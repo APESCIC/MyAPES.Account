@@ -18,7 +18,7 @@ description: Checklist for finishing a MyAPES Account change. Use when work is r
    php artisan myapes:changelog-prepare --type=patch --title="Short public title" --issue=<n> --pr=<n>
    ```
 
-   Replace every `TODO:` in the new `resources/data/releases.json` head. Then:
+   Replace every `TODO:` in the new `resources/data/releases.json` head. The command rewrites `$releases[N]['date']` indexes and the version strings. It does not bump `array_slice($releases, N)` in `tests/Feature/ReleaseHistoryCommandTest.php`, and it does not rewrite assertions that name the current release title, issue, or pull request. Update those so they describe the new head, then:
 
    ```bash
    git fetch origin

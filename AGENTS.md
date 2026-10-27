@@ -104,6 +104,8 @@ The command writes:
 - `resources/data/module-runtime-contract.json` key `application_version`
 - The version-pinned tests listed in `app/Support/ReleaseHistoryPreparer.php`
 
+The prepare command rewrites version strings and `$releases[N]['date']` indexes. It does not bump a tail `array_slice($releases, N)` in `tests/Feature/ReleaseHistoryCommandTest.php`, and it does not rewrite assertions that name the current release's title, issue, or pull request. Update those to the new head before validating.
+
 Validate:
 
 ```bash

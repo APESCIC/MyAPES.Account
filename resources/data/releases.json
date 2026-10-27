@@ -1,5 +1,52 @@
 [
   {
+    "version": "0.39.11",
+    "date": "2026-10-27",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Agent instructions for end-to-end shipping",
+    "summary": "Cursor agents now follow one written workflow: Laragon on the owner machine, a milestone with an epic and sub-issues at the start, and a finish through merge, the change log, and Cloudron deploy.",
+    "changes": [
+      "Make AGENTS.md the source of truth for local development, GitHub issues, release metadata, and Cloudron deploy.",
+      "Point the Cursor rules at that file and add a release-and-deploy checklist that uses the repository's real commands.",
+      "Assign new issues to apescic-director, and record that Issue Type, Priority, and Effort are set in GitHub when the API cannot.",
+      "Keep Recruitment vacancies on RecruitmentRole, and keep app and docs wording in UK English."
+    ],
+    "affected_areas": [
+      "Agent instructions and Cursor rules",
+      "Release ops documentation",
+      "GitHub issue templates"
+    ],
+    "categories": [
+      "fixed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.39 line: documentation and issue-template defaults only, with no application behaviour change.",
+    "validation": [
+      "php artisan myapes:changelog-validate --base-ref=origin/main on the pull request branch.",
+      "Version-pinned release history tests updated by myapes:changelog-prepare."
+    ],
+    "known_limitations": [
+      "Issue Type, Priority, Effort, assignee, labels, and milestone still need a person in the GitHub sidebar when the API cannot update them.",
+      "The GitHub Release is published by the Cloudron deploy workflow, which needs the existing deployment secrets."
+    ],
+    "rollback": "Redeploy the previous release package. Documentation and issue-template changes do not alter runtime application behaviour.",
+    "provenance": "Issue #399 (epic #397); pull request #401.",
+    "references": [
+      {
+        "label": "Issue #399",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/399"
+      },
+      {
+        "label": "Pull request #401",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/401"
+      }
+    ]
+  },
+  {
     "version": "0.39.10",
     "date": "2026-10-08",
     "channel": "stable",
