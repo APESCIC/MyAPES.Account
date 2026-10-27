@@ -128,17 +128,11 @@ class RecruitmentServiceProvider extends PluginServiceProvider
                     icon: 'clipboard-list',
                     order: 35,
                     routeIsPattern: 'apes-cic.recruitment.*',
-                    abilities: [
-                        'apes-cic.recruitment.view-all',
-                        'apes-cic.recruitment.create',
-                        'apes-cic.recruitment.update',
-                        'apes-cic.recruitment.delete',
-                        'apes-cic.recruitment.review-applications',
-                    ],
+                    abilities: RecruitmentAbilities::MANAGE,
                     enabled: $enabled,
                     homeRouteName: 'apes-cic.recruitment.index',
                     fallbackRouteName: 'apes-cic.recruitment.applications.index',
-                    homeAbility: 'apes-cic.recruitment.view-all',
+                    homeAbility: RecruitmentAbilities::VIEW_ALL,
                 ),
             ];
         });
