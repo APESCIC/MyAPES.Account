@@ -296,9 +296,13 @@ class ModuleRegistryTest extends TestCase
             'apes-cic.recruitment.create',
             $matrix[AuthorizationProfile::ROLE_SERVICE_USER],
         );
-        $this->assertContains(
+        $this->assertNotContains(
             'apes-cic.recruitment.create',
             $matrix[AuthorizationProfile::ROLE_STAFF],
+        );
+        $this->assertContains(
+            'apes-cic.recruitment.create',
+            $matrix[AuthorizationProfile::ROLE_ADMINISTRATOR],
         );
         $this->assertContains(
             'apes-cic.tickets.assign',

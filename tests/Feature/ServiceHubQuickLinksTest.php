@@ -11,10 +11,12 @@ use Plugins\Tickets\Models\SupportTicket;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
+use Tests\Concerns\CreatesRecruitmentPersonas;
 use Tests\TestCase;
 
 class ServiceHubQuickLinksTest extends TestCase
 {
+    use CreatesRecruitmentPersonas;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -25,9 +27,7 @@ class ServiceHubQuickLinksTest extends TestCase
 
     public function test_staff_hub_create_and_view_links_use_distinct_compose_and_list_urls(): void
     {
-        $staff = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
-            ->create();
+        $staff = $this->hrStaff();
 
         $hubs = [
             '/apes-cic' => [

@@ -9,10 +9,12 @@ use DOMDocument;
 use DOMXPath;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Plugins\Recruitment\Models\RecruitmentRole;
+use Tests\Concerns\CreatesRecruitmentPersonas;
 use Tests\TestCase;
 
 class LayoutSpacingSmokeTest extends TestCase
 {
+    use CreatesRecruitmentPersonas;
     use RefreshDatabase;
 
     private function stylesheet(): string
@@ -137,7 +139,7 @@ class LayoutSpacingSmokeTest extends TestCase
     public function test_staff_list_and_create_pages_wrap_their_panels_in_a_panel_stack(): void
     {
         app(ModuleInstallationSynchronizer::class)->synchronize();
-        $staff = User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create();
+        $staff = $this->hrStaff();
 
         foreach ([
             'apes-cic.tickets.index',
