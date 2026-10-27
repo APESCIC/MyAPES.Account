@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.41.2",
+    "date": "2026-10-27",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Recruitment closed to students and volunteers",
+    "summary": "Student and volunteer accounts no longer see Recruitment, and its pages are closed to them.",
+    "changes": [
+      "Hide the Recruitment menu link from student and volunteer accounts.",
+      "Close Open roles, My applications, applying, and Recruitment manage pages to student and volunteer accounts.",
+      "Keep Open roles available to visitors and to public accounts that have not chosen a service yet."
+    ],
+    "affected_areas": [
+      "Recruitment",
+      "Navigation"
+    ],
+    "categories": [
+      "changed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.41 line: narrows who can use Recruitment with no new screens.",
+    "validation": [
+      "New student and volunteer Recruitment access tests.",
+      "Recruitment, navigation, hub, and layout tests.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "Human Resources, Admin, and Super Admin accounts still see separate Recruitment and Recruit manage menu links until a later 0.41 release."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #345; pull request #418.",
+    "references": [
+      {
+        "label": "Issue #345",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/345"
+      },
+      {
+        "label": "Pull request #418",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/418"
+      }
+    ]
+  },
+  {
     "version": "0.41.1",
     "date": "2026-10-27",
     "channel": "stable",
