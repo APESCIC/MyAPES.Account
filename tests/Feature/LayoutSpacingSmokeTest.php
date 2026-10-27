@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Core\Accounts\User;
+use App\Services\AuthorizationProfile;
 use App\Services\ModuleInstallationSynchronizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Plugins\Recruitment\Models\RecruitmentRole;
@@ -66,6 +67,35 @@ class LayoutSpacingSmokeTest extends TestCase
 
         foreach ($expectations as $selector => $declaration) {
             $this->assertStringContainsString($declaration, $this->ruleBody($selector), "{$selector} should use {$declaration}");
+        }
+    }
+
+    public function test_panel_stack_spaces_page_level_cards(): void
+    {
+        $panelStack = $this->ruleBody('.panel-stack');
+
+        $this->assertStringContainsString('flex-direction: column;', $panelStack);
+        $this->assertStringContainsString('gap: var(--space-section);', $panelStack);
+        $this->assertStringContainsString('margin: 0;', $this->ruleBody('.panel-stack > .panel'));
+    }
+
+    public function test_staff_list_and_create_pages_wrap_their_panels_in_a_panel_stack(): void
+    {
+        app(ModuleInstallationSynchronizer::class)->synchronize();
+        $staff = User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create();
+
+        foreach ([
+            'apes-cic.tickets.index',
+            'apes-cic.cases.index',
+            'shelter.cases.index',
+            'petcare.consultations.index',
+            'apes-cic.recruitment.index',
+            'apes-cic.recruitment.applications.index',
+        ] as $routeName) {
+            $this->actingAs($staff)
+                ->get(route($routeName))
+                ->assertOk()
+                ->assertSee('<div class="panel-stack">', false);
         }
     }
 

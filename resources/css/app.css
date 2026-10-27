@@ -2391,6 +2391,17 @@ ol.stack {
     margin: 0;
 }
 
+/* Page-level sequence of .panel cards (heading, list, create). */
+.panel-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-section);
+}
+
+.panel-stack > .panel {
+    margin: 0;
+}
+
 .item-divider {
     padding: 0.7rem 0;
     border-bottom: 1px solid var(--line);
