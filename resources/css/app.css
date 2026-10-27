@@ -47,6 +47,16 @@
     --radius-lg: 1.2rem;
     --page-width: 92rem;
     --sidebar-width: 16rem;
+    /*
+     * Spacing contract. Page cards (.panel) are separated by --space-section.
+     * Nested tiles (.panel-flat) carry no margin and take their gap from the
+     * parent .stack or .grid. Lists of cards use .stack, grids use .grid.
+     */
+    --space-stack: 1rem;
+    --space-stack-tight: 0.65rem;
+    --space-stack-loose: 1.5rem;
+    --space-grid: 1rem;
+    --space-section: 1.25rem;
 }
 
 [data-theme='dark'] {
@@ -1063,7 +1073,7 @@ form.inline {
 }
 
 .panel {
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-section);
     padding: clamp(1rem, 2.2vw, 1.6rem);
     overflow-x: auto;
     border: 1px solid var(--line);
@@ -1084,6 +1094,7 @@ form.inline {
     }
 }
 
+/* Nested tile: no own margin, so it must sit inside a .stack or .grid. */
 .panel-flat {
     margin: 0;
     background: var(--canvas);
@@ -2132,7 +2143,7 @@ form.inline {
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
-    gap: 1rem;
+    gap: var(--space-grid);
 }
 
 .row {
@@ -2350,8 +2361,34 @@ tbody tr:hover {
     border-radius: var(--radius-md);
 }
 
+/* Top offset only; it does not gap its children. Pair with .stack for that. */
 .stack-spaced {
-    margin-top: 1rem;
+    margin-top: var(--space-stack);
+}
+
+.stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-stack);
+}
+
+.stack--tight {
+    gap: var(--space-stack-tight);
+}
+
+.stack--loose {
+    gap: var(--space-stack-loose);
+}
+
+ul.stack,
+ol.stack {
+    margin-inline: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.stack > .panel {
+    margin: 0;
 }
 
 .item-divider {

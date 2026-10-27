@@ -1,5 +1,51 @@
 [
   {
+    "version": "0.40.0",
+    "date": "2026-10-27",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Shared card spacing contract",
+    "summary": "Pages now share one set of spacing rules, so cards and sections sit at a consistent distance from each other. Page sections have slightly more breathing room.",
+    "changes": [
+      "Add shared spacing values for card stacks, grids, and page sections.",
+      "Add a stack layout that spaces the cards inside it, for lists of cards.",
+      "Give page sections a little more space between them.",
+      "Add automated checks for the shared spacing rules."
+    ],
+    "affected_areas": [
+      "Page layout",
+      "Styles"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Minor: first release of the 0.40 card spacing line, adding a new backward-compatible layout capability.",
+    "validation": [
+      "php artisan test tests/Feature/LayoutSpacingSmokeTest.php.",
+      "composer pre-pr-verify on the pull request branch.",
+      "Local browser check of the public Recruitment page."
+    ],
+    "known_limitations": [
+      "Individual pages adopt the new stack layout in the following 0.40 releases."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #334; pull request #406.",
+    "references": [
+      {
+        "label": "Issue #334",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/334"
+      },
+      {
+        "label": "Pull request #406",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/406"
+      }
+    ]
+  },
+  {
     "version": "0.39.13",
     "date": "2026-10-27",
     "channel": "stable",
