@@ -48,7 +48,7 @@ class RecruitmentServiceProvider extends PluginServiceProvider
             compatibleModules: ['apes-cic'],
             shippedModules: ['apes-cic'],
             permissions: [
-                $a::public('view-own', 'View own recruitment items'),
+                $a::applicant('view-own', 'View own recruitment items'),
                 $a::manage('create', 'Create recruitment roles'),
                 $a::manage('view-all', 'View all recruitment roles'),
                 $a::manage('update', 'Update recruitment roles'),
@@ -102,6 +102,7 @@ class RecruitmentServiceProvider extends PluginServiceProvider
                     order: 40,
                     routeIsPattern: 'recruitment.*',
                     enabled: $enabled,
+                    visibleToSignedIn: static fn ($user): bool => ! app(RecruitmentAudience::class)->denies($user),
                 ),
             ];
         });

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\ModuleSettingsService;
 use Plugins\Recruitment\Models\RecruitmentApplication;
 use Plugins\Recruitment\Models\RecruitmentRole;
+use Plugins\Recruitment\RecruitmentAudience;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -15,6 +16,7 @@ class RecruitmentBoardController extends Controller
     public function index(Request $request, ModuleSettingsService $moduleSettings): View
     {
         abort_unless($moduleSettings->recruitmentPublicBoardEnabled(), 404);
+        $this->denyExcludedAudience($request);
 
         $category = $request->query('category');
         if (is_string($category) && $category !== '' && ! in_array($category, RecruitmentRole::CATEGORIES, true)) {
@@ -48,6 +50,7 @@ class RecruitmentBoardController extends Controller
     public function show(Request $request, RecruitmentRole $recruitmentRole, ModuleSettingsService $moduleSettings): View
     {
         abort_unless($moduleSettings->recruitmentPublicBoardEnabled(), 404);
+        $this->denyExcludedAudience($request);
         abort_unless($recruitmentRole->isOpen(), 404);
 
         $user = $request->user();
@@ -85,6 +88,11 @@ class RecruitmentBoardController extends Controller
                 RecruitmentApplication::STATUS_CLOSED => 'Closed',
             ],
         ]);
+    }
+
+    private function denyExcludedAudience(Request $request): void
+    {
+        abort_if(app(RecruitmentAudience::class)->denies($request->user()), 403);
     }
 
     /**

@@ -43,6 +43,21 @@ final class PluginAbilityFactory
     }
 
     /**
+     * Public roles that may apply for openings; students and volunteers are excluded.
+     *
+     * @return list<string>
+     */
+    public static function applicantRoles(): array
+    {
+        return [
+            'service-user',
+            'staff',
+            'administrator',
+            'super-admin',
+        ];
+    }
+
+    /**
      * Protected roles that hold manage abilities by default; other staff need a job role.
      *
      * @return list<string>
@@ -58,6 +73,11 @@ final class PluginAbilityFactory
     public static function public(string $ability, string $label): PluginAbility
     {
         return new PluginAbility($ability, $label, false, self::publicRoles(), public: true);
+    }
+
+    public static function applicant(string $ability, string $label): PluginAbility
+    {
+        return new PluginAbility($ability, $label, false, self::applicantRoles(), public: true);
     }
 
     public static function staff(string $ability, string $label): PluginAbility
