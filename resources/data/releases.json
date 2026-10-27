@@ -1,5 +1,51 @@
 [
   {
+    "version": "0.41.3",
+    "date": "2026-10-27",
+    "channel": "stable",
+    "type": "patch",
+    "title": "One Recruitment menu link",
+    "summary": "The menu now has one Recruitment link. It opens the right Recruitment page for each account.",
+    "changes": [
+      "Replace the separate Recruitment and Recruit manage menu links with one Recruitment link.",
+      "Open Roles for Human Resources, Admin, and Super Admin accounts, and Open roles for everyone else who can use Recruitment.",
+      "Keep the Recruitment link highlighted on both public and manage Recruitment pages.",
+      "Retire the Recruit manage wording from page titles and the glossary."
+    ],
+    "affected_areas": [
+      "Recruitment",
+      "Navigation"
+    ],
+    "categories": [
+      "changed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.41 line: a compatible navigation change with no new pages or permissions.",
+    "validation": [
+      "Recruitment menu tests for visitors, public, staff, Human Resources, Admin, Super Admin, and review-only accounts.",
+      "Recruitment, terminology, navigation, dashboard, and layout tests.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "Recruitment pages still show two different page submenus until a later 0.41 release."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #346; pull request #419.",
+    "references": [
+      {
+        "label": "Issue #346",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/346"
+      },
+      {
+        "label": "Pull request #419",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/419"
+      }
+    ]
+  },
+  {
     "version": "0.41.2",
     "date": "2026-10-27",
     "channel": "stable",
