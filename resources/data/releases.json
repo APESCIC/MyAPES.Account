@@ -1,5 +1,49 @@
 [
   {
+    "version": "0.39.12",
+    "date": "2026-10-27",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Deploy once per release",
+    "summary": "Agents now check for a deploy that is already queued or running, and for the live site already serving the release, before starting a Cloudron deploy, so each release is activated once.",
+    "changes": [
+      "Check for a queued or running Cloudron deploy, and for live health already reporting the version and commit, before dispatching a deploy.",
+      "Record that a GitHub Release creation date is the commit date, and that its publish date shows when it was made.",
+      "Record the Windows PowerShell quoting trap with GitHub CLI arguments and filters."
+    ],
+    "affected_areas": [
+      "Agent instructions",
+      "Release ops documentation"
+    ],
+    "categories": [
+      "fixed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.39 line: agent documentation only, with no application behaviour change.",
+    "validation": [
+      "php artisan myapes:changelog-validate --base-ref=origin/main on the pull request branch.",
+      "Version-pinned release history tests updated for the new head record."
+    ],
+    "known_limitations": [
+      "The check is a documented step for agents. The deploy workflow itself still accepts a second dispatch and queues it."
+    ],
+    "rollback": "Redeploy the previous release package. Documentation changes do not alter runtime application behaviour.",
+    "provenance": "Issue #402; pull request #403.",
+    "references": [
+      {
+        "label": "Issue #402",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/402"
+      },
+      {
+        "label": "Pull request #403",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/403"
+      }
+    ]
+  },
+  {
     "version": "0.39.11",
     "date": "2026-10-27",
     "channel": "stable",
