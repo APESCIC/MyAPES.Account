@@ -106,10 +106,9 @@
                     @foreach($staffPluginNavigation ?? [] as $staffPluginNav)
                         @php
                             $staffPluginHome = $staffPluginNav->homeUrlFor(auth()->user());
-                            $staffPluginNavActive = request()->routeIs(...$staffPluginNav->routePatterns());
                         @endphp
                         @continue($staffPluginHome === null)
-                        <a href="{{ $staffPluginHome }}" @class(['primary-nav__link', 'is-active' => $staffPluginNavActive]) @if($staffPluginNavActive) aria-current="page" @endif>
+                        <a href="{{ $staffPluginHome }}" @class(['primary-nav__link', 'is-active' => $staffPluginNav->isActive()]) @if($staffPluginNav->isActive()) aria-current="page" @endif>
                             <i data-lucide="{{ $staffPluginNav->icon }}" aria-hidden="true"></i>
                             <span>{{ $staffPluginNav->label }}</span>
                         </a>

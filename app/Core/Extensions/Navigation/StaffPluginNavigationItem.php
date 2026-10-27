@@ -36,6 +36,11 @@ final readonly class StaffPluginNavigationItem
         return (array) $this->routeIsPattern;
     }
 
+    public function isActive(): bool
+    {
+        return request()->routeIs(...$this->routePatterns());
+    }
+
     public function homeUrlFor(Authenticatable $user): ?string
     {
         if ($this->destination !== null) {
