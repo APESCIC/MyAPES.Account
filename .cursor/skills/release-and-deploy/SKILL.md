@@ -37,8 +37,12 @@ description: Checklist for finishing a MyAPES Account change. Use when work is r
 
 7. Deploy (GitHub Actions secrets `CLOUDRON_FQDN` and `CLOUDRON_TOKEN` on environment `cloudron-deploy`; do not copy them into the repo):
 
+   Dispatch once. Do not dispatch if a deploy run is `queued` or `in_progress` (watch that run), or if live `healthz` already shows this `version` and the `origin/main` SHA as `release` (go to verify).
+
    ```bash
    version=$(git show origin/main:VERSION | tr -d '\r\n')
+   gh run list --workflow "Deploy MyAPES Core to Cloudron" --limit 3 --json databaseId,status,conclusion,headSha,createdAt
+   curl --fail --silent --show-error https://myaccount.myapes.me.uk/healthz
    gh workflow run "Deploy MyAPES Core to Cloudron" --ref main -f app_version="$version"
    gh run list --workflow "Deploy MyAPES Core to Cloudron" --limit 1
    gh run watch <run-id>

@@ -32,6 +32,8 @@ Cloud and Linux agents have no Laragon. For a UI change, reuse a running server 
 
 `composer pre-pr-verify` and `composer pre-merge` invoke PowerShell (`scripts/local/pre-pr-verify.ps1`, `scripts/local/pre-merge.ps1`). On Linux without PowerShell, run the steps from `pre-merge.ps1` yourself: `git fetch origin`, `php artisan myapes:changelog-validate --base-ref=origin/main`, the PHPUnit files named in that script, `npm run test:frontend`, and `npm run build`. This repository has no second composer script for that path.
 
+Windows PowerShell 5.1 strips double quotes inside arguments passed to `gh`. A `--jq` filter with a string literal, or a `--body` containing `"`, breaks or is split into extra arguments. Use `--body-file`, pipe JSON to `gh api graphql --input -`, or filter with `ConvertFrom-Json`.
+
 ## Reports
 
 End every report or question with next options and one recommended option:
@@ -132,8 +134,15 @@ Use a merge commit. Squash only when the owner asks. Confirm the commit is on `o
 
 Deploy is a manual `workflow_dispatch` of **Deploy MyAPES Core to Cloudron** (`.github/workflows/deploy-cloudron.yml`). A green `main` does not deploy by itself.
 
+Dispatch once. The owner, another agent, or the GitHub web page may already have started a deploy under the same login. Before `gh workflow run`, check both of these and do not dispatch if either is true:
+
+- A deploy run is `queued` or `in_progress`. Watch that run instead. A second dispatch waits in the concurrency group and then activates the same commit again.
+- Live `healthz` already reports `version` equal to `VERSION` and `release` equal to the `origin/main` SHA. That commit is deployed; go straight to verify.
+
 ```bash
 version=$(git show origin/main:VERSION | tr -d '\r\n')
+gh run list --workflow "Deploy MyAPES Core to Cloudron" --limit 3 --json databaseId,status,conclusion,headSha,createdAt
+curl --fail --silent --show-error https://myaccount.myapes.me.uk/healthz
 gh workflow run "Deploy MyAPES Core to Cloudron" --ref main -f app_version="$version"
 gh run list --workflow "Deploy MyAPES Core to Cloudron" --limit 1
 gh run watch <run-id>
@@ -148,6 +157,8 @@ After a successful deploy, the **Publish GitHub Release** job runs `scripts/depl
 - target commit equal to the deployed SHA
 
 Do not create that GitHub Release by hand before deploy. The publish job fails if the tag already points at a different commit. Create it by hand only to recover a failed publish job, with the same notes script and the deployed SHA.
+
+A release's `created_at` is the date of its target commit, not when it was published. Use `published_at` and the release `author` (`github-actions[bot]` for the publish job) to see when and how it was made.
 
 `scripts/github/rename-release-titles.sh` and `scripts/github/migrate-beta-milestones.sh` are maintenance helpers for titles that have already shipped. They are not part of a normal deploy.
 
