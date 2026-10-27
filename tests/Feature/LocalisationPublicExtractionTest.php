@@ -25,7 +25,7 @@ class LocalisationPublicExtractionTest extends TestCase
 
     public function test_public_recruitment_nav_uses_glossary_terms(): void
     {
-        $nav = (string) file_get_contents(base_path('plugins/recruitment/resources/views/public/_navigation.blade.php'));
+        $nav = (string) file_get_contents(base_path('plugins/recruitment/resources/views/_navigation.blade.php'));
         $this->assertStringContainsString("__('terms.open_roles')", $nav);
         $this->assertStringContainsString("__('terms.my_applications')", $nav);
     }

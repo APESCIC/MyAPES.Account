@@ -5,7 +5,7 @@
 @section('meta_keywords', __('seo.recruitment.index.keywords'))
 
 @section('content')
-    @include('recruitment::public._navigation')
+    @include('recruitment::_navigation')
 
     <div class="panel" data-recruitment-board>
         <span class="service-label service-apes-cic">{{ __('recruitment::public.index.blade.apes_cic') }}</span>

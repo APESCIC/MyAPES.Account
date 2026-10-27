@@ -3,7 +3,7 @@
 @section('title', 'Application | MyAPES Core')
 
 @section('content')
-    @include('recruitment::public._navigation')
+    @include('recruitment::_navigation')
 
     @inject('ukDateTime', \App\Support\UkDateTime::class)
     <div class="panel" data-recruitment-application-detail>

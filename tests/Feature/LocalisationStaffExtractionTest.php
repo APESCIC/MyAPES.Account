@@ -38,7 +38,7 @@ class LocalisationStaffExtractionTest extends TestCase
 
     public function test_staff_recruitment_nav_uses_glossary_roles_not_job_role(): void
     {
-        $nav = (string) file_get_contents(base_path('plugins/recruitment/resources/views/staff/_navigation.blade.php'));
+        $nav = (string) file_get_contents(base_path('plugins/recruitment/resources/views/_navigation.blade.php'));
         $this->assertStringContainsString("__('terms.recruitment_roles')", $nav);
         $this->assertStringContainsString("__('terms.applications')", $nav);
         $this->assertStringNotContainsString('job role', strtolower($nav));

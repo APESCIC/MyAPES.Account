@@ -3,7 +3,7 @@
 @section('title', 'Recruitment — Roles')
 
 @section('content')
-    @include('recruitment::staff._navigation')
+    @include('recruitment::_navigation')
     <div class="panel-stack">
         <div class="panel">
             <span class="service-label service-apes-cic">{{ __('recruitment::staff.staff.index.blade.apes_cic') }}</span>

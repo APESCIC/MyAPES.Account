@@ -5,7 +5,7 @@
 @section('meta_keywords', __('seo.recruitment.show.keywords'))
 
 @section('content')
-    @include('recruitment::public._navigation')
+    @include('recruitment::_navigation')
 
     <div class="panel" data-recruitment-role-detail>
         <span class="service-label service-apes-cic">{{ $categoryLabels[$role->category] }}</span>
