@@ -15,6 +15,8 @@ final class DefaultJobRoles
 
     public const RECEPTIONIST = 'receptionist';
 
+    public const HUMAN_RESOURCES = 'human-resources';
+
     /**
      * @return array<string, array{title: string, permissions: array<int, string>}>
      */
@@ -44,6 +46,16 @@ final class DefaultJobRoles
                 'title' => 'Receptionist',
                 'permissions' => [
                     'admin.users.view',
+                ],
+            ],
+            self::HUMAN_RESOURCES => [
+                'title' => 'Human Resources',
+                'permissions' => [
+                    'apes-cic.recruitment.create',
+                    'apes-cic.recruitment.delete',
+                    'apes-cic.recruitment.review-applications',
+                    'apes-cic.recruitment.update',
+                    'apes-cic.recruitment.view-all',
                 ],
             ],
         ];
