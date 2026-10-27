@@ -1,6 +1,6 @@
 # Developer guide — Modules and Plugins
 
-How to add a **Module** (organisation area) or **Plugin** (reusable feature) to MyAPES Account without editing Core. How Cursor agents start work, ship a release, and deploy is [AGENTS.md](../AGENTS.md).
+How to add a **Module** (organisation area) or **Plugin** (reusable feature) to MyAPES Account without editing Core.
 
 Layer rules: [architecture.md](architecture.md). Decision record: [ADR 0001](adr/0001-core-modules-plugins.md). Inventory: [architecture-inventory.md](architecture-inventory.md).
 
@@ -80,7 +80,3 @@ composer pre-pr-verify   # or ship-gate manual steps
 ```
 
 Keep `VERSION`, `resources/data/releases.json`, and `resources/data/module-runtime-contract.json` → `application_version` in sync.
-
-## Agent skill
-
-Cursor agents: see `.cursor/skills/new-plugin/SKILL.md` for the generator workflow.
