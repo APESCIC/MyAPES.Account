@@ -1,93 +1,14 @@
 ---
-description: Gated ship lifecycle — local dev verify before PR, commit/push, post-CI merge, changelog hubs, Cloudron deploy last, then live hub and GitHub Release verification
+description: Finish work through merge, the patch or minor release, and Cloudron deploy
 alwaysApply: true
 ---
 
-# Ship-gate workflow
+# Ship through deploy
 
-Start and finish product work from a Cursor agent request. Do not auto-commit, auto-push, auto-merge, auto-deploy, or manually create a GitHub Release (deploy workflow creates it) without an explicit user choice at each gate (or a prior explicit order that covers that gate).
+Follow **Definition of done** and **Completing work** in `AGENTS.md`. Commands: `.cursor/skills/release-and-deploy/SKILL.md`.
 
-## Gates
+Commit, open the pull request, get **Test MyAPES Core** green, merge to `main`, then dispatch **Deploy MyAPES Core to Cloudron**. Do not stop between those steps for permission. Stop when CI is red, when a secret or a person is required, or when the owner says stop. Name the step and give the exact command.
 
-At each gate, end the turn with a numbered list of next best actions and **one recommended reply**. Wait for the user before continuing.
+The GitHub Release (`v{VERSION}`, display name `{VERSION} Beta`) is created by the deploy workflow after a successful deploy. Do not create it by hand unless that publish job failed.
 
-### Before PR — local dev verify
-
-Present after focused tests pass and release metadata validates (`changelog-validate` vs `origin/main`), but **before** the commit gate.
-
-**Recommended:** Run local dev verify on the PR branch (`composer pre-pr-verify` or the manual steps in `.cursor/skills/ship-gate/SKILL.md`), then continue to commit/PR.
-
-1. Local verify passed — continue to commit/PR
-2. Re-run local verify (install test with `-Fresh`)
-3. Fix issues and retry
-4. Skip local verify (document why)
-5. Stop / leave as-is
-
-Reuse an already-running preview; do not start duplicate servers. On Laragon use `http://myapes-account.test/` and `composer run dev:laragon`; otherwise `http://127.0.0.1:8000/` and `composer run dev`.
-
-### Before PR / commit
-
-**When to commit** (all that apply):
-
-1. Slice on the `cursor/...` branch is complete (or the user wants a clear WIP checkpoint).
-2. Focused tests for the change have been run (or failure is documented and the user still wants a commit).
-3. If merging to `main`: release metadata is on the branch (`changelog-prepare`, TODOs filled, `changelog-validate` vs `origin/main`) — same PR as the work.
-4. Local dev verify passed (or skip documented at the local verify gate).
-5. Diff is free of secrets / unrelated files; message will explain *why*.
-
-Prefer **not** to commit mid-edit with broken tests (unless WIP), before required release metadata, before local verify (unless skipped), or while scope is undecided. Mid-work commits only after an explicit pick below (or a prior “commit WIP” order) — no automatic checkpoint cadence.
-
-Present this gate when work is ready for review, or when the user asks to save progress. **Recommended:** Commit and open/update PR when review-ready (release metadata included if needed). Prefer Commit only when a PR already exists and only the commit is missing.
-
-1. Commit and open/update PR
-2. Commit only (no push / no PR yet)
-3. Commit WIP checkpoint (incomplete; message notes WIP)
-4. Keep working uncommitted
-5. Stop / leave as-is
-
-Never commit or push unless the user already ordered it or picks 1–3.
-
-### After PR CI is green
-
-Recommended usually: merge when release metadata and checks are OK.
-
-1. Merge the PR
-2. Fix remaining review / CI issues
-3. Leave PR open / stop
-
-Never merge unless the user already ordered merge or picks option 1.
-
-### After merge is verified on `main` — changelog hubs
-
-App Change Log Hub (`/change-log`) is fed by `resources/data/releases.json` in **this** repo. Confirm the head record on `main` matches `VERSION`. **Live** hub verification waits until after Cloudron deploy; do not open a separate metadata PR for the hub.
-
-Recommended: confirm metadata on `main`, then continue to the Cloudron deploy gate.
-
-1. Changelog metadata on `main` looks good — continue to Cloudron deploy gate
-2. Skip hub checks
-
-Sibling website changelogs/hubs are **out of scope** for this ship flow. Do not offer or update them when shipping MyAPES Account; only this repo’s Change Log Hub (`/change-log` from `releases.json`) is in scope.
-
-### After changelog gate — Cloudron deploy
-
-Recommended: deploy when main tests are green and pre-merge local verify already passed on the PR branch.
-
-1. Deploy to Cloudron now
-2. Skip deploy
-
-Never assume Cloudron already updated. Deploy only via `workflow_dispatch` (see `.cursor/skills/ship-gate/SKILL.md`). Pass `app_version` from `VERSION` when dispatching.
-
-### After Cloudron deploy succeeds — live hub and GitHub Release verification
-
-Successful Cloudron deploy publishes the live Change Log Hub and runs **Publish GitHub Release** automatically (`{VERSION} Beta` display title; tag `v{VERSION}` on the deployed SHA).
-
-Recommended: verify live `/change-log`, `healthz`, and the GitHub Release match the deployed version and SHA.
-
-1. Verify live hub and GitHub Release for deployed version
-2. Skip live verification
-
-Never create a duplicate GitHub Release manually unless recovering from a failed publish job.
-
-## Unchanged
-
-Release **metadata** (`VERSION`, `releases.json`, contract) still ships in the **same PR** before merge (see release-metadata rule). That metadata is the source of truth for the MyAPES Core Change Log Hub after deploy.
+End every report with the Next actions block from `AGENTS.md`.

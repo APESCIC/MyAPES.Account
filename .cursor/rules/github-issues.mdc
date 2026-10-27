@@ -1,20 +1,17 @@
 ---
-description: Fill complete GitHub issue metadata whenever creating or updating issues
+description: GitHub milestone, epic, and sub-issue metadata for MyAPES Account
 alwaysApply: true
 ---
 
-# GitHub issue metadata
+# GitHub issues
+
+Follow **Starting work** and **GitHub milestones** in `AGENTS.md`.
 
 Search this repository for duplicates before creating an issue. Never open issues in other repositories.
 
-Human issue templates cannot set custom fields, milestone, parent/sub-issues, or Development. After creating or updating a task, fill the sidebar completely with GitHub MCP `issue_write` / `gh` (call `list_issue_types` and `list_issue_fields` for `APESCIC/MyAPES-Account` first):
+- Assignee: `apescic-director` (not `bmurphy-apescic`, unless that person is named as the owner).
+- Labels: `area:auth`, `area:admin`, `area:public`, `area:cloudron`, `area:tests` only.
+- Titles: `[v0.N.x] NN Short title`. `00` is the epic. Keep its checklist current.
+- Issue Type, Priority, Effort, and dates: set with the API when the token allows. If the API returns 403, write the values in the issue body for the GitHub sidebar. Do not create a second issue after a failed call.
 
-- **Assignees:** the person doing the work (`bmurphy-apescic` unless another owner is named)
-- **Labels:** `bug`, `enhancement`, or `documentation` (create `chore` only if that label exists)
-- **Type:** `Task` | `Bug` | `Feature`
-- **Fields:** Priority (`Urgent` / `High` / `Medium` / `Low`), Effort (`High` / `Medium` / `Low`); Start date and Target date when known
-- **Milestone:** active minor-line milestone, titled with a full version (`v0.N.P Beta` — projected final patch while open, last shipped patch once closed) (see AGENTS.md **GitHub milestones**)
-- **Relationships:** parent/sub-issue via `sub_issue_write`; blocked-by when there is a real dependency
-- **Development:** branch `cursor/{feature|fix|chore}/<issue-number>-<short-slug>` and PR body `Fixes #<n>` or `Closes #<n>`
-
-Comment progress, blockers, and the branch/PR on the issue. Close with `state_reason` `completed`, `not_planned`, or `duplicate`.
+Branch `cursor/{feature|fix|chore}/<issue-number>-<short-slug>`. Pull request body: `Closes #<n>`.

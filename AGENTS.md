@@ -1,8 +1,185 @@
 # Agent instructions for MyAPES Account
 
+This file is the source of truth for Cursor agents, both cloud and the local IDE. Files in `.cursor/rules/` stay short and point here. Command detail lives in `.cursor/skills/release-and-deploy/SKILL.md` and `.cursor/skills/release-metadata/SKILL.md`. If a rule, skill, or issue template disagrees with this file, follow this file and correct the other file in the same change.
+
+The owner is Bambie Murphy. App wording and docs use UK English.
+
+## Language and model names
+
+- Write UK English (organisation, behaviour, colour) in the product and in docs.
+- Recruitment vacancies use `RecruitmentRole`. That model is not Spatie's `Role` and not an Access job role.
+- Layers are **Core > Modules > Plugins**. See [ADR 0001](docs/adr/0001-core-modules-plugins.md) and [docs/architecture.md](docs/architecture.md). Core never depends on a Module or a Plugin. Add packages with `php artisan make:module` and `php artisan make:plugin`. Do not edit Core to register them.
+
+## Local development
+
+The owner's working copy is Laragon on Windows.
+
+| Item | Value |
+| --- | --- |
+| Clone | `C:\laragon\www\myapes-account` |
+| App URL | `http://myapes-account.test` |
+| Document root | `{repo}\public` |
+| Daily loop | Start Laragon (Apache), then `composer run dev:laragon` |
+| First bootstrap | `powershell -ExecutionPolicy Bypass -File .\scripts\local\bootstrap.ps1 -Laragon -Fresh` |
+| Env file | `.env.laragon.example` (the `-Laragon` switch copies it) |
+| Extra seed | `bootstrap.ps1 -Laragon -Seed` when the database should keep existing rows |
+
+Pass `-AppUrl` when the virtual host is not `myapes-account.test`. Vite HMR listens on `http://127.0.0.1:5173/`. Passkeys need a secure context, so prefer `https://myapes-account.test` with a trusted local certificate. Live Cloudron is `https://myaccount.myapes.me.uk`.
+
+Local QA accounts are the fixtures in `database/seeders/LocalQaSeeder.php` (`emails()`, `DEFAULT_PASSWORD`). The seeder runs only when `APP_ENV` is `local` or `testing`. The README lists the same email addresses. Do not copy passwords, tokens, or the production walkthrough secret into issues, pull requests, release notes, or new docs. The production walkthrough password is in the operator secret store, not this repository.
+
+Cloud and Linux agents have no Laragon. For a UI change, reuse a running server or start `bash scripts/local/dev.sh` and open `http://127.0.0.1:8000/` (`APP_PORT` overrides the port). Skip the preview when the change is not UI.
+
+`composer pre-pr-verify` and `composer pre-merge` invoke PowerShell (`scripts/local/pre-pr-verify.ps1`, `scripts/local/pre-merge.ps1`). On Linux without PowerShell, run the steps from `pre-merge.ps1` yourself: `git fetch origin`, `php artisan myapes:changelog-validate --base-ref=origin/main`, the PHPUnit files named in that script, `npm run test:frontend`, and `npm run build`. This repository has no second composer script for that path.
+
+## Reports
+
+End every report or question with next options and one recommended option:
+
+```markdown
+## Next actions
+**Recommended:** <one best option>
+
+1. ...
+2. ...
+```
+
+That block tells the owner how to steer the next piece of work. It does not pause the definition of done, unless a step needs a secret or a person.
+
+## Starting work
+
+Search this repository for an open issue that already covers the task. Never open an issue in another repository.
+
+1. **Milestone.** One milestone per minor line, titled `v{major}.{minor}.{patch} Beta`. A closed milestone shows the last version shipped on that line. A new minor line, while open, shows the projected final patch: `0.N.(non-epic issues − 1)`, because the first story ships `0.N.0`. A patch on a line that has already shipped stays on that same milestone: reopen it if it is closed and retitle it to the version this patch will ship. Read live titles before trusting the catalogue below:
+
+   ```bash
+   gh api 'repos/APESCIC/MyAPES-Account/milestones?state=open&per_page=20' --jq '.[] | {number,title,open_issues}'
+   ```
+
+2. **Epic and sub-issues.** Title prefix `[v0.N.x] NN` with a two-digit index. `00` is the epic. The epic body keeps a checklist of the children (`- [ ] #123 Short title`). Link each child as a sub-issue (`parentIssueId` on `createIssue`, or `addSubIssue`). Tick the checklist as children finish, and comment when the branch, pull request, CI, or a blocker changes.
+
+3. **Assignee.** `apescic-director`. That is the account on current issues. `bmurphy-apescic` is the repository administration account named in the README and was the old template default. Do not assign new work to `bmurphy-apescic` unless that person is named as the owner of the task.
+
+4. **Labels.** `area:` only: `area:auth`, `area:admin`, `area:public`, `area:cloudron`, `area:tests`. Human templates may still apply `bug` or `enhancement`. Add the `area:` label for the surface you are changing. Do not add `type:` or `priority:` labels.
+
+5. **Issue Type, Priority, Effort, dates.** Types are `Task`, `Bug`, and `Feature`. Priority is `Urgent`, `High`, `Medium`, or `Low`. Effort is `High`, `Medium`, or `Low`. Start date and Target date are set when they are known. Set them with the GitHub API on create (`issueTypeId`, `issueFields`) or update (`issueFieldUpdates`) when the token allows. If the call returns 403, or the issue comes back with those fields empty, write the intended values in the issue body and in the report. A person sets them in the GitHub sidebar. Do not keep creating issues after an error: list the latest issues first, so a failed assignee call does not leave a duplicate.
+
+6. **Branch and pull request.** Branch from `main` as `cursor/{feature|fix|chore}/<issue-number>-<short-slug>`. Never commit on `main`. If the agent session requires another prefix, keep the issue number in the branch name and say so on the issue. The pull request body uses `Closes #<n>` for each issue that pull request finishes.
+
+7. **In progress.** Comment on the epic and the leaf issue with the branch name. This repository has no in-progress label. The open pull request plus that comment is the in-progress mark.
+
+## Definition of done
+
+A change is done when every item below is true. Do them in order. Do not stop between them for permission. Stop when CI is red (fix it), when a secret or a person is required (name the step and the exact command), or when the owner says stop.
+
+1. The slice is on the working branch. Focused tests for the change have been run, or the report says there is no behaviour change to test.
+2. The epic checklist, sub-issue links, and a progress comment match the code.
+3. Release metadata is in this same pull request. `php artisan myapes:changelog-validate --base-ref=origin/main` passes. The new head record in `resources/data/releases.json` has no `TODO:`.
+4. The pull request is open, **Test MyAPES Core** is green, and the pull request is merged to `main`.
+5. Cloudron deploy has been dispatched for that `main` commit and has succeeded, or dispatch could not run and the exact command is in the report and on the shipping issue.
+6. Live `https://myaccount.myapes.me.uk/healthz` returns `"status": "ok"`, `version` equal to `VERSION`, and `release` equal to the deployed commit. `/change-log` shows the new head record.
+7. Leaf issues that the pull request finished are closed. The epic is closed when every child is done. The milestone is closed, titled with the last shipped `v0.N.P Beta`, when it has no open issues.
+8. The report ends with Next actions and one recommended option.
+
+## Completing work
+
+The owner has ordered agents to finish the slice: commit, open the pull request, get CI green, merge to `main`, ship the version, deploy, and verify.
+
+### Release metadata, before merge, same pull request
+
+`php artisan myapes:changelog-prepare` refuses to run without `--pr`. Open the pull request, then:
+
+```bash
+php artisan myapes:changelog-prepare --type=patch --title="Short public title" --issue=<n> --pr=<n>
+```
+
+Use `--type=minor` for a backward-compatible capability and `--type=patch` for a compatible fix. While the app is pre-1.0, document a breaking change and bump **minor**.
+
+Replace every `TODO:` in the new head of `resources/data/releases.json`. Public notes stay free of credentials, personal data, private operational identifiers, exploitable security detail, and unnecessary infrastructure detail.
+
+The command writes:
+
+- `VERSION`
+- `resources/data/releases.json` (one new head record; do not edit or reorder published records)
+- `resources/data/module-runtime-contract.json` key `application_version`
+- The version-pinned tests listed in `app/Support/ReleaseHistoryPreparer.php`
+
+Validate:
+
+```bash
+git fetch origin
+php artisan myapes:changelog-validate --base-ref=origin/main
+```
+
+On the owner's PC, `composer pre-pr-verify` is the full local check and `composer pre-merge` is the contract gate. On Linux, use the `pre-merge.ps1` steps under Local development.
+
+`release-commit-map.json` is generated by `node scripts/local/map-release-commits.mjs` for backfill. A normal release does not edit it.
+
+`App\Console\Commands\ValidateChangeLog` is the `myapes:changelog-validate` command. CI runs it from `.github/workflows/test-cloudron.yml`.
+
+### Merge
+
+```bash
+gh pr checks --watch --fail-fast
+gh pr merge --merge --delete-branch
+```
+
+Use a merge commit. Squash only when the owner asks. Confirm the commit is on `origin/main` before deploy. **Test MyAPES Core** (`.github/workflows/test-cloudron.yml`) also runs on push to `main`.
+
+### GitHub Release and Cloudron deploy
+
+Deploy is a manual `workflow_dispatch` of **Deploy MyAPES Core to Cloudron** (`.github/workflows/deploy-cloudron.yml`). A green `main` does not deploy by itself.
+
+```bash
+version=$(git show origin/main:VERSION | tr -d '\r\n')
+gh workflow run "Deploy MyAPES Core to Cloudron" --ref main -f app_version="$version"
+gh run list --workflow "Deploy MyAPES Core to Cloudron" --limit 1
+gh run watch <run-id>
+```
+
+The workflow checks out that commit, builds, runs `scripts/deploy/package-release.sh`, and activates the archive on `https://myaccount.myapes.me.uk`. Activation uses `scripts/deploy/cloudron-run.sh`, `scripts/deploy/cloudron-app.conf`, `scripts/deploy/activate-release.sh`, and `scripts/deploy/rollback-release.sh`. Agents do not run those scripts locally and do not install a Cloudron CLI. This repository has no local deploy command.
+
+After a successful deploy, the **Publish GitHub Release** job runs `scripts/deploy/github-release-notes.sh` against `resources/data/releases.json` and creates:
+
+- tag `v{VERSION}`
+- release name `{VERSION} Beta` (for example `0.39.11 Beta`)
+- target commit equal to the deployed SHA
+
+Do not create that GitHub Release by hand before deploy. The publish job fails if the tag already points at a different commit. Create it by hand only to recover a failed publish job, with the same notes script and the deployed SHA.
+
+`scripts/github/rename-release-titles.sh` and `scripts/github/migrate-beta-milestones.sh` are maintenance helpers for titles that have already shipped. They are not part of a normal deploy.
+
+### Secrets and human steps
+
+- `CLOUDRON_FQDN` and `CLOUDRON_TOKEN` are GitHub Actions secrets on the `cloudron-deploy` environment. They are not in this repository. The workflow reads them. If dispatch or the job fails because a secret or permission is missing, stop. Leave the shipping issue open and put the `gh workflow run` command in the report.
+- When this file was written, `cloudron-deploy` had no required reviewers. If GitHub asks for approval, a person approves the run. Say so and stop.
+- Assignee, labels, milestone, Issue Type, Priority, Effort, and dates need a token that can update issues. A 403 means a person sets them in the GitHub UI. Put the intended values in the issue body.
+- Closing or renaming a milestone (`gh api -X PATCH repos/APESCIC/MyAPES-Account/milestones/<number>`) needs that same permission. A 403 is a human step, not a reason to invent a second milestone.
+
+### Verify live
+
+```bash
+curl --fail --silent --show-error https://myaccount.myapes.me.uk/healthz
+gh release view "v$version" --json tagName,name,targetCommitish,url
+```
+
+`healthz` JSON has `status`, `version`, `release` (the deployed SHA, or `development` when no `REVISION` file is present), `maintenance`, and `checks`. Confirm `/change-log` on that host matches the head record. Sibling website changelogs are out of scope.
+
+### Close the book
+
+`Closes #<n>` on the merged pull request closes the issues that pull request finished. Close the epic when every child is done, with `state_reason` `completed`. Close the milestone when it has no open issues, titled with the last shipped version.
+
+## No Aikido
+
+This project does not use Aikido. Do not call Aikido tools, follow Aikido skills, or ask anyone to sign in to Aikido. When someone asks for a security review, use PHPUnit and the `review-security` skill.
+
+## Product history
+
+Shipped lines and the open backlog are listed here. Confirm open milestone titles on GitHub before assigning new work. The operating procedure above wins if this catalogue is stale.
+
 ## Implement order
 
-`main` holds the merged stack through **v0.39.x** (Account security). **`v0.34.4 Beta`** through **`v0.38.9 Beta`** are **closed**. See [docs/architecture.md](docs/architecture.md) and [docs/developer-guide.md](docs/developer-guide.md).
+`main` holds the merged stack through **v0.39.x** (Account security). How to start, ship, and deploy is the procedure at the top of this file, not this history. **`v0.34.4 Beta`** through **`v0.38.9 Beta`** are **closed**. See [docs/architecture.md](docs/architecture.md) and [docs/developer-guide.md](docs/developer-guide.md).
 
 Do not reopen Access/RBAC or password-pack feature PRs for work already on `main` (#97–#99, #142, #121, #147, #148, #122, #133). Do not reopen Account security feature PRs for work already on `main` (#225–#234).
 
@@ -16,8 +193,8 @@ Use one milestone per **minor line**, titled with a **full version** and a **Bet
 - **Patch** releases (`0.32.1`, `0.32.2`, …) stay on the same minor-line milestone; a patch outside the plan (for example ops hygiene) bumps the projected title
 - **Minor** bump (`0.32.x` → `0.33.0`): close the completed milestone (renamed to its last shipped version) when its issues are done; assign new work to the next minor line
 - Closed historical lines: `v0.1.0 Beta` through `v0.30.0 Beta` (archaeology milestones, one per minor line)
-- **Completed product lines:** `v0.31.12`, `v0.32.14`, `v0.33.7`, `v0.34.4`, `v0.35.1`, `v0.36.2`, `v0.37.11`, `v0.38.9`, `v0.39.10 Beta` (Account security plus nav cleanup #331 and this milestone convention #377)
-- **Active backlog (projected):** `v0.40.7 Beta` Card spacing & page polish → `v0.41.7 Beta` Unified Recruitment menu → `v0.42.11 Beta` Email templates & outbound mail → `v0.43.10 Beta` Language & keywords expansion
+- **Completed product lines:** `v0.31.12`, `v0.32.14`, `v0.33.7`, `v0.34.4`, `v0.35.1`, `v0.36.2`, `v0.37.11`, `v0.38.9`, `v0.39.10 Beta` (Account security plus nav cleanup #331 and milestone titles #377). A later patch on this line reopens that milestone and retitles it to the version just shipped.
+- **Active backlog (open on GitHub; re-check before use):** `v0.40.7 Beta` Card spacing and page polish → `v0.41.7 Beta` Unified Recruitment menu → `v0.42.11 Beta` Email templates and outbound mail → `v0.43.10 Beta` Language and keywords expansion → `v0.44.0 Beta` Staff app redesign (horizontal mega menu and logo palette, epic #382). `v0.44.0 Beta` is titled with the line's opening version; re-project it to the final patch when that line's scope is firm.
 - **Ship order (complete):** `v0.35` Admin shell → `v0.36` Recruitment IA → `v0.37` Structure → `v0.38` Language → `v0.39` Account security (milestones **7 → 9 → 8 → 5**)
 
 Planning lists below still describe feature order; map issues to the minor-line milestone above.
@@ -173,120 +350,6 @@ Shipped after Language. Auth emails, step-up, password/username/verify hardening
 7. #231 TOTP 2FA + recovery codes
 8. #232 Passkeys via `laravel/passkeys`
 9. #234 PHPUnit account-security matrix
-
-## GitHub issues
-
-Search this repository for duplicates before creating an issue. Never open issues in other repositories.
-
-When creating or updating a task, fill the GitHub sidebar completely (templates cannot set fields, milestone, relationships, or Development):
-
-1. Call `list_issue_types` and `list_issue_fields` for `APESCIC/MyAPES-Account`.
-2. Create with GitHub MCP `issue_write` (or `gh`) including:
-   - **Assignees:** the person doing the work (`bmurphy-apescic` unless another owner is named)
-   - **Labels:** `area:` only — `area:auth`, `area:admin`, `area:public`, `area:cloudron`, `area:tests`. Do not use `type:` or `priority:` labels. GitHub Issue Type and Priority/Effort fields cover type and priority.
-   - **Type:** `Task`, `Bug`, or `Feature`
-   - **Fields:** Priority (`Urgent` / `High` / `Medium` / `Low`), Effort (`High` / `Medium` / `Low`); Start date and Target date when known
-   - **Milestone:** the active minor-line Beta milestone — `v0.N.P Beta` (see **GitHub milestones** above). Patch work stays on the current minor-line milestone (re-project its title if the patch count changes); open the next minor-line milestone when `changelog-prepare --type=minor` ships and the previous line is complete.
-3. **Relationships:** link parent/sub-issues with `sub_issue_write`. Record blocked-by when there is a real dependency.
-4. **Development:** branch `cursor/{feature|fix|chore}/<issue-number>-<short-slug>` and open the PR with `Fixes #<n>` or `Closes #<n>` so GitHub links the PR in Development.
-5. Comment progress, blockers, and the branch/PR on the issue. Close with `state_reason` `completed`, `not_planned`, or `duplicate`.
-
-Human templates live in `.github/ISSUE_TEMPLATE/`. After a template create, still set fields, milestone, relationships, and Development via the API.
-
-## Releases
-
-Every change merged to `main` must include release metadata in the **same pull request** as the feature or fix work. Do not open a separate release-only PR after merge.
-
-### End-of-work checklist
-
-1. Complete the feature/fix and its tests on the working branch.
-2. Scaffold the next release:
-   ```powershell
-   php artisan myapes:changelog-prepare --type=patch --title="Short public title" --issue=<n> --pr=<n>
-   ```
-   Use `--type=minor` for backward-compatible capabilities and `--type=patch` for compatible fixes. While the app is pre-1.0, document breaking changes and bump **minor**.
-3. Replace every `TODO:` field in the new head record of `resources/data/releases.json` with reviewed public prose. Keep notes free of credentials, personal data, private operational identifiers, exploitable security detail, and unnecessary infrastructure detail.
-4. Validate against remote `main`:
-   ```powershell
-   git fetch origin
-   php artisan myapes:changelog-validate --base-ref=origin/main
-   ```
-5. Run local dev verify on the PR branch (`composer pre-pr-verify` or ship-gate manual steps in `.cursor/skills/ship-gate/SKILL.md`) after release metadata validates and before commit/PR.
-6. Include `VERSION`, `resources/data/releases.json`, `resources/data/module-runtime-contract.json`, and the version-pinned test updates from the prepare command in the **same PR**. Before the first commit or push, present the ship-gate **local verify** then **commit** Next-actions menus (do not auto-commit); then open/update the PR and merge only when CI is green.
-7. After merge, follow post-merge gates in order: changelog hubs (confirm metadata on `main` for this repo only), Cloudron deploy last (`workflow_dispatch` only — pass `app_version` from `VERSION`), then verify live `/change-log`, `healthz`, and the GitHub Release `{VERSION} Beta` / tag `v{VERSION}` on the deployed SHA (created by the deploy workflow). Do not update sibling website changelogs/hubs as part of shipping. Follow `.cursor/rules/ship-gate.mdc` and `.cursor/skills/ship-gate/SKILL.md`.
-
-The prepare command syncs `VERSION`, prepends one release record, updates `module-runtime-contract.json` → `application_version`, and patches version-pinned tests. Do not edit or reorder published release records. See `.cursor/skills/release-metadata/SKILL.md` for full guidance.
-
-### Pre-merge validation
-
-Before pushing a release branch, run local dev verify (includes contract gate + bootstrap):
-
-```powershell
-composer pre-pr-verify
-```
-
-Or the contract gate alone:
-
-```powershell
-composer pre-merge
-```
-
-Or:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\local\pre-pr-verify.ps1
-powershell -ExecutionPolicy Bypass -File .\scripts\local\pre-merge.ps1
-```
-
-This validates release history against `origin/main`, version-pinned tests, frontend tests, and a production build.
-
-## Local preview
-
-Before planning or editing UI-facing files, ensure a local preview is running and open the app in Cursor's built-in browser.
-
-### Start the stack
-
-Prefer the cross-platform Composer script from the repository root:
-
-```powershell
-composer run dev
-```
-
-On Windows you may also use:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\local\dev.ps1
-```
-
-On macOS / Linux:
-
-```bash
-bash scripts/local/dev.sh
-```
-
-These start Laravel, the queue listener, application logs, and Vite together. Default app URL: **http://127.0.0.1:8000/** (override with `APP_PORT`). Vite HMR typically listens on **http://127.0.0.1:5173/**.
-
-On Laragon with an Apache virtual host, use **`http://myapes-account.test/`** (or your `-AppUrl` from `bootstrap.ps1 -Laragon`) and run **`composer run dev:laragon`** instead of `composer run dev`. See README “Local development with Laragon (Windows)”.
-
-### Bootstrap when `.env` is missing
-
-If local env is not set up yet, run bootstrap first (installs dependencies, creates `.env` from `.env.local.example`, migrates/seeds, builds frontend):
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\local\bootstrap.ps1 -Fresh
-```
-
-For Laragon, use `-Laragon` (and optional `-AppUrl`) so `.env` is seeded from `.env.laragon.example` instead.
-
-```bash
-bash scripts/local/bootstrap.sh --fresh
-```
-
-Use `--seed` / `-Seed` for non-destructive seeding. See README “Local environment setup” for details.
-
-### Agent requirement
-
-Reuse an already-running preview; do not start duplicate servers. Open **http://127.0.0.1:8000/** in Cursor's built-in browser (side pane preferred) before UI edits, confirm the page loads, and note the preview URL (and Vite HMR port when relevant) in your reply. Skip preview startup for non-UI tasks.
 
 ===
 

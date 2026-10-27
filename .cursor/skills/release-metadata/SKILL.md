@@ -101,9 +101,11 @@ composer pre-merge
 
 ## Local verify and deploy timing
 
-Release metadata belongs in the PR **before merge**. After release metadata validates, run local dev verify on the PR branch (`composer pre-pr-verify` or the ship-gate manual steps) before commit/PR.
+Release metadata belongs in the pull request **before merge**. `myapes:changelog-prepare` needs `--pr`, so open the pull request first, then prepare and fill the `TODO:` fields.
 
-After merge to `main`, `.github/workflows/test-cloudron.yml` validates release history and runs tests. Post-merge gates run in order: changelog hubs (metadata on `main` for this repo only; live hub after deploy), **Cloudron deploy last** (`workflow_dispatch` on `.github/workflows/deploy-cloudron.yml`, passing `app_version` from `VERSION`), then verify live `healthz`, the Change Log Hub, and the GitHub Release `{VERSION} Beta` / tag `v{VERSION}` on the deployed SHA (created by the deploy workflow). Sibling website changelogs/hubs are out of scope. See `.cursor/skills/ship-gate/SKILL.md`.
+On Windows, `composer pre-pr-verify` is the local check. On Linux without PowerShell, run the steps in `scripts/local/pre-merge.ps1`. The owner has ordered agents to merge when **Test MyAPES Core** is green and then deploy. See `.cursor/skills/release-and-deploy/SKILL.md`.
+
+After merge, `.github/workflows/test-cloudron.yml` validates release history and runs tests. Deploy with `workflow_dispatch` on `.github/workflows/deploy-cloudron.yml`, passing `app_version` from `VERSION`. That workflow publishes the live Change Log Hub and the GitHub Release `{VERSION} Beta` / tag `v{VERSION}` on the deployed SHA. Sibling website changelogs are out of scope.
 
 ## Do not
 

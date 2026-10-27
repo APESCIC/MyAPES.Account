@@ -1,0 +1,8 @@
+---
+description: End every report or question with next options and one recommendation
+alwaysApply: true
+---
+
+# Next actions
+
+End every report or question with the **Next actions** block from `AGENTS.md`: a numbered list and exactly one **Recommended** option. Do this when the work is finished as well as when a step is blocked.

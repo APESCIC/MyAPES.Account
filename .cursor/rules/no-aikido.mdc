@@ -5,7 +5,7 @@ alwaysApply: true
 
 # No Aikido
 
-This project does not use Aikido. Do not invoke Aikido for any task.
+This project does not use Aikido. Do not invoke Aikido for any task. The same rule is in `AGENTS.md`.
 
 ## Forbidden
 

@@ -24,7 +24,7 @@ MyAPES Core is the APES CIC service-user and staff portal built on Laravel for C
 - [Report a security vulnerability privately](SECURITY.md)
 - [Browse existing issues](https://github.com/APESCIC/MyAPES-Account/issues)
 - [Browse discussions](https://github.com/APESCIC/MyAPES-Account/discussions)
-- Maintained by [APES CIC](https://github.com/APESCIC) with repository administration by [bmurphy-apescic](https://github.com/bmurphy-apescic).
+- Maintained by [APES CIC](https://github.com/APESCIC) with repository administration by [bmurphy-apescic](https://github.com/bmurphy-apescic). New issues are assigned to [apescic-director](https://github.com/apescic-director). See [AGENTS.md](AGENTS.md).
 
 Do not disclose suspected security vulnerabilities in a public issue. Follow the private reporting path in [SECURITY.md](SECURITY.md).
 
@@ -271,14 +271,14 @@ Use Laragon when you prefer an Apache virtual host (for example `http://myapes-a
 
 **Virtual host**
 
-- Recommended: place the clone at `C:\laragon\www\MyAPES-Account` so Laragon auto-creates `http://myapes-account.test`
+- The owner's clone is `C:\laragon\www\myapes-account`, which Laragon serves as `http://myapes-account.test`
 - Document root must be **`{repo}/public`** (Laragon “Quick app → Laravel” or an equivalent manual vhost)
 - Restart Apache after vhost changes
 
 **One-time Laragon bootstrap**
 
 ```powershell
-cd C:\laragon\www\MyAPES-Account
+cd C:\laragon\www\myapes-account
 powershell -ExecutionPolicy Bypass -File .\scripts\local\bootstrap.ps1 -Laragon -Fresh
 ```
 
