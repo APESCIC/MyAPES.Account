@@ -2,14 +2,14 @@ name: Task
 description: Track a concrete piece of implementation or maintenance work
 title: "[Task]: "
 assignees:
-  - bmurphy-apescic
+  - apescic-director
 type: Task
 body:
   - type: markdown
     attributes:
       value: |
         Describe the work to complete. Remove credentials, personal data, and private operational details.
-        After opening, agents must still set Priority, Effort, the active minor-line `v0.N.P Beta` milestone, relationships, and Development via GitHub MCP or `gh`.
+        After opening, set assignee `apescic-director` if it is empty, an `area:` label, Priority, Effort, the minor-line `v0.N.P Beta` milestone, and parent or sub-issue links. If the API returns 403, set those in the GitHub sidebar. See AGENTS.md.
 
   - type: textarea
     id: summary

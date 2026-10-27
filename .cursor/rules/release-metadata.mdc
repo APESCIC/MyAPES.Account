@@ -1,31 +1,12 @@
 ---
-description: Require release metadata in the same PR before merge and deploy
+description: Release metadata ships in the same pull request as the change
 alwaysApply: true
 ---
 
-# Release metadata before deploy
+# Release metadata
 
-Every feature or fix merged to `main` must include release metadata in the **same PR**. Do not defer versioning to a follow-up PR.
+Follow **Completing work** in `AGENTS.md` and `.cursor/skills/release-metadata/SKILL.md`.
 
-## Mandatory end-of-work steps
+Every change merged to `main` includes `VERSION`, `resources/data/releases.json`, `resources/data/module-runtime-contract.json` (`application_version`), and the version-pinned tests from `php artisan myapes:changelog-prepare` in the same pull request. Replace every `TODO:` in the new head record. Validate with `php artisan myapes:changelog-validate --base-ref=origin/main`.
 
-1. Finish implementation and tests on the branch.
-2. Run `php artisan myapes:changelog-prepare` with `--type`, `--title`, and `--issue` (plus `--pr` when known).
-3. Replace all `TODO:` fields in the new `resources/data/releases.json` head record.
-4. Run `git fetch origin && php artisan myapes:changelog-validate --base-ref=origin/main`.
-5. Run local dev verify on the PR branch (`composer pre-pr-verify` or ship-gate manual steps), then open or update the PR with release files included. Merge when CI is green. Changelog hubs, GitHub Release, and Cloudron deploy are separate post-merge gates in that order; Cloudron deploy is last (see ship-gate rule).
-
-## Files that must stay in sync
-
-- `VERSION`
-- `resources/data/releases.json` (prepend exactly one record; never rewrite published records)
-- `resources/data/module-runtime-contract.json` → `application_version`
-- Version-pinned tests updated by the prepare command
-
-## Semver policy
-
-- **patch** — backward-compatible fix
-- **minor** — backward-compatible capability
-- Pre-1.0 breaking changes — document explicitly and bump **minor**
-
-For detailed examples and field guidance, read `.cursor/skills/release-metadata/SKILL.md`.
+Patch for a compatible fix. Minor for a backward-compatible capability. Pre-1.0 breaking changes are documented and bump minor.
