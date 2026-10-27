@@ -99,6 +99,31 @@ class LayoutSpacingSmokeTest extends TestCase
         }
     }
 
+    public function test_admin_kpis_and_plugin_registry_use_shared_spacing_tokens(): void
+    {
+        $this->assertStringContainsString('gap: var(--space-stack-tight);', $this->ruleBody('.analytics-kpis'));
+        $this->assertStringContainsString('padding: 0.8rem 1rem;', $this->ruleBody('.analytics-kpis > .panel-flat'));
+        $this->assertStringContainsString('gap: var(--space-section);', $this->ruleBody('.module-registry'));
+        $this->assertStringContainsString('gap: var(--space-grid);', $this->ruleBody('.module-registry__rows'));
+        $this->assertStringContainsString('gap: var(--space-stack-tight);', $this->ruleBody('.module-registry__card-body'));
+        $this->assertStringContainsString('margin-bottom: var(--space-stack);', $this->ruleBody('.module-registry__subcore-header'));
+    }
+
+    public function test_admin_overview_kpis_render_as_flat_tiles_in_the_kpi_grid(): void
+    {
+        app(ModuleInstallationSynchronizer::class)->synchronize();
+        $admin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
+
+        $content = $this->actingAs($admin)
+            ->get(route('admin.index'))
+            ->assertOk()
+            ->assertSee('<div class="grid analytics-kpis" role="list">', false)
+            ->getContent();
+
+        $this->assertSame(6, substr_count($content, '<div class="panel panel-flat" role="listitem">'));
+        $this->assertStringContainsString('data-kpi="total-accounts"', $content);
+    }
+
     public function test_public_recruitment_role_list_uses_the_stack_contract(): void
     {
         app(ModuleInstallationSynchronizer::class)->synchronize();
