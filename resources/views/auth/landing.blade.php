@@ -12,7 +12,7 @@
         </h1>
         <p class="muted">{{ __('auth.common.support_tools_intro') }}</p>
         <x-mascot-tip />
-        <div class="grid">
+        <div class="grid auth-service-tiles">
             <div class="panel panel-flat">
                 <span class="service-label apes-cic">{{ __('auth.common.apes_cic') }}</span>
                 <p>{{ __('auth.common.apes_cic_blurb') }}</p>
@@ -27,7 +27,7 @@
             </div>
         </div>
     </div>
-    <div class="grid">
+    <div class="grid auth-entry-grid">
         <div class="panel">
             <h2>{{ __('auth.landing.public_access') }}</h2>
             <p class="muted">{{ __('auth.landing.public_access_blurb') }}</p>

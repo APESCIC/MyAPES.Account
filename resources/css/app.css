@@ -2495,6 +2495,35 @@ ol.stack {
     flex: 0 0 auto;
 }
 
+.auth-service-tiles {
+    margin-top: var(--space-stack);
+    gap: var(--space-grid);
+}
+
+.auth-service-tiles + form {
+    margin-top: var(--space-section);
+}
+
+.auth-service-tiles > .panel-flat {
+    padding: 0.9rem 1.1rem;
+    border-radius: var(--radius-md);
+}
+
+.auth-service-tiles > .panel-flat p {
+    margin: 0.5rem 0 0;
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+    line-height: 1.45;
+}
+
+.auth-entry-grid {
+    gap: var(--space-grid);
+}
+
+.auth-entry-grid > .panel {
+    margin: 0;
+}
+
 .brand-mascot {
     width: 5rem;
     height: 5rem;
