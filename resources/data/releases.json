@@ -1,5 +1,51 @@
 [
   {
+    "version": "0.41.5",
+    "date": "2026-10-27",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Recruitment manage for managers only",
+    "summary": "Staff without the Human Resources job role can browse and apply for roles, but no longer reach the Recruitment manage pages.",
+    "changes": [
+      "Close the Recruitment Roles manage list and role pages to accounts that cannot manage Recruitment.",
+      "Show the Recruitment card in the APES CIC service hub only to accounts that can manage Recruitment.",
+      "Keep Open roles, applying, and My applications available to staff."
+    ],
+    "affected_areas": [
+      "Recruitment",
+      "APES CIC service hub"
+    ],
+    "categories": [
+      "fixed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.41 line: closes manage pages that showed an empty list to accounts without manage access.",
+    "validation": [
+      "Recruitment staff browse and manage access tests.",
+      "Recruitment, hub, dashboard, module navigation, and layout tests.",
+      "Full PHPUnit suite.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "None."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #348; pull request #421.",
+    "references": [
+      {
+        "label": "Issue #348",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/348"
+      },
+      {
+        "label": "Pull request #421",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/421"
+      }
+    ]
+  },
+  {
     "version": "0.41.4",
     "date": "2026-10-27",
     "channel": "stable",
