@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.41.7",
+    "date": "2026-10-27",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Recruitment access matrix tests",
+    "summary": "Automated checks now confirm the single Recruitment menu and who can use each Recruitment page.",
+    "changes": [
+      "Check the Recruitment menu link, page menu, and page access for visitors, public, student, volunteer, staff, Human Resources, Admin, Super Admin, and review-only accounts.",
+      "Check the public board and apply switches, the Recruitment switch, and the APES CIC service hub card.",
+      "Complete the single Recruitment menu work for the 0.41 line."
+    ],
+    "affected_areas": [
+      "Automated tests",
+      "Recruitment"
+    ],
+    "categories": [
+      "fixed"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.41 line: test coverage only, with no application behaviour change.",
+    "validation": [
+      "php artisan test tests/Feature/RecruitmentUnifiedMenuAccessMatrixTest.php.",
+      "All Recruitment tests.",
+      "Full PHPUnit suite.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "None."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #350; pull request #423.",
+    "references": [
+      {
+        "label": "Issue #350",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/350"
+      },
+      {
+        "label": "Pull request #423",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/423"
+      }
+    ]
+  },
+  {
     "version": "0.41.6",
     "date": "2026-10-27",
     "channel": "stable",
