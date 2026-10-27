@@ -4,7 +4,7 @@
 
 @section('content')
     @inject('ukDateTime', \App\Support\UkDateTime::class)
-    @include('recruitment::staff._navigation')
+    @include('recruitment::_navigation')
     <div class="panel">
         <span class="service-label service-apes-cic">{{ __('recruitment::staff.staff.index.blade.apes_cic') }}</span>
         <h1>{{ $role->title }}</h1>

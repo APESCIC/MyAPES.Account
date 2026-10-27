@@ -32,7 +32,6 @@ return [
         ],
         '_navigation' => [
             'blade' => [
-                'recruitment_manage_sections' => 'Recruitment manage sections',
                 'applications' => 'Applications',
                 'roles' => 'Roles',
             ],

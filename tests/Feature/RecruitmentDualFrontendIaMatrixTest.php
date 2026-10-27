@@ -35,12 +35,11 @@ class RecruitmentDualFrontendIaMatrixTest extends TestCase
             ->assertDontSee('>Recruit manage</span>', false)
             ->assertDontSee('href="'.route('apes-cic.recruitment.index').'"', false);
 
-        $this->get(route('recruitment.index'))
+        $board = $this->get(route('recruitment.index'))
             ->assertOk()
-            ->assertSeeText('Open roles')
-            ->assertDontSeeText('My applications')
             ->assertDontSee('>Recruit manage</span>', false)
-            ->assertDontSee('aria-label="Recruitment manage sections"', false);
+            ->getContent();
+        $this->assertSame(['Open roles'], $this->recruitmentSubmenuLabels($board));
 
         $this->get(route('apes-cic.recruitment.index'))
             ->assertRedirect(route('public.login'));
@@ -61,13 +60,11 @@ class RecruitmentDualFrontendIaMatrixTest extends TestCase
             ->assertDontSee('href="'.route('apes-cic.recruitment.index').'"', false);
         $this->assertSame(route('recruitment.index'), $this->recruitmentPrimaryHref($dashboard->getContent()));
 
-        $this->actingAs($applicant)
+        $board = $this->actingAs($applicant)
             ->get(route('recruitment.index'))
             ->assertOk()
-            ->assertSeeText('Open roles')
-            ->assertSeeText('My applications')
-            ->assertSee('aria-label="Recruitment sections"', false)
-            ->assertDontSee('aria-label="Recruitment manage sections"', false);
+            ->getContent();
+        $this->assertSame(['Open roles', 'My applications'], $this->recruitmentSubmenuLabels($board));
 
         $this->actingAs($applicant)
             ->get(route('apes-cic.recruitment.index'))
@@ -96,6 +93,7 @@ class RecruitmentDualFrontendIaMatrixTest extends TestCase
             ->get(route('recruitment.index'))
             ->assertOk();
         $this->assertSame(route('recruitment.index'), $this->recruitmentPrimaryHref($board->getContent()));
+        $this->assertSame(['Open roles', 'My applications'], $this->recruitmentSubmenuLabels($board->getContent()));
         $this->assertMatchesRegularExpression(
             '/class="primary-nav__link is-active"\s+aria-current="page"\s*>\s*<i data-lucide="briefcase"/',
             $board->getContent(),
@@ -124,21 +122,30 @@ class RecruitmentDualFrontendIaMatrixTest extends TestCase
             $this->actingAs($actor)
                 ->get(route('apes-cic.recruitment.index'))
                 ->assertOk()
-                ->assertSee('aria-label="Recruitment manage sections"', false)
+                ->assertSee('aria-label="Recruitment sections"', false)
                 ->assertSee('>Roles</span>', false)
                 ->assertSee('>Applications</span>', false)
                 ->assertSee('href="'.route('apes-cic.recruitment.applications.index').'"', false)
                 ->assertSee('>Recruitment</span>', false)
                 ->assertDontSee('>Recruit manage</span>', false);
 
-            $this->actingAs($actor)
+            $applications = $this->actingAs($actor)
                 ->get(route('apes-cic.recruitment.applications.index'))
                 ->assertOk()
-                ->assertSee('aria-label="Recruitment manage sections"', false)
-                ->assertSee('>Roles</span>', false)
-                ->assertSee('>Applications</span>', false)
-                ->assertDontSee('aria-label="Recruitment sections"', false)
-                ->assertDontSeeText('My applications');
+                ->getContent();
+            $this->assertSame(
+                ['Open roles', 'My applications', 'Roles', 'Applications'],
+                $this->recruitmentSubmenuLabels($applications),
+            );
+
+            $board = $this->actingAs($actor)
+                ->get(route('recruitment.index'))
+                ->assertOk()
+                ->getContent();
+            $this->assertSame(
+                ['Open roles', 'My applications', 'Roles', 'Applications'],
+                $this->recruitmentSubmenuLabels($board),
+            );
         }
     }
 
@@ -161,13 +168,11 @@ class RecruitmentDualFrontendIaMatrixTest extends TestCase
             ->assertDontSee('href="'.route('apes-cic.recruitment.index').'"', false);
         $this->assertSame(route('apes-cic.recruitment.applications.index'), $this->recruitmentPrimaryHref($dashboard->getContent()));
 
-        $this->actingAs($hr)
+        $applications = $this->actingAs($hr)
             ->get(route('apes-cic.recruitment.applications.index'))
             ->assertOk()
-            ->assertSee('aria-label="Recruitment manage sections"', false)
-            ->assertSee('>Applications</span>', false)
-            ->assertDontSee('>Roles</span>', false)
-            ->assertDontSeeText('My applications');
+            ->getContent();
+        $this->assertSame(['Open roles', 'Applications'], $this->recruitmentSubmenuLabels($applications));
 
         $this->actingAs($hr)
             ->get(route('apes-cic.recruitment.index'))
@@ -314,6 +319,22 @@ class RecruitmentDualFrontendIaMatrixTest extends TestCase
         }
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function recruitmentSubmenuLabels(string $html): array
+    {
+        $this->assertSame(
+            1,
+            preg_match('/<nav class="admin-nav" aria-label="Recruitment sections">(.*?)<\/nav>/s', $html, $nav),
+            'Expected exactly one Recruitment submenu.',
+        );
+        $this->assertSame(1, substr_count($html, 'aria-label="Recruitment sections"'));
+        preg_match_all('/<span>([^<]+)<\/span>/', $nav[1], $labels);
+
+        return $labels[1];
     }
 
     private function recruitmentPrimaryHref(string $html): string
