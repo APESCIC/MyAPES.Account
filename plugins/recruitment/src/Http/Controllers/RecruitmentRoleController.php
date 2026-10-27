@@ -16,11 +16,7 @@ class RecruitmentRoleController extends Controller
     public function index(Request $request): View
     {
         $user = $request->user();
-        abort_unless(
-            $user->can(RecruitmentRole::PERMISSION_PREFIX.'view-own')
-                || $user->can(RecruitmentRole::PERMISSION_PREFIX.'view-all'),
-            403,
-        );
+        Gate::authorize('viewAny', RecruitmentRole::class);
 
         $roles = RecruitmentRole::query()
             ->visibleTo($user)

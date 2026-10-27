@@ -8,10 +8,12 @@ use App\Services\AuthorizationProfile;
 use App\Services\ModuleInstallationSynchronizer;
 use App\Services\ModuleProjectionCache;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\CreatesRecruitmentPersonas;
 use Tests\TestCase;
 
 class ModuleAdministrationAndNavigationTest extends TestCase
 {
+    use CreatesRecruitmentPersonas;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -22,7 +24,7 @@ class ModuleAdministrationAndNavigationTest extends TestCase
 
     public function test_stable_sub_core_entry_pages_are_generated_from_registry_metadata(): void
     {
-        $user = User::factory()->create();
+        $user = $this->hrStaff();
 
         $this->actingAs($user)
             ->get('/apes-cic')

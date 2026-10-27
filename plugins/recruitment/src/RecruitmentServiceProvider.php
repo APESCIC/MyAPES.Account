@@ -62,6 +62,7 @@ class RecruitmentServiceProvider extends PluginServiceProvider
                     'apes-cic.recruitment.index',
                     'clipboard-list',
                     30,
+                    requiredAbility: 'view-all',
                     moduleSlug: 'apes-cic',
                 ),
             ],

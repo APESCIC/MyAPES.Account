@@ -68,9 +68,7 @@ class RecruitmentDualFrontendIaMatrixTest extends TestCase
 
         $this->actingAs($applicant)
             ->get(route('apes-cic.recruitment.index'))
-            ->assertOk()
-            ->assertDontSee('>Recruit manage</span>', false)
-            ->assertDontSee('action="'.route('apes-cic.recruitment.store').'"', false);
+            ->assertForbidden();
 
         $this->actingAs($applicant)
             ->get(route('apes-cic.recruitment.applications.index'))
@@ -94,6 +92,28 @@ class RecruitmentDualFrontendIaMatrixTest extends TestCase
             ->assertOk();
         $this->assertSame(route('recruitment.index'), $this->recruitmentPrimaryHref($board->getContent()));
         $this->assertSame(['Open roles', 'My applications'], $this->recruitmentSubmenuLabels($board->getContent()));
+
+        foreach ([
+            route('apes-cic.recruitment.index'),
+            route('apes-cic.recruitment.applications.index'),
+        ] as $url) {
+            $this->actingAs($staff)->get($url)->assertForbidden();
+        }
+
+        $hub = $this->actingAs($staff)
+            ->get('/apes-cic')
+            ->assertOk()
+            ->getContent();
+        $this->assertSame(0, preg_match('/data-module-key="recruitment"/', $hub));
+
+        $role = RecruitmentRole::factory()->open()->create(['title' => 'Staff can apply']);
+        $this->actingAs($staff)
+            ->post(route('recruitment.apply', $role), ['statement' => 'I would like to move teams.'])
+            ->assertRedirect();
+        $this->actingAs($staff)
+            ->get(route('recruitment.applications.index'))
+            ->assertOk()
+            ->assertSeeText('Staff can apply');
         $this->assertMatchesRegularExpression(
             '/class="primary-nav__link is-active"\s+aria-current="page"\s*>\s*<i data-lucide="briefcase"/',
             $board->getContent(),

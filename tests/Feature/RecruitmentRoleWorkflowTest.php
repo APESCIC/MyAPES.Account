@@ -183,8 +183,7 @@ class RecruitmentRoleWorkflowTest extends TestCase
 
         $this->actingAs($public)
             ->get(route('apes-cic.recruitment.index'))
-            ->assertOk()
-            ->assertDontSee('action="'.route('apes-cic.recruitment.store').'"', false);
+            ->assertForbidden();
 
         $this->actingAs($public)
             ->post(route('apes-cic.recruitment.store'), [

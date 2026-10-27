@@ -178,6 +178,7 @@ final class FirstPartyModuleRegistry implements ModuleRegistry
                 $item->routeName,
                 $item->icon,
                 $item->order,
+                $item->requiredAbility,
             );
         }
 
