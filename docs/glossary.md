@@ -36,6 +36,7 @@ Locale and key conventions: [localisation.md](localisation.md). Canonical labels
 | Canonical | Meaning / audience | Use in UI | Avoid | Lang key |
 | --- | --- | --- | --- | --- |
 | Job role | Access capability pack under Admin → Access (not a vacancy). | Access → **Job roles**. | Roles (alone) on Access screens when it could mean Recruitment; Recruitment role. | `terms.job_role` / `terms.job_roles` |
+| Human Resources | Seeded job role (`human-resources`) that grants Recruitment manage (Roles and Applications) on top of staff. Not a vacancy and not a protected role. | Access → **Job roles**; Recruitment access matrix. | HR as a protected tier; Recruitment role. | — (job role title) |
 | Access group | Managed Cloudron / directory group for authorisation. | Access → **Groups**. | Calling groups “roles”. | `terms.access_group` / `terms.access_groups` |
 | Permission | Catalogue ability string (stored keys unchanged). | Access → **Permission catalogue**; display labels only. | Renaming stored keys for wording. | `terms.permission` / `terms.permissions` |
 | Spatie Role | Framework role model used for Access tiers — not a vacancy. | Rarely named in UI; prefer Job role / protected role. | Role on public Recruitment pages. | — (code only) |
