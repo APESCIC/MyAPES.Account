@@ -1,5 +1,48 @@
 [
   {
+    "version": "0.40.1",
+    "date": "2026-10-27",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Spaced Recruitment role cards",
+    "summary": "Role cards on the public Recruitment Open roles page now have a clear gap between them instead of touching.",
+    "changes": [
+      "Space the Open roles cards apart using the shared stack layout.",
+      "Add an automated check that the Open roles list keeps its spacing."
+    ],
+    "affected_areas": [
+      "Public Recruitment board"
+    ],
+    "categories": [
+      "fixed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.40 line: a compatible layout fix with no behaviour change.",
+    "validation": [
+      "php artisan test tests/Feature/LayoutSpacingSmokeTest.php tests/Feature/PublicRecruitmentBoardTest.php.",
+      "composer pre-merge on the pull request branch.",
+      "Local browser check that the seeded role cards are evenly spaced."
+    ],
+    "known_limitations": [
+      "None."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #335; pull request #407.",
+    "references": [
+      {
+        "label": "Issue #335",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/335"
+      },
+      {
+        "label": "Pull request #407",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/407"
+      }
+    ]
+  },
+  {
     "version": "0.40.0",
     "date": "2026-10-27",
     "channel": "stable",
