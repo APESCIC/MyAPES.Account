@@ -1,5 +1,45 @@
 [
   {
+    "version": "0.40.3",
+    "date": "2026-10-27",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Even staff list page spacing",
+    "summary": "Staff list pages for Tickets, Cases, Pet Profiles, Consultations, and Recruitment now space their heading, list, and create sections evenly.",
+    "changes": [
+      "Space the heading, list, and create sections on staff list pages with one shared page rhythm.,Apply it to APES CIC Tickets and Cases, Shelter Cases, Pet Profiles, Consultations, Recruitment roles, and Recruitment applications.,Add automated checks that these pages keep the shared spacing."
+    ],
+    "affected_areas": [
+      "Tickets,Cases,Pet Profiles,Consultations,Recruitment"
+    ],
+    "categories": [
+      "fixed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.40 line: a compatible layout polish with no behaviour change.",
+    "validation": [
+      "php artisan test tests/Feature/LayoutSpacingSmokeTest.php and the affected plugin workflow tests.,composer pre-merge on the pull request branch.,Local browser check of APES CIC Tickets as Staff."
+    ],
+    "known_limitations": [
+      "None."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #337; pull request #409.",
+    "references": [
+      {
+        "label": "Issue #337",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/337"
+      },
+      {
+        "label": "Pull request #409",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/409"
+      }
+    ]
+  },
+  {
     "version": "0.40.2",
     "date": "2026-10-27",
     "channel": "stable",
