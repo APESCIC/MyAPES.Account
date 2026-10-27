@@ -1,5 +1,45 @@
 [
   {
+    "version": "0.40.6",
+    "date": "2026-10-27",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Calmer profile and sign-in pages",
+    "summary": "Profile page sections are evenly spaced, and the service tiles on the welcome and sign-in pages are lighter and easier to read.",
+    "changes": [
+      "Space the profile page sections with one shared page rhythm.,Give the APES CIC, Shelter, and Pet Care tiles on the welcome and sign-in pages lighter padding and softer text.,Space the welcome page access cards with the shared grid gap.,Add automated checks for the profile and welcome page spacing."
+    ],
+    "affected_areas": [
+      "Profile,Welcome page,Sign-in"
+    ],
+    "categories": [
+      "fixed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.40 line: a compatible layout polish with no behaviour change.",
+    "validation": [
+      "php artisan test tests/Feature/LayoutSpacingSmokeTest.php tests/Feature/HealthAndThemeTest.php tests/Feature/MascotHelperTest.php.,composer pre-merge on the pull request branch.,Local browser check of the public profile and welcome pages."
+    ],
+    "known_limitations": [
+      "None."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #340; pull request #412.",
+    "references": [
+      {
+        "label": "Issue #340",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/340"
+      },
+      {
+        "label": "Pull request #412",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/412"
+      }
+    ]
+  },
+  {
     "version": "0.40.5",
     "date": "2026-10-27",
     "channel": "stable",
