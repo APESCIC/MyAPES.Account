@@ -1,5 +1,45 @@
 [
   {
+    "version": "0.40.4",
+    "date": "2026-10-27",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Tidier Admin overview and Plugins registry",
+    "summary": "Admin overview figures now show as compact, easy-to-scan tiles, and the Admin Plugins page uses the shared spacing rules.",
+    "changes": [
+      "Show Admin overview figures as compact tiles with a small label and a larger number.,Space the Admin Plugins cards, titles, figures, and actions with the shared spacing values.,Add automated checks for the Admin overview tiles and Plugins page spacing."
+    ],
+    "affected_areas": [
+      "Admin overview,Admin Plugins"
+    ],
+    "categories": [
+      "fixed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.40 line: a compatible layout polish with no behaviour change.",
+    "validation": [
+      "php artisan test tests/Feature/LayoutSpacingSmokeTest.php.,composer pre-merge on the pull request branch.,Local browser check of the Admin overview and Admin Plugins pages as Super Admin."
+    ],
+    "known_limitations": [
+      "None."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #338; pull request #410.",
+    "references": [
+      {
+        "label": "Issue #338",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/338"
+      },
+      {
+        "label": "Pull request #410",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/410"
+      }
+    ]
+  },
+  {
     "version": "0.40.3",
     "date": "2026-10-27",
     "channel": "stable",
