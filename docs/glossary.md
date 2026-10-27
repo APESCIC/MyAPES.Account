@@ -40,11 +40,10 @@ Locale and key conventions: [localisation.md](localisation.md). Canonical labels
 | Access group | Managed Cloudron / directory group for authorisation. | Access → **Groups**. | Calling groups “roles”. | `terms.access_group` / `terms.access_groups` |
 | Permission | Catalogue ability string (stored keys unchanged). | Access → **Permission catalogue**; display labels only. | Renaming stored keys for wording. | `terms.permission` / `terms.permissions` |
 | Spatie Role | Framework role model used for Access tiers — not a vacancy. | Rarely named in UI; prefer Job role / protected role. | Role on public Recruitment pages. | — (code only) |
-| Recruitment role | Vacancy / opening; model `RecruitmentRole`. | Public: **Open roles**; staff manage: **Roles** under Recruit manage. | Job role; Spatie Role; Access “Roles”. | `terms.recruitment_role` / `terms.recruitment_roles` |
+| Recruitment role | Vacancy / opening; model `RecruitmentRole`. | Public: **Open roles**; manage: **Roles** in the Recruitment submenu. | Job role; Spatie Role; Access “Roles”. | `terms.recruitment_role` / `terms.recruitment_roles` |
 | Open roles | Public board of open vacancies. | Public Recruitment submenu and board title. | Jobs board; Careers (as the product label). | `terms.open_roles` |
 | My applications | Signed-in public user’s own applications. | Public Recruitment submenu. | My roles; Applications (alone when ambiguous with staff review). | `terms.my_applications` |
-| Recruit manage | Staff primary nav for APES CIC recruitment manage (product-shortened). | Staff primary **Recruit manage**; Roles \| Applications submenu. | Mixing with public Recruitment nav; Access job roles. | `terms.recruit_manage` |
-| Recruitment | Plugin and public primary for openings. | Public primary **Recruitment**; Admin Plugins name. | Roles as the public primary label. | `terms.recruitment` |
+| Recruitment | Plugin and the single Recruitment primary (0.41.3). The page submenu shows Open roles, My applications, Roles and Applications as each account is allowed. | Primary **Recruitment** for guests and signed-in accounts; Admin Plugins name. | Recruit manage (retired second primary); Roles as the primary label. | `terms.recruitment` |
 
 ## Organisation areas (modules)
 

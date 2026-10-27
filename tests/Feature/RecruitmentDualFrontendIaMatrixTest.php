@@ -8,7 +8,6 @@ use App\Core\Accounts\User;
 use App\Core\Extensions\Models\ModuleInstallation;
 use App\Services\AuthorizationProfile;
 use App\Services\ModuleInstallationSynchronizer;
-use App\Services\ModuleSettingsService;
 use App\Support\DefaultJobRoles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Plugins\Recruitment\Models\RecruitmentApplication;
@@ -55,12 +54,12 @@ class RecruitmentDualFrontendIaMatrixTest extends TestCase
             ->protectedRole(AuthorizationProfile::ROLE_SERVICE_USER)
             ->create();
 
-        $this->actingAs($applicant)
+        $dashboard = $this->actingAs($applicant)
             ->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('>Recruitment</span>', false)
             ->assertDontSee('>Recruit manage</span>', false)
             ->assertDontSee('href="'.route('apes-cic.recruitment.index').'"', false);
+        $this->assertSame(route('recruitment.index'), $this->recruitmentPrimaryHref($dashboard->getContent()));
 
         $this->actingAs($applicant)
             ->get(route('recruitment.index'))
@@ -81,7 +80,29 @@ class RecruitmentDualFrontendIaMatrixTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_hr_admin_and_superadmin_see_recruit_manage_with_roles_and_applications(): void
+    public function test_staff_without_hr_job_role_recruitment_primary_lands_on_open_roles(): void
+    {
+        $staff = User::factory()
+            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
+            ->create();
+
+        $dashboard = $this->actingAs($staff)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertDontSee('>Recruit manage</span>', false);
+        $this->assertSame(route('recruitment.index'), $this->recruitmentPrimaryHref($dashboard->getContent()));
+
+        $board = $this->actingAs($staff)
+            ->get(route('recruitment.index'))
+            ->assertOk();
+        $this->assertSame(route('recruitment.index'), $this->recruitmentPrimaryHref($board->getContent()));
+        $this->assertMatchesRegularExpression(
+            '/class="primary-nav__link is-active"\s+aria-current="page"\s*>\s*<i data-lucide="briefcase"/',
+            $board->getContent(),
+        );
+    }
+
+    public function test_hr_admin_and_superadmin_recruitment_primary_lands_on_roles(): void
     {
         foreach ([
             'hr',
@@ -97,12 +118,8 @@ class RecruitmentDualFrontendIaMatrixTest extends TestCase
             $dashboard = $this->actingAs($actor)
                 ->get(route('dashboard'))
                 ->assertOk()
-                ->assertSee('>Recruit manage</span>', false)
-                ->assertSee('href="'.route('apes-cic.recruitment.index').'"', false);
-
-            if (app(ModuleSettingsService::class)->recruitmentPublicBoardEnabled()) {
-                $dashboard->assertSee('>Recruitment</span>', false);
-            }
+                ->assertDontSee('>Recruit manage</span>', false);
+            $this->assertSame(route('apes-cic.recruitment.index'), $this->recruitmentPrimaryHref($dashboard->getContent()));
 
             $this->actingAs($actor)
                 ->get(route('apes-cic.recruitment.index'))
@@ -111,7 +128,8 @@ class RecruitmentDualFrontendIaMatrixTest extends TestCase
                 ->assertSee('>Roles</span>', false)
                 ->assertSee('>Applications</span>', false)
                 ->assertSee('href="'.route('apes-cic.recruitment.applications.index').'"', false)
-                ->assertSee('>Recruit manage</span>', false);
+                ->assertSee('>Recruitment</span>', false)
+                ->assertDontSee('>Recruit manage</span>', false);
 
             $this->actingAs($actor)
                 ->get(route('apes-cic.recruitment.applications.index'))
@@ -137,12 +155,11 @@ class RecruitmentDualFrontendIaMatrixTest extends TestCase
         $role = RecruitmentRole::factory()->create();
         $application = RecruitmentApplication::factory()->create();
 
-        $this->actingAs($hr)
+        $dashboard = $this->actingAs($hr)
             ->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('>Recruit manage</span>', false)
-            ->assertSee('href="'.route('apes-cic.recruitment.applications.index').'"', false)
             ->assertDontSee('href="'.route('apes-cic.recruitment.index').'"', false);
+        $this->assertSame(route('apes-cic.recruitment.applications.index'), $this->recruitmentPrimaryHref($dashboard->getContent()));
 
         $this->actingAs($hr)
             ->get(route('apes-cic.recruitment.applications.index'))
@@ -297,6 +314,19 @@ class RecruitmentDualFrontendIaMatrixTest extends TestCase
         }
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
+    }
+
+    private function recruitmentPrimaryHref(string $html): string
+    {
+        $count = preg_match_all(
+            '/<a href="([^"]+)"[^>]*class="primary-nav__link[^"]*"[^>]*>\s*<i[^>]*><\/i>\s*<span>Recruitment<\/span>/',
+            $html,
+            $matches,
+        );
+
+        $this->assertSame(1, $count, 'Expected exactly one Recruitment primary.');
+
+        return html_entity_decode($matches[1][0], ENT_QUOTES);
     }
 
     private function hubActionHref(string $html, string $action, string $moduleKey): string

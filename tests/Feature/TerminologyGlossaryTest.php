@@ -28,7 +28,6 @@ class TerminologyGlossaryTest extends TestCase
         $this->assertSame('Job role', trans_choice('terms.job_role', 1));
         $this->assertSame('Open roles', __('terms.open_roles'));
         $this->assertSame('My applications', __('terms.my_applications'));
-        $this->assertSame('Recruit manage', __('terms.recruit_manage'));
         $this->assertSame('Admin', __('terms.admin'));
         $this->assertSame('APES CIC', __('terms.apes_cic'));
         $this->assertSame('Pet Care Clinic', __('terms.pet_care_clinic'));
@@ -58,6 +57,8 @@ class TerminologyGlossaryTest extends TestCase
         $this->assertContains('sub-core', $patterns);
         $this->assertContains('module type', $patterns);
         $this->assertContains('Service user', $patterns);
+        $this->assertContains('Recruit manage', $patterns);
+        $this->assertNull(config('glossary.canonical.recruit_manage'));
 
         foreach ($synonyms as $entry) {
             $this->assertArrayHasKey('pattern', $entry);
