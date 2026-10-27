@@ -39,7 +39,7 @@ class CoreAdminServiceProvider extends ServiceProvider
             );
             $view->with(
                 'publicPluginNavigation',
-                app(PublicNavigationRegistry::class)->enabledItems(),
+                app(PublicNavigationRegistry::class)->visibleTo(auth()->user()),
             );
             $view->with(
                 'staffPluginNavigation',

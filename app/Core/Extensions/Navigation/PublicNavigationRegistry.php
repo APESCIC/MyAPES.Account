@@ -2,6 +2,8 @@
 
 namespace App\Core\Extensions\Navigation;
 
+use Illuminate\Contracts\Auth\Authenticatable;
+
 /**
  * Lazily evaluates public navigation contributions (#282).
  */
@@ -36,5 +38,23 @@ final class PublicNavigationRegistry
         );
 
         return $items;
+    }
+
+    /**
+     * Enabled items, minus those hidden from this signed-in user.
+     *
+     * @return list<PublicNavigationItem>
+     */
+    public function visibleTo(?Authenticatable $user): array
+    {
+        if ($user === null) {
+            return $this->enabledItems();
+        }
+
+        return array_values(array_filter(
+            $this->enabledItems(),
+            static fn (PublicNavigationItem $item): bool => $item->visibleToSignedIn === null
+                || ($item->visibleToSignedIn)($user),
+        ));
     }
 }
