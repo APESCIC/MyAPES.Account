@@ -52,6 +52,23 @@ class LayoutSpacingSmokeTest extends TestCase
         $this->assertStringContainsString('gap: var(--space-grid);', $this->ruleBody('.grid'));
     }
 
+    public function test_dashboard_and_hub_sections_use_shared_spacing_tokens(): void
+    {
+        $expectations = [
+            '.dashboard-layout' => 'gap: var(--space-section);',
+            '.service-summary' => 'gap: var(--space-stack);',
+            '.service-summary__group' => 'gap: var(--space-stack);',
+            '.service-summary__items' => 'gap: var(--space-grid);',
+            '.module-hub__grid' => 'gap: var(--space-grid);',
+            '.service-dashboard' => 'gap: var(--space-stack-loose);',
+            '.service-dashboard__quick-links-grid' => 'gap: var(--space-grid);',
+        ];
+
+        foreach ($expectations as $selector => $declaration) {
+            $this->assertStringContainsString($declaration, $this->ruleBody($selector), "{$selector} should use {$declaration}");
+        }
+    }
+
     public function test_public_recruitment_role_list_uses_the_stack_contract(): void
     {
         app(ModuleInstallationSynchronizer::class)->synchronize();

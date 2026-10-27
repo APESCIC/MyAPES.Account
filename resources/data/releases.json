@@ -1,5 +1,45 @@
 [
   {
+    "version": "0.40.2",
+    "date": "2026-10-27",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Roomier dashboard and Service hubs",
+    "summary": "The dashboard and each Service hub now use the shared spacing rules, so sections and cards have more even, less cramped spacing.",
+    "changes": [
+      "Space the dashboard welcome card, attention list, and service totals with the shared spacing values.,Give service total cards and Service hub quick links a little more room.,Remove a doubled gap under the Available plugins heading on Service hubs."
+    ],
+    "affected_areas": [
+      "Dashboard,Service hubs"
+    ],
+    "categories": [
+      "fixed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.40 line: a compatible layout polish with no behaviour change.",
+    "validation": [
+      "php artisan test tests/Feature/LayoutSpacingSmokeTest.php tests/Feature/DashboardAttentionTest.php.,composer pre-merge on the pull request branch.,Local browser check of the dashboard and the APES CIC hub."
+    ],
+    "known_limitations": [
+      "None."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #336; pull request #408.",
+    "references": [
+      {
+        "label": "Issue #336",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/336"
+      },
+      {
+        "label": "Pull request #408",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/408"
+      }
+    ]
+  },
+  {
     "version": "0.40.1",
     "date": "2026-10-27",
     "channel": "stable",

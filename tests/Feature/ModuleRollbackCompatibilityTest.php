@@ -57,8 +57,8 @@ class ModuleRollbackCompatibilityTest extends TestCase
             flags: JSON_THROW_ON_ERROR,
         );
 
-        $this->assertSame('0.40.1', trim((string) file_get_contents(base_path('VERSION'))));
-        $this->assertSame('0.40.1', $manifest['application_version']);
+        $this->assertSame('0.40.2', trim((string) file_get_contents(base_path('VERSION'))));
+        $this->assertSame('0.40.2', $manifest['application_version']);
         $this->assertSame([
             'apes-cic:cases',
             'apes-cic:recruitment',
@@ -82,7 +82,7 @@ class ModuleRollbackCompatibilityTest extends TestCase
             ->check(base_path());
         $this->assertSame('manifest', $result['contract']);
         $this->assertSame(9, $result['installations']);
-        $this->assertSame('0.40.1', $result['target_version']);
+        $this->assertSame('0.40.2', $result['target_version']);
     }
 
     public function test_a_legacy_target_without_a_manifest_requires_exactly_five_enabled_baselines(): void
@@ -334,7 +334,7 @@ class ModuleRollbackCompatibilityTest extends TestCase
             true,
             flags: JSON_THROW_ON_ERROR,
         );
-        $this->assertSame('0.40.1', $manifest['application_version']);
+        $this->assertSame('0.40.2', $manifest['application_version']);
         file_put_contents(
             $target.'/resources/data/module-runtime-contract.json',
             json_encode([

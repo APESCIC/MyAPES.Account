@@ -617,7 +617,7 @@ form.inline {
 .dashboard-layout {
     display: grid;
     grid-template-columns: minmax(20rem, 34%) minmax(0, 1fr);
-    gap: 1.15rem;
+    gap: var(--space-section);
     align-items: stretch;
 }
 
@@ -911,19 +911,19 @@ form.inline {
 }
 
 .service-summary {
-    margin-top: 1.15rem;
+    margin-top: var(--space-section);
     display: flex;
     flex-direction: column;
-    gap: 0.85rem;
+    gap: var(--space-stack);
 }
 
 .service-summary__group {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: var(--space-stack);
     min-width: 0;
-    padding: 0.95rem 1.1rem 1.1rem 1.25rem;
+    padding: 1.1rem 1.25rem 1.25rem 1.4rem;
     overflow: hidden;
     border: 1px solid var(--line);
     border-radius: var(--radius-lg);
@@ -999,7 +999,7 @@ form.inline {
 .service-summary__items {
     display: grid;
     grid-template-columns: repeat(var(--module-count, 3), minmax(0, 1fr));
-    gap: 0.65rem;
+    gap: var(--space-grid);
     min-width: 0;
 }
 
@@ -1235,7 +1235,7 @@ form.inline {
 .module-hub__grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
-    gap: 0.85rem;
+    gap: var(--space-grid);
 }
 
 .module-hub__card {
@@ -1276,7 +1276,7 @@ form.inline {
 
 .service-dashboard {
     display: grid;
-    gap: 1.5rem;
+    gap: var(--space-stack-loose);
 }
 
 .service-dashboard__heading {
@@ -1325,7 +1325,7 @@ form.inline {
 }
 
 .service-dashboard__intro > p {
-    margin-bottom: 0.85rem;
+    margin-bottom: var(--space-stack-tight);
     color: var(--muted);
 }
 
@@ -1382,7 +1382,7 @@ form.inline {
 }
 
 .service-summary--hub .service-summary__header {
-    margin-bottom: 0.85rem;
+    margin-bottom: 0;
 }
 
 .service-summary--hub .service-summary__items {
@@ -1395,7 +1395,7 @@ form.inline {
 .service-dashboard__quick-links-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(13rem, 100%), 1fr));
-    gap: 0.75rem;
+    gap: var(--space-grid);
 }
 
 .service-dashboard__quick-link {
@@ -1431,7 +1431,7 @@ form.inline {
 }
 
 .service-dashboard__recent .attention-list {
-    margin-top: 0.85rem;
+    margin-top: var(--space-stack);
 }
 
 .service-dashboard--apes-cic .service-dashboard__intro {
