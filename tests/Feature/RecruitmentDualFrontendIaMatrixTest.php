@@ -9,14 +9,17 @@ use App\Core\Extensions\Models\ModuleInstallation;
 use App\Services\AuthorizationProfile;
 use App\Services\ModuleInstallationSynchronizer;
 use App\Services\ModuleSettingsService;
+use App\Support\DefaultJobRoles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Plugins\Recruitment\Models\RecruitmentApplication;
 use Plugins\Recruitment\Models\RecruitmentRole;
 use Spatie\Permission\PermissionRegistrar;
+use Tests\Concerns\CreatesRecruitmentPersonas;
 use Tests\TestCase;
 
 class RecruitmentDualFrontendIaMatrixTest extends TestCase
 {
+    use CreatesRecruitmentPersonas;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -78,16 +81,18 @@ class RecruitmentDualFrontendIaMatrixTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_staff_admin_and_superadmin_see_recruit_manage_with_roles_and_applications(): void
+    public function test_hr_admin_and_superadmin_see_recruit_manage_with_roles_and_applications(): void
     {
         foreach ([
-            AuthorizationProfile::ROLE_STAFF,
+            'hr',
             AuthorizationProfile::ROLE_ADMINISTRATOR,
             AuthorizationProfile::ROLE_SUPER_ADMIN,
         ] as $roleName) {
-            $actor = User::factory()
-                ->protectedRole($roleName)
-                ->create();
+            $actor = $roleName === 'hr'
+                ? $this->hrStaff()
+                : User::factory()
+                    ->protectedRole($roleName)
+                    ->create();
 
             $dashboard = $this->actingAs($actor)
                 ->get(route('dashboard'))
@@ -121,11 +126,9 @@ class RecruitmentDualFrontendIaMatrixTest extends TestCase
 
     public function test_hr_review_only_sees_applications_submenu_and_roles_crud_fail_closed(): void
     {
-        $hr = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
-            ->create();
+        $hr = $this->hrStaff();
 
-        $this->stripStaffRecruitmentPermissionsExceptReview();
+        $this->stripHumanResourcesPermissionsExceptReview();
 
         $hr = $hr->fresh();
         $hr->unsetRelation('roles');
@@ -176,9 +179,7 @@ class RecruitmentDualFrontendIaMatrixTest extends TestCase
 
     public function test_staff_manage_primary_hidden_when_recruitment_module_disabled(): void
     {
-        $staff = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
-            ->create();
+        $staff = $this->hrStaff();
 
         ModuleInstallation::query()
             ->where('sub_core_key', 'apes-cic')
@@ -198,11 +199,9 @@ class RecruitmentDualFrontendIaMatrixTest extends TestCase
             ->assertNotFound();
     }
 
-    public function test_apes_cic_hub_still_links_to_recruitment_manage(): void
+    public function test_apes_cic_hub_still_links_to_recruitment_manage_for_hr(): void
     {
-        $staff = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
-            ->create();
+        $staff = $this->hrStaff();
 
         $html = $this->actingAs($staff)
             ->get('/apes-cic')
@@ -214,12 +213,12 @@ class RecruitmentDualFrontendIaMatrixTest extends TestCase
         $this->assertSame($listUrl.'#create', $this->hubActionHref($html, 'create', 'recruitment'));
     }
 
-    private function stripStaffRecruitmentPermissionsExceptReview(): void
+    private function stripHumanResourcesPermissionsExceptReview(): void
     {
-        $role = Role::query()
+        $roles = Role::query()
             ->where('guard_name', 'web')
-            ->where('name', AuthorizationProfile::ROLE_STAFF)
-            ->firstOrFail();
+            ->whereIn('name', [AuthorizationProfile::ROLE_STAFF, DefaultJobRoles::HUMAN_RESOURCES])
+            ->get();
 
         $recruitmentPermissions = Permission::query()
             ->where('guard_name', 'web')
@@ -227,8 +226,10 @@ class RecruitmentDualFrontendIaMatrixTest extends TestCase
             ->where('name', '!=', RecruitmentApplication::PERMISSION_PREFIX.'review-applications')
             ->get();
 
-        foreach ($recruitmentPermissions as $permission) {
-            $role->revokePermissionTo($permission);
+        foreach ($roles as $role) {
+            foreach ($recruitmentPermissions as $permission) {
+                $role->revokePermissionTo($permission);
+            }
         }
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();

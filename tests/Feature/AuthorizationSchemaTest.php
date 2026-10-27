@@ -137,6 +137,7 @@ class AuthorizationSchemaTest extends TestCase
             ['name' => 'administrator', 'guard_name' => 'web', 'is_protected' => 1],
             ['name' => 'board-of-directors', 'guard_name' => 'web', 'is_protected' => 0],
             ['name' => 'client-services-advisor', 'guard_name' => 'web', 'is_protected' => 0],
+            ['name' => 'human-resources', 'guard_name' => 'web', 'is_protected' => 0],
             ['name' => 'management', 'guard_name' => 'web', 'is_protected' => 0],
             ['name' => 'receptionist', 'guard_name' => 'web', 'is_protected' => 0],
             ['name' => 'service-user', 'guard_name' => 'web', 'is_protected' => 1],

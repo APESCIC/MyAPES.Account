@@ -6,15 +6,18 @@ use App\Core\Accounts\Role;
 use App\Core\Accounts\User;
 use App\Services\AuthorizationProfile;
 use App\Services\ModuleInstallationSynchronizer;
+use App\Support\DefaultJobRoles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Plugins\Recruitment\Models\RecruitmentApplication;
 use Plugins\Recruitment\Models\RecruitmentRole;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
+use Tests\Concerns\CreatesRecruitmentPersonas;
 use Tests\TestCase;
 
 class RecruitmentApplicationManageTest extends TestCase
 {
+    use CreatesRecruitmentPersonas;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -151,11 +154,9 @@ class RecruitmentApplicationManageTest extends TestCase
             ->assertRedirect(route('public.login'));
     }
 
-    public function test_staff_can_review_application_status_transitions(): void
+    public function test_hr_staff_can_review_application_status_transitions(): void
     {
-        $staff = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
-            ->create();
+        $staff = $this->hrStaff();
         $applicant = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_SERVICE_USER)
             ->create([
@@ -252,20 +253,18 @@ class RecruitmentApplicationManageTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_staff_without_review_ability_cannot_update_status(): void
+    public function test_hr_staff_without_review_ability_cannot_update_status(): void
     {
-        $viewer = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
-            ->create();
+        $viewer = $this->hrStaff();
 
         $permission = Permission::findOrCreate(
             RecruitmentApplication::PERMISSION_PREFIX.'review-applications',
             'web',
         );
-        $staffRole = Role::query()
-            ->where('name', AuthorizationProfile::ROLE_STAFF)
+        $hrRole = Role::query()
+            ->where('name', DefaultJobRoles::HUMAN_RESOURCES)
             ->firstOrFail();
-        $staffRole->revokePermissionTo($permission);
+        $hrRole->revokePermissionTo($permission);
         app(PermissionRegistrar::class)->forgetCachedPermissions();
         $viewer->unsetRelation('roles');
         $viewer->unsetRelation('permissions');

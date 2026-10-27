@@ -12,6 +12,7 @@ use App\Services\AuthorizationMetadataSynchronizer;
 use App\Services\AuthorizationProfile;
 use App\Services\AuthorizationRoleManagementService;
 use App\Services\AuthorizationRoleMaterializer;
+use App\Support\DefaultJobRoles;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Eloquent\Model;
@@ -37,6 +38,8 @@ class LocalQaSeeder extends Seeder
 
     public const STAFF_EMAIL = 'qa.staff@myapes.local';
 
+    public const HR_EMAIL = 'qa.hr@myapes.local';
+
     public const ADMIN_EMAIL = 'qa.admin@myapes.local';
 
     public const SUPERADMIN_EMAIL = 'qa.superadmin@myapes.local';
@@ -55,6 +58,7 @@ class LocalQaSeeder extends Seeder
             self::STUDENT_EMAIL,
             self::VOLUNTEER_EMAIL,
             self::STAFF_EMAIL,
+            self::HR_EMAIL,
             self::ADMIN_EMAIL,
             self::SUPERADMIN_EMAIL,
         ];
@@ -95,6 +99,12 @@ class LocalQaSeeder extends Seeder
             User::ROLE_STAFF,
             $seededAt
         );
+        $hrUser = $this->upsertUser(
+            self::HR_EMAIL,
+            'QA HR User',
+            User::ROLE_STAFF,
+            $seededAt
+        );
         $adminUser = $this->upsertUser(
             self::ADMIN_EMAIL,
             'QA Admin User',
@@ -111,15 +121,18 @@ class LocalQaSeeder extends Seeder
             $studentUser,
             $volunteerUser,
             $staffUser,
+            $hrUser,
             $adminUser,
             $superAdminUser,
         );
         $this->upsertCustomRole($superAdminUser, $staffUser);
+        $this->grantHumanResourcesJobRole($superAdminUser, $hrUser);
 
         $this->upsertProfile($serviceUser, 'Service User', '+44 7700 900101', 'APES CIC Service User');
         $this->upsertStaffProfile($studentUser, 'Placement student', StaffProfile::TEAM_SHELTER_RESCUE, '+447700900105');
         $this->upsertStaffProfile($volunteerUser, 'Shelter volunteer', StaffProfile::TEAM_SHELTER_RESCUE, '+447700900106');
         $this->upsertStaffProfile($staffUser, 'Rescue coordinator', StaffProfile::TEAM_SHELTER_RESCUE, '+447700900102');
+        $this->upsertStaffProfile($hrUser, 'People and recruitment lead', StaffProfile::TEAM_OPERATIONS, '+447700900107');
         $this->upsertStaffProfile($adminUser, 'Operations manager', StaffProfile::TEAM_OPERATIONS, '+447700900103');
         $this->upsertStaffProfile($superAdminUser, 'Director', StaffProfile::TEAM_OPERATIONS, '+447700900104');
 
@@ -886,6 +899,7 @@ class LocalQaSeeder extends Seeder
         User $studentUser,
         User $volunteerUser,
         User $staffUser,
+        User $hrUser,
         User $adminUser,
         User $superAdminUser,
     ): void {
@@ -910,6 +924,14 @@ class LocalQaSeeder extends Seeder
                 'department.directors',
                 'department.finance',
                 'intranet.managers',
+                'myapesaccount.staff',
+                'position.staff',
+            ],
+        ])->save();
+
+        $hrUser->forceFill([
+            'ldap_groups' => [
+                'myapesaccount.hr',
                 'myapesaccount.staff',
                 'position.staff',
             ],
@@ -1008,6 +1030,21 @@ class LocalQaSeeder extends Seeder
                     $permissions,
                 ),
         );
+
+        app(AuthorizationRoleMaterializer::class)->grant(
+            $assignee,
+            $role,
+            RoleSource::SOURCE_LOCAL,
+            actor: $actor,
+        );
+    }
+
+    private function grantHumanResourcesJobRole(User $actor, User $assignee): void
+    {
+        $role = Role::query()
+            ->where('guard_name', 'web')
+            ->where('name', DefaultJobRoles::HUMAN_RESOURCES)
+            ->firstOrFail();
 
         app(AuthorizationRoleMaterializer::class)->grant(
             $assignee,

@@ -7,15 +7,18 @@ use App\Core\Accounts\Role;
 use App\Core\Accounts\User;
 use App\Services\AuthorizationProfile;
 use App\Services\ModuleInstallationSynchronizer;
+use App\Support\DefaultJobRoles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Plugins\Recruitment\Dashboard\RecruitmentActiveRecordDetector;
 use Plugins\Recruitment\Models\RecruitmentRole;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
+use Tests\Concerns\CreatesRecruitmentPersonas;
 use Tests\TestCase;
 
 class RecruitmentRoleWorkflowTest extends TestCase
 {
+    use CreatesRecruitmentPersonas;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -24,11 +27,9 @@ class RecruitmentRoleWorkflowTest extends TestCase
         app(ModuleInstallationSynchronizer::class)->synchronize();
     }
 
-    public function test_staff_can_create_edit_publish_and_close_roles_in_all_categories(): void
+    public function test_hr_staff_can_create_edit_publish_and_close_roles_in_all_categories(): void
     {
-        $staff = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
-            ->create();
+        $staff = $this->hrStaff();
 
         foreach (RecruitmentRole::CATEGORIES as $category) {
             $response = $this->actingAs($staff)->post(route('apes-cic.recruitment.store'), [
@@ -83,11 +84,9 @@ class RecruitmentRoleWorkflowTest extends TestCase
         }
     }
 
-    public function test_staff_index_lists_roles_and_shows_create_form(): void
+    public function test_hr_staff_index_lists_roles_and_shows_create_form(): void
     {
-        $staff = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
-            ->create();
+        $staff = $this->hrStaff();
         $role = RecruitmentRole::factory()
             ->for($staff, 'creator')
             ->create(['title' => 'Listed staff role']);
@@ -101,11 +100,9 @@ class RecruitmentRoleWorkflowTest extends TestCase
             ->assertSee('action="'.route('apes-cic.recruitment.store').'"', false);
     }
 
-    public function test_apes_cic_hub_quick_links_point_at_recruitment_list_and_create(): void
+    public function test_apes_cic_hub_quick_links_for_hr_point_at_recruitment_list_and_create(): void
     {
-        $staff = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
-            ->create();
+        $staff = $this->hrStaff();
 
         $html = $this->actingAs($staff)
             ->get('/apes-cic')
@@ -115,6 +112,39 @@ class RecruitmentRoleWorkflowTest extends TestCase
         $listUrl = route('apes-cic.recruitment.index');
         $this->assertSame($listUrl.'#list', $this->hubActionHref($html, 'view', 'recruitment'));
         $this->assertSame($listUrl.'#create', $this->hubActionHref($html, 'create', 'recruitment'));
+    }
+
+    public function test_plain_staff_without_hr_job_role_cannot_manage_recruitment(): void
+    {
+        $staff = User::factory()
+            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
+            ->create();
+        $role = RecruitmentRole::factory()->draft()->create(['title' => 'HR only draft']);
+
+        $this->actingAs($staff)
+            ->post(route('apes-cic.recruitment.store'), [
+                'title' => 'Plain staff role',
+                'description' => 'Denied',
+                'category' => 'staff',
+            ])
+            ->assertForbidden();
+        $this->actingAs($staff)
+            ->put(route('apes-cic.recruitment.update', $role), [
+                'title' => 'Plain staff rewrite',
+                'description' => 'Denied',
+                'category' => 'staff',
+            ])
+            ->assertForbidden();
+        $this->actingAs($staff)
+            ->post(route('apes-cic.recruitment.publish', $role))
+            ->assertForbidden();
+        $this->actingAs($staff)
+            ->get(route('apes-cic.recruitment.applications.index'))
+            ->assertForbidden();
+
+        $this->assertDatabaseMissing('recruitment_roles', ['title' => 'Plain staff role']);
+        $this->assertSame('HR only draft', $role->fresh()->title);
+        $this->assertSame(RecruitmentRole::STATUS_DRAFT, $role->fresh()->status);
     }
 
     public function test_guests_cannot_mutate_recruitment_roles(): void
@@ -186,13 +216,11 @@ class RecruitmentRoleWorkflowTest extends TestCase
         $this->assertSame('Protected role', $role->fresh()->title);
     }
 
-    public function test_staff_without_create_cannot_store_and_form_is_hidden(): void
+    public function test_hr_staff_without_create_cannot_store_and_form_is_hidden(): void
     {
-        $staff = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
-            ->create();
+        $staff = $this->hrStaff();
         $this->removeRolePermission(
-            AuthorizationProfile::ROLE_STAFF,
+            DefaultJobRoles::HUMAN_RESOURCES,
             'apes-cic.recruitment.create',
         );
 
@@ -212,17 +240,15 @@ class RecruitmentRoleWorkflowTest extends TestCase
         ]);
     }
 
-    public function test_staff_without_update_cannot_publish_or_close(): void
+    public function test_hr_staff_without_update_cannot_publish_or_close(): void
     {
-        $staff = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
-            ->create();
+        $staff = $this->hrStaff();
         $role = RecruitmentRole::factory()
             ->for($staff, 'creator')
             ->draft()
             ->create(['title' => 'Locked draft']);
         $this->removeRolePermission(
-            AuthorizationProfile::ROLE_STAFF,
+            DefaultJobRoles::HUMAN_RESOURCES,
             'apes-cic.recruitment.update',
         );
 

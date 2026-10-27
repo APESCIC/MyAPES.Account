@@ -19,10 +19,12 @@ use Plugins\Recruitment\Http\Controllers\RecruitmentApplicationController;
 use Plugins\Recruitment\Http\Controllers\RecruitmentBoardController;
 use Plugins\Recruitment\Http\Controllers\RecruitmentRoleController;
 use Plugins\Recruitment\Models\RecruitmentRole;
+use Tests\Concerns\CreatesRecruitmentPersonas;
 use Tests\TestCase;
 
 class StructureRecruitConsultWave7Test extends TestCase
 {
+    use CreatesRecruitmentPersonas;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -85,10 +87,11 @@ class StructureRecruitConsultWave7Test extends TestCase
         $staff = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_STAFF)
             ->create();
+        $hr = $this->hrStaff();
 
         $this->get('/recruitment')->assertOk();
-        $this->actingAs($staff)->get('/apes-cic/recruitment')->assertOk();
-        $this->actingAs($staff)->get('/apes-cic/recruitment/applications')->assertOk();
+        $this->actingAs($hr)->get('/apes-cic/recruitment')->assertOk();
+        $this->actingAs($hr)->get('/apes-cic/recruitment/applications')->assertOk();
         $this->actingAs($staff)->get('/petcare/consultations')->assertOk();
     }
 
@@ -122,11 +125,9 @@ class StructureRecruitConsultWave7Test extends TestCase
         $this->assertFalse(is_subclass_of(RecruitmentRole::class, \Spatie\Permission\Models\Role::class));
     }
 
-    public function test_staff_can_create_open_recruitment_role(): void
+    public function test_hr_staff_can_create_open_recruitment_role(): void
     {
-        $staff = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
-            ->create();
+        $staff = $this->hrStaff();
 
         $this->actingAs($staff)->post(route('apes-cic.recruitment.store'), [
             'title' => 'Wave7 volunteer',

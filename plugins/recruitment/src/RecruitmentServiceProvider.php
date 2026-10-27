@@ -49,11 +49,11 @@ class RecruitmentServiceProvider extends PluginServiceProvider
             shippedModules: ['apes-cic'],
             permissions: [
                 $a::public('view-own', 'View own recruitment items'),
-                $a::staff('create', 'Create recruitment roles'),
-                $a::staff('view-all', 'View all recruitment roles'),
-                $a::staff('update', 'Update recruitment roles'),
-                $a::staffDelete('delete', 'Delete recruitment roles'),
-                $a::staff('review-applications', 'Review recruitment applications'),
+                $a::manage('create', 'Create recruitment roles'),
+                $a::manage('view-all', 'View all recruitment roles'),
+                $a::manage('update', 'Update recruitment roles'),
+                $a::manage('delete', 'Delete recruitment roles'),
+                $a::manage('review-applications', 'Review recruitment applications'),
             ],
             navigation: [
                 new PluginNavigationItem(

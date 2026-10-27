@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.41.1",
+    "date": "2026-10-27",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Human Resources job role for Recruitment",
+    "summary": "Managing Recruitment roles and applications now needs the new Human Resources job role, or an Admin or Super Admin account.",
+    "changes": [
+      "Add a Human Resources job role that can create, edit, publish, close, and delete Recruitment roles and review applications.",
+      "Stop giving Recruitment manage access to every staff, student, and volunteer account.",
+      "Keep Recruitment manage access for Admin and Super Admin accounts.",
+      "Add a local Human Resources test account."
+    ],
+    "affected_areas": [
+      "Recruitment",
+      "Access"
+    ],
+    "categories": [
+      "changed"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.41 line: tightens who can manage Recruitment with no new screens. Staff who manage Recruitment need the Human Resources job role after deploy.",
+    "validation": [
+      "Recruitment, seeding, Access, and job role tests.",
+      "Full PHPUnit suite.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "Staff without the Human Resources job role can still open an empty Recruitment roles list until a later 0.41 release."
+    ],
+    "rollback": "Redeploy the previous release package. The Human Resources job role stays in the database and can be removed in Admin Access if needed.",
+    "provenance": "Issue #344; pull request #417.",
+    "references": [
+      {
+        "label": "Issue #344",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/344"
+      },
+      {
+        "label": "Pull request #417",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/417"
+      }
+    ]
+  },
+  {
     "version": "0.41.0",
     "date": "2026-10-27",
     "channel": "stable",

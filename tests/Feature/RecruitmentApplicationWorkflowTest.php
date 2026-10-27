@@ -12,10 +12,12 @@ use Illuminate\Support\Facades\Gate;
 use InvalidArgumentException;
 use Plugins\Recruitment\Models\RecruitmentApplication;
 use Plugins\Recruitment\Models\RecruitmentRole;
+use Tests\Concerns\CreatesRecruitmentPersonas;
 use Tests\TestCase;
 
 class RecruitmentApplicationWorkflowTest extends TestCase
 {
+    use CreatesRecruitmentPersonas;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -131,7 +133,7 @@ class RecruitmentApplicationWorkflowTest extends TestCase
         $this->assertTrue($rejected->isTerminal());
     }
 
-    public function test_applicant_owns_row_and_staff_can_review(): void
+    public function test_applicant_owns_row_and_hr_staff_can_review(): void
     {
         $applicant = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_SERVICE_USER)
@@ -139,9 +141,7 @@ class RecruitmentApplicationWorkflowTest extends TestCase
         $other = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_SERVICE_USER)
             ->create();
-        $staff = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
-            ->create();
+        $staff = $this->hrStaff();
         $openRole = RecruitmentRole::factory()->open()->create();
         $application = RecruitmentApplication::factory()
             ->forRole($openRole)
@@ -186,9 +186,7 @@ class RecruitmentApplicationWorkflowTest extends TestCase
         $other = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_SERVICE_USER)
             ->create();
-        $staff = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
-            ->create();
+        $staff = $this->hrStaff();
 
         $own = RecruitmentApplication::factory()->forUser($applicant)->create();
         RecruitmentApplication::factory()->forUser($other)->create();
@@ -205,9 +203,7 @@ class RecruitmentApplicationWorkflowTest extends TestCase
 
     public function test_review_policy_denies_terminal_applications(): void
     {
-        $staff = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
-            ->create();
+        $staff = $this->hrStaff();
         $application = RecruitmentApplication::factory()->accepted()->create();
 
         $this->actingAs($staff);

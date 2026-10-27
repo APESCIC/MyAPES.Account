@@ -154,7 +154,7 @@ class FreshInstallAuthorizationSeederTest extends TestCase
             ->orderBy('email')
             ->get();
 
-        $this->assertCount(6, $users);
+        $this->assertCount(7, $users);
         $this->assertSame(
             [User::IDENTITY_LOCAL],
             $users->pluck('identity_type')->unique()->values()->all(),
@@ -178,6 +178,11 @@ class FreshInstallAuthorizationSeederTest extends TestCase
             'myapesaccount.staff',
             'position.staff',
         ], $users->firstWhere('email', LocalQaSeeder::STAFF_EMAIL)?->ldap_groups);
+        $this->assertSame([
+            'myapesaccount.hr',
+            'myapesaccount.staff',
+            'position.staff',
+        ], $users->firstWhere('email', LocalQaSeeder::HR_EMAIL)?->ldap_groups);
         $this->assertSame([
             'department.directors',
             'intranet.managers',
@@ -785,6 +790,7 @@ class FreshInstallAuthorizationSeederTest extends TestCase
             LocalQaSeeder::STUDENT_EMAIL => AuthorizationProfile::ROLE_STUDENT,
             LocalQaSeeder::VOLUNTEER_EMAIL => AuthorizationProfile::ROLE_VOLUNTEER,
             LocalQaSeeder::STAFF_EMAIL => AuthorizationProfile::ROLE_STAFF,
+            LocalQaSeeder::HR_EMAIL => AuthorizationProfile::ROLE_STAFF,
             LocalQaSeeder::ADMIN_EMAIL => AuthorizationProfile::ROLE_ADMINISTRATOR,
             LocalQaSeeder::SUPERADMIN_EMAIL => AuthorizationProfile::ROLE_SUPER_ADMIN,
         ];
@@ -822,6 +828,16 @@ class FreshInstallAuthorizationSeederTest extends TestCase
                 ->value('id'),
             'source' => RoleSource::SOURCE_LOCAL,
         ]);
+
+        $hrUser = User::query()
+            ->where('email', LocalQaSeeder::HR_EMAIL)
+            ->firstOrFail();
+        $this->assertTrue(
+            $hrUser->roles()
+                ->where('guard_name', 'web')
+                ->where('name', DefaultJobRoles::HUMAN_RESOURCES)
+                ->exists(),
+        );
 
         $this->artisan('myapes:authorization-check')
             ->assertSuccessful();
