@@ -23,6 +23,8 @@ One **Recruitment** primary in the app chrome, with a page submenu gated by abil
 
 Toggles from 0.35.1 still apply on top of the matrix: when the public board is off, Open roles is hidden and the board returns 404; when public apply is off, the apply button is hidden and apply returns 404.
 
+`tests/Feature/RecruitmentUnifiedMenuAccessMatrixTest.php` encodes this table; change both together.
+
 ## HR grant
 
 Recruitment manage is not part of the plain staff role. It comes from:
