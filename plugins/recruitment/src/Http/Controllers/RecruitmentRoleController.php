@@ -34,7 +34,7 @@ class RecruitmentRoleController extends Controller
 
     public function store(Request $request, AuditLogger $auditLogger): RedirectResponse
     {
-        Gate::authorize(RecruitmentRole::PERMISSION_PREFIX.'create');
+        Gate::authorize('create', RecruitmentRole::class);
 
         $validated = $this->validatedRole($request);
         $validated['created_by'] = $request->user()->id;

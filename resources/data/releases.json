@@ -1,5 +1,51 @@
 [
   {
+    "version": "0.41.6",
+    "date": "2026-10-27",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Private My applications for managers",
+    "summary": "My applications now shows only your own applications for every account, and Recruitment manage pages check access more strictly.",
+    "changes": [
+      "Show only your own applications in My applications, including for Human Resources, Admin, and Super Admin accounts.",
+      "Keep reviewing other people's applications on the Recruitment Applications manage page.",
+      "Check Recruitment manage access, including whether Recruitment is switched on, before every manage action."
+    ],
+    "affected_areas": [
+      "Recruitment"
+    ],
+    "categories": [
+      "fixed",
+      "security"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.41 line: a compatible access fix with no new pages.",
+    "validation": [
+      "New My applications and manage access tests for Human Resources, Admin, and public accounts.",
+      "Recruitment and layout tests.",
+      "Full PHPUnit suite.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "None."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #349; pull request #422.",
+    "references": [
+      {
+        "label": "Issue #349",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/349"
+      },
+      {
+        "label": "Pull request #422",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/422"
+      }
+    ]
+  },
+  {
     "version": "0.41.5",
     "date": "2026-10-27",
     "channel": "stable",

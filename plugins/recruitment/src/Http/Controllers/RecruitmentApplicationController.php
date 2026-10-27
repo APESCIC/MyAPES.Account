@@ -31,11 +31,7 @@ class RecruitmentApplicationController extends Controller
     public function index(Request $request): View
     {
         $user = $request->user();
-        abort_unless(
-            $user->can(RecruitmentApplication::PERMISSION_PREFIX.'view-all')
-                || $user->can(RecruitmentApplication::PERMISSION_PREFIX.'review-applications'),
-            403,
-        );
+        Gate::authorize('manageAny', RecruitmentApplication::class);
 
         $status = $request->query('status');
         if (is_string($status) && $status !== '' && ! in_array($status, RecruitmentApplication::STATUSES, true)) {
@@ -96,7 +92,7 @@ class RecruitmentApplicationController extends Controller
 
     public function show(RecruitmentApplication $recruitmentApplication): View
     {
-        Gate::authorize('view', $recruitmentApplication);
+        Gate::authorize('manageAny', RecruitmentApplication::class);
         $recruitmentApplication->loadMissing(['recruitmentRole', 'user']);
 
         $allowedTransitions = array_values(array_filter(
