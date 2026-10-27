@@ -2,10 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Core\Accounts\User;
+use App\Services\ModuleInstallationSynchronizer;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Plugins\Recruitment\Models\RecruitmentRole;
 use Tests\TestCase;
 
 class LayoutSpacingSmokeTest extends TestCase
 {
+    use RefreshDatabase;
+
     private function stylesheet(): string
     {
         return (string) file_get_contents(resource_path('css/app.css'));
@@ -44,5 +50,17 @@ class LayoutSpacingSmokeTest extends TestCase
         $this->assertStringContainsString('margin-bottom: var(--space-section);', $this->ruleBody('.panel'));
         $this->assertStringContainsString('margin: 0;', $this->ruleBody('.panel-flat'));
         $this->assertStringContainsString('gap: var(--space-grid);', $this->ruleBody('.grid'));
+    }
+
+    public function test_public_recruitment_role_list_uses_the_stack_contract(): void
+    {
+        app(ModuleInstallationSynchronizer::class)->synchronize();
+        $author = User::factory()->create();
+        RecruitmentRole::factory()->open()->category('staff')->count(2)->create(['created_by' => $author->id]);
+
+        $this->get(route('recruitment.index'))
+            ->assertOk()
+            ->assertSee('<ul class="stack stack-spaced" data-recruitment-role-list>', false)
+            ->assertSee('<li class="panel panel-flat">', false);
     }
 }

@@ -47,7 +47,7 @@
                 body="{{ $selectedCategory ? 'Try another category, or check back soon.' : 'Check back soon for staff, volunteer, and student openings.' }}"
             />
         @else
-            <ul class="stack-spaced" data-recruitment-role-list>
+            <ul class="stack stack-spaced" data-recruitment-role-list>
                 @foreach($roles as $role)
                     <li class="panel panel-flat">
                         <span class="service-label service-apes-cic">{{ $categoryLabels[$role->category] }}</span>
