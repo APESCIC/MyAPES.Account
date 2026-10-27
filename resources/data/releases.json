@@ -1,5 +1,51 @@
 [
   {
+    "version": "0.41.4",
+    "date": "2026-10-27",
+    "channel": "stable",
+    "type": "patch",
+    "title": "One Recruitment page menu",
+    "summary": "Every Recruitment page now shares one page menu that only shows the sections each account can use.",
+    "changes": [
+      "Show one Recruitment page menu with Open roles, My applications, Roles, and Applications.",
+      "Hide Roles and Applications from accounts that cannot manage Recruitment.",
+      "Hide Open roles while the public board is switched off."
+    ],
+    "affected_areas": [
+      "Recruitment",
+      "Navigation"
+    ],
+    "categories": [
+      "changed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.41 line: a compatible navigation change with no new pages or permissions.",
+    "validation": [
+      "Recruitment page menu tests for each kind of account.",
+      "Recruitment, localisation, terminology, hub, and layout tests.",
+      "Local browser check of the Recruitment pages as Super Admin, staff, and student test accounts.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "Staff without the Human Resources job role can still open an empty Recruitment roles list until the next 0.41 release."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #347; pull request #420.",
+    "references": [
+      {
+        "label": "Issue #347",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/347"
+      },
+      {
+        "label": "Pull request #420",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/420"
+      }
+    ]
+  },
+  {
     "version": "0.41.3",
     "date": "2026-10-27",
     "channel": "stable",
