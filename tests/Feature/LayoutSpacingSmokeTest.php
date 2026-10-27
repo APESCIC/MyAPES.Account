@@ -143,6 +143,36 @@ class LayoutSpacingSmokeTest extends TestCase
         }
     }
 
+    public function test_auth_service_tiles_use_lighter_nested_spacing(): void
+    {
+        $this->assertStringContainsString('gap: var(--space-grid);', $this->ruleBody('.auth-service-tiles'));
+        $this->assertStringContainsString('padding: 0.9rem 1.1rem;', $this->ruleBody('.auth-service-tiles > .panel-flat'));
+        $this->assertStringContainsString('margin: 0;', $this->ruleBody('.auth-entry-grid > .panel'));
+    }
+
+    public function test_landing_and_staff_login_render_service_tiles_in_the_auth_grid(): void
+    {
+        app(ModuleInstallationSynchronizer::class)->synchronize();
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('<div class="grid auth-service-tiles">', false)
+            ->assertSee('<div class="grid auth-entry-grid">', false);
+
+        $this->view('auth.login')
+            ->assertSee('<div class="grid auth-service-tiles">', false);
+    }
+
+    public function test_profile_edit_stacks_its_sections(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('profile.edit'))
+            ->assertOk()
+            ->assertSee('<div class="panel-stack">', false);
+    }
+
     public function test_public_recruitment_role_list_uses_the_stack_contract(): void
     {
         app(ModuleInstallationSynchronizer::class)->synchronize();
