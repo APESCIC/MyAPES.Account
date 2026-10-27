@@ -131,6 +131,11 @@ class RecruitmentApplication extends Model
         return $query->whereRaw('1 = 0');
     }
 
+    public function scopeOwnedBy(Builder $query, User $user): Builder
+    {
+        return $query->where('user_id', $user->id);
+    }
+
     public function scopeForRole(Builder $query, RecruitmentRole $role): Builder
     {
         return $query->where('recruitment_role_id', $role->id);

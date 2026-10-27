@@ -21,6 +21,20 @@ class RecruitmentApplicationPolicy
                 || $user->can(RecruitmentApplication::PERMISSION_PREFIX.'review-applications'));
     }
 
+    public function manageAny(User $user): bool
+    {
+        return $this->moduleEnabled()
+            && ($user->can(RecruitmentApplication::PERMISSION_PREFIX.'view-all')
+                || $user->can(RecruitmentApplication::PERMISSION_PREFIX.'review-applications'));
+    }
+
+    public function viewOwn(User $user, RecruitmentApplication $recruitmentApplication): bool
+    {
+        return $this->moduleEnabled()
+            && $user->can(RecruitmentApplication::PERMISSION_PREFIX.'view-own')
+            && $recruitmentApplication->user_id === $user->id;
+    }
+
     public function view(User $user, RecruitmentApplication $recruitmentApplication): bool
     {
         if (! $this->moduleEnabled()) {

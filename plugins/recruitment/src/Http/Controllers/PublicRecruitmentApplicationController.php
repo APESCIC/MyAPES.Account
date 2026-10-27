@@ -20,7 +20,7 @@ class PublicRecruitmentApplicationController extends Controller
         Gate::authorize('viewAny', RecruitmentApplication::class);
 
         $applications = RecruitmentApplication::query()
-            ->visibleTo($request->user())
+            ->ownedBy($request->user())
             ->with('recruitmentRole')
             ->latest('submitted_at')
             ->latest('id')
@@ -34,7 +34,7 @@ class PublicRecruitmentApplicationController extends Controller
 
     public function show(RecruitmentApplication $recruitmentApplication): View
     {
-        Gate::authorize('view', $recruitmentApplication);
+        Gate::authorize('viewOwn', $recruitmentApplication);
         $recruitmentApplication->loadMissing('recruitmentRole');
 
         return view('recruitment::public.applications.show', [

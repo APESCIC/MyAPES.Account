@@ -231,6 +231,66 @@ class RecruitmentApplicationManageTest extends TestCase
         $this->assertTrue($application->isTerminal());
     }
 
+    public function test_managers_my_applications_lists_only_their_own_applications(): void
+    {
+        $role = RecruitmentRole::factory()->open()->create(['title' => 'Shared opening']);
+        $someoneElse = User::factory()
+            ->protectedRole(AuthorizationProfile::ROLE_SERVICE_USER)
+            ->create();
+        $othersApplication = RecruitmentApplication::factory()
+            ->forRole($role)
+            ->forUser($someoneElse)
+            ->create(['statement' => 'Someone else statement']);
+
+        foreach ([
+            $this->hrStaff(),
+            User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create(),
+        ] as $manager) {
+            $own = RecruitmentApplication::factory()
+                ->forRole(RecruitmentRole::factory()->open()->create(['title' => "Own opening {$manager->id}"]))
+                ->forUser($manager)
+                ->create();
+
+            $this->actingAs($manager)
+                ->get(route('recruitment.applications.index'))
+                ->assertOk()
+                ->assertSeeText("Own opening {$manager->id}")
+                ->assertDontSeeText('Shared opening');
+
+            $this->actingAs($manager)
+                ->get(route('recruitment.applications.show', $own))
+                ->assertOk();
+            $this->actingAs($manager)
+                ->get(route('recruitment.applications.show', $othersApplication))
+                ->assertForbidden();
+            $this->actingAs($manager)
+                ->post(route('recruitment.applications.withdraw', $othersApplication))
+                ->assertForbidden();
+
+            $this->actingAs($manager)
+                ->get(route('apes-cic.recruitment.applications.show', $othersApplication))
+                ->assertOk()
+                ->assertSeeText('Someone else statement');
+        }
+
+        $this->assertSame(RecruitmentApplication::STATUS_SUBMITTED, $othersApplication->fresh()->status);
+    }
+
+    public function test_applicant_cannot_open_own_application_on_the_staff_review_page(): void
+    {
+        $applicant = User::factory()
+            ->protectedRole(AuthorizationProfile::ROLE_SERVICE_USER)
+            ->create();
+        $application = RecruitmentApplication::factory()->forUser($applicant)->create();
+
+        $this->actingAs($applicant)
+            ->get(route('recruitment.applications.show', $application))
+            ->assertOk();
+        $this->actingAs($applicant)
+            ->get(route('apes-cic.recruitment.applications.show', $application))
+            ->assertForbidden();
+    }
+
     public function test_public_user_cannot_access_staff_review_ui(): void
     {
         $applicant = User::factory()
