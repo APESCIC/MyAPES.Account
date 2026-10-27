@@ -124,6 +124,25 @@ class LayoutSpacingSmokeTest extends TestCase
         $this->assertStringContainsString('data-kpi="total-accounts"', $content);
     }
 
+    public function test_admin_access_user_detail_and_maintenance_pages_use_a_panel_stack(): void
+    {
+        app(ModuleInstallationSynchronizer::class)->synchronize();
+        $superAdmin = User::factory()->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)->create();
+        $managed = User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create();
+
+        foreach ([
+            route('admin.access.index'),
+            route('admin.access.index', ['tab' => 'permissions']),
+            route('admin.users.show', $managed),
+            route('admin.maintenance.index'),
+        ] as $url) {
+            $this->actingAs($superAdmin)
+                ->get($url)
+                ->assertOk()
+                ->assertSee('<div class="panel-stack">', false);
+        }
+    }
+
     public function test_public_recruitment_role_list_uses_the_stack_contract(): void
     {
         app(ModuleInstallationSynchronizer::class)->synchronize();

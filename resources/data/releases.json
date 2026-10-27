@@ -1,5 +1,45 @@
 [
   {
+    "version": "0.40.5",
+    "date": "2026-10-27",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Even Admin page sections",
+    "summary": "Admin user details, Access, job role, and Maintenance pages now space their sections evenly, so long pages are easier to scan.",
+    "changes": [
+      "Space the sections on Admin user details, job role details, and Maintenance with one shared page rhythm.,Apply the same rhythm to the Access Groups, Job roles, and Permissions tabs.,Add automated checks that these Admin pages keep the shared spacing."
+    ],
+    "affected_areas": [
+      "Admin users,Admin Access,Admin Maintenance"
+    ],
+    "categories": [
+      "fixed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.40 line: a compatible layout polish with no behaviour change.",
+    "validation": [
+      "php artisan test tests/Feature/LayoutSpacingSmokeTest.php and the Admin view tests.,composer pre-merge on the pull request branch.,Local browser check of an Admin user detail page as Super Admin."
+    ],
+    "known_limitations": [
+      "None."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #339; pull request #411.",
+    "references": [
+      {
+        "label": "Issue #339",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/339"
+      },
+      {
+        "label": "Pull request #411",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/411"
+      }
+    ]
+  },
+  {
     "version": "0.40.4",
     "date": "2026-10-27",
     "channel": "stable",
