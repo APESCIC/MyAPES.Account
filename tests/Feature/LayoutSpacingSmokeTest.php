@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Core\Accounts\User;
 use App\Services\AuthorizationProfile;
 use App\Services\ModuleInstallationSynchronizer;
+use DOMDocument;
+use DOMXPath;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Plugins\Recruitment\Models\RecruitmentRole;
 use Tests\TestCase;
@@ -24,6 +26,59 @@ class LayoutSpacingSmokeTest extends TestCase
         $this->assertSame(1, preg_match($pattern, $this->stylesheet(), $matches), "Missing CSS rule for {$selector}.");
 
         return $matches[1];
+    }
+
+    /**
+     * A .panel-flat tile has no margin of its own, so its direct parent must be a
+     * .grid or .stack that gaps it.
+     */
+    private function assertFlatTilesSitInGappingParents(string $html, string $surface): void
+    {
+        $document = new DOMDocument;
+        $previous = libxml_use_internal_errors(true);
+        $document->loadHTML($html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+
+        $tiles = (new DOMXPath($document))->query('//*[contains(concat(" ", normalize-space(@class), " "), " panel-flat ")]');
+        $this->assertGreaterThan(0, $tiles->length, "{$surface} should render flat tiles.");
+
+        foreach ($tiles as $tile) {
+            $parentClasses = preg_split('/\s+/', trim((string) $tile->parentNode->getAttribute('class')));
+            $this->assertNotEmpty(
+                array_intersect(['grid', 'stack'], $parentClasses),
+                "{$surface} has a .panel-flat tile whose parent (".implode(' ', $parentClasses).') does not gap it.',
+            );
+        }
+    }
+
+    public function test_every_spacing_token_used_in_the_stylesheet_is_defined(): void
+    {
+        $root = $this->ruleBody(':root');
+        preg_match_all('/var\((--space-[a-z-]+)\)/', $this->stylesheet(), $matches);
+        $used = array_unique($matches[1]);
+
+        $this->assertNotEmpty($used);
+        foreach ($used as $token) {
+            $this->assertStringContainsString("{$token}:", $root, "{$token} is used but not defined on :root.");
+        }
+    }
+
+    public function test_flat_tiles_always_sit_inside_a_gapping_parent(): void
+    {
+        app(ModuleInstallationSynchronizer::class)->synchronize();
+        $author = User::factory()->create();
+        RecruitmentRole::factory()->open()->category('volunteer')->count(2)->create(['created_by' => $author->id]);
+
+        $this->assertFlatTilesSitInGappingParents($this->get(route('home'))->assertOk()->getContent(), 'Landing');
+        $this->assertFlatTilesSitInGappingParents($this->get(route('recruitment.index'))->assertOk()->getContent(), 'Recruitment board');
+        $this->assertFlatTilesSitInGappingParents((string) $this->view('auth.login'), 'Cloudron sign-in');
+
+        $superAdmin = User::factory()->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)->create();
+        $this->assertFlatTilesSitInGappingParents(
+            $this->actingAs($superAdmin)->get(route('admin.index'))->assertOk()->getContent(),
+            'Admin overview',
+        );
     }
 
     public function test_spacing_tokens_are_defined_on_root(): void
