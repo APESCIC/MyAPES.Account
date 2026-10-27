@@ -177,6 +177,70 @@ class RecruitmentDualFrontendIaMatrixTest extends TestCase
             ->assertOk();
     }
 
+    public function test_students_and_volunteers_are_denied_recruitment(): void
+    {
+        $role = RecruitmentRole::factory()->open()->create();
+        $application = RecruitmentApplication::factory()->forRole($role)->create();
+
+        foreach ([
+            AuthorizationProfile::ROLE_STUDENT,
+            AuthorizationProfile::ROLE_VOLUNTEER,
+        ] as $roleName) {
+            $actor = User::factory()
+                ->protectedRole($roleName)
+                ->create();
+
+            $this->actingAs($actor)
+                ->get(route('dashboard'))
+                ->assertOk()
+                ->assertDontSee('>Recruitment</span>', false)
+                ->assertDontSee('>Recruit manage</span>', false)
+                ->assertDontSee('href="'.route('recruitment.index').'"', false);
+
+            foreach ([
+                route('recruitment.index'),
+                route('recruitment.show', $role),
+                route('recruitment.applications.index'),
+                route('recruitment.applications.show', $application),
+                route('apes-cic.recruitment.index'),
+                route('apes-cic.recruitment.applications.index'),
+                route('apes-cic.recruitment.applications.show', $application),
+            ] as $url) {
+                $this->actingAs($actor)->get($url)->assertForbidden();
+            }
+
+            $this->actingAs($actor)
+                ->post(route('recruitment.apply', $role), ['statement' => 'Denied'])
+                ->assertForbidden();
+            $this->actingAs($actor)
+                ->post(route('apes-cic.recruitment.store'), [
+                    'title' => 'Denied',
+                    'description' => 'Denied',
+                    'category' => 'student',
+                ])
+                ->assertForbidden();
+        }
+
+        $this->assertSame(1, RecruitmentApplication::query()->count());
+    }
+
+    public function test_signed_in_service_user_without_service_selection_can_still_browse_open_roles(): void
+    {
+        $applicant = User::factory()
+            ->protectedRole(AuthorizationProfile::ROLE_SERVICE_USER)
+            ->create();
+        $applicant->serviceSelections()->delete();
+        $role = RecruitmentRole::factory()->open()->create(['title' => 'Browsable role']);
+
+        $this->actingAs($applicant)
+            ->get(route('recruitment.index'))
+            ->assertOk()
+            ->assertSeeText('Browsable role');
+        $this->actingAs($applicant)
+            ->get(route('recruitment.show', $role))
+            ->assertOk();
+    }
+
     public function test_staff_manage_primary_hidden_when_recruitment_module_disabled(): void
     {
         $staff = $this->hrStaff();
