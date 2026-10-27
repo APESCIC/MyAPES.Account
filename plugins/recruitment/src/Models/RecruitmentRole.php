@@ -77,10 +77,6 @@ class RecruitmentRole extends Model
             return $query;
         }
 
-        if ($user->can(self::PERMISSION_PREFIX.'view-own')) {
-            return $query->where('created_by', $user->id);
-        }
-
         return $query->whereRaw('1 = 0');
     }
 

@@ -68,7 +68,7 @@ class RegistryModuleNavigationProvider implements ModuleNavigationProvider
                 ->navigation[$subCoreKey] ?? null;
 
             if ($navigation === null
-                || ! $this->canView($user, $instance->key())) {
+                || ! $this->canView($user, $instance->key(), $navigation->requiredAbility)) {
                 continue;
             }
 
@@ -91,9 +91,13 @@ class RegistryModuleNavigationProvider implements ModuleNavigationProvider
         return $items;
     }
 
-    private function canView(User $user, string $instanceKey): bool
+    private function canView(User $user, string $instanceKey, ?string $requiredAbility): bool
     {
         [$subCore, $module] = explode(':', $instanceKey, 2);
+
+        if ($requiredAbility !== null) {
+            return $user->can("{$subCore}.{$module}.{$requiredAbility}");
+        }
 
         return $user->can("{$subCore}.{$module}.view-own")
             || $user->can("{$subCore}.{$module}.view-all");

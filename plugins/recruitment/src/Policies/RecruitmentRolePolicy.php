@@ -15,22 +15,12 @@ class RecruitmentRolePolicy
     public function viewAny(User $user): bool
     {
         return $this->moduleEnabled()
-            && ($user->can(RecruitmentRole::PERMISSION_PREFIX.'view-own')
-                || $user->can(RecruitmentRole::PERMISSION_PREFIX.'view-all'));
+            && $user->can(RecruitmentRole::PERMISSION_PREFIX.'view-all');
     }
 
     public function view(User $user, RecruitmentRole $recruitmentRole): bool
     {
-        if (! $this->moduleEnabled()) {
-            return false;
-        }
-
-        if ($user->can(RecruitmentRole::PERMISSION_PREFIX.'view-all')) {
-            return true;
-        }
-
-        return $user->can(RecruitmentRole::PERMISSION_PREFIX.'view-own')
-            && $recruitmentRole->created_by === $user->id;
+        return $this->viewAny($user);
     }
 
     public function create(User $user): bool
