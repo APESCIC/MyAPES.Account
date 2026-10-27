@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Recruit manage — Roles')
+@section('title', 'Recruitment — Roles')
 
 @section('content')
     @include('recruitment::staff._navigation')

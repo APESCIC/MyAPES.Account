@@ -88,7 +88,7 @@
                                 ->before('.')
                                 ->toString();
                             $staffPluginPatterns = collect($staffPluginNavigation ?? [])
-                                ->pluck('routeIsPattern')
+                                ->flatMap(static fn ($item): array => $item->routePatterns())
                                 ->all();
                             $active = request()->routeIs($routePrefix.'.*');
                             foreach ($staffPluginPatterns as $pattern) {
@@ -104,21 +104,14 @@
                         </a>
                     @endforeach
                     @foreach($staffPluginNavigation ?? [] as $staffPluginNav)
-                        @canany($staffPluginNav->abilities)
-                            @php
-                                $staffPluginNavActive = request()->routeIs($staffPluginNav->routeIsPattern);
-                                $canUseHome = $staffPluginNav->homeAbility === null
-                                    || auth()->user()->can($staffPluginNav->homeAbility)
-                                    || auth()->user()->can(str_replace('.view-all', '.view-own', (string) $staffPluginNav->homeAbility));
-                                $staffPluginHome = $canUseHome
-                                    ? route($staffPluginNav->homeRouteName)
-                                    : route($staffPluginNav->fallbackRouteName ?? $staffPluginNav->homeRouteName);
-                            @endphp
-                            <a href="{{ $staffPluginHome }}" @class(['primary-nav__link', 'is-active' => $staffPluginNavActive]) @if($staffPluginNavActive) aria-current="page" @endif>
-                                <i data-lucide="{{ $staffPluginNav->icon }}" aria-hidden="true"></i>
-                                <span>{{ $staffPluginNav->label }}</span>
-                            </a>
-                        @endcanany
+                        @php
+                            $staffPluginHome = $staffPluginNav->homeUrlFor(auth()->user());
+                        @endphp
+                        @continue($staffPluginHome === null)
+                        <a href="{{ $staffPluginHome }}" @class(['primary-nav__link', 'is-active' => $staffPluginNav->isActive()]) @if($staffPluginNav->isActive()) aria-current="page" @endif>
+                            <i data-lucide="{{ $staffPluginNav->icon }}" aria-hidden="true"></i>
+                            <span>{{ $staffPluginNav->label }}</span>
+                        </a>
                     @endforeach
                     @php
                         $adminPrimaryNav = app(\App\Support\AdminPrimaryNav::class)->forUser(auth()->user());

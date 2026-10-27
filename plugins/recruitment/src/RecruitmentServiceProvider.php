@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Gate;
 use Plugins\Recruitment\Dashboard\RecruitmentActiveRecordDetector;
 use Plugins\Recruitment\Models\RecruitmentApplication;
 use Plugins\Recruitment\Models\RecruitmentRole;
+use Plugins\Recruitment\Navigation\RecruitmentPrimaryNav;
 use Plugins\Recruitment\Policies\RecruitmentApplicationPolicy;
 use Plugins\Recruitment\Policies\RecruitmentRolePolicy;
 
@@ -102,7 +103,7 @@ class RecruitmentServiceProvider extends PluginServiceProvider
                     order: 40,
                     routeIsPattern: 'recruitment.*',
                     enabled: $enabled,
-                    visibleToSignedIn: static fn ($user): bool => ! app(RecruitmentAudience::class)->denies($user),
+                    visibleToSignedIn: static fn (): bool => false,
                 ),
             ];
         });
@@ -125,15 +126,14 @@ class RecruitmentServiceProvider extends PluginServiceProvider
 
             return [
                 new StaffPluginNavigationItem(
-                    label: 'Recruit manage',
-                    icon: 'clipboard-list',
+                    label: 'Recruitment',
+                    icon: 'briefcase',
                     order: 35,
-                    routeIsPattern: 'apes-cic.recruitment.*',
-                    abilities: RecruitmentAbilities::MANAGE,
+                    routeIsPattern: ['apes-cic.recruitment.*', 'recruitment.*'],
+                    abilities: [],
                     enabled: $enabled,
                     homeRouteName: 'apes-cic.recruitment.index',
-                    fallbackRouteName: 'apes-cic.recruitment.applications.index',
-                    homeAbility: RecruitmentAbilities::VIEW_ALL,
+                    destination: static fn ($user): ?string => app(RecruitmentPrimaryNav::class)->destinationFor($user),
                 ),
             ];
         });

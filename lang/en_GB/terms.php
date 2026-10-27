@@ -38,7 +38,6 @@ return [
     'open_roles' => 'Open roles',
     'my_applications' => 'My applications',
     'applications' => 'Applications',
-    'recruit_manage' => 'Recruit manage',
     'recruitment' => 'Recruitment',
 
     'apes_cic' => 'APES CIC',

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Recruit manage: '.$role->title)
+@section('title', 'Recruitment: '.$role->title)
 
 @section('content')
     @inject('ukDateTime', \App\Support\UkDateTime::class)

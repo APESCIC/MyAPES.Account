@@ -29,7 +29,6 @@ return [
         'recruitment_role' => 'terms.recruitment_role',
         'open_roles' => 'terms.open_roles',
         'my_applications' => 'terms.my_applications',
-        'recruit_manage' => 'terms.recruit_manage',
         'apes_cic' => 'terms.apes_cic',
         'pet_care_clinic' => 'terms.pet_care_clinic',
         'shelter_and_rescue' => 'terms.shelter_and_rescue',
@@ -103,6 +102,12 @@ return [
             'canonical' => 'Public user',
             'contexts' => ['nav', 'public_ui', 'admin_ui'],
             'notes' => 'Prefer Public user in Admin filters and labels.',
+        ],
+        [
+            'pattern' => 'Recruit manage',
+            'canonical' => 'Recruitment',
+            'contexts' => ['nav', 'public_ui', 'admin_ui'],
+            'notes' => 'Retired in 0.41.3: one Recruitment primary with a role-gated submenu replaces the separate manage primary.',
         ],
         [
             'pattern' => 'Jobs',
