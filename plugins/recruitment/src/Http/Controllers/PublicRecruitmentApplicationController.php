@@ -17,7 +17,7 @@ class PublicRecruitmentApplicationController extends Controller
 {
     public function index(Request $request): View
     {
-        Gate::authorize('viewAny', RecruitmentApplication::class);
+        Gate::authorize('viewOwnAny', RecruitmentApplication::class);
 
         $applications = RecruitmentApplication::query()
             ->ownedBy($request->user())

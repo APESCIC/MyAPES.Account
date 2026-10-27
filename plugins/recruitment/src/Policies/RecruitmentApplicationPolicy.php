@@ -28,6 +28,12 @@ class RecruitmentApplicationPolicy
                 || $user->can(RecruitmentApplication::PERMISSION_PREFIX.'review-applications'));
     }
 
+    public function viewOwnAny(User $user): bool
+    {
+        return $this->moduleEnabled()
+            && $user->can(RecruitmentApplication::PERMISSION_PREFIX.'view-own');
+    }
+
     public function viewOwn(User $user, RecruitmentApplication $recruitmentApplication): bool
     {
         return $this->moduleEnabled()
