@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.39.13",
+    "date": "2026-10-27",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Remove AI-agent files",
+    "summary": "The repository no longer carries AI-agent instruction files. Development, release, and deploy steps live in the README, the developer guide, and the CI workflows.",
+    "changes": [
+      "Remove AGENTS.md, the Laravel Boost configuration file, and the Cursor rules and skills from the repository.",
+      "Remove the README, developer guide, and task issue template links that pointed to those files.",
+      "Ignore the local Cursor folder so editor settings stay out of the repository."
+    ],
+    "affected_areas": [
+      "Agent instructions",
+      "Repository documentation"
+    ],
+    "categories": [
+      "fixed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.39 line: repository documentation only, with no application behaviour change.",
+    "validation": [
+      "php artisan myapes:changelog-validate --base-ref=origin/main on the pull request branch.",
+      "Version-pinned release history tests updated for the new head record.",
+      "Searched the repository for remaining links to the removed files."
+    ],
+    "known_limitations": [
+      "The laravel/boost development dependency is still installed. Earlier release notes and design records still mention the removed files as history."
+    ],
+    "rollback": "Redeploy the previous release package. To restore the files, revert pull request #405.",
+    "provenance": "Issue #404; pull request #405.",
+    "references": [
+      {
+        "label": "Issue #404",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/404"
+      },
+      {
+        "label": "Pull request #405",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/405"
+      }
+    ]
+  },
+  {
     "version": "0.39.12",
     "date": "2026-10-27",
     "channel": "stable",

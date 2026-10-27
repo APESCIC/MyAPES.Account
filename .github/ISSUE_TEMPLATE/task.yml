@@ -9,7 +9,7 @@ body:
     attributes:
       value: |
         Describe the work to complete. Remove credentials, personal data, and private operational details.
-        After opening, set assignee `apescic-director` if it is empty, an `area:` label, Priority, Effort, the minor-line `v0.N.P Beta` milestone, and parent or sub-issue links. If the API returns 403, set those in the GitHub sidebar. See AGENTS.md.
+        After opening, set assignee `apescic-director` if it is empty, an `area:` label, Priority, Effort, the minor-line `v0.N.P Beta` milestone, and parent or sub-issue links. If the API returns 403, set those in the GitHub sidebar.
 
   - type: textarea
     id: summary
