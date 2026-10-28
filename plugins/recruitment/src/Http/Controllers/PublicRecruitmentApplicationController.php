@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Plugins\Recruitment\Models\RecruitmentApplication;
 use Plugins\Recruitment\Models\RecruitmentRole;
+use Plugins\Recruitment\Notifications\RecruitmentApplicationReceivedNotification;
 
 class PublicRecruitmentApplicationController extends Controller
 {
@@ -80,6 +81,8 @@ class PublicRecruitmentApplicationController extends Controller
             $request->user(),
             $application,
         );
+
+        $request->user()->notify(new RecruitmentApplicationReceivedNotification($application));
 
         return redirect()
             ->route('recruitment.applications.show', $application)

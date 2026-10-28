@@ -30,6 +30,8 @@ use Plugins\Cases\Notifications\ApesCicCaseUpdatedNotification;
 use Plugins\Cases\Notifications\ShelterCaseUpdatedNotification;
 use Plugins\Consultations\Models\PetCareConsultation;
 use Plugins\Consultations\Notifications\ConsultationUpdatedNotification;
+use Plugins\Recruitment\Notifications\RecruitmentApplicationReceivedNotification;
+use Plugins\Recruitment\Notifications\RecruitmentApplicationStatusNotification;
 use Plugins\Tickets\Models\SupportTicket;
 use Plugins\Tickets\Notifications\TicketUpdatedNotification;
 use Tests\TestCase;
@@ -59,6 +61,8 @@ class OutboundMailQueueTest extends TestCase
             'apes cic case updated' => [ApesCicCaseUpdatedNotification::class],
             'shelter case updated' => [ShelterCaseUpdatedNotification::class],
             'consultation updated' => [ConsultationUpdatedNotification::class],
+            'recruitment application received' => [RecruitmentApplicationReceivedNotification::class],
+            'recruitment application status' => [RecruitmentApplicationStatusNotification::class],
         ];
     }
 

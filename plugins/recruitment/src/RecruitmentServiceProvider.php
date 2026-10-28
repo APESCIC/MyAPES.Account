@@ -11,6 +11,8 @@ use App\Core\Extensions\Plugins\PluginManifest;
 use App\Core\Extensions\Plugins\PluginNavigationItem;
 use App\Core\Extensions\Plugins\PluginServiceProvider;
 use App\Core\Extensions\Plugins\PluginSettingsSchema;
+use App\Core\Mail\MailCategory;
+use App\Core\Mail\MailTemplate;
 use App\Services\ModuleCatalogueProjection;
 use App\Services\ModuleSettingsService;
 use Illuminate\Support\Facades\Gate;
@@ -18,6 +20,8 @@ use Plugins\Recruitment\Dashboard\RecruitmentActiveRecordDetector;
 use Plugins\Recruitment\Models\RecruitmentApplication;
 use Plugins\Recruitment\Models\RecruitmentRole;
 use Plugins\Recruitment\Navigation\RecruitmentPrimaryNav;
+use Plugins\Recruitment\Notifications\RecruitmentApplicationReceivedNotification;
+use Plugins\Recruitment\Notifications\RecruitmentApplicationStatusNotification;
 use Plugins\Recruitment\Policies\RecruitmentApplicationPolicy;
 use Plugins\Recruitment\Policies\RecruitmentRolePolicy;
 
@@ -83,6 +87,42 @@ class RecruitmentServiceProvider extends PluginServiceProvider
                 dirname(__DIR__).'/routes/apes-cic.php',
             ],
         );
+    }
+
+    protected function mailTemplates(): array
+    {
+        return [
+            new MailTemplate(
+                key: 'recruitment.application_received',
+                notification: RecruitmentApplicationReceivedNotification::class,
+                category: MailCategory::Service,
+                labelKey: 'recruitment::mail.templates.application_received.name',
+                descriptionKey: 'recruitment::mail.templates.application_received.description',
+                sample: static fn (): RecruitmentApplicationReceivedNotification => new RecruitmentApplicationReceivedNotification(
+                    self::sampleApplication(RecruitmentApplication::STATUS_SUBMITTED),
+                ),
+                owner: 'recruitment',
+            ),
+            new MailTemplate(
+                key: 'recruitment.application_status',
+                notification: RecruitmentApplicationStatusNotification::class,
+                category: MailCategory::Optional,
+                labelKey: 'recruitment::mail.templates.application_status.name',
+                descriptionKey: 'recruitment::mail.templates.application_status.description',
+                sample: static fn (): RecruitmentApplicationStatusNotification => new RecruitmentApplicationStatusNotification(
+                    self::sampleApplication(RecruitmentApplication::STATUS_SHORTLISTED),
+                    RecruitmentApplication::STATUS_SHORTLISTED,
+                ),
+                owner: 'recruitment',
+            ),
+        ];
+    }
+
+    private static function sampleApplication(string $status): RecruitmentApplication
+    {
+        return (new RecruitmentApplication)
+            ->forceFill(['id' => 64, 'status' => $status])
+            ->setRelation('recruitmentRole', (new RecruitmentRole)->forceFill(['title' => 'Sample volunteer role']));
     }
 
     private function registerPublicNavigation(): void
