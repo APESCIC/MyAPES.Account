@@ -28,6 +28,19 @@
             </dl>
         </section>
 
+        @can('admin.emails.manage')
+            <section class="panel" aria-labelledby="email-template-test-heading">
+                <h2 id="email-template-test-heading">{{ __('admin.emails.send_test') }}</h2>
+                <p class="muted">{{ __('admin.emails.send_test_help', ['email' => auth()->user()->email, 'count' => $testSendLimit]) }}</p>
+                <form method="post" action="{{ route('admin.emails.test', $template->key) }}">
+                    @csrf
+                    <div class="actions">
+                        <button type="submit">{{ __('admin.emails.send_test_button') }}</button>
+                    </div>
+                </form>
+            </section>
+        @endcan
+
         <section class="panel" aria-labelledby="email-template-preview-heading">
             <h2 id="email-template-preview-heading">{{ __('admin.emails.preview') }}</h2>
             <p class="muted">{{ __('admin.emails.preview_help') }}</p>

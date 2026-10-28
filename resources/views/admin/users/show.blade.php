@@ -123,6 +123,18 @@
         @endif
 
         @can('admin.users.manage')
+            @if($canResendVerification)
+                <section class="panel" id="resend-verification" aria-labelledby="resend-verification-title">
+                    <h2 id="resend-verification-title">{{ __('admin.emails.resend_heading') }}</h2>
+                    <p class="muted">{{ __('admin.emails.resend_help') }}</p>
+                    <form method="post" action="{{ route('admin.users.resend-verification', $managedUser) }}">
+                        @csrf
+                        <div class="actions">
+                            <button type="submit">{{ __('admin.emails.resend_button') }}</button>
+                        </div>
+                    </form>
+                </section>
+            @endif
             @if($canResetLocalPassword)
                 <section class="panel" id="local-password" aria-labelledby="local-password-title">
                     <h2 id="local-password-title">{{ __('admin.users.local_password') }}</h2>

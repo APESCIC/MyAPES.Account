@@ -19,6 +19,7 @@ use App\Services\PendingFirstLoginChaseService;
 use App\Services\SecureUploadService;
 use App\Services\StaffProfilePhotoResponder;
 use App\Services\UkPhoneNumber;
+use App\Services\VerificationResendService;
 use App\Support\JobRoleCapabilityPacks;
 use DomainException;
 use Illuminate\Contracts\View\View;
@@ -144,6 +145,7 @@ class AdminUserController extends Controller
         LocalPublicPasswordResetService $passwordResets,
         PendingFirstLoginChaseService $pendingFirstLoginChase,
         ModuleRegistry $modules,
+        VerificationResendService $verificationResends,
     ): View {
         Gate::authorize('admin.users.view');
         $managedUser = User::query()->findOrFail($user);
@@ -246,6 +248,8 @@ class AdminUserController extends Controller
                     $request->user(),
                     $managedUser,
                 ),
+            'canResendVerification' => $request->user() instanceof User
+                && $verificationResends->canResend($request->user(), $managedUser),
             'identityLabel' => match ($managedUser->identity_type) {
                 User::IDENTITY_LOCAL => 'Local',
                 User::IDENTITY_CLOUDRON_OIDC => 'Cloudron OIDC',
