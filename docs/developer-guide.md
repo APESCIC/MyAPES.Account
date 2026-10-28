@@ -45,6 +45,7 @@ Permission convention for module-only abilities (rare): `{module}.{ability}`. Pr
 8. Translations / keywords: see [localisation.md](localisation.md). Plugin `translationNamespace` + `lang/en_GB/plugin.php` (`name`, `description`, `keywords`) load via `PluginServiceProvider` (#272). Admin Plugins labels use `nameKey` / `descriptionKey` → `label()` / `descriptionLabel()`. Keywords power Admin search in #274.
 9. Migrations are forward-only; historical tables keep their names (`shelter_cases` stays).
 10. Vacancy model for Recruitment is `RecruitmentRole` — never Spatie `Role`, never an Access job role.
+11. Email: build notifications with `BuildsBrandedMail`, queue them after commit, and register each one by overriding `mailTemplates()` in the plugin provider. Conventions and categories: [mail.md](mail.md).
 
 ## Enablement
 

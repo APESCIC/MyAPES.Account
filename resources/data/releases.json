@@ -1,5 +1,48 @@
 [
   {
+    "version": "0.42.11",
+    "date": "2026-10-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Email templates documentation",
+    "summary": "Documentation for MyAPES Account email templates, Admin Emails, and the outbound email log.",
+    "changes": [
+      "Document how to build, brand, queue, and register an email, and the template key rules.",
+      "Document email categories, the Email preference, Admin Emails actions, wording overrides, and log retention.",
+      "Complete the email templates and outbound mail work for the 0.42 line."
+    ],
+    "affected_areas": [
+      "Documentation",
+      "Email"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.42 line: documentation only, with no application behaviour change.",
+    "validation": [
+      "Docs reviewed against the code for commands, settings, permissions, and limits.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "None."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #363; pull request #435.",
+    "references": [
+      {
+        "label": "Issue #363",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/363"
+      },
+      {
+        "label": "Pull request #435",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/435"
+      }
+    ]
+  },
+  {
     "version": "0.42.10",
     "date": "2026-10-28",
     "channel": "stable",

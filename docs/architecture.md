@@ -15,7 +15,7 @@ Always on. Core has no knowledge of a specific organisation area or feature.
 - Sign-in and auth: local public accounts, and staff sign-in through Cloudron OIDC
 - Accounts and profiles
 - Access: directory groups, job roles, and permissions
-- Notifications (the delivery mechanism, not a feature's message copy)
+- Notifications (the delivery mechanism, not a feature's message copy). Mail templates, branding, the outbound log and Admin Emails: [mail.md](mail.md)
 - Settings
 - Unified Admin shell, including maintenance
 - Audit, health, and the change log
