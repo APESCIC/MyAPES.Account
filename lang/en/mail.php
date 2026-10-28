@@ -109,12 +109,6 @@ return [
     ],
 
     'auth' => [
-        'greeting_fallback' => 'there',
-        'footer' => [
-            'copyright' => '© :year :app. All rights reserved.',
-            'help' => 'Need help? Visit the Help page',
-            'salutation' => '— MyAPES Account',
-        ],
         'verify' => [
             'subject' => 'Verify your MyAPES Account email',
             'greeting' => 'Hello :name,',

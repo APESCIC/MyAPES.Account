@@ -2,7 +2,7 @@
 
 namespace App\Notifications\Auth;
 
-use App\Notifications\Auth\Concerns\BuildsAuthMail;
+use App\Core\Mail\Concerns\BuildsBrandedMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -13,7 +13,7 @@ use Illuminate\Notifications\Notification;
  */
 class EmailChangeConfirmNotification extends Notification implements ShouldQueue
 {
-    use BuildsAuthMail;
+    use BuildsBrandedMail;
     use Queueable;
 
     public function __construct(
@@ -34,9 +34,9 @@ class EmailChangeConfirmNotification extends Notification implements ShouldQueue
     {
         $name = is_string($this->recipientName) && trim($this->recipientName) !== ''
             ? trim($this->recipientName)
-            : __('mail.auth.greeting_fallback');
+            : __('mail.brand.greeting_fallback');
 
-        return $this->authMail()
+        return $this->brandedMail()
             ->subject(__('mail.auth.email_change_confirm.subject'))
             ->markdown('mail.auth.security-event', [
                 'greeting' => __('mail.auth.email_change_confirm.greeting', [

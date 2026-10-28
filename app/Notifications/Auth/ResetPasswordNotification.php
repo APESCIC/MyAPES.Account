@@ -2,7 +2,7 @@
 
 namespace App\Notifications\Auth;
 
-use App\Notifications\Auth\Concerns\BuildsAuthMail;
+use App\Core\Mail\Concerns\BuildsBrandedMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -10,7 +10,7 @@ use Illuminate\Notifications\Notification;
 
 class ResetPasswordNotification extends Notification implements ShouldQueue
 {
-    use BuildsAuthMail;
+    use BuildsBrandedMail;
     use Queueable;
 
     public function __construct(
@@ -33,7 +33,7 @@ class ResetPasswordNotification extends Notification implements ShouldQueue
             60,
         );
 
-        return $this->authMail()
+        return $this->brandedMail()
             ->subject(__('mail.auth.reset.subject'))
             ->markdown('mail.auth.reset-password', [
                 'url' => $this->resetUrl($notifiable),
