@@ -2447,6 +2447,14 @@ ol.stack {
     white-space: pre-wrap;
 }
 
+.mail-preview-frame {
+    width: 100%;
+    min-height: 40rem;
+    border: 1px solid var(--line);
+    border-radius: 0.5rem;
+    background: #fff;
+}
+
 .table-wrap {
     overflow-x: auto;
 }

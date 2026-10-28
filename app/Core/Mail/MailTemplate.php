@@ -3,6 +3,7 @@
 namespace App\Core\Mail;
 
 use App\Core\Accounts\User;
+use App\Core\Extensions\Plugins\PluginRegistry;
 use Closure;
 use Illuminate\Notifications\Notification;
 use InvalidArgumentException;
@@ -45,6 +46,15 @@ final class MailTemplate
     public function description(): string
     {
         return __($this->descriptionKey);
+    }
+
+    public function ownerLabel(): string
+    {
+        $plugins = app(PluginRegistry::class);
+
+        return $this->owner !== 'core' && $plugins->has($this->owner)
+            ? $plugins->plugin($this->owner)->label()
+            : __('admin.emails.owner_core');
     }
 
     public function sampleNotification(User $recipient): Notification

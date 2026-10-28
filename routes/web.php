@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminAccessController;
+use App\Http\Controllers\Admin\AdminEmailController;
 use App\Http\Controllers\Admin\AdminGroupController;
 use App\Http\Controllers\Admin\AdminMaintenanceController;
 use App\Http\Controllers\Admin\AdminModuleController;
@@ -341,6 +342,18 @@ Route::middleware([
             Route::get('/permissions', fn () => redirect()->route('admin.access.index', ['tab' => 'permissions'], 301))
                 ->middleware('can:admin.permissions.view')
                 ->name('permissions.index');
+
+            Route::get('/emails', [AdminEmailController::class, 'index'])
+                ->middleware('can:admin.emails.view')
+                ->name('emails.index');
+            Route::get('/emails/{template}', [AdminEmailController::class, 'show'])
+                ->middleware('can:admin.emails.view')
+                ->where('template', '[a-z0-9_]+\.[a-z0-9_]+')
+                ->name('emails.show');
+            Route::get('/emails/{template}/preview', [AdminEmailController::class, 'preview'])
+                ->middleware('can:admin.emails.view')
+                ->where('template', '[a-z0-9_]+\.[a-z0-9_]+')
+                ->name('emails.preview');
 
             Route::get('/organisation-modules', [AdminOrganisationModuleController::class, 'index'])
                 ->middleware('can:admin.modules.view')

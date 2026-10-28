@@ -35,6 +35,12 @@
                 <span>{{ __('admin.nav.plugins') }}</span>
             </a>
         @endcan
+        @can('admin.emails.view')
+            <a href="{{ route('admin.emails.index') }}" @if(request()->routeIs('admin.emails.*')) aria-current="page" @endif>
+                <i data-lucide="mail" aria-hidden="true"></i>
+                <span>{{ __('admin.nav.emails') }}</span>
+            </a>
+        @endcan
         @can('admin.maintenance.manage')
             <a href="{{ route('admin.maintenance.index') }}" @if(request()->routeIs('admin.maintenance.*')) aria-current="page" @endif>
                 <i data-lucide="circle-pause" aria-hidden="true"></i>

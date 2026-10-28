@@ -84,6 +84,16 @@ final class PermissionDescriptions
             'description' => 'Activate or deactivate application maintenance mode.',
             'group' => 'Platform',
         ],
+        'admin.emails.view' => [
+            'title' => 'View email templates',
+            'description' => 'Browse registered email templates and preview them with sample data.',
+            'group' => 'Email',
+        ],
+        'admin.emails.manage' => [
+            'title' => 'Manage email templates',
+            'description' => 'Send test emails, resend verification safely, and edit subject and intro wording.',
+            'group' => 'Email',
+        ],
     ];
 
     public static function title(string $permission): string

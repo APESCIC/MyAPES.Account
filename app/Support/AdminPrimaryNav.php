@@ -72,6 +72,10 @@ final class AdminPrimaryNav
                 'url' => route('admin.modules.index'),
             ],
             [
+                'abilities' => ['admin.emails.view'],
+                'url' => route('admin.emails.index'),
+            ],
+            [
                 'abilities' => ['admin.maintenance.manage'],
                 'url' => route('admin.maintenance.index'),
             ],
