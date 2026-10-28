@@ -47,6 +47,7 @@ class AuthorizationProfile
             'admin.users.view',
             'admin.users.manage',
             'admin.analytics.view',
+            'admin.emails.view',
         ],
         self::ROLE_SUPER_ADMIN => [
             self::PERMISSION_STAFF_ACCESS,
@@ -63,6 +64,8 @@ class AuthorizationProfile
             'admin.modules.manage',
             'admin.analytics.view',
             'admin.maintenance.manage',
+            'admin.emails.view',
+            'admin.emails.manage',
         ],
     ];
 
@@ -85,6 +88,7 @@ class AuthorizationProfile
         'admin.modules.view',
         'admin.modules.manage',
         'admin.maintenance.manage',
+        'admin.emails.manage',
     ];
 
     private const LEGACY_TO_PROTECTED = [

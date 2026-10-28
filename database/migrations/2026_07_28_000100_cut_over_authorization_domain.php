@@ -48,6 +48,8 @@ return new class extends Migration
         'admin.modules.manage',
         'admin.analytics.view',
         'admin.maintenance.manage',
+        'admin.emails.view',
+        'admin.emails.manage',
     ];
 
     private const DIRECTORY_MAPPINGS = [
