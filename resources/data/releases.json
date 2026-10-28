@@ -1,5 +1,52 @@
 [
   {
+    "version": "0.42.8",
+    "date": "2026-10-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Email preference for optional mail",
+    "summary": "Optional emails, such as Recruitment decisions, now go only to people who turned on Email in their contact preferences.",
+    "changes": [
+      "Send Recruitment decision emails only when the applicant has Email turned on in their contact preferences.",
+      "Keep sending sign-in, security, and service emails, such as password resets and ticket updates, whatever the preference.",
+      "Explain on the profile page which emails the Email preference covers."
+    ],
+    "affected_areas": [
+      "Email",
+      "Profile",
+      "Recruitment"
+    ],
+    "categories": [
+      "changed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.42 line: honours an existing preference for optional emails only.",
+    "validation": [
+      "php artisan test tests/Feature/Mail/OptionalMailPreferenceTest.php.",
+      "Recruitment lifecycle, mail, and profile tests.",
+      "php artisan lang:check --fail-on-missing.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "Applicants who never turned Email on stop receiving Recruitment decision emails; they still see decisions on their application page."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #360; pull request #432.",
+    "references": [
+      {
+        "label": "Issue #360",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/360"
+      },
+      {
+        "label": "Pull request #432",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/432"
+      }
+    ]
+  },
+  {
     "version": "0.42.7",
     "date": "2026-10-28",
     "channel": "stable",

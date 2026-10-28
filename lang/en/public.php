@@ -201,6 +201,7 @@ return [
             'blade' => [
                 'leave_blank_to_use_your_mobile_number' => 'Leave blank to use your mobile number.',
                 'optional_contact_preferences' => 'Optional contact preferences',
+                'email_preference_help' => 'Email covers optional updates, such as Recruitment decisions. Sign-in, security, and service emails (for example password resets and updates on your tickets or cases) are always sent.',
                 'separate_whatsapp_number' => 'Separate WhatsApp number',
                 'read_the_privacy_notice' => 'Read the privacy notice',
                 'your_myapes_services' => 'Your MyAPES services',

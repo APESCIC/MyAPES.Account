@@ -31,5 +31,6 @@
     @foreach (['calls' => 'Calls', 'sms' => 'SMS', 'whatsapp' => 'WhatsApp', 'telegram' => 'Telegram', 'email' => 'Email'] as $channel => $label)
         <label class="inline-check"><input type="checkbox" name="contact_{{ $channel }}" value="1" @checked(old('contact_'.$channel, $preference?->{$channel} ?? false))> {{ $label }}</label>
     @endforeach
+    <small data-email-preference-help>{{ __('public.profile._account-fields.blade.email_preference_help') }}</small>
     <input type="hidden" name="contact_preferences_confirmed" value="1">
 </fieldset>
