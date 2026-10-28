@@ -1,5 +1,52 @@
 [
   {
+    "version": "0.42.5",
+    "date": "2026-10-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Admin Emails template list and preview",
+    "summary": "Admins can now open Admin, Emails to see every email MyAPES Account sends and preview each one with sample data.",
+    "changes": [
+      "Add Emails to the Admin menu and Admin search for Administrators and Super Admins.",
+      "List every email with its category, owner, and whether it respects the Email contact preference.",
+      "Preview each email with sample data and your own name in a locked-down frame; previews never send mail."
+    ],
+    "affected_areas": [
+      "Admin",
+      "Email",
+      "Permissions"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.42 line: a new read-only Admin page and two new Admin permissions.",
+    "validation": [
+      "php artisan test tests/Feature/AdminEmailsTest.php.",
+      "Authorization, Admin access, and permission matrix tests.",
+      "php artisan lang:check --fail-on-missing.",
+      "Full PHPUnit suite.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "Send test, resend verification, the outbound log, and wording changes arrive in later 0.42 releases."
+    ],
+    "rollback": "Redeploy the previous release package. The migration only adds two permission rows, which the previous release ignores.",
+    "provenance": "Issue #357; pull request #429.",
+    "references": [
+      {
+        "label": "Issue #357",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/357"
+      },
+      {
+        "label": "Pull request #429",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/429"
+      }
+    ]
+  },
+  {
     "version": "0.42.4",
     "date": "2026-10-28",
     "channel": "stable",
