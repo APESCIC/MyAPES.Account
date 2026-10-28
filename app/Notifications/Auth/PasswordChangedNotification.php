@@ -2,7 +2,7 @@
 
 namespace App\Notifications\Auth;
 
-use App\Notifications\Auth\Concerns\BuildsAuthMail;
+use App\Core\Mail\Concerns\BuildsBrandedMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -10,7 +10,7 @@ use Illuminate\Notifications\Notification;
 
 class PasswordChangedNotification extends Notification implements ShouldQueue
 {
-    use BuildsAuthMail;
+    use BuildsBrandedMail;
     use Queueable;
 
     /**
@@ -23,7 +23,7 @@ class PasswordChangedNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        return $this->authMail()
+        return $this->brandedMail()
             ->subject(__('mail.auth.password_changed.subject'))
             ->markdown('mail.auth.password-changed', [
                 'url' => route('public.login'),

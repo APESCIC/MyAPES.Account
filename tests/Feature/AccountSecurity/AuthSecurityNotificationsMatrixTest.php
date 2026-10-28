@@ -97,7 +97,7 @@ class AuthSecurityNotificationsMatrixTest extends TestCase
             $this->assertStringNotContainsString('totp', strtolower($subject));
             $this->assertStringNotContainsString('token=', strtolower($subject));
             $this->assertStringContainsString(__('terms.app_name'), $html);
-            $this->assertStringContainsString(__('mail.auth.footer.help'), $html);
+            $this->assertStringContainsString(__('mail.brand.footer.help'), $html);
             $this->assertStringContainsString(
                 url('/logos/myapes-header-light-600x128.png'),
                 $html,

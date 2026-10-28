@@ -2,7 +2,7 @@
 
 namespace App\Notifications\Auth;
 
-use App\Notifications\Auth\Concerns\BuildsAuthMail;
+use App\Core\Mail\Concerns\BuildsBrandedMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\URL;
 
 class VerifyEmailNotification extends Notification implements ShouldQueue
 {
-    use BuildsAuthMail;
+    use BuildsBrandedMail;
     use Queueable;
 
     /**
@@ -28,7 +28,7 @@ class VerifyEmailNotification extends Notification implements ShouldQueue
     {
         $url = $this->verificationUrl($notifiable);
 
-        return $this->authMail()
+        return $this->brandedMail()
             ->subject(__('mail.auth.verify.subject'))
             ->markdown('mail.auth.verify-email', [
                 'url' => $url,

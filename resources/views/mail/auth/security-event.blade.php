@@ -1,5 +1,5 @@
 {{-- Shared stub body for future MFA / passkey / email-change security emails (#226). --}}
-@component('mail.auth.message')
+@component('mail.brand.message')
 {{ $greeting }}
 
 {{ $intro }}

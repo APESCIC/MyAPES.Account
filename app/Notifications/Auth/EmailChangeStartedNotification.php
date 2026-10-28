@@ -2,7 +2,7 @@
 
 namespace App\Notifications\Auth;
 
-use App\Notifications\Auth\Concerns\BuildsAuthMail;
+use App\Core\Mail\Concerns\BuildsBrandedMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -14,7 +14,7 @@ use Illuminate\Notifications\Notification;
  */
 class EmailChangeStartedNotification extends Notification implements ShouldQueue
 {
-    use BuildsAuthMail;
+    use BuildsBrandedMail;
     use Queueable;
 
     /**
@@ -27,7 +27,7 @@ class EmailChangeStartedNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        return $this->authMail()
+        return $this->brandedMail()
             ->subject(__('mail.auth.email_change_started.subject'))
             ->markdown('mail.auth.security-event', [
                 'greeting' => __('mail.auth.email_change_started.greeting', [

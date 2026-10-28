@@ -2,7 +2,7 @@
 
 namespace App\Notifications\Auth;
 
-use App\Notifications\Auth\Concerns\BuildsAuthMail;
+use App\Core\Mail\Concerns\BuildsBrandedMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -13,7 +13,7 @@ use Illuminate\Notifications\Notification;
  */
 class TwoFactorDisabledNotification extends Notification implements ShouldQueue
 {
-    use BuildsAuthMail;
+    use BuildsBrandedMail;
     use Queueable;
 
     /**
@@ -26,7 +26,7 @@ class TwoFactorDisabledNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        return $this->authMail()
+        return $this->brandedMail()
             ->subject(__('mail.auth.two_factor_disabled.subject'))
             ->markdown('mail.auth.security-event', [
                 'greeting' => __('mail.auth.two_factor_disabled.greeting', [

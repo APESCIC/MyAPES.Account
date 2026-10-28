@@ -1,4 +1,4 @@
-@component('mail.auth.message')
+@component('mail.brand.message')
 {{ __('mail.auth.reset.greeting', ['name' => $name]) }}
 
 {{ __('mail.auth.reset.intro') }}
