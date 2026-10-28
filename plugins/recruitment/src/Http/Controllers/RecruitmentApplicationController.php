@@ -12,6 +12,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Plugins\Recruitment\Models\RecruitmentApplication;
 use Plugins\Recruitment\Models\RecruitmentRole;
+use Plugins\Recruitment\Notifications\RecruitmentApplicationStatusNotification;
 
 class RecruitmentApplicationController extends Controller
 {
@@ -142,6 +143,12 @@ class RecruitmentApplicationController extends Controller
             $recruitmentApplication,
             ['status' => $validated['status']],
         );
+
+        if (in_array($validated['status'], RecruitmentApplicationStatusNotification::NOTIFIED_STATUSES, true)) {
+            $recruitmentApplication->user?->notify(
+                new RecruitmentApplicationStatusNotification($recruitmentApplication, $validated['status']),
+            );
+        }
 
         return redirect()
             ->route('apes-cic.recruitment.applications.show', $recruitmentApplication)

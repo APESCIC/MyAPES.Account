@@ -1,5 +1,51 @@
 [
   {
+    "version": "0.42.4",
+    "date": "2026-10-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Recruitment application lifecycle mail",
+    "summary": "Recruitment applicants now get an email when they apply and when there is a decision on their application.",
+    "changes": [
+      "Email applicants to confirm their Recruitment application was received.",
+      "Email applicants when their application is shortlisted, rejected, accepted, or closed.",
+      "Link each email to the applicant's own application page and keep staff notes out of every email."
+    ],
+    "affected_areas": [
+      "Email",
+      "Recruitment"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.42 line: new Recruitment emails on the existing email foundation, with no change to the Recruitment workflow.",
+    "validation": [
+      "php artisan test tests/Feature/RecruitmentLifecycleMailTest.php.",
+      "Recruitment manage, workflow, access matrix, and public board tests.",
+      "php artisan lang:check --fail-on-missing.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "Decision emails start respecting the Email contact preference in 0.42.8."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #356; pull request #428.",
+    "references": [
+      {
+        "label": "Issue #356",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/356"
+      },
+      {
+        "label": "Pull request #428",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/428"
+      }
+    ]
+  },
+  {
     "version": "0.42.3",
     "date": "2026-10-28",
     "channel": "stable",
