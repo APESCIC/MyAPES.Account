@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Core\Accounts\User;
 use App\Core\Mail\MailTemplate;
 use App\Core\Mail\MailTemplateRegistry;
+use App\Core\Mail\OutboundMailLog;
 use App\Http\Controllers\Controller;
 use App\Services\AuditLogger;
 use App\Services\VerificationResendService;
@@ -26,6 +27,15 @@ class AdminEmailController extends Controller
     {
         return view('admin.emails.index', [
             'templates' => array_values($registry->all()),
+        ]);
+    }
+
+    public function log(MailTemplateRegistry $registry): View
+    {
+        return view('admin.emails.log', [
+            'entries' => OutboundMailLog::query()->latest('created_at')->latest('id')->paginate(50),
+            'templates' => $registry->all(),
+            'retentionDays' => (int) config('myapes.mail.log_retention_days', 90),
         ]);
     }
 

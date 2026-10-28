@@ -58,6 +58,10 @@ return [
         'retention_days' => (int) env('AUDIT_LOG_RETENTION_DAYS', 180),
     ],
 
+    'mail' => [
+        'log_retention_days' => (int) env('MAIL_LOG_RETENTION_DAYS', 90),
+    ],
+
     'consent' => [
         'policy_version' => env('CONTACT_CONSENT_POLICY_VERSION', '2026-08'),
         'privacy_notice_url' => env('PRIVACY_NOTICE_URL'),

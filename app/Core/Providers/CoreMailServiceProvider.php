@@ -4,6 +4,10 @@ namespace App\Core\Providers;
 
 use App\Core\Mail\CoreMailTemplates;
 use App\Core\Mail\MailTemplateRegistry;
+use App\Core\Mail\RecordOutboundMail;
+use Illuminate\Notifications\Events\NotificationFailed;
+use Illuminate\Notifications\Events\NotificationSent;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class CoreMailServiceProvider extends ServiceProvider
@@ -17,5 +21,8 @@ class CoreMailServiceProvider extends ServiceProvider
     {
         $this->app->make(MailTemplateRegistry::class)
             ->contribute(static fn (): array => CoreMailTemplates::all());
+
+        Event::listen(NotificationSent::class, [RecordOutboundMail::class, 'sent']);
+        Event::listen(NotificationFailed::class, [RecordOutboundMail::class, 'failed']);
     }
 }

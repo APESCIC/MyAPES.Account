@@ -10,6 +10,7 @@
             <p class="eyebrow">{{ __('admin.emails.eyebrow') }}</p>
             <h1>{{ __('admin.emails.heading') }}</h1>
             <p>{{ __('admin.emails.intro') }}</p>
+            <p><a href="{{ route('admin.emails.log') }}">{{ __('admin.emails.log_link') }}</a></p>
         </div>
     </header>
 
