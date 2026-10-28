@@ -1,5 +1,52 @@
 [
   {
+    "version": "0.42.1",
+    "date": "2026-10-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Queued ticket, case, consultation and reminder emails",
+    "summary": "Ticket, case, consultation, and Staff Login reminder emails now send in the background, like sign-in and security emails already do.",
+    "changes": [
+      "Send ticket, case, and consultation update emails through the background queue instead of during the page request.",
+      "Send the Staff Login reminder through the background queue.",
+      "Wait until a change is saved before sending its email, and skip the email if the record was deleted first."
+    ],
+    "affected_areas": [
+      "Email",
+      "Tickets",
+      "Cases",
+      "Consultations"
+    ],
+    "categories": [
+      "changed"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.42 line: emails keep the same content and recipients and now send from the queue.",
+    "validation": [
+      "php artisan test tests/Feature/Mail/OutboundMailQueueTest.php.",
+      "Ticket, case, consultation, and Staff Login reminder workflow tests.",
+      "Full PHPUnit suite.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "Emails need the queue worker running; on Cloudron the run script starts it."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #353; pull request #425.",
+    "references": [
+      {
+        "label": "Issue #353",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/353"
+      },
+      {
+        "label": "Pull request #425",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/425"
+      }
+    ]
+  },
+  {
     "version": "0.42.0",
     "date": "2026-10-28",
     "channel": "stable",
