@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Core\Accounts\User;
+use App\Core\Mail\MailCopyOverrides;
 use App\Core\Mail\MailTemplate;
 use App\Core\Mail\MailTemplateRegistry;
 use App\Core\Mail\OutboundMailLog;
@@ -39,16 +40,62 @@ class AdminEmailController extends Controller
         ]);
     }
 
-    public function show(Request $request, MailTemplateRegistry $registry, string $template): View
+    public function show(Request $request, MailTemplateRegistry $registry, MailCopyOverrides $overrides, string $template): View
     {
         $mailTemplate = $this->findOrFail($registry, $template);
         $mail = $mailTemplate->sampleNotification($request->user())->toMail($request->user());
+        $locale = $this->copyLocale();
 
         return view('admin.emails.show', [
             'template' => $mailTemplate,
             'subject' => (string) $mail->subject,
             'testSendLimit' => self::TEST_SENDS_PER_WINDOW,
+            'override' => $overrides->current($mailTemplate, $locale),
+            'shippedSubject' => $mailTemplate->subjectKey === null ? null : $overrides->shipped($mailTemplate->subjectKey, $locale),
+            'shippedIntro' => $mailTemplate->introKey === null ? null : $overrides->shipped($mailTemplate->introKey, $locale),
         ]);
+    }
+
+    public function updateCopy(Request $request, MailTemplateRegistry $registry, MailCopyOverrides $overrides, string $template): RedirectResponse
+    {
+        $mailTemplate = $this->findOrFail($registry, $template);
+        abort_unless($mailTemplate->hasEditableCopy(), 404);
+
+        $validated = $request->validate([
+            'subject' => ['nullable', 'string', 'max:200'],
+            'intro' => ['nullable', 'string', 'max:1000'],
+            'lock_version' => ['required', 'integer', 'min:0'],
+        ]);
+
+        $overrides->save(
+            $mailTemplate,
+            $request->user(),
+            $this->copyLocale(),
+            $validated['subject'] ?? null,
+            $validated['intro'] ?? null,
+            (int) $validated['lock_version'],
+        );
+
+        return redirect()
+            ->route('admin.emails.show', $mailTemplate->key)
+            ->with('status', __('admin.flash.email_copy_saved'));
+    }
+
+    public function resetCopy(Request $request, MailTemplateRegistry $registry, MailCopyOverrides $overrides, string $template): RedirectResponse
+    {
+        $mailTemplate = $this->findOrFail($registry, $template);
+        $request->validate(['confirm_reset' => ['accepted']]);
+
+        $overrides->reset($mailTemplate, $request->user(), $this->copyLocale());
+
+        return redirect()
+            ->route('admin.emails.show', $mailTemplate->key)
+            ->with('status', __('admin.flash.email_copy_reset'));
+    }
+
+    private function copyLocale(): string
+    {
+        return (string) config('app.locale');
     }
 
     /**

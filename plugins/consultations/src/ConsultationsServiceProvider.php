@@ -51,6 +51,8 @@ class ConsultationsServiceProvider extends PluginServiceProvider
                     'updated',
                 ),
                 owner: 'consultations',
+                subjectKey: 'mail.consultation_updated.subject',
+                introKey: 'mail.consultation_updated.line_body',
             ),
         ];
     }

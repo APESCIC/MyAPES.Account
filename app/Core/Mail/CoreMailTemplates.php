@@ -25,29 +25,29 @@ final class CoreMailTemplates
     public static function all(): array
     {
         return [
-            self::auth('verify_email', VerifyEmailNotification::class, MailCategory::Security,
+            self::auth('verify_email', 'verify', VerifyEmailNotification::class,
                 static fn (): VerifyEmailNotification => new VerifyEmailNotification),
-            self::auth('reset_password', ResetPasswordNotification::class, MailCategory::Security,
+            self::auth('reset_password', 'reset', ResetPasswordNotification::class,
                 static fn (): ResetPasswordNotification => new ResetPasswordNotification('sample-preview-token')),
-            self::auth('password_changed', PasswordChangedNotification::class, MailCategory::Security,
+            self::auth('password_changed', 'password_changed', PasswordChangedNotification::class,
                 static fn (): PasswordChangedNotification => new PasswordChangedNotification),
-            self::auth('two_factor_enabled', TwoFactorEnabledNotification::class, MailCategory::Security,
+            self::auth('two_factor_enabled', 'two_factor_enabled', TwoFactorEnabledNotification::class,
                 static fn (): TwoFactorEnabledNotification => new TwoFactorEnabledNotification),
-            self::auth('two_factor_disabled', TwoFactorDisabledNotification::class, MailCategory::Security,
+            self::auth('two_factor_disabled', 'two_factor_disabled', TwoFactorDisabledNotification::class,
                 static fn (): TwoFactorDisabledNotification => new TwoFactorDisabledNotification),
-            self::auth('passkey_added', PasskeyAddedNotification::class, MailCategory::Security,
+            self::auth('passkey_added', 'passkey_added', PasskeyAddedNotification::class,
                 static fn (): PasskeyAddedNotification => new PasskeyAddedNotification),
-            self::auth('passkey_removed', PasskeyRemovedNotification::class, MailCategory::Security,
+            self::auth('passkey_removed', 'passkey_removed', PasskeyRemovedNotification::class,
                 static fn (): PasskeyRemovedNotification => new PasskeyRemovedNotification),
-            self::auth('email_change_started', EmailChangeStartedNotification::class, MailCategory::Security,
+            self::auth('email_change_started', 'email_change_started', EmailChangeStartedNotification::class,
                 static fn (): EmailChangeStartedNotification => new EmailChangeStartedNotification),
-            self::auth('email_change_confirm', EmailChangeConfirmNotification::class, MailCategory::Security,
+            self::auth('email_change_confirm', 'email_change_confirm', EmailChangeConfirmNotification::class,
                 static fn (User $recipient): EmailChangeConfirmNotification => new EmailChangeConfirmNotification(
                     recipientName: $recipient->name,
                     confirmUrl: url('/email/change/confirm/sample-preview'),
                     newEmail: 'new.address@example.com',
                 )),
-            self::auth('email_change_completed', EmailChangeCompletedNotification::class, MailCategory::Security,
+            self::auth('email_change_completed', 'email_change_completed', EmailChangeCompletedNotification::class,
                 static fn (): EmailChangeCompletedNotification => new EmailChangeCompletedNotification),
             new MailTemplate(
                 key: 'accounts.pending_first_login_chase',
@@ -56,6 +56,8 @@ final class CoreMailTemplates
                 labelKey: 'mail.templates.accounts.pending_first_login_chase.name',
                 descriptionKey: 'mail.templates.accounts.pending_first_login_chase.description',
                 sample: static fn (User $recipient): PendingFirstLoginChaseNotification => new PendingFirstLoginChaseNotification($recipient),
+                subjectKey: 'mail.pending_first_login.subject',
+                introKey: 'mail.pending_first_login.line_request',
             ),
         ];
     }
@@ -63,15 +65,17 @@ final class CoreMailTemplates
     /**
      * @param  class-string<Notification>  $notification
      */
-    private static function auth(string $name, string $notification, MailCategory $category, Closure $sample): MailTemplate
+    private static function auth(string $name, string $langGroup, string $notification, Closure $sample): MailTemplate
     {
         return new MailTemplate(
             key: 'auth.'.$name,
             notification: $notification,
-            category: $category,
+            category: MailCategory::Security,
             labelKey: "mail.templates.auth.{$name}.name",
             descriptionKey: "mail.templates.auth.{$name}.description",
             sample: $sample,
+            subjectKey: "mail.auth.{$langGroup}.subject",
+            introKey: "mail.auth.{$langGroup}.intro",
         );
     }
 }

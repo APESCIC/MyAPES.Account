@@ -361,6 +361,14 @@ Route::middleware([
                 ->middleware('can:admin.emails.manage')
                 ->where('template', '[a-z0-9_]+\.[a-z0-9_]+')
                 ->name('emails.test');
+            Route::put('/emails/{template}/copy', [AdminEmailController::class, 'updateCopy'])
+                ->middleware('can:admin.emails.manage')
+                ->where('template', '[a-z0-9_]+\.[a-z0-9_]+')
+                ->name('emails.copy.update');
+            Route::delete('/emails/{template}/copy', [AdminEmailController::class, 'resetCopy'])
+                ->middleware('can:admin.emails.manage')
+                ->where('template', '[a-z0-9_]+\.[a-z0-9_]+')
+                ->name('emails.copy.reset');
             Route::post('/users/{user}/resend-verification', [AdminEmailController::class, 'resendVerification'])
                 ->middleware('can:admin.users.manage')
                 ->name('users.resend-verification');
