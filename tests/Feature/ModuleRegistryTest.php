@@ -343,7 +343,7 @@ class ModuleRegistryTest extends TestCase
         $this->assertTrue(
             $profile->isSuperAdminOnlyPermission('admin.modules.manage'),
         );
-        $this->assertCount(81, $profile->permissions());
+        $this->assertCount(83, $profile->permissions());
         $this->assertTrue(
             $profile->isSuperAdminOnlyPermission('superadmin.access'),
         );
