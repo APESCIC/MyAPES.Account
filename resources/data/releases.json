@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.42.2",
+    "date": "2026-10-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Auth and security mail on the shared brand layout",
+    "summary": "Sign-in and security emails now use the shared MyAPES Account email design.",
+    "changes": [
+      "Show verify email, reset password, password changed, and security notice emails in the shared MyAPES Account email design.",
+      "Use one shared footer and greeting for every branded email.",
+      "Keep the same wording, links, and sending for every sign-in and security email."
+    ],
+    "affected_areas": [
+      "Email",
+      "Sign-in and security"
+    ],
+    "categories": [
+      "changed"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.42 line: the same sign-in and security emails, now built from the shared design.",
+    "validation": [
+      "php artisan test tests/Feature/Auth/AuthEmailBrandKitTest.php.",
+      "Sign-in, account security, and mail tests.",
+      "php artisan lang:check --fail-on-missing.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "Ticket, case, consultation, and Staff Login reminder emails move to the shared design in 0.42.3."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #354; pull request #426.",
+    "references": [
+      {
+        "label": "Issue #354",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/354"
+      },
+      {
+        "label": "Pull request #426",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/426"
+      }
+    ]
+  },
+  {
     "version": "0.42.1",
     "date": "2026-10-28",
     "channel": "stable",
