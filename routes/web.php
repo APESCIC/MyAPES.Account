@@ -354,6 +354,13 @@ Route::middleware([
                 ->middleware('can:admin.emails.view')
                 ->where('template', '[a-z0-9_]+\.[a-z0-9_]+')
                 ->name('emails.preview');
+            Route::post('/emails/{template}/test', [AdminEmailController::class, 'sendTest'])
+                ->middleware('can:admin.emails.manage')
+                ->where('template', '[a-z0-9_]+\.[a-z0-9_]+')
+                ->name('emails.test');
+            Route::post('/users/{user}/resend-verification', [AdminEmailController::class, 'resendVerification'])
+                ->middleware('can:admin.users.manage')
+                ->name('users.resend-verification');
 
             Route::get('/organisation-modules', [AdminOrganisationModuleController::class, 'index'])
                 ->middleware('can:admin.modules.view')

@@ -1,5 +1,51 @@
 [
   {
+    "version": "0.42.6",
+    "date": "2026-10-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Admin email send-test and safe verification resend",
+    "summary": "Super Admins can send themselves a test of any email, and Admins can safely resend a verification email to a Public Login account.",
+    "changes": [
+      "Send a test of any email with sample data to your own address only, up to 5 times every 10 minutes.",
+      "Resend the verification email from an unverified Public Login account's Admin page, up to 3 times an hour per account.",
+      "Build a brand-new verification link for every resend and record each test and resend in the audit log."
+    ],
+    "affected_areas": [
+      "Admin",
+      "Email",
+      "Sign-in and security"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.42 line: two guarded Admin actions on top of Admin Emails.",
+    "validation": [
+      "php artisan test tests/Feature/AdminEmailSendTestAndResendTest.php.",
+      "Admin Emails and Staff Login reminder tests.",
+      "php artisan lang:check --fail-on-missing.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "Send test is for Super Admins only; Administrators can preview but not send."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #358; pull request #430.",
+    "references": [
+      {
+        "label": "Issue #358",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/358"
+      },
+      {
+        "label": "Pull request #430",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/430"
+      }
+    ]
+  },
+  {
     "version": "0.42.5",
     "date": "2026-10-28",
     "channel": "stable",
