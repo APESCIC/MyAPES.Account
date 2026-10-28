@@ -1,5 +1,51 @@
 [
   {
+    "version": "0.42.7",
+    "date": "2026-10-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Outbound mail log",
+    "summary": "MyAPES Account now keeps a short, privacy-safe record of which emails were sent, and Admins can read it.",
+    "changes": [
+      "Record each sent or failed email with its template, time, mailer, and the recipient's email domain.",
+      "Never store full addresses, subjects, message text, links, or tokens; addresses are kept only as a one-way hash.",
+      "Delete records older than 90 days every day, and show the log under Admin, Emails."
+    ],
+    "affected_areas": [
+      "Admin",
+      "Email",
+      "Privacy"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.42 line: an additive log table and a read-only Admin page.",
+    "validation": [
+      "php artisan test tests/Feature/Mail/OutboundMailLogTest.php.",
+      "Mail and Admin Emails tests.",
+      "php artisan lang:check --fail-on-missing.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "Failures are recorded only when the mail channel reports them; a message rejected later by a recipient's server is not tracked."
+    ],
+    "rollback": "Redeploy the previous release package. The new outbound_mail_logs table is left in place and ignored by the previous release.",
+    "provenance": "Issue #359; pull request #431.",
+    "references": [
+      {
+        "label": "Issue #359",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/359"
+      },
+      {
+        "label": "Pull request #431",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/431"
+      }
+    ]
+  },
+  {
     "version": "0.42.6",
     "date": "2026-10-28",
     "channel": "stable",
