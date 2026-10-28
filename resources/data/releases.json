@@ -1,5 +1,49 @@
 [
   {
+    "version": "0.42.10",
+    "date": "2026-10-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Email template test matrix",
+    "summary": "Automated checks now cover every email template and who can use each Admin Emails action.",
+    "changes": [
+      "Check every email for the shared design, background sending, secret-free subjects, privacy-safe logging, and the Email preference.",
+      "Check Admin Emails pages and actions for visitors, public, student, volunteer, staff, Admin, and Super Admin accounts.",
+      "Fail the checks when a new email is added without being covered."
+    ],
+    "affected_areas": [
+      "Automated tests",
+      "Email"
+    ],
+    "categories": [
+      "fixed"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.42 line: test coverage only, with no application behaviour change.",
+    "validation": [
+      "php artisan test tests/Feature/Mail/MailTemplateMatrixTest.php.",
+      "Full PHPUnit suite.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "None."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #362; pull request #434.",
+    "references": [
+      {
+        "label": "Issue #362",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/362"
+      },
+      {
+        "label": "Pull request #434",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/434"
+      }
+    ]
+  },
+  {
     "version": "0.42.9",
     "date": "2026-10-28",
     "channel": "stable",
