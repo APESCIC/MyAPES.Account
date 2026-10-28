@@ -3,6 +3,7 @@
 namespace Tests\Feature\Mail;
 
 use App\Core\Accounts\User;
+use App\Core\Mail\MailTemplateRegistry;
 use App\Notifications\Auth\EmailChangeCompletedNotification;
 use App\Notifications\Auth\EmailChangeConfirmNotification;
 use App\Notifications\Auth\EmailChangeStartedNotification;
@@ -68,6 +69,16 @@ class OutboundMailQueueTest extends TestCase
     public function test_every_outbound_mail_notification_is_queued(string $class): void
     {
         $this->assertTrue(is_subclass_of($class, ShouldQueue::class), "{$class} must implement ShouldQueue.");
+    }
+
+    public function test_every_registered_mail_template_is_queued(): void
+    {
+        foreach (app(MailTemplateRegistry::class)->all() as $template) {
+            $this->assertTrue(
+                is_subclass_of($template->notification, ShouldQueue::class),
+                "Template {$template->key} must queue.",
+            );
+        }
     }
 
     /**
