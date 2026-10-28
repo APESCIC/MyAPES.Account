@@ -2,11 +2,14 @@
 
 namespace Plugins\Tickets;
 
+use App\Core\Accounts\User;
 use App\Core\Extensions\Plugins\PluginAbilityFactory;
 use App\Core\Extensions\Plugins\PluginManifest;
 use App\Core\Extensions\Plugins\PluginNavigationItem;
 use App\Core\Extensions\Plugins\PluginServiceProvider;
 use App\Core\Extensions\Plugins\PluginSettingsSchema;
+use App\Core\Mail\MailCategory;
+use App\Core\Mail\MailTemplate;
 use Illuminate\Support\Facades\Gate;
 use Plugins\Tickets\Dashboard\SupportTicketActiveRecordDetector;
 use Plugins\Tickets\Dashboard\SupportTicketAnalyticsProvider;
@@ -14,6 +17,7 @@ use Plugins\Tickets\Dashboard\SupportTicketAttentionProvider;
 use Plugins\Tickets\Dashboard\SupportTicketRecentActivityProvider;
 use Plugins\Tickets\Dashboard\SupportTicketSummaryProvider;
 use Plugins\Tickets\Models\SupportTicket;
+use Plugins\Tickets\Notifications\TicketUpdatedNotification;
 use Plugins\Tickets\Policies\SupportTicketPolicy;
 
 class TicketsServiceProvider extends PluginServiceProvider
@@ -25,6 +29,33 @@ class TicketsServiceProvider extends PluginServiceProvider
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'tickets');
 
         Gate::policy(SupportTicket::class, SupportTicketPolicy::class);
+    }
+
+    protected function mailTemplates(): array
+    {
+        return [
+            new MailTemplate(
+                key: 'tickets.ticket_updated',
+                notification: TicketUpdatedNotification::class,
+                category: MailCategory::Service,
+                labelKey: 'tickets::mail.templates.ticket_updated.name',
+                descriptionKey: 'tickets::mail.templates.ticket_updated.description',
+                sample: static fn (User $recipient): TicketUpdatedNotification => new TicketUpdatedNotification(
+                    (new SupportTicket)->forceFill([
+                        'id' => 1024,
+                        'subject' => 'Sample support request',
+                        'status' => 'open',
+                        'priority' => 'medium',
+                    ]),
+                    $recipient,
+                    'updated',
+                    'apes-cic',
+                    'apes-cic.tickets.show',
+                    'APES CIC',
+                ),
+                owner: 'tickets',
+            ),
+        ];
     }
 
     protected function manifest(): PluginManifest

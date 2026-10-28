@@ -2,6 +2,8 @@
 
 namespace App\Core\Extensions\Plugins;
 
+use App\Core\Mail\MailTemplate;
+use App\Core\Mail\MailTemplateRegistry;
 use Illuminate\Support\ServiceProvider;
 use ReflectionClass;
 
@@ -16,6 +18,16 @@ use ReflectionClass;
 abstract class PluginServiceProvider extends ServiceProvider
 {
     abstract protected function manifest(): PluginManifest;
+
+    /**
+     * Outbound mail templates this plugin owns (#352).
+     *
+     * @return list<MailTemplate>
+     */
+    protected function mailTemplates(): array
+    {
+        return [];
+    }
 
     public function register(): void
     {
@@ -38,6 +50,9 @@ abstract class PluginServiceProvider extends ServiceProvider
         if ($manifest->migrationsPath !== null && is_dir($manifest->migrationsPath)) {
             $this->loadMigrationsFrom($manifest->migrationsPath);
         }
+
+        $this->app->make(MailTemplateRegistry::class)
+            ->contribute(fn (): array => $this->mailTemplates());
     }
 
     /**

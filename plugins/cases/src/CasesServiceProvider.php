@@ -2,12 +2,15 @@
 
 namespace Plugins\Cases;
 
+use App\Core\Accounts\User;
 use App\Core\Extensions\Plugins\PluginAbilityFactory;
 use App\Core\Extensions\Plugins\PluginDependency;
 use App\Core\Extensions\Plugins\PluginManifest;
 use App\Core\Extensions\Plugins\PluginNavigationItem;
 use App\Core\Extensions\Plugins\PluginServiceProvider;
 use App\Core\Extensions\Plugins\PluginSettingsSchema;
+use App\Core\Mail\MailCategory;
+use App\Core\Mail\MailTemplate;
 use Illuminate\Support\Facades\Gate;
 use Plugins\Cases\Dashboard\CaseAnalyticsProvider;
 use Plugins\Cases\Dashboard\CaseAttentionProvider;
@@ -15,6 +18,8 @@ use Plugins\Cases\Dashboard\CaseRecentActivityProvider;
 use Plugins\Cases\Dashboard\ShelterCaseActiveRecordDetector;
 use Plugins\Cases\Dashboard\ShelterCaseSummaryProvider;
 use Plugins\Cases\Models\ShelterCase;
+use Plugins\Cases\Notifications\ApesCicCaseUpdatedNotification;
+use Plugins\Cases\Notifications\ShelterCaseUpdatedNotification;
 use Plugins\Cases\Policies\ShelterCasePolicy;
 
 class CasesServiceProvider extends PluginServiceProvider
@@ -26,6 +31,49 @@ class CasesServiceProvider extends PluginServiceProvider
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'cases');
 
         Gate::policy(ShelterCase::class, ShelterCasePolicy::class);
+    }
+
+    protected function mailTemplates(): array
+    {
+        return [
+            new MailTemplate(
+                key: 'cases.apes_cic_case_updated',
+                notification: ApesCicCaseUpdatedNotification::class,
+                category: MailCategory::Service,
+                labelKey: 'cases::mail.templates.apes_cic_case_updated.name',
+                descriptionKey: 'cases::mail.templates.apes_cic_case_updated.description',
+                sample: static fn (User $recipient): ApesCicCaseUpdatedNotification => new ApesCicCaseUpdatedNotification(
+                    (new ShelterCase)->forceFill([
+                        'id' => 512,
+                        'status' => 'open',
+                        'priority' => 'medium',
+                    ]),
+                    $recipient,
+                    'updated',
+                    'apes-cic',
+                    'apes-cic.cases.show',
+                ),
+                owner: 'cases',
+            ),
+            new MailTemplate(
+                key: 'cases.shelter_case_updated',
+                notification: ShelterCaseUpdatedNotification::class,
+                category: MailCategory::Service,
+                labelKey: 'cases::mail.templates.shelter_case_updated.name',
+                descriptionKey: 'cases::mail.templates.shelter_case_updated.description',
+                sample: static fn (User $recipient): ShelterCaseUpdatedNotification => new ShelterCaseUpdatedNotification(
+                    (new ShelterCase)->forceFill([
+                        'id' => 256,
+                        'title' => 'Sample rescue case',
+                        'case_type' => 'rescue',
+                        'status' => 'open',
+                    ]),
+                    $recipient,
+                    'updated',
+                ),
+                owner: 'cases',
+            ),
+        ];
     }
 
     protected function manifest(): PluginManifest

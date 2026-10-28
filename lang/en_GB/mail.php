@@ -1,6 +1,72 @@
 <?php
 
 return [
+    'brand' => [
+        'greeting_fallback' => 'there',
+        'footer' => [
+            'copyright' => '© :year :app. All rights reserved.',
+            'help' => 'Need help? Visit the Help page',
+            'salutation' => '— MyAPES Account',
+        ],
+    ],
+
+    'categories' => [
+        'security' => 'Security',
+        'service' => 'Service',
+        'optional' => 'Optional',
+    ],
+
+    'templates' => [
+        'auth' => [
+            'verify_email' => [
+                'name' => 'Verify email address',
+                'description' => 'Sent when a Public Login account registers or asks for a new verification link.',
+            ],
+            'reset_password' => [
+                'name' => 'Reset password',
+                'description' => 'Sent when someone asks to reset a Public Login password.',
+            ],
+            'password_changed' => [
+                'name' => 'Password changed',
+                'description' => 'Confirms a Public Login password change.',
+            ],
+            'two_factor_enabled' => [
+                'name' => 'Authenticator app enabled',
+                'description' => 'Security notice when an authenticator app is turned on.',
+            ],
+            'two_factor_disabled' => [
+                'name' => 'Authenticator app disabled',
+                'description' => 'Security notice when an authenticator app is turned off.',
+            ],
+            'passkey_added' => [
+                'name' => 'Passkey added',
+                'description' => 'Security notice when a passkey is added.',
+            ],
+            'passkey_removed' => [
+                'name' => 'Passkey removed',
+                'description' => 'Security notice when a passkey is removed.',
+            ],
+            'email_change_started' => [
+                'name' => 'Email change started',
+                'description' => 'Sent to the current address when an email change begins.',
+            ],
+            'email_change_confirm' => [
+                'name' => 'Confirm new email',
+                'description' => 'Sent to the new address with the confirmation link.',
+            ],
+            'email_change_completed' => [
+                'name' => 'Email change completed',
+                'description' => 'Sent to the old and new addresses after an email change.',
+            ],
+        ],
+        'accounts' => [
+            'pending_first_login_chase' => [
+                'name' => 'Staff Login reminder',
+                'description' => 'Sent by an administrator to staff who have not completed their first Staff Login.',
+            ],
+        ],
+    ],
+
     'pending_first_login' => [
         'subject' => 'Complete your MyAPES Staff Login',
         'greeting' => 'Hello :name,',
