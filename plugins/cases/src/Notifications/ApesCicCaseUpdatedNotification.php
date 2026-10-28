@@ -3,6 +3,7 @@
 namespace Plugins\Cases\Notifications;
 
 use App\Core\Accounts\User;
+use App\Core\Mail\Concerns\BuildsBrandedMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -11,6 +12,7 @@ use Plugins\Cases\Models\ShelterCase;
 
 class ApesCicCaseUpdatedNotification extends Notification implements ShouldQueue
 {
+    use BuildsBrandedMail;
     use Queueable;
 
     public bool $deleteWhenMissingModels = true;
@@ -32,7 +34,9 @@ class ApesCicCaseUpdatedNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
+        return $this->brandedMail()
+            ->markdown('mail.brand.notification')
+            ->greeting(__('mail.brand.greeting', ['name' => $this->recipientName($notifiable)]))
             ->subject(__('mail.case_updated.subject', [
                 'id' => $this->case->id,
                 'event' => $this->eventLabel,

@@ -2,7 +2,9 @@
 
 return [
     'brand' => [
+        'greeting' => 'Hello :name,',
         'greeting_fallback' => 'there',
+        'action_fallback' => 'If the button does not work, open this address in your browser: :url',
         'footer' => [
             'copyright' => '© :year :app. All rights reserved.',
             'help' => 'Need help? Visit the Help page',
@@ -73,8 +75,6 @@ return [
         'line_request' => 'An APES administrator asked you to complete your first Staff Login so your Cloudron directory account can link to MyAPES Account.',
         'line_cloudron' => 'Use Staff Login and continue with APES Cloudron. Your password and passkeys stay on Cloudron — this message is not a public password reset.',
         'action' => 'Open Staff Login',
-        'line_fallback' => 'If the button does not work, open this address: :url',
-        'salutation' => '— MyAPES Account',
     ],
 
     'ticket_updated' => [

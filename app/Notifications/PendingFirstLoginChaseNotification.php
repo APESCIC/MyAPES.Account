@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Core\Accounts\User;
+use App\Core\Mail\Concerns\BuildsBrandedMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -10,6 +11,7 @@ use Illuminate\Notifications\Notification;
 
 class PendingFirstLoginChaseNotification extends Notification implements ShouldQueue
 {
+    use BuildsBrandedMail;
     use Queueable;
 
     public function __construct(
@@ -30,14 +32,13 @@ class PendingFirstLoginChaseNotification extends Notification implements ShouldQ
     {
         $staffLoginUrl = route('staff.login');
 
-        return (new MailMessage)
+        return $this->brandedMail()
             ->subject(__('mail.pending_first_login.subject'))
-            ->greeting(__('mail.pending_first_login.greeting', ['name' => $notifiable->name]))
+            ->greeting(__('mail.pending_first_login.greeting', ['name' => $this->recipientName($notifiable)]))
             ->line(__('mail.pending_first_login.line_request'))
             ->line(__('mail.pending_first_login.line_cloudron'))
             ->action(__('mail.pending_first_login.action'), $staffLoginUrl)
-            ->line(__('mail.pending_first_login.line_fallback', ['url' => $staffLoginUrl]))
-            ->salutation(__('mail.pending_first_login.salutation'));
+            ->markdown('mail.brand.notification');
     }
 
     /**

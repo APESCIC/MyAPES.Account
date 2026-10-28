@@ -1,5 +1,53 @@
 [
   {
+    "version": "0.42.3",
+    "date": "2026-10-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Branded ticket, case, consultation and reminder mail",
+    "summary": "Ticket, case, consultation, and Staff Login reminder emails now use the MyAPES Account email design.",
+    "changes": [
+      "Show ticket, case, and consultation update emails in the shared MyAPES Account design with the logo, footer, and Help link.",
+      "Show the Staff Login reminder in the same design.",
+      "Greet each person by name and show a plain link under the button for email apps that block buttons."
+    ],
+    "affected_areas": [
+      "Email",
+      "Tickets",
+      "Cases",
+      "Consultations"
+    ],
+    "categories": [
+      "changed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.42 line: same emails and recipients, now in the shared design.",
+    "validation": [
+      "php artisan test tests/Feature/Mail/BrandedDomainMailTest.php.",
+      "Ticket, case, consultation, and Staff Login reminder workflow tests.",
+      "php artisan lang:check --fail-on-missing.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "Status and priority values in update emails still show their stored names until the wider labels work."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #355; pull request #427.",
+    "references": [
+      {
+        "label": "Issue #355",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/355"
+      },
+      {
+        "label": "Pull request #427",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/427"
+      }
+    ]
+  },
+  {
     "version": "0.42.2",
     "date": "2026-10-28",
     "channel": "stable",

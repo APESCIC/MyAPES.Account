@@ -3,6 +3,7 @@
 namespace Plugins\Tickets\Notifications;
 
 use App\Core\Accounts\User;
+use App\Core\Mail\Concerns\BuildsBrandedMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -11,6 +12,7 @@ use Plugins\Tickets\Models\SupportTicket;
 
 class TicketUpdatedNotification extends Notification implements ShouldQueue
 {
+    use BuildsBrandedMail;
     use Queueable;
 
     public bool $deleteWhenMissingModels = true;
@@ -41,7 +43,9 @@ class TicketUpdatedNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
+        return $this->brandedMail()
+            ->markdown('mail.brand.notification')
+            ->greeting(__('mail.brand.greeting', ['name' => $this->recipientName($notifiable)]))
             ->subject(__('mail.ticket_updated.subject', [
                 'service' => $this->serviceName,
                 'id' => $this->ticket->id,
