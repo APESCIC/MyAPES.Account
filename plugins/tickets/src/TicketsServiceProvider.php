@@ -54,6 +54,8 @@ class TicketsServiceProvider extends PluginServiceProvider
                     'APES CIC',
                 ),
                 owner: 'tickets',
+                subjectKey: 'mail.ticket_updated.subject',
+                introKey: 'mail.ticket_updated.line_body',
             ),
         ];
     }

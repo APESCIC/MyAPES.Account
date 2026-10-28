@@ -102,6 +102,8 @@ class RecruitmentServiceProvider extends PluginServiceProvider
                     self::sampleApplication(RecruitmentApplication::STATUS_SUBMITTED),
                 ),
                 owner: 'recruitment',
+                subjectKey: 'recruitment::mail.received.subject',
+                introKey: 'recruitment::mail.received.line_received',
             ),
             new MailTemplate(
                 key: 'recruitment.application_status',

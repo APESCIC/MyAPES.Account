@@ -28,6 +28,63 @@
             </dl>
         </section>
 
+        @if($template->hasEditableCopy())
+            <section class="panel" aria-labelledby="email-template-copy-heading" data-mail-copy>
+                <h2 id="email-template-copy-heading">{{ __('admin.emails.copy_heading') }}</h2>
+                <p class="muted">{{ __('admin.emails.copy_help') }}</p>
+                <dl class="detail-list">
+                    @if($shippedSubject !== null)
+                        <div><dt>{{ __('admin.emails.copy_shipped_subject') }}</dt><dd>{{ $shippedSubject }}</dd></div>
+                    @endif
+                    @if($shippedIntro !== null)
+                        <div><dt>{{ __('admin.emails.copy_shipped_intro') }}</dt><dd>{{ $shippedIntro }}</dd></div>
+                    @endif
+                    <div>
+                        <dt>{{ __('admin.emails.copy_status') }}</dt>
+                        <dd>
+                            @if($override)
+                                {{ __('admin.emails.copy_overridden', ['name' => $override->editor?->name ?? __('admin.emails.copy_unknown_editor'), 'when' => $override->updated_at?->format('Y-m-d H:i')]) }}
+                            @else
+                                {{ __('admin.emails.copy_shipped') }}
+                            @endif
+                        </dd>
+                    </div>
+                </dl>
+
+                @can('admin.emails.manage')
+                    <form method="post" action="{{ route('admin.emails.copy.update', $template->key) }}" class="stacked-form">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="lock_version" value="{{ $override?->lock_version ?? 0 }}">
+                        @if($template->subjectKey !== null)
+                            <label for="mail-copy-subject">{{ __('admin.emails.copy_subject') }}</label>
+                            <input id="mail-copy-subject" name="subject" maxlength="200" value="{{ old('subject', $override?->subject) }}" placeholder="{{ $shippedSubject }}">
+                        @endif
+                        @if($template->introKey !== null)
+                            <label for="mail-copy-intro">{{ __('admin.emails.copy_intro') }}</label>
+                            <textarea id="mail-copy-intro" name="intro" maxlength="1000" placeholder="{{ $shippedIntro }}">{{ old('intro', $override?->intro) }}</textarea>
+                        @endif
+                        <div class="actions">
+                            <button type="submit">{{ __('admin.emails.copy_save') }}</button>
+                        </div>
+                    </form>
+                    @if($override)
+                        <form method="post" action="{{ route('admin.emails.copy.reset', $template->key) }}">
+                            @csrf
+                            @method('DELETE')
+                            <label class="inline-check">
+                                <input type="checkbox" name="confirm_reset" value="1" required>
+                                <span>{{ __('admin.emails.copy_reset_confirm') }}</span>
+                            </label>
+                            <div class="actions">
+                                <button type="submit" class="button button-secondary">{{ __('admin.emails.copy_reset') }}</button>
+                            </div>
+                        </form>
+                    @endif
+                @endcan
+            </section>
+        @endif
+
         @can('admin.emails.manage')
             <section class="panel" aria-labelledby="email-template-test-heading">
                 <h2 id="email-template-test-heading">{{ __('admin.emails.send_test') }}</h2>

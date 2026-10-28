@@ -19,6 +19,8 @@ final class MailTemplate
     /**
      * @param  class-string<Notification>  $notification
      * @param  Closure(User): Notification  $sample  Builds a notification from in-memory sample data; must not persist or send.
+     * @param  string|null  $subjectKey  Lang key Admins may override for the subject (#361).
+     * @param  string|null  $introKey  Lang key Admins may override for the opening line (#361).
      */
     public function __construct(
         public readonly string $key,
@@ -28,6 +30,8 @@ final class MailTemplate
         public readonly string $descriptionKey,
         public readonly Closure $sample,
         public readonly string $owner = 'core',
+        public readonly ?string $subjectKey = null,
+        public readonly ?string $introKey = null,
     ) {
         if (preg_match('/^[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*$/', $key) !== 1) {
             throw new InvalidArgumentException("Mail template key [{$key}] must look like group.name in snake_case.");
@@ -36,6 +40,11 @@ final class MailTemplate
         if (! is_a($notification, Notification::class, true)) {
             throw new InvalidArgumentException("Mail template [{$key}] must reference a Notification class.");
         }
+    }
+
+    public function hasEditableCopy(): bool
+    {
+        return $this->subjectKey !== null || $this->introKey !== null;
     }
 
     public function label(): string

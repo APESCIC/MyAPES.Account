@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.42.9",
+    "date": "2026-10-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Email subject and opening line overrides",
+    "summary": "Super Admins can change an email's subject and opening line in plain text, and reset it to the shipped wording.",
+    "changes": [
+      "Edit the subject and opening line of sign-in, security, reminder, ticket, case, consultation, and Recruitment received emails.",
+      "Allow plain text only and only the placeholders the shipped wording already uses.",
+      "Record who changed what in the audit log, block stale edits, and reset to the shipped wording in one step."
+    ],
+    "affected_areas": [
+      "Admin",
+      "Email"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.42 line: optional wording overrides on top of the existing templates.",
+    "validation": [
+      "php artisan test tests/Feature/Mail/MailCopyOverridesTest.php.",
+      "Mail, Admin Emails, and auth email tests.",
+      "php artisan lang:check --fail-on-missing.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "Overrides apply to UK English only, and Recruitment decision emails are not editable."
+    ],
+    "rollback": "Redeploy the previous release package. The new mail_template_overrides table is left in place and ignored, so emails use the shipped wording.",
+    "provenance": "Issue #361; pull request #433.",
+    "references": [
+      {
+        "label": "Issue #361",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/361"
+      },
+      {
+        "label": "Pull request #433",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/433"
+      }
+    ]
+  },
+  {
     "version": "0.42.8",
     "date": "2026-10-28",
     "channel": "stable",

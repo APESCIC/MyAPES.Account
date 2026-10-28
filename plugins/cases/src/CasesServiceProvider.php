@@ -54,6 +54,8 @@ class CasesServiceProvider extends PluginServiceProvider
                     'apes-cic.cases.show',
                 ),
                 owner: 'cases',
+                subjectKey: 'mail.case_updated.subject',
+                introKey: 'mail.case_updated.line_body',
             ),
             new MailTemplate(
                 key: 'cases.shelter_case_updated',
@@ -72,6 +74,8 @@ class CasesServiceProvider extends PluginServiceProvider
                     'updated',
                 ),
                 owner: 'cases',
+                subjectKey: 'mail.shelter_case_updated.subject',
+                introKey: 'mail.shelter_case_updated.line_body',
             ),
         ];
     }
