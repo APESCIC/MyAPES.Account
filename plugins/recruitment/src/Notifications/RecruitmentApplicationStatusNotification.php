@@ -3,6 +3,7 @@
 namespace Plugins\Recruitment\Notifications;
 
 use App\Core\Mail\Concerns\BuildsBrandedMail;
+use App\Core\Mail\Concerns\RespectsMailPreference;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -17,6 +18,7 @@ class RecruitmentApplicationStatusNotification extends Notification implements S
 {
     use BuildsBrandedMail;
     use Queueable;
+    use RespectsMailPreference;
 
     public const NOTIFIED_STATUSES = [
         RecruitmentApplication::STATUS_SHORTLISTED,
@@ -43,7 +45,7 @@ class RecruitmentApplicationStatusNotification extends Notification implements S
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return $this->optionalMailChannels($notifiable);
     }
 
     public function toMail(object $notifiable): MailMessage
