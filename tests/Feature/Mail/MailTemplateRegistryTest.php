@@ -49,7 +49,7 @@ class MailTemplateRegistryTest extends TestCase
         foreach (app(MailTemplateRegistry::class)->all() as $template) {
             $this->assertNotSame($template->labelKey, $template->label(), "Missing label for {$template->key}");
             $this->assertNotSame($template->descriptionKey, $template->description(), "Missing description for {$template->key}");
-            $this->assertNotSame('mail.categories.'.$template->category->value, $template->category->label());
+            $this->assertStringNotContainsString('mail.categories', $template->category->label());
         }
     }
 

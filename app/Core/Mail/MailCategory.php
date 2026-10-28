@@ -21,6 +21,10 @@ enum MailCategory: string
 
     public function label(): string
     {
-        return __('mail.categories.'.$this->value);
+        return match ($this) {
+            self::Security => __('mail.categories.security'),
+            self::Service => __('mail.categories.service'),
+            self::Optional => __('mail.categories.optional'),
+        };
     }
 }
