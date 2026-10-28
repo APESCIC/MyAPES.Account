@@ -1,5 +1,51 @@
 [
   {
+    "version": "0.42.0",
+    "date": "2026-10-28",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Shared brand mail layout and template registry",
+    "summary": "Starts the email templates work with one shared MyAPES Account email design and a list of every email the app sends.",
+    "changes": [
+      "Add a shared MyAPES Account email layout with the logo, footer, and Help link, ready for every email.",
+      "Keep one list of every email the app sends, with a name, a description, and whether it is a security, service, or optional email.",
+      "Tickets, Cases, and Consultations add their own update emails to that list."
+    ],
+    "affected_areas": [
+      "Email",
+      "Sign-in and security"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Minor: opens the 0.42 line for email templates and outbound mail. Emails look and send the same as before.",
+    "validation": [
+      "php artisan test tests/Feature/Mail/MailTemplateRegistryTest.php.",
+      "php artisan test tests/Feature/Auth/AuthEmailBrandKitTest.php.",
+      "php artisan lang:check --fail-on-missing.",
+      "Full PHPUnit suite.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "Ticket, case, consultation, and Staff Login reminder emails keep the plain default design until later 0.42 releases."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #352; pull request #424.",
+    "references": [
+      {
+        "label": "Issue #352",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/352"
+      },
+      {
+        "label": "Pull request #424",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/424"
+      }
+    ]
+  },
+  {
     "version": "0.41.7",
     "date": "2026-10-27",
     "channel": "stable",
