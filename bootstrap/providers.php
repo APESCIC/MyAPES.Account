@@ -3,6 +3,7 @@
 use App\Core\Providers\CoreAccessServiceProvider;
 use App\Core\Providers\CoreAdminServiceProvider;
 use App\Core\Providers\CoreAuthServiceProvider;
+use App\Core\Providers\CoreMailServiceProvider;
 use App\Core\Providers\CoreServiceProvider;
 use App\Providers\AppServiceProvider;
 use App\Providers\ExtensionRegistryServiceProvider;
@@ -20,6 +21,7 @@ return [
     CoreAuthServiceProvider::class,
     CoreAccessServiceProvider::class,
     CoreAdminServiceProvider::class,
+    CoreMailServiceProvider::class,
     ExtensionRegistryServiceProvider::class,
     AppServiceProvider::class,
     ApesCicServiceProvider::class,

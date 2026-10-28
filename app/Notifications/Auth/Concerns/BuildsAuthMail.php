@@ -2,25 +2,15 @@
 
 namespace App\Notifications\Auth\Concerns;
 
+use App\Core\Mail\Concerns\BuildsBrandedMail;
 use Illuminate\Notifications\Messages\MailMessage;
 
 trait BuildsAuthMail
 {
+    use BuildsBrandedMail;
+
     protected function authMail(): MailMessage
     {
-        return (new MailMessage)
-            ->from(
-                (string) config('mail.from.address'),
-                __('terms.app_name'),
-            );
-    }
-
-    protected function recipientName(object $notifiable): string
-    {
-        $name = $notifiable->name ?? null;
-
-        return is_string($name) && trim($name) !== ''
-            ? trim($name)
-            : __('mail.auth.greeting_fallback');
+        return $this->brandedMail();
     }
 }

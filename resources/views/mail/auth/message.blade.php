@@ -1,8 +1,8 @@
 {{--
-    Shared MyAPES Account auth email brand kit (#226).
+    Auth email brand kit (#226) on the shared brand layout (#352).
     Used by auth security notifications via MailMessage::markdown().
 --}}
-@component('mail.auth.layout')
+@component('mail.brand.layout')
 {{-- Header --}}
 @slot('header')
 <x-mail::header :url="config('app.url')">
