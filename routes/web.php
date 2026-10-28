@@ -346,6 +346,9 @@ Route::middleware([
             Route::get('/emails', [AdminEmailController::class, 'index'])
                 ->middleware('can:admin.emails.view')
                 ->name('emails.index');
+            Route::get('/emails/log', [AdminEmailController::class, 'log'])
+                ->middleware('can:admin.emails.view')
+                ->name('emails.log');
             Route::get('/emails/{template}', [AdminEmailController::class, 'show'])
                 ->middleware('can:admin.emails.view')
                 ->where('template', '[a-z0-9_]+\.[a-z0-9_]+')
