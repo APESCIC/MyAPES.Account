@@ -3,17 +3,25 @@
 namespace Plugins\Cases\Notifications;
 
 use App\Core\Accounts\User;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Plugins\Cases\Models\ShelterCase;
 
-class ShelterCaseUpdatedNotification extends Notification
+class ShelterCaseUpdatedNotification extends Notification implements ShouldQueue
 {
+    use Queueable;
+
+    public bool $deleteWhenMissingModels = true;
+
     public function __construct(
         private readonly ShelterCase $case,
         private readonly User $actor,
         private readonly string $eventLabel,
-    ) {}
+    ) {
+        $this->afterCommit();
+    }
 
     /**
      * Get the notification's delivery channels.

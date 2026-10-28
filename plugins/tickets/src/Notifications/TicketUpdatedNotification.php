@@ -3,12 +3,18 @@
 namespace Plugins\Tickets\Notifications;
 
 use App\Core\Accounts\User;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Plugins\Tickets\Models\SupportTicket;
 
-class TicketUpdatedNotification extends Notification
+class TicketUpdatedNotification extends Notification implements ShouldQueue
 {
+    use Queueable;
+
+    public bool $deleteWhenMissingModels = true;
+
     public function __construct(
         private readonly SupportTicket $ticket,
         private readonly User $actor,
@@ -16,7 +22,9 @@ class TicketUpdatedNotification extends Notification
         private readonly string $subCoreKey,
         private readonly string $showRouteName,
         private readonly string $serviceName,
-    ) {}
+    ) {
+        $this->afterCommit();
+    }
 
     /**
      * Get the notification's delivery channels.
