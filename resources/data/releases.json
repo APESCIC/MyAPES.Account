@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.43.10",
+    "date": "2026-10-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Workflow label coverage",
+    "summary": "Automated checks keep every workflow label in Title Case and stop raw stored values reaching screens.",
+    "changes": [
+      "Check that every stored ticket, case, consultation, recruitment and pet value has a Title Case label in both English locales.",
+      "Check that the label lists match the values the code uses, with no gaps or leftovers.",
+      "Guard plugin views against showing raw stored values, and check the docs describe the convention.",
+      "Complete the 0.43 language and keywords line."
+    ],
+    "affected_areas": [
+      "Language",
+      "Testing"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.43 line: tests only, with no application behaviour change.",
+    "validation": [
+      "WorkflowLabelMatrixTest.",
+      "Full PHPUnit suite in CI.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "None."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #375; pull request #447; epic #364.",
+    "references": [
+      {
+        "label": "Issue #375",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/375"
+      },
+      {
+        "label": "Pull request #447",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/447"
+      }
+    ]
+  },
+  {
     "version": "0.43.9",
     "date": "2026-10-29",
     "channel": "stable",
