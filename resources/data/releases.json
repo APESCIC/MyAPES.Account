@@ -1,5 +1,49 @@
 [
   {
+    "version": "0.43.5",
+    "date": "2026-10-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Recruitment workflow labels",
+    "summary": "Recruitment application status, role status and role category labels now come from the shared terms in Title Case.",
+    "changes": [
+      "Application statuses on public and staff Recruitment screens use the shared terms, so Under review now reads Under Review.",
+      "Staff role lists, details and filters show Title Case role status and category instead of stored values.",
+      "Remove three duplicated application status label maps."
+    ],
+    "affected_areas": [
+      "Recruitment"
+    ],
+    "categories": [
+      "changed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.43 line: display labels only, with no data, transition, validation or permission change.",
+    "validation": [
+      "RecruitmentWorkflowLabelsTest covers public and staff status, category and role status labels.",
+      "All Recruitment feature tests.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "Recruitment decision emails keep their existing per-status wording."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #370; pull request #441.",
+    "references": [
+      {
+        "label": "Issue #370",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/370"
+      },
+      {
+        "label": "Pull request #441",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/441"
+      }
+    ]
+  },
+  {
     "version": "0.43.4",
     "date": "2026-10-29",
     "channel": "stable",
