@@ -1,5 +1,49 @@
 [
   {
+    "version": "0.43.8",
+    "date": "2026-10-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Admin search synonyms",
+    "summary": "Admin search finds more pages and plugins from everyday words and the new workflow labels.",
+    "changes": [
+      "Admin search synonyms cover words such as reactivate, employees, group mappings, code not shipped, mail log and maintenance mode.",
+      "Plugin search synonyms include workflow labels such as waiting on user, urgent, under review, neutering and check-up.",
+      "Search synonyms stay in lang files only; there is no Language editor."
+    ],
+    "affected_areas": [
+      "Admin",
+      "Language"
+    ],
+    "categories": [
+      "changed"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.43 line: search synonym additions only.",
+    "validation": [
+      "AdminSearchKeywordsTest covers the new synonyms and keyword list hygiene.",
+      "php artisan lang:check --fail-on-missing.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "Search remains synonym matching only."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #373; pull request #444.",
+    "references": [
+      {
+        "label": "Issue #373",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/373"
+      },
+      {
+        "label": "Pull request #444",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/444"
+      }
+    ]
+  },
+  {
     "version": "0.43.7",
     "date": "2026-10-29",
     "channel": "stable",

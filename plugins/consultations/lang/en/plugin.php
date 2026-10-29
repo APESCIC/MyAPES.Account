@@ -11,5 +11,9 @@ return [
         'appointments',
         'vet',
         'veterinary',
+        'consultation status',
+        'in progress',
+        'check-up',
+        'checkup',
     ],
 ];
