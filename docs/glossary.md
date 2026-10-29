@@ -7,7 +7,7 @@ Locale and key conventions: [localisation.md](localisation.md). Canonical labels
 **Rules**
 
 - Display labels only — do not rename stored permission strings or live URLs for wording.
-- Prefer `__('terms.*')` / `trans_choice('terms.*', $n)` once extraction waves wire screens.
+- Use `__('terms.*')` / `trans_choice('terms.*', $n)` for product terms, and `App\Support\WorkflowLabels` for stored workflow values ([Workflow labels](#workflow-labels)).
 - Bambie’s approval of the Language milestone plan is glossary sign-off for Wave 0b.
 
 ## Product and layers
@@ -70,7 +70,7 @@ Locale and key conventions: [localisation.md](localisation.md). Canonical labels
 | Dashboard | Signed-in home. | Nav **Dashboard**; title Dashboard. | Home (when the screen is the signed-in dashboard). | `terms.dashboard` |
 | Profile | Account profile / onboarding. | Nav **Profile**. | Account settings (unless a dedicated settings screen exists). | `terms.profile` |
 | Submitted | Application received, awaiting review. | Application status badges and filters. | Pending (unless a distinct status exists). | `terms.status.submitted` |
-| Shortlisted | Application shortlisted by staff. | Status badges. | Under review (as a substitute status name). | `terms.status.shortlisted` |
+| Shortlisted | Application shortlisted by staff. | Status badges. | Under Review (that is a separate, earlier status). | `terms.status.shortlisted` |
 | Accepted | Application accepted. | Status badges. | Approved (prefer Accepted for recruitment applications). | `terms.status.accepted` |
 | Rejected | Application rejected. | Status badges. | Declined (prefer Rejected for recruitment applications). | `terms.status.rejected` |
 | Draft | Recruitment role not yet published. | Staff role status. | Unpublished (as the primary status word). | `terms.status.draft` |

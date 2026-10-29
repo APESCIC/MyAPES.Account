@@ -31,7 +31,7 @@ php artisan lang:check --fail-on-missing
 - Logic: `App\Services\Localisation\TranslationKeyChecker` (+ hard-coded count via `#266` scanner).
 - Config: `config/lang_check.php`.
 - Wired into `.github/workflows/test-cloudron.yml` with **`--fail-on-missing`** (Wave 4 / #276). Unused-key output stays informational and does not fail CI.
-- Dynamic keys (interpolated segments) are skipped by the scanner; cover enum/status label maps with dedicated Feature tests instead.
+- Dynamic keys (interpolated segments) are reported as missing by the scanner, so write literal keys in views (for example a `match` over known values) and keep enum/status label maps in `terms.php` behind `WorkflowLabels`, covered by dedicated Feature tests.
 
 ## Locale configuration
 
@@ -147,6 +147,14 @@ Statuses, priorities and similar stored values (`in_progress`, `not_neutered`) a
 
 Keep option `value`s and validation rules on the stored values; only the visible text changes. Add new values to `terms.php` (both `en_GB` and `en`) and the glossary in the same change.
 
+Convention:
+
+- **Title Case** for every label: capitalise each word, but keep short joining words such as *on*, *of* and *and* lower case (**Waiting on User**, **Not Neutered**, **Code Not Shipped**).
+- **One source**: do not add per-controller label maps or `str_replace('_', ' ', …)` in Blade. Plugin screens, emails and dashboard items all call `WorkflowLabels`.
+- **Emails** pass the label, not the stored value, into `:status` / `:priority` placeholders.
+- **Admin chrome** that is not a workflow value (module code status, enable/disable actions, user and group status) uses literal `admin.*` keys, for example `admin.plugins.code_status.*`.
+- **Search synonyms** for these labels live in `admin.search.keywords.*` and `{ns}::plugin.keywords` only; there is no Language editor.
+
 ## Plugin namespaces
 
 Each plugin declares `PluginManifest::$translationNamespace` (Structure). [#272](https://github.com/APESCIC/MyAPES-Account/issues/272) loads package trees via `PluginServiceProvider::loadTranslationsFrom`:
@@ -154,7 +162,7 @@ Each plugin declares `PluginManifest::$translationNamespace` (Structure). [#272]
 | Namespace | Example |
 | --- | --- |
 | `cases::` | `__('cases::plugin.name')` |
-| `tickets::` | `__('tickets::statuses.open')` |
+| `tickets::` | `__('tickets::ui.index.blade.status')` (column heading; status values use `WorkflowLabels`) |
 | `recruitment::` | `__('recruitment::roles.title')` |
 | `consultations::` | `__('consultations::plugin.name')` |
 | `pet_profiles::` | `__('pet_profiles::plugin.keywords')` |
