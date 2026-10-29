@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "application_version": "0.43.10",
+  "application_version": "0.43.11",
   "modules": [
     "apes-cic",
     "pet-care-clinic",
