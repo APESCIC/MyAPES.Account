@@ -132,6 +132,21 @@ Rules:
 {{ __('mail.greeting', ['name' => $user->name]) }}
 ```
 
+### Workflow labels
+
+Statuses, priorities and similar stored values (`in_progress`, `not_neutered`) are never shown raw. Use `App\Support\WorkflowLabels`, which reads `terms.<group>.<value>` from `lang/en_GB/terms.php` and falls back to a headline of the value when a key is missing. Groups: `status`, `priority`, `case_type`, `recruitment_category`, `sex`, `neutering_status` ([glossary](glossary.md#workflow-labels)).
+
+```blade
+<span class="status">{{ \App\Support\WorkflowLabels::status($ticket->status) }}</span>
+{{ \App\Support\WorkflowLabels::priority($ticket->priority) }}
+
+@foreach(\App\Support\WorkflowLabels::options('status', $statuses) as $value => $label)
+    <option value="{{ $value }}" @selected($current === $value)>{{ $label }}</option>
+@endforeach
+```
+
+Keep option `value`s and validation rules on the stored values; only the visible text changes. Add new values to `terms.php` (both `en_GB` and `en`) and the glossary in the same change.
+
 ## Plugin namespaces
 
 Each plugin declares `PluginManifest::$translationNamespace` (Structure). [#272](https://github.com/APESCIC/MyAPES-Account/issues/272) loads package trees via `PluginServiceProvider::loadTranslationsFrom`:
