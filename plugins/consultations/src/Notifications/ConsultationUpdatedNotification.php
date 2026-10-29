@@ -4,6 +4,7 @@ namespace Plugins\Consultations\Notifications;
 
 use App\Core\Accounts\User;
 use App\Core\Mail\Concerns\BuildsBrandedMail;
+use App\Support\WorkflowLabels;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -53,7 +54,7 @@ class ConsultationUpdatedNotification extends Notification implements ShouldQueu
                 'event' => $this->eventLabel,
                 'actor' => $this->actor->name,
             ]))
-            ->line(__('mail.consultation_updated.line_status', ['status' => $this->consultation->status]))
+            ->line(__('mail.consultation_updated.line_status', ['status' => WorkflowLabels::status($this->consultation->status)]))
             ->action(__('mail.consultation_updated.action'), route('petcare.consultations.show', $this->consultation));
     }
 

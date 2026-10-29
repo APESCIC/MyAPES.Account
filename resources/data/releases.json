@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.43.4",
+    "date": "2026-10-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Consultation workflow labels",
+    "summary": "Consultation status now reads as a Title Case label on consultation screens and in update emails.",
+    "changes": [
+      "Consultation lists and details show statuses such as In Progress instead of stored values.",
+      "The staff consultation status select shows Title Case labels while keeping the same stored values.",
+      "Consultation update emails show the Title Case status."
+    ],
+    "affected_areas": [
+      "Consultations",
+      "Email"
+    ],
+    "categories": [
+      "changed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.43 line: display labels only, with no data, validation or permission change.",
+    "validation": [
+      "ConsultationWorkflowLabelsTest covers the list, detail, select and update email.",
+      "PetCareConsultationWorkflowTest.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "None."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #369; pull request #440.",
+    "references": [
+      {
+        "label": "Issue #369",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/369"
+      },
+      {
+        "label": "Pull request #440",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/440"
+      }
+    ]
+  },
+  {
     "version": "0.43.3",
     "date": "2026-10-29",
     "channel": "stable",

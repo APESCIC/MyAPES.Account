@@ -261,7 +261,7 @@ class PetCareConsultationWorkflowTest extends TestCase
         $this->actingAs($owner)
             ->get(route('petcare.consultations.show', $consultation))
             ->assertOk()
-            ->assertSee('in_progress')
+            ->assertSee('In Progress')
             ->assertSee('No notes recorded.')
             ->assertDontSee('name="notes"', false)
             ->assertDontSee('name="scheduled_for"', false);
