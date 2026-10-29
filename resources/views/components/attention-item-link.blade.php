@@ -23,10 +23,10 @@
         <span class="attention-item__kicker">{{ $kicker }}</span>
         <strong>{{ $title }}</strong>
         <span class="attention-item__detail">
-            <span>{{ str($status)->replace('_', ' ')->title() }}</span>
+            <span>{{ \App\Support\WorkflowLabels::status($status) }}</span>
             @if($priority)
                 <span aria-hidden="true">•</span>
-                <span>Priority: <b class="priority priority--{{ $priority }}">{{ str($priority)->title() }}</b></span>
+                <span>Priority: <b class="priority priority--{{ $priority }}">{{ \App\Support\WorkflowLabels::priority($priority) }}</b></span>
             @elseif($context)
                 <span aria-hidden="true">•</span>
                 <span>{{ $context }}</span>
