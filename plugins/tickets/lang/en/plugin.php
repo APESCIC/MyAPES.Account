@@ -12,5 +12,12 @@ return [
         'requests',
         'service desk',
         'incidents',
+        'ticket status',
+        'priority',
+        'urgent',
+        'in progress',
+        'resolved',
+        'issue',
+        'it support',
     ],
 ];

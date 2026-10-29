@@ -17,5 +17,11 @@ return [
         'applications',
         'hiring',
         'careers',
+        'application status',
+        'under review',
+        'shortlisted',
+        'withdrawn',
+        'job applications',
+        'staff roles',
     ],
 ];

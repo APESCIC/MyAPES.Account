@@ -10,5 +10,11 @@ return [
         'animals',
         'profiles',
         'pet records',
+        'sex',
+        'neutering',
+        'neutered',
+        'not neutered',
+        'species',
+        'pet details',
     ],
 ];
