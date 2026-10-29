@@ -1,5 +1,51 @@
 [
   {
+    "version": "0.43.1",
+    "date": "2026-10-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Workflow labels helper",
+    "summary": "A shared helper turns stored workflow values into Title Case labels, starting with dashboard attention items.",
+    "changes": [
+      "Add one shared helper that shows workflow statuses, priorities and related values as Title Case labels, with a readable fallback for unknown values.",
+      "Dashboard attention items use the shared labels, so a waiting case now reads Waiting on User.",
+      "Document how screens should show workflow labels."
+    ],
+    "affected_areas": [
+      "Language",
+      "Dashboard",
+      "Documentation"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.43 line: a shared display helper with no data or permission change.",
+    "validation": [
+      "WorkflowLabelsTest covers lang-backed labels, fallbacks, option order and every label group.",
+      "Dashboard attention provider tests.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "Tickets, Cases, Consultations, Recruitment and Pet Profiles screens move to the shared labels in the following 0.43 releases."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #366; pull request #437.",
+    "references": [
+      {
+        "label": "Issue #366",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/366"
+      },
+      {
+        "label": "Pull request #437",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/437"
+      }
+    ]
+  },
+  {
     "version": "0.43.0",
     "date": "2026-10-29",
     "channel": "stable",
