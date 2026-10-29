@@ -22,7 +22,7 @@
                     </dd>
                 </div>
                 <div><dt>{{ __('admin.users.suspension_state') }}</dt><dd>
-                    {{ $managedUser->suspended_at === null ? 'Active' : 'Suspended' }}
+                    {{ $managedUser->suspended_at === null ? __('admin.users.active') : __('admin.overview.suspended') }}
                     @can('admin.users.manage')
                         @if($canManageTarget && $managedUser->suspended_at === null)
                             · <a href="#suspend-user">{{ __('admin.users.suspend') }}</a>

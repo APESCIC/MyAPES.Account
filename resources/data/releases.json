@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.43.7",
+    "date": "2026-10-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Admin status labels",
+    "summary": "Admin module, plugin, user and group status labels now come from lang keys in Title Case.",
+    "changes": [
+      "Plugin code status reads Shipped, Code Not Shipped or Incompatible from lang, matching the Admin overview alerts.",
+      "Admin Plugins and Modules show Enabled, Disabled, Available and the Install, Enable and Disable actions from lang.",
+      "Admin user and group screens show Active, Suspended, Present and Missing from lang instead of hard-coded text."
+    ],
+    "affected_areas": [
+      "Admin",
+      "Language"
+    ],
+    "categories": [
+      "changed"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.43 line: Admin display labels only, with no behaviour or permission change.",
+    "validation": [
+      "AdminStatusLabelsTest covers lang-backed code status, actions, states and the absence of hard-coded Admin status chrome.",
+      "Module administration and Admin analytics tests.",
+      "php artisan lang:check --fail-on-missing.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "None."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #372; pull request #443.",
+    "references": [
+      {
+        "label": "Issue #372",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/372"
+      },
+      {
+        "label": "Pull request #443",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/443"
+      }
+    ]
+  },
+  {
     "version": "0.43.6",
     "date": "2026-10-29",
     "channel": "stable",

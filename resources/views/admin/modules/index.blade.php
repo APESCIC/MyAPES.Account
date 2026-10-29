@@ -53,8 +53,8 @@
                             $stateLabel = ! $shipped
                                 ? $status->label()
                                 : ($installation
-                                    ? ($installation->enabled ? __('admin.plugins.enabled') : 'Disabled')
-                                    : 'Available');
+                                    ? ($installation->enabled ? __('admin.plugins.enabled') : __('admin.plugins.disabled'))
+                                    : __('admin.plugins.available'));
                             $dependencySummary = collect($cell['dependencies'])
                                 ->map(fn (array $dependency): string => $dependency['key'].' ('.($dependency['enabled'] ? __('admin.plugins.enabled') : __('admin.access.unavailable')).')')
                                 ->implode(', ');
@@ -138,7 +138,7 @@
                                                         {{ __('admin.plugins.confirm_navigation_change') }}
                                                     </label>
                                                     <button type="submit" class="button button-secondary">
-                                                        {{ str($action)->title() }}
+                                                        {{ match ($action) { 'install' => __('admin.plugins.actions.install'), 'enable' => __('admin.plugins.actions.enable'), default => __('admin.plugins.actions.disable') } }}
                                                     </button>
                                                 </form>
                                             </details>
