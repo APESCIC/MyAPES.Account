@@ -21,7 +21,7 @@
             </div>
             <div>
                 <dt>{{ __('recruitment::staff.staff.index.blade.category') }}</dt>
-                <dd>{{ $application->recruitmentRole?->category ?? '—' }}</dd>
+                <dd>{{ $application->recruitmentRole ? \App\Support\WorkflowLabels::label('recruitment_category', $application->recruitmentRole->category) : '—' }}</dd>
             </div>
             <div>
                 <dt>{{ __('recruitment::staff.staff.index.blade.submitted') }}</dt>

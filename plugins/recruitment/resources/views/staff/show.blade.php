@@ -8,7 +8,7 @@
     <div class="panel">
         <span class="service-label service-apes-cic">{{ __('recruitment::staff.staff.index.blade.apes_cic') }}</span>
         <h1>{{ $role->title }}</h1>
-        <p class="muted">{{ $role->category }} | {{ $role->status }}</p>
+        <p class="muted">{{ \App\Support\WorkflowLabels::label('recruitment_category', $role->category) }} | {{ \App\Support\WorkflowLabels::status($role->status) }}</p>
         <dl class="ticket-meta">
             @if($revealCreator)
                 <div>
@@ -85,7 +85,7 @@
                         <select id="role_category" name="category" required>
                             @foreach($categories as $category)
                                 <option value="{{ $category }}" @selected(old('category', $role->category) === $category)>
-                                    {{ $category }}
+                                    {{ \App\Support\WorkflowLabels::label('recruitment_category', $category) }}
                                 </option>
                             @endforeach
                         </select>

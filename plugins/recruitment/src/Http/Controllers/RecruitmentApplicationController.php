@@ -4,6 +4,7 @@ namespace Plugins\Recruitment\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Services\AuditLogger;
+use App\Support\WorkflowLabels;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -160,14 +161,6 @@ class RecruitmentApplicationController extends Controller
      */
     private function statusLabels(): array
     {
-        return [
-            RecruitmentApplication::STATUS_SUBMITTED => 'Submitted',
-            RecruitmentApplication::STATUS_UNDER_REVIEW => 'Under review',
-            RecruitmentApplication::STATUS_SHORTLISTED => 'Shortlisted',
-            RecruitmentApplication::STATUS_REJECTED => 'Rejected',
-            RecruitmentApplication::STATUS_ACCEPTED => 'Accepted',
-            RecruitmentApplication::STATUS_WITHDRAWN => 'Withdrawn',
-            RecruitmentApplication::STATUS_CLOSED => 'Closed',
-        ];
+        return WorkflowLabels::options('status', RecruitmentApplication::STATUSES);
     }
 }

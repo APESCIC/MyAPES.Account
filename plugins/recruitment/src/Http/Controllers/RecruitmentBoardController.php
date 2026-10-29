@@ -4,12 +4,13 @@ namespace Plugins\Recruitment\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Services\ModuleSettingsService;
-use Plugins\Recruitment\Models\RecruitmentApplication;
-use Plugins\Recruitment\Models\RecruitmentRole;
-use Plugins\Recruitment\RecruitmentAudience;
+use App\Support\WorkflowLabels;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Plugins\Recruitment\Models\RecruitmentApplication;
+use Plugins\Recruitment\Models\RecruitmentRole;
+use Plugins\Recruitment\RecruitmentAudience;
 
 class RecruitmentBoardController extends Controller
 {
@@ -78,15 +79,7 @@ class RecruitmentBoardController extends Controller
             'existingApplication' => $existingApplication,
             'canApply' => $canApply,
             'publicApplyEnabled' => $publicApplyEnabled,
-            'statusLabels' => [
-                RecruitmentApplication::STATUS_SUBMITTED => 'Submitted',
-                RecruitmentApplication::STATUS_UNDER_REVIEW => 'Under review',
-                RecruitmentApplication::STATUS_SHORTLISTED => 'Shortlisted',
-                RecruitmentApplication::STATUS_REJECTED => 'Rejected',
-                RecruitmentApplication::STATUS_ACCEPTED => 'Accepted',
-                RecruitmentApplication::STATUS_WITHDRAWN => 'Withdrawn',
-                RecruitmentApplication::STATUS_CLOSED => 'Closed',
-            ],
+            'statusLabels' => WorkflowLabels::options('status', RecruitmentApplication::STATUSES),
         ]);
     }
 
@@ -100,10 +93,6 @@ class RecruitmentBoardController extends Controller
      */
     private function categoryLabels(): array
     {
-        return [
-            'staff' => 'Staff',
-            'volunteer' => 'Volunteer',
-            'student' => 'Student',
-        ];
+        return WorkflowLabels::options('recruitment_category', RecruitmentRole::CATEGORIES);
     }
 }
