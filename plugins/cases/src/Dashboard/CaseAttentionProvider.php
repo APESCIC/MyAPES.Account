@@ -7,6 +7,7 @@ use App\Core\Accounts\User;
 use Plugins\Cases\Models\ShelterCase;
 use App\Modules\ModuleAttentionItem;
 use App\Modules\ModuleInstanceDefinition;
+use App\Support\WorkflowLabels;
 use Plugins\PetProfiles\Models\PetProfile;
 
 class CaseAttentionProvider implements ModuleAttentionProvider
@@ -50,10 +51,9 @@ class CaseAttentionProvider implements ModuleAttentionProvider
                 $case->title,
                 $case->status,
                 $isApesCic ? $case->priority : null,
-                str($isApesCic ? $case->category : $case->case_type)
-                    ->replace('_', ' ')
-                    ->title()
-                    ->toString(),
+                $isApesCic
+                    ? str($case->category)->replace('_', ' ')->title()->toString()
+                    : WorkflowLabels::label('case_type', $case->case_type),
                 $isApesCic
                     ? ($case->user ? "For: {$case->user->name}" : null)
                     : ($case->petProfile

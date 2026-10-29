@@ -18,8 +18,8 @@
                     <tr>
                         <td>#{{ $case->id }}</td>
                         <td>{{ $case->title }}</td>
-                        <td>{{ $case->case_type }}</td>
-                        <td><span class="status">{{ $case->status }}</span></td>
+                        <td>{{ \App\Support\WorkflowLabels::label('case_type', $case->case_type) }}</td>
+                        <td><span class="status">{{ \App\Support\WorkflowLabels::status($case->status) }}</span></td>
                         <td>{{ $case->petProfile->name }}</td>
                         <td><a href="{{ route('shelter.cases.show', $case) }}">{{ __('cases::ui.index.blade.open') }}</a></td>
                     </tr>
@@ -40,7 +40,7 @@
                         @include('pet-profiles::partials.pet-profile-select')
                         <div>
                             <label>{{ __('cases::ui.index.blade.case_type') }}</label>
-                            <select name="case_type">@foreach(['adoption','surrender','rescue','fostering'] as $type)<option value="{{ $type }}">{{ $type }}</option>@endforeach</select>
+                            <select name="case_type">@foreach(['adoption','surrender','rescue','fostering'] as $type)<option value="{{ $type }}">{{ \App\Support\WorkflowLabels::label('case_type', $type) }}</option>@endforeach</select>
                         </div>
                     </div>
                     <label>{{ __('cases::ui.index.blade.title') }}</label>

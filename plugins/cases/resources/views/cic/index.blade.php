@@ -43,8 +43,8 @@
                                     <br><small class="muted">{{ $categoryResolver->labelForSubcategory($case->sub_core_key, (string) $case->category, $case->sub_category) }}</small>
                                 @endif
                             </td>
-                            <td><span class="status">{{ $case->status }}</span></td>
-                            <td>{{ $case->priority }}</td>
+                            <td><span class="status">{{ \App\Support\WorkflowLabels::status($case->status) }}</span></td>
+                            <td>{{ \App\Support\WorkflowLabels::priority($case->priority) }}</td>
                             <td>{{ $case->user?->name ?? '—' }}</td>
                             <td>
                                 @if($revealAssigneeIdentity)
@@ -87,7 +87,7 @@
                         <label for="priority">{{ __('cases::ui.index.blade.priority') }}</label>
                         <select id="priority" name="priority">
                             @foreach($priorities as $priority)
-                                <option value="{{ $priority }}" @selected(old('priority', 'medium') === $priority)>{{ $priority }}</option>
+                                <option value="{{ $priority }}" @selected(old('priority', 'medium') === $priority)>{{ \App\Support\WorkflowLabels::priority($priority) }}</option>
                             @endforeach
                         </select>
                     </div>
