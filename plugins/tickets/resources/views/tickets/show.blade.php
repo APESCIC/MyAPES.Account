@@ -47,11 +47,11 @@
             @endif
             <div>
                 <dt>{{ __('tickets::ui.index.blade.status') }}</dt>
-                <dd><span class="status">{{ $ticket->status }}</span></dd>
+                <dd><span class="status">{{ \App\Support\WorkflowLabels::status($ticket->status) }}</span></dd>
             </div>
             <div>
                 <dt>{{ __('tickets::ui.index.blade.priority') }}</dt>
-                <dd>{{ $ticket->priority }}</dd>
+                <dd>{{ \App\Support\WorkflowLabels::priority($ticket->priority) }}</dd>
             </div>
         </dl>
 
@@ -66,7 +66,7 @@
                             <select id="status" name="status">
                                 @foreach(['open', 'in_progress', 'resolved', 'closed'] as $status)
                                     @continue(in_array($status, ['resolved', 'closed'], true) && ! $canCloseTicket && $ticket->status !== $status)
-                                    <option value="{{ $status }}" @selected($ticket->status === $status)>{{ $status }}</option>
+                                    <option value="{{ $status }}" @selected($ticket->status === $status)>{{ \App\Support\WorkflowLabels::status($status) }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -74,7 +74,7 @@
                             <label for="priority">{{ __('tickets::ui.index.blade.priority') }}</label>
                             <select id="priority" name="priority">
                                 @foreach($priorities as $priority)
-                                    <option value="{{ $priority }}" @selected($ticket->priority === $priority)>{{ $priority }}</option>
+                                    <option value="{{ $priority }}" @selected($ticket->priority === $priority)>{{ \App\Support\WorkflowLabels::priority($priority) }}</option>
                                 @endforeach
                             </select>
                         </div>

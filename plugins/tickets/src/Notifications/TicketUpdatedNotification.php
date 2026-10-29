@@ -4,6 +4,7 @@ namespace Plugins\Tickets\Notifications;
 
 use App\Core\Accounts\User;
 use App\Core\Mail\Concerns\BuildsBrandedMail;
+use App\Support\WorkflowLabels;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -57,8 +58,8 @@ class TicketUpdatedNotification extends Notification implements ShouldQueue
                 'event' => $this->eventLabel,
                 'actor' => $this->actor->name,
             ]))
-            ->line(__('mail.ticket_updated.line_status', ['status' => $this->ticket->status]))
-            ->line(__('mail.ticket_updated.line_priority', ['priority' => $this->ticket->priority]))
+            ->line(__('mail.ticket_updated.line_status', ['status' => WorkflowLabels::status($this->ticket->status)]))
+            ->line(__('mail.ticket_updated.line_priority', ['priority' => WorkflowLabels::priority($this->ticket->priority)]))
             ->action(__('mail.ticket_updated.action'), route($this->showRouteName, $this->ticket));
     }
 

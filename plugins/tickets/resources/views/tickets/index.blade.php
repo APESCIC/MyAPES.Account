@@ -47,8 +47,8 @@
                                     {{ $ticket->service_area }}
                                 @endif
                             </td>
-                            <td><span class="status">{{ $ticket->status }}</span></td>
-                            <td>{{ $ticket->priority }}</td>
+                            <td><span class="status">{{ \App\Support\WorkflowLabels::status($ticket->status) }}</span></td>
+                            <td>{{ \App\Support\WorkflowLabels::priority($ticket->priority) }}</td>
                             <td>{{ $ticket->user?->name ?? '—' }}</td>
                             <td>
                                 @if($revealAssigneeIdentity)
@@ -106,7 +106,7 @@
                         <label for="priority">{{ __('tickets::ui.index.blade.priority') }}</label>
                         <select id="priority" name="priority">
                             @foreach($priorities as $priority)
-                                <option value="{{ $priority }}" @selected(old('priority', 'medium') === $priority)>{{ $priority }}</option>
+                                <option value="{{ $priority }}" @selected(old('priority', 'medium') === $priority)>{{ \App\Support\WorkflowLabels::priority($priority) }}</option>
                             @endforeach
                         </select>
                     </div>
