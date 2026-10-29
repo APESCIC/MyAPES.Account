@@ -4,6 +4,7 @@ namespace Plugins\Cases\Notifications;
 
 use App\Core\Accounts\User;
 use App\Core\Mail\Concerns\BuildsBrandedMail;
+use App\Support\WorkflowLabels;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -54,7 +55,7 @@ class ShelterCaseUpdatedNotification extends Notification implements ShouldQueue
                 'actor' => $this->actor->name,
             ]))
             ->line(__('mail.shelter_case_updated.line_case_type', ['type' => $this->case->case_type]))
-            ->line(__('mail.shelter_case_updated.line_status', ['status' => $this->case->status]))
+            ->line(__('mail.shelter_case_updated.line_status', ['status' => WorkflowLabels::status($this->case->status)]))
             ->action(__('mail.shelter_case_updated.action'), route('shelter.cases.show', $this->case));
     }
 

@@ -4,6 +4,7 @@ namespace Plugins\Cases\Notifications;
 
 use App\Core\Accounts\User;
 use App\Core\Mail\Concerns\BuildsBrandedMail;
+use App\Support\WorkflowLabels;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -46,8 +47,8 @@ class ApesCicCaseUpdatedNotification extends Notification implements ShouldQueue
                 'event' => $this->eventLabel,
                 'actor' => $this->actor->name,
             ]))
-            ->line(__('mail.case_updated.line_status', ['status' => $this->case->status]))
-            ->line(__('mail.case_updated.line_priority', ['priority' => $this->case->priority]))
+            ->line(__('mail.case_updated.line_status', ['status' => WorkflowLabels::status($this->case->status)]))
+            ->line(__('mail.case_updated.line_priority', ['priority' => WorkflowLabels::priority($this->case->priority)]))
             ->action(__('mail.case_updated.action'), route($this->showRouteName, $this->case));
     }
 

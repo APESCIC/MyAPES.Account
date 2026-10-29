@@ -41,11 +41,11 @@
             @endif
             <div>
                 <dt>{{ __('cases::ui.index.blade.status') }}</dt>
-                <dd><span class="status">{{ $case->status }}</span></dd>
+                <dd><span class="status">{{ \App\Support\WorkflowLabels::status($case->status) }}</span></dd>
             </div>
             <div>
                 <dt>{{ __('cases::ui.index.blade.priority') }}</dt>
-                <dd>{{ $case->priority }} priority</dd>
+                <dd>{{ \App\Support\WorkflowLabels::priority($case->priority) }} priority</dd>
             </div>
         </dl>
 
@@ -75,7 +75,7 @@
                             <label for="priority">{{ __('cases::ui.index.blade.priority') }}</label>
                             <select id="priority" name="priority">
                                 @foreach($priorities as $priority)
-                                    <option value="{{ $priority }}" @selected($case->priority === $priority)>{{ $priority }}</option>
+                                    <option value="{{ $priority }}" @selected($case->priority === $priority)>{{ \App\Support\WorkflowLabels::priority($priority) }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -84,7 +84,7 @@
                             <select id="status" name="status">
                                 @foreach($statuses as $status)
                                     @continue((in_array($status, ['resolved', 'closed'], true) || in_array($case->status, ['resolved', 'closed'], true)) && ! $canCloseCase && $case->status !== $status)
-                                    <option value="{{ $status }}" @selected($case->status === $status)>{{ str_replace('_', ' ', $status) }}</option>
+                                    <option value="{{ $status }}" @selected($case->status === $status)>{{ \App\Support\WorkflowLabels::status($status) }}</option>
                                 @endforeach
                             </select>
                         </div>

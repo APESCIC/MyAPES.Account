@@ -285,7 +285,7 @@ class ShelterCaseWorkflowTest extends TestCase
         $this->actingAs($owner->fresh())
             ->get(route('shelter.cases.show', $case))
             ->assertOk()
-            ->assertSee('Status: open')
+            ->assertSee('Status: Open')
             ->assertSee('Initial Shelter case details.')
             ->assertDontSee('action="'.route('shelter.cases.update', $case).'"', false);
         $this->put(route('shelter.cases.update', $case), [
