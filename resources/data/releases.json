@@ -1,5 +1,48 @@
 [
   {
+    "version": "0.43.6",
+    "date": "2026-10-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Pet profile labels",
+    "summary": "Pet sex and neutering status now read as Title Case labels on pet profile screens.",
+    "changes": [
+      "Pet lists and profile summaries show sex and neutering status such as Male and Not Neutered instead of stored values.",
+      "Pet create and edit selects show Title Case labels while keeping the same stored values."
+    ],
+    "affected_areas": [
+      "Pet Profiles"
+    ],
+    "categories": [
+      "changed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.43 line: display labels only, with no data, validation or permission change.",
+    "validation": [
+      "PetProfileWorkflowLabelsTest covers the list, summary line and selects.",
+      "Pet profile feature tests.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "Species stays free text as entered."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #371; pull request #442.",
+    "references": [
+      {
+        "label": "Issue #371",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/371"
+      },
+      {
+        "label": "Pull request #442",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/442"
+      }
+    ]
+  },
+  {
     "version": "0.43.5",
     "date": "2026-10-29",
     "channel": "stable",

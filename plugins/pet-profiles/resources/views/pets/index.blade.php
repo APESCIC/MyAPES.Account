@@ -25,7 +25,7 @@
                             <td>{{ $pet->name }}</td>
                             <td>{{ $pet->species }}</td>
                             <td>{{ $pet->age_years }}</td>
-                            <td>{{ $pet->sex }}</td>
+                            <td>{{ \App\Support\WorkflowLabels::label('sex', $pet->sex) }}</td>
                             <td><a href="{{ route($area->showRouteName(), $pet) }}">{{ __('pet_profiles::ui.index.blade.open') }}</a></td>
                         </tr>
                     @endforeach
@@ -51,8 +51,8 @@
                     <div><label for="pet_age_years">{{ __('pet_profiles::ui.index.blade.age_years') }}</label><input id="pet_age_years" type="number" min="0" max="80" name="age_years"></div>
                 </div>
                 <div class="row">
-                    <div><label for="pet_sex">{{ __('pet_profiles::ui.index.blade.sex') }}</label><select id="pet_sex" name="sex">@foreach(['male','female','unknown'] as $v)<option value="{{ $v }}">{{ $v }}</option>@endforeach</select></div>
-                    <div><label for="pet_neutering_status">{{ __('pet_profiles::ui.index.blade.neutering_status') }}</label><select id="pet_neutering_status" name="neutering_status">@foreach(['neutered','not_neutered','unknown'] as $v)<option value="{{ $v }}">{{ $v }}</option>@endforeach</select></div>
+                    <div><label for="pet_sex">{{ __('pet_profiles::ui.index.blade.sex') }}</label><select id="pet_sex" name="sex">@foreach(['male','female','unknown'] as $v)<option value="{{ $v }}">{{ \App\Support\WorkflowLabels::label('sex', $v) }}</option>@endforeach</select></div>
+                    <div><label for="pet_neutering_status">{{ __('pet_profiles::ui.index.blade.neutering_status') }}</label><select id="pet_neutering_status" name="neutering_status">@foreach(['neutered','not_neutered','unknown'] as $v)<option value="{{ $v }}">{{ \App\Support\WorkflowLabels::label('neutering_status', $v) }}</option>@endforeach</select></div>
                     <div><label for="pet_photo">{{ __('pet_profiles::ui.index.blade.photo') }}</label><input id="pet_photo" type="file" name="photo" accept="image/*"></div>
                 </div>
                 <label for="pet_health_issues">{{ __('pet_profiles::ui.index.blade.health_issues') }}</label>
