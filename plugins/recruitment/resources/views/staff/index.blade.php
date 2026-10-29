@@ -33,8 +33,8 @@
                         @foreach($roles as $role)
                             <tr>
                                 <td>{{ $role->title }}</td>
-                                <td>{{ $role->category }}</td>
-                                <td>{{ $role->status }}</td>
+                                <td>{{ \App\Support\WorkflowLabels::label('recruitment_category', $role->category) }}</td>
+                                <td>{{ \App\Support\WorkflowLabels::status($role->status) }}</td>
                                 <td>
                                     <a href="{{ route('apes-cic.recruitment.show', $role) }}">{{ __('recruitment::staff.staff.index.blade.open') }}</a>
                                 </td>
@@ -60,7 +60,7 @@
                             <select id="role_category" name="category" required>
                                 @foreach($categories as $category)
                                     <option value="{{ $category }}" @selected(old('category') === $category)>
-                                        {{ $category }}
+                                        {{ \App\Support\WorkflowLabels::label('recruitment_category', $category) }}
                                     </option>
                                 @endforeach
                             </select>

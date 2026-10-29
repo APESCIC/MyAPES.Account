@@ -33,7 +33,7 @@
                             <option value="">{{ __('recruitment::staff.staff.index.blade.all_categories') }}</option>
                             @foreach($categories as $category)
                                 <option value="{{ $category }}" @selected($selectedCategory === $category)>
-                                    {{ $category }}
+                                    {{ \App\Support\WorkflowLabels::label('recruitment_category', $category) }}
                                 </option>
                             @endforeach
                         </select>
@@ -44,7 +44,7 @@
                             <option value="">{{ __('recruitment::staff.staff.index.blade.all_roles') }}</option>
                             @foreach($roles as $role)
                                 <option value="{{ $role->id }}" @selected($selectedRoleId === $role->id)>
-                                    {{ $role->title }} ({{ $role->status }})
+                                    {{ $role->title }} ({{ \App\Support\WorkflowLabels::status($role->status) }})
                                 </option>
                             @endforeach
                         </select>
