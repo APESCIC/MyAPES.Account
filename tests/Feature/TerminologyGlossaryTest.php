@@ -43,6 +43,45 @@ class TerminologyGlossaryTest extends TestCase
         $this->assertSame('Rejected', __('terms.status.rejected'));
     }
 
+    public function test_workflow_terms_are_title_case_for_every_stored_value(): void
+    {
+        $groups = [
+            'status' => [
+                'submitted' => 'Submitted',
+                'under_review' => 'Under Review',
+                'shortlisted' => 'Shortlisted',
+                'accepted' => 'Accepted',
+                'rejected' => 'Rejected',
+                'withdrawn' => 'Withdrawn',
+                'draft' => 'Draft',
+                'open' => 'Open',
+                'in_progress' => 'In Progress',
+                'in_review' => 'In Review',
+                'waiting_on_user' => 'Waiting on User',
+                'resolved' => 'Resolved',
+                'closed' => 'Closed',
+            ],
+            'priority' => ['low' => 'Low', 'medium' => 'Medium', 'high' => 'High', 'urgent' => 'Urgent'],
+            'case_type' => ['adoption' => 'Adoption', 'surrender' => 'Surrender', 'rescue' => 'Rescue', 'fostering' => 'Fostering'],
+            'recruitment_category' => ['staff' => 'Staff', 'volunteer' => 'Volunteer', 'student' => 'Student'],
+            'sex' => ['male' => 'Male', 'female' => 'Female', 'unknown' => 'Unknown'],
+            'neutering_status' => ['neutered' => 'Neutered', 'not_neutered' => 'Not Neutered', 'unknown' => 'Unknown'],
+        ];
+
+        $glossary = file_get_contents(base_path('docs/glossary.md'));
+
+        foreach ($groups as $group => $labels) {
+            $this->assertSame("terms.{$group}", config("glossary.canonical.{$group}"));
+            $this->assertSame($labels, __("terms.{$group}"), "terms.{$group} labels drifted.");
+            $this->assertStringContainsString("`terms.{$group}.", $glossary);
+        }
+    }
+
+    public function test_en_fallback_terms_match_en_gb(): void
+    {
+        $this->assertSame(require lang_path('en_GB/terms.php'), require lang_path('en/terms.php'));
+    }
+
     public function test_deprecated_synonyms_are_machine_readable_for_ci(): void
     {
         $synonyms = config('glossary.deprecated_synonyms');

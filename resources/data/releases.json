@@ -1,5 +1,49 @@
 [
   {
+    "version": "0.43.0",
+    "date": "2026-10-29",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Workflow label terms",
+    "summary": "Shared Title Case labels for workflow statuses, priorities and related values, ready for the screens on the 0.43 line.",
+    "changes": [
+      "Add Title Case labels for every stored ticket, case, consultation and application status, including In Progress, Waiting on User and Under Review.",
+      "Add label groups for priorities, Shelter case types, Recruitment role categories, and pet sex and neutering status.",
+      "Document the workflow labels in the glossary; stored values stay snake_case."
+    ],
+    "affected_areas": [
+      "Language",
+      "Documentation"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Minor: opens the 0.43 language and keywords line with new shared label groups.",
+    "validation": [
+      "TerminologyGlossaryTest covers every label group and the en fallback.",
+      "php artisan lang:check --fail-on-missing.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "Screens still show stored values until the following 0.43 releases wire them to these labels."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #365; pull request #436.",
+    "references": [
+      {
+        "label": "Issue #365",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/365"
+      },
+      {
+        "label": "Pull request #436",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/436"
+      }
+    ]
+  },
+  {
     "version": "0.42.11",
     "date": "2026-10-28",
     "channel": "stable",

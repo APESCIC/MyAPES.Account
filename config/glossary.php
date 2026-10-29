@@ -37,6 +37,12 @@ return [
         'recruitment' => 'terms.recruitment',
         'consultations' => 'terms.consultations',
         'pet_profiles' => 'terms.pet_profiles',
+        'status' => 'terms.status',
+        'priority' => 'terms.priority',
+        'case_type' => 'terms.case_type',
+        'recruitment_category' => 'terms.recruitment_category',
+        'sex' => 'terms.sex',
+        'neutering_status' => 'terms.neutering_status',
     ],
 
     /*

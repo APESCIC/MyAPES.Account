@@ -75,7 +75,25 @@ Locale and key conventions: [localisation.md](localisation.md). Canonical labels
 | Rejected | Application rejected. | Status badges. | Declined (prefer Rejected for recruitment applications). | `terms.status.rejected` |
 | Draft | Recruitment role not yet published. | Staff role status. | Unpublished (as the primary status word). | `terms.status.draft` |
 | Open | Recruitment role accepting applications. | Staff/public role status. | Live / Active (as the primary status word). | `terms.status.open` |
-| Closed | Recruitment role no longer accepting applications. | Staff/public role status. | Archived (unless a distinct archive state exists). | `terms.status.closed` |
+| Closed | Recruitment role no longer accepting applications; ticket, case, consultation or application finished. | Status badges, filters and selects. | Archived (unless a distinct archive state exists). | `terms.status.closed` |
+| Under Review | Application being reviewed by staff. | Application status badges and filters. | In review (that is the Shelter case status). | `terms.status.under_review` |
+| Withdrawn | Application withdrawn by the applicant. | Application status badges. | Cancelled. | `terms.status.withdrawn` |
+| In Progress | Ticket, APES CIC case or consultation being worked on. | Status badges and selects. | Pending; Active. | `terms.status.in_progress` |
+| In Review | Shelter case being reviewed. | Shelter case status. | Under Review (that is the application status). | `terms.status.in_review` |
+| Waiting on User | APES CIC case waiting for the service user to reply. | Case status. | On hold; Pending. | `terms.status.waiting_on_user` |
+| Resolved | Ticket or APES CIC case resolved, before closing. | Status badges and selects. | Fixed; Done. | `terms.status.resolved` |
+
+## Workflow labels
+
+Stored values stay snake_case (`in_progress`, `not_neutered`). Screens show the Title Case label from `lang/en_GB/terms.php`, never the raw value. Short words such as *on* stay lower case (**Waiting on User**).
+
+| Group | Stored values | Labels | Lang keys |
+| --- | --- | --- | --- |
+| Priority (tickets, APES CIC cases) | `low`, `medium`, `high`, `urgent` | Low, Medium, High, Urgent | `terms.priority.*` |
+| Shelter case type | `adoption`, `surrender`, `rescue`, `fostering` | Adoption, Surrender, Rescue, Fostering | `terms.case_type.*` |
+| Recruitment role category | `staff`, `volunteer`, `student` | Staff, Volunteer, Student | `terms.recruitment_category.*` |
+| Pet sex | `male`, `female`, `unknown` | Male, Female, Unknown | `terms.sex.*` |
+| Pet neutering status | `neutered`, `not_neutered`, `unknown` | Neutered, Not Neutered, Unknown | `terms.neutering_status.*` |
 
 ## en_GB spelling
 

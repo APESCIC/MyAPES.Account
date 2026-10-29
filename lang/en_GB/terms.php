@@ -55,13 +55,54 @@ return [
     'profile' => 'Profile',
     'access' => 'Access',
 
+    /*
+     * Workflow display labels. Keys are the stored snake_case values; labels are Title Case.
+     */
     'status' => [
         'submitted' => 'Submitted',
+        'under_review' => 'Under Review',
         'shortlisted' => 'Shortlisted',
         'accepted' => 'Accepted',
         'rejected' => 'Rejected',
+        'withdrawn' => 'Withdrawn',
         'draft' => 'Draft',
         'open' => 'Open',
+        'in_progress' => 'In Progress',
+        'in_review' => 'In Review',
+        'waiting_on_user' => 'Waiting on User',
+        'resolved' => 'Resolved',
         'closed' => 'Closed',
+    ],
+
+    'priority' => [
+        'low' => 'Low',
+        'medium' => 'Medium',
+        'high' => 'High',
+        'urgent' => 'Urgent',
+    ],
+
+    'case_type' => [
+        'adoption' => 'Adoption',
+        'surrender' => 'Surrender',
+        'rescue' => 'Rescue',
+        'fostering' => 'Fostering',
+    ],
+
+    'recruitment_category' => [
+        'staff' => 'Staff',
+        'volunteer' => 'Volunteer',
+        'student' => 'Student',
+    ],
+
+    'sex' => [
+        'male' => 'Male',
+        'female' => 'Female',
+        'unknown' => 'Unknown',
+    ],
+
+    'neutering_status' => [
+        'neutered' => 'Neutered',
+        'not_neutered' => 'Not Neutered',
+        'unknown' => 'Unknown',
     ],
 ];
