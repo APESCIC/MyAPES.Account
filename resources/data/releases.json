@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.43.2",
+    "date": "2026-10-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Ticket workflow labels",
+    "summary": "Ticket status and priority now read as Title Case labels on every ticket screen and in ticket update emails.",
+    "changes": [
+      "Ticket lists and details show statuses such as In Progress and priorities such as Urgent instead of stored values.",
+      "Ticket create and staff edit selects show Title Case labels while keeping the same stored values.",
+      "Ticket update emails show the Title Case status and priority."
+    ],
+    "affected_areas": [
+      "Tickets",
+      "Email"
+    ],
+    "categories": [
+      "changed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.43 line: display labels only, with no data, validation or permission change.",
+    "validation": [
+      "TicketWorkflowLabelsTest covers lists, details, selects and the update email.",
+      "PublicTicketPriorityTest confirms option values are unchanged.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "Ticket service area names are unchanged in this release."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #367; pull request #438.",
+    "references": [
+      {
+        "label": "Issue #367",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/367"
+      },
+      {
+        "label": "Pull request #438",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/438"
+      }
+    ]
+  },
+  {
     "version": "0.43.1",
     "date": "2026-10-29",
     "channel": "stable",
