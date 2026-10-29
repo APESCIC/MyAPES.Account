@@ -1,5 +1,47 @@
 [
   {
+    "version": "0.43.9",
+    "date": "2026-10-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Language docs hygiene",
+    "summary": "Product and localisation docs describe the Title Case workflow label convention.",
+    "changes": [
+      "PRODUCT.md no longer says screen labels wait for the glossary, and states the Title Case rule for workflow values.",
+      "The localisation guide documents one shared helper, Title Case rules, email placeholders, Admin keys and search synonyms.",
+      "Glossary rules point to the shared workflow label helper."
+    ],
+    "affected_areas": [
+      "Documentation"
+    ],
+    "categories": [
+      "changed"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.43 line: documentation only, with no application behaviour change.",
+    "validation": [
+      "Docs reviewed against the shipped helper, terms and Admin keys.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "None."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #374; pull request #446.",
+    "references": [
+      {
+        "label": "Issue #374",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/374"
+      },
+      {
+        "label": "Pull request #446",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/446"
+      }
+    ]
+  },
+  {
     "version": "0.43.8",
     "date": "2026-10-29",
     "channel": "stable",
