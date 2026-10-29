@@ -1,5 +1,51 @@
 [
   {
+    "version": "0.43.3",
+    "date": "2026-10-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Case workflow labels",
+    "summary": "Case status, priority and Shelter case type now read as Title Case labels on APES CIC and Shelter case screens and emails.",
+    "changes": [
+      "APES CIC case lists, details and selects show statuses such as Waiting on User and priorities such as Urgent.",
+      "Shelter case lists, details and selects show statuses such as In Review and case types such as Surrender.",
+      "Case update emails and Shelter dashboard items use the same labels."
+    ],
+    "affected_areas": [
+      "Cases",
+      "Email",
+      "Dashboard"
+    ],
+    "categories": [
+      "changed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.43 line: display labels only, with no data, validation or permission change.",
+    "validation": [
+      "CaseWorkflowLabelsTest covers APES CIC and Shelter screens, selects and both update emails.",
+      "Existing Shelter and APES CIC case workflow tests.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "APES CIC case categories keep their existing settings-driven names."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Issue #368; pull request #439.",
+    "references": [
+      {
+        "label": "Issue #368",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/368"
+      },
+      {
+        "label": "Pull request #439",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/439"
+      }
+    ]
+  },
+  {
     "version": "0.43.2",
     "date": "2026-10-29",
     "channel": "stable",
