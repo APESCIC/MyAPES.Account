@@ -10,7 +10,7 @@
         <p class="muted">Pet: {{ $consultation->petProfile->name }}</p>
         <dl>
             <dt>{{ __('consultations::ui.index.blade.status') }}</dt>
-            <dd>{{ $consultation->status }}</dd>
+            <dd>{{ \App\Support\WorkflowLabels::status($consultation->status) }}</dd>
             <dt>{{ __('consultations::ui.index.blade.scheduled_for') }}</dt>
             <dd>{{ $ukDateTime->format($consultation->scheduled_for) ?? 'Not scheduled' }}</dd>
             <dt>{{ __('consultations::ui.index.blade.notes') }}</dt>
@@ -40,7 +40,7 @@
                             <select name="status">
                                 @foreach(['open','in_progress','closed'] as $status)
                                     @if($status === $consultation->status || ($status === 'closed' ? $canClose : ($consultation->status === 'closed' ? $canClose : $canUpdate)))
-                                        <option value="{{ $status }}" @selected($consultation->status===$status)>{{ $status }}</option>
+                                        <option value="{{ $status }}" @selected($consultation->status===$status)>{{ \App\Support\WorkflowLabels::status($status) }}</option>
                                     @endif
                                 @endforeach
                             </select>
