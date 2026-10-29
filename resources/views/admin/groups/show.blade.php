@@ -11,7 +11,7 @@
         <dl class="admin-definition-list">
             <div>
                 <dt>{{ __('admin.access.catalogue_status') }}</dt>
-                <dd>{{ ucfirst($group->status) }}</dd>
+                <dd>{{ $group->status === \App\Core\Accounts\DirectoryGroup::STATUS_PRESENT ? __('admin.access.present') : __('admin.access.missing') }}</dd>
             </div>
             <div>
                 <dt>{{ __('admin.access.catalogue_member_count') }}</dt>

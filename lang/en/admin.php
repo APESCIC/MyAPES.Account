@@ -169,7 +169,7 @@ return [
         'alert' => [
             'disabled' => 'Disabled',
             'incompatible' => 'Incompatible',
-            'code_not_shipped' => 'Code not shipped',
+            'code_not_shipped' => 'Code Not Shipped',
             'active_records' => 'Active records',
         ],
     ],
@@ -304,6 +304,18 @@ return [
         'metrics_for' => 'Plugin metrics for',
         'plugins_for' => 'Plugins for',
         'enabled' => 'Enabled',
+        'disabled' => 'Disabled',
+        'available' => 'Available',
+        'code_status' => [
+            'shipped' => 'Shipped',
+            'code_not_shipped' => 'Code Not Shipped',
+            'incompatible' => 'Incompatible',
+        ],
+        'actions' => [
+            'install' => 'Install',
+            'enable' => 'Enable',
+            'disable' => 'Disable',
+        ],
     ],
     'flash' => [
         'temporary_password_generated' => 'A one-time temporary password was generated. Copy it now; it will not be shown again.',

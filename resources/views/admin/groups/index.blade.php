@@ -60,7 +60,7 @@
                             {{ \App\Support\DirectoryGroupLabels::sourceLabel($group) }}
                         </span>
                     </td>
-                    <td>{{ ucfirst($group->status) }}</td>
+                    <td>{{ $group->status === \App\Core\Accounts\DirectoryGroup::STATUS_PRESENT ? __('admin.access.present') : __('admin.access.missing') }}</td>
                     <td>{{ $group->member_count ?? 'Unknown' }}</td>
                     <td>
                         @forelse($group->roles as $role)

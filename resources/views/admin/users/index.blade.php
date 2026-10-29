@@ -90,7 +90,7 @@
                             <br><span class="status">{{ __('admin.users.pending_first_login') }}</span>
                         @endif
                     </td>
-                    <td>{{ $user->suspended_at === null ? 'Active' : 'Suspended' }}</td>
+                    <td>{{ $user->suspended_at === null ? __('admin.users.active') : __('admin.overview.suspended') }}</td>
                     <td>{{ $authorizationProfile->effectiveProtectedRole($user) ?? __('admin.access.none') }}</td>
                     <td>
                         <a href="{{ route('admin.users.show', $user) }}">{{ __('admin.users.view_user') }}</a>

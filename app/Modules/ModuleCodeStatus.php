@@ -11,9 +11,9 @@ enum ModuleCodeStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Shipped => 'Shipped',
-            self::CodeNotShipped => 'Code not shipped',
-            self::Incompatible => 'Incompatible',
+            self::Shipped => __('admin.plugins.code_status.shipped'),
+            self::CodeNotShipped => __('admin.plugins.code_status.code_not_shipped'),
+            self::Incompatible => __('admin.plugins.code_status.incompatible'),
         };
     }
 }

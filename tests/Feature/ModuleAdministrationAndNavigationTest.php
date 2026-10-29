@@ -141,7 +141,7 @@ class ModuleAdministrationAndNavigationTest extends TestCase
                 'data-code-status="code_not_shipped"',
             ),
         );
-        $response->assertDontSee('Code not shipped');
+        $response->assertDontSee('Code Not Shipped');
         $response->assertSee('Incompatible');
         $response->assertSeeText('shelter-rescue:pet-profiles (Enabled)');
         $response->assertSee('data-module-action-form', false);

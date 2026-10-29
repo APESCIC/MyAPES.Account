@@ -26,7 +26,7 @@
                     <h2>{{ $manifest->name }}</h2>
                     <p class="muted"><code>{{ $manifest->slug }}</code> · {{ $manifest->routePrefix }}</p>
                     <p>{{ $manifest->description }}</p>
-                    <p class="muted">State: {{ $enabled ? 'Enabled' : 'Disabled' }}</p>
+                    <p class="muted">State: {{ $enabled ? __('admin.plugins.enabled') : __('admin.plugins.disabled') }}</p>
                     @if($plugins !== [])
                         <ul class="module-registry__chips" aria-label="{{ __('admin.plugins.plugins_for') }} {{ $manifest->name }}">
                             @foreach($plugins as $plugin)
