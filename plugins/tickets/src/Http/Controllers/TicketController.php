@@ -12,7 +12,9 @@ use App\Services\AssignmentAuthorization;
 use App\Services\AuditLogger;
 use App\Services\SecureUploadService;
 use App\Services\SupportAttachmentService;
+use Closure;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -24,6 +26,7 @@ use Plugins\Tickets\Models\SupportTicket;
 use Plugins\Tickets\Models\SupportTicketMessage;
 use Plugins\Tickets\Notifications\TicketUpdatedNotification;
 use Plugins\Tickets\TicketCategoryResolver;
+use Plugins\Tickets\TicketOwnerCandidates;
 use Plugins\Tickets\TicketsArea;
 use Plugins\Tickets\TicketServiceConfiguration;
 
@@ -48,6 +51,7 @@ class TicketController extends Controller
         private readonly TicketServiceConfiguration $ticketServices,
         private readonly TicketCategoryResolver $categories,
         private readonly SupportAttachmentService $attachments,
+        private readonly TicketOwnerCandidates $ownerCandidates,
     ) {}
 
     public function index(Request $request): View
@@ -223,6 +227,12 @@ class TicketController extends Controller
         }
         $messages = $messagesQuery->get();
         $creationMarker = $this->ticketCreationMarker($ticket, $messages);
+        $ownerSearch = $canChangeAssignment ? (string) $request->query('owner_q', '') : '';
+        $ownerMatches = $canChangeAssignment
+            ? $this->ownerCandidates->search($prefix, $ownerSearch)
+                ->reject(static fn (User $candidate): bool => (int) $candidate->id === (int) $ticket->user_id)
+                ->values()
+            : collect();
 
         return view('tickets::tickets.show', [
             'ticket' => $ticket->load(['user', 'assignedTo', 'attachments']),
@@ -243,9 +253,10 @@ class TicketController extends Controller
                     ->orderBy('name')
                     ->get()
                 : collect(),
-            'ownerCandidates' => $canChangeAssignment
-                ? User::query()->orderBy('name')->limit(200)->get()
-                : collect(),
+            'ownerSearch' => $ownerSearch,
+            'ownerMatches' => $ownerMatches,
+            'ownerSearchHadNoMatches' => mb_strlen(trim($ownerSearch)) >= TicketOwnerCandidates::MIN_TERM_LENGTH
+                && $ownerMatches->isEmpty(),
             'ticketService' => $ticketService,
             'usesHierarchicalCategories' => $isApesCic,
             'priorities' => self::PRIORITIES,
@@ -257,6 +268,30 @@ class TicketController extends Controller
                 ? $this->categories->websites($instance->subCore->key)
                 : [],
         ]);
+    }
+
+    public function ownerCandidates(
+        Request $request,
+        SupportTicket $ticket,
+        AssignmentAuthorization $assignments,
+    ): JsonResponse {
+        $instance = $this->instance($request);
+        $prefix = $this->area()->permissionPrefix();
+        $this->requireTicketForInstance($ticket, $instance);
+        Gate::authorize('view', $ticket);
+        abort_unless($assignments->allows($request->user()), 403);
+        Gate::authorize($prefix.'assign');
+
+        $matches = $this->ownerCandidates
+            ->search($prefix, (string) $request->query('q', ''))
+            ->reject(static fn (User $candidate): bool => (int) $candidate->id === (int) $ticket->user_id)
+            ->map(static fn (User $candidate): array => [
+                'id' => (int) $candidate->id,
+                'label' => $candidate->name.' ('.$candidate->email.')',
+            ])
+            ->values();
+
+        return response()->json(['data' => $matches]);
     }
 
     public function update(
@@ -348,6 +383,12 @@ class TicketController extends Controller
                 'required',
                 'integer',
                 new EligibleRecordOwner,
+                function (string $attribute, mixed $value, Closure $fail) use ($prefix, $ticket): void {
+                    if ((int) $value !== (int) $ticket->user_id
+                        && ! $this->ownerCandidates->isEligible($prefix, (int) $value)) {
+                        $fail(__('tickets::ui.validation.choose_an_owner_who_can_use_this_service'));
+                    }
+                },
             ];
         }
         if ($attachmentRequested) {
