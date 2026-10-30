@@ -190,6 +190,13 @@ body.has-mascot-dock .app-main {
     scroll-padding-bottom: 7.25rem;
 }
 
+@media (max-width: 63.99rem) {
+    body.has-mascot-dock .app-main {
+        padding-bottom: 0;
+        scroll-padding-bottom: 0;
+    }
+}
+
 form.inline {
     display: inline;
 }
@@ -1391,9 +1398,19 @@ form.inline {
     font-size: 0.88rem;
 }
 
+.module-settings-editor {
+    padding-bottom: 0.75rem;
+}
+
+.module-settings-editor :is(input, select, textarea, button, summary) {
+    scroll-margin-bottom: 5.5rem;
+}
+
 .module-settings-sticky-actions {
     position: sticky;
+    z-index: 2;
     bottom: 0.75rem;
+    margin-top: 1rem;
     display: flex;
     justify-content: flex-end;
     gap: 0.55rem;
@@ -1859,6 +1876,13 @@ th {
     text-transform: uppercase;
 }
 
+th[scope='row'] {
+    color: var(--color-sg-ink);
+    font-size: inherit;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
 tbody tr:hover {
     background: var(--sg-hover);
 }
@@ -2133,7 +2157,7 @@ ol.stack {
 .mascot-dock__bubble {
     position: relative;
     min-width: 0;
-    padding: 0.85rem 2.15rem 0.85rem 1rem;
+    padding: 0.85rem 2.6rem 0.85rem 1rem;
     border: 1px solid var(--line);
     border-radius: 1.15rem 1.15rem 0.35rem 1.15rem;
     background: var(--surface-raised);
@@ -2184,6 +2208,14 @@ ol.stack {
 @media (prefers-reduced-motion: no-preference) {
     .mascot-dock__avatar {
         animation: mascot-bob 3.2s ease-in-out infinite;
+    }
+}
+
+@media (max-width: 63.99rem) {
+    .mascot-dock {
+        position: static;
+        justify-content: flex-end;
+        margin: 1.5rem 0 0 auto;
     }
 }
 

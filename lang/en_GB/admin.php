@@ -164,7 +164,9 @@ return [
             'public' => 'Public',
             'staff' => 'Staff',
             'administrator' => 'Administrator',
-            'super_admin' => 'Super-admin',
+            'super_admin' => 'Super Admin',
+            'volunteer' => 'Volunteer',
+            'student' => 'Student',
         ],
         'alert' => [
             'disabled' => 'Disabled',

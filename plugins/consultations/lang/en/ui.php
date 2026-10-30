@@ -25,6 +25,8 @@ return [
             'create_consultation' => 'Create consultation',
             'dd_mm_yyyy_hh_mm_ss' => 'dd/mm/yyyy HH:mm:ss',
             'consultations' => 'Consultations',
+            'no_consultations_yet' => 'No consultations are available to you yet',
+            'no_consultations_body' => 'When a consultation is booked for one of your pets, or you create one, it will appear here.',
             'scheduled_for' => 'Scheduled for',
             'dd_mm_yyyy' => '(dd/mm/yyyy)',
             'scheduled' => 'Scheduled',
