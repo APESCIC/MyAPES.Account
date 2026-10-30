@@ -8,6 +8,7 @@ use Plugins\Cases\CasesArea;
 use Plugins\Recruitment\Models\RecruitmentApplication;
 use Plugins\Recruitment\Models\RecruitmentRole;
 use Plugins\Tickets\Http\Controllers\TicketController;
+use Plugins\Tickets\TicketServiceConfiguration;
 use Tests\TestCase;
 
 class WorkflowLabelMatrixTest extends TestCase
@@ -106,6 +107,8 @@ class WorkflowLabelMatrixTest extends TestCase
         return [
             'tickets status' => ['status', $this->inRule('plugins/tickets/src/Http/Controllers/TicketController.php', 'open,in_progress')],
             'tickets priority' => ['priority', TicketController::PRIORITIES],
+            'shelter ticket area' => ['ticket_area', app(TicketServiceConfiguration::class)->for('shelter-rescue')->serviceAreas],
+            'pet care ticket area' => ['ticket_area', app(TicketServiceConfiguration::class)->for('pet-care-clinic')->serviceAreas],
             'apes cic case status' => ['status', $cic->statuses],
             'apes cic case priority' => ['priority', $cic->priorities],
             'shelter case status' => ['status', $shelter->statuses],

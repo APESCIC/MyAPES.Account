@@ -104,4 +104,17 @@ return [
         'not_neutered' => 'Not Neutered',
         'unknown' => 'Unknown',
     ],
+    'ticket_area' => [
+        'adoption' => 'Adoption',
+        'surrender' => 'Surrender',
+        'rescue' => 'Rescue',
+        'fostering' => 'Fostering',
+        'animal_welfare' => 'Animal Welfare',
+        'appointment' => 'Appointment',
+        'consultation' => 'Consultation',
+        'prescription' => 'Prescription',
+        'billing' => 'Billing',
+        'follow_up' => 'Follow Up',
+        'other' => 'Other',
+    ],
 ];

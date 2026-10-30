@@ -77,13 +77,13 @@ class PetCareTicketWorkflowTest extends TestCase
             ->get(route('petcare.tickets.index'))
             ->assertOk()
             ->assertSeeInOrder([
-                'appointment',
-                'consultation',
-                'prescription',
-                'billing',
-                'follow_up',
-                'other',
-            ]);
+                '<option value="appointment" >Appointment</option>',
+                '<option value="consultation" >Consultation</option>',
+                '<option value="prescription" >Prescription</option>',
+                '<option value="billing" >Billing</option>',
+                '<option value="follow_up" >Follow Up</option>',
+                '<option value="other" >Other</option>',
+            ], false);
 
         foreach (['operations', 'rescue'] as $foreignServiceArea) {
             $this->post(route('petcare.tickets.store'), [

@@ -3,6 +3,8 @@
 namespace Plugins\Tickets;
 
 use App\Services\ModuleSettingsService;
+use App\Support\WorkflowLabels;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class TicketCategoryResolver
@@ -86,7 +88,7 @@ class TicketCategoryResolver
             }
         }
 
-        return str_replace('_', ' ', $key);
+        return WorkflowLabels::label('ticket_area', $key);
     }
 
     public function labelForSubcategory(string $subCoreKey, string $areaKey, string $subKey): string
@@ -95,7 +97,7 @@ class TicketCategoryResolver
 
         return $sub !== null
             ? (string) ($sub['label'] ?? $subKey)
-            : str_replace('_', ' ', $subKey);
+            : Str::headline($subKey);
     }
 
     public function labelForWebsite(string $subCoreKey, ?string $key): string

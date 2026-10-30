@@ -29,7 +29,7 @@
                     @if($usesHierarchicalCategories)
                         {{ $categoryResolver->labelForArea($ticket->sub_core_key, $ticket->service_area) }}
                     @else
-                        {{ $ticket->service_area }}
+                        {{ \App\Support\WorkflowLabels::label('ticket_area', $ticket->service_area) }}
                     @endif
                 </dd>
             </div>

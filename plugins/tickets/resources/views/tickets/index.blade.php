@@ -44,7 +44,7 @@
                                         <br><small class="muted">{{ $categoryResolver->labelForSubcategory($ticket->sub_core_key, $ticket->service_area, $ticket->sub_category) }}</small>
                                     @endif
                                 @else
-                                    {{ $ticket->service_area }}
+                                    {{ \App\Support\WorkflowLabels::label('ticket_area', $ticket->service_area) }}
                                 @endif
                             </td>
                             <td><span class="status">{{ \App\Support\WorkflowLabels::status($ticket->status) }}</span></td>
@@ -89,7 +89,7 @@
                                 @endforeach
                             @else
                                 @foreach($serviceAreas as $serviceArea)
-                                    <option value="{{ $serviceArea }}" @selected(old('service_area') === $serviceArea)>{{ $serviceArea }}</option>
+                                    <option value="{{ $serviceArea }}" @selected(old('service_area') === $serviceArea)>{{ \App\Support\WorkflowLabels::label('ticket_area', $serviceArea) }}</option>
                                 @endforeach
                             @endif
                         </select>

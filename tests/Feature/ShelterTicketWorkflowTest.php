@@ -40,13 +40,13 @@ class ShelterTicketWorkflowTest extends TestCase
             ->get(route('shelter.tickets.index'))
             ->assertOk()
             ->assertSeeInOrder([
-                'adoption',
-                'surrender',
-                'rescue',
-                'fostering',
-                'animal_welfare',
-                'other',
-            ]);
+                '<option value="adoption" >Adoption</option>',
+                '<option value="surrender" >Surrender</option>',
+                '<option value="rescue" >Rescue</option>',
+                '<option value="fostering" >Fostering</option>',
+                '<option value="animal_welfare" >Animal Welfare</option>',
+                '<option value="other" >Other</option>',
+            ], false);
 
         $this->post(route('shelter.tickets.store'), [
             'service_area' => 'operations',
