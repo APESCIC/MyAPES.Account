@@ -1,5 +1,54 @@
 [
   {
+    "version": "0.45.3",
+    "date": "2026-10-30",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Save confirmations",
+    "summary": "You now see a clear confirmation after every save, and a clear message when something needs fixing.",
+    "changes": [
+      "Show a confirmation message just below the header after saving a profile, ticket, case, consultation, plugin settings or email template. It closes by itself after a few seconds, or you can dismiss it.",
+      "Show problems with a form in an error message that stays until you dismiss it.",
+      "Announce both messages to screen readers.",
+      "Confirm when a new case or consultation is created."
+    ],
+    "affected_areas": [
+      "Accessibility",
+      "Design",
+      "Forms"
+    ],
+    "categories": [
+      "fixed",
+      "changed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch: presentation and feedback only. Routes, permissions and stored data are unchanged.",
+    "validation": [
+      "FlashToastTest for confirmation and error toasts, and status checks on case create and plugin settings save.",
+      "Toast JavaScript tests for auto-dismiss and announcement politeness.",
+      "Save, profile, settings, mail, case, consultation and layout test files locally, and the full PHPUnit suite in CI.",
+      "Manual check of a Profile save in the local preview."
+    ],
+    "known_limitations": [
+      "Messages appear after the page reloads; there are no live notifications."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Epic #450, issue #454; pull request #566.",
+    "references": [
+      {
+        "label": "Issue #454",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/454"
+      },
+      {
+        "label": "Pull request #566",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/566"
+      }
+    ]
+  },
+  {
     "version": "0.45.2",
     "date": "2026-10-30",
     "channel": "stable",
