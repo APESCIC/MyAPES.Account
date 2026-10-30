@@ -52,6 +52,48 @@
     ]
   },
   {
+    "version": "0.43.11",
+    "date": "2026-10-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "CodeQL scanning workflow",
+    "summary": "Code scanning runs again from a repository workflow after the organisation policy turned off default setup.",
+    "changes": [
+      "Add a CodeQL workflow that scans GitHub Actions and JavaScript on pull requests, pushes to main and a weekly schedule.",
+      "Pin the CodeQL and checkout actions to full commit hashes."
+    ],
+    "affected_areas": [
+      "Testing"
+    ],
+    "categories": [
+      "fixed"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.43 line: continuous integration only, with no application behaviour change.",
+    "validation": [
+      "CodeQL workflow runs on the pull request.",
+      "actionlint on the new workflow.",
+      "composer pre-merge on the pull request branch."
+    ],
+    "known_limitations": [
+      "PHP is not scanned because CodeQL does not support it."
+    ],
+    "rollback": "Remove the CodeQL workflow. No application or database change is involved.",
+    "provenance": "Issue #445; pull request #448.",
+    "references": [
+      {
+        "label": "Issue #445",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/445"
+      },
+      {
+        "label": "Pull request #448",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/448"
+      }
+    ]
+  },
+  {
     "version": "0.43.10",
     "date": "2026-10-29",
     "channel": "stable",
