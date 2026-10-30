@@ -1,5 +1,52 @@
 [
   {
+    "version": "0.45.5",
+    "date": "2026-10-30",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Owner search on tickets",
+    "summary": "Changing a ticket's owner now uses a search instead of a list of every account.",
+    "changes": [
+      "Ticket pages no longer list every account in the Owner field; staff search by name or email instead.",
+      "Matches are limited to people who can use that service and to ten results, and suspended accounts never appear.",
+      "The search also works without JavaScript using the Search button.",
+      "Saving checks that the new owner can use the service."
+    ],
+    "affected_areas": [
+      "Tickets",
+      "Privacy"
+    ],
+    "categories": [
+      "changed",
+      "security"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch: replaces one form control and tightens owner validation. Routes gain one read-only search endpoint; stored data is unchanged.",
+    "validation": [
+      "TicketOwnerPickerTest for search limits, permissions, suspended accounts and save validation.",
+      "Owner picker JavaScript test.",
+      "Ticket, assignment and workflow test files locally, and the full PHPUnit suite in CI.",
+      "Manual search on a ticket in the local preview."
+    ],
+    "known_limitations": [
+      "Search matches names, emails and usernames only."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Epic #450, issue #456; pull request #571.",
+    "references": [
+      {
+        "label": "Issue #456",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/456"
+      },
+      {
+        "label": "Pull request #571",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/571"
+      }
+    ]
+  },
+  {
     "version": "0.45.4",
     "date": "2026-10-30",
     "channel": "stable",
@@ -10,7 +57,7 @@
       "On tablets and phones, Spike's tip now sits at the end of the page instead of floating over tables and forms.",
       "Plugin settings pages leave room below the last row so the Save settings bar never hides it.",
       "Admin overview shows identity types and access classes with their normal names, such as Local, Cloudron OIDC, Volunteer and Student.",
-      "Admin permission groups use real module names, such as APES CIC · Cases.",
+      "Admin permission groups use real module names, such as APES CIC \u00b7 Cases.",
       "The Consultations list shows a friendly message when there is nothing to show yet."
     ],
     "affected_areas": [
