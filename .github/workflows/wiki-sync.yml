@@ -1,0 +1,57 @@
+name: Sync docs/wiki to GitHub wiki
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/wiki/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wiki-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Publish wiki
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Push docs/wiki to the wiki repository
+        shell: bash
+        env:
+          # GITHUB_TOKEN with contents: write is used by default.
+          # If the push is refused, add a repository secret WIKI_TOKEN
+          # (fine-grained token, this repository only, Contents: read and write).
+          WIKI_TOKEN: ${{ secrets.WIKI_TOKEN || secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          auth="$(printf 'x-access-token:%s' "$WIKI_TOKEN" | base64 -w0)"
+          echo "::add-mask::$auth"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git -c http.extraheader="AUTHORIZATION: basic $auth" \
+            clone --quiet --depth 1 "https://github.com/${REPO}.wiki.git" wiki
+
+          rsync -a --delete --exclude '.git' --exclude 'README.md' docs/wiki/ wiki/
+
+          cd wiki
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Wiki already up to date."
+            exit 0
+          fi
+          git commit --quiet -m "Sync from ${REPO}@${SHA}"
+          git -c http.extraheader="AUTHORIZATION: basic $auth" push --quiet origin HEAD
+          echo "Wiki updated from ${SHA}."
