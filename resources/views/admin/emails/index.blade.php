@@ -3,8 +3,6 @@
 @section('title', __('admin.emails.page_title'))
 
 @section('content')
-    @include('admin._navigation')
-
     <header class="page-heading">
         <div>
             <p class="eyebrow">{{ __('admin.emails.eyebrow') }}</p>

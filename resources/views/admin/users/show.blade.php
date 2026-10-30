@@ -3,8 +3,6 @@
 @section('title', 'Admin user | MyAPES Core')
 
 @section('content')
-    @include('admin._navigation')
-
     <div class="panel-stack">
         <section class="panel" aria-labelledby="managed-user-title">
             <p><a href="{{ route('admin.users.index') }}">{{ __('admin.users.back_to_users') }}</a></p>

@@ -85,7 +85,7 @@ class AdminSearchKeywordsTest extends TestCase
         $this->assertFalse($this->catalogueContains($catalogue, 'permissions', 'Access'));
     }
 
-    public function test_admin_shell_renders_permission_gated_search_box(): void
+    public function test_command_palette_carries_permission_gated_admin_search_entries(): void
     {
         $superAdmin = User::factory()->accessLevel(User::ROLE_SUPERADMIN)->create();
         $admin = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
@@ -93,18 +93,18 @@ class AdminSearchKeywordsTest extends TestCase
         $this->actingAs($superAdmin)
             ->get(route('admin.index'))
             ->assertOk()
-            ->assertSee('data-admin-search', false)
-            ->assertSee(__('admin.search.placeholder'), false)
-            ->assertSee('data-admin-search-index', false)
-            ->assertSee('Recruitment', false)
+            ->assertSee('data-workspace-palette-index', false)
+            ->assertSee(__('workspace.palette.placeholder'), false)
+            ->assertSee('"id":"admin:admin.access"', false)
+            ->assertSee('"id":"search:plugin.recruitment"', false)
             ->assertSee('jobs', false);
 
         $this->actingAs($admin)
             ->get(route('admin.index'))
             ->assertOk()
-            ->assertSee('data-admin-search', false)
-            ->assertDontSee('"id":"admin.access"', false)
-            ->assertDontSee('"id":"plugin.recruitment"', false);
+            ->assertSee('data-workspace-palette-index', false)
+            ->assertDontSee('"id":"admin:admin.access"', false)
+            ->assertDontSee('"id":"search:plugin.recruitment"', false);
     }
 
     public function test_plugin_manifests_expose_search_keywords_from_lang(): void

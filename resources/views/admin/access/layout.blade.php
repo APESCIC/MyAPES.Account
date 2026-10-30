@@ -3,8 +3,6 @@
 @section('title', 'Access | MyAPES Core')
 
 @section('content')
-    @include('admin._navigation')
-
     <div class="panel-stack">
         <section class="panel" aria-labelledby="admin-access-title">
             <h1 id="admin-access-title">{{ __('admin.nav.access') }}</h1>

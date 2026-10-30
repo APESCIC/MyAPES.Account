@@ -9,8 +9,6 @@
 @endcan
 
 @section('content')
-    @include('admin._navigation')
-
     @php
         $accounts = $dashboard['accounts'];
         $workload = $dashboard['workload'];

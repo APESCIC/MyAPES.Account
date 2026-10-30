@@ -13,7 +13,9 @@ import {
     CircleUserRound,
     ClipboardList,
     Compass,
+    createElement,
     createIcons,
+    ExternalLink,
     Github,
     Heart,
     HeartPulse,
@@ -23,12 +25,15 @@ import {
     Leaf,
     LogIn,
     LogOut,
+    Mail,
     Menu,
     MessagesSquare,
     Moon,
     PawPrint,
     Plus,
     Puzzle,
+    ScrollText,
+    Search,
     Settings,
     ShieldCheck,
     Sprout,
@@ -39,33 +44,71 @@ import {
     X,
 } from 'lucide';
 import { initChangeLog } from './change-log.js';
-import { initAdminSearch } from './admin-search.js';
 import { initPasskeys } from './passkeys.js';
+import { initCommandPalette } from './workspace/command-palette.js';
+import { initWorkspaceDrawer } from './workspace/drawer.js';
+
+const icons = {
+    ArrowRight,
+    BadgeCheck,
+    Briefcase,
+    BriefcaseBusiness,
+    Building2,
+    ChevronRight,
+    Circle,
+    CircleHelp,
+    CirclePause,
+    CircleCheckBig,
+    CirclePlus,
+    CircleUserRound,
+    ClipboardList,
+    Compass,
+    ExternalLink,
+    Github,
+    Heart,
+    HeartPulse,
+    House,
+    Inbox,
+    LayoutDashboard,
+    Leaf,
+    LogIn,
+    LogOut,
+    Mail,
+    Menu,
+    MessagesSquare,
+    Moon,
+    PawPrint,
+    Plus,
+    Puzzle,
+    ScrollText,
+    Search,
+    Settings,
+    ShieldCheck,
+    Sprout,
+    Sun,
+    Ticket,
+    UserPlus,
+    UserRound,
+    X,
+};
 
 const themeStorageKey = 'myapes-theme';
-const themeToggle = document.querySelector('[data-theme-toggle]');
-const themeLabel = document.querySelector('[data-theme-label]');
 const themeColor = document.querySelector('meta[name="theme-color"]');
-const sidebar = document.querySelector('[data-sidebar]');
-const sidebarToggle = document.querySelector('[data-sidebar-toggle]');
-const sidebarClose = document.querySelector('[data-sidebar-close]');
-const sidebarBackdrop = document.querySelector('[data-sidebar-backdrop]');
-const sidebarMedia = window.matchMedia('(max-width: 64rem)');
-let sidebarReturnFocus = null;
 
 const applyTheme = (theme, persist = false) => {
     const normalizedTheme = theme === 'dark' ? 'dark' : 'light';
+    const isDark = normalizedTheme === 'dark';
 
     document.documentElement.dataset.theme = normalizedTheme;
     document.documentElement.style.colorScheme = normalizedTheme;
-    themeColor?.setAttribute('content', normalizedTheme === 'dark' ? '#1c1914' : '#f3e4c4');
+    themeColor?.setAttribute('content', isDark ? '#0b1a1f' : '#d2f4fa');
 
-    if (themeToggle) {
-        const isDark = normalizedTheme === 'dark';
-        themeToggle.setAttribute('aria-pressed', String(isDark));
-        themeToggle.setAttribute('aria-label', `Switch to ${isDark ? 'light' : 'dark'} theme`);
-        if (themeLabel) {
-            themeLabel.textContent = isDark ? 'Dark mode' : 'Light mode';
+    for (const toggle of document.querySelectorAll('[data-theme-toggle]')) {
+        toggle.setAttribute('aria-pressed', String(isDark));
+        const label = isDark ? toggle.dataset.labelLight : toggle.dataset.labelDark;
+        if (label) {
+            toggle.setAttribute('aria-label', label);
+            toggle.setAttribute('title', label);
         }
     }
 
@@ -78,124 +121,25 @@ const applyTheme = (theme, persist = false) => {
     }
 };
 
-createIcons({
-    icons: {
-        ArrowRight,
-        BadgeCheck,
-        Briefcase,
-        BriefcaseBusiness,
-        Building2,
-        ChevronRight,
-        Circle,
-        CircleHelp,
-        CirclePause,
-        CircleCheckBig,
-        CirclePlus,
-        CircleUserRound,
-        ClipboardList,
-        Compass,
-        Github,
-        Heart,
-        HeartPulse,
-        House,
-        Inbox,
-        LayoutDashboard,
-        Leaf,
-        LogIn,
-        LogOut,
-        Menu,
-        MessagesSquare,
-        Moon,
-        PawPrint,
-        Plus,
-        Puzzle,
-        Settings,
-        ShieldCheck,
-        Sprout,
-        Sun,
-        Ticket,
-        UserPlus,
-        UserRound,
-        X,
-    },
-});
+createIcons({ icons });
 
 applyTheme(document.documentElement.dataset.theme);
 initChangeLog();
-initAdminSearch();
 initPasskeys();
 
-themeToggle?.addEventListener('click', () => {
-    applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark', true);
-});
-
-const sidebarFocusableElements = () => Array.from(sidebar?.querySelectorAll(
-    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-) ?? []).filter((element) => element.getClientRects().length > 0);
-
-const setSidebarOpen = (open, returnFocus = true) => {
-    if (!sidebar || !sidebarToggle) {
-        return;
-    }
-
-    const shouldOpen = Boolean(open && sidebarMedia.matches);
-    sidebar.dataset.open = String(shouldOpen);
-    sidebarToggle.setAttribute('aria-expanded', String(shouldOpen));
-    sidebarToggle.setAttribute('aria-label', shouldOpen ? 'Close navigation menu' : 'Open navigation menu');
-    document.body.classList.toggle('sidebar-open', shouldOpen);
-
-    if (shouldOpen) {
-        sidebarReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : sidebarToggle;
-        window.requestAnimationFrame(() => {
-            (sidebarClose ?? sidebarFocusableElements()[0])?.focus();
-        });
-    } else if (returnFocus && sidebarReturnFocus instanceof HTMLElement) {
-        sidebarReturnFocus.focus();
-        sidebarReturnFocus = null;
-    }
-};
-
-sidebarToggle?.addEventListener('click', () => {
-    setSidebarOpen(sidebar?.dataset.open !== 'true');
-});
-
-sidebarClose?.addEventListener('click', () => setSidebarOpen(false));
-sidebarBackdrop?.addEventListener('click', () => setSidebarOpen(false));
-
-document.addEventListener('keydown', (event) => {
-    if (sidebar?.dataset.open !== 'true') {
-        return;
-    }
-
-    if (event.key === 'Escape') {
-        event.preventDefault();
-        setSidebarOpen(false);
-        return;
-    }
-
-    if (event.key !== 'Tab') {
-        return;
-    }
-
-    const focusable = sidebarFocusableElements();
-    const first = focusable[0];
-    const last = focusable.at(-1);
-
-    if (!first || !last) {
-        return;
-    }
-
-    if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
+document.addEventListener('click', (event) => {
+    if (event.target instanceof Element && event.target.closest('[data-theme-toggle]')) {
+        applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark', true);
     }
 });
 
-sidebarMedia.addEventListener('change', () => {
-    setSidebarOpen(false, false);
+const drawer = initWorkspaceDrawer({
+    onOpen: () => applyTheme(document.documentElement.dataset.theme),
+});
+initCommandPalette({
+    icons,
+    createElement,
+    beforeOpen: () => drawer.close({ restoreFocus: false }),
 });
 
 const mascotStorageKey = 'myapes-mascot-dismissed-v2';

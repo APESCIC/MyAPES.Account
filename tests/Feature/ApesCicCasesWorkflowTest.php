@@ -74,7 +74,7 @@ class ApesCicCasesWorkflowTest extends TestCase
         $this->actingAs($viewer->fresh())
             ->get(route('apes-cic.tickets.index'))
             ->assertOk()
-            ->assertDontSee('Create ticket')
+            ->assertDontSee('"id":"action:create.apes-cic.tickets"', false)
             ->assertDontSee('action="'.route('apes-cic.tickets.store').'"', false);
         $this->get(route('apes-cic.cases.index'))
             ->assertOk()

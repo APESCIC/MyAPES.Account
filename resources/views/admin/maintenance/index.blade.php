@@ -3,8 +3,6 @@
 @section('title', 'Admin maintenance | MyAPES Core')
 
 @section('content')
-    @include('admin._navigation')
-
     <header class="page-heading">
         <div>
             <p class="eyebrow">{{ __('admin.maintenance.guarded_recovery_controls') }}</p>
@@ -14,7 +12,7 @@
     </header>
 
     <div class="panel-stack">
-        <section class="panel" aria-labelledby="maintenance-state-heading">
+        <x-card aria-labelledby="maintenance-state-heading">
             <h2 id="maintenance-state-heading">{{ $active ? 'Application is in maintenance' : 'Application is available' }}</h2>
             <p>{{ __('admin.maintenance.laravel_s_native_maintenance_store_is_authoritative') }}</p>
             @if($current)
@@ -30,50 +28,52 @@
                 </dl>
             @endif
             @if($problem)
-                <p class="error-list">{{ $problem }}</p>
+                <x-alert tone="error">{{ $problem }}</x-alert>
             @endif
-        </section>
+        </x-card>
 
-        <section class="panel" aria-labelledby="queue-impact-heading">
+        <x-card aria-labelledby="queue-impact-heading">
             <h2 id="queue-impact-heading">{{ __('admin.maintenance.queue_processing_pauses') }}</h2>
             <p>The Redis queue worker runs without <code>--force</code>. Jobs remain durable and resume after maintenance ends.</p>
-        </section>
+        </x-card>
 
         @unless($problem)
             @unless($active)
-                <section class="panel" aria-labelledby="activate-maintenance-heading">
+                <x-card aria-labelledby="activate-maintenance-heading">
                     <h2 id="activate-maintenance-heading">{{ __('admin.maintenance.activate_maintenance') }}</h2>
                     <p>{{ __('admin.maintenance.public_users_and_ordinary_staff_will_receive_the_maintenance') }}</p>
-                    <form method="post" action="{{ route('admin.maintenance.activate') }}" class="stacked-form">
+                    <form method="post" action="{{ route('admin.maintenance.activate') }}" class="stacked-form stack">
                         @csrf
-                        <label for="maintenance-message">{{ __('admin.maintenance.public_message') }}</label>
-                        <textarea id="maintenance-message" name="message" maxlength="500" required>{{ old('message') }}</textarea>
-                        <label for="maintenance-planned-end">{{ __('admin.maintenance.planned_end_optional') }}</label>
-                        <input id="maintenance-planned-end" type="datetime-local" name="planned_end_at" value="{{ old('planned_end_at') }}">
-                        <label>
+                        <x-field id="maintenance-message" name="message" type="textarea" :label="__('admin.maintenance.public_message')" maxlength="500" required />
+                        <x-field id="maintenance-planned-end" name="planned_end_at" type="datetime-local" :label="__('admin.maintenance.planned_end_optional')" />
+                        <label class="inline-check">
                             <input type="checkbox" name="confirm_activation" value="1" required>
                             {{ __('admin.maintenance.confirm_block') }}
                         </label>
-                        <button type="submit" class="button danger-btn">{{ __('admin.maintenance.activate_maintenance') }}</button>
+                        <div>
+                            <x-button variant="danger" icon="circle-pause">{{ __('admin.maintenance.activate_maintenance') }}</x-button>
+                        </div>
                     </form>
-                </section>
+                </x-card>
             @else
-                <section class="panel" aria-labelledby="deactivate-maintenance-heading">
+                <x-card aria-labelledby="deactivate-maintenance-heading">
                     <h2 id="deactivate-maintenance-heading">{{ __('admin.maintenance.end_maintenance') }}</h2>
                     <p>{{ __('admin.maintenance.public_and_staff_traffic_will_resume_immediately_queued_jobs') }}</p>
-                    <form method="post" action="{{ route('admin.maintenance.deactivate') }}" class="stacked-form">
+                    <form method="post" action="{{ route('admin.maintenance.deactivate') }}" class="stacked-form stack">
                         @csrf
-                        <label>
+                        <label class="inline-check">
                             <input type="checkbox" name="confirm_deactivation" value="1" required>
                             {{ __('admin.maintenance.confirm_resume') }}
                         </label>
-                        <button type="submit" class="button">{{ __('admin.maintenance.deactivate_maintenance') }}</button>
+                        <div>
+                            <x-button>{{ __('admin.maintenance.deactivate_maintenance') }}</x-button>
+                        </div>
                     </form>
-                </section>
+                </x-card>
             @endunless
         @endunless
 
-        <section class="panel" aria-labelledby="maintenance-history-heading">
+        <x-card aria-labelledby="maintenance-history-heading">
             <h2 id="maintenance-history-heading">{{ __('admin.maintenance.recent_maintenance_windows') }}</h2>
             @if($history->isEmpty())
                 <p>{{ __('admin.maintenance.no_maintenance_windows_have_been_recorded') }}</p>
@@ -108,6 +108,6 @@
                     </table>
                 </div>
             @endif
-        </section>
+        </x-card>
     </div>
 @endsection

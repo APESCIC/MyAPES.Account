@@ -114,7 +114,7 @@ class TerminologyGlossaryTest extends TestCase
 
     public function test_admin_primary_nav_already_avoids_super_admin_door(): void
     {
-        $navigation = file_get_contents(resource_path('views/admin/_navigation.blade.php'));
+        $navigation = file_get_contents(app_path('Support/Navigation/WorkspaceNavigation.php'));
 
         $this->assertIsString($navigation);
         $this->assertStringContainsString("__('admin.nav.plugins')", $navigation);

@@ -3,11 +3,10 @@
 namespace App\Core\Providers;
 
 use App\Contracts\MaintenanceModeGateway;
-use App\Contracts\ModuleNavigationProvider;
 use App\Core\Extensions\Navigation\PublicNavigationRegistry;
-use App\Core\Extensions\Navigation\StaffPluginNavigationRegistry;
 use App\Services\LaravelMaintenanceModeGateway;
 use App\Support\MascotTips;
+use App\Support\Navigation\WorkspaceNavigation;
 use App\Support\ReleaseHistoryRepository;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -32,18 +31,18 @@ class CoreAdminServiceProvider extends ServiceProvider
             $view->with('appVersion', app(ReleaseHistoryRepository::class)->version());
             $view->with('mascotTip', app(MascotTips::class)->forCurrentRequest());
             $view->with(
-                'moduleNavigation',
-                auth()->check()
-                    ? app(ModuleNavigationProvider::class)->forUser(auth()->user())
-                    : [],
-            );
-            $view->with(
                 'publicPluginNavigation',
                 app(PublicNavigationRegistry::class)->visibleTo(auth()->user()),
             );
+        });
+
+        View::composer('layouts.app', function (IlluminateView $view): void {
+            $request = request();
+            $user = $request->hasSession() ? auth()->user() : null;
+
             $view->with(
-                'staffPluginNavigation',
-                app(StaffPluginNavigationRegistry::class)->enabledItems(),
+                'workspaceMenu',
+                app(WorkspaceNavigation::class)->forRequest($user, $request),
             );
         });
     }

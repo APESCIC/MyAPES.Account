@@ -3,8 +3,6 @@
 @section('title', 'Admin plugins | MyAPES Core')
 
 @section('content')
-    @include('admin._navigation')
-
     <header class="page-heading">
         <div>
             <p class="eyebrow">{{ __('admin.plugins.first_party_capability_registry') }}</p>

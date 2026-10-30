@@ -3,8 +3,6 @@
 @section('title', __('admin.emails.page_title'))
 
 @section('content')
-    @include('admin._navigation')
-
     <header class="page-heading">
         <div>
             <p class="eyebrow"><a href="{{ route('admin.emails.index') }}">{{ __('admin.emails.heading') }}</a></p>

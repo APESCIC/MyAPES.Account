@@ -3,8 +3,6 @@
 @section('title', 'Super Admin groups | MyAPES Core')
 
 @section('content')
-    @include('admin._navigation')
-
     <section class="panel" aria-labelledby="admin-groups-title">
         <h1 id="admin-groups-title">{{ __('admin.access.super_admin_groups') }}</h1>
         <p class="muted">{{ __('admin.access.groups_intro') }}</p>
