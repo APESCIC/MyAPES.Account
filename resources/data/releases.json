@@ -1,5 +1,51 @@
 [
   {
+    "version": "0.45.2",
+    "date": "2026-10-30",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Raw translation key guard",
+    "summary": "Admin permission lists now show readable names, and a new check stops untranslated text from reaching any page.",
+    "changes": [
+      "Show plugin permissions on Admin Roles and Permissions with their plain names, such as Assign tickets, instead of generated titles.",
+      "Add readable names for the Student and Volunteer area access permissions.",
+      "Add an automated check that renders pages for guests, public users, staff and Super Admins and fails if a translation key or snake_case text appears."
+    ],
+    "affected_areas": [
+      "Admin",
+      "Content",
+      "Testing"
+    ],
+    "categories": [
+      "fixed",
+      "added"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch: wording fixes plus a new test. Stored permission names, routes and data are unchanged.",
+    "validation": [
+      "RenderedRawKeyGuardTest across 55 pages and four personas, with a self-check that it catches a raw key.",
+      "LocalisationAdminExtractionTest for the plugin permission label fallback.",
+      "Admin, localisation, permission, role and structure test files locally, and the full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "The Change Log Hub is checked for translation keys only, because historic release notes quote code."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Epic #450, issue #453; pull request #565.",
+    "references": [
+      {
+        "label": "Issue #453",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/453"
+      },
+      {
+        "label": "Pull request #565",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/565"
+      }
+    ]
+  },
+  {
     "version": "0.45.1",
     "date": "2026-10-30",
     "channel": "stable",

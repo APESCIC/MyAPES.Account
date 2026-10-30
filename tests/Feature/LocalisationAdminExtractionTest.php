@@ -30,6 +30,12 @@ class LocalisationAdminExtractionTest extends TestCase
         $this->assertSame('Admin panel access', PermissionDescriptions::title('admin.access'));
     }
 
+    public function test_plugin_permissions_use_the_manifest_ability_label(): void
+    {
+        $this->assertSame('Assign tickets', PermissionDescriptions::title('apes-cic.tickets.assign'));
+        $this->assertSame('Student area access', PermissionDescriptions::title('student.access'));
+    }
+
     public function test_admin_inventory_section_is_clear(): void
     {
         $path = base_path('docs/i18n-inventory.md');
