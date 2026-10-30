@@ -86,7 +86,8 @@ class ConsultationController extends Controller
             'module_key' => 'consultations',
         ]);
 
-        return redirect()->route('petcare.consultations.show', $consultation);
+        return redirect()->route('petcare.consultations.show', $consultation)
+            ->with('status', __('consultations::ui.flash.consultation_created'));
     }
 
     public function show(

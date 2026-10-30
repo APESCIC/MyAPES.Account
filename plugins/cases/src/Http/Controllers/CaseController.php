@@ -185,7 +185,8 @@ class CaseController extends Controller
             'status' => $case->status,
         ]);
 
-        return redirect()->route($this->area()->showRouteName(), $case);
+        return redirect()->route($this->area()->showRouteName(), $case)
+            ->with('status', __('cases::ui.flash.case_created'));
     }
 
     private function cicShow(
@@ -554,7 +555,8 @@ class CaseController extends Controller
             'status' => $case->status,
         ]);
 
-        return redirect()->route($area->showRouteName(), $case);
+        return redirect()->route($area->showRouteName(), $case)
+            ->with('status', __('cases::ui.flash.case_created'));
     }
 
     private function shelterShow(

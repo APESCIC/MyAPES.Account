@@ -6,7 +6,7 @@
         "build": "vite build",
         "dev": "vite",
         "test:change-log": "node --test resources/js/change-log.test.js",
-        "test:workspace": "node --test resources/js/workspace/command-palette.test.js resources/js/workspace/dialog-focus.test.js",
+        "test:workspace": "node --test resources/js/workspace/command-palette.test.js resources/js/workspace/dialog-focus.test.js resources/js/workspace/toasts.test.js",
         "test:frontend": "npm run test:local-dev && npm run test:change-log && npm run test:workspace",
         "test:local-dev": "node --test scripts/local/dev-runner.test.mjs",
         "test:release-backfill": "node --test scripts/local/release-backfill.test.mjs"

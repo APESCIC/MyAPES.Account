@@ -67,16 +67,7 @@
             @endif
 
             <main id="main-content" class="app-main" tabindex="-1">
-                @if(session('status'))
-                    <x-alert tone="ok">{{ session('status') }}</x-alert>
-                @endif
-                @if($errors->any())
-                    <div class="error-list" role="alert">
-                        @foreach($errors->all() as $error)
-                            <div>{{ $error }}</div>
-                        @endforeach
-                    </div>
-                @endif
+                <x-flash-toasts />
 
                 @yield('content')
             </main>

@@ -22,10 +22,6 @@
         </div>
     </header>
 
-    @if(session('status'))
-        <p class="status">{{ session('status') }}</p>
-    @endif
-
     <form
         id="module-settings-form"
         method="post"

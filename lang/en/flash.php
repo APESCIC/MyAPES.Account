@@ -17,4 +17,6 @@ return [
     'saved' => 'Saved.',
     'deleted' => 'Deleted.',
     'not_authorised' => 'You are not authorised to perform this action.',
+    'dismiss' => 'Dismiss message',
+    'errors_heading' => 'Please fix this problem:|Please fix these :count problems:',
 ];
