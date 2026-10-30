@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.45.1",
+    "date": "2026-10-30",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Friendly ticket area labels",
+    "summary": "Shelter and Pet Care tickets now show clear labels such as Animal Welfare and Follow-Up instead of internal IDs.",
+    "changes": [
+      "Show Title Case service area labels on the Shelter and Pet Care ticket forms, ticket lists and ticket pages.",
+      "Fall back to a readable label for any unknown area or subcategory instead of showing the stored ID."
+    ],
+    "affected_areas": [
+      "Tickets",
+      "Content"
+    ],
+    "categories": [
+      "fixed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch: display-only label fix. Stored values, routes and permissions are unchanged.",
+    "validation": [
+      "TicketOptionLabelsTest fails if any Shelter or Pet Care ticket option label contains an underscore.",
+      "ShelterTicketWorkflowTest, PetCareTicketWorkflowTest and TerminologyGlossaryTest.",
+      "Full PHPUnit suite in CI.",
+      "Manual check of the Shelter ticket form in the local preview."
+    ],
+    "known_limitations": [
+      "The Shelter and Pet Care area lists are still fixed; making them editable is tracked separately."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Epic #450, issue #452; pull request #564.",
+    "references": [
+      {
+        "label": "Issue #452",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/452"
+      },
+      {
+        "label": "Pull request #564",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/564"
+      }
+    ]
+  },
+  {
     "version": "0.45.0",
     "date": "2026-10-30",
     "channel": "stable",
