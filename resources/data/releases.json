@@ -1,5 +1,45 @@
 [
   {
+    "version": "0.45.8",
+    "date": "2026-10-30",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Discussion forms and code of conduct",
+    "summary": "GitHub Discussions now has forms for each category, and the project has a code of conduct.",
+    "changes": [
+      "Add discussion forms for the Help, Ideas and Releases and deploys categories; Help and Ideas forms ask people to confirm they have removed personal data and that the post is not a security problem.",
+      "Fix the security advisory link in the issue chooser and add links to the Help and Ideas discussions.",
+      "Add CODE_OF_CONDUCT.md covering standards, privacy, security reporting and enforcement."
+    ],
+    "affected_areas": [
+      "Documentation",
+      "Developer workflow"
+    ],
+    "categories": [
+      "added",
+      "fixed"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch: repository community files only. Application code, routes, permissions and stored data are unchanged.",
+    "validation": [
+      "All forms parse and pass yamllint.",
+      "Release history validation and the full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "Polls cannot be limited to maintainers in GitHub, so polls from others are closed by hand."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Discussions setup approved on 30 October 2026.",
+    "references": [
+      {
+        "label": "Pull request #568",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/568"
+      }
+    ]
+  },
+  {
     "version": "0.45.7",
     "date": "2026-10-30",
     "channel": "stable",

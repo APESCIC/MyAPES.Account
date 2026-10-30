@@ -1,0 +1,27 @@
+title: "Release v0."
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: v0.44.1
+    validations:
+      required: true
+  - type: input
+    id: milestone
+    attributes:
+      label: Milestone link
+  - type: textarea
+    id: changes
+    attributes:
+      label: What changed
+    validations:
+      required: true
+  - type: dropdown
+    id: deploy
+    attributes:
+      label: Cloudron deploy status
+      options:
+        - Deployed and verified
+        - Deploying
+        - Not yet deployed
