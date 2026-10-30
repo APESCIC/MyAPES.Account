@@ -16,7 +16,7 @@ class HealthAndThemeTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'status' => 'ok',
-                'version' => '0.43.10',
+                'version' => '0.44.0',
                 'release' => 'development',
                 'maintenance' => false,
                 'checks' => [
@@ -50,7 +50,7 @@ class HealthAndThemeTest extends TestCase
             ->assertServiceUnavailable()
             ->assertExactJson([
                 'status' => 'unavailable',
-                'version' => '0.43.10',
+                'version' => '0.44.0',
                 'release' => 'development',
                 'maintenance' => false,
                 'checks' => [
@@ -90,7 +90,7 @@ class HealthAndThemeTest extends TestCase
         }
     }
 
-    public function test_light_theme_and_responsive_guest_sidebar_are_rendered(): void
+    public function test_light_theme_and_responsive_guest_workspace_shell_are_rendered(): void
     {
         $response = $this->get(route('home'));
 
@@ -98,13 +98,12 @@ class HealthAndThemeTest extends TestCase
         $response->assertSee('data-theme="light"', false);
         $response->assertSee("localStorage.getItem('myapes-theme')", false);
         $response->assertSee('data-theme-toggle', false);
-        $response->assertSee('data-sidebar', false);
-        $response->assertSee('data-sidebar-toggle', false);
-        $response->assertSee('branding/logo-myapes-account.png', false);
-        $response->assertSee('logos/myapes-mark-256x256.png', false);
-        $response->assertSee('srcset=', false);
-        $response->assertSee('width="1024"', false);
-        $response->assertSee('height="1024"', false);
+        $response->assertSee('data-workspace-rail', false);
+        $response->assertSee('data-workspace-menu-open', false);
+        $response->assertSee('logos/myapes-mark-40x40.png', false);
+        $response->assertSee('logos/myapes-mark-80x80.png 2x', false);
+        $response->assertSee('width="40"', false);
+        $response->assertSee('height="40"', false);
         $response->assertSee('mascot/spike-welcome.png', false);
         $response->assertSee('welcome-heading__mascot', false);
         $response->assertDontSee('class="hero-image"', false);
@@ -113,9 +112,8 @@ class HealthAndThemeTest extends TestCase
         $response->assertSee('href="'.route('public.login').'"', false);
         $response->assertSee('href="'.route('public.register').'"', false);
         $response->assertSee('href="'.route('staff.login').'"', false);
-        $response->assertSee('sidebar-support', false);
-        $response->assertSeeText('App Support');
-        $response->assertSee('sidebar-support__pill', false);
+        $response->assertSee('data-workspace-dock', false);
+        $response->assertSeeText(__('workspace.groups.support'));
         $response->assertSee('https://github.com/APESCIC/MyAPES-Account"', false);
         $response->assertSee('site-footer__links', false);
         $response->assertSee('href="'.route('privacy').'"', false);
@@ -151,7 +149,7 @@ class HealthAndThemeTest extends TestCase
 
     }
 
-    public function test_authenticated_sidebar_is_role_aware(): void
+    public function test_authenticated_workspace_rail_is_role_aware(): void
     {
         $serviceUser = User::factory()->accessLevel(User::ROLE_SERVICE_USER)->create();
 
@@ -163,8 +161,8 @@ class HealthAndThemeTest extends TestCase
             ->assertSee('href="'.route('apes-cic.tickets.index').'"', false)
             ->assertSee('href="'.route('shelter.pets.index').'"', false)
             ->assertSee('href="'.route('petcare.pets.index').'"', false)
-            ->assertSee('sidebar-support', false)
-            ->assertSeeText('App Support')
+            ->assertSee('data-workspace-dock', false)
+            ->assertSeeText(__('workspace.groups.support'))
             ->assertDontSee('href="'.route('admin.index').'"', false);
 
         $admin = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
@@ -179,6 +177,9 @@ class HealthAndThemeTest extends TestCase
     {
         $this->assertSame([1254, 1254], array_slice(getimagesize(resource_path('branding/source/apes-logo-v3.png')), 0, 2));
         $this->assertSame([1024, 1024], array_slice(getimagesize(public_path('branding/logo-myapes-account.png')), 0, 2));
+        $this->assertSame([40, 40], array_slice(getimagesize(public_path('logos/myapes-mark-40x40.png')), 0, 2));
+        $this->assertSame([80, 80], array_slice(getimagesize(public_path('logos/myapes-mark-80x80.png')), 0, 2));
+        $this->assertSame([120, 120], array_slice(getimagesize(public_path('logos/myapes-mark-120x120.png')), 0, 2));
         $this->assertSame([192, 192], array_slice(getimagesize(public_path('icons/pwa-maskable-192x192.png')), 0, 2));
         $this->assertSame([512, 512], array_slice(getimagesize(public_path('icons/pwa-maskable-512x512.png')), 0, 2));
         $this->assertSame([1200, 630], array_slice(getimagesize(public_path('social/og-image-1200x630.jpg')), 0, 2));

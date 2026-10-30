@@ -112,7 +112,7 @@ class PublicChromeNamingTest extends TestCase
             ->assertSee('property="og:site_name" content="MyAPES Account"', false)
             ->assertSee('name="application-name" content="MyAPES Account"', false)
             ->assertSee('name="apple-mobile-web-app-title" content="MyAPES Account"', false)
-            ->assertSee('alt="MyAPES Core"', false)
+            ->assertSee('<span class="sg-brand__name">MyAPES Account</span>', false)
             ->assertSee('<span><strong>MyAPES</strong> Core</span>', false)
             ->assertSee('rel="manifest"', false)
             ->assertSee('site.webmanifest', false)

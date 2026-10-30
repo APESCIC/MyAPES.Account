@@ -3,8 +3,6 @@
 @section('title', 'Group members | MyAPES Core')
 
 @section('content')
-    @include('admin._navigation')
-
     <section class="panel" aria-labelledby="group-members-title">
         <p><a href="{{ route('admin.access.index', ['tab' => 'groups']) }}">{{ __('admin.access.back_to_groups') }}</a></p>
         <h1 id="group-members-title">{{ __('admin.access.members_of') }} <code>{{ $group->name }}</code></h1>

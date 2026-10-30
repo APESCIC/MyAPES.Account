@@ -3,8 +3,6 @@
 @section('title', 'Admin users | MyAPES Core')
 
 @section('content')
-    @include('admin._navigation')
-
     <section class="panel" aria-labelledby="admin-users-title">
         <h1 id="admin-users-title">
             @if(($filters['account_type'] ?? '') === 'staff')

@@ -1,5 +1,57 @@
 [
   {
+    "version": "0.44.0",
+    "date": "2026-10-30",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Newsroom-style glass sidebar",
+    "summary": "A new Newsroom-style glass sidebar replaces the old sidebar, with a Staff | Admin panel switch, a breadcrumb header and a Ctrl K command palette.",
+    "changes": [
+      "Replace the sidebar with a floating frosted-glass rail in MyAPES logo colours: flat links grouped by module and plugin, and a user dock pinned to the bottom.",
+      "Add a Staff | Admin switch for people who can use both panels, and a Public panel for guests.",
+      "Add a page header with a breadcrumb, a Search pill and View site.",
+      "Add a Ctrl K (or ⌘K) command palette that finds every page you can open, plugin settings, and quick actions such as Create ticket.",
+      "On phones and tablets, a top card opens the same navigation in an accessible slide-in drawer.",
+      "Restyle cards, buttons, fields, tables, tabs and alerts, the auth pages and the dark theme to match, and hide the navigation when printing.",
+      "Respect reduced-motion and reduced-transparency settings, with a skip link, a clear focus ring and one current link on every page."
+    ],
+    "affected_areas": [
+      "Navigation",
+      "Design",
+      "Accessibility"
+    ],
+    "categories": [
+      "added",
+      "changed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Minor: a new navigation shell and command palette. Route names, permissions and URLs are unchanged.",
+    "validation": [
+      "WorkspaceNavigationTest, WorkspaceMenuTest and WorkspaceShellTest for every QA role.",
+      "Workspace JavaScript tests for the palette filter and focus trap.",
+      "Full PHPUnit suite in CI.",
+      "Manual check of the rail, drawer, palette, dark theme and reduced transparency in the local preview."
+    ],
+    "known_limitations": [
+      "Pages keep their own headings; the header title only appears where a page sets one."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Epic #382 (issues #383 to #396, #415 and #416); pull request #449.",
+    "references": [
+      {
+        "label": "Issue #382",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/382"
+      },
+      {
+        "label": "Pull request #449",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/449"
+      }
+    ]
+  },
+  {
     "version": "0.43.10",
     "date": "2026-10-29",
     "channel": "stable",

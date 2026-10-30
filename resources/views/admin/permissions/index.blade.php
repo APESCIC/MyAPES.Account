@@ -3,8 +3,6 @@
 @section('title', __('admin.access.permissions_page_title'))
 
 @section('content')
-    @include('admin._navigation')
-
     <section class="panel" aria-labelledby="admin-permissions-title">
         <h1 id="admin-permissions-title">{{ __('admin.access.super_admin_permissions') }}</h1>
         <p class="muted">{{ __('admin.access.permissions_intro') }}</p>

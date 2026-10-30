@@ -323,7 +323,7 @@ class RecruitmentUnifiedMenuAccessMatrixTest extends TestCase
     private function recruitmentPrimaryHref(string $html): ?string
     {
         $count = preg_match_all(
-            '/<a href="([^"]+)"[^>]*class="primary-nav__link[^"]*"[^>]*>\s*<i[^>]*><\/i>\s*<span>Recruitment<\/span>/',
+            '/<a\s+href="([^"]+)"\s+class="sg-nav-link"[^>]*>\s*<i[^>]*><\/i>\s*<span>Recruitment<\/span>/',
             $html,
             $matches,
         );

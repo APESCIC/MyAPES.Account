@@ -3,8 +3,6 @@
 @section('title', 'Admin modules | MyAPES Core')
 
 @section('content')
-    @include('admin._navigation')
-
     <header class="page-heading">
         <div>
             <p class="eyebrow">{{ __('admin.plugins.organisation_areas') }}</p>

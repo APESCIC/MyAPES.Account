@@ -3,8 +3,6 @@
 @section('title', 'Recruitment settings | MyAPES Core')
 
 @section('content')
-    @include('admin._navigation')
-
     <header class="page-heading module-settings-heading">
         <div>
             <p class="eyebrow">{{ strtoupper(str_replace('-', ' ', $subCoreKey)) }} · RECRUITMENT</p>

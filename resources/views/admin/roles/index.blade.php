@@ -3,8 +3,6 @@
 @section('title', 'Super Admin roles | MyAPES Core')
 
 @section('content')
-    @include('admin._navigation')
-
     <section class="panel" aria-labelledby="admin-roles-title">
         <h1 id="admin-roles-title">{{ __('admin.access.super_admin_roles') }}</h1>
         <p class="muted">{{ __('admin.access.protected_roles_sync_from_application_code_custom_roles_can_') }}</p>

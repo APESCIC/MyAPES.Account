@@ -3,8 +3,6 @@
 @section('title', 'Super Admin role | MyAPES Core')
 
 @section('content')
-    @include('admin._navigation')
-
     <section class="panel" aria-labelledby="managed-role-title">
         <p><a href="{{ route('admin.roles.index') }}">{{ __('admin.access.back_to_super_admin_roles') }}</a></p>
         <h1 id="managed-role-title">{{ $managedRole->name }}</h1>

@@ -24,8 +24,9 @@ class AdminShellNavigationTest extends TestCase
             $this->actingAs($actor)
                 ->get(route('dashboard'))
                 ->assertOk()
-                ->assertDontSee('>Admin</span>', false)
-                ->assertDontSee('>Super Admin</span>', false)
+                ->assertDontSee('data-workspace-panel-switch', false)
+                ->assertDontSee('>Admin</a>', false)
+                ->assertDontSee('<span>Super Admin</span>', false)
                 ->assertDontSee('href="'.route('admin.index').'"', false)
                 ->assertDontSee('href="'.route('superadmin.index').'"', false);
         }
@@ -38,8 +39,9 @@ class AdminShellNavigationTest extends TestCase
         $this->actingAs($admin)
             ->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('>Admin</span>', false)
-            ->assertDontSee('>Super Admin</span>', false)
+            ->assertSee('data-workspace-panel-switch', false)
+            ->assertSee('>Admin</a>', false)
+            ->assertDontSee('<span>Super Admin</span>', false)
             ->assertSee('href="'.route('admin.index').'"', false)
             ->assertDontSee('href="'.route('superadmin.index').'"', false);
     }
@@ -51,8 +53,8 @@ class AdminShellNavigationTest extends TestCase
         $this->actingAs($superAdmin)
             ->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('>Admin</span>', false)
-            ->assertDontSee('>Super Admin</span>', false)
+            ->assertSee('>Admin</a>', false)
+            ->assertDontSee('<span>Super Admin</span>', false)
             ->assertSee('href="'.route('admin.index').'"', false)
             ->assertDontSee('href="'.route('superadmin.index').'"', false);
 
@@ -147,7 +149,7 @@ class AdminShellNavigationTest extends TestCase
         $this->actingAs($actor)
             ->get(route('dashboard'))
             ->assertOk()
-            ->assertDontSee('>Admin</span>', false);
+            ->assertDontSee('data-workspace-panel-switch', false);
 
         $this->actingAs($actor)->get(route('admin.index'))->assertForbidden();
         $this->actingAs($actor)->get(route('admin.users.index'))->assertForbidden();
@@ -177,7 +179,7 @@ class AdminShellNavigationTest extends TestCase
         $this->actingAs($actor)
             ->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('>Admin</span>', false)
+            ->assertSee('>Admin</a>', false)
             ->assertSee('href="'.route('admin.users.index', ['account_type' => 'public']).'"', false)
             ->assertDontSee('href="'.route('admin.index').'"', false);
     }
