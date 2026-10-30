@@ -16,6 +16,10 @@ Route::post('tickets', [TicketController::class, 'store'])
     ->defaults('subCoreKey', 'shelter-rescue')
     ->defaults('moduleKey', 'tickets')
     ->name('tickets.store');
+Route::get('tickets/{ticket}/owner-candidates', [TicketController::class, 'ownerCandidates'])
+    ->defaults('subCoreKey', 'shelter-rescue')
+    ->defaults('moduleKey', 'tickets')
+    ->name('tickets.owner-candidates');
 Route::get('tickets/{ticket}', [TicketController::class, 'show'])
     ->defaults('subCoreKey', 'shelter-rescue')
     ->defaults('moduleKey', 'tickets')

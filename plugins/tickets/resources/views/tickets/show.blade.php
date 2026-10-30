@@ -103,19 +103,42 @@
             </form>
         @endif
         @if($canChangeAssignment)
+            <form id="ticket-owner-search" method="get" action="{{ route($ticketService->routePrefix.'.show', $ticket) }}#ticket-assignment-form"></form>
             <form id="ticket-assignment-form" method="post" action="{{ route($ticketService->routePrefix.'.update', $ticket) }}">
                 @csrf
                 @method('put')
                 <div class="row">
-                    <div>
+                    <div data-owner-picker data-owner-endpoint="{{ route($ticketService->routePrefix.'.owner-candidates', $ticket) }}" data-owner-empty="{{ __('tickets::ui.show.blade.no_owner_matches') }}">
+                        <label for="owner_q">{{ __('tickets::ui.show.blade.find_owner') }}</label>
+                        <div class="actions">
+                            <input
+                                id="owner_q"
+                                type="search"
+                                name="owner_q"
+                                form="ticket-owner-search"
+                                value="{{ $ownerSearch }}"
+                                minlength="{{ \Plugins\Tickets\TicketOwnerCandidates::MIN_TERM_LENGTH }}"
+                                autocomplete="off"
+                                aria-describedby="owner_q_hint"
+                                data-owner-search
+                            >
+                            <button type="submit" form="ticket-owner-search" class="button-secondary">{{ __('tickets::ui.show.blade.search') }}</button>
+                        </div>
+                        <p id="owner_q_hint" class="muted">{{ __('tickets::ui.show.blade.find_owner_hint') }}</p>
                         <label for="user_id">{{ __('tickets::ui.index.blade.owner') }}</label>
-                        <select id="user_id" name="user_id">
-                            @foreach($ownerCandidates as $ownerCandidate)
-                                <option value="{{ $ownerCandidate->id }}" @selected((int) $ticket->user_id === (int) $ownerCandidate->id)>
-                                    {{ $ownerCandidate->name }} ({{ $ownerCandidate->email }})
-                                </option>
+                        <select id="user_id" name="user_id" data-owner-results>
+                            <option value="{{ $ticket->user_id }}" selected data-owner-current>
+                                {{ __('tickets::ui.show.blade.current_owner', ['owner' => $ticket->user?->name ?? '—']) }}
+                            </option>
+                            @foreach($ownerMatches as $ownerMatch)
+                                <option value="{{ $ownerMatch->id }}">{{ $ownerMatch->name }} ({{ $ownerMatch->email }})</option>
                             @endforeach
                         </select>
+                        <p class="muted" role="status" data-owner-status>
+                            @if($ownerSearchHadNoMatches)
+                                {{ __('tickets::ui.show.blade.no_owner_matches') }}
+                            @endif
+                        </p>
                     </div>
                     <div>
                         <label for="assigned_to">{{ __('tickets::ui.show.blade.assigned_staff') }}</label>
