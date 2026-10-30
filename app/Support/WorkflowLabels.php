@@ -20,6 +20,7 @@ final class WorkflowLabels
         'recruitment_category',
         'sex',
         'neutering_status',
+        'ticket_area',
     ];
 
     public static function label(string $group, ?string $value): string
