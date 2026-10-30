@@ -72,6 +72,48 @@
                 @yield('content')
             </main>
 
+            @if($mascotTip)
+                <aside
+                    class="mascot-dock mascot-dock--collapsed"
+                    data-mascot-dock
+                    data-mascot-route="{{ $mascotTip['route'] }}"
+                    aria-label="{{ __('public.chrome.app.blade.tip_from_spike_the_myapes_bearded_dragon') }}"
+                >
+                    <button
+                        type="button"
+                        class="mascot-dock__toggle"
+                        data-mascot-toggle
+                        aria-expanded="false"
+                        aria-controls="mascot-dock-bubble"
+                        aria-label="{{ __('public.chrome.app.blade.show_tip_from_spike') }}"
+                    >
+                        <img
+                            src="{{ asset('mascot/spike-dock.png') }}"
+                            alt=""
+                            class="mascot-dock__avatar"
+                            width="512"
+                            height="512"
+                        >
+                    </button>
+                    <div
+                        id="mascot-dock-bubble"
+                        class="mascot-dock__bubble"
+                        data-mascot-bubble
+                        hidden
+                    >
+                        <button
+                            type="button"
+                            class="mascot-dock__dismiss"
+                            data-mascot-dismiss
+                            aria-label="{{ __('public.chrome.app.blade.hide_tip') }}"
+                        >
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <p><strong>{{ $mascotTip['title'] }}</strong> {{ $mascotTip['body'] }}</p>
+                    </div>
+                </aside>
+            @endif
+
             <footer class="site-footer">
                 <div class="site-footer__brand">
                     <span><strong>{{ __('public.chrome.app.blade.myapes') }}</strong> {{ __('public.chrome.app.blade.account') }}</span>
@@ -94,48 +136,6 @@
             </footer>
         </div>
     </div>
-
-    @if($mascotTip)
-        <aside
-            class="mascot-dock mascot-dock--collapsed"
-            data-mascot-dock
-            data-mascot-route="{{ $mascotTip['route'] }}"
-            aria-label="{{ __('public.chrome.app.blade.tip_from_spike_the_myapes_bearded_dragon') }}"
-        >
-            <button
-                type="button"
-                class="mascot-dock__toggle"
-                data-mascot-toggle
-                aria-expanded="false"
-                aria-controls="mascot-dock-bubble"
-                aria-label="{{ __('public.chrome.app.blade.show_tip_from_spike') }}"
-            >
-                <img
-                    src="{{ asset('mascot/spike-dock.png') }}"
-                    alt=""
-                    class="mascot-dock__avatar"
-                    width="512"
-                    height="512"
-                >
-            </button>
-            <div
-                id="mascot-dock-bubble"
-                class="mascot-dock__bubble"
-                data-mascot-bubble
-                hidden
-            >
-                <button
-                    type="button"
-                    class="mascot-dock__dismiss"
-                    data-mascot-dismiss
-                    aria-label="{{ __('public.chrome.app.blade.hide_tip') }}"
-                >
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                <p><strong>{{ $mascotTip['title'] }}</strong> {{ $mascotTip['body'] }}</p>
-            </div>
-        </aside>
-    @endif
 </div>
 
 <x-workspace.drawer />

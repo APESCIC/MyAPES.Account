@@ -23,6 +23,8 @@
             'staff' => __('admin.overview.access.staff'),
             'administrator' => __('admin.overview.access.administrator'),
             'super-admin' => __('admin.overview.access.super_admin'),
+            'volunteer' => __('admin.overview.access.volunteer'),
+            'student' => __('admin.overview.access.student'),
         ];
         $alertLabels = [
             'disabled' => __('admin.overview.alert.disabled'),

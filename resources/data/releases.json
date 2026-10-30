@@ -1,5 +1,53 @@
 [
   {
+    "version": "0.45.4",
+    "date": "2026-10-30",
+    "channel": "stable",
+    "type": "patch",
+    "title": "UI review fixes",
+    "summary": "Layout and wording fixes from the UI review: Spike no longer covers tables on smaller screens, and admin labels use their proper names.",
+    "changes": [
+      "On tablets and phones, Spike's tip now sits at the end of the page instead of floating over tables and forms.",
+      "Plugin settings pages leave room below the last row so the Save settings bar never hides it.",
+      "Admin overview shows identity types and access classes with their normal names, such as Local, Cloudron OIDC, Volunteer and Student.",
+      "Admin permission groups use real module names, such as APES CIC · Cases.",
+      "The Consultations list shows a friendly message when there is nothing to show yet."
+    ],
+    "affected_areas": [
+      "Design",
+      "Admin",
+      "Consultations"
+    ],
+    "categories": [
+      "fixed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch: layout and wording fixes only. Routes, permissions and stored data are unchanged.",
+    "validation": [
+      "UiReviewFixesTest for the empty state, labels, permission groups and layout rules.",
+      "Admin, access, layout, consultation and localisation test files locally, and the full PHPUnit suite in CI.",
+      "Manual check in the local preview at 1280, 840 and 630 pixels wide."
+    ],
+    "known_limitations": [
+      "On wide screens Spike still floats in the corner, with space reserved at the bottom of each page."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Epic #450, issue #455; pull request #570.",
+    "references": [
+      {
+        "label": "Issue #455",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/455"
+      },
+      {
+        "label": "Pull request #570",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/570"
+      }
+    ]
+  },
+  {
     "version": "0.45.3",
     "date": "2026-10-30",
     "channel": "stable",

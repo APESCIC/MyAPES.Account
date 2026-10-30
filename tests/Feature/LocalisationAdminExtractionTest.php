@@ -36,6 +36,13 @@ class LocalisationAdminExtractionTest extends TestCase
         $this->assertSame('Student area access', PermissionDescriptions::title('student.access'));
     }
 
+    public function test_plugin_permission_groups_use_module_and_plugin_names(): void
+    {
+        $this->assertSame('APES CIC · Cases', PermissionDescriptions::group('apes-cic.cases.assign'));
+        $this->assertSame('APES Shelter and Rescue · Tickets', PermissionDescriptions::group('shelter-rescue.tickets.view-all'));
+        $this->assertSame('Access', PermissionDescriptions::group('admin.access'));
+    }
+
     public function test_admin_inventory_section_is_clear(): void
     {
         $path = base_path('docs/i18n-inventory.md');

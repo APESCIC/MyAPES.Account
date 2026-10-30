@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Core\Access\PermissionNaming;
+use App\Core\Extensions\Modules\ModulePackageRegistry;
 use App\Core\Extensions\Plugins\PluginRegistry;
 
 /**
@@ -143,10 +144,23 @@ final class PermissionDescriptions
         if (str_contains($permission, '.')) {
             $parts = explode('.', $permission);
 
-            return self::headlineFromKey($parts[0].'.'.$parts[1]);
+            return self::pluginGroupLabel($parts[0], $parts[1])
+                ?? self::headlineFromKey($parts[0].'.'.$parts[1]);
         }
 
         return 'Other';
+    }
+
+    private static function pluginGroupLabel(string $moduleSlug, string $pluginSlug): ?string
+    {
+        $modules = app(ModulePackageRegistry::class);
+        $plugins = app(PluginRegistry::class);
+
+        if (! $modules->has($moduleSlug) || ! $plugins->has($pluginSlug)) {
+            return null;
+        }
+
+        return $modules->module($moduleSlug)->name.' · '.$plugins->plugin($pluginSlug)->name;
     }
 
     public static function layer(string $permission): string
