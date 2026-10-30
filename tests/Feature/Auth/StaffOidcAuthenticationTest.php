@@ -162,7 +162,7 @@ class StaffOidcAuthenticationTest extends TestCase
 
         $this->get(route('staff.auth.callback'))
             ->assertServiceUnavailable()
-            ->assertSeeText('MyAPES Core')
+            ->assertSeeText('MyAPES Account')
             ->assertSeeText('Temporarily unavailable');
 
         $this->assertAuthenticated();

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Plugin settings | MyAPES Core')
+@section('title', 'Plugin settings | MyAPES Account')
 
 @section('content')
     @php

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Super Admin role | MyAPES Core')
+@section('title', 'Super Admin role | MyAPES Account')
 
 @section('content')
     <section class="panel" aria-labelledby="managed-role-title">

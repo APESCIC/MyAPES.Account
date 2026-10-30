@@ -13,7 +13,7 @@
 
         <section>
             <h2>{{ __('public.legal.cookies.blade.what_we_use') }}</h2>
-            <p>MyAPES Core sets a small number of essential cookies so the site can sign you in, protect forms, and remember a public session if you ask it to. We do not set advertising cookies, and we do not use third-party analytics cookies on these pages.</p>
+            <p>MyAPES Account sets a small number of essential cookies so the site can sign you in, protect forms, and remember a public session if you ask it to. We do not set advertising cookies, and we do not use third-party analytics cookies on these pages.</p>
         </section>
 
         <section>

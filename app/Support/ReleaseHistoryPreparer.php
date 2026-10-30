@@ -363,7 +363,7 @@ class ReleaseHistoryPreparer
             "assertSame('{$previousVersion}', \$result['target_version'])" => "assertSame('{$nextVersion}', \$result['target_version'])",
             "Release history is valid at v{$previousVersion}" => "Release history is valid at v{$nextVersion}",
             "Current version v{$previousVersion}" => "Current version v{$nextVersion}",
-            'aria-label="View the MyAPES Core change log for version v'.$previousVersion.'"' => 'aria-label="View the MyAPES Core change log for version v'.$nextVersion.'"',
+            'aria-label="View the MyAPES Account change log for version v'.$previousVersion.'"' => 'aria-label="View the MyAPES Account change log for version v'.$nextVersion.'"',
             'href="#release-v'.str_replace('.', '-', $previousVersion).'"' => 'href="#release-v'.str_replace('.', '-', $nextVersion).'"',
             "assertSeeText('v{$previousVersion}')" => "assertSeeText('v{$nextVersion}')",
         ];

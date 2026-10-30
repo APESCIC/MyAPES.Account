@@ -1,7 +1,7 @@
 {
-  "name": "MyAPES Core",
+  "name": "MyAPES Account",
   "short_name": "MyAPES",
-  "description": "MyAPES Core web application",
+  "description": "MyAPES Account web application",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

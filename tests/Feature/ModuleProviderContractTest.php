@@ -733,7 +733,7 @@ class ModuleProviderContractTest extends TestCase
         $response = $this->actingAs($owner)->get(route('apes-cic.index'));
 
         $response->assertOk()
-            ->assertSee('MyAPES Core service')
+            ->assertSee('MyAPES Account service')
             ->assertSee('Available plugins')
             ->assertSee('What needs your attention')
             ->assertSee('Recent updates')

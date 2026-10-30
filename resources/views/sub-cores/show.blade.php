@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', $subCore->name.' | MyAPES Core')
+@section('title', $subCore->name.' | MyAPES Account')
 
 @section('content')
     <div class="service-dashboard service-dashboard--{{ $subCore->key }}">
         <header class="page-heading service-dashboard__heading">
             <div>
-                <p class="eyebrow">MyAPES Core service</p>
+                <p class="eyebrow">MyAPES Account service</p>
                 <h1>{{ $subCore->name }}</h1>
                 <p>{{ $subCore->description }}</p>
             </div>

@@ -1,4 +1,4 @@
-name: Test MyAPES Core
+name: Test MyAPES Account
 
 on:
   pull_request:

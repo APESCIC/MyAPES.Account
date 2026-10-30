@@ -52,7 +52,7 @@ final class SeoMeta
             : self::canonicalUrl($request);
 
         return new self(
-            title: $title,
+            title: self::withProductSuffix($title),
             description: Str::limit(trim(strip_tags($description)), 155, ''),
             keywords: $keywords,
             canonical: $canonical,
@@ -93,6 +93,18 @@ final class SeoMeta
         }
 
         return Str::limit($clean, 155, '');
+    }
+
+    public static function withProductSuffix(string $title): string
+    {
+        $productName = __('terms.app_name');
+        $suffix = ' | '.$productName;
+
+        if ($title === $productName || str_ends_with($title, $suffix)) {
+            return $title;
+        }
+
+        return $title.$suffix;
     }
 
     private static function nonEmpty(mixed $value): ?string

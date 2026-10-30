@@ -17,7 +17,7 @@ class TerminologyGlossaryTest extends TestCase
     public function test_canonical_terms_resolve_from_en_gb(): void
     {
         $this->assertSame('MyAPES Account', __('terms.app_name'));
-        $this->assertSame('MyAPES Core', __('terms.platform_name'));
+        $this->assertNull(config('glossary.canonical.platform_name'));
         $this->assertSame('Plugin', trans_choice('terms.plugin', 1));
         $this->assertSame('Plugins', trans_choice('terms.plugin', 2));
         $this->assertSame('Public user', trans_choice('terms.public_user', 1));

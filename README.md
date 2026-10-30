@@ -1,12 +1,12 @@
-# MyAPES Core
+# MyAPES Account
 
-MyAPES Core is the APES CIC service-user and staff portal built on Laravel for Cloudron LAMP deployments. The GitHub repository remains `APESCIC/MyAPES-Account`. Account login and registration surfaces may still say **MyAPES Account**.
+MyAPES Account is the APES CIC service-user and staff portal built on Laravel for Cloudron LAMP deployments. The GitHub repository is `APESCIC/MyAPES-Account`.
 
 ## Product vocabulary
 
 | Public name | Meaning | Internal identifiers (unchanged) |
 |-------------|---------|----------------------------------|
-| **MyAPES Core** | Platform software (auth chrome, Admin, dashboard, changelog) | Application / `APP_NAME` |
+| **MyAPES Account** | The product: auth chrome, Admin, dashboard, changelog | Application / `APP_NAME` |
 | **Services** | Service hubs: APES CIC, Shelter and Rescue, Pet Care Clinic | `sub_cores` |
 | **Plugins** | Capabilities: Tickets, Cases, Pet Profiles, Consultations | `module_types` / module instances |
 
@@ -14,8 +14,8 @@ MyAPES Core is the APES CIC service-user and staff portal built on Laravel for C
 
 - Last verified README health review: `2026-08-14T16:05:40+01:00`
 - Source-controlled application version: [`VERSION`](VERSION)
-- Continuous integration and manual Cloudron deploy: [Deploy MyAPES Core to Cloudron](https://github.com/APESCIC/MyAPES-Account/actions/workflows/deploy-cloudron.yml)
-- Public release history: [MyAPES Core Change Log](https://myaccount.myapes.me.uk/change-log)
+- Continuous integration and manual Cloudron deploy: [Deploy MyAPES Account to Cloudron](https://github.com/APESCIC/MyAPES-Account/actions/workflows/deploy-cloudron.yml)
+- Public release history: [MyAPES Account Change Log](https://myaccount.myapes.me.uk/change-log)
 
 ## Support and maintainers
 
@@ -76,7 +76,7 @@ Do not disclose suspected security vulnerabilities in a public issue. Follow the
 - `/` - landing page with Public Login, Register, and Staff Login choices
 - `/login` and `/register` - public local password accounts only. Directory (`cloudron_oidc`) users are redirected to Staff Login and cannot use public password authentication.
 - `/staff/login` - the only production sign-in path for Cloudron directory users; it starts Cloudron OIDC. The local staff password form exists only in local/testing.
-- `/change-log` - public, searchable MyAPES Core release history for guests, public users, and staff
+- `/change-log` - public, searchable MyAPES Account release history for guests, public users, and staff
 - local/testing only: QA role switcher (Public/Student/Volunteer/Staff/Admin/Super Admin) available in the app layout for one-click identity switching
 
 Public service-user accounts stay separate from Cloudron staff accounts: directory sync creates `identity_type=cloudron_oidc` users only, never `identity_type=local` public users, and does not convert an existing local public account. Public users receive own-record module abilities plus selected services; they cannot open Staff, Admin, or Super Admin routes. Volunteers and students share staff-class service access without delete. Admins can open Admin Users; Super Admins can open Access, Modules, and Maintenance.
@@ -439,7 +439,7 @@ Deployments are handled by `.github/workflows/deploy-cloudron.yml`.
 
 ### Deployment triggers
 
-1. Deploy runs only on manual `workflow_dispatch` (for example `gh workflow run "Deploy MyAPES Core to Cloudron" --ref main`). There is no auto-deploy after a green `main` test run.
+1. Deploy runs only on manual `workflow_dispatch` (for example `gh workflow run "Deploy MyAPES Account to Cloudron" --ref main`). There is no auto-deploy after a green `main` test run.
 2. Run local dev verify on the PR branch before merge (`composer pre-pr-verify` or ship-gate steps). Prefer Cloudron deploy only after `test-cloudron.yml` has succeeded for the target `main` revision, local verify passed, and changelog metadata on `main` is confirmed. Cloudron is the **last** post-merge deploy step; pass `app_version` from `VERSION` when dispatching (ship-gate).
 3. After a successful Cloudron deploy, the app Change Log Hub at `/change-log` shows the head `releases.json` record, and the deploy workflow publishes GitHub Release `{VERSION} Beta` with tag `v{VERSION}`. Sibling APES websites keep separate changelogs; update those only when the operator asks (ship-gate).
 

@@ -46,7 +46,7 @@ Feature/fix complete
 ## Later change (#167)
 
 - Auto-deploy on green `main` removed; deploy is `workflow_dispatch` only
-- Agents verify the MyAPES Core Change Log Hub after deploy; sibling website changelogs/hubs are out of scope
+- Agents verify the MyAPES Account Change Log Hub after deploy; sibling website changelogs/hubs are out of scope
 
 ## Later change (#183)
 

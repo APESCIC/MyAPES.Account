@@ -14,8 +14,7 @@ Locale and key conventions: [localisation.md](localisation.md). Canonical labels
 
 | Canonical | Meaning / audience | Use in UI | Avoid | Lang key |
 | --- | --- | --- | --- | --- |
-| MyAPES Account | This application — user-facing product name (chrome, emails, page titles, public notices). | Brand, titles, emails, footer when referring to the product people use. | MyAPES Core (in public/user-facing chrome); “the Core app” as a display name. | `terms.app_name` |
-| MyAPES Core | Platform / internal naming (repo history, some deploy notes, Change Log Hub provenance). Not the public product label. | Docs and internal notes only when distinguishing platform from product. Prefer “MyAPES Account” on screen. | Using Core as the default `<title>`, OG site name, or welcome headline. | `terms.platform_name` |
+| MyAPES Account | This application — the one product name (chrome, emails, page titles, public notices, docs). Every page title ends “\| MyAPES Account”. | Brand, titles, emails, footer, docs. | MyAPES Core (retired in 0.45.0; historic release notes only); “the Core app” as a display name. | `terms.app_name` |
 | Core | Always-on platform layer (auth, accounts, profiles, access, Admin shell, …). | Rarely as a standalone nav label; say Admin, Access, etc. for screens. | Calling an organisation area or plugin “Core”. | `terms.core` |
 | Module | Organisation area package (`modules/<slug>`). | Admin → **Modules** (enable areas). Area hubs use the area’s public name. | sub-core; service area / Service (when it means the area); calling a feature a module in UI. | `terms.module` / `terms.modules` |
 | Plugin | Reusable feature package (`plugins/<slug>`), enabled per module. | Admin → **Plugins**; empty states (“Plugins will appear here…”). | module / module type (when it means a feature); “add-on” as the primary label. | `terms.plugin` / `terms.plugins` |

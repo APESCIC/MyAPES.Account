@@ -17,7 +17,6 @@ return [
     */
     'canonical' => [
         'app_name' => 'terms.app_name',
-        'platform_name' => 'terms.platform_name',
         'core' => 'terms.core',
         'module' => 'terms.module',
         'plugin' => 'terms.plugin',
@@ -58,8 +57,8 @@ return [
         [
             'pattern' => 'MyAPES Core',
             'canonical' => 'MyAPES Account',
-            'contexts' => ['nav', 'public_ui', 'admin_ui'],
-            'notes' => 'User-facing chrome, emails, and page titles use MyAPES Account. Platform/internal docs may still say MyAPES Core.',
+            'contexts' => ['nav', 'public_ui', 'admin_ui', 'docs'],
+            'notes' => 'Retired in 0.45.0: MyAPES Account is the only product name. Historic release notes keep the old name.',
         ],
         [
             'pattern' => 'Super Admin',

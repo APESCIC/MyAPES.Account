@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Group members | MyAPES Core')
+@section('title', 'Group members | MyAPES Account')
 
 @section('content')
     <section class="panel" aria-labelledby="group-members-title">

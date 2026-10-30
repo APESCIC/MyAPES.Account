@@ -103,7 +103,7 @@ return [
         'groups_intro' => 'Managed Cloudron myapesaccount.* groups used for MyAPES Account authorization. Directory sync imports only these groups (legacy aliases map to the canonical names). Historical non-prefix catalogue rows stay in the database for audits but are hidden here. Protected access-tier mappings stay preset; Super Admins can attach an optional job role.',
         'unknown' => 'Unknown',
         'permissions_intro' => 'Code-owned catalogue with plain-language titles. Permissions are assigned through job roles, not directly to directory groups.',
-        'permissions_page_title' => 'Permissions | MyAPES Core',
+        'permissions_page_title' => 'Permissions | MyAPES Account',
         'members_currently_in_group' => 'members currently in this group',
     ],
     'overview' => [
@@ -382,7 +382,7 @@ return [
         'maintenance' => 'Maintenance',
     ],
     'emails' => [
-        'page_title' => 'Admin emails | MyAPES Core',
+        'page_title' => 'Admin emails | MyAPES Account',
         'eyebrow' => 'Outbound mail',
         'heading' => 'Emails',
         'intro' => 'Every email MyAPES Account sends, with a preview built from sample data. Previews never send mail.',

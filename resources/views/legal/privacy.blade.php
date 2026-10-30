@@ -13,7 +13,7 @@
 
         <section>
             <h2>{{ __('public.legal.privacy.blade.who_we_are') }}</h2>
-            <p>Association of Protecting Exotic Species CIC (CIC No. 16253848) is the controller for personal information processed in MyAPES Core. This notice covers the public portal used by service users, and the staff tools that support APES CIC, APES Shelter and Rescue, and APES Pet Care Clinic.</p>
+            <p>Association of Protecting Exotic Species CIC (CIC No. 16253848) is the controller for personal information processed in MyAPES Account. This notice covers the public portal used by service users, and the staff tools that support APES CIC, APES Shelter and Rescue, and APES Pet Care Clinic.</p>
             <p>You can also read more about APES CIC on the <a href="https://www.apes.org.uk" rel="noopener noreferrer">{{ __('public.legal.help.blade.apes_website') }}</a>.</p>
         </section>
 
@@ -31,7 +31,7 @@
 
         <section>
             <h2>{{ __('public.legal.privacy.blade.why_we_use_it') }}</h2>
-            <p>We use this information to run MyAPES Core: to let you sign in, finish account setup, contact you about the services you asked for, and handle tickets, cases, and pet records. We rely on the steps you take in the app, our legitimate interest in running a safe support portal, and our public-interest work as a community interest company.</p>
+            <p>We use this information to run MyAPES Account: to let you sign in, finish account setup, contact you about the services you asked for, and handle tickets, cases, and pet records. We rely on the steps you take in the app, our legitimate interest in running a safe support portal, and our public-interest work as a community interest company.</p>
             <p>{{ __('public.legal.privacy.blade.we_do_not_sell_personal_information_and_we_do_not_use_i') }}</p>
         </section>
 
@@ -42,7 +42,7 @@
 
         <section>
             <h2>{{ __('public.legal.privacy.blade.how_long_we_keep_it') }}</h2>
-            <p>We keep account and service records while you use MyAPES Core and for as long as we need them to deliver support, meet safeguarding or animal-welfare duties, or meet a legal requirement. Audit records are retained for a limited period and then removed.</p>
+            <p>We keep account and service records while you use MyAPES Account and for as long as we need them to deliver support, meet safeguarding or animal-welfare duties, or meet a legal requirement. Audit records are retained for a limited period and then removed.</p>
         </section>
 
         <section>
@@ -53,7 +53,7 @@
 
         <section>
             <h2>{{ __('public.legal.privacy.blade.cookies_and_related_notices') }}</h2>
-            <p>MyAPES Core uses a small set of essential cookies so you can sign in and stay signed in. The <a href="{{ route('cookies') }}">{{ __('public.legal.help.blade.cookie_notice') }}</a> explains those in more detail. Using the service is also covered by the <a href="{{ route('terms') }}">{{ __('public.legal.cookies.blade.terms_of_use') }}</a>.</p>
+            <p>MyAPES Account uses a small set of essential cookies so you can sign in and stay signed in. The <a href="{{ route('cookies') }}">{{ __('public.legal.help.blade.cookie_notice') }}</a> explains those in more detail. Using the service is also covered by the <a href="{{ route('terms') }}">{{ __('public.legal.cookies.blade.terms_of_use') }}</a>.</p>
         </section>
     </article>
 @endsection

@@ -66,7 +66,7 @@ test('internal-only release notes omit version rationale when not public-facing'
         channel: 'stable',
         type: 'patch',
         title: 'Laragon local dev testing setup',
-        summary: 'Windows developers can run MyAPES Core on Laragon.',
+        summary: 'Windows developers can run MyAPES Account on Laragon.',
         changes: ['Add .env.laragon.example.'],
         affected_areas: ['Local development documentation'],
         audiences: ['internal-only'],

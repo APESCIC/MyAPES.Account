@@ -8,7 +8,6 @@
  */
 return [
     'app_name' => 'MyAPES Account',
-    'platform_name' => 'MyAPES Core',
     'core' => 'Core',
 
     'module' => 'Module|Modules',

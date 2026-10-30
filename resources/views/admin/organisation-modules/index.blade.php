@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Admin modules | MyAPES Core')
+@section('title', 'Admin modules | MyAPES Account')
 
 @section('content')
     <header class="page-heading">

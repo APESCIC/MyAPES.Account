@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Access denied | MyAPES Core')
+@section('title', 'Access denied | MyAPES Account')
 
 @section('content')
     @php
