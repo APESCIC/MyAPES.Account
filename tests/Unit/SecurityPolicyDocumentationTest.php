@@ -33,7 +33,7 @@ class SecurityPolicyDocumentationTest extends TestCase
         );
         $this->assertStringContainsString('SECURITY.md', $bugReport);
         $this->assertStringContainsString(
-            'https://github.com/APESCIC/MyAPES-Account/security/advisories/new',
+            'https://github.com/APESCIC/MyAPES.Account/security/advisories/new',
             $issueConfig,
         );
     }

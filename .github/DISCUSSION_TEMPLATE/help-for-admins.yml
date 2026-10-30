@@ -1,0 +1,48 @@
+title: "[Help] "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for asking. This category is for admins. Please do not include personal data.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part of the app?
+      options:
+        - Core and accounts (sign-in, profile, people, email, search)
+        - APES CIC module
+        - Pet Care Clinic module
+        - Shelter and Rescue module
+        - Tickets
+        - Pet profiles
+        - Cases
+        - Recruitment
+        - Consultations
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      description: What are you trying to do, and what happened?
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: What have you tried?
+  - type: input
+    id: device
+    attributes:
+      label: Device and browser
+      placeholder: e.g. Windows 11, Edge
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy and security
+      options:
+        - label: I have removed personal data (names, emails, phone numbers, client, pet, case or medical details).
+          required: true
+        - label: This is not a security problem (those go to SECURITY.md and a private advisory).
+          required: true
