@@ -93,7 +93,7 @@ Stored values stay snake_case (`in_progress`, `not_neutered`). Screens show the 
 | Recruitment role category | `staff`, `volunteer`, `student` | Staff, Volunteer, Student | `terms.recruitment_category.*` |
 | Pet sex | `male`, `female`, `unknown` | Male, Female, Unknown | `terms.sex.*` |
 | Pet neutering status | `neutered`, `not_neutered`, `unknown` | Neutered, Not Neutered, Unknown | `terms.neutering_status.*` |
-| Ticket area (Shelter, Pet Care, APES CIC fallback) | `adoption`, `surrender`, `rescue`, `fostering`, `animal_welfare`, `appointment`, `consultation`, `prescription`, `billing`, `follow_up`, `web_development`, `it_systems`, `other` | Adoption, Surrender, Rescue, Fostering, Animal Welfare, Appointment, Consultation, Prescription, Billing, Follow-Up, Web Development, IT Systems, Other | `terms.ticket_area.*` |
+| Ticket area (Shelter, Pet Care) | `adoption`, `surrender`, `rescue`, `fostering`, `animal_welfare`, `appointment`, `consultation`, `prescription`, `billing`, `follow_up`, `other` | Adoption, Surrender, Rescue, Fostering, Animal Welfare, Appointment, Consultation, Prescription, Billing, Follow Up, Other | `terms.ticket_area.*` |
 
 ## en_GB spelling
 

@@ -114,9 +114,7 @@ return [
         'consultation' => 'Consultation',
         'prescription' => 'Prescription',
         'billing' => 'Billing',
-        'follow_up' => 'Follow-Up',
-        'web_development' => 'Web Development',
-        'it_systems' => 'IT Systems',
+        'follow_up' => 'Follow Up',
         'other' => 'Other',
     ],
 ];

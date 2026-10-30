@@ -5,7 +5,7 @@
     "channel": "stable",
     "type": "patch",
     "title": "Friendly ticket area labels",
-    "summary": "Shelter and Pet Care tickets now show clear labels such as Animal Welfare and Follow-Up instead of internal IDs.",
+    "summary": "Shelter and Pet Care tickets now show clear labels such as Animal Welfare and Follow Up instead of internal IDs.",
     "changes": [
       "Show Title Case service area labels on the Shelter and Pet Care ticket forms, ticket lists and ticket pages.",
       "Fall back to a readable label for any unknown area or subcategory instead of showing the stored ID."

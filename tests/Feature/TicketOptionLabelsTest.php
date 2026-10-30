@@ -59,7 +59,7 @@ class TicketOptionLabelsTest extends TestCase
     {
         $owner = User::factory()->create();
         $area = $subCoreKey === 'shelter-rescue' ? 'animal_welfare' : 'follow_up';
-        $label = $subCoreKey === 'shelter-rescue' ? 'Animal Welfare' : 'Follow-Up';
+        $label = $subCoreKey === 'shelter-rescue' ? 'Animal Welfare' : 'Follow Up';
         $ticket = SupportTicket::query()->create([
             'sub_core_key' => $subCoreKey,
             'user_id' => $owner->id,

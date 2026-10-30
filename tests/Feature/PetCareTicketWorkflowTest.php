@@ -81,7 +81,7 @@ class PetCareTicketWorkflowTest extends TestCase
                 '<option value="consultation" >Consultation</option>',
                 '<option value="prescription" >Prescription</option>',
                 '<option value="billing" >Billing</option>',
-                '<option value="follow_up" >Follow-Up</option>',
+                '<option value="follow_up" >Follow Up</option>',
                 '<option value="other" >Other</option>',
             ], false);
 
