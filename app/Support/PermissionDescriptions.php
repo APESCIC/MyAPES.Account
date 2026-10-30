@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Core\Access\PermissionNaming;
+use App\Core\Extensions\Plugins\PluginRegistry;
 
 /**
  * Human-readable titles and descriptions for code-owned permission keys.
@@ -99,14 +100,32 @@ final class PermissionDescriptions
     public static function title(string $permission): string
     {
         $key = 'admin.permissions.labels.'.str_replace('.', '_', $permission);
-        $translated = __($key);
 
-        if ($translated !== $key) {
-            return $translated;
+        if (trans()->has($key)) {
+            return __($key);
         }
 
         return self::CATALOGUE[$permission]['title']
+            ?? self::pluginAbilityLabel($permission)
             ?? self::headlineFromKey($permission);
+    }
+
+    private static function pluginAbilityLabel(string $permission): ?string
+    {
+        $parts = explode('.', $permission);
+        $plugins = app(PluginRegistry::class);
+
+        if (count($parts) !== 3 || ! $plugins->has($parts[1])) {
+            return null;
+        }
+
+        foreach ($plugins->plugin($parts[1])->permissions as $ability) {
+            if ($ability->ability === $parts[2]) {
+                return $ability->label;
+            }
+        }
+
+        return null;
     }
 
     public static function description(string $permission): string
