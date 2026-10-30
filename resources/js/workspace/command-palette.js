@@ -29,24 +29,6 @@ export const isPaletteShortcut = (event) => Boolean(event.metaKey || event.ctrlK
     && !event.altKey
     && String(event.key).toLowerCase() === 'k';
 
-/**
- * Palette entries only ever point inside this app; anything else is ignored.
- */
-export const sameOriginTarget = (url, origin) => {
-    let target;
-    try {
-        target = new URL(String(url), origin);
-    } catch {
-        return null;
-    }
-
-    if (!['http:', 'https:'].includes(target.protocol) || target.origin !== origin) {
-        return null;
-    }
-
-    return `${target.pathname}${target.search}${target.hash}`;
-};
-
 export const iconExportName = (name) => String(name)
     .split('-')
     .filter(Boolean)
@@ -167,13 +149,14 @@ export const initCommandPalette = ({ icons = {}, createElement = null, beforeOpe
             return;
         }
 
-        const target = sameOriginTarget(command.url, window.location.origin);
-        if (target === null) {
+        const link = Array.from(overlay.querySelectorAll('[data-workspace-palette-links] a[data-command-id]'))
+            .find((anchor) => anchor.dataset.commandId === command.id);
+        if (!link) {
             return;
         }
 
         close();
-        window.location.assign(target);
+        link.click();
     };
 
     const open = () => {

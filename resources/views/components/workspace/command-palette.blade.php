@@ -1,4 +1,5 @@
 @props(['menu'])
+@php($commands = $menu->paletteCommands())
 <div class="sg-overlay sg-palette-overlay" data-workspace-palette hidden>
     <div
         class="sg-dialog"
@@ -34,5 +35,11 @@
         ></ul>
         <p class="sg-palette__empty" data-workspace-palette-empty hidden>{{ __('workspace.palette.empty') }}</p>
     </div>
-    <script type="application/json" data-workspace-palette-index>{!! json_encode($menu->paletteCommands(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) !!}</script>
+    <script type="application/json" data-workspace-palette-index>{!! json_encode($commands, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) !!}</script>
+    {{-- Choosing an option follows its server-rendered link, so script never builds a URL. --}}
+    <div hidden data-workspace-palette-links>
+        @foreach($commands as $command)
+            <a href="{{ $command['url'] }}" data-command-id="{{ $command['id'] }}" tabindex="-1" aria-hidden="true"></a>
+        @endforeach
+    </div>
 </div>

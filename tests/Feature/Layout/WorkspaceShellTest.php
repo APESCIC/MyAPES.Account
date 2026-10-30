@@ -131,6 +131,10 @@ class WorkspaceShellTest extends TestCase
 
         $this->assertSame($expected, $this->paletteCommands($response));
         $this->assertNotSame([], $expected);
+
+        foreach ($expected as $command) {
+            $response->assertSee('<a href="'.e($command['url']).'" data-command-id="'.e($command['id']).'"', false);
+        }
     }
 
     public function test_palette_trigger_and_dialog_are_accessible(): void

@@ -5,7 +5,6 @@ import {
     iconExportName,
     isPaletteShortcut,
     moveIndex,
-    sameOriginTarget,
     shortcutLabel,
 } from './command-palette.js';
 
@@ -52,16 +51,6 @@ test('Ctrl K and Cmd K open the palette, other keys do not', () => {
     assert.equal(isPaletteShortcut({ ctrlKey: true, altKey: true, key: 'k' }), false);
     assert.equal(isPaletteShortcut({ key: 'k' }), false);
     assert.equal(isPaletteShortcut({ ctrlKey: true, key: 'j' }), false);
-});
-
-test('only same-origin http links are opened', () => {
-    const origin = 'https://myaccount.myapes.me.uk';
-
-    assert.equal(sameOriginTarget('https://myaccount.myapes.me.uk/shelter/tickets#create', origin), '/shelter/tickets#create');
-    assert.equal(sameOriginTarget('/admin/users?account_type=staff', origin), '/admin/users?account_type=staff');
-    assert.equal(sameOriginTarget('javascript:alert(1)', origin), null);
-    assert.equal(sameOriginTarget('https://example.com/phish', origin), null);
-    assert.equal(sameOriginTarget('//example.com/phish', origin), null);
 });
 
 test('icon names map to lucide export names', () => {
