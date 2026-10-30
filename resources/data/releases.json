@@ -1,5 +1,45 @@
 [
   {
+    "version": "0.45.7",
+    "date": "2026-10-30",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Project wiki",
+    "summary": "The project now has a wiki with developer guides, kept in the repository and published automatically.",
+    "changes": [
+      "Add wiki pages under docs/wiki: home, sidebar, footer, a skeleton page for each guide, and full developer guides.",
+      "Add a workflow that publishes docs/wiki to the GitHub wiki when it changes on main.",
+      "Link the wiki from the README."
+    ],
+    "affected_areas": [
+      "Documentation",
+      "Developer workflow"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch: documentation and a publishing workflow only. Application code, routes, permissions and stored data are unchanged.",
+    "validation": [
+      "Release history validation and the full PHPUnit suite in CI.",
+      "Manual review of the wiki pages and workflow."
+    ],
+    "known_limitations": [
+      "Most user guide pages are skeletons and will be filled in milestone by milestone.",
+      "Edits made directly in the wiki are overwritten on the next sync."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Wiki setup approved on 30 October 2026.",
+    "references": [
+      {
+        "label": "Pull request #569",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/569"
+      }
+    ]
+  },
+  {
     "version": "0.45.6",
     "date": "2026-10-30",
     "channel": "stable",
