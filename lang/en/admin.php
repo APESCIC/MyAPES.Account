@@ -548,6 +548,8 @@ return [
             'staff_access' => 'Staff area access',
             'admin_access' => 'Admin panel access',
             'superadmin_access' => 'Super Admin panel access',
+            'student_access' => 'Student area access',
+            'volunteer_access' => 'Volunteer area access',
             'admin_users_view' => 'View accounts',
             'admin_users_manage' => 'Manage accounts',
             'admin_analytics_view' => 'View admin overview',

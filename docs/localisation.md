@@ -32,6 +32,7 @@ php artisan lang:check --fail-on-missing
 - Config: `config/lang_check.php`.
 - Wired into `.github/workflows/test-cloudron.yml` with **`--fail-on-missing`** (Wave 4 / #276). Unused-key output stays informational and does not fail CI.
 - Dynamic keys (interpolated segments) are reported as missing by the scanner, so write literal keys in views (for example a `match` over known values) and keep enum/status label maps in `terms.php` behind `WorkflowLabels`, covered by dedicated Feature tests.
+- `tests/Feature/RenderedRawKeyGuardTest.php` (#453) renders key pages as a guest, a public user, staff and a Super Admin. It fails on any translation key the translator could not resolve and on visible `word_word` text. Text inside `<code>`, scripts and form fields is ignored, and the Change Log Hub is only checked for keys because historic notes quote code. Use `trans()->has()` before falling back, so a deliberate fallback is not reported as missing.
 
 ## Locale configuration
 
