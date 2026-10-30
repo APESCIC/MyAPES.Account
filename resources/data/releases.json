@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.45.6",
+    "date": "2026-10-30",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Walkthrough data clean-up",
+    "summary": "Operators can now remove walkthrough and test records from the live service safely, with an archive kept first.",
+    "changes": [
+      "Add an operator command that lists walkthrough and QA test records and, when confirmed, archives them to a file before removing them.",
+      "Keep the documented walkthrough sign-in account; only its test records are removed.",
+      "Confirm that setting up the live service never creates QA test accounts or records."
+    ],
+    "affected_areas": [
+      "Operations",
+      "Data quality"
+    ],
+    "categories": [
+      "added",
+      "fixed"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch: an operator command and a test. No user-facing behaviour, routes or schema change.",
+    "validation": [
+      "ArchiveQaDataCommandTest for the dry run, forced archive and removal, and the production seeding guard.",
+      "Seeder and architecture tests locally, and the full PHPUnit suite in CI.",
+      "Read-only production check before release, then a production dry run before removal."
+    ],
+    "known_limitations": [
+      "Matching relies on the documented test title prefixes and QA account emails."
+    ],
+    "rollback": "Redeploy the previous release package. Removed test records can be restored from the JSON archive or the pre-deploy Cloudron backup.",
+    "provenance": "Epic #450, issue #457; pull request #572.",
+    "references": [
+      {
+        "label": "Issue #457",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/457"
+      },
+      {
+        "label": "Pull request #572",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/572"
+      }
+    ]
+  },
+  {
     "version": "0.45.5",
     "date": "2026-10-30",
     "channel": "stable",
