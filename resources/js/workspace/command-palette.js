@@ -29,6 +29,24 @@ export const isPaletteShortcut = (event) => Boolean(event.metaKey || event.ctrlK
     && !event.altKey
     && String(event.key).toLowerCase() === 'k';
 
+/**
+ * Palette entries only ever point inside this app; anything else is ignored.
+ */
+export const sameOriginTarget = (url, origin) => {
+    let target;
+    try {
+        target = new URL(String(url), origin);
+    } catch {
+        return null;
+    }
+
+    if (!['http:', 'https:'].includes(target.protocol) || target.origin !== origin) {
+        return null;
+    }
+
+    return `${target.pathname}${target.search}${target.hash}`;
+};
+
 export const iconExportName = (name) => String(name)
     .split('-')
     .filter(Boolean)
@@ -101,8 +119,6 @@ export const initCommandPalette = ({ icons = {}, createElement = null, beforeOpe
             option.id = optionId(index);
             option.className = 'sg-palette-option';
             option.setAttribute('role', 'option');
-            option.dataset.url = command.url;
-
             const icon = iconFor(command.icon);
             if (icon) {
                 option.append(icon);
@@ -151,8 +167,13 @@ export const initCommandPalette = ({ icons = {}, createElement = null, beforeOpe
             return;
         }
 
+        const target = sameOriginTarget(command.url, window.location.origin);
+        if (target === null) {
+            return;
+        }
+
         close();
-        window.location.assign(command.url);
+        window.location.assign(target);
     };
 
     const open = () => {
