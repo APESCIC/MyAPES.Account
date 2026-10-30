@@ -244,7 +244,12 @@ class ApesCicTicketCaseEnhancementTest extends TestCase
                 'websites' => $settings['websites'],
                 'service_areas' => $settings['service_areas'],
             ])
-            ->assertRedirect(route('admin.modules.settings.edit', ['apes-cic', 'tickets']));
+            ->assertRedirect(route('admin.modules.settings.edit', ['apes-cic', 'tickets']))
+            ->assertSessionHas('status');
+
+        $this->get(route('admin.modules.settings.edit', ['apes-cic', 'tickets']))
+            ->assertOk()
+            ->assertSee('data-toast-tone="ok"', false);
 
         $this->assertSame(
             'APES main website (edited)',

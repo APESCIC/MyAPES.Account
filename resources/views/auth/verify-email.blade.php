@@ -9,9 +9,6 @@
         @if (auth()->user()?->email)
             <p>{{ __('auth.verify_email.sent_to', ['email' => auth()->user()->email]) }}</p>
         @endif
-        @if (session('status'))
-            <p class="status" role="status">{{ session('status') }}</p>
-        @endif
         <x-mascot-tip />
         <form method="post" action="{{ route('verification.send') }}">
             @csrf

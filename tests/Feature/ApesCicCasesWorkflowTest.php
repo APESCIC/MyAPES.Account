@@ -53,7 +53,8 @@ class ApesCicCasesWorkflowTest extends TestCase
             ->where('sub_core_key', 'apes-cic')
             ->where('user_id', $owner->id)
             ->firstOrFail();
-        $response->assertRedirect(route('apes-cic.cases.show', $case));
+        $response->assertRedirect(route('apes-cic.cases.show', $case))
+            ->assertSessionHas('status', 'Case created.');
         $this->assertSame('open', $case->status);
         $this->assertNotNull($case->opened_at);
         $this->assertNull($case->pet_profile_id);

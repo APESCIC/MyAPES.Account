@@ -71,6 +71,7 @@ return [
         'select_a_valid_website' => 'Select a valid website.',
     ],
     'flash' => [
+        'case_created' => 'Case created.',
         'case_update_added' => 'Case update added.',
         'case_updated' => 'Case updated.',
         'case_deleted' => 'Case deleted.',

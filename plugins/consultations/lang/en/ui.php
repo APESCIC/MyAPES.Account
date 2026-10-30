@@ -38,6 +38,7 @@ return [
         ],
     ],
     'flash' => [
+        'consultation_created' => 'Consultation created.',
         'consultation_updated' => 'Consultation updated.',
     ],
 ];

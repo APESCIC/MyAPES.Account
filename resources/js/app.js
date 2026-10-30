@@ -47,6 +47,7 @@ import { initChangeLog } from './change-log.js';
 import { initPasskeys } from './passkeys.js';
 import { initCommandPalette } from './workspace/command-palette.js';
 import { initWorkspaceDrawer } from './workspace/drawer.js';
+import { initToasts } from './workspace/toasts.js';
 
 const icons = {
     ArrowRight,
@@ -126,6 +127,7 @@ createIcons({ icons });
 applyTheme(document.documentElement.dataset.theme);
 initChangeLog();
 initPasskeys();
+initToasts();
 
 document.addEventListener('click', (event) => {
     if (event.target instanceof Element && event.target.closest('[data-theme-toggle]')) {
