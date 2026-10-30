@@ -15,9 +15,9 @@ class BrandedErrorPagesTest extends TestCase
     {
         $this->get('/this-route-does-not-exist-for-branded-404')
             ->assertNotFound()
-            ->assertSeeText('MyAPES Core')
+            ->assertSeeText('MyAPES Account')
             ->assertSeeText('Page not found')
-            ->assertSeeText('That address is not available in MyAPES Core')
+            ->assertSeeText('That address is not available in MyAPES Account')
             ->assertSeeText('Back to home')
             ->assertDontSee('404 | Not Found', false);
     }
@@ -30,7 +30,7 @@ class BrandedErrorPagesTest extends TestCase
             $this->actingAs($user)
                 ->get($path)
                 ->assertForbidden()
-                ->assertSeeText('MyAPES Core')
+                ->assertSeeText('MyAPES Account')
                 ->assertSeeText('Access denied')
                 ->assertSeeText('You do not have permission to view this page')
                 ->assertSeeText('Go to dashboard')
@@ -46,7 +46,7 @@ class BrandedErrorPagesTest extends TestCase
 
         $this->get('/__branded-403-with-message')
             ->assertForbidden()
-            ->assertSeeText('MyAPES Core')
+            ->assertSeeText('MyAPES Account')
             ->assertSeeText('Access denied')
             ->assertSeeText('Use a different Cloudron or work email')
             ->assertDontSee('403 | Forbidden', false);

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Admin | MyAPES Core')
+@section('title', 'Admin | MyAPES Account')
 
 @can('superadmin.access')
     @push('head')

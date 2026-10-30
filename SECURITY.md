@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-If you believe you have found a security vulnerability in MyAPES Core (`APESCIC/MyAPES-Account`), report it privately so repository administrators can review it before any public disclosure.
+If you believe you have found a security vulnerability in MyAPES Account (`APESCIC/MyAPES-Account`), report it privately so repository administrators can review it before any public disclosure.
 
 **Use GitHub private vulnerability reporting:**
 
@@ -27,7 +27,7 @@ Do not include credentials, personal data, or production secrets in the report.
 
 ## Supported versions
 
-Security reports are accepted for the current released MyAPES Core version on `main` (see [`VERSION`](VERSION)). Older beta versions may not receive a separate patch.
+Security reports are accepted for the current released MyAPES Account version on `main` (see [`VERSION`](VERSION)). Older beta versions may not receive a separate patch.
 
 ## Public issues and change log
 

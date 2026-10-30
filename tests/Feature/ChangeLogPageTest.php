@@ -159,7 +159,7 @@ class ChangeLogPageTest extends TestCase
             $response
                 ->assertOk()
                 ->assertSee('href="'.route('change-log.index').'"', false)
-                ->assertSee('aria-label="View the MyAPES Core change log for version v0.44.0"', false)
+                ->assertSee('aria-label="View the MyAPES Account change log for version v0.44.0"', false)
                 ->assertSeeText('v0.44.0');
 
             $this->assertPublicGithubLinks($response);

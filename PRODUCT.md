@@ -2,23 +2,23 @@
 
 ## Register
 
-This document defines the product direction, user needs, and design principles for the MyAPES Core interface. Account login and registration may still present as MyAPES Account.
+This document defines the product direction, user needs, and design principles for the MyAPES Account interface.
 
 ## Product vocabulary
 
 | Public name | Meaning |
 |-------------|---------|
-| **MyAPES Core** | Platform software: signed-in chrome, Admin, dashboard, changelog |
+| **MyAPES Account** | The product: signed-in chrome, Admin, dashboard, changelog |
 | **Modules** | Organisation areas: APES CIC, APES Shelter and Rescue, APES Pet Care Clinic. Each has its own navigation and chooses which plugins it uses. |
 | **Plugins** | Reusable features a module enables: Tickets, Cases, Pet Profiles, Consultations, Recruitment |
 
 The layer names are Core, Module, and Plugin ([docs/architecture.md](docs/architecture.md)). Code still says sub-core for a module and module for a plugin until the structure epic moves it. On-screen labels follow the glossary ([docs/glossary.md](docs/glossary.md)) and `lang/en_GB/terms.php`; do not invent a second UI word in product copy. Workflow statuses, priorities and similar stored values are always shown as Title Case labels (In Progress, Waiting on User), never as raw snake_case ([docs/localisation.md](docs/localisation.md#workflow-labels)). "Service" as a name for an organisation area is a deprecated synonym of Module.
 
 ## Users
-MyAPES Core serves two core user groups: public service users and APES staff/administrators. Public users manage service requests, personal profile details, and pet records across APES CIC, APES Shelter and Rescue, and APES Pet Care Clinic. Staff and admin users operate in a task-heavy workflow that requires fast navigation, case/ticket visibility, and reliable operational controls.
+MyAPES Account serves two core user groups: public service users and APES staff/administrators. Public users manage service requests, personal profile details, and pet records across APES CIC, APES Shelter and Rescue, and APES Pet Care Clinic. Staff and admin users operate in a task-heavy workflow that requires fast navigation, case/ticket visibility, and reliable operational controls.
 
 ## Product Purpose
-MyAPES Core centralizes support, shelter, and APES Pet Care Clinic workflows into one secure portal with role-appropriate access. It exists to reduce friction for service users while giving staff a dependable operational interface for tickets, pet profiles, rescue/shelter cases, and consultations. Success means users can quickly complete their next action with confidence and clear context about which module they are in.
+MyAPES Account centralizes support, shelter, and APES Pet Care Clinic workflows into one secure portal with role-appropriate access. It exists to reduce friction for service users while giving staff a dependable operational interface for tickets, pet profiles, rescue/shelter cases, and consultations. Success means users can quickly complete their next action with confidence and clear context about which module they are in.
 
 ## Brand Personality
 Friendly, reassuring, practical. The product voice should feel welcoming and compassionate (aligned with animal welfare and community support), but remain clear and dependable for administrative work. Emotional goals are trust, warmth, and momentum.

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Application | MyAPES Core')
+@section('title', 'Application | MyAPES Account')
 
 @section('content')
     @include('recruitment::_navigation')

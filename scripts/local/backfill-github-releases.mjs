@@ -114,7 +114,7 @@ export function buildReleaseNotes(release) {
         lines.push('');
     }
 
-    lines.push(`_MyAPES Core ${release.version} (${release.date}) · ${release.channel} · ${release.type}_`);
+    lines.push(`_MyAPES Account ${release.version} (${release.date}) · ${release.channel} · ${release.type}_`);
 
     return lines.join('\n').trim();
 }

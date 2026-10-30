@@ -53,7 +53,7 @@ class PublicLegalPagesTest extends TestCase
     ): void {
         $this->get($path)
             ->assertOk()
-            ->assertSeeText('MyAPES Core')
+            ->assertSeeText('MyAPES Account')
             ->assertSeeText($title)
             ->assertSeeText($snippet)
             ->assertSee('data-legal-page="'.$page.'"', false)

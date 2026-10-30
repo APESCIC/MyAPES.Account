@@ -30,7 +30,7 @@ class MaintenanceModeResponseTest extends TestCase
             ->assertServiceUnavailable()
             ->assertHeader('Retry-After', '60')
             ->assertHeader('Refresh', '60')
-            ->assertSeeText('MyAPES Core')
+            ->assertSeeText('MyAPES Account')
             ->assertSeeText('<script>alert("unsafe")</script> Planned work')
             ->assertDontSee('<script>alert("unsafe")</script>', false)
             ->assertSeeText('service will not resume automatically');

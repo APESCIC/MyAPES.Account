@@ -130,5 +130,5 @@ Invoke-CheckedCommand npm run build
 if ($Laragon) {
     Write-Host "Local Laragon bootstrap complete. Start Laragon Apache, then run 'composer run dev:laragon'."
 } else {
-    Write-Host "Local bootstrap complete. Run 'composer run dev' to start MyAPES Core."
+    Write-Host "Local bootstrap complete. Run 'composer run dev' to start MyAPES Account."
 }

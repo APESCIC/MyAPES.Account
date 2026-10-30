@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a reproducible problem with MyAPES Core
+description: Report a reproducible problem with MyAPES Account
 title: "[Bug]: "
 labels:
   - bug

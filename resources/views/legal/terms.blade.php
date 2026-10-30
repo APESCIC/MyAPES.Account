@@ -13,7 +13,7 @@
 
         <section>
             <h2>{{ __('public.legal.terms.blade.the_service') }}</h2>
-            <p>MyAPES Core is the service portal run by Association of Protecting Exotic Species CIC (CIC No. 16253848) for APES CIC, APES Shelter and Rescue, and APES Pet Care Clinic. These terms cover use of the portal. They do not replace veterinary advice, rescue decisions, or a separate agreement APES CIC may have with you.</p>
+            <p>MyAPES Account is the service portal run by Association of Protecting Exotic Species CIC (CIC No. 16253848) for APES CIC, APES Shelter and Rescue, and APES Pet Care Clinic. These terms cover use of the portal. They do not replace veterinary advice, rescue decisions, or a separate agreement APES CIC may have with you.</p>
         </section>
 
         <section>
@@ -34,7 +34,7 @@
 
         <section>
             <h2>{{ __('public.legal.terms.blade.content_and_availability') }}</h2>
-            <p>Records you add stay available to the people who need them for support and animal-care work. We aim to keep MyAPES Core available, but we may take it offline for maintenance, security, or operational reasons. The <a href="{{ route('change-log.index') }}">{{ __('public.change_log.change_log_hub') }}</a> lists released changes.</p>
+            <p>Records you add stay available to the people who need them for support and animal-care work. We aim to keep MyAPES Account available, but we may take it offline for maintenance, security, or operational reasons. The <a href="{{ route('change-log.index') }}">{{ __('public.change_log.change_log_hub') }}</a> lists released changes.</p>
         </section>
 
         <section>

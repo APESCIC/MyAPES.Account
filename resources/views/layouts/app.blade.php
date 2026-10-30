@@ -83,7 +83,7 @@
 
             <footer class="site-footer">
                 <div class="site-footer__brand">
-                    <span><strong>{{ __('public.chrome.app.blade.myapes') }}</strong> Core</span>
+                    <span><strong>{{ __('public.chrome.app.blade.myapes') }}</strong> Account</span>
                     <span>© {{ now()->year }} Association of Protecting Exotic Species CIC · CIC No: 16253848</span>
                 </div>
                 <nav class="site-footer__links" aria-label="{{ __('public.chrome.app.blade.legal_and_help') }}">
@@ -98,7 +98,7 @@
                 <a
                     class="site-footer__version"
                     href="{{ route('change-log.index') }}"
-                    aria-label="View the MyAPES Core change log for version v{{ $appVersion }}"
+                    aria-label="View the MyAPES Account change log for version v{{ $appVersion }}"
                 >v{{ $appVersion }}</a>
             </footer>
         </div>

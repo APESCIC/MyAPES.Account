@@ -32,6 +32,6 @@ jq -r '
     []
   end | join("\n")),
   "",
-  "_MyAPES Core \($release.version) (\($release.date)) · \($release.channel) · \($release.type)_"
+  "_MyAPES Account \($release.version) (\($release.date)) · \($release.channel) · \($release.type)_"
   ] | join("\n")
 ' "$releases_file"

@@ -104,7 +104,7 @@ return [
 
         [
             'path' => 'resources/views/',
-            'pattern' => '#^(Core|MyAPES Core|The|Use|, and|Read the|Dashboard|Log in|Register|Deploy now|user\(\)\);?|\'messages-square\'|we suggest you start|Watch video tutorials|Public accounts are for|Records you add stay|lists released changes|explains the essential|explains those in more|We may update these terms|Questions about these terms|page or, once you are signed|You can ask APES CIC|and open a case|MyAPES Core uses a small set|for how the portal handles)#',
+            'pattern' => '#^(Core|MyAPES Account|The|Use|, and|Read the|Dashboard|Log in|Register|Deploy now|user\(\)\);?|\'messages-square\'|we suggest you start|Watch video tutorials|Public accounts are for|Records you add stay|lists released changes|explains the essential|explains those in more|We may update these terms|Questions about these terms|page or, once you are signed|You can ask APES CIC|and open a case|MyAPES Account uses a small set|for how the portal handles)#',
             'reason' => 'Residual public Blade fragments after #268 extraction (HTML-split sentences and welcome scaffolding).',
         ],
         [
@@ -126,7 +126,7 @@ return [
 
         [
             'path' => 'resources/views/',
-            'pattern' => '#(values\(\);|user\(\)\);?|homeRouteName\)|\'Terms\', \];|The\$|Use\$|Read the\$|first, or|explains how|cover using|Open service|Planned end:|Feedback & source|Showing releases|Development mode|View the MyAPES Core change log|© Association|Protect exotic species|MyAPES Core sets a small|Keeps you signed in|Helps stop another|Set only if you tick|theme control|Association of Protecting|Staff accounts are created|We use this information|Public users see their own|We keep account|is for service users|is for APES staff|to create a public account|Signed-in public users should|If you cannot sign in|You can also read more|This page checks again)#',
+            'pattern' => '#(values\(\);|user\(\)\);?|homeRouteName\)|\'Terms\', \];|The\$|Use\$|Read the\$|first, or|explains how|cover using|Open service|Planned end:|Feedback & source|Showing releases|Development mode|View the MyAPES Account change log|© Association|Protect exotic species|MyAPES Account sets a small|Keeps you signed in|Helps stop another|Set only if you tick|theme control|Association of Protecting|Staff accounts are created|We use this information|Public users see their own|We keep account|is for service users|is for APES staff|to create a public account|Signed-in public users should|If you cannot sign in|You can also read more|This page checks again)#',
             'reason' => 'Partial Blade/HTML interpolations after public __() extraction (#268).',
         ],
 

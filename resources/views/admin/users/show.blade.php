@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Admin user | MyAPES Core')
+@section('title', 'Admin user | MyAPES Account')
 
 @section('content')
     <div class="panel-stack">

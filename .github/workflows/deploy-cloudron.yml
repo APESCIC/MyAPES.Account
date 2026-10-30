@@ -1,4 +1,4 @@
-name: Deploy MyAPES Core to Cloudron
+name: Deploy MyAPES Account to Cloudron
 
 on:
   workflow_dispatch:
