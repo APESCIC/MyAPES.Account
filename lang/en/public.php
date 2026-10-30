@@ -280,6 +280,7 @@ return [
                 'privacy' => 'Privacy',
                 'cookies' => 'Cookies',
                 'myapes' => 'MyAPES',
+                'account' => 'Account',
                 'admin' => 'Admin',
                 'terms' => 'Terms',
                 'apes' => 'APES',

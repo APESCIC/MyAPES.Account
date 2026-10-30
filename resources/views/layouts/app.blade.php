@@ -83,7 +83,7 @@
 
             <footer class="site-footer">
                 <div class="site-footer__brand">
-                    <span><strong>{{ __('public.chrome.app.blade.myapes') }}</strong> Account</span>
+                    <span><strong>{{ __('public.chrome.app.blade.myapes') }}</strong> {{ __('public.chrome.app.blade.account') }}</span>
                     <span>© {{ now()->year }} Association of Protecting Exotic Species CIC · CIC No: 16253848</span>
                 </div>
                 <nav class="site-footer__links" aria-label="{{ __('public.chrome.app.blade.legal_and_help') }}">
