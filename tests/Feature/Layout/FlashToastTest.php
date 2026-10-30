@@ -17,7 +17,7 @@ class FlashToastTest extends TestCase
         app(ModuleInstallationSynchronizer::class)->synchronize();
     }
 
-    public function test_a_saved_status_renders_once_as_a_polite_dismissible_toast(): void
+    public function test_a_saved_status_renders_once_as_a_dismissible_toast_with_a_polite_announcer(): void
     {
         $html = $this->actingAs(User::factory()->create())
             ->withSession(['status' => 'Profile updated.'])
@@ -26,12 +26,13 @@ class FlashToastTest extends TestCase
             ->getContent();
 
         $this->assertStringContainsString('data-toast-region', $html);
-        $this->assertMatchesRegularExpression('/class="sg-toast sg-toast-ok" role="status" aria-live="polite"[^>]*data-toast-tone="ok"/', $html);
+        $this->assertStringContainsString('aria-live="polite" data-toast-announcer="polite"', $html);
+        $this->assertStringContainsString('class="sg-toast sg-toast-ok" data-toast data-toast-tone="ok"', $html);
         $this->assertSame(1, substr_count($html, 'Profile updated.'));
         $this->assertStringContainsString('aria-label="Dismiss message"', $html);
     }
 
-    public function test_failed_saves_show_an_alert_toast_that_stays(): void
+    public function test_failed_saves_show_an_error_toast_with_an_assertive_announcer(): void
     {
         $owner = User::factory()->create();
 
@@ -42,8 +43,8 @@ class FlashToastTest extends TestCase
 
         $this->get(route('apes-cic.tickets.index'))
             ->assertOk()
-            ->assertSee('class="sg-toast sg-toast-error" role="alert"', false)
-            ->assertSee('data-toast-tone="error"', false)
+            ->assertSee('aria-live="assertive" data-toast-announcer="assertive"', false)
+            ->assertSee('class="sg-toast sg-toast-error" data-toast data-toast-tone="error"', false)
             ->assertSeeText('Please fix these')
             ->assertSeeText('The subject field is required.');
     }

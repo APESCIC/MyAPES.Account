@@ -2,15 +2,18 @@ export const TOAST_DISMISS_MS = 6000;
 
 export const toastDismissDelay = (tone) => (tone === 'ok' ? TOAST_DISMISS_MS : null);
 
-const reannounce = (toast) => {
+export const toastPoliteness = (tone) => (tone === 'error' ? 'assertive' : 'polite');
+
+const announce = (root, toast) => {
     const message = toast.querySelector('[data-toast-message]');
-    if (!(message instanceof HTMLElement)) {
+    const announcer = root.querySelector(`[data-toast-announcer="${toastPoliteness(toast.dataset.toastTone)}"]`);
+    if (!(message instanceof HTMLElement) || !(announcer instanceof HTMLElement)) {
         return;
     }
 
-    const content = [...message.childNodes];
-    message.replaceChildren();
-    window.setTimeout(() => message.replaceChildren(...content), 150);
+    window.setTimeout(() => {
+        announcer.textContent = message.innerText.trim();
+    }, 150);
 };
 
 const dismiss = (toast) => {
@@ -35,7 +38,7 @@ const scheduleDismiss = (toast, delay) => {
 
 export const initToasts = (root = document) => {
     for (const toast of root.querySelectorAll('[data-toast]')) {
-        reannounce(toast);
+        announce(root, toast);
 
         toast.querySelector('[data-toast-dismiss]')?.addEventListener('click', () => dismiss(toast));
 
