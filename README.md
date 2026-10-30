@@ -346,6 +346,7 @@ Separation rules:
 - The account can reach public modules and owner-scoped records only; Admin, Super Admin, and staff-only routes remain forbidden.
 - Local QA seeds such as `qa.service.user@myapes.local` stay local/testing-only fixtures and do not substitute for this live account.
 - An Admin or Super Admin can issue a one-time temporary password from Admin → Public users for this local account. Guest forgot-password remains tracked in issue #121. Directory / Cloudron / pending first-login accounts stay on Cloudron.
+- Clean up after a walkthrough with `php artisan myapes:qa-data:archive`. It lists tickets, cases and consultations titled "Walkthrough test…" or "QA Seed:", plus anything owned by `@myapes.local` accounts, and those accounts themselves. Add `--force` to write a JSON archive to `storage/app/private/qa-data-archive/` and delete them. The walkthrough account itself is kept.
 
 ### Feature test matrix by seeded role
 
