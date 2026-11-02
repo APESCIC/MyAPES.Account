@@ -2,7 +2,7 @@
 
 How to add a **Module** (organisation area) or **Plugin** (reusable feature) to MyAPES Account without editing Core.
 
-Layer rules: [architecture.md](architecture.md). Decision record: [ADR 0001](adr/0001-core-modules-plugins.md). Inventory: [architecture-inventory.md](architecture-inventory.md).
+Layer rules: [architecture.md](architecture.md). Decision record: [ADR 0001](adr/0001-core-modules-plugins.md). Inventory: [architecture-inventory.md](architecture-inventory.md). Agent workflow (issues, release metadata, deploy): [AGENTS.md](../AGENTS.md).
 
 ## Quick start
 

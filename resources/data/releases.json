@@ -1,5 +1,43 @@
 [
   {
+    "version": "0.45.9",
+    "date": "2026-11-02",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Agent guide restored",
+    "summary": "The repository has a short, up-to-date AGENTS.md again for agents working on MyAPES Account.",
+    "changes": [
+      "Restore AGENTS.md as a shorter guide covering local development, the issue workflow, release metadata and the ship flow.",
+      "Link AGENTS.md from the README, the developer guide and the wiki's Working with Cursor page."
+    ],
+    "affected_areas": [
+      "Documentation",
+      "Developer workflow"
+    ],
+    "categories": [
+      "changed"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch: documentation only. Application code, routes, permissions and stored data are unchanged.",
+    "validation": [
+      "Release history validation and the full PHPUnit suite in CI.",
+      "Owner review of AGENTS.md."
+    ],
+    "known_limitations": [
+      "Cursor rules and skills are not restored; AGENTS.md is the only agent file."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Requested by the owner on 2 November 2026; pull request #575.",
+    "references": [
+      {
+        "label": "Pull request #575",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/575"
+      }
+    ]
+  },
+  {
     "version": "0.45.8",
     "date": "2026-10-30",
     "channel": "stable",
