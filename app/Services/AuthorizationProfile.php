@@ -14,8 +14,6 @@ class AuthorizationProfile
 
     public const ROLE_ADMINISTRATOR = 'administrator';
 
-    public const ROLE_SUPER_ADMIN = 'super-admin';
-
     public const ROLE_VOLUNTEER = 'volunteer';
 
     public const ROLE_STUDENT = 'student';
@@ -23,8 +21,6 @@ class AuthorizationProfile
     public const PERMISSION_STAFF_ACCESS = 'staff.access';
 
     public const PERMISSION_ADMIN_ACCESS = 'admin.access';
-
-    public const PERMISSION_SUPERADMIN_ACCESS = 'superadmin.access';
 
     public const PERMISSION_VOLUNTEER_ACCESS = 'volunteer.access';
 
@@ -46,15 +42,6 @@ class AuthorizationProfile
             self::PERMISSION_ADMIN_ACCESS,
             'admin.users.view',
             'admin.users.manage',
-            'admin.analytics.view',
-            'admin.emails.view',
-        ],
-        self::ROLE_SUPER_ADMIN => [
-            self::PERMISSION_STAFF_ACCESS,
-            self::PERMISSION_ADMIN_ACCESS,
-            self::PERMISSION_SUPERADMIN_ACCESS,
-            'admin.users.view',
-            'admin.users.manage',
             'admin.groups.view',
             'admin.group-mappings.manage',
             'admin.roles.view',
@@ -70,7 +57,6 @@ class AuthorizationProfile
     ];
 
     private const PROTECTED_ROLE_PRECEDENCE = [
-        self::ROLE_SUPER_ADMIN,
         self::ROLE_ADMINISTRATOR,
         self::ROLE_STAFF,
         self::ROLE_VOLUNTEER,
@@ -78,8 +64,7 @@ class AuthorizationProfile
         self::ROLE_SERVICE_USER,
     ];
 
-    private const SUPER_ADMIN_ONLY_PERMISSIONS = [
-        self::PERMISSION_SUPERADMIN_ACCESS,
+    private const ADMINISTRATOR_ONLY_PERMISSIONS = [
         'admin.groups.view',
         'admin.group-mappings.manage',
         'admin.roles.view',
@@ -97,7 +82,6 @@ class AuthorizationProfile
         'volunteer' => self::ROLE_VOLUNTEER,
         'staff' => self::ROLE_STAFF,
         'admin' => self::ROLE_ADMINISTRATOR,
-        'superadmin' => self::ROLE_SUPER_ADMIN,
     ];
 
     /** @var array<string, array<int, string>>|null */
@@ -187,11 +171,11 @@ class AuthorizationProfile
         return in_array($permission, $this->permissions(), true);
     }
 
-    public function isSuperAdminOnlyPermission(string $permission): bool
+    public function isAdministratorOnlyPermission(string $permission): bool
     {
         return in_array(
             $permission,
-            self::SUPER_ADMIN_ONLY_PERMISSIONS,
+            self::ADMINISTRATOR_ONLY_PERMISSIONS,
             true,
         );
     }
@@ -221,7 +205,6 @@ class AuthorizationProfile
                 self::ROLE_VOLUNTEER,
                 self::ROLE_STAFF,
                 self::ROLE_ADMINISTRATOR,
-                self::ROLE_SUPER_ADMIN,
             ],
             true,
         );
@@ -237,18 +220,12 @@ class AuthorizationProfile
             self::ROLE_VOLUNTEER,
             self::ROLE_STAFF,
             self::ROLE_ADMINISTRATOR,
-            self::ROLE_SUPER_ADMIN,
         ];
     }
 
-    public function isSuperAdmin(User $user): bool
+    public function isAdministrator(User $user): bool
     {
-        return $this->effectiveProtectedRole($user) === self::ROLE_SUPER_ADMIN;
-    }
-
-    public function superAdminRoleName(): string
-    {
-        return self::ROLE_SUPER_ADMIN;
+        return $this->effectiveProtectedRole($user) === self::ROLE_ADMINISTRATOR;
     }
 
     public function protectedRoleForLegacy(string $legacyAccessLevel): ?string
@@ -282,7 +259,7 @@ class AuthorizationProfile
      */
     public function qaSwitchSelectors(): array
     {
-        return ['service_user', 'student', 'volunteer', 'staff', 'admin', 'superadmin'];
+        return ['service_user', 'student', 'volunteer', 'staff', 'admin'];
     }
 
     public function matchesQaSelector(User $user, string $selector): bool
@@ -306,7 +283,6 @@ class AuthorizationProfile
             self::ROLE_VOLUNTEER => 'Volunteer',
             self::ROLE_STAFF => 'Staff',
             self::ROLE_ADMINISTRATOR => 'Admin',
-            self::ROLE_SUPER_ADMIN => 'Super Admin',
             default => 'Custom',
         };
     }

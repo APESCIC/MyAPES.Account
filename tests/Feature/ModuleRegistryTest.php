@@ -283,7 +283,7 @@ class ModuleRegistryTest extends TestCase
         }
     }
 
-    public function test_module_permissions_extend_protected_role_matrices_without_granting_module_management_to_administrators(): void
+    public function test_module_permissions_extend_protected_role_matrices_and_grant_module_management_to_administrators(): void
     {
         $profile = app(AuthorizationProfile::class);
         $matrix = $profile->permissionMatrix();
@@ -332,28 +332,20 @@ class ModuleRegistryTest extends TestCase
             'pet-care-clinic.consultations.close',
             $matrix[AuthorizationProfile::ROLE_ADMINISTRATOR],
         );
-        $this->assertNotContains(
+        $this->assertContains(
             'admin.modules.manage',
             $matrix[AuthorizationProfile::ROLE_ADMINISTRATOR],
         );
+        $this->assertTrue(
+            $profile->isAdministratorOnlyPermission('admin.modules.manage'),
+        );
+        $this->assertCount(82, $profile->permissions());
+        $this->assertFalse(
+            $profile->isApplicationPermission('superadmin.access'),
+        );
         $this->assertContains(
-            'admin.modules.manage',
-            $matrix[AuthorizationProfile::ROLE_SUPER_ADMIN],
-        );
-        $this->assertTrue(
-            $profile->isSuperAdminOnlyPermission('admin.modules.manage'),
-        );
-        $this->assertCount(83, $profile->permissions());
-        $this->assertTrue(
-            $profile->isSuperAdminOnlyPermission('superadmin.access'),
-        );
-        $this->assertNotContains(
             'admin.modules.view',
             $matrix[AuthorizationProfile::ROLE_ADMINISTRATOR],
-        );
-        $this->assertContains(
-            'superadmin.access',
-            $matrix[AuthorizationProfile::ROLE_SUPER_ADMIN],
         );
         $this->assertFalse(
             $profile->isDirectoryRestrictedPermission(

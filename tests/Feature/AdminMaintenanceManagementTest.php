@@ -22,7 +22,7 @@ class AdminMaintenanceManagementTest extends TestCase
     public function test_super_admin_can_open_the_guarded_maintenance_console(): void
     {
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
 
         $this->actingAs($administrator)
@@ -39,7 +39,7 @@ class AdminMaintenanceManagementTest extends TestCase
             ->protectedRole(AuthorizationProfile::ROLE_STAFF)
             ->create();
         $superAdministrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
 
         $this->get('/admin/maintenance')
@@ -82,7 +82,7 @@ class AdminMaintenanceManagementTest extends TestCase
     public function test_transitions_require_csrf_tokens(): void
     {
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $this->app->instance('env', 'production');
 
@@ -99,7 +99,7 @@ class AdminMaintenanceManagementTest extends TestCase
         $maintenanceMode = new FakeMaintenanceModeGateway;
         $this->app->instance(MaintenanceModeGateway::class, $maintenanceMode);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
 
         $this->actingAs($administrator)
@@ -129,7 +129,7 @@ class AdminMaintenanceManagementTest extends TestCase
         $maintenanceMode->active = true;
         $this->app->instance(MaintenanceModeGateway::class, $maintenanceMode);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
 
         $this->actingAs($administrator)
@@ -150,7 +150,7 @@ class AdminMaintenanceManagementTest extends TestCase
         $maintenanceMode = new FakeMaintenanceModeGateway;
         $this->app->instance(MaintenanceModeGateway::class, $maintenanceMode);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
 
         $this->actingAs($administrator)
@@ -190,7 +190,7 @@ class AdminMaintenanceManagementTest extends TestCase
         $maintenanceMode->active = true;
         $this->app->instance(MaintenanceModeGateway::class, $maintenanceMode);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $window = MaintenanceWindow::query()->create([
             'message' => 'Current maintenance',
@@ -227,7 +227,7 @@ class AdminMaintenanceManagementTest extends TestCase
         $maintenanceMode->failActivation = true;
         $this->app->instance(MaintenanceModeGateway::class, $maintenanceMode);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
 
         $this->actingAs($administrator)
@@ -261,7 +261,7 @@ class AdminMaintenanceManagementTest extends TestCase
         $maintenanceMode->failDeactivation = true;
         $this->app->instance(MaintenanceModeGateway::class, $maintenanceMode);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $window = MaintenanceWindow::query()->create([
             'message' => 'Failure boundary test',
@@ -298,7 +298,7 @@ class AdminMaintenanceManagementTest extends TestCase
     public function test_database_enforces_one_current_window_and_retains_history_after_actor_deletion(): void
     {
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $window = MaintenanceWindow::query()->create([
             'message' => 'Current maintenance',
@@ -333,7 +333,7 @@ class AdminMaintenanceManagementTest extends TestCase
         $maintenanceMode->active = true;
         $this->app->instance(MaintenanceModeGateway::class, $maintenanceMode);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $window = MaintenanceWindow::query()->create([
             'message' => 'Interrupted activation',
@@ -363,7 +363,7 @@ class AdminMaintenanceManagementTest extends TestCase
         $maintenanceMode->active = true;
         $this->app->instance(MaintenanceModeGateway::class, $maintenanceMode);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
 
         foreach (['First conflicting row', 'Second conflicting row'] as $message) {
@@ -398,7 +398,7 @@ class AdminMaintenanceManagementTest extends TestCase
         $maintenanceMode = new FakeMaintenanceModeGateway;
         $this->app->instance(MaintenanceModeGateway::class, $maintenanceMode);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $window = MaintenanceWindow::query()->create([
             'message' => 'Interrupted deactivation',
@@ -427,7 +427,7 @@ class AdminMaintenanceManagementTest extends TestCase
         $maintenanceMode = new FakeMaintenanceModeGateway;
         $this->app->instance(MaintenanceModeGateway::class, $maintenanceMode);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $window = MaintenanceWindow::query()->create([
             'message' => 'Interrupted before native activation',
@@ -459,7 +459,7 @@ class AdminMaintenanceManagementTest extends TestCase
         $maintenanceMode->active = true;
         $this->app->instance(MaintenanceModeGateway::class, $maintenanceMode);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
 
         $this->actingAs($administrator)
@@ -480,7 +480,7 @@ class AdminMaintenanceManagementTest extends TestCase
         $maintenanceMode = new FakeMaintenanceModeGateway;
         $this->app->instance(MaintenanceModeGateway::class, $maintenanceMode);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $lock = Cache::store(config('cache.default'))
             ->lock('myapes:maintenance-transition', 10);
@@ -512,7 +512,7 @@ class AdminMaintenanceManagementTest extends TestCase
         $maintenanceMode = new FakeMaintenanceModeGateway;
         $this->app->instance(MaintenanceModeGateway::class, $maintenanceMode);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         MaintenanceWindow::updating(static function (MaintenanceWindow $window): void {
             if ($window->state === MaintenanceWindow::STATE_ACTIVE) {
@@ -546,7 +546,7 @@ class AdminMaintenanceManagementTest extends TestCase
         $maintenanceMode->active = true;
         $this->app->instance(MaintenanceModeGateway::class, $maintenanceMode);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $window = MaintenanceWindow::query()->create([
             'message' => 'Deactivation history test',
@@ -587,7 +587,7 @@ class AdminMaintenanceManagementTest extends TestCase
         $maintenanceMode->active = true;
         $this->app->instance(MaintenanceModeGateway::class, $maintenanceMode);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         MaintenanceWindow::query()->create([
             'message' => 'Contended deactivation',
@@ -625,7 +625,7 @@ class AdminMaintenanceManagementTest extends TestCase
         $maintenanceMode = new FakeMaintenanceModeGateway;
         $this->app->instance(MaintenanceModeGateway::class, $maintenanceMode);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $lock = Cache::store(config('cache.default'))
             ->lock('myapes:maintenance-transition', 10);
@@ -652,7 +652,7 @@ class AdminMaintenanceManagementTest extends TestCase
         $maintenanceMode->active = true;
         $this->app->instance(MaintenanceModeGateway::class, $maintenanceMode);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create(['name' => 'Maintenance Operator']);
 
         foreach (range(1, 26) as $number) {

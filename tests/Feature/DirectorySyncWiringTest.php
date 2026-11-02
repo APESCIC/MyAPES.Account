@@ -58,11 +58,11 @@ class DirectorySyncWiringTest extends TestCase
 
         $this->assertSame(0, $exitCode);
         $this->assertStringContainsString(
-            'Directory catalogue: ok (1 seen, 4 missing)',
+            'Directory catalogue: ok (1 seen, 3 missing)',
             $output,
         );
         $this->assertStringContainsString(
-            'Directory groups: warning (4 missing)',
+            'Directory groups: warning (3 missing)',
             $output,
         );
         $this->assertStringNotContainsString('myapesaccount.staff', $output);

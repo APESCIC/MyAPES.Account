@@ -20,7 +20,7 @@ class AdminDirectoryManagementTest extends TestCase
 
     public function test_job_role_mappings_can_be_added_on_managed_groups(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
         $group = DirectoryGroup::query()
             ->where('name', 'myapesaccount.staff')
             ->firstOrFail();
@@ -76,7 +76,7 @@ class AdminDirectoryManagementTest extends TestCase
     {
         Queue::fake();
         config(['queue.default' => 'database']);
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
 
         $this->actingAs($superAdmin)
             ->post('/admin/access/sync')
@@ -102,7 +102,7 @@ class AdminDirectoryManagementTest extends TestCase
             'queue.default' => 'redis',
             'queue.connections.redis.driver' => 'redis',
         ]);
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
 
         $this->actingAs($superAdmin)
             ->post('/admin/access/sync')
@@ -125,7 +125,7 @@ class AdminDirectoryManagementTest extends TestCase
                 'connections' => ['redis', 'database'],
             ],
         ]);
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
 
         $this->actingAs($superAdmin)
             ->post('/admin/access/sync')
@@ -152,7 +152,7 @@ class AdminDirectoryManagementTest extends TestCase
                 'connections' => ['redis', 'deferred'],
             ],
         ]);
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
 
         $this->actingAs($superAdmin)
             ->from('/admin/access?tab=groups')
@@ -175,7 +175,7 @@ class AdminDirectoryManagementTest extends TestCase
     ): void {
         Queue::fake();
         config($queueConfiguration);
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
 
         $this->actingAs($superAdmin)
             ->from('/admin/access?tab=groups')
@@ -234,7 +234,7 @@ class AdminDirectoryManagementTest extends TestCase
 
     public function test_admin_groups_index_lists_managed_prefix_groups_and_hides_historical_noise(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
         DirectoryGroup::query()->create([
             'name' => 'intranet.managers',
             'status' => DirectoryGroup::STATUS_PRESENT,

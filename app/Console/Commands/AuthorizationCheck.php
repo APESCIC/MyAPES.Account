@@ -51,7 +51,7 @@ class AuthorizationCheck extends Command
         );
         $this->components->info('Session cutover: ok');
         $this->components->info(
-            "Effective super-admins: ok ({$result['super_admins']} users)",
+            "Effective administrators: ok ({$result['administrators']} users)",
         );
         $this->components->info(
             "Authorization check: ok ({$result['users']} users)",

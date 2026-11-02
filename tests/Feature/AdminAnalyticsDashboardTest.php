@@ -39,28 +39,8 @@ class AdminAnalyticsDashboardTest extends TestCase
         $admin = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
 
         $this->actingAs($staff)->get(route('admin.index'))->assertForbidden();
-        $adminResponse = $this->actingAs($admin)
-            ->get(route('admin.index'))
-            ->assertOk()
-            ->assertSee('Admin overview')
-            ->assertSee('data-kpi="open-workload"', false)
-            ->assertDontSee('data-kpi="median-closure"', false)
-            ->assertDontSee('data-kpi="enabled-modules"', false)
-            ->assertDontSee('data-kpi="module-alerts"', false)
-            ->assertDontSee('Created versus closed')
-            ->assertDontSee('id="analytics-trend-chart"', false)
-            ->assertDontSee('cdn.jsdelivr.net');
-        $this->assertKpisAppearOnce($adminResponse->getContent(), [
-            'total-accounts',
-            'created-in-range',
-            'suspended-accounts',
-            'open-workload',
-            'high-or-urgent',
-            'unassigned',
-        ]);
 
-        $superAdmin = User::factory()->accessLevel(User::ROLE_SUPERADMIN)->create();
-        $superAdminResponse = $this->actingAs($superAdmin)
+        $superAdminResponse = $this->actingAs($admin)
             ->get(route('admin.index'))
             ->assertOk()
             ->assertSee('Admin overview')
@@ -168,7 +148,7 @@ class AdminAnalyticsDashboardTest extends TestCase
         $this->assertGreaterThan(0, $dashboard['accounts']['by_access_class']['administrator']);
         $this->assertGreaterThan(0, $dashboard['modules']['enabled']);
 
-        $superAdmin = User::factory()->accessLevel(User::ROLE_SUPERADMIN)->create();
+        $superAdmin = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
         $this->actingAs($superAdmin)
             ->get(route('admin.index', ['range' => 7]))
             ->assertOk()
@@ -203,7 +183,7 @@ class AdminAnalyticsDashboardTest extends TestCase
 
     public function test_disabled_modules_are_visible_on_the_dashboard_without_changing_healthz(): void
     {
-        $superAdmin = User::factory()->accessLevel(User::ROLE_SUPERADMIN)->create();
+        $superAdmin = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
         ModuleInstallation::query()
             ->where('sub_core_key', 'apes-cic')
             ->where('module_key', 'tickets')
@@ -227,7 +207,7 @@ class AdminAnalyticsDashboardTest extends TestCase
 
     public function test_superadmin_module_alerts_use_incompatible_not_blocked(): void
     {
-        $superAdmin = User::factory()->accessLevel(User::ROLE_SUPERADMIN)->create();
+        $superAdmin = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
 
         $response = $this->actingAs($superAdmin)->get(route('admin.index'));
         $dashboard = $response->viewData('dashboard');
@@ -318,7 +298,7 @@ class AdminAnalyticsDashboardTest extends TestCase
 
     public function test_privileged_events_show_actor_action_and_time_only(): void
     {
-        $superAdmin = User::factory()->accessLevel(User::ROLE_SUPERADMIN)->create([
+        $superAdmin = User::factory()->accessLevel(User::ROLE_ADMIN)->create([
             'name' => 'Dashboard Operator',
         ]);
         AuditLog::query()->create([

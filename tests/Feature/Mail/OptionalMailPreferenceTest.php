@@ -74,7 +74,7 @@ class OptionalMailPreferenceTest extends TestCase
 
     public function test_admin_send_test_reaches_the_admin_even_with_their_preference_off(): void
     {
-        $superAdmin = User::factory()->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)->create();
+        $superAdmin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
         $superAdmin->contactPreference()->updateOrCreate([], ['email' => false, 'policy_version' => 'test', 'confirmed_at' => now()]);
 
         $this->actingAs($superAdmin)

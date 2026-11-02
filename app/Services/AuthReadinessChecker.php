@@ -12,7 +12,6 @@ class AuthReadinessChecker
     private const ALWAYS_MEMBERED_GROUPS = [
         'myapesaccount.admin',
         'myapesaccount.staff',
-        'myapesaccount.superadmin',
     ];
 
     public function __construct(

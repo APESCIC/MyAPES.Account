@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Super Admin role | MyAPES Account')
+@section('title', 'Role | MyAPES Account')
 
 @section('content')
     <section class="panel" aria-labelledby="managed-role-title">
-        <p><a href="{{ route('admin.roles.index') }}">{{ __('admin.access.back_to_super_admin_roles') }}</a></p>
+        <p><a href="{{ route('admin.roles.index') }}">{{ __('admin.access.back_to_roles') }}</a></p>
         <h1 id="managed-role-title">{{ $managedRole->name }}</h1>
         <dl class="admin-definition-list">
             <div><dt>{{ __('admin.access.ownership') }}</dt><dd>{{ $managedRole->is_protected ? 'Protected by application code' : 'Custom' }}</dd></div>
@@ -44,7 +44,7 @@
         @endforelse
 
         @if(! $managedRole->is_protected && \Illuminate\Support\Facades\Gate::denies('admin.roles.manage'))
-            <p class="muted">{{ __('admin.access.custom_role_management_requires_super_admin_authorization') }}</p>
+            <p class="muted">{{ __('admin.access.custom_role_management_requires_admin_authorization') }}</p>
         @endif
 
         @can('admin.roles.manage')

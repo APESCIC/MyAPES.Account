@@ -87,7 +87,7 @@ class StructureEnablementWave2Test extends TestCase
     public function test_cannot_disable_pet_profiles_while_consultations_enabled(): void
     {
         $admin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $this->actingAs($admin);
 
@@ -112,7 +112,7 @@ class StructureEnablementWave2Test extends TestCase
     public function test_cannot_enable_consultations_without_pet_profiles(): void
     {
         $admin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $this->actingAs($admin);
         $lifecycle = app(ModuleLifecycleManager::class);
@@ -157,7 +157,7 @@ class StructureEnablementWave2Test extends TestCase
     public function test_admin_modules_and_plugins_views_are_separate_and_gated(): void
     {
         $admin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $staff = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_STAFF)
@@ -187,7 +187,7 @@ class StructureEnablementWave2Test extends TestCase
     public function test_disabled_plugin_permissions_are_not_offered_in_access_editors(): void
     {
         $admin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $this->actingAs($admin);
         $enablement = app(PluginEnablement::class);

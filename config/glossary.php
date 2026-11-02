@@ -21,7 +21,6 @@ return [
         'module' => 'terms.module',
         'plugin' => 'terms.plugin',
         'admin' => 'terms.admin',
-        'super_admin' => 'terms.super_admin',
         'public_user' => 'terms.public_user',
         'staff' => 'terms.staff',
         'job_role' => 'terms.job_role',
@@ -63,8 +62,8 @@ return [
         [
             'pattern' => 'Super Admin',
             'canonical' => 'Admin',
-            'contexts' => ['nav'],
-            'notes' => 'Retire as a nav door or Admin page-family label. Keep when naming the superadmin.access tier or protected role.',
+            'contexts' => ['nav', 'public_ui', 'admin_ui'],
+            'notes' => 'Retired in 0.46.0 (#459): administrator is the only admin role. Historic release notes keep the old name.',
         ],
         [
             'pattern' => 'sub-core',

@@ -80,7 +80,6 @@ class RecruitmentUnifiedMenuAccessMatrixTest extends TestCase
             'staff without HR' => ['staff', 'recruitment.index', self::BROWSE_SECTIONS, $applicant],
             'HR staff' => ['hr', 'apes-cic.recruitment.index', self::ALL_SECTIONS, $manager],
             'administrator' => ['administrator', 'apes-cic.recruitment.index', self::ALL_SECTIONS, $manager],
-            'super admin' => ['super-admin', 'apes-cic.recruitment.index', self::ALL_SECTIONS, $manager],
             'review only' => ['review-only', 'apes-cic.recruitment.applications.index', ['Open roles', 'Applications'], [
                 'board' => 200,
                 'board.show' => 200,
@@ -244,7 +243,7 @@ class RecruitmentUnifiedMenuAccessMatrixTest extends TestCase
             'guest' => null,
             'hr' => $this->hrStaff(),
             'review-only' => $this->reviewOnlyStaff(),
-            'service-user', 'student', 'volunteer', 'staff', 'administrator', 'super-admin' => User::factory()
+            'service-user', 'student', 'volunteer', 'staff', 'administrator' => User::factory()
                 ->protectedRole($persona)
                 ->create(),
         };
@@ -297,7 +296,7 @@ class RecruitmentUnifiedMenuAccessMatrixTest extends TestCase
             ->where('module_key', 'recruitment')
             ->firstOrFail();
 
-        $this->actingAs($this->persona('super-admin'))
+        $this->actingAs($this->persona('administrator'))
             ->put(route('admin.modules.settings.update', ['apes-cic', 'recruitment']), [
                 'version' => $record->lock_version,
                 'public_board_enabled' => $board ? '1' : '0',

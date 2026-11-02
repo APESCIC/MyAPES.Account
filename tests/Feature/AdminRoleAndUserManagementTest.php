@@ -26,7 +26,7 @@ class AdminRoleAndUserManagementTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_administrator_manages_custom_roles_and_suspension_only_for_service_and_staff_targets(): void
+    public function test_administrator_manages_custom_roles_and_suspension_for_other_administrators(): void
     {
         $administrator = $this->userWithAccess(User::ROLE_ADMIN);
         $serviceUser = $this->userWithAccess(User::ROLE_SERVICE_USER);
@@ -63,14 +63,22 @@ class AdminRoleAndUserManagementTest extends TestCase
         $this->assertNull($staff->fresh()->suspended_at);
 
         $this->actingAs($administrator)
-            ->from("/admin/users/{$otherAdministrator->id}")
             ->post("/admin/users/{$otherAdministrator->id}/suspension", [
+                'reason' => 'Temporary access review',
+                'confirm_suspend' => '1',
+            ])
+            ->assertRedirect("/admin/users/{$otherAdministrator->id}");
+        $this->assertNotNull($otherAdministrator->fresh()->suspended_at);
+
+        $this->actingAs($administrator)
+            ->from("/admin/users/{$administrator->id}")
+            ->post("/admin/users/{$administrator->id}/suspension", [
                 'reason' => 'Not permitted',
                 'confirm_suspend' => '1',
             ])
-            ->assertRedirect("/admin/users/{$otherAdministrator->id}")
+            ->assertRedirect("/admin/users/{$administrator->id}")
             ->assertSessionHasErrors('authorization');
-        $this->assertNull($otherAdministrator->fresh()->suspended_at);
+        $this->assertNull($administrator->fresh()->suspended_at);
 
         $denial = AuditLog::query()
             ->where('event', 'authorization.privileged_mutation_denied')
@@ -78,19 +86,16 @@ class AdminRoleAndUserManagementTest extends TestCase
             ->latest('id')
             ->firstOrFail();
         $this->assertSame('suspend', $denial->context['action']);
+        $this->assertSame('self_change', $denial->context['reason_code']);
         $this->assertSame(
-            'administrator_target_requires_super_admin',
-            $denial->context['reason_code'],
-        );
-        $this->assertSame(
-            $otherAdministrator->id,
+            $administrator->id,
             $denial->context['target_user_id'],
         );
     }
 
     public function test_self_changes_and_protected_local_assignments_are_rejected_at_service_boundaries(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
         $protectedRole = Role::query()
             ->where('name', 'administrator')
             ->firstOrFail();
@@ -137,7 +142,7 @@ class AdminRoleAndUserManagementTest extends TestCase
 
     public function test_custom_role_lifecycle_validates_catalogue_resets_cache_and_invalidates_assigned_users(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
         $target = $this->userWithAccess(User::ROLE_SERVICE_USER);
 
         $this->actingAs($superAdmin)
@@ -241,7 +246,7 @@ class AdminRoleAndUserManagementTest extends TestCase
 
     public function test_protected_roles_are_read_only_even_for_super_admins(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
         $protected = Role::query()->where('name', 'staff')->firstOrFail();
         $permission = Permission::query()
             ->where('name', 'admin.users.view')
@@ -266,7 +271,7 @@ class AdminRoleAndUserManagementTest extends TestCase
 
     public function test_super_admin_can_update_default_job_role_permissions_within_catalogue_rules(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
         $role = Role::query()
             ->where('name', DefaultJobRoles::RECEPTIONIST)
             ->firstOrFail();
@@ -304,7 +309,7 @@ class AdminRoleAndUserManagementTest extends TestCase
 
     public function test_custom_role_deletion_rejects_mappings_and_unsafe_permissions(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
         $role = Role::query()->create([
             'name' => 'mapped-reviewer',
             'guard_name' => 'web',
@@ -355,7 +360,7 @@ class AdminRoleAndUserManagementTest extends TestCase
     public function test_role_management_revalidates_directory_eligibility_inside_the_transaction(): void
     {
         $group = DirectoryGroup::query()
-            ->where('name', 'myapesaccount.superadmin')
+            ->where('name', 'myapesaccount.admin')
             ->firstOrFail();
         $group->forceFill([
             'status' => DirectoryGroup::STATUS_PRESENT,
@@ -371,7 +376,7 @@ class AdminRoleAndUserManagementTest extends TestCase
         );
         $actor->refresh();
         $superAdminRoleId = Role::query()
-            ->where('name', AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->where('name', AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->value('id');
         RoleSource::query()
             ->whereBelongsTo($actor)
@@ -379,7 +384,7 @@ class AdminRoleAndUserManagementTest extends TestCase
             ->where('source', '<>', RoleSource::SOURCE_DIRECTORY)
             ->delete();
         $this->assertSame(
-            AuthorizationProfile::ROLE_SUPER_ADMIN,
+            AuthorizationProfile::ROLE_ADMINISTRATOR,
             app(AuthorizationProfile::class)->effectiveProtectedRole($actor),
         );
         $this->authenticateQaContext($actor);
@@ -399,7 +404,7 @@ class AdminRoleAndUserManagementTest extends TestCase
             );
             $this->fail('A directory-revoked actor created a role.');
         } catch (AuthorizationMutationDenied $exception) {
-            $this->assertSame('super_admin_required', $exception->reasonCode);
+            $this->assertSame('administrator_required', $exception->reasonCode);
         }
 
         $this->assertDatabaseMissing('roles', [

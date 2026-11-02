@@ -47,7 +47,7 @@ class AuthorizationPreflight extends Command
             "Directory groups: ok ({$result['groups']} groups)",
         );
         $this->components->info(
-            "Eligible OIDC super-admins: ok ({$result['super_admins']} users)",
+            "Eligible OIDC administrators: ok ({$result['administrators']} users)",
         );
         $this->components->info(
             "Authorization preflight: ok ({$result['users']} users)",

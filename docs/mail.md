@@ -54,8 +54,8 @@ Admin → Emails (`/admin/emails`).
 
 | Permission | Roles | Allows |
 | --- | --- | --- |
-| `admin.emails.view` | Administrator, Super Admin | List templates, open a template, preview it, read the outbound log |
-| `admin.emails.manage` | Super Admin only | Send a test, edit and reset wording |
+| `admin.emails.view` | Administrator | List templates, open a template, preview it, read the outbound log |
+| `admin.emails.manage` | Administrator only | Send a test, edit and reset wording |
 
 - **Preview** renders the sample with the viewing admin's name inside a sandboxed iframe (`/admin/emails/{key}/preview`, served with its own `sandbox` Content Security Policy). Nothing is sent.
 - **Send test** sends the sample to the acting admin's own address only, immediately and on the mail channel only, so no in-app notification is written. Limited to 5 tests per admin every 10 minutes and audited as `admin.emails.test_sent`.
@@ -63,7 +63,7 @@ Admin → Emails (`/admin/emails`).
 
 ## Wording overrides
 
-For templates with `subjectKey` or `introKey`, a Super Admin can change the subject and opening line on the template page.
+For templates with `subjectKey` or `introKey`, an Administrator can change the subject and opening line on the template page.
 
 - Plain text only, up to 200 characters for the subject and 1,000 for the opening line. Angle brackets are rejected.
 - Placeholders such as `:role` must already appear in the shipped wording.

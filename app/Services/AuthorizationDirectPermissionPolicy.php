@@ -56,10 +56,10 @@ class AuthorizationDirectPermissionPolicy
 
         if (collect($targets)->contains(
             fn (string $ability): bool => $this->profile
-                ->isSuperAdminOnlyPermission($ability),
+                ->isAdministratorOnlyPermission($ability),
         )) {
             throw new InvalidArgumentException(
-                'Super-admin-only permissions cannot be assigned directly.',
+                'Administrator-only permissions cannot be assigned directly.',
             );
         }
     }

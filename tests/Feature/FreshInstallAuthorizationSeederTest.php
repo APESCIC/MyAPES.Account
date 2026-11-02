@@ -154,7 +154,7 @@ class FreshInstallAuthorizationSeederTest extends TestCase
             ->orderBy('email')
             ->get();
 
-        $this->assertCount(7, $users);
+        $this->assertCount(6, $users);
         $this->assertSame(
             [User::IDENTITY_LOCAL],
             $users->pluck('identity_type')->unique()->values()->all(),
@@ -189,16 +189,6 @@ class FreshInstallAuthorizationSeederTest extends TestCase
             'myapesaccount.admin',
             'position.staff',
         ], $users->firstWhere('email', LocalQaSeeder::ADMIN_EMAIL)?->ldap_groups);
-        $this->assertSame([
-            'board-of-directors',
-            'department.developers',
-            'department.directors',
-            'intranet.superadmin',
-            'myapesaccount.superadmin',
-            'myapesaccount.superadmin',
-            'newsroom.superadmin',
-            'position.staff',
-        ], $users->firstWhere('email', LocalQaSeeder::SUPERADMIN_EMAIL)?->ldap_groups);
 
         foreach ($users as $user) {
             $protectedRoles = $user->roles()
@@ -792,7 +782,6 @@ class FreshInstallAuthorizationSeederTest extends TestCase
             LocalQaSeeder::STAFF_EMAIL => AuthorizationProfile::ROLE_STAFF,
             LocalQaSeeder::HR_EMAIL => AuthorizationProfile::ROLE_STAFF,
             LocalQaSeeder::ADMIN_EMAIL => AuthorizationProfile::ROLE_ADMINISTRATOR,
-            LocalQaSeeder::SUPERADMIN_EMAIL => AuthorizationProfile::ROLE_SUPER_ADMIN,
         ];
 
         foreach ($expectedProtectedRoles as $email => $expectedRole) {
@@ -902,7 +891,7 @@ class FreshInstallAuthorizationSeederTest extends TestCase
 
             foreach ($role->permissions()->pluck('name') as $permission) {
                 $this->assertFalse(
-                    $profile->isSuperAdminOnlyPermission($permission),
+                    $profile->isAdministratorOnlyPermission($permission),
                     "Default job role [{$name}] must not include Super Admin-only permission [{$permission}].",
                 );
             }

@@ -37,10 +37,10 @@ class UiReviewFixesTest extends TestCase
             User::factory()->protectedRole($role)->create();
         }
 
-        $this->actingAs(User::factory()->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)->create())
+        $this->actingAs(User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create())
             ->get(route('admin.index'))
             ->assertOk()
-            ->assertSee('<th scope="row">Super Admin</th>', false)
+            ->assertSee('<th scope="row">Administrator</th>', false)
             ->assertSee('<th scope="row">Volunteer</th>', false)
             ->assertSee('<th scope="row">Student</th>', false)
             ->assertSee('<th scope="row">Cloudron OIDC</th>', false);
@@ -48,7 +48,7 @@ class UiReviewFixesTest extends TestCase
 
     public function test_permission_groups_use_real_module_names(): void
     {
-        $this->actingAs(User::factory()->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)->create())
+        $this->actingAs(User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create())
             ->followingRedirects()
             ->get('/admin/permissions')
             ->assertOk()

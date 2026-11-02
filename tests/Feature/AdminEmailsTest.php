@@ -63,7 +63,7 @@ class AdminEmailsTest extends TestCase
     {
         return [
             'administrator' => [AuthorizationProfile::ROLE_ADMINISTRATOR],
-            'super admin' => [AuthorizationProfile::ROLE_SUPER_ADMIN],
+            'super admin' => [AuthorizationProfile::ROLE_ADMINISTRATOR],
         ];
     }
 
@@ -120,7 +120,7 @@ class AdminEmailsTest extends TestCase
 
     public function test_preview_frame_is_locked_down_by_its_own_policy(): void
     {
-        $admin = User::factory()->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)->create();
+        $admin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
 
         $policy = $this->actingAs($admin)
             ->get(route('admin.emails.preview', 'tickets.ticket_updated'))
@@ -168,11 +168,9 @@ class AdminEmailsTest extends TestCase
         $matrix = $profile->permissionMatrix();
 
         $this->assertContains('admin.emails.view', $matrix[AuthorizationProfile::ROLE_ADMINISTRATOR]);
-        $this->assertNotContains('admin.emails.manage', $matrix[AuthorizationProfile::ROLE_ADMINISTRATOR]);
-        $this->assertContains('admin.emails.view', $matrix[AuthorizationProfile::ROLE_SUPER_ADMIN]);
-        $this->assertContains('admin.emails.manage', $matrix[AuthorizationProfile::ROLE_SUPER_ADMIN]);
+        $this->assertContains('admin.emails.manage', $matrix[AuthorizationProfile::ROLE_ADMINISTRATOR]);
         $this->assertNotContains('admin.emails.view', $matrix[AuthorizationProfile::ROLE_STAFF]);
-        $this->assertTrue($profile->isSuperAdminOnlyPermission('admin.emails.manage'));
+        $this->assertTrue($profile->isAdministratorOnlyPermission('admin.emails.manage'));
         $this->assertDatabaseHas('permissions', ['name' => 'admin.emails.manage', 'is_code_owned' => true]);
     }
 }

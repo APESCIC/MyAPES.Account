@@ -23,32 +23,33 @@ class AdminAccessAndViewsTest extends TestCase
     public function test_admin_routes_enforce_exact_permissions_and_audit_denials(): void
     {
         $administrator = $this->userWithAccess(User::ROLE_ADMIN);
+        $staff = $this->userWithAccess(User::ROLE_STAFF);
 
-        $this->actingAs($administrator)->get('/admin/users')->assertOk();
-
-        foreach ([
-            '/admin/access',
-            '/admin/modules',
-            '/superadmin',
-            '/superadmin/plugins',
-            '/superadmin/groups',
-        ] as $path) {
-            $this->actingAs($administrator)->get($path)->assertForbidden();
+        foreach (['/admin/users', '/admin/access', '/admin/modules'] as $path) {
+            $this->actingAs($administrator)->get($path)->assertOk();
         }
 
-        $this->actingAs($administrator)
+        foreach (['/superadmin', '/superadmin/plugins', '/superadmin/groups'] as $path) {
+            $this->actingAs($administrator)->get($path)->assertStatus(301);
+        }
+
+        foreach (['/admin/access', '/admin/modules', '/superadmin', '/superadmin/plugins'] as $path) {
+            $this->actingAs($staff)->get($path)->assertForbidden();
+        }
+
+        $this->actingAs($staff)
             ->post(route('admin.access.job-roles.store'), [
                 'name' => 'case-reviewer',
                 'permissions' => [],
             ])
             ->assertForbidden();
-        $this->actingAs($administrator)
+        $this->actingAs($staff)
             ->post(route('admin.access.sync'))
             ->assertForbidden();
 
         $denials = AuditLog::query()
             ->where('event', 'authorization.admin_denied')
-            ->where('user_id', $administrator->id)
+            ->where('user_id', $staff->id)
             ->get();
 
         $this->assertGreaterThanOrEqual(2, $denials->count());
@@ -230,7 +231,7 @@ class AdminAccessAndViewsTest extends TestCase
 
     public function test_group_role_and_permission_lists_support_validated_search_and_semantic_markup(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
         DirectoryGroup::query()
             ->where('name', 'myapesaccount.volunteer')
             ->update([
@@ -260,7 +261,7 @@ class AdminAccessAndViewsTest extends TestCase
 
     public function test_groups_ui_is_read_only_for_preset_cloudron_groups(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
         $group = DirectoryGroup::query()
             ->where('name', 'myapesaccount.staff')
             ->firstOrFail();
@@ -283,10 +284,10 @@ class AdminAccessAndViewsTest extends TestCase
             ->assertNotFound();
     }
 
-    public function test_super_admin_can_read_custom_role_permissions_and_administrators_cannot(): void
+    public function test_administrator_can_read_custom_role_permissions_and_staff_cannot(): void
     {
+        $staff = $this->userWithAccess(User::ROLE_STAFF);
         $administrator = $this->userWithAccess(User::ROLE_ADMIN);
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
         $role = Role::query()->create([
             'name' => 'case-reviewer',
             'guard_name' => 'web',
@@ -297,11 +298,11 @@ class AdminAccessAndViewsTest extends TestCase
             ->firstOrFail();
         $role->permissions()->attach($permission->id);
 
-        $this->actingAs($administrator)
+        $this->actingAs($staff)
             ->get(route('admin.access.job-roles.show', $role))
             ->assertForbidden();
 
-        $this->actingAs($superAdmin)
+        $this->actingAs($administrator)
             ->get(route('admin.access.job-roles.show', $role))
             ->assertOk()
             ->assertSee('View accounts')
@@ -311,7 +312,7 @@ class AdminAccessAndViewsTest extends TestCase
 
     public function test_admin_mutations_require_csrf_tokens(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
         $this->app->instance('env', 'production');
 
         $this->withMiddleware(ValidateCsrfToken::class)
@@ -461,22 +462,22 @@ class AdminAccessAndViewsTest extends TestCase
 
     public function test_role_and_group_identifier_probes_are_denied_before_lookup(): void
     {
-        $administrator = $this->userWithAccess(User::ROLE_ADMIN);
+        $otherStaff = $this->userWithAccess(User::ROLE_STAFF);
         $staff = $this->userWithAccess(User::ROLE_STAFF);
         $role = Role::query()->create([
             'name' => 'oracle-test-role',
             'guard_name' => 'web',
         ]);
 
-        $roleExisting = $this->actingAs($administrator)->put(
+        $roleExisting = $this->actingAs($otherStaff)->put(
             route('admin.access.job-roles.update', $role),
             ['name' => 'ignored-role', 'permissions' => []],
         );
-        $roleMissing = $this->actingAs($administrator)->put(
+        $roleMissing = $this->actingAs($otherStaff)->put(
             route('admin.access.job-roles.update', 999999),
             ['name' => 'ignored-role', 'permissions' => []],
         );
-        $groupSync = $this->actingAs($administrator)->post(route('admin.access.sync'));
+        $groupSync = $this->actingAs($otherStaff)->post(route('admin.access.sync'));
         $roleShowExisting = $this->actingAs($staff)->get(
             route('admin.access.job-roles.show', $role),
         );
@@ -537,7 +538,7 @@ class AdminAccessAndViewsTest extends TestCase
 
     public function test_authorized_admin_identifier_misses_reach_explicit_not_found_responses(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
         $role = Role::query()->create([
             'name' => 'lookup-control-role',
             'guard_name' => 'web',

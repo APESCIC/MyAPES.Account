@@ -89,7 +89,7 @@ class DirectoryGroupMappingService
                     $storedGroup->name,
                     $lockedUsers,
                 );
-                $this->assertAnActiveSuperAdminRemains();
+                $this->assertAnActiveAdministratorRemains();
                 $this->auditLogger->record(
                     'authorization.directory_mapping_changed',
                     $lockedActor,
@@ -120,7 +120,7 @@ class DirectoryGroupMappingService
             $this->auditDenied(
                 $actor,
                 'mapping_create',
-                'super_admin_required',
+                'administrator_required',
                 $group,
                 $role,
             );
@@ -163,7 +163,7 @@ class DirectoryGroupMappingService
                     $group->name,
                     $lockedUsers,
                 );
-                $this->assertAnActiveSuperAdminRemains();
+                $this->assertAnActiveAdministratorRemains();
                 $this->auditLogger->record(
                     'authorization.directory_mapping_changed',
                     $lockedActor,
@@ -191,7 +191,7 @@ class DirectoryGroupMappingService
             $this->auditDenied(
                 $actor,
                 'mapping_remove',
-                'super_admin_required',
+                'administrator_required',
                 mapping: $mapping,
             );
 
@@ -237,7 +237,7 @@ class DirectoryGroupMappingService
             'admin.group-mappings.manage',
         )) {
             throw new AuthorizationException(
-                'Super-admin authorization is required.',
+                'Administrator authorization is required.',
             );
         }
     }
@@ -279,9 +279,9 @@ class DirectoryGroupMappingService
         return [$users->count(), $changed];
     }
 
-    private function assertAnActiveSuperAdminRemains(): void
+    private function assertAnActiveAdministratorRemains(): void
     {
-        $this->authorizer->assertEligibleSuperAdminRemains();
+        $this->authorizer->assertEligibleAdministratorRemains();
     }
 
     private function denyPresetGroupsOnly(): never

@@ -97,7 +97,7 @@ class DatabaseModuleLifecycleManager implements ModuleLifecycleManager
                             [$lockedActor] = $this->authorizer->lock($actor);
 
                             if (! $this->authorizer
-                                ->isEligibleSuperAdmin($lockedActor)
+                                ->isEligibleAdministrator($lockedActor)
                                 || ! $this->authorizer->authorizes(
                                     $lockedActor,
                                     'admin.modules.manage',

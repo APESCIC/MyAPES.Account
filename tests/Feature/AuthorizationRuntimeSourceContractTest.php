@@ -46,6 +46,7 @@ class AuthorizationRuntimeSourceContractTest extends TestCase
                     'app/Services/LegacyAccessCompatibilityAdapter.php',
                     'app/Services/AuthorizationPreflightChecker.php',
                     'app/Support/AccessCompatibilityDatabaseGuard.php',
+                    'app/Services/AuthorizationSuperAdminRetirement.php',
                     'app/Support/AuthorizationCompatibilityDatabaseGuard.php',
                 ], true)) {
                 $violations[] = "{$path}: legacy mirror reference outside compatibility synchronization";
@@ -59,6 +60,7 @@ class AuthorizationRuntimeSourceContractTest extends TestCase
                     'app/Services/AuthorizationIntegrityChecker.php',
                     'app/Services/AuthorizationPhaseBSchemaInspector.php',
                     'app/Services/AuthorizationPreflightChecker.php',
+                    'app/Services/AuthorizationSuperAdminRetirement.php',
                     'app/Support/AuthorizationCompatibilityDatabaseGuard.php',
                 ], true)) {
                 $violations[] = "{$path}: direct user permission-pivot access";
@@ -71,6 +73,7 @@ class AuthorizationRuntimeSourceContractTest extends TestCase
                     'app/Services/AuthorizationDirectPermissionMaterializer.php',
                     'app/Services/AuthorizationIntegrityChecker.php',
                     'app/Services/AuthorizationPhaseBSchemaInspector.php',
+                    'app/Services/AuthorizationSuperAdminRetirement.php',
                     'app/Support/AuthorizationCompatibilityDatabaseGuard.php',
                 ], true)) {
                 $violations[] = "{$path}: direct permission provenance access";
@@ -88,6 +91,7 @@ class AuthorizationRuntimeSourceContractTest extends TestCase
                     'app/Services/AuthorizationPreflightChecker.php',
                     'app/Services/AuthorizationRoleManagementService.php',
                     'app/Services/AuthorizationRoleMaterializer.php',
+                    'app/Services/AuthorizationSuperAdminRetirement.php',
                     'app/Support/AuthorizationCompatibilityDatabaseGuard.php',
                 ], true)) {
                 $violations[] = "{$path}: unprovenanced effective-role pivot access";
@@ -103,6 +107,7 @@ class AuthorizationRuntimeSourceContractTest extends TestCase
                     'app/Services/AuthorizationPreflightChecker.php',
                     'app/Services/AuthorizationPermissionSynchronizer.php',
                     'app/Services/AuthorizationRoleManagementService.php',
+                    'app/Services/AuthorizationSuperAdminRetirement.php',
                     'app/Support/AuthorizationCompatibilityDatabaseGuard.php',
                 ], true)) {
                 $violations[] = "{$path}: direct role-permission pivot access";
@@ -115,6 +120,7 @@ class AuthorizationRuntimeSourceContractTest extends TestCase
                     'app/Services/AuthorizationPhaseBSchemaInspector.php',
                     'app/Services/AuthorizationPreflightChecker.php',
                     'app/Services/AuthorizationRoleManagementService.php',
+                    'app/Services/AuthorizationSuperAdminRetirement.php',
                     'app/Support/AuthorizationCompatibilityDatabaseGuard.php',
                 ], true)) {
                 $violations[] = "{$path}: direct provenance-table access";

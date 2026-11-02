@@ -203,7 +203,7 @@ class AdminRoleController extends Controller
 
         return array_values(array_filter(
             $profile->permissions(),
-            fn (string $permission): bool => ! $profile->isSuperAdminOnlyPermission($permission)
+            fn (string $permission): bool => ! $profile->isAdministratorOnlyPermission($permission)
                 && $enablement->isOfferedInAccessEditors($permission),
         ));
     }

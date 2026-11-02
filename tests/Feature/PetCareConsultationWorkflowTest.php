@@ -343,7 +343,7 @@ class PetCareConsultationWorkflowTest extends TestCase
     {
         $owner = User::factory()->create();
         $actor = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
+            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
             ->create();
         $candidate = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_STAFF)
@@ -351,7 +351,7 @@ class PetCareConsultationWorkflowTest extends TestCase
         $pet = $this->petFor($owner, PetProfile::DOMAIN_PETCARE, 'Authorization order pet');
         $consultation = $this->consultationFor($owner, $pet, 'Authorization order consultation');
 
-        $this->removeRolePermissions(AuthorizationProfile::ROLE_ADMINISTRATOR, [
+        $this->removeRolePermissions(AuthorizationProfile::ROLE_STAFF, [
             'pet-care-clinic.consultations.update-all',
         ]);
         foreach ([
@@ -366,10 +366,10 @@ class PetCareConsultationWorkflowTest extends TestCase
                 "The {$scenario} request did not authorize before validation.",
             );
         }
-        $this->restoreRolePermissions(AuthorizationProfile::ROLE_ADMINISTRATOR, [
+        $this->restoreRolePermissions(AuthorizationProfile::ROLE_STAFF, [
             'pet-care-clinic.consultations.update-all',
         ]);
-        $this->removeRolePermissions(AuthorizationProfile::ROLE_ADMINISTRATOR, [
+        $this->removeRolePermissions(AuthorizationProfile::ROLE_STAFF, [
             'pet-care-clinic.consultations.assign',
         ]);
         foreach ([
@@ -384,10 +384,10 @@ class PetCareConsultationWorkflowTest extends TestCase
                 "The {$scenario} request did not authorize before validation.",
             );
         }
-        $this->restoreRolePermissions(AuthorizationProfile::ROLE_ADMINISTRATOR, [
+        $this->restoreRolePermissions(AuthorizationProfile::ROLE_STAFF, [
             'pet-care-clinic.consultations.assign',
         ]);
-        $this->removeRolePermissions(AuthorizationProfile::ROLE_ADMINISTRATOR, [
+        $this->removeRolePermissions(AuthorizationProfile::ROLE_STAFF, [
             'pet-care-clinic.consultations.close',
         ]);
         foreach ([
@@ -402,12 +402,12 @@ class PetCareConsultationWorkflowTest extends TestCase
                 "The {$scenario} request did not authorize before validation.",
             );
         }
-        $this->restoreRolePermissions(AuthorizationProfile::ROLE_ADMINISTRATOR, [
+        $this->restoreRolePermissions(AuthorizationProfile::ROLE_STAFF, [
             'pet-care-clinic.consultations.close',
         ]);
         $this->assertConsultationUnchanged($consultation);
 
-        $this->removeRolePermissions(AuthorizationProfile::ROLE_ADMINISTRATOR, [
+        $this->removeRolePermissions(AuthorizationProfile::ROLE_STAFF, [
             'pet-care-clinic.consultations.view-all',
         ]);
 
@@ -488,7 +488,7 @@ class PetCareConsultationWorkflowTest extends TestCase
     {
         $owner = User::factory()->create();
         $actor = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
+            ->protectedRole(AuthorizationProfile::ROLE_VOLUNTEER)
             ->create();
         $eligibleCandidate = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
@@ -513,7 +513,7 @@ class PetCareConsultationWorkflowTest extends TestCase
         $this->removeRolePermissions(AuthorizationProfile::ROLE_STAFF, [
             'pet-care-clinic.consultations.view-all',
         ]);
-        $this->removeRolePermissions(AuthorizationProfile::ROLE_ADMINISTRATOR, [
+        $this->removeRolePermissions(AuthorizationProfile::ROLE_VOLUNTEER, [
             'pet-care-clinic.consultations.update-all',
             'pet-care-clinic.consultations.close',
         ]);
@@ -583,7 +583,7 @@ class PetCareConsultationWorkflowTest extends TestCase
         );
 
         $this->removeRolePermissions(
-            AuthorizationProfile::ROLE_ADMINISTRATOR,
+            AuthorizationProfile::ROLE_VOLUNTEER,
             ['pet-care-clinic.consultations.assign'],
         );
         $this->actingAs($actor->fresh())
@@ -598,7 +598,7 @@ class PetCareConsultationWorkflowTest extends TestCase
     {
         $owner = User::factory()->create();
         $actor = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $suspended = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
@@ -832,7 +832,7 @@ class PetCareConsultationWorkflowTest extends TestCase
             ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $actor = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $pet = $this->petFor(
             $ownerAndStaff,
@@ -889,7 +889,7 @@ class PetCareConsultationWorkflowTest extends TestCase
     {
         $owner = User::factory()->create();
         $superAdmin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $pet = $this->petFor($owner, PetProfile::DOMAIN_PETCARE, 'Analytics state pet');
         $this->consultationFor($owner, $pet, 'Analytics exact lower boundary', [
@@ -1081,7 +1081,7 @@ class PetCareConsultationWorkflowTest extends TestCase
     public function test_disablement_ignores_foreign_rows_blocks_strict_open_rows_and_retains_data(): void
     {
         $superAdmin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $owner = User::factory()->create();
         $shelterPet = $this->petFor($owner, PetProfile::DOMAIN_SHELTER, 'Lifecycle Shelter pet');

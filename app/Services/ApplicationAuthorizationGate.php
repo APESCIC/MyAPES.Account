@@ -56,8 +56,8 @@ class ApplicationAuthorizationGate
 
             $eligible = User::query();
 
-            if ($this->profile->isSuperAdminOnlyPermission($ability)) {
-                $eligible->eligibleSuperAdmins();
+            if ($this->profile->isAdministratorOnlyPermission($ability)) {
+                $eligible->eligibleAdministrators();
             } else {
                 $eligible->eligibleStaff();
             }
@@ -68,11 +68,11 @@ class ApplicationAuthorizationGate
                 return false;
             }
 
-            if ($this->profile->isSuperAdminOnlyPermission($ability)) {
-                return $this->profile->isSuperAdmin($user);
+            if ($this->profile->isAdministratorOnlyPermission($ability)) {
+                return $this->profile->isAdministrator($user);
             }
 
-            if ($this->profile->isSuperAdmin($user)) {
+            if ($this->profile->isAdministrator($user)) {
                 return true;
             }
         }

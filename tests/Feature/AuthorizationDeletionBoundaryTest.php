@@ -278,10 +278,10 @@ class AuthorizationDeletionBoundaryTest extends TestCase
             'administrator rename' => ['administrator', ['name' => 'renamed-administrator']],
             'administrator guard' => ['administrator', ['guard_name' => 'api']],
             'administrator timestamp' => ['administrator', ['updated_at' => '2027-01-01 00:00:00']],
-            'super admin unprotect' => ['super-admin', ['is_protected' => false]],
-            'super admin rename' => ['super-admin', ['name' => 'renamed-super-admin']],
-            'super admin guard' => ['super-admin', ['guard_name' => 'api']],
-            'super admin timestamp' => ['super-admin', ['updated_at' => '2027-01-01 00:00:00']],
+            'super admin unprotect' => ['administrator', ['is_protected' => false]],
+            'super admin rename' => ['administrator', ['name' => 'renamed-super-admin']],
+            'super admin guard' => ['administrator', ['guard_name' => 'api']],
+            'super admin timestamp' => ['administrator', ['updated_at' => '2027-01-01 00:00:00']],
         ];
     }
 }

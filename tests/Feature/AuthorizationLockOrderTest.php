@@ -23,7 +23,7 @@ class AuthorizationLockOrderTest extends TestCase
     public function test_integrity_check_locks_state_and_complete_user_set_before_data_reads(): void
     {
         User::factory()
-            ->accessLevel(User::ROLE_SUPERADMIN)
+            ->accessLevel(User::ROLE_ADMIN)
             ->create();
         $queries = [];
         DB::listen(static function (QueryExecuted $query) use (&$queries): void {
@@ -83,7 +83,7 @@ class AuthorizationLockOrderTest extends TestCase
     public function test_role_permission_updates_lock_the_complete_user_set_before_the_role(): void
     {
         $actor = User::factory()
-            ->accessLevel(User::ROLE_SUPERADMIN)
+            ->accessLevel(User::ROLE_ADMIN)
             ->create()
             ->refresh();
         $target = User::factory()
@@ -167,13 +167,13 @@ class AuthorizationLockOrderTest extends TestCase
         bool $expectsActiveSuperAdminQuery,
     ): void {
         $actor = User::factory()
-            ->accessLevel(User::ROLE_SUPERADMIN)
+            ->accessLevel(User::ROLE_ADMIN)
             ->create()
             ->refresh();
         $target = User::factory()
             ->accessLevel(
                 $operation === 'suspend'
-                    ? User::ROLE_SUPERADMIN
+                    ? User::ROLE_ADMIN
                     : User::ROLE_SERVICE_USER,
             )
             ->create()

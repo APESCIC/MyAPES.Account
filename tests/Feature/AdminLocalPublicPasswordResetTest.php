@@ -109,7 +109,7 @@ class AdminLocalPublicPasswordResetTest extends TestCase
         Notification::fake();
 
         $superAdmin = User::factory()
-            ->accessLevel(User::ROLE_SUPERADMIN)
+            ->accessLevel(User::ROLE_ADMIN)
             ->create()
             ->refresh();
         $public = User::factory()->create([

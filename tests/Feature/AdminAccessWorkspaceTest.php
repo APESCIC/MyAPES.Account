@@ -15,7 +15,7 @@ class AdminAccessWorkspaceTest extends TestCase
 
     public function test_access_workspace_tabs_and_legacy_redirects(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
 
         $this->actingAs($superAdmin)
             ->get('/admin/access?tab=groups')
@@ -56,16 +56,16 @@ class AdminAccessWorkspaceTest extends TestCase
 
     public function test_stale_superadmin_section_urls_redirect_to_live_admin_routes(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
-        $administrator = $this->userWithAccess(User::ROLE_ADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
+        $staff = $this->userWithAccess(User::ROLE_STAFF);
 
         $this->get('/superadmin/groups')->assertRedirect(route('public.login'));
         $this->get('/superadmin/plugins')->assertRedirect(route('public.login'));
         $this->get('/superadmin/modules')->assertRedirect(route('public.login'));
 
-        $this->actingAs($administrator)->get('/superadmin/groups')->assertForbidden();
-        $this->actingAs($administrator)->get('/superadmin/plugins')->assertForbidden();
-        $this->actingAs($administrator)->get('/superadmin/modules')->assertForbidden();
+        $this->actingAs($staff)->get('/superadmin/groups')->assertForbidden();
+        $this->actingAs($staff)->get('/superadmin/plugins')->assertForbidden();
+        $this->actingAs($staff)->get('/superadmin/modules')->assertForbidden();
 
         $this->actingAs($superAdmin)
             ->get('/superadmin/groups')
@@ -92,7 +92,7 @@ class AdminAccessWorkspaceTest extends TestCase
 
     public function test_groups_tab_shows_sync_tier_and_job_role_mapping(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
 
         $this->actingAs($superAdmin)
             ->get('/admin/access?tab=groups')
@@ -107,7 +107,7 @@ class AdminAccessWorkspaceTest extends TestCase
 
     public function test_job_role_mappings_use_access_routes(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
         $group = DirectoryGroup::query()
             ->where('name', 'myapesaccount.staff')
             ->firstOrFail();
@@ -124,7 +124,7 @@ class AdminAccessWorkspaceTest extends TestCase
 
     public function test_job_roles_tab_lists_defaults_not_protected_tiers(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
 
         $this->actingAs($superAdmin)
             ->get('/admin/access?tab=job-roles')
@@ -137,7 +137,7 @@ class AdminAccessWorkspaceTest extends TestCase
 
     public function test_job_role_show_has_capability_packs_and_advanced(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
         $role = Role::query()
             ->where('name', DefaultJobRoles::RECEPTIONIST)
             ->firstOrFail();
@@ -155,7 +155,7 @@ class AdminAccessWorkspaceTest extends TestCase
 
     public function test_protected_role_show_returns_not_found(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
         $role = Role::query()
             ->where('name', 'staff')
             ->firstOrFail();
@@ -167,7 +167,7 @@ class AdminAccessWorkspaceTest extends TestCase
 
     public function test_permissions_tab_is_read_only_catalogue(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
 
         $this->actingAs($superAdmin)
             ->get('/admin/access?tab=permissions&q=users.view')
@@ -179,7 +179,7 @@ class AdminAccessWorkspaceTest extends TestCase
 
     public function test_create_job_role_with_advanced_permissions(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
 
         $this->actingAs($superAdmin)
             ->post(route('admin.access.job-roles.store'), [

@@ -14,7 +14,7 @@ class AdminSearchKeywordsTest extends TestCase
 
     public function test_synonyms_resolve_recruitment_tickets_and_access(): void
     {
-        $superAdmin = User::factory()->accessLevel(User::ROLE_SUPERADMIN)->create();
+        $superAdmin = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
         $this->actingAs($superAdmin);
         $catalogue = app(AdminSearchCatalogue::class)->entriesFor($superAdmin);
 
@@ -26,7 +26,7 @@ class AdminSearchKeywordsTest extends TestCase
 
     public function test_workflow_label_and_admin_synonyms_find_the_right_entries(): void
     {
-        $superAdmin = User::factory()->accessLevel(User::ROLE_SUPERADMIN)->create();
+        $superAdmin = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
         $this->actingAs($superAdmin);
         $catalogue = app(AdminSearchCatalogue::class)->entriesFor($superAdmin);
 
@@ -70,7 +70,7 @@ class AdminSearchKeywordsTest extends TestCase
         }
     }
 
-    public function test_administrator_does_not_see_access_or_plugin_entries(): void
+    public function test_administrator_sees_access_and_plugin_entries(): void
     {
         $admin = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
         $this->actingAs($admin);
@@ -79,18 +79,18 @@ class AdminSearchKeywordsTest extends TestCase
         $labels = array_column($catalogue, 'label');
         $this->assertContains(__('admin.nav.overview'), $labels);
         $this->assertContains(__('terms.public_users'), $labels);
-        $this->assertNotContains(__('admin.nav.access'), $labels);
-        $this->assertNotContains(__('admin.nav.plugins'), $labels);
-        $this->assertFalse($this->catalogueContains($catalogue, 'jobs', 'Recruitment'));
-        $this->assertFalse($this->catalogueContains($catalogue, 'permissions', 'Access'));
+        $this->assertContains(__('admin.nav.access'), $labels);
+        $this->assertContains(__('admin.nav.plugins'), $labels);
+        $this->assertTrue($this->catalogueContains($catalogue, 'jobs', 'Recruitment'));
+        $this->assertTrue($this->catalogueContains($catalogue, 'permissions', 'Access'));
     }
 
     public function test_command_palette_carries_permission_gated_admin_search_entries(): void
     {
-        $superAdmin = User::factory()->accessLevel(User::ROLE_SUPERADMIN)->create();
         $admin = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
+        $staff = User::factory()->accessLevel(User::ROLE_STAFF)->create();
 
-        $this->actingAs($superAdmin)
+        $this->actingAs($admin)
             ->get(route('admin.index'))
             ->assertOk()
             ->assertSee('data-workspace-palette-index', false)
@@ -99,8 +99,8 @@ class AdminSearchKeywordsTest extends TestCase
             ->assertSee('"id":"search:plugin.recruitment"', false)
             ->assertSee('jobs', false);
 
-        $this->actingAs($admin)
-            ->get(route('admin.index'))
+        $this->actingAs($staff)
+            ->get(route('dashboard'))
             ->assertOk()
             ->assertSee('data-workspace-palette-index', false)
             ->assertDontSee('"id":"admin:admin.access"', false)

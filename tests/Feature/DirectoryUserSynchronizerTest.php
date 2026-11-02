@@ -199,7 +199,7 @@ class DirectoryUserSynchronizerTest extends TestCase
     public function test_sync_from_legacy_alias_membership_creates_canonical_directory_users(): void
     {
         $this->directory->membersByGroup = [
-            'myapesaccount.superadmin' => [
+            'myapesaccount.admin' => [
                 $this->profile(
                     'alias.superadmin@example.test',
                     'Alias Superadmin',
@@ -218,10 +218,10 @@ class DirectoryUserSynchronizerTest extends TestCase
         $this->assertSame(User::IDENTITY_CLOUDRON_OIDC, $user->identity_type);
         $this->assertNotSame(User::IDENTITY_LOCAL, $user->identity_type);
         $this->assertSame(
-            AuthorizationProfile::ROLE_SUPER_ADMIN,
+            AuthorizationProfile::ROLE_ADMINISTRATOR,
             app(AuthorizationProfile::class)->effectiveProtectedRole($user),
         );
-        $this->assertSame(['myapesaccount.superadmin'], $user->ldap_groups);
+        $this->assertSame(['myapesaccount.admin'], $user->ldap_groups);
         $this->assertDatabaseMissing('directory_groups', [
             'name' => 'myapes.superadmins',
         ]);

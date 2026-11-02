@@ -76,7 +76,7 @@ class LayoutSpacingSmokeTest extends TestCase
         $this->assertFlatTilesSitInGappingParents($this->get(route('recruitment.index'))->assertOk()->getContent(), 'Recruitment board');
         $this->assertFlatTilesSitInGappingParents((string) $this->view('auth.login'), 'Cloudron sign-in');
 
-        $superAdmin = User::factory()->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)->create();
+        $superAdmin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
         $this->assertFlatTilesSitInGappingParents(
             $this->actingAs($superAdmin)->get(route('admin.index'))->assertOk()->getContent(),
             'Admin overview',
@@ -177,14 +177,14 @@ class LayoutSpacingSmokeTest extends TestCase
             ->assertSee('<div class="grid analytics-kpis" role="list">', false)
             ->getContent();
 
-        $this->assertSame(6, substr_count($content, '<div class="panel panel-flat" role="listitem">'));
+        $this->assertSame(9, substr_count($content, '<div class="panel panel-flat" role="listitem">'));
         $this->assertStringContainsString('data-kpi="total-accounts"', $content);
     }
 
     public function test_admin_access_user_detail_and_maintenance_pages_use_a_panel_stack(): void
     {
         app(ModuleInstallationSynchronizer::class)->synchronize();
-        $superAdmin = User::factory()->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)->create();
+        $superAdmin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
         $managed = User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create();
 
         foreach ([

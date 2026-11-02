@@ -30,7 +30,7 @@ class AdminGroupMembershipTest extends TestCase
 
     public function test_groups_tab_shows_clickable_member_counts_and_last_sync_as_of(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
         $syncedAt = now()->subMinutes(12)->seconds(0);
         $group = DirectoryGroup::query()
             ->where('name', 'myapesaccount.staff')
@@ -56,7 +56,7 @@ class AdminGroupMembershipTest extends TestCase
     public function test_membership_view_lists_live_directory_members_without_sync(): void
     {
         Queue::fake();
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
         $group = DirectoryGroup::query()
             ->where('name', 'myapesaccount.staff')
             ->firstOrFail();
@@ -103,7 +103,7 @@ class AdminGroupMembershipTest extends TestCase
     public function test_membership_view_fails_closed_when_directory_is_unavailable(): void
     {
         Queue::fake();
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
         $group = DirectoryGroup::query()
             ->where('name', 'myapesaccount.volunteer')
             ->firstOrFail();
@@ -163,7 +163,7 @@ class AdminGroupMembershipTest extends TestCase
 
     public function test_unmanaged_directory_groups_are_not_exposed(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
         $unmanaged = DirectoryGroup::query()->create([
             'name' => 'myapes.case-reviewers',
             'status' => DirectoryGroup::STATUS_PRESENT,

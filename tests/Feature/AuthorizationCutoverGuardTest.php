@@ -654,7 +654,7 @@ class AuthorizationCutoverGuardTest extends TestCase
             'oidc_sub' => null,
             'name' => 'Upgrade User',
             'email' => 'upgrade@example.com',
-            'role' => 'superadmin',
+            'role' => 'admin',
             'password' => null,
             'created_at' => '2026-07-28 09:00:00',
             'updated_at' => '2026-07-28 09:00:00',
@@ -689,11 +689,11 @@ class AuthorizationCutoverGuardTest extends TestCase
         );
         $migration->up();
 
-        $superAdmin = Role::query()->where('name', 'super-admin')->firstOrFail();
+        $administrator = Role::query()->where('name', 'administrator')->firstOrFail();
         $this->assertFalse(Schema::hasColumn('users', 'role'));
         $this->assertDatabaseHas('role_sources', [
             'user_id' => 200,
-            'role_id' => $superAdmin->id,
+            'role_id' => $administrator->id,
             'source' => RoleSource::SOURCE_LEGACY_COMPATIBILITY,
         ]);
         $this->assertTrue(app(AuthorizationCompatibilityDatabaseGuard::class)->isInstalled());
@@ -702,8 +702,8 @@ class AuthorizationCutoverGuardTest extends TestCase
 
         $this->assertDatabaseHas('users', [
             'id' => 200,
-            'role' => 'superadmin',
-            'legacy_access_level' => 'superadmin',
+            'role' => 'admin',
+            'legacy_access_level' => 'admin',
         ]);
         $this->assertTrue(app(AccessCompatibilityDatabaseGuard::class)->isInstalled());
         $this->assertFalse(app(AuthorizationCompatibilityDatabaseGuard::class)->isInstalled());
@@ -1400,7 +1400,7 @@ class AuthorizationCutoverGuardTest extends TestCase
     {
         $driver = DB::connection()->getDriverName();
         $legacyLevels = "'service_user', 'staff', 'admin', 'superadmin'";
-        $currentLevels = "'service_user', 'student', 'volunteer', 'staff', 'admin', 'superadmin'";
+        $currentLevels = "'service_user', 'student', 'volunteer', 'staff', 'admin'";
 
         foreach ([
             'users_authorization_compatibility_insert',

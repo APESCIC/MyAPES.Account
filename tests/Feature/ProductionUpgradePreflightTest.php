@@ -38,7 +38,6 @@ class ProductionUpgradePreflightTest extends TestCase
             'myapes.directory.required_groups' => [
                 'myapesaccount.staff',
                 'myapesaccount.admin',
-                'myapesaccount.superadmin',
                 'myapesaccount.volunteer',
                 'myapesaccount.student',
             ],
@@ -60,7 +59,7 @@ class ProductionUpgradePreflightTest extends TestCase
     public function test_production_style_preflight_accepts_legacy_ldap_groups_before_migration(): void
     {
         $superAdmin = User::factory()
-            ->accessLevel(User::ROLE_SUPERADMIN)
+            ->accessLevel(User::ROLE_ADMIN)
             ->cloudronIdentity('oidc-subject-canary-production-upgrade')
             ->create([
                 'email' => 'production-upgrade-super-person-canary@example.test',
@@ -72,7 +71,7 @@ class ProductionUpgradePreflightTest extends TestCase
 
         $this->assertSame(0, $exitCode, $output);
         $this->assertStringContainsString('Authorization schema: ok (phase_b)', $output);
-        $this->assertStringContainsString('Directory groups: ok (5 groups)', $output);
+        $this->assertStringContainsString('Directory groups: ok (4 groups)', $output);
         $this->assertStringContainsString('Authorization preflight: ok', $output);
     }
 

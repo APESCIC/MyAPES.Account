@@ -16,7 +16,7 @@ class MaintenanceModeResponseTest extends TestCase
     {
         $this->fakeMaintenanceMode(false);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
 
         $this->actingAs($administrator)
@@ -40,7 +40,7 @@ class MaintenanceModeResponseTest extends TestCase
     {
         $this->fakeMaintenanceMode(false);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $this->actingAs($administrator)
             ->post('/admin/maintenance/activate', [
@@ -70,7 +70,7 @@ class MaintenanceModeResponseTest extends TestCase
     {
         $this->fakeMaintenanceMode(true);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
 
         $this->actingAs($administrator)
@@ -84,7 +84,7 @@ class MaintenanceModeResponseTest extends TestCase
     {
         $this->fakeMaintenanceMode(false);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $staff = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_STAFF)
@@ -119,7 +119,7 @@ class MaintenanceModeResponseTest extends TestCase
     {
         $this->fakeMaintenanceMode(false);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $this->actingAs($administrator)
             ->post('/admin/maintenance/activate', [
@@ -143,7 +143,7 @@ class MaintenanceModeResponseTest extends TestCase
     {
         $this->fakeMaintenanceMode(true);
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
 
         $this->actingAs($administrator)

@@ -2,7 +2,7 @@
 
 @section('title', 'Admin | MyAPES Account')
 
-@can('superadmin.access')
+@can('admin.modules.view')
     @push('head')
         @vite('resources/js/admin-analytics.js')
     @endpush
@@ -22,7 +22,6 @@
             'service-user' => __('admin.overview.access.public'),
             'staff' => __('admin.overview.access.staff'),
             'administrator' => __('admin.overview.access.administrator'),
-            'super-admin' => __('admin.overview.access.super_admin'),
             'volunteer' => __('admin.overview.access.volunteer'),
             'student' => __('admin.overview.access.student'),
         ];
@@ -38,7 +37,7 @@
             'closed' => $workload['closed_per_day'],
             'instances' => $workload['by_instance'],
         ];
-        $showTechnicalExtras = auth()->user()?->can('superadmin.access') === true;
+        $showTechnicalExtras = auth()->user()?->can('admin.modules.view') === true;
     @endphp
 
     <div class="panel">

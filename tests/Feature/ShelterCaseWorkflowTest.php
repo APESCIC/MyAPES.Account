@@ -411,13 +411,13 @@ class ShelterCaseWorkflowTest extends TestCase
     {
         $owner = User::factory()->create(['name' => 'Case owner']);
         $actor = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
+            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
             ->create(['name' => 'Assignment actor']);
         $eligible = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create(['name' => 'Exact Shelter case assignee']);
         $viewlessStaff = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
+            ->protectedRole(AuthorizationProfile::ROLE_STUDENT)
             ->create(['name' => 'Wrong namespace staff']);
         $suspendedStaff = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
@@ -433,11 +433,11 @@ class ShelterCaseWorkflowTest extends TestCase
             'shelter-rescue.cases.view-all',
         );
         $this->removeRolePermission(
-            AuthorizationProfile::ROLE_STAFF,
+            AuthorizationProfile::ROLE_STUDENT,
             'shelter-rescue.cases.view-all',
         );
         $this->removeRolePermission(
-            AuthorizationProfile::ROLE_ADMINISTRATOR,
+            AuthorizationProfile::ROLE_STAFF,
             'shelter-rescue.cases.update-all',
         );
         $case = $this->shelterCaseFor($owner, 'Exact assignment case');
@@ -477,7 +477,7 @@ class ShelterCaseWorkflowTest extends TestCase
         }
 
         $this->removeRolePermission(
-            AuthorizationProfile::ROLE_ADMINISTRATOR,
+            AuthorizationProfile::ROLE_STAFF,
             'shelter-rescue.cases.assign',
         );
         $this->actingAs($actor->fresh())

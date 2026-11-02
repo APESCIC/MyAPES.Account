@@ -21,7 +21,7 @@ class DirectoryGroupMappingServiceTest extends TestCase
     public function test_custom_mapping_mutations_are_rejected_for_preset_groups(): void
     {
         $actor = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $group = DirectoryGroup::query()
             ->where('name', 'myapesaccount.staff')
@@ -51,7 +51,7 @@ class DirectoryGroupMappingServiceTest extends TestCase
     public function test_legacy_myapes_groups_are_not_eligible_for_mapping(): void
     {
         $actor = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $group = DirectoryGroup::query()->create([
             'name' => 'myapes.staff',
@@ -67,7 +67,7 @@ class DirectoryGroupMappingServiceTest extends TestCase
     public function test_immutable_mapping_removal_is_rejected(): void
     {
         $actor = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $group = DirectoryGroup::query()
             ->where('name', 'myapesaccount.admin')
@@ -93,7 +93,7 @@ class DirectoryGroupMappingServiceTest extends TestCase
     public function test_job_role_mapping_is_mutable_without_replacing_protected_mappings(): void
     {
         $actor = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $this->actingAs($actor);
         $group = DirectoryGroup::query()
@@ -155,7 +155,7 @@ class DirectoryGroupMappingServiceTest extends TestCase
     public function test_job_role_mapping_does_not_replace_missing_directory_eligibility(): void
     {
         $actor = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $this->actingAs($actor);
         $group = DirectoryGroup::query()->create([

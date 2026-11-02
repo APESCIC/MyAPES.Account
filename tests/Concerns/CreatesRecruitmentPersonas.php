@@ -24,7 +24,7 @@ trait CreatesRecruitmentPersonas
             ->create($attributes);
 
         $actor = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
 
         app(AuthorizationRoleMaterializer::class)->grant(

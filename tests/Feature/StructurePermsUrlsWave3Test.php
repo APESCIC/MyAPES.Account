@@ -134,7 +134,7 @@ class StructurePermsUrlsWave3Test extends TestCase
 
     public function test_access_permissions_tab_groups_by_core_module_plugin_layers(): void
     {
-        $superAdmin = User::factory()->accessLevel(User::ROLE_SUPERADMIN)->create();
+        $superAdmin = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
 
         $this->actingAs($superAdmin)
             ->get(route('admin.access.index', ['tab' => 'permissions']))
@@ -162,7 +162,7 @@ class StructurePermsUrlsWave3Test extends TestCase
 
     public function test_legacy_redirects_are_permanent_301(): void
     {
-        $superAdmin = User::factory()->accessLevel(User::ROLE_SUPERADMIN)->create();
+        $superAdmin = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
 
         $this->actingAs($superAdmin)
             ->get('/superadmin')

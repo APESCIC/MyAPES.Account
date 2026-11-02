@@ -23,6 +23,8 @@ final class DirectoryLegacyGroupAliases
             'myapes.students',
             'myapes.volunteers',
             'myapes.vounteers',
+            'myapesaccount.superadmin',
+            'myapesaccount.superadmins',
             'myapesaccount.vounteer',
             'myapesaccount.vounteers',
             'myapesaccont.staff',
@@ -49,8 +51,9 @@ final class DirectoryLegacyGroupAliases
 
         $aliased = match ($normalized) {
             'myapes.staff', 'myapesaccont.staff' => 'myapesaccount.staff',
-            'myapes.admin', 'myapes.admins', 'myapesaccont.admin', 'myapesaccont.admins' => 'myapesaccount.admin',
-            'myapes.superadmin', 'myapes.superadmins', 'myapesaccont.superadmin', 'myapesaccont.superadmins' => 'myapesaccount.superadmin',
+            'myapes.admin', 'myapes.admins', 'myapesaccont.admin', 'myapesaccont.admins',
+            'myapes.superadmin', 'myapes.superadmins', 'myapesaccont.superadmin', 'myapesaccont.superadmins',
+            'myapesaccount.superadmin', 'myapesaccount.superadmins' => 'myapesaccount.admin',
             'myapes.volunteers', 'myapes.vounteers', 'myapesaccount.vounteer', 'myapesaccount.vounteers', 'myapesaccont.volunteer', 'myapesaccont.volunteers', 'myapesaccont.vounteer', 'myapesaccont.vounteers' => 'myapesaccount.volunteer',
             'myapes.students', 'myapesaccont.student', 'myapesaccont.students' => 'myapesaccount.student',
             default => null,

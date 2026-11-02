@@ -29,11 +29,11 @@ class AuthorizationAccessMatrixTest extends TestCase
             'volunteer' => ['volunteer', 'all', 'forbidden', 'forbidden', 'forbidden'],
             'student' => ['student', 'all', 'forbidden', 'forbidden', 'forbidden'],
             'staff' => ['staff', 'all', 'deleted', 'forbidden', 'forbidden'],
-            'administrator' => ['administrator', 'all', 'deleted', 'ok', 'forbidden'],
-            'super-admin via canonical myapesaccount.superadmin' => [
+            'administrator' => ['administrator', 'all', 'deleted', 'ok', 'ok'],
+            'administrator via retired myapesaccount.superadmin group' => [
                 'superadmin-canonical', 'all', 'deleted', 'ok', 'ok',
             ],
-            'super-admin via legacy alias mapping' => [
+            'administrator via legacy alias mapping' => [
                 'superadmin-alias', 'all', 'deleted', 'ok', 'ok',
             ],
         ];
@@ -74,8 +74,7 @@ class AuthorizationAccessMatrixTest extends TestCase
             'volunteer' => [User::ROLE_VOLUNTEER, true, false, false, false],
             'student' => [User::ROLE_STUDENT, true, false, false, false],
             'staff' => [User::ROLE_STAFF, true, true, false, false],
-            'administrator' => [User::ROLE_ADMIN, true, true, true, false],
-            'super-admin' => [User::ROLE_SUPERADMIN, true, true, true, true],
+            'administrator' => [User::ROLE_ADMIN, true, true, true, true],
         ];
     }
 
@@ -95,7 +94,7 @@ class AuthorizationAccessMatrixTest extends TestCase
         $this->assertSame($canDelete, $user->can('apes-cic.tickets.delete'));
         $this->assertSame($canAdminUsers, $user->can('admin.users.view'));
         $this->assertSame($canAdminUsers, $user->can('admin.access'));
-        $this->assertSame($canSuperAdmin, $user->can('superadmin.access'));
+        $this->assertFalse($user->can('superadmin.access'));
         $this->assertSame($canSuperAdmin, $user->can('admin.groups.view'));
     }
 
@@ -105,7 +104,8 @@ class AuthorizationAccessMatrixTest extends TestCase
     public static function superAdminAliasProvider(): array
     {
         return [
-            'canonical' => ['myapesaccount.superadmin'],
+            'canonical' => ['myapesaccount.admin'],
+            'retired superadmin group' => ['myapesaccount.superadmin'],
             'legacy singular' => ['myapes.superadmin'],
             'legacy plural' => ['myapes.superadmins'],
         ];
@@ -126,13 +126,13 @@ class AuthorizationAccessMatrixTest extends TestCase
         ]);
 
         $this->assertTrue($result->eligible);
-        $this->assertSame(AuthorizationProfile::ROLE_SUPER_ADMIN, $result->protectedRole);
+        $this->assertSame(AuthorizationProfile::ROLE_ADMINISTRATOR, $result->protectedRole);
         $this->assertSame(
             [DirectoryLegacyGroupAliases::canonicalFor($incomingGroup)],
             $user->fresh()->ldap_groups,
         );
         $this->assertDatabaseHas('directory_groups', [
-            'name' => 'myapesaccount.superadmin',
+            'name' => 'myapesaccount.admin',
         ]);
         $this->assertDatabaseMissing('directory_groups', [
             'name' => 'myapes.superadmin',
@@ -141,11 +141,11 @@ class AuthorizationAccessMatrixTest extends TestCase
             'name' => 'myapes.superadmins',
         ]);
         $this->assertSame(
-            'myapesaccount.superadmin',
+            'myapesaccount.admin',
             DirectoryLegacyGroupAliases::canonicalFor($incomingGroup),
         );
         $this->assertSame(
-            ['myapesaccount.superadmin'],
+            ['myapesaccount.admin'],
             DirectoryGroupPrefix::filterGroups([$incomingGroup]),
         );
     }
@@ -163,13 +163,13 @@ class AuthorizationAccessMatrixTest extends TestCase
             'app_enabled' => true,
         ]);
 
-        $superAdmin = User::factory()->accessLevel(User::ROLE_SUPERADMIN)->create();
+        $superAdmin = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
 
         $this->actingAs($superAdmin)
             ->get('/admin/access?tab=groups')
             ->assertOk()
             ->assertSee('myapesaccount.staff')
-            ->assertSee('myapesaccount.superadmin')
+            ->assertSee('myapesaccount.admin')
             ->assertDontSee('myapes.superadmins')
             ->assertDontSee('intranet.administrator');
     }
@@ -179,7 +179,6 @@ class AuthorizationAccessMatrixTest extends TestCase
         $this->assertSame([
             'myapesaccount.staff',
             'myapesaccount.admin',
-            'myapesaccount.superadmin',
             'myapesaccount.volunteer',
             'myapesaccount.student',
         ], DirectoryGroupPrefix::requiredGroups());
@@ -237,7 +236,7 @@ class AuthorizationAccessMatrixTest extends TestCase
 
         $user = $user->fresh();
         $this->assertSame(
-            AuthorizationProfile::ROLE_SUPER_ADMIN,
+            AuthorizationProfile::ROLE_ADMINISTRATOR,
             app(AuthorizationProfile::class)->effectiveProtectedRole($user),
         );
         $this->assertDatabaseMissing('directory_groups', ['name' => 'myapes.superadmins']);

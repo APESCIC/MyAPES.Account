@@ -48,7 +48,7 @@ class UserAccessCompatibilityTest extends TestCase
         app(AccessCompatibilityDatabaseGuard::class)->drop();
         DB::table('users')->where('id', $user->id)->update([
             'legacy_access_level' => User::ROLE_STAFF,
-            'role' => User::ROLE_SUPERADMIN,
+            'role' => User::ROLE_ADMIN,
         ]);
 
         $this->assertSame(User::ROLE_STAFF, $user->fresh()->accessLevel());

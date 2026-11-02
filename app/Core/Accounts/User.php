@@ -57,8 +57,6 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
 
     public const ROLE_ADMIN = 'admin';
 
-    public const ROLE_SUPERADMIN = 'superadmin';
-
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, MustVerifyEmailTrait, Notifiable, PasskeyAuthenticatable;
 
@@ -259,7 +257,6 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
             self::ROLE_VOLUNTEER,
             self::ROLE_STAFF,
             self::ROLE_ADMIN,
-            self::ROLE_SUPERADMIN,
         ];
     }
 
@@ -273,7 +270,6 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
             self::ROLE_VOLUNTEER,
             self::ROLE_STAFF,
             self::ROLE_ADMIN,
-            self::ROLE_SUPERADMIN,
         ];
     }
 
@@ -282,7 +278,7 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
      */
     public static function adminAccessLevels(): array
     {
-        return [self::ROLE_ADMIN, self::ROLE_SUPERADMIN];
+        return [self::ROLE_ADMIN];
     }
 
     public function setAccessLevel(string $accessLevel): static
@@ -321,14 +317,13 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
             AuthorizationProfile::ROLE_VOLUNTEER,
             AuthorizationProfile::ROLE_STAFF,
             AuthorizationProfile::ROLE_ADMINISTRATOR,
-            AuthorizationProfile::ROLE_SUPER_ADMIN,
         ]);
     }
 
-    public function scopeEligibleSuperAdmins(Builder $query): Builder
+    public function scopeEligibleAdministrators(Builder $query): Builder
     {
         return $this->scopeEligibleForProtectedRoles($query, [
-            AuthorizationProfile::ROLE_SUPER_ADMIN,
+            AuthorizationProfile::ROLE_ADMINISTRATOR,
         ]);
     }
 

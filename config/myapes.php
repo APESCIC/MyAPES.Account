@@ -45,7 +45,6 @@ return [
         'required_groups' => [
             'myapesaccount.staff',
             'myapesaccount.admin',
-            'myapesaccount.superadmin',
             'myapesaccount.volunteer',
             'myapesaccount.student',
         ],

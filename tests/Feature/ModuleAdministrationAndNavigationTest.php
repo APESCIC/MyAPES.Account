@@ -91,17 +91,17 @@ class ModuleAdministrationAndNavigationTest extends TestCase
             ->assertSee('No plugins are currently available.');
     }
 
-    public function test_administrators_cannot_open_module_administration(): void
+    public function test_staff_cannot_open_module_administration(): void
     {
-        $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
+        $staff = User::factory()
+            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
             ->create();
 
-        $this->actingAs($administrator)
+        $this->actingAs($staff)
             ->get('/admin/modules')
             ->assertForbidden();
 
-        $this->actingAs($administrator)
+        $this->actingAs($staff)
             ->post('/admin/modules/apes-cic/tickets/transition', [
                 'action' => 'disable',
                 'confirm_action' => '1',
@@ -117,7 +117,7 @@ class ModuleAdministrationAndNavigationTest extends TestCase
     public function test_super_admins_can_view_the_complete_matrix_with_deferred_manage_controls(): void
     {
         $superAdmin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
 
         $response = $this->actingAs($superAdmin)->get('/admin/modules');
@@ -169,7 +169,7 @@ class ModuleAdministrationAndNavigationTest extends TestCase
     public function test_super_admin_forms_require_both_explicit_confirmations(): void
     {
         $superAdmin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $installation = $this->installation('apes-cic', 'tickets');
 
@@ -197,7 +197,7 @@ class ModuleAdministrationAndNavigationTest extends TestCase
     public function test_super_admin_can_submit_a_confirmed_lifecycle_transition(): void
     {
         $superAdmin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $installation = $this->installation('apes-cic', 'tickets');
 
@@ -216,8 +216,8 @@ class ModuleAdministrationAndNavigationTest extends TestCase
 
     public function test_module_mutation_authorization_precedes_identifier_lookup(): void
     {
-        $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
+        $staff = User::factory()
+            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
             ->create();
         $payload = [
             'action' => 'disable',
@@ -229,9 +229,9 @@ class ModuleAdministrationAndNavigationTest extends TestCase
             )->lock_version,
         ];
 
-        $existing = $this->actingAs($administrator)
+        $existing = $this->actingAs($staff)
             ->post('/admin/modules/apes-cic/tickets/transition', $payload);
-        $missing = $this->actingAs($administrator)
+        $missing = $this->actingAs($staff)
             ->post('/admin/modules/not-a-core/not-a-module/transition', $payload);
 
         $existing->assertForbidden();
