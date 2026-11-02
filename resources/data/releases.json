@@ -1,5 +1,55 @@
 [
   {
+    "version": "0.46.0",
+    "date": "2026-11-02",
+    "channel": "stable",
+    "type": "minor",
+    "title": "One administrator role",
+    "summary": "Admin is now the only admin role. Admins can use every Admin page, including Access, Plugins, Emails and Maintenance. Super Admin no longer exists.",
+    "changes": [
+      "Give the Admin role everything Super Admin could do: Access, group mappings, job roles, permissions, plugins, maintenance and email wording.",
+      "Remove the Super Admin role and its separate permission. Existing Super Admin accounts become Admin accounts automatically.",
+      "Treat the Cloudron myapesaccount.superadmin group as the Admin group until it is deleted, so sign-in works with or without it.",
+      "Let Admins manage other Admins, while still blocking changes to their own account and keeping at least one active Admin.",
+      "Keep old /superadmin addresses as permanent redirects to Admin.",
+      "Remove the Super Admin option from the local QA role switcher."
+    ],
+    "affected_areas": [
+      "Admin",
+      "Access",
+      "Sign-in and directory sync"
+    ],
+    "categories": [
+      "changed",
+      "removed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Minor: removes a protected role and changes who can open Admin pages, with a data migration.",
+    "validation": [
+      "Full PHPUnit suite, including a new upgrade test that starts from a Super Admin database and the previous database guard.",
+      "Upgrade and guard tests on MySQL 8.",
+      "Local browser check of the Admin pages as the QA Admin account."
+    ],
+    "known_limitations": [
+      "The Cloudron myapesaccount.superadmin group still exists until it is removed by hand (issue #462)."
+    ],
+    "rollback": "Redeploy the previous release package and restore the pre-deploy database backup. The migration merges Super Admin into Admin and is not reversed automatically.",
+    "provenance": "Milestone v0.46.3 Beta, issue #459 under epic #458, pull request #576.",
+    "references": [
+      {
+        "label": "Issue #459",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/459"
+      },
+      {
+        "label": "Pull request #576",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/576"
+      }
+    ]
+  },
+  {
     "version": "0.45.9",
     "date": "2026-11-02",
     "channel": "stable",
