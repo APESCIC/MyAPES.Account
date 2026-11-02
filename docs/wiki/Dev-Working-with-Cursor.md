@@ -18,4 +18,4 @@
 - Recruitment uses `RecruitmentRole`, never Spatie `Role`.
 - Wiki pages are edited in `docs/wiki` through a PR, never in the wiki itself.
 
-> The agent rules file (AGENTS.md / Cursor rules) is the source of truth. This page will link to it once its location on `main` is confirmed.
+> The agent rules file, [AGENTS.md](https://github.com/APESCIC/MyAPES.Account/blob/main/AGENTS.md) on `main`, is the source of truth. If this page disagrees with it, AGENTS.md wins.
