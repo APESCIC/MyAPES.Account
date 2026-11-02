@@ -193,21 +193,21 @@ class AuthorizationCutoverConcurrencyTest extends TestCase
         $this->requireMysqlFamily();
 
         $user = User::factory()
-            ->accessLevel(User::ROLE_SUPERADMIN)
+            ->accessLevel(User::ROLE_ADMIN)
             ->cloudronIdentity('cutover-integrity-subject')
             ->create([
-                'ldap_groups' => ['myapesaccount.superadmin'],
+                'ldap_groups' => ['myapesaccount.admin'],
             ]);
-        $superAdmin = Role::query()
+        $administrator = Role::query()
             ->where('guard_name', 'web')
-            ->where('name', 'super-admin')
+            ->where('name', 'administrator')
             ->firstOrFail();
         $directoryGroupId = (int) DB::table('directory_groups')
-            ->where('name', 'myapesaccount.superadmin')
+            ->where('name', 'myapesaccount.admin')
             ->value('id');
         DB::table('role_sources')->insert([
             'user_id' => $user->id,
-            'role_id' => $superAdmin->id,
+            'role_id' => $administrator->id,
             'source' => RoleSource::SOURCE_DIRECTORY,
             'source_key' => RoleSource::SOURCE_DIRECTORY.':'.$directoryGroupId,
             'directory_group_id' => $directoryGroupId,
@@ -225,7 +225,7 @@ class AuthorizationCutoverConcurrencyTest extends TestCase
         $writer = $this->startWorker(
             'writer-hold',
             (int) $user->id,
-            User::ROLE_SUPERADMIN,
+            User::ROLE_ADMIN,
             $stateDirectory,
         );
         $writerConnection = $this->connectionIdFromSignal(
@@ -236,7 +236,7 @@ class AuthorizationCutoverConcurrencyTest extends TestCase
         $checker = $this->startWorker(
             'integrity-check-once',
             (int) $user->id,
-            User::ROLE_SUPERADMIN,
+            User::ROLE_ADMIN,
             $stateDirectory,
         );
         $checkerConnection = $this->connectionIdFromSignal(
@@ -260,7 +260,7 @@ class AuthorizationCutoverConcurrencyTest extends TestCase
         }
 
         $this->assertSame(
-            ['super-admin'],
+            ['administrator'],
             $this->legacyProtectedRoleNames((int) $user->id),
         );
     }
@@ -273,7 +273,7 @@ class AuthorizationCutoverConcurrencyTest extends TestCase
         return [
             'promotion' => ['service_user', 'staff', 'staff'],
             'demotion' => ['admin', 'staff', 'staff'],
-            'revocation' => ['superadmin', 'service_user', 'service-user'],
+            'revocation' => ['admin', 'service_user', 'service-user'],
         ];
     }
 
@@ -365,7 +365,6 @@ class AuthorizationCutoverConcurrencyTest extends TestCase
             'service_user' => 'service-user',
             'staff' => 'staff',
             'admin' => 'administrator',
-            'superadmin' => 'super-admin',
         };
     }
 
