@@ -1,5 +1,52 @@
 [
   {
+    "version": "0.48.0",
+    "date": "2026-11-03",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Managed lists for service areas and case categories",
+    "summary": "Admins can now manage APES CIC ticket service areas and case categories one row at a time. Rows already used by tickets or cases are archived rather than deleted.",
+    "changes": [
+      "Add a row-by-row screen for ticket service areas and case categories, linked from plugin settings.",
+      "Admins can add, rename, reorder, archive, restore and delete rows.",
+      "Rows used by existing tickets or cases are archived: they leave new forms but older records keep their label.",
+      "Reset to defaults still restores the original lists."
+    ],
+    "affected_areas": [
+      "Admin",
+      "Plugins",
+      "Tickets",
+      "Cases"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Minor: starts the v0.48 plugin settings epic with a new admin capability; stored settings keep their shape, with an optional archived flag.",
+    "validation": [
+      "New feature test for adding, renaming, reordering, deleting, archiving, restoring and resetting rows.",
+      "Ticket, case, plugin settings, admin route denial and architecture tests.",
+      "Full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "Subcategories are still edited in the plugin settings form. Shelter and Pet Care ticket areas follow in a later release."
+    ],
+    "rollback": "Redeploy the previous release package. Archived rows would show on forms again until re-archived; no data is lost.",
+    "provenance": "Milestone v0.48.3 Beta, issue #471 under epic #470, pull request #598.",
+    "references": [
+      {
+        "label": "Issue #471",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/471"
+      },
+      {
+        "label": "Pull request #598",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/598"
+      }
+    ]
+  },
+  {
     "version": "0.47.5",
     "date": "2026-11-03",
     "channel": "stable",
