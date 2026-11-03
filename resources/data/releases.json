@@ -1,5 +1,48 @@
 [
   {
+    "version": "0.47.1",
+    "date": "2026-11-03",
+    "channel": "stable",
+    "type": "patch",
+    "title": "No-reply address on system emails",
+    "summary": "Emails from MyAPES Account now come from a no-reply address and explain how to reply in the app instead.",
+    "changes": [
+      "Every email now has a no-reply Reply-To address.",
+      "The email footer says replies are not read and links to Log in to reply."
+    ],
+    "affected_areas": [
+      "Email"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch: adds a mail header and a footer line, with an optional environment setting and no data change.",
+    "validation": [
+      "New feature test that sends a real email and checks the Reply-To header and footer.",
+      "Mail, brand kit and translation tests.",
+      "Full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "Replies sent to the no-reply address are not read or imported. Links to the exact ticket or case follow in a later release."
+    ],
+    "rollback": "Redeploy the previous release package. No data changes.",
+    "provenance": "Milestone v0.47.4 Beta, issue #467 under epic #463, pull request #593.",
+    "references": [
+      {
+        "label": "Issue #467",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/467"
+      },
+      {
+        "label": "Pull request #593",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/593"
+      }
+    ]
+  },
+  {
     "version": "0.47.0",
     "date": "2026-11-03",
     "channel": "stable",
