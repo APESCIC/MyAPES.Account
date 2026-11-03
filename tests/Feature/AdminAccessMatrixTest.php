@@ -134,7 +134,7 @@ class AdminAccessMatrixTest extends TestCase
         $this->assertSame(
             ['student', 'apes-cic', 'tickets', 'on', 'off'],
             [
-                $events[0]->context['role'],
+                $events[0]->context['group'],
                 $events[0]->context['sub_core_key'],
                 $events[0]->context['module_key'],
                 $events[0]->context['before'],

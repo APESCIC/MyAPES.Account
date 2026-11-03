@@ -138,7 +138,7 @@ final class GroupAccessMatrix
                     null,
                     [
                         'actor_id' => $actor->id,
-                        'role' => $role,
+                        'group' => $role,
                         'sub_core_key' => $subCoreKey,
                         'module_key' => $moduleKey,
                         'before' => $before ? 'on' : 'off',
