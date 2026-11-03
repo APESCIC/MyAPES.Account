@@ -17,18 +17,18 @@ class HelpController extends Controller
     public function public(Request $request): View
     {
         return view('legal.help', [
-            'showStaffGuideLink' => $this->isStaff($request),
+            'showStaffGuideLink' => $this->readsStaffGuide($request),
         ]);
     }
 
     public function staff(Request $request): View
     {
-        abort_unless($this->isStaff($request), 403);
+        abort_unless($this->readsStaffGuide($request), 403);
 
         return view('help.staff');
     }
 
-    private function isStaff(Request $request): bool
+    private function readsStaffGuide(Request $request): bool
     {
         $user = $request->user();
 

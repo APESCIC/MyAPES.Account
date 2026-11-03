@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.47.0",
+    "date": "2026-11-03",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Public, staff and admin areas with a staff guide",
+    "summary": "MyAPES Account now has three clear areas: Public, Staff and Admin. Staff, volunteers and students get their own staff guide alongside the public Help page.",
+    "changes": [
+      "Add a staff guide for staff, volunteers, students and administrators, linked from the Support menu.",
+      "The public Help page points signed-in staff to the staff guide.",
+      "Confirm that signed-out visitors only reach public pages, staff land on the staff dashboard, and only administrators can switch to Admin."
+    ],
+    "affected_areas": [
+      "Help",
+      "Navigation"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Minor: starts the v0.47 public, staff and admin areas epic with a new staff guide page.",
+    "validation": [
+      "New feature test for the three areas, the staff guide and the admin switch.",
+      "Navigation, Help and translation tests.",
+      "Full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "The staff guide covers the basics; admin help pages follow in a later release."
+    ],
+    "rollback": "Redeploy the previous release package. No data changes.",
+    "provenance": "Milestone v0.47.4 Beta, issue #464 under epic #463, pull request #592.",
+    "references": [
+      {
+        "label": "Issue #464",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/464"
+      },
+      {
+        "label": "Pull request #592",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/592"
+      }
+    ]
+  },
+  {
     "version": "0.46.2",
     "date": "2026-11-03",
     "channel": "stable",
