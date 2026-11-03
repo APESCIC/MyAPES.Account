@@ -71,8 +71,10 @@ class TicketController extends Controller
             ->latest();
 
         $isApesCic = $this->area()->usesHierarchicalCategories;
+        $prefill = $request->query('service_area');
 
         return view('tickets::tickets.index', [
+            'prefillServiceArea' => is_string($prefill) && in_array($prefill, $ticketService->serviceAreas, true) ? $prefill : null,
             'tickets' => $query->paginate(20)->fragment('list'),
             'serviceAreas' => $ticketService->serviceAreas,
             'serviceAreaGroups' => $isApesCic

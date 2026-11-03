@@ -84,12 +84,12 @@
                                 @foreach($serviceAreaGroups as $area)
                                     <option
                                         value="{{ $area['key'] }}"
-                                        @selected(old('service_area') === $area['key'])
+                                        @selected(old('service_area', $prefillServiceArea) === $area['key'])
                                     >{{ $area['label'] }}</option>
                                 @endforeach
                             @else
                                 @foreach($serviceAreas as $serviceArea)
-                                    <option value="{{ $serviceArea }}" @selected(old('service_area') === $serviceArea)>{{ \App\Support\WorkflowLabels::label('ticket_area', $serviceArea) }}</option>
+                                    <option value="{{ $serviceArea }}" @selected(old('service_area', $prefillServiceArea) === $serviceArea)>{{ \App\Support\WorkflowLabels::label('ticket_area', $serviceArea) }}</option>
                                 @endforeach
                             @endif
                         </select>
@@ -148,7 +148,7 @@
     @if($usesHierarchicalCategories && $canCreateTicket)
         @include('partials.category-cascade-script', [
             'groups' => $serviceAreaGroups,
-            'oldParent' => old('service_area'),
+            'oldParent' => old('service_area', $prefillServiceArea),
             'oldChild' => old('sub_category'),
         ])
     @endif

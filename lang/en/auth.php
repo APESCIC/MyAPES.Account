@@ -56,6 +56,8 @@ return [
         'open_roles' => 'Open roles',
         'open_roles_blurb' => 'Browse staff, volunteering, and student opportunities with APES CIC.',
         'view_open_roles' => 'View open roles',
+        'open_ticket_blurb' => 'See which APES services you can raise a ticket with, then sign in or register to send it.',
+        'view_ticket_services' => 'See services and areas',
     ],
 
     'public_login' => [

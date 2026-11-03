@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.47.4",
+    "date": "2026-11-03",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Public Open a ticket page",
+    "summary": "A new public Open a ticket page shows which APES services take tickets and their areas. Signing in or registering brings visitors back to the right form with the area already chosen.",
+    "changes": [
+      "Add an Open a ticket page that anyone can open, listing APES CIC, APES Shelter and Rescue and APES Pet Care Clinic with their service areas.",
+      "Opening a ticket asks signed-out visitors to sign in or register, then returns them to that service's ticket form with the area selected.",
+      "Add Open a ticket to the public menu and the home page."
+    ],
+    "affected_areas": [
+      "Tickets",
+      "Public site"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch: adds a public listing page and a redirect step to existing ticket forms, with no data change.",
+    "validation": [
+      "New feature test for the public page, sign-in and registration return, prefilled area and refused services.",
+      "Ticket, navigation, public page, layout and translation tests.",
+      "Full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "Anonymous tickets are not supported. People who have not chosen a service in their profile are asked to choose it before the form opens."
+    ],
+    "rollback": "Redeploy the previous release package. No data changes.",
+    "provenance": "Milestone v0.47.4 Beta, issue #466 under epic #463, pull request #596.",
+    "references": [
+      {
+        "label": "Issue #466",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/466"
+      },
+      {
+        "label": "Pull request #596",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/596"
+      }
+    ]
+  },
+  {
     "version": "0.47.3",
     "date": "2026-11-03",
     "channel": "stable",
