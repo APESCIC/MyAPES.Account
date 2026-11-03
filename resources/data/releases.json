@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.47.5",
+    "date": "2026-11-03",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Recruitment application-form builder",
+    "summary": "Staff can now add their own questions to each recruitment role's application form. Applicants answer them when they apply, and staff see the answers with the application.",
+    "changes": [
+      "Add an Application questions panel to each recruitment role, where staff add, reorder and remove questions.",
+      "Questions can be short or long answers, optional or required, with help text.",
+      "The role's application form shows the questions and checks required answers.",
+      "Answers are saved with the application and shown to staff and the applicant."
+    ],
+    "affected_areas": [
+      "Recruitment"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch: adds a new table and a nullable column for an optional form builder; existing roles and applications are unchanged.",
+    "validation": [
+      "New feature test for adding, ordering and removing questions, required answers, saved answers and refused access.",
+      "Recruitment, migration, rollback, translation and audit tests.",
+      "Full PHPUnit suite and the MySQL contract job in CI."
+    ],
+    "known_limitations": [
+      "Questions are text answers only. Answers keep the question wording from the time of applying."
+    ],
+    "rollback": "Redeploy the previous release package. The new table and column can stay; earlier releases ignore them, and saved answers are not shown until this release returns.",
+    "provenance": "Milestone v0.47.4 Beta, issue #469 under epic #463, pull request #597.",
+    "references": [
+      {
+        "label": "Issue #469",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/469"
+      },
+      {
+        "label": "Pull request #597",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/597"
+      }
+    ]
+  },
+  {
     "version": "0.47.4",
     "date": "2026-11-03",
     "channel": "stable",
