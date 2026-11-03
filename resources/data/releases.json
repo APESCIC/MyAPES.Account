@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.47.3",
+    "date": "2026-11-03",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Apply from the public roles board after sign-in",
+    "summary": "Anyone can browse open roles without signing in. Choosing to apply now takes visitors through sign-in or registration and back to the application form.",
+    "changes": [
+      "Apply links on a role page send signed-out visitors to Public Login or Register, then back to that role's application form.",
+      "New accounts return to the form once account setup is finished.",
+      "Signed-in visitors go straight to the form."
+    ],
+    "affected_areas": [
+      "Recruitment",
+      "Public site"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch: adds a redirect step to the existing public roles board, with no data change.",
+    "validation": [
+      "New feature test for the sign-in and registration round trips, signed-in shortcut and closed roles.",
+      "Recruitment, account lifecycle, onboarding and translation tests.",
+      "Full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "If the email verification link is opened in a different browser, new accounts land on the dashboard instead of the form."
+    ],
+    "rollback": "Redeploy the previous release package. No data changes.",
+    "provenance": "Milestone v0.47.4 Beta, issue #465 under epic #463, pull request #595.",
+    "references": [
+      {
+        "label": "Issue #465",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/465"
+      },
+      {
+        "label": "Pull request #595",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/595"
+      }
+    ]
+  },
+  {
     "version": "0.47.2",
     "date": "2026-11-03",
     "channel": "stable",
