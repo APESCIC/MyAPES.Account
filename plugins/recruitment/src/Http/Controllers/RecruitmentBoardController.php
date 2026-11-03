@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\ModuleSettingsService;
 use App\Support\WorkflowLabels;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Plugins\Recruitment\Models\RecruitmentApplication;
@@ -81,6 +82,27 @@ class RecruitmentBoardController extends Controller
             'publicApplyEnabled' => $publicApplyEnabled,
             'statusLabels' => WorkflowLabels::options('status', RecruitmentApplication::STATUSES),
         ]);
+    }
+
+    /**
+     * Apply from the public board (#465): signed-out visitors sign in or
+     * register first, then return to the application form.
+     */
+    public function startApply(Request $request, RecruitmentRole $recruitmentRole, ModuleSettingsService $moduleSettings): RedirectResponse
+    {
+        abort_unless($moduleSettings->recruitmentPublicBoardEnabled(), 404);
+        $this->denyExcludedAudience($request);
+        abort_unless($recruitmentRole->isOpen(), 404);
+
+        $formUrl = route('recruitment.show', $recruitmentRole).'#apply';
+
+        if ($request->user() !== null) {
+            return redirect()->to($formUrl);
+        }
+
+        $request->session()->put('url.intended', $formUrl);
+
+        return redirect()->route($request->query('via') === 'register' ? 'public.register' : 'public.login');
     }
 
     private function denyExcludedAudience(Request $request): void

@@ -14,3 +14,6 @@ Route::get('/recruitment', [RecruitmentBoardController::class, 'index'])
 Route::get('/recruitment/{recruitmentRole}', [RecruitmentBoardController::class, 'show'])
     ->whereNumber('recruitmentRole')
     ->name('recruitment.show');
+Route::get('/recruitment/{recruitmentRole}/apply/start', [RecruitmentBoardController::class, 'startApply'])
+    ->whereNumber('recruitmentRole')
+    ->name('recruitment.apply.start');

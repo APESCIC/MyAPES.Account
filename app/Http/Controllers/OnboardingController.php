@@ -46,7 +46,7 @@ class OnboardingController extends Controller
             $user->forceFill(['onboarding_completed_at' => now()])->save();
         });
 
-        return redirect()->route('dashboard')->with('status', __('public.onboarding.your_account_setup_is_complete'));
+        return redirect()->intended(route('dashboard'))->with('status', __('public.onboarding.your_account_setup_is_complete'));
     }
 
     /** @return array<string, mixed> */
