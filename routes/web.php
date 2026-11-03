@@ -19,6 +19,7 @@ use App\Http\Controllers\ChangeLogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\MailReplyLinkController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RobotsTxtController;
@@ -45,6 +46,9 @@ Route::view('/privacy', 'legal.privacy')->name('privacy');
 Route::view('/cookies', 'legal.cookies')->name('cookies');
 Route::get('/help', [HelpController::class, 'public'])->name('help');
 Route::view('/terms', 'legal.terms')->name('terms');
+Route::get('/mail/reply', MailReplyLinkController::class)
+    ->middleware(['signed', 'throttle:30,1'])
+    ->name('mail.reply');
 Route::get('/email/change/confirm/{user}/{hash}', [EmailChangeController::class, 'confirm'])
     ->middleware(['signed', 'throttle:6,1'])
     ->name('email.change.confirm');

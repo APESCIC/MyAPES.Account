@@ -56,7 +56,7 @@ class ShelterCaseUpdatedNotification extends Notification implements ShouldQueue
             ]))
             ->line(__('mail.shelter_case_updated.line_case_type', ['type' => $this->case->case_type]))
             ->line(__('mail.shelter_case_updated.line_status', ['status' => WorkflowLabels::status($this->case->status)]))
-            ->action(__('mail.shelter_case_updated.action'), route('shelter.cases.show', $this->case));
+            ->action(__('mail.shelter_case_updated.action'), $this->replyLink($notifiable, route('shelter.cases.show', $this->case)));
     }
 
     /**

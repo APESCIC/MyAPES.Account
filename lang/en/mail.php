@@ -84,7 +84,7 @@ return [
         'line_body' => 'Ticket #:id (:subject) was :event by :actor.',
         'line_status' => 'Status: :status',
         'line_priority' => 'Priority: :priority',
-        'action' => 'Open ticket',
+        'action' => 'Log in to reply',
     ],
 
     'case_updated' => [
@@ -92,7 +92,7 @@ return [
         'line_body' => 'Case #:id was :event by :actor.',
         'line_status' => 'Status: :status',
         'line_priority' => 'Priority: :priority',
-        'action' => 'Open case',
+        'action' => 'Log in to reply',
     ],
 
     'shelter_case_updated' => [
@@ -100,7 +100,7 @@ return [
         'line_body' => 'Case #:id (:title) was :event by :actor.',
         'line_case_type' => 'Case type: :type',
         'line_status' => 'Status: :status',
-        'action' => 'Open case',
+        'action' => 'Log in to reply',
     ],
 
     'consultation_updated' => [
