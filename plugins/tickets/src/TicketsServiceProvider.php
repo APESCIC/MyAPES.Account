@@ -3,6 +3,8 @@
 namespace Plugins\Tickets;
 
 use App\Core\Accounts\User;
+use App\Core\Extensions\Navigation\PublicNavigationItem;
+use App\Core\Extensions\Navigation\PublicNavigationRegistry;
 use App\Core\Extensions\Plugins\PluginAbilityFactory;
 use App\Core\Extensions\Plugins\PluginManifest;
 use App\Core\Extensions\Plugins\PluginNavigationItem;
@@ -29,6 +31,18 @@ class TicketsServiceProvider extends PluginServiceProvider
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'tickets');
 
         Gate::policy(SupportTicket::class, SupportTicketPolicy::class);
+
+        app(PublicNavigationRegistry::class)->contribute(static fn (): array => [
+            new PublicNavigationItem(
+                label: __('tickets::public.nav'),
+                routeName: 'tickets.public.index',
+                icon: 'ticket',
+                order: 30,
+                routeIsPattern: 'tickets.public.*',
+                enabled: true,
+                visibleToSignedIn: static fn (): bool => false,
+            ),
+        ]);
     }
 
     protected function mailTemplates(): array

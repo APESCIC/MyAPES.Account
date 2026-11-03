@@ -55,6 +55,7 @@ Route::get('/email/change/confirm/{user}/{hash}', [EmailChangeController::class,
 Route::middleware('plugin.enabled:apes-cic,recruitment')->group(function (): void {
     require base_path('plugins/recruitment/routes/public.php');
 });
+require base_path('plugins/tickets/routes/public.php');
 Route::get('/storage/pet-profiles/{path?}', static fn () => abort(404))
     ->where('path', '.*');
 

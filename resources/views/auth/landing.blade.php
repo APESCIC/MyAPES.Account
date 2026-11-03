@@ -45,11 +45,24 @@
         </div>
         @foreach($publicPluginNavigation ?? [] as $publicPluginNav)
             <div class="panel">
-                <h2>{{ $publicPluginNav->label === 'Recruitment' ? __('auth.landing.open_roles') : $publicPluginNav->label }}</h2>
-                <p class="muted">{{ __('auth.landing.open_roles_blurb') }}</p>
-                <div class="actions">
-                    <a href="{{ route($publicPluginNav->routeName) }}">{{ __('auth.landing.view_open_roles') }}</a>
-                </div>
+                @if($publicPluginNav->routeName === 'recruitment.index')
+                    <h2>{{ __('auth.landing.open_roles') }}</h2>
+                    <p class="muted">{{ __('auth.landing.open_roles_blurb') }}</p>
+                    <div class="actions">
+                        <a href="{{ route($publicPluginNav->routeName) }}">{{ __('auth.landing.view_open_roles') }}</a>
+                    </div>
+                @elseif($publicPluginNav->routeName === 'tickets.public.index')
+                    <h2>{{ $publicPluginNav->label }}</h2>
+                    <p class="muted">{{ __('auth.landing.open_ticket_blurb') }}</p>
+                    <div class="actions">
+                        <a href="{{ route($publicPluginNav->routeName) }}">{{ __('auth.landing.view_ticket_services') }}</a>
+                    </div>
+                @else
+                    <h2>{{ $publicPluginNav->label }}</h2>
+                    <div class="actions">
+                        <a href="{{ route($publicPluginNav->routeName) }}">{{ $publicPluginNav->label }}</a>
+                    </div>
+                @endif
             </div>
         @endforeach
     </div>
