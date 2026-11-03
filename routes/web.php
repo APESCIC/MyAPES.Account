@@ -17,6 +17,7 @@ use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\ChangeLogController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HelpController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\ProfileController;
@@ -42,7 +43,7 @@ Route::post('/locale', [LocaleController::class, 'store'])
 Route::get('/change-log', ChangeLogController::class)->name('change-log.index');
 Route::view('/privacy', 'legal.privacy')->name('privacy');
 Route::view('/cookies', 'legal.cookies')->name('cookies');
-Route::view('/help', 'legal.help')->name('help');
+Route::get('/help', [HelpController::class, 'public'])->name('help');
 Route::view('/terms', 'legal.terms')->name('terms');
 Route::get('/email/change/confirm/{user}/{hash}', [EmailChangeController::class, 'confirm'])
     ->middleware(['signed', 'throttle:6,1'])
@@ -143,6 +144,7 @@ Route::middleware([
     'account.ready',
 ])->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('/help/staff', [HelpController::class, 'staff'])->name('help.staff');
     Route::get('/support/attachments/{attachment}', [SupportAttachmentController::class, 'download'])
         ->name('support.attachments.download');
 
