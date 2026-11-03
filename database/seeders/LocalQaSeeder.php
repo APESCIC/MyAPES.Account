@@ -42,8 +42,6 @@ class LocalQaSeeder extends Seeder
 
     public const ADMIN_EMAIL = 'qa.admin@myapes.local';
 
-    public const SUPERADMIN_EMAIL = 'qa.superadmin@myapes.local';
-
     public const CUSTOM_ROLE_NAME = 'local-qa-reviewer';
 
     public const DEFAULT_PASSWORD = 'MyAPES-Local-QA-2026!';
@@ -60,7 +58,6 @@ class LocalQaSeeder extends Seeder
             self::STAFF_EMAIL,
             self::HR_EMAIL,
             self::ADMIN_EMAIL,
-            self::SUPERADMIN_EMAIL,
         ];
     }
 
@@ -111,22 +108,15 @@ class LocalQaSeeder extends Seeder
             User::ROLE_ADMIN,
             $seededAt
         );
-        $superAdminUser = $this->upsertUser(
-            self::SUPERADMIN_EMAIL,
-            'QA Superadmin User',
-            User::ROLE_SUPERADMIN,
-            $seededAt
-        );
         $this->seedDirectoryGroupsForQaStaff(
             $studentUser,
             $volunteerUser,
             $staffUser,
             $hrUser,
             $adminUser,
-            $superAdminUser,
         );
-        $this->upsertCustomRole($superAdminUser, $staffUser);
-        $this->grantHumanResourcesJobRole($superAdminUser, $hrUser);
+        $this->upsertCustomRole($adminUser, $staffUser);
+        $this->grantHumanResourcesJobRole($adminUser, $hrUser);
 
         $this->upsertProfile($serviceUser, 'Service User', '+44 7700 900101', 'APES CIC Service User');
         $this->upsertStaffProfile($studentUser, 'Placement student', StaffProfile::TEAM_SHELTER_RESCUE, '+447700900105');
@@ -134,7 +124,6 @@ class LocalQaSeeder extends Seeder
         $this->upsertStaffProfile($staffUser, 'Rescue coordinator', StaffProfile::TEAM_SHELTER_RESCUE, '+447700900102');
         $this->upsertStaffProfile($hrUser, 'People and recruitment lead', StaffProfile::TEAM_OPERATIONS, '+447700900107');
         $this->upsertStaffProfile($adminUser, 'Operations manager', StaffProfile::TEAM_OPERATIONS, '+447700900103');
-        $this->upsertStaffProfile($superAdminUser, 'Director', StaffProfile::TEAM_OPERATIONS, '+447700900104');
 
         $openTicket = SupportTicket::query()->updateOrCreate(
             [
@@ -901,7 +890,6 @@ class LocalQaSeeder extends Seeder
         User $staffUser,
         User $hrUser,
         User $adminUser,
-        User $superAdminUser,
     ): void {
         $studentUser->forceFill([
             'ldap_groups' => [
@@ -942,19 +930,6 @@ class LocalQaSeeder extends Seeder
                 'department.directors',
                 'intranet.managers',
                 'myapesaccount.admin',
-                'position.staff',
-            ],
-        ])->save();
-
-        $superAdminUser->forceFill([
-            'ldap_groups' => [
-                'board-of-directors',
-                'department.developers',
-                'department.directors',
-                'intranet.superadmin',
-                'myapesaccount.superadmin',
-                'myapesaccount.superadmin',
-                'newsroom.superadmin',
                 'position.staff',
             ],
         ])->save();

@@ -16,7 +16,6 @@ final class PluginAbilityFactory
             'volunteer',
             'staff',
             'administrator',
-            'super-admin',
         ];
     }
 
@@ -28,7 +27,6 @@ final class PluginAbilityFactory
             'volunteer',
             'staff',
             'administrator',
-            'super-admin',
         ];
     }
 
@@ -38,7 +36,6 @@ final class PluginAbilityFactory
         return [
             'staff',
             'administrator',
-            'super-admin',
         ];
     }
 
@@ -53,7 +50,6 @@ final class PluginAbilityFactory
             'service-user',
             'staff',
             'administrator',
-            'super-admin',
         ];
     }
 
@@ -66,7 +62,6 @@ final class PluginAbilityFactory
     {
         return [
             'administrator',
-            'super-admin',
         ];
     }
 

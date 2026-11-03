@@ -26,7 +26,7 @@ class AuthorizationPreflightChecker
      *     phase: string,
      *     users: int,
      *     groups: int,
-     *     super_admins: int
+     *     administrators: int
      * }
      */
     public function check(): array
@@ -57,13 +57,13 @@ class AuthorizationPreflightChecker
             );
         }
 
-        $superAdmins = $this->eligibleOidcSuperAdmins();
+        $administrators = $this->eligibleOidcAdministrators();
 
         return [
             'phase' => $phase,
             'users' => $users,
             'groups' => $groups,
-            'super_admins' => $superAdmins,
+            'administrators' => $administrators,
         ];
     }
 
@@ -97,7 +97,7 @@ class AuthorizationPreflightChecker
         return 'phase_b';
     }
 
-    private function eligibleOidcSuperAdmins(): int
+    private function eligibleOidcAdministrators(): int
     {
         $candidates = DB::table('users')
             ->select(['id', 'email'])
@@ -129,14 +129,14 @@ class AuthorizationPreflightChecker
                 );
             }
 
-            if (in_array('myapesaccount.superadmin', $groups, true)) {
+            if (in_array('myapesaccount.admin', $groups, true)) {
                 $eligible += 1;
             }
         }
 
         if ($eligible < 1) {
             throw new AuthorizationLifecycleException(
-                'super_admin_unavailable',
+                'administrator_unavailable',
             );
         }
 

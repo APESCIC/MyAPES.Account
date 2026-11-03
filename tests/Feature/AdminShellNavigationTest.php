@@ -48,7 +48,7 @@ class AdminShellNavigationTest extends TestCase
 
     public function test_super_admin_sees_single_admin_primary_nav_covering_all_children(): void
     {
-        $superAdmin = User::factory()->accessLevel(User::ROLE_SUPERADMIN)->create();
+        $superAdmin = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
 
         $this->actingAs($superAdmin)
             ->get(route('dashboard'))
@@ -70,7 +70,7 @@ class AdminShellNavigationTest extends TestCase
             ->assertSee('>Maintenance</span>', false);
     }
 
-    public function test_administrator_submenu_hides_super_admin_only_children(): void
+    public function test_administrator_submenu_shows_every_admin_child(): void
     {
         $admin = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
 
@@ -80,18 +80,16 @@ class AdminShellNavigationTest extends TestCase
             ->assertSee('>Overview</span>', false)
             ->assertSee('>Public users</span>', false)
             ->assertSee('>Staff</span>', false)
-            ->assertDontSee('>Access</span>', false)
-            ->assertDontSee('>Plugins</span>', false)
-            ->assertDontSee('>Maintenance</span>', false);
+            ->assertSee('>Access</span>', false)
+            ->assertSee('>Plugins</span>', false)
+            ->assertSee('>Maintenance</span>', false);
     }
 
     public function test_admin_child_urls_fail_closed_without_matching_permission(): void
     {
-        $admin = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
         $staff = User::factory()->accessLevel(User::ROLE_STAFF)->create();
 
         foreach (['/admin/access', '/admin/modules', '/admin/maintenance', '/superadmin'] as $path) {
-            $this->actingAs($admin)->get($path)->assertForbidden();
             $this->actingAs($staff)->get($path)->assertForbidden();
         }
 
@@ -101,7 +99,7 @@ class AdminShellNavigationTest extends TestCase
 
     public function test_legacy_superadmin_paths_redirect_into_admin_equivalents(): void
     {
-        $superAdmin = User::factory()->accessLevel(User::ROLE_SUPERADMIN)->create();
+        $superAdmin = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
 
         $this->actingAs($superAdmin)
             ->get('/superadmin')
@@ -184,19 +182,11 @@ class AdminShellNavigationTest extends TestCase
             ->assertDontSee('href="'.route('admin.index').'"', false);
     }
 
-    public function test_superadmin_access_still_required_for_technical_overview_extras(): void
+    public function test_technical_overview_extras_render_for_administrators(): void
     {
         $admin = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
-        $superAdmin = User::factory()->accessLevel(User::ROLE_SUPERADMIN)->create();
 
         $this->actingAs($admin)
-            ->get(route('admin.index'))
-            ->assertOk()
-            ->assertSee('data-kpi="total-accounts"', false)
-            ->assertDontSee('data-kpi="enabled-modules"', false)
-            ->assertDontSee('Created versus closed');
-
-        $this->actingAs($superAdmin)
             ->get(route('admin.index'))
             ->assertOk()
             ->assertSee('data-kpi="total-accounts"', false)

@@ -33,7 +33,7 @@ if (! is_string($mode)
     || ! is_string($accessLevel)
     || ! in_array(
         $accessLevel,
-        ['service_user', 'staff', 'admin', 'superadmin'],
+        ['service_user', 'staff', 'admin'],
         true,
     )
     || ! is_string($stateDirectory)

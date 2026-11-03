@@ -74,24 +74,24 @@ class ModulePermissionGateTest extends TestCase
         $this->assertFalse($serviceUser->can('apes-cic.tickets.assign'));
     }
 
-    public function test_module_administration_is_super_admin_only(): void
+    public function test_module_administration_is_administrator_only(): void
     {
+        $staff = User::factory()
+            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
+            ->create();
+        $this->actingAs($staff);
+
+        $this->assertFalse($staff->can('admin.modules.view'));
+        $this->assertFalse($staff->can('admin.modules.manage'));
+
         $administrator = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $this->actingAs($administrator);
 
-        $this->assertFalse($administrator->can('admin.modules.view'));
-        $this->assertFalse($administrator->can('admin.modules.manage'));
-
-        $superAdmin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
-            ->create();
-        $this->actingAs($superAdmin);
-
-        $this->assertTrue($superAdmin->can('admin.modules.view'));
-        $this->assertTrue($superAdmin->can('admin.modules.manage'));
-        $this->assertTrue($superAdmin->can('superadmin.access'));
+        $this->assertTrue($administrator->can('admin.modules.view'));
+        $this->assertTrue($administrator->can('admin.modules.manage'));
+        $this->assertFalse($administrator->can('superadmin.access'));
     }
 
     public function test_suspension_denies_public_and_staff_module_permissions_immediately(): void
@@ -118,7 +118,7 @@ class ModulePermissionGateTest extends TestCase
             'volunteer denies delete' => [AuthorizationProfile::ROLE_VOLUNTEER, false],
             'staff allows delete' => [AuthorizationProfile::ROLE_STAFF, true],
             'administrator allows delete' => [AuthorizationProfile::ROLE_ADMINISTRATOR, true],
-            'super-admin allows delete' => [AuthorizationProfile::ROLE_SUPER_ADMIN, true],
+            'super-admin allows delete' => [AuthorizationProfile::ROLE_ADMINISTRATOR, true],
         ];
     }
 

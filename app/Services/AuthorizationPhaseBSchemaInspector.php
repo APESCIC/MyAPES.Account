@@ -341,6 +341,12 @@ class AuthorizationPhaseBSchemaInspector
             return true;
         }
 
+        if ($this->phaseBGuard->isSuperAdminRevisionInstalled()) {
+            return $this->hasPendingMigration(
+                '2026_11_02_000100_merge_super_admin_into_administrator',
+            );
+        }
+
         return $this->phaseBGuard->isLegacyInstalled()
             && $this->hasPendingMigration(
                 '2026_08_24_000003_extend_directory_authorization_roles',

@@ -38,7 +38,7 @@ class ModuleLifecycleTest extends TestCase
 
         app(ModuleInstallationSynchronizer::class)->synchronize();
         $this->superAdmin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $this->actingAs($this->superAdmin);
         $this->lifecycle = app(ModuleLifecycleManager::class);
@@ -75,10 +75,10 @@ class ModuleLifecycleTest extends TestCase
             ->count());
     }
 
-    public function test_only_an_eligible_current_super_admin_can_mutate_module_state(): void
+    public function test_only_an_eligible_current_administrator_can_mutate_module_state(): void
     {
         $administrator = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
+            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
             ->create();
         $this->actingAs($administrator);
         $installation = $this->installation('apes-cic', 'tickets');
@@ -90,7 +90,7 @@ class ModuleLifecycleTest extends TestCase
                 'tickets',
                 (int) $installation->lock_version,
             );
-            $this->fail('An administrator mutated module state.');
+            $this->fail('A staff member mutated module state.');
         } catch (ModuleLifecycleException $exception) {
             $this->assertSame('forbidden', $exception->reason);
         }

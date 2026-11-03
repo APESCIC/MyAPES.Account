@@ -272,8 +272,8 @@ class AuthorizationRoleManagementService
             'admin.roles.manage',
         )) {
             $this->deny(
-                'super_admin_required',
-                'Only an active super-admin may manage roles.',
+                'administrator_required',
+                'Only an active administrator may manage roles.',
             );
         }
     }

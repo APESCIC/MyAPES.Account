@@ -137,20 +137,18 @@ class MailCopyOverridesTest extends TestCase
         $this->assertSame('Your MyAPES Account password was changed', __('mail.auth.password_changed.subject'));
     }
 
-    public function test_view_only_admins_see_the_wording_but_cannot_change_it(): void
+    public function test_staff_cannot_see_or_change_the_wording(): void
     {
-        $administrator = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
+        $staff = User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create();
 
-        $this->actingAs($administrator)
+        $this->actingAs($staff)
             ->get(route('admin.emails.show', 'auth.password_changed'))
-            ->assertOk()
-            ->assertSee('data-mail-copy', false)
-            ->assertDontSee('action="'.route('admin.emails.copy.update', 'auth.password_changed').'"', false);
+            ->assertForbidden();
 
-        $this->actingAs($administrator)
+        $this->actingAs($staff)
             ->put(route('admin.emails.copy.update', 'auth.password_changed'), ['subject' => 'Nope', 'lock_version' => 0])
             ->assertForbidden();
-        $this->actingAs($administrator)
+        $this->actingAs($staff)
             ->delete(route('admin.emails.copy.reset', 'auth.password_changed'), ['confirm_reset' => '1'])
             ->assertForbidden();
 
@@ -166,6 +164,6 @@ class MailCopyOverridesTest extends TestCase
 
     private function superAdmin(): User
     {
-        return User::factory()->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)->create();
+        return User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
     }
 }

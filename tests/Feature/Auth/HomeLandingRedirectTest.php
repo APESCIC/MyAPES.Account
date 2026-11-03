@@ -33,7 +33,7 @@ class HomeLandingRedirectTest extends TestCase
 
     public function test_signed_in_superadmins_are_redirected_from_home_to_dashboard(): void
     {
-        $user = User::factory()->accessLevel(User::ROLE_SUPERADMIN)->create();
+        $user = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
 
         $this->actingAs($user)
             ->get(route('home'))

@@ -24,7 +24,7 @@ final class RecruitmentAbilities
         self::VIEW_OWN,
     ];
 
-    /** Manage Roles and Applications (HR, Admin, Super Admin). */
+    /** Manage Roles and Applications (HR, Admin). */
     public const MANAGE = [
         self::VIEW_ALL,
         self::CREATE,

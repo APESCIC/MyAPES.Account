@@ -33,7 +33,7 @@ class WorkspaceNavigationTest extends TestCase
             'volunteer' => ['volunteer', [NavPanel::STAFF], 'Staff'],
             'staff' => ['staff', [NavPanel::STAFF], 'Staff'],
             'administrator' => ['administrator', [NavPanel::STAFF, NavPanel::ADMIN], 'Staff'],
-            'super admin' => ['super-admin', [NavPanel::STAFF, NavPanel::ADMIN], 'Staff'],
+            'super admin' => ['administrator', [NavPanel::STAFF, NavPanel::ADMIN], 'Staff'],
         ];
     }
 
@@ -59,7 +59,7 @@ class WorkspaceNavigationTest extends TestCase
 
     public function test_every_shown_staff_link_is_reachable_for_each_persona(): void
     {
-        foreach (['service-user', 'student', 'volunteer', 'staff', 'administrator', 'super-admin'] as $persona) {
+        foreach (['service-user', 'student', 'volunteer', 'staff', 'administrator'] as $persona) {
             $user = User::factory()->protectedRole($persona)->create();
             $menu = $this->menuFor($user, 'dashboard');
 
@@ -83,22 +83,14 @@ class WorkspaceNavigationTest extends TestCase
         $this->assertSame([], $menu->quickActions);
     }
 
-    public function test_administrator_admin_panel_hides_super_admin_only_groups(): void
+    public function test_administrator_admin_panel_shows_every_admin_group(): void
     {
         $admin = User::factory()->protectedRole('administrator')->create();
-        $superAdmin = User::factory()->protectedRole('super-admin')->create();
 
         $adminKeys = $this->itemKeys($this->menuFor($admin, 'admin.index')->panels[NavPanel::ADMIN]);
-        $superKeys = $this->itemKeys($this->menuFor($superAdmin, 'admin.index')->panels[NavPanel::ADMIN]);
-
-        $this->assertContains('admin.overview', $adminKeys);
-        $this->assertContains('admin.users', $adminKeys);
-        $this->assertNotContains('admin.access', $adminKeys);
-        $this->assertNotContains('admin.plugins', $adminKeys);
-        $this->assertNotContains('admin.maintenance', $adminKeys);
 
         foreach (['admin.overview', 'admin.users', 'admin.staff', 'admin.access', 'admin.modules', 'admin.plugins', 'admin.emails', 'admin.maintenance'] as $key) {
-            $this->assertContains($key, $superKeys);
+            $this->assertContains($key, $adminKeys);
         }
     }
 
@@ -137,7 +129,7 @@ class WorkspaceNavigationTest extends TestCase
     #[DataProvider('activeRoutes')]
     public function test_the_current_route_resolves_exactly_one_active_item(string $routeName, array $query, string $panel, string $item): void
     {
-        $superAdmin = User::factory()->protectedRole('super-admin')->create();
+        $superAdmin = User::factory()->protectedRole('administrator')->create();
         $menu = $this->menuFor($superAdmin, $routeName, $query);
 
         $this->assertSame($panel, $menu->currentPanelKey);
@@ -147,7 +139,7 @@ class WorkspaceNavigationTest extends TestCase
 
     public function test_a_user_page_activates_the_list_for_that_account_type(): void
     {
-        $superAdmin = User::factory()->protectedRole('super-admin')->create();
+        $superAdmin = User::factory()->protectedRole('administrator')->create();
         $staffMember = User::factory()->protectedRole('staff')->create();
         $publicMember = User::factory()->protectedRole('service-user')->create();
 
@@ -157,7 +149,7 @@ class WorkspaceNavigationTest extends TestCase
 
     public function test_quick_actions_follow_create_permissions_and_panel_access(): void
     {
-        foreach (['service-user', 'staff', 'administrator', 'super-admin'] as $persona) {
+        foreach (['service-user', 'staff', 'administrator'] as $persona) {
             $user = User::factory()->protectedRole($persona)->create();
             $menu = $this->menuFor($user, 'dashboard');
             $keys = array_map(static fn ($action): string => $action->key, $menu->quickActions);

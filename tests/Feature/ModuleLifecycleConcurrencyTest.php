@@ -54,7 +54,7 @@ class ModuleLifecycleConcurrencyTest extends TestCase
     {
         $this->requireMysqlFamily();
         $actor = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $installation = $this->tickets();
         $state = $this->newStateDirectory();
@@ -255,7 +255,7 @@ class ModuleLifecycleConcurrencyTest extends TestCase
     {
         $this->requireMysqlFamily();
         $actor = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $owner = User::factory()->create();
         $installation = $this->tickets();
@@ -300,7 +300,7 @@ class ModuleLifecycleConcurrencyTest extends TestCase
             'modules.lock_wait_seconds' => 5,
         ]);
         $actor = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $owner = User::factory()->create();
         $installation = $this->tickets();
@@ -346,7 +346,7 @@ class ModuleLifecycleConcurrencyTest extends TestCase
         $this->requireMysqlFamily();
         config(['modules.lock_wait_seconds' => 5]);
         $actor = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $owner = User::factory()->create();
         $state = $this->newStateDirectory();

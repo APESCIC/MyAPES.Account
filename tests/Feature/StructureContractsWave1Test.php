@@ -141,7 +141,7 @@ class StructureContractsWave1Test extends TestCase
     public function test_disabling_an_organisation_module_hides_nav_and_returns_404(): void
     {
         $admin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
 
         OrganisationModule::query()->updateOrCreate(
@@ -167,7 +167,7 @@ class StructureContractsWave1Test extends TestCase
     public function test_admin_can_re_enable_organisation_module(): void
     {
         $admin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
 
         OrganisationModule::query()->updateOrCreate(

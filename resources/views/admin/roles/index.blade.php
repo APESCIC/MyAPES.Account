@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Super Admin roles | MyAPES Account')
+@section('title', 'Roles | MyAPES Account')
 
 @section('content')
     <section class="panel" aria-labelledby="admin-roles-title">
-        <h1 id="admin-roles-title">{{ __('admin.access.super_admin_roles') }}</h1>
+        <h1 id="admin-roles-title">{{ __('admin.access.roles_title') }}</h1>
         <p class="muted">{{ __('admin.access.protected_roles_sync_from_application_code_custom_roles_can_') }}</p>
 
         <form method="get" action="{{ route('admin.roles.index') }}">

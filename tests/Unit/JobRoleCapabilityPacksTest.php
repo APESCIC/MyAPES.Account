@@ -87,7 +87,7 @@ class JobRoleCapabilityPacksTest extends TestCase
 
         foreach (JobRoleCapabilityPacks::expand($packKeys, $modules) as $permission) {
             $this->assertFalse(
-                $profile->isSuperAdminOnlyPermission($permission),
+                $profile->isAdministratorOnlyPermission($permission),
                 "Pack expand must not include Super Admin-only permission [{$permission}].",
             );
         }

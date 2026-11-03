@@ -61,7 +61,6 @@ class AccountLifecycleReadinessChecker
         $staffRoles = [
             AuthorizationProfile::ROLE_STAFF,
             AuthorizationProfile::ROLE_ADMINISTRATOR,
-            AuthorizationProfile::ROLE_SUPER_ADMIN,
         ];
         $publicAccounts = User::query()
             ->where('identity_type', User::IDENTITY_LOCAL)

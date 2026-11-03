@@ -19,10 +19,12 @@ class AuthorizationMetadataSynchronizer
     public function __construct(
         private readonly AuthorizationProfile $profile,
         private readonly AuthorizationPermissionSynchronizer $permissions,
+        private readonly AuthorizationSuperAdminRetirement $superAdminRetirement,
     ) {}
 
     public function synchronize(): void
     {
+        $this->superAdminRetirement->retire();
         $this->synchronizeRoles();
         $this->synchronizePermissions();
         $this->synchronizeDefaultJobRoles();
@@ -122,7 +124,7 @@ class AuthorizationMetadataSynchronizer
                 $rows = [];
 
                 foreach (DefaultJobRoles::defaultPermissions($name) as $permission) {
-                    if ($this->profile->isSuperAdminOnlyPermission($permission)
+                    if ($this->profile->isAdministratorOnlyPermission($permission)
                         || ! $permissionIds->has($permission)) {
                         continue;
                     }

@@ -6,7 +6,7 @@ namespace App\Core\Access;
  * Permission naming convention for Core > Modules > Plugins (#292).
  *
  * ADR 0001 lock: keep every existing `{module}.{plugin}.*` string and keep
- * `admin.*` / `superadmin.access` (plus staff/volunteer/student access). Do not
+ * `admin.*` (plus staff/volunteer/student access). Do not
  * rename to `core.*` in this epic. Prefer zero renames; the alias map and
  * id-preserving migrator exist only if a future child must change a name.
  */
@@ -42,7 +42,6 @@ final class PermissionNaming
     private const CORE_EXACT = [
         'staff.access',
         'admin.access',
-        'superadmin.access',
         'volunteer.access',
         'student.access',
     ];

@@ -21,14 +21,14 @@ class WorkspaceShellTest extends TestCase
     public static function staffAndAdminPages(): array
     {
         return [
-            'dashboard' => ['super-admin', '/dashboard'],
-            'shelter' => ['super-admin', '/shelter'],
-            'petcare' => ['super-admin', '/petcare'],
-            'apes cic' => ['super-admin', '/apes-cic'],
-            'plugin list' => ['super-admin', '/apes-cic/tickets'],
-            'admin' => ['super-admin', '/admin'],
-            'admin users' => ['super-admin', '/admin/users?account_type=staff'],
-            'admin maintenance' => ['super-admin', '/admin/maintenance'],
+            'dashboard' => ['administrator', '/dashboard'],
+            'shelter' => ['administrator', '/shelter'],
+            'petcare' => ['administrator', '/petcare'],
+            'apes cic' => ['administrator', '/apes-cic'],
+            'plugin list' => ['administrator', '/apes-cic/tickets'],
+            'admin' => ['administrator', '/admin'],
+            'admin users' => ['administrator', '/admin/users?account_type=staff'],
+            'admin maintenance' => ['administrator', '/admin/maintenance'],
             'staff dashboard' => ['staff', '/dashboard'],
         ];
     }
@@ -53,7 +53,7 @@ class WorkspaceShellTest extends TestCase
             ->assertOk()
             ->assertDontSee('data-workspace-panel-switch', false);
 
-        $this->actingAs(User::factory()->protectedRole('super-admin')->create())
+        $this->actingAs(User::factory()->protectedRole('administrator')->create())
             ->get('/admin')
             ->assertOk()
             ->assertSee('data-workspace-panel-switch', false)
@@ -108,7 +108,7 @@ class WorkspaceShellTest extends TestCase
             'service user' => ['service-user', 'dashboard'],
             'staff' => ['staff', 'dashboard'],
             'administrator' => ['administrator', 'admin.index'],
-            'super admin' => ['super-admin', 'admin.index'],
+            'super admin' => ['administrator', 'admin.index'],
         ];
     }
 

@@ -18,7 +18,6 @@ return [
     'plugin_settings' => 'Plugin settings',
 
     'admin' => 'Admin',
-    'super_admin' => 'Super Admin',
 
     'public_user' => 'Public user|Public users',
     'public_users' => 'Public users',

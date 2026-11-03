@@ -63,7 +63,7 @@ class StaffProfileWorkflowTest extends TestCase
             'board-of-directors',
             'department.developers',
             'department.animal.care',
-            'myapesaccount.superadmin',
+            'myapesaccount.admin',
             'position.staff',
         ];
 

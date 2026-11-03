@@ -99,10 +99,10 @@ class PrivilegedMutationAuthorizer
         }
     }
 
-    public function isEligibleSuperAdmin(User $user): bool
+    public function isEligibleAdministrator(User $user): bool
     {
         return $this->isEligibleForProtectedRoles($user, [
-            AuthorizationProfile::ROLE_SUPER_ADMIN,
+            AuthorizationProfile::ROLE_ADMINISTRATOR,
         ]);
     }
 
@@ -119,17 +119,17 @@ class PrivilegedMutationAuthorizer
             ->exists();
     }
 
-    public function eligibleSuperAdminCount(): int
+    public function eligibleAdministratorCount(): int
     {
-        return User::query()->eligibleSuperAdmins()->count();
+        return User::query()->eligibleAdministrators()->count();
     }
 
-    public function assertEligibleSuperAdminRemains(): void
+    public function assertEligibleAdministratorRemains(): void
     {
-        if ($this->eligibleSuperAdminCount() < 1) {
+        if ($this->eligibleAdministratorCount() < 1) {
             throw new AuthorizationMutationDenied(
-                'final_active_super_admin',
-                'At least one active super-admin must remain.',
+                'final_active_administrator',
+                'At least one active administrator must remain.',
             );
         }
     }

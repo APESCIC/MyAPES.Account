@@ -26,11 +26,6 @@ final class PermissionDescriptions
             'description' => 'Open the day-to-day Admin panel for account operations.',
             'group' => 'Access',
         ],
-        'superadmin.access' => [
-            'title' => 'Super Admin panel access',
-            'description' => 'Open the Super Admin panel for technical configuration and directory controls.',
-            'group' => 'Access',
-        ],
         'admin.users.view' => [
             'title' => 'View accounts',
             'description' => 'Browse public and staff accounts and open account detail pages.',

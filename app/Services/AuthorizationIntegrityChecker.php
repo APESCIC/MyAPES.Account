@@ -25,7 +25,7 @@ class AuthorizationIntegrityChecker
      *     users: int,
      *     permissions: int,
      *     immutable_mappings: int,
-     *     super_admins: int
+     *     administrators: int
      * }
      */
     public function check(): array
@@ -46,11 +46,11 @@ class AuthorizationIntegrityChecker
             $this->checkMappings();
             $users = $this->checkProvenance();
             $this->checkSessionCutover($state);
-            $superAdmins = $this->effectiveSuperAdminCount();
+            $administrators = $this->effectiveAdministratorCount();
 
-            if ($superAdmins < 1) {
+            if ($administrators < 1) {
                 throw new AuthorizationLifecycleException(
-                    'super_admin_unavailable',
+                    'administrator_unavailable',
                 );
             }
 
@@ -58,7 +58,7 @@ class AuthorizationIntegrityChecker
                 'users' => $users,
                 'permissions' => count($this->profile->permissions()),
                 'immutable_mappings' => count(DirectoryImmutableMappings::all()),
-                'super_admins' => $superAdmins,
+                'administrators' => $administrators,
             ];
         });
     }
@@ -487,10 +487,10 @@ class AuthorizationIntegrityChecker
         }
     }
 
-    private function effectiveSuperAdminCount(): int
+    private function effectiveAdministratorCount(): int
     {
         return User::query()
-            ->eligibleSuperAdmins()
+            ->eligibleAdministrators()
             ->count();
     }
 }

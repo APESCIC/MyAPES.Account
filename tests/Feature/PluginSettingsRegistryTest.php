@@ -61,7 +61,7 @@ class PluginSettingsRegistryTest extends TestCase
     public function test_plugins_index_uses_registry_for_settings_links_and_no_settings_state(): void
     {
         $superAdmin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
 
         $response = $this->actingAs($superAdmin)->get(route('admin.modules.index'));
@@ -85,11 +85,11 @@ class PluginSettingsRegistryTest extends TestCase
         $staff = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_STAFF)
             ->create();
-        $admin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
+        $volunteer = User::factory()
+            ->protectedRole(AuthorizationProfile::ROLE_VOLUNTEER)
             ->create();
 
-        foreach ([$staff, $admin] as $actor) {
+        foreach ([$staff, $volunteer] as $actor) {
             foreach (['tickets', 'cases', 'recruitment'] as $moduleKey) {
                 $this->actingAs($actor)
                     ->get(route('admin.modules.settings.edit', ['apes-cic', $moduleKey]))
@@ -106,7 +106,7 @@ class PluginSettingsRegistryTest extends TestCase
     public function test_modules_without_settings_return_404_on_settings_urls(): void
     {
         $superAdmin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
 
         $this->actingAs($superAdmin)
@@ -125,7 +125,7 @@ class PluginSettingsRegistryTest extends TestCase
         ]);
 
         $superAdmin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $record = ModuleSetting::query()
             ->where('sub_core_key', 'apes-cic')
@@ -157,7 +157,7 @@ class PluginSettingsRegistryTest extends TestCase
     public function test_disabling_public_board_hides_discovery_and_returns_404(): void
     {
         $superAdmin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $record = ModuleSetting::query()
             ->where('sub_core_key', 'apes-cic')
@@ -185,7 +185,7 @@ class PluginSettingsRegistryTest extends TestCase
     public function test_disabling_public_apply_blocks_submissions_while_board_stays_open(): void
     {
         $superAdmin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $public = User::factory()->accessLevel(User::ROLE_SERVICE_USER)->create();
         $staff = User::factory()->create();

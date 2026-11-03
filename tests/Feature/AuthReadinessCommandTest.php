@@ -34,7 +34,6 @@ class AuthReadinessCommandTest extends TestCase
             'myapes.directory.required_groups' => [
                 'myapesaccount.staff',
                 'myapesaccount.admin',
-                'myapesaccount.superadmin',
                 'myapesaccount.volunteer',
                 'myapesaccount.student',
             ],
@@ -64,7 +63,7 @@ class AuthReadinessCommandTest extends TestCase
         $this->assertStringContainsString('OIDC configuration: ok', $output);
         $this->assertStringContainsString('OIDC discovery: ok', $output);
         $this->assertStringContainsString('LDAP bind: ok', $output);
-        $this->assertStringContainsString('LDAP groups: ok (5 required)', $output);
+        $this->assertStringContainsString('LDAP groups: ok (4 required)', $output);
         $this->assertStringContainsString('Authentication readiness: ok', $output);
         $this->assertCanariesAreAbsent($output);
         Http::assertSentCount(1);
@@ -395,7 +394,6 @@ class AuthReadinessCommandTest extends TestCase
                 ->andReturn([
                     ['name' => 'myapesaccount.admin', 'external_id' => null, 'member_count' => 1],
                     ['name' => 'myapesaccount.staff', 'external_id' => null, 'member_count' => 1],
-                    ['name' => 'myapesaccount.superadmin', 'external_id' => null, 'member_count' => 1],
                     ['name' => 'myapesaccount.volunteer', 'external_id' => null, 'member_count' => 0],
                     ['name' => 'myapesaccount.student', 'external_id' => null, 'member_count' => 0],
                 ]);
@@ -405,7 +403,7 @@ class AuthReadinessCommandTest extends TestCase
         $output = Artisan::output();
 
         $this->assertSame(0, $exitCode);
-        $this->assertStringContainsString('LDAP groups: ok (5 required)', $output);
+        $this->assertStringContainsString('LDAP groups: ok (4 required)', $output);
         $this->assertStringContainsString('Authentication readiness: ok', $output);
         $this->assertCanariesAreAbsent($output);
     }
@@ -464,12 +462,12 @@ class AuthReadinessCommandTest extends TestCase
         $output = Artisan::output();
 
         $this->assertSame(0, $exitCode);
-        $this->assertStringContainsString('LDAP groups: ok (5 required)', $output);
+        $this->assertStringContainsString('LDAP groups: ok (4 required)', $output);
         $this->assertStringContainsString('Authentication readiness: ok', $output);
         $this->assertCanariesAreAbsent($output);
     }
 
-    public function test_command_fails_when_superadmin_group_is_empty(): void
+    public function test_command_fails_when_admin_group_is_empty(): void
     {
         Http::fake([
             self::DISCOVERY => Http::response($this->validMetadata()),
@@ -479,9 +477,8 @@ class AuthReadinessCommandTest extends TestCase
             $mock->shouldReceive('enumerateGroups')
                 ->once()
                 ->andReturn([
-                    ['name' => 'myapesaccount.admin', 'external_id' => null, 'member_count' => 1],
+                    ['name' => 'myapesaccount.admin', 'external_id' => null, 'member_count' => 0],
                     ['name' => 'myapesaccount.staff', 'external_id' => null, 'member_count' => 1],
-                    ['name' => 'myapesaccount.superadmin', 'external_id' => null, 'member_count' => 0],
                     ['name' => 'myapesaccount.volunteer', 'external_id' => null, 'member_count' => 0],
                     ['name' => 'myapesaccount.student', 'external_id' => null, 'member_count' => 0],
                 ]);
@@ -526,7 +523,6 @@ class AuthReadinessCommandTest extends TestCase
         return [
             'myapesaccount.admin',
             'myapesaccount.staff',
-            'myapesaccount.superadmin',
             'myapesaccount.volunteer',
             'myapesaccount.student',
         ];

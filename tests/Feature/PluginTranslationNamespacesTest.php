@@ -55,7 +55,7 @@ class PluginTranslationNamespacesTest extends TestCase
     public function test_admin_plugins_index_renders_names_and_descriptions_from_lang(): void
     {
         $superAdmin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
 
         $response = $this->actingAs($superAdmin)->get(route('admin.modules.index'));
@@ -119,7 +119,7 @@ PHP);
         $this->assertSame('Recruitment', __('recruitment::plugin.name'));
 
         $superAdmin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
 
         $this->actingAs($superAdmin)

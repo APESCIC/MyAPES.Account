@@ -74,20 +74,20 @@ class DirectoryRoleSynchronizerTest extends TestCase
 
         $result = app(DirectoryRoleSynchronizer::class)->synchronize($user, [
             'myapesaccount.staff',
-            'myapesaccount.superadmin',
+            'myapesaccount.admin',
         ]);
 
         $this->assertTrue($result->eligible);
-        $this->assertSame('super-admin', $result->protectedRole);
+        $this->assertSame('administrator', $result->protectedRole);
         $this->assertSame(
-            ['super-admin'],
+            ['administrator'],
             $user->fresh()->roles()->orderBy('name')->pluck('name')->all(),
         );
         $this->assertDatabaseHas('role_sources', [
             'user_id' => $user->id,
             'source' => RoleSource::SOURCE_DIRECTORY,
             'directory_group_id' => DirectoryGroup::query()
-                ->where('name', 'myapesaccount.superadmin')
+                ->where('name', 'myapesaccount.admin')
                 ->value('id'),
         ]);
     }
@@ -118,19 +118,19 @@ class DirectoryRoleSynchronizerTest extends TestCase
         ]);
 
         $this->assertTrue($result->eligible);
-        $this->assertSame('super-admin', $result->protectedRole);
-        $this->assertSame(['myapesaccount.superadmin'], $user->fresh()->ldap_groups);
+        $this->assertSame('administrator', $result->protectedRole);
+        $this->assertSame(['myapesaccount.admin'], $user->fresh()->ldap_groups);
         $this->assertDatabaseHas('role_sources', [
             'user_id' => $user->id,
             'source' => RoleSource::SOURCE_DIRECTORY,
             'directory_group_id' => DirectoryGroup::query()
-                ->where('name', 'myapesaccount.superadmin')
+                ->where('name', 'myapesaccount.admin')
                 ->value('id'),
         ]);
         $this->assertDatabaseMissing('directory_groups', ['name' => $alias]);
         $this->assertSame(
             1,
-            DirectoryGroup::query()->where('name', 'myapesaccount.superadmin')->count(),
+            DirectoryGroup::query()->where('name', 'myapesaccount.admin')->count(),
         );
     }
 

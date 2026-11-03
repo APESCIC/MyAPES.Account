@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Super Admin groups | MyAPES Account')
+@section('title', 'Groups | MyAPES Account')
 
 @section('content')
     <section class="panel" aria-labelledby="admin-groups-title">
-        <h1 id="admin-groups-title">{{ __('admin.access.super_admin_groups') }}</h1>
+        <h1 id="admin-groups-title">{{ __('admin.access.groups_title') }}</h1>
         <p class="muted">{{ __('admin.access.groups_intro') }}</p>
 
         <form method="get" action="{{ route('admin.groups.index') }}">

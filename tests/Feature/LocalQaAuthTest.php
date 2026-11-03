@@ -191,19 +191,24 @@ class LocalQaAuthTest extends TestCase
         ]);
     }
 
-    public function test_role_switcher_can_switch_to_seeded_super_admin_user(): void
+    public function test_role_switcher_admin_has_full_admin_rights_and_no_super_admin_option(): void
     {
         $this->seed(LocalQaSeeder::class);
 
+        $this->post(route('qa.switch-role'), ['role' => 'superadmin'])
+            ->assertSessionHasErrors('role');
+
         $response = $this->post(route('qa.switch-role'), [
-            'role' => User::ROLE_SUPERADMIN,
+            'role' => User::ROLE_ADMIN,
         ]);
 
         $response->assertRedirect(route('dashboard'));
         $this->assertAuthenticated();
-        $this->assertSame(User::ROLE_SUPERADMIN, auth()->user()?->accessLevel());
-        $this->assertSame(LocalQaSeeder::SUPERADMIN_EMAIL, auth()->user()?->email);
-        $this->assertTrue(auth()->user()?->can('superadmin.access'));
+        $this->assertSame(User::ROLE_ADMIN, auth()->user()?->accessLevel());
+        $this->assertSame(LocalQaSeeder::ADMIN_EMAIL, auth()->user()?->email);
+        $this->assertTrue(auth()->user()?->can('admin.modules.manage'));
+        $this->assertTrue(auth()->user()?->can('admin.group-mappings.manage'));
+        $this->assertFalse(auth()->user()?->can('superadmin.access'));
 
         $this->get(route('superadmin.index'))
             ->assertRedirect(route('admin.index'));

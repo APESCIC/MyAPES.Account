@@ -232,7 +232,6 @@ class LdapGroupResolverTest extends TestCase
             'myapesaccount.admin',
             'myapesaccount.staff',
             'myapesaccount.student',
-            'myapesaccount.superadmin',
             'myapesaccount.volunteer',
         ], array_column($groups, 'name'));
         $this->assertSame(1, collect($groups)->firstWhere('name', 'myapesaccount.staff')['member_count']);
@@ -291,7 +290,6 @@ class LdapGroupResolverTest extends TestCase
             'myapesaccount.admin',
             'myapesaccount.staff',
             'myapesaccount.student',
-            'myapesaccount.superadmin',
             'myapesaccount.volunteer',
         ], array_column($groups, 'name'));
         $this->assertSame(1, collect($groups)->firstWhere('name', 'myapesaccount.staff')['member_count']);
@@ -350,7 +348,6 @@ class LdapGroupResolverTest extends TestCase
             'myapesaccount.admin',
             'myapesaccount.staff',
             'myapesaccount.student',
-            'myapesaccount.superadmin',
             'myapesaccount.volunteer',
         ], array_column($groups, 'name'));
     }
@@ -392,7 +389,7 @@ class LdapGroupResolverTest extends TestCase
         };
 
         $this->assertSame(
-            ['myapesaccount.staff', 'myapesaccount.superadmin'],
+            ['myapesaccount.admin', 'myapesaccount.staff'],
             $resolver->resolveByEmail('legacy-person-canary@example.test'),
         );
     }
@@ -434,7 +431,7 @@ class LdapGroupResolverTest extends TestCase
         };
 
         $this->assertSame(
-            ['myapesaccount.superadmin', 'myapesaccount.volunteer'],
+            ['myapesaccount.admin', 'myapesaccount.volunteer'],
             $resolver->resolveByEmail('misspelled-person-canary@example.test'),
         );
     }

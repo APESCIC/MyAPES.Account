@@ -249,9 +249,9 @@ Route::middleware([
         ->name('superadmin.')
         ->middleware('admin.denial-audit')
         ->group(function (): void {
-            // Legacy Super Admin shell URLs collapse into the unified Admin area (#252 / #293 → 301).
+            // Legacy Super Admin shell URLs collapse into the unified Admin area (#252 / #293 / #459 → 301).
             Route::get('/', fn () => redirect()->route('admin.index', request()->query(), 301))
-                ->middleware('can:superadmin.access')
+                ->middleware('can:admin.analytics.view')
                 ->name('index');
             Route::get('/groups', fn () => redirect()->route('admin.groups.index', [], 301))
                 ->middleware('can:admin.groups.view')

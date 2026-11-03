@@ -40,7 +40,8 @@ class AuthorizationGateTest extends TestCase
         $this->actingAsWithContext($administrator, 'qa');
         $this->assertTrue(Gate::allows('staff.access'));
         $this->assertTrue(Gate::allows('admin.access'));
-        $this->assertFalse(Gate::allows('admin.roles.manage'));
+        $this->assertTrue(Gate::allows('admin.roles.manage'));
+        $this->assertFalse(Gate::allows('superadmin.access'));
     }
 
     public function test_password_context_never_satisfies_directory_restricted_permissions(): void
@@ -86,10 +87,10 @@ class AuthorizationGateTest extends TestCase
         $this->assertFalse(Gate::allows('staff.access'));
     }
 
-    public function test_current_directory_super_admin_is_granted_every_catalogue_permission(): void
+    public function test_current_directory_administrator_is_granted_every_catalogue_permission(): void
     {
         $superAdmin = User::factory()
-            ->accessLevel(User::ROLE_SUPERADMIN)
+            ->accessLevel(User::ROLE_ADMIN)
             ->cloudronIdentity('super-admin-subject')
             ->create();
         $this->actingAsWithContext(
@@ -101,7 +102,6 @@ class AuthorizationGateTest extends TestCase
         foreach ([
             'staff.access',
             'admin.access',
-            'superadmin.access',
             'admin.users.view',
             'admin.users.manage',
             'admin.groups.view',
@@ -116,7 +116,7 @@ class AuthorizationGateTest extends TestCase
         ] as $permission) {
             $this->assertTrue(
                 Gate::allows($permission),
-                "Expected super-admin permission [{$permission}].",
+                "Expected administrator permission [{$permission}].",
             );
         }
     }

@@ -66,7 +66,7 @@ class DirectoryCatalogueSynchronizerTest extends TestCase
         );
         $this->assertSame(DirectorySyncRun::STATUS_SUCCEEDED, $run->status);
         $this->assertSame(1, $run->groups_seen);
-        $this->assertSame(4, $run->groups_missing);
+        $this->assertSame(3, $run->groups_missing);
         $this->assertDatabaseHas('directory_groups', [
             'name' => 'myapesaccount.staff',
             'external_id' => '4101',
@@ -79,12 +79,6 @@ class DirectoryCatalogueSynchronizerTest extends TestCase
         ]);
         $this->assertDatabaseMissing('directory_groups', [
             'name' => 'myapes.empty',
-        ]);
-        $this->assertDatabaseHas('directory_groups', [
-            'name' => 'myapesaccount.superadmin',
-            'status' => DirectoryGroup::STATUS_MISSING,
-            'app_enabled' => true,
-            'last_synced_at' => '2026-07-28 09:00:00',
         ]);
         $this->assertDatabaseHas('directory_groups', [
             'name' => 'myapesaccount.admin',
@@ -109,8 +103,8 @@ class DirectoryCatalogueSynchronizerTest extends TestCase
         );
 
         $this->assertSame(1, $repeated->groups_seen);
-        $this->assertSame(4, $repeated->groups_missing);
-        $this->assertSame(5, DirectoryGroup::query()->count());
+        $this->assertSame(3, $repeated->groups_missing);
+        $this->assertSame(4, DirectoryGroup::query()->count());
         $staff = DirectoryGroup::query()
             ->where('name', 'myapesaccount.staff')
             ->firstOrFail();

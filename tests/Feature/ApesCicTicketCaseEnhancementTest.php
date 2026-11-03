@@ -229,7 +229,7 @@ class ApesCicTicketCaseEnhancementTest extends TestCase
         ]);
 
         $superAdmin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $record = ModuleSetting::query()
             ->where('sub_core_key', 'apes-cic')
@@ -260,7 +260,7 @@ class ApesCicTicketCaseEnhancementTest extends TestCase
     public function test_admin_modules_page_shows_grid_and_settings_links(): void
     {
         $superAdmin = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
 
         $response = $this->actingAs($superAdmin)->get(route('admin.modules.index'));

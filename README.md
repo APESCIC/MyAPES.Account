@@ -42,19 +42,19 @@ Do not disclose suspected security vulnerabilities in a public issue. Follow the
   - One Laravel `web` guard carries explicit `password`, `cloudron_oidc`, or local/testing-only `qa` session provenance.
   - Durable authorization epochs, recent directory-validation timestamps, suspension checks, remember-token rotation, and the Phase B session-cutover marker force reauthentication whenever authorization changes.
 - **Protected authorization**:
-  - The exact protected roles are `service-user`, `student`, `volunteer`, `staff`, `administrator`, and `super-admin`.
-  - Students and volunteers receive staff-class service and plugin access for all enabled modules, but do not receive module `*.delete` abilities. Staff, administrators, and super-admins retain delete where the registry grants it.
-  - The core code-owned permission catalogue contains `staff.access`, `admin.access`, `superadmin.access`, `admin.users.view`, `admin.users.manage`, `admin.groups.view`, `admin.group-mappings.manage`, `admin.roles.view`, `admin.roles.manage`, `admin.permissions.view`, `admin.modules.view`, `admin.modules.manage`, `admin.analytics.view`, and `admin.maintenance.manage`.
-  - The first-party registry contributes 59 namespaced permissions for shipped instances. All 73 permissions are synchronized from immutable code definitions and enforced by the application-owned Gate and policies.
-  - Administrators retain `admin.modules.view`; `admin.modules.manage` is super-admin-only.
+  - The exact protected roles are `service-user`, `student`, `volunteer`, `staff`, and `administrator`. The former `super-admin` role was merged into `administrator` in 0.46.0 (#459).
+  - Students and volunteers receive staff-class service and plugin access for all enabled modules, but do not receive module `*.delete` abilities. Staff and administrators retain delete where the registry grants it.
+  - The core code-owned permission catalogue contains `staff.access`, `admin.access`, `admin.users.view`, `admin.users.manage`, `admin.groups.view`, `admin.group-mappings.manage`, `admin.roles.view`, `admin.roles.manage`, `admin.permissions.view`, `admin.modules.view`, `admin.modules.manage`, `admin.analytics.view`, and `admin.maintenance.manage`.
+  - The first-party registry contributes 65 namespaced permissions for shipped instances. All 82 permissions are synchronized from immutable code definitions and enforced by the application-owned Gate and policies.
+  - Administrators hold every core and plugin permission. Administrator-only permissions (groups, group mappings, roles, permissions, modules, maintenance, and email management) cannot be granted to custom roles.
   - Direct user permissions remain an internal central-materializer capability with mandatory provenance and no arbitrary Admin assignment UI. Authorized Admin user details show the same deduplicated role-plus-direct effective set used by the Gate and list each direct source with only a system label or granting account ID.
   - Spatie provides role/permission storage only. Its automatic Gate hook remains disabled while the teams schema and wildcard matching are enabled for the application-owned authorization path. Direct user permissions are allowed only through the central provenance materializer; direct pivot mutation remains disabled.
   - Every effective role has `system`, `directory`, `local`, or `legacy-compatibility` provenance. Local assignments require the persisted user ID of the actor who granted them, may use custom roles, and cannot assign protected roles or replace missing directory eligibility; non-local sources cannot claim an actor.
   - Staff assignment and notification eligibility requires an unsuspended protected staff-class pivot and a qualifying source for that same role. Production accepts directory provenance only; local/testing may also accept the approved system and legacy compatibility fixtures. A custom role containing `staff.access` never qualifies by itself.
-  - Privileged role, mapping, and user mutations lock the singleton authorization state before users or directory records, then revalidate the session method, user and global epochs, directory generation, suspension, exact-role provenance, and effective protected role. Final-super-admin safeguards use this same present-group-backed predicate; an unprovenanced or stale pivot cannot satisfy them.
+  - Privileged role, mapping, and user mutations lock the singleton authorization state before users or directory records, then revalidate the session method, user and global epochs, directory generation, suspension, exact-role provenance, and effective protected role. Final-administrator safeguards use this same present-group-backed predicate; an unprovenanced or stale pivot cannot satisfy them.
 - **Directory catalogue and mappings**:
-  - The only immutable mappings are the five preset `myapesaccount.*` groups: `staff`, `admin`, `superadmin`, `volunteer`, and `student` to their matching protected roles. Super-admins may add a mutable job-role mapping on the same managed group without replacing those presets.
-  - Fresh installs seed four custom job roles (`board-of-directors`, `management`, `client-services-advisor`, `receptionist`) with reviewed default permission packs. Later metadata sync creates any missing defaults and does not overwrite Super Admin permission edits. Job roles never replace missing directory eligibility for staff-class access.
+  - The only immutable mappings are the four preset `myapesaccount.*` groups: `staff`, `admin`, `volunteer`, and `student` to their matching protected roles. The retired `myapesaccount.superadmin` group is treated as an alias of `myapesaccount.admin`. Administrators may add a mutable job-role mapping on the same managed group without replacing those presets.
+  - Fresh installs seed four custom job roles (`board-of-directors`, `management`, `client-services-advisor`, `receptionist`) with reviewed default permission packs. Later metadata sync creates any missing defaults and does not overwrite Admin permission edits. Job roles never replace missing directory eligibility for staff-class access.
   - Matching is normalized and exact. Only groups with the configured `myapesaccount.` prefix are synchronized into the working catalogue; wildcards are rejected, and known legacy or misspelled aliases map to the canonical names.
   - Historical non-prefix catalogue rows remain in the database for audit continuity but are hidden from the Access Groups tab and are not marked missing by sync.
   - The catalogue stores normalized group identity, optional external ID, aggregate member count, presence state, and synchronization timestamps; individual directory members are never persisted in the catalogue, but directory sync can pre-provision Cloudron OIDC users and staff profiles before first login.
@@ -66,7 +66,7 @@ Do not disclose suspected security vulnerabilities in a public issue. Follow the
 - **First-party plugin registry** (internal module contracts):
   - Immutable Laravel contracts define the permanent Services (`apes-cic`, `shelter-rescue`, and `pet-care-clinic` sub-cores) plus the Plugins (`tickets`, `cases`, `pet-profiles`, and `consultations` module types). Executable providers, instance-scoped active-record detectors, routes, summaries, bounded recent activity, and typed analytics snapshots are registered from reviewed source code only; database or writable-storage discovery is unsupported.
   - The eight shipped instances are APES CIC Tickets and Cases; APES Shelter and Rescue Pet Profiles, Tickets, and Cases; and APES Pet Care Clinic Pet Profiles, Tickets, and Consultations. Fresh and upgraded databases keep them installed and enabled by default without overwriting a later intentional disabled state. All other matrix cells are explicitly incompatible.
-  - Lifecycle operations are transactional, super-admin-only, and serialized with module write requests through the same durable per-instance advisory/file lock. Lock acquisition has a bounded wait, while ownership lasts for the complete operation. Dependencies and active records are rechecked under the transition transaction; disablement never deletes records, and no uninstall operation exists.
+  - Lifecycle operations are transactional, administrator-only, and serialized with module write requests through the same durable per-instance advisory/file lock. Lock acquisition has a bounded wait, while ownership lasts for the complete operation. Dependencies and active records are rechecked under the transition transaction; disablement never deletes records, and no uninstall operation exists.
   - Each installation carries a monotonic transition version, so even multiple enable/disable operations within one second invalidate stale Admin forms. Direct route checks read authoritative installation state. Generated navigation and aggregate dashboard summaries use a short versioned projection cache, invalidated after committed lifecycle transitions and synchronization repairs.
   - v0.14.0 adds no database migration. The Shelter modules reuse the existing sub-core-discriminated `support_tickets`/`support_ticket_messages`, `pet_profiles`, `shelter_cases`/`case_updates`, and media storage. Existing records are neither copied nor assigned new IDs, owners, pets, assignees, morph identities, or media paths.
   - v0.15.0 also adds no database migration. APES Pet Care Clinic reuses its existing rows in `pet_profiles` and `pet_care_consultations` plus the shared sub-core-discriminated `support_tickets` and `support_ticket_messages` tables. Existing IDs, owners, pet links, assignments, schedules, statuses, closure timestamps, audit and notification identities, media paths, and physical media remain unchanged.
@@ -83,9 +83,9 @@ Do not disclose suspected security vulnerabilities in a public issue. Follow the
 - `/login` and `/register` - public local password accounts only. Directory (`cloudron_oidc`) users are redirected to Staff Login and cannot use public password authentication.
 - `/staff/login` - the only production sign-in path for Cloudron directory users; it starts Cloudron OIDC. The local staff password form exists only in local/testing.
 - `/change-log` - public, searchable MyAPES Account release history for guests, public users, and staff
-- local/testing only: QA role switcher (Public/Student/Volunteer/Staff/Admin/Super Admin) available in the app layout for one-click identity switching
+- local/testing only: QA role switcher (Public/Student/Volunteer/Staff/Admin) available in the app layout for one-click identity switching
 
-Public service-user accounts stay separate from Cloudron staff accounts: directory sync creates `identity_type=cloudron_oidc` users only, never `identity_type=local` public users, and does not convert an existing local public account. Public users receive own-record module abilities plus selected services; they cannot open Staff, Admin, or Super Admin routes. Volunteers and students share staff-class service access without delete. Admins can open Admin Users; Super Admins can open Access, Modules, and Maintenance.
+Public service-user accounts stay separate from Cloudron staff accounts: directory sync creates `identity_type=cloudron_oidc` users only, never `identity_type=local` public users, and does not convert an existing local public account. Public users receive own-record module abilities plus selected services; they cannot open Staff or Admin routes. Volunteers and students share staff-class service access without delete. Admins can open every Admin page, including Users, Access, Plugins, Emails, and Maintenance.
 
 ### APES CIC route and permission contract
 
@@ -323,7 +323,7 @@ All seeded users use this password:
 
 - `MyAPES-Local-QA-2026!`
 
-In local/testing, opening `/login` immediately signs into the seeded public account. Use the in-app QA role switcher to move between Public, Student, Volunteer, Staff, Admin, and Super Admin without re-entering credentials. These are local identities with `qa` session provenance and system-provenanced protected baselines; they do not contain OIDC subjects, directory memberships, production group aliases, or direct user permissions. The Staff fixture also has the deterministic local custom role `local-qa-reviewer`. If a seeded account is missing, re-run `php artisan db:seed` in the local environment.
+In local/testing, opening `/login` immediately signs into the seeded public account. Use the in-app QA role switcher to move between Public, Student, Volunteer, Staff, and Admin without re-entering credentials. These are local identities with `qa` session provenance and system-provenanced protected baselines; they do not contain OIDC subjects, directory memberships, production group aliases, or direct user permissions. The Staff fixture also has the deterministic local custom role `local-qa-reviewer`. If a seeded account is missing, re-run `php artisan db:seed` in the local environment.
 
 | Role | Login email | Login route | Primary QA coverage |
 | --- | --- | --- | --- |
@@ -331,12 +331,11 @@ In local/testing, opening `/login` immediately signs into the seeded public acco
 | Student | `qa.student@myapes.local` | QA switcher or `/staff/login` (local direct form) | Staff-class service workflows without module delete abilities |
 | Volunteer | `qa.volunteer@myapes.local` | QA switcher or `/staff/login` (local direct form) | Staff-class service workflows without module delete abilities |
 | Staff | `qa.staff@myapes.local` | QA switcher or `/staff/login` (local direct form) | Exact-namespace staff visibility, assignment updates, internal Ticket messages and Case updates, status workflows, delete abilities, and the local custom-role fixture |
-| Admin | `qa.admin@myapes.local` | QA switcher or `/staff/login` (local direct form) | Staff workflows plus Admin Users and the simplified Admin overview KPIs |
-| Super Admin | `qa.superadmin@myapes.local` | QA switcher or `/staff/login` (local direct form) | Super Admin panel (`/superadmin`): directory groups, roles, permissions, modules, maintenance, and technical analytics charts |
+| Admin | `qa.admin@myapes.local` | QA switcher or `/staff/login` (local direct form) | Staff workflows plus every Admin page: Users, Access (groups, roles, permissions), Plugins, Emails, Maintenance, and the technical overview charts |
 
 ### Live public walkthrough account (production)
 
-Production walkthroughs and public-surface QA should use the dedicated local public account below instead of a superadmin session. Credentials live in the APES operator secret store (Vaultwarden); they are not stored in this repository, GitHub issues, or release notes.
+Production walkthroughs and public-surface QA should use the dedicated local public account below instead of an admin session. Credentials live in the APES operator secret store (Vaultwarden); they are not stored in this repository, GitHub issues, or release notes.
 
 | Field | Value |
 | --- | --- |
@@ -349,9 +348,9 @@ Production walkthroughs and public-surface QA should use the dedicated local pub
 Separation rules:
 
 - Use `/login` only. Staff Login, Cloudron OIDC, and directory sync must never own or convert this account.
-- The account can reach public modules and owner-scoped records only; Admin, Super Admin, and staff-only routes remain forbidden.
+- The account can reach public modules and owner-scoped records only; Admin and staff-only routes remain forbidden.
 - Local QA seeds such as `qa.service.user@myapes.local` stay local/testing-only fixtures and do not substitute for this live account.
-- An Admin or Super Admin can issue a one-time temporary password from Admin → Public users for this local account. Guest forgot-password remains tracked in issue #121. Directory / Cloudron / pending first-login accounts stay on Cloudron.
+- An Admin can issue a one-time temporary password from Admin → Public users for this local account. Guest forgot-password remains tracked in issue #121. Directory / Cloudron / pending first-login accounts stay on Cloudron.
 
 ### Feature test matrix by seeded role
 
@@ -360,8 +359,7 @@ Separation rules:
 | Public | Create/view/comment on own APES CIC and Shelter Tickets/Cases; create/view/comment on own APES Pet Care Clinic Tickets; update own Shelter and APES Pet Care Clinic Pet Profiles and Clinic Consultations; edit profile/settings; and verify owner-only/public-update visibility |
 | Student / Volunteer | Use staff-class visibility and updates across services; confirm delete actions are denied |
 | Staff | Use exact instance permissions to see all users' Tickets/Cases/Consultations, assign eligible staff/admin accounts, update statuses, delete where permitted, and verify internal-note privacy |
-| Admin | Run full staff workflows plus inspect Admin Users and the simplified Admin overview |
-| Super Admin | Open `/superadmin`, exercise Access/Modules/Maintenance, and confirm overview charts stay fixed-height |
+| Admin | Run full staff workflows plus Admin Users, Access/Plugins/Maintenance, and confirm overview charts stay fixed-height |
 
 ### Seeded data included for quick E2E checks
 
@@ -370,7 +368,7 @@ Separation rules:
 - Shelter Tickets: an open unassigned adoption enquiry, an in-progress staff-assigned rescue request, and a closed admin-assigned animal-welfare follow-up, each with deterministic public and internal messages
 - Shelter Cases: the existing Mango Pet Profile with two open/in-review cases plus a closed example; the rescue Case has deterministic public and internal updates without changing its parent identity or timestamp
 - APES Pet Care Clinic: a seeded Pet Profile with two open/in-progress Consultations plus a closed example, and three deterministic Tickets covering appointment/open/unassigned/low, prescription/in-progress/staff/high, and billing/closed/admin/medium states with one public and one internal message each
-- Profiles: the public QA account has a `UserProfile`; student, volunteer, staff, admin, and superadmin QA accounts have `StaffProfile` workplace details. Repeated non-destructive seeding preserves Ticket/Case parent and child IDs, owners, pets, assignees, values, and timestamps without cross-sub-core overwrite
+- Profiles: the public QA account has a `UserProfile`; student, volunteer, staff, and admin QA accounts have `StaffProfile` workplace details. Repeated non-destructive seeding preserves Ticket/Case parent and child IDs, owners, pets, assignees, values, and timestamps without cross-sub-core overwrite
 
 Start Laravel, the queue listener, application logs, and Vite together with the cross-platform Composer script:
 
@@ -480,7 +478,6 @@ Before deploy, create or rename Cloudron directory groups to these exact
 
 - `myapesaccount.staff` → staff role
 - `myapesaccount.admin` → administrator role
-- `myapesaccount.superadmin` → super-admin role
 - `myapesaccount.volunteer` → volunteer role (optional membership; group must exist)
 - `myapesaccount.student` → student role (optional membership; group must exist)
 
@@ -489,7 +486,9 @@ Delete obsolete legacy groups after migration, including `myapes.staff`,
 `myapes.vounteers`, `myapesaccount.vounteer`, and `myapesaccont.*`. The app
 temporarily normalizes those misspellings to the canonical `myapesaccount.*`
 names so deploy readiness can succeed while operators rename Cloudron groups.
-Only the five preset groups above are synchronized and mapped; custom group
+The retired `myapesaccount.superadmin` group maps to the administrator role
+until it is deleted in Cloudron.
+Only the four preset groups above are synchronized and mapped; custom group
 mappings and enable/disable controls are not supported.
 
 The LAMP package injects rotating `CLOUDRON_LDAP_*` credentials. MyAPES uses
@@ -590,7 +589,7 @@ APP_MAINTENANCE_DRIVER=cache
 APP_MAINTENANCE_STORE=redis
 ```
 
-An authenticated administrator or super-admin with
+An authenticated administrator with
 `admin.maintenance.manage` can use `/admin/maintenance` to activate or
 deactivate maintenance. Activation requires a message and explicit
 confirmation; an optional planned end is informational and never restores the

@@ -18,15 +18,15 @@ class MyapesToMyapesaccountGroupMigrationTest extends TestCase
 
     public function test_migration_merges_legacy_groups_when_canonical_names_already_exist(): void
     {
-        $superAdminRole = Role::query()
-            ->where('name', AuthorizationProfile::ROLE_SUPER_ADMIN)
+        $administratorRole = Role::query()
+            ->where('name', AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->firstOrFail();
 
-        $canonicalSuperAdmin = DirectoryGroup::query()
-            ->where('name', 'myapesaccount.superadmin')
+        $canonicalAdmin = DirectoryGroup::query()
+            ->where('name', 'myapesaccount.admin')
             ->firstOrFail();
-        $legacySuperAdmin = DirectoryGroup::query()->create([
-            'name' => 'myapes.superadmins',
+        $legacyAdmin = DirectoryGroup::query()->create([
+            'name' => 'myapes.admin',
             'status' => DirectoryGroup::STATUS_PRESENT,
             'app_enabled' => true,
         ]);
@@ -37,28 +37,28 @@ class MyapesToMyapesaccountGroupMigrationTest extends TestCase
         ]);
 
         DB::table('directory_group_role_mappings')->insert([
-            'directory_group_id' => $legacySuperAdmin->id,
-            'role_id' => $superAdminRole->id,
+            'directory_group_id' => $legacyAdmin->id,
+            'role_id' => $administratorRole->id,
             'is_immutable' => true,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
         $user = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create([
                 'ldap_groups' => [
-                    'myapes.superadmins',
+                    'myapes.admin',
                     'myapes.staff',
                 ],
             ]);
 
         DB::table('role_sources')->insert([
             'user_id' => $user->id,
-            'role_id' => $superAdminRole->id,
+            'role_id' => $administratorRole->id,
             'source' => RoleSource::SOURCE_DIRECTORY,
-            'source_key' => 'directory:'.$legacySuperAdmin->id,
-            'directory_group_id' => $legacySuperAdmin->id,
+            'source_key' => 'directory:'.$legacyAdmin->id,
+            'directory_group_id' => $legacyAdmin->id,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -79,37 +79,37 @@ class MyapesToMyapesaccountGroupMigrationTest extends TestCase
         );
 
         $this->assertDatabaseMissing('directory_groups', [
-            'name' => 'myapes.superadmins',
+            'name' => 'myapes.admin',
         ]);
         $this->assertDatabaseMissing('directory_groups', [
             'name' => 'myapes.staff',
         ]);
         $this->assertDatabaseHas('directory_groups', [
-            'id' => $canonicalSuperAdmin->id,
-            'name' => 'myapesaccount.superadmin',
+            'id' => $canonicalAdmin->id,
+            'name' => 'myapesaccount.admin',
         ]);
         $this->assertDatabaseHas('directory_groups', [
             'name' => 'myapesaccount.staff',
         ]);
 
         $this->assertDatabaseMissing('directory_group_role_mappings', [
-            'directory_group_id' => $legacySuperAdmin->id,
+            'directory_group_id' => $legacyAdmin->id,
         ]);
         $this->assertDatabaseHas('role_sources', [
             'user_id' => $user->id,
-            'role_id' => $superAdminRole->id,
-            'directory_group_id' => $canonicalSuperAdmin->id,
-            'source_key' => 'directory:'.$canonicalSuperAdmin->id,
+            'role_id' => $administratorRole->id,
+            'directory_group_id' => $canonicalAdmin->id,
+            'source_key' => 'directory:'.$canonicalAdmin->id,
         ]);
 
         $user->refresh();
         $this->assertSame(
-            ['myapesaccount.staff', 'myapesaccount.superadmin'],
+            ['myapesaccount.admin', 'myapesaccount.staff'],
             $user->ldap_groups,
         );
 
         $this->assertDatabaseMissing('directory_groups', [
-            'id' => $legacySuperAdmin->id,
+            'id' => $legacyAdmin->id,
         ]);
         $this->assertDatabaseMissing('directory_groups', [
             'id' => $legacyStaff->id,

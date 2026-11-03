@@ -21,7 +21,6 @@ Locale and key conventions: [localisation.md](localisation.md). Canonical labels
 | Plugin enablement | One module with one plugin switched on (e.g. `apes-cic:recruitment`). | Settings and enablement copy: “enabled for this module”. | module instance (in UI). | `terms.plugin_enablement` |
 | Plugin settings | Per-enablement settings edited from Admin → Plugins. | **Settings** link / **Plugin settings** page titles. | module settings (in UI). | `terms.plugin_settings` |
 | Admin | Unified staff administration shell after v0.35. | Primary nav **Admin**; page titles under `/admin`. | Super Admin as a nav door or page-family label. | `terms.admin` |
-| Super Admin | Access tier / permission (`superadmin.access`) and protected role — not a separate shell. | Permission and role catalogue wording only when describing that tier. | Super Admin as primary nav or as the name of the Admin area. | `terms.super_admin` |
 
 ## Account types
 

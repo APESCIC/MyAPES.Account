@@ -114,13 +114,13 @@ class StaffOidcAuthenticationTest extends TestCase
         );
     }
 
-    public function test_super_admin_callback_redirects_to_recovery_while_maintenance_is_active(): void
+    public function test_administrator_callback_redirects_to_recovery_while_maintenance_is_active(): void
     {
         $this->fakeMaintenanceMode(true);
         $this->identityProvider->identity = new OidcIdentity(
-            'maintenance-superadmin-subject',
-            'maintenance-superadmin@example.com',
-            'Maintenance Super Admin',
+            'maintenance-admin-subject',
+            'maintenance-admin@example.com',
+            'Maintenance Administrator',
         );
         $this->withDirectoryGroups(['myapesaccount.superadmin']);
 
@@ -133,15 +133,15 @@ class StaffOidcAuthenticationTest extends TestCase
         ]);
     }
 
-    public function test_administrator_callback_returns_maintenance_response_while_maintenance_is_active(): void
+    public function test_staff_callback_returns_maintenance_response_while_maintenance_is_active(): void
     {
         $this->fakeMaintenanceMode(true);
         $this->identityProvider->identity = new OidcIdentity(
-            'maintenance-admin-subject',
-            'maintenance-admin@example.com',
-            'Maintenance Administrator',
+            'maintenance-staff-subject',
+            'maintenance-staff@example.com',
+            'Maintenance Staff',
         );
-        $this->withDirectoryGroups(['myapesaccount.admin']);
+        $this->withDirectoryGroups(['myapesaccount.staff']);
 
         $this->get(route('staff.auth.callback'))
             ->assertServiceUnavailable()

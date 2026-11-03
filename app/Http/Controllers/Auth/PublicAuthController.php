@@ -325,7 +325,6 @@ class PublicAuthController extends Controller
             'volunteer' => LocalQaSeeder::VOLUNTEER_EMAIL,
             'staff' => LocalQaSeeder::STAFF_EMAIL,
             'admin' => LocalQaSeeder::ADMIN_EMAIL,
-            'superadmin' => LocalQaSeeder::SUPERADMIN_EMAIL,
             default => throw new RuntimeException("Unsupported QA role [{$role}]."),
         };
 

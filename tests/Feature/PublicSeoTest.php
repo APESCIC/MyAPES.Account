@@ -81,7 +81,7 @@ class PublicSeoTest extends TestCase
     {
         $user = User::factory()->create();
         $admin = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
-        $superAdmin = User::factory()->accessLevel(User::ROLE_SUPERADMIN)->create();
+        $superAdmin = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
         $homeCanonical = 'rel="canonical" href="'.e(url('/')).'"';
         $homeOgUrl = 'property="og:url" content="'.e(url('/')).'"';
 

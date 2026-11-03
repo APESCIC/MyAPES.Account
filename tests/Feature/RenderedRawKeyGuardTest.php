@@ -55,7 +55,7 @@ class RenderedRawKeyGuardTest extends TestCase
             'guest' => [null, ['/', '/login', '/register', '/staff/login', '/forgot-password', '/help', '/privacy', '/cookies', '/terms', '/change-log', '/recruitment']],
             'public user' => ['public', ['/dashboard', '/profile', '/apes-cic', '/apes-cic/tickets', '/apes-cic/cases', '/shelter', '/shelter/tickets', '/shelter/cases', '/shelter/pets', '/petcare', '/petcare/tickets', '/petcare/pets', '/petcare/consultations', '/recruitment', '/recruitment/applications', '/help']],
             'staff' => ['staff', ['/dashboard', '/profile', '/apes-cic', '/apes-cic/tickets', '/apes-cic/cases', '/shelter', '/shelter/tickets', '/shelter/cases', '/shelter/pets', '/petcare', '/petcare/tickets', '/petcare/pets', '/petcare/consultations']],
-            'super admin' => ['super-admin', ['/admin', '/admin/access', '/admin/emails', '/admin/emails/log', '/admin/maintenance', '/admin/modules', '/admin/organisation-modules', '/admin/permissions', '/admin/roles', '/admin/groups', '/admin/users', '/admin/users?account_type=staff', '/change-log']],
+            'super admin' => ['administrator', ['/admin', '/admin/access', '/admin/emails', '/admin/emails/log', '/admin/maintenance', '/admin/modules', '/admin/organisation-modules', '/admin/permissions', '/admin/roles', '/admin/groups', '/admin/users', '/admin/users?account_type=staff', '/change-log']],
         ];
     }
 

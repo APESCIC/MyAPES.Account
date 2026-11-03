@@ -106,13 +106,13 @@ class AuthorizationActivationSynchronizer
                     }
                 }
 
-                $superAdmins = User::query()
-                    ->eligibleSuperAdmins()
+                $administrators = User::query()
+                    ->eligibleAdministrators()
                     ->count();
 
-                if ($superAdmins < 1) {
+                if ($administrators < 1) {
                     throw new AuthorizationLifecycleException(
-                        'super_admin_unavailable',
+                        'administrator_unavailable',
                     );
                 }
 

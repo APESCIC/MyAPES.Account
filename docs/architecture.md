@@ -119,7 +119,7 @@ Stored names stay. See [ADR 0001](adr/0001-core-modules-plugins.md). Enforced in
 
 | Layer | Pattern | Status |
 | --- | --- | --- |
-| Core | `admin.*`, `superadmin.access`, `staff.access`, `volunteer.access`, `student.access` | **Keep.** Do not rename to `core.*` in this epic. |
+| Core | `admin.*`, `staff.access`, `volunteer.access`, `student.access` | **Keep.** Do not rename to `core.*` in this epic. |
 | Plugin in a module | `{module}.{plugin}.{ability}` | **Keep.** Example: `apes-cic.recruitment.review-applications`. Built via `PermissionNaming::pluginPermission()`. |
 | Module-only | `{module}.{ability}` | Reserved. None exist today. |
 | Plugin global | `plugin.{plugin}.{ability}` | Not used. Do not invent a second name for module-scoped abilities. |

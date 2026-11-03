@@ -174,10 +174,24 @@ class AuthorizationCompatibilityDatabaseGuard
 
     public function isInstalled(): bool
     {
+        return $this->definitionsInstalled(withSuperAdmin: false);
+    }
+
+    /**
+     * Guard revision from before #459 removed the super-admin role. Preflight
+     * accepts it only while the merge migration is still pending.
+     */
+    public function isSuperAdminRevisionInstalled(): bool
+    {
+        return $this->definitionsInstalled(withSuperAdmin: true);
+    }
+
+    private function definitionsInstalled(bool $withSuperAdmin): bool
+    {
         $driver = $this->driverName();
 
         if ($driver === 'sqlite') {
-            $expected = $this->sqliteDefinitions();
+            $expected = $this->sqliteDefinitions($withSuperAdmin);
             $actual = DB::table('sqlite_master')
                 ->where('type', 'trigger')
                 ->whereIn('name', array_keys($expected))
@@ -199,7 +213,7 @@ class AuthorizationCompatibilityDatabaseGuard
         }
 
         if ($driver === 'mysql') {
-            $expected = $this->mysqlDefinitions();
+            $expected = $this->mysqlDefinitions($withSuperAdmin);
             $actual = collect(DB::select(
                 'SELECT trigger_name AS name,
                         event_object_table AS table_name,
@@ -266,11 +280,12 @@ class AuthorizationCompatibilityDatabaseGuard
     /**
      * @return array<string, string>
      */
-    private function sqliteDefinitions(): array
+    private function sqliteDefinitions(bool $withSuperAdmin = false): array
     {
         $userModel = self::USER_MODEL_EXPRESSION;
-        $mapping = $this->legacyRoleMapping('NEW.legacy_access_level');
-        $protectedRole = $this->protectedRoleIdentity('OLD');
+        $mapping = $this->legacyRoleMapping('NEW.legacy_access_level', $withSuperAdmin);
+        $protectedRole = $this->protectedRoleIdentity('OLD', $withSuperAdmin);
+        $accessLevels = $this->legacyAccessLevels($withSuperAdmin);
 
         return [
             self::INSERT_TRIGGER => 'CREATE TRIGGER '.self::INSERT_TRIGGER."
@@ -280,7 +295,7 @@ class AuthorizationCompatibilityDatabaseGuard
                     WHERE NEW.legacy_access_level IS NULL
                        OR TRIM(NEW.legacy_access_level) = ''
                        OR NEW.legacy_access_level NOT IN (
-                           'service_user', 'student', 'volunteer', 'staff', 'admin', 'superadmin'
+                           {$accessLevels}
                        );
                     SELECT RAISE(ABORT, 'Protected authorization role is unavailable.')
                     WHERE NOT EXISTS (
@@ -334,7 +349,7 @@ class AuthorizationCompatibilityDatabaseGuard
                     WHERE NEW.legacy_access_level IS NULL
                        OR TRIM(NEW.legacy_access_level) = ''
                        OR NEW.legacy_access_level NOT IN (
-                           'service_user', 'student', 'volunteer', 'staff', 'admin', 'superadmin'
+                           {$accessLevels}
                        );
                     SELECT RAISE(ABORT, 'Protected authorization role is unavailable.')
                     WHERE NOT EXISTS (
@@ -537,11 +552,12 @@ class AuthorizationCompatibilityDatabaseGuard
     /**
      * @return array<string, array{table: string, timing: string, event: string, body: string}>
      */
-    private function mysqlDefinitions(): array
+    private function mysqlDefinitions(bool $withSuperAdmin = false): array
     {
         $userModel = self::USER_MODEL_EXPRESSION;
-        $mapping = $this->legacyRoleMapping('NEW.legacy_access_level');
-        $protectedRole = $this->protectedRoleIdentity('OLD');
+        $mapping = $this->legacyRoleMapping('NEW.legacy_access_level', $withSuperAdmin);
+        $protectedRole = $this->protectedRoleIdentity('OLD', $withSuperAdmin);
+        $accessLevels = $this->legacyAccessLevels($withSuperAdmin);
 
         return [
             self::INSERT_TRIGGER => [
@@ -552,7 +568,7 @@ class AuthorizationCompatibilityDatabaseGuard
                     IF NEW.legacy_access_level IS NULL
                        OR TRIM(NEW.legacy_access_level) = ''
                        OR NEW.legacy_access_level NOT IN (
-                           'service_user', 'student', 'volunteer', 'staff', 'admin', 'superadmin'
+                           {$accessLevels}
                        )
                     THEN
                         SIGNAL SQLSTATE '45000'
@@ -615,7 +631,7 @@ class AuthorizationCompatibilityDatabaseGuard
                         IF NEW.legacy_access_level IS NULL
                            OR TRIM(NEW.legacy_access_level) = ''
                            OR NEW.legacy_access_level NOT IN (
-                               'service_user', 'student', 'volunteer', 'staff', 'admin', 'superadmin'
+                               {$accessLevels}
                            )
                         THEN
                             SIGNAL SQLSTATE '45000'
@@ -989,23 +1005,35 @@ class AuthorizationCompatibilityDatabaseGuard
         ];
     }
 
-    private function legacyRoleMapping(string $column): string
+    private function legacyAccessLevels(bool $withSuperAdmin): string
     {
+        $levels = "'service_user', 'student', 'volunteer', 'staff', 'admin'";
+
+        return $withSuperAdmin ? "{$levels}, 'superadmin'" : $levels;
+    }
+
+    private function legacyRoleMapping(string $column, bool $withSuperAdmin = false): string
+    {
+        $superAdmin = $withSuperAdmin
+            ? "\n            WHEN 'superadmin' THEN 'super-admin'"
+            : '';
+
         return "CASE {$column}
             WHEN 'service_user' THEN 'service-user'
             WHEN 'student' THEN 'student'
             WHEN 'volunteer' THEN 'volunteer'
             WHEN 'staff' THEN 'staff'
-            WHEN 'admin' THEN 'administrator'
-            WHEN 'superadmin' THEN 'super-admin'
+            WHEN 'admin' THEN 'administrator'{$superAdmin}
         END";
     }
 
-    private function protectedRoleIdentity(string $row): string
+    private function protectedRoleIdentity(string $row, bool $withSuperAdmin = false): string
     {
+        $superAdmin = $withSuperAdmin ? ", 'super-admin'" : '';
+
         return "{$row}.guard_name = 'web'
             AND {$row}.name IN (
-                'service-user', 'student', 'volunteer', 'staff', 'administrator', 'super-admin'
+                'service-user', 'student', 'volunteer', 'staff', 'administrator'{$superAdmin}
             )";
     }
 

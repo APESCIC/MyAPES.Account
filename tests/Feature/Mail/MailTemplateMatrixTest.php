@@ -135,8 +135,7 @@ class MailTemplateMatrixTest extends TestCase
             'student' => [AuthorizationProfile::ROLE_STUDENT, 403, 403],
             'volunteer' => [AuthorizationProfile::ROLE_VOLUNTEER, 403, 403],
             'staff' => [AuthorizationProfile::ROLE_STAFF, 403, 403],
-            'administrator' => [AuthorizationProfile::ROLE_ADMINISTRATOR, 200, 403],
-            'super admin' => [AuthorizationProfile::ROLE_SUPER_ADMIN, 200, 302],
+            'administrator' => [AuthorizationProfile::ROLE_ADMINISTRATOR, 200, 302],
         ];
     }
 

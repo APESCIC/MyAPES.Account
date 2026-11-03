@@ -20,7 +20,7 @@ class AuthorizationMutationServiceTest extends TestCase
 
     public function test_suspension_is_transactional_and_invalidates_existing_authorization(): void
     {
-        $actor = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $actor = $this->userWithAccess(User::ROLE_ADMIN);
         $target = $this->userWithAccess(User::ROLE_ADMIN);
         $originalToken = $target->remember_token;
         $this->actingAs($actor);
@@ -44,10 +44,10 @@ class AuthorizationMutationServiceTest extends TestCase
         ]);
     }
 
-    public function test_self_change_and_non_super_admin_changes_to_super_admins_are_rejected(): void
+    public function test_self_change_is_rejected_and_administrators_may_suspend_other_administrators(): void
     {
-        $first = $this->userWithAccess(User::ROLE_SUPERADMIN);
-        $second = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $first = $this->userWithAccess(User::ROLE_ADMIN);
+        $second = $this->userWithAccess(User::ROLE_ADMIN);
         $this->actingAs($first);
         app(AuthorizationMutationService::class)->suspend(
             $second,
@@ -69,31 +69,24 @@ class AuthorizationMutationServiceTest extends TestCase
             );
         }
 
-        $otherActor = $this->userWithAccess(User::ROLE_ADMIN);
-        $this->actingAs($otherActor);
-
-        try {
-            app(AuthorizationMutationService::class)->suspend(
-                $first,
-                $otherActor,
-                'Final administrator',
-            );
-            $this->fail('The final active super-admin was suspended.');
-        } catch (DomainException $exception) {
-            $this->assertSame(
-                'Only an active super-admin may affect administrator targets.',
-                $exception->getMessage(),
-            );
-        }
-
         $first->refresh();
         $this->assertNull($first->suspended_at);
         $this->assertSame(1, $first->authorization_epoch);
+
+        $otherActor = $this->userWithAccess(User::ROLE_ADMIN);
+        $this->actingAs($otherActor);
+        app(AuthorizationMutationService::class)->suspend(
+            $first,
+            $otherActor,
+            'Rotation',
+        );
+
+        $this->assertNotNull($first->fresh()->suspended_at);
     }
 
     public function test_reactivation_and_role_changes_rotate_authorization_state(): void
     {
-        $actor = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $actor = $this->userWithAccess(User::ROLE_ADMIN);
         $target = $this->userWithAccess(User::ROLE_STAFF);
         $this->actingAs($actor);
         $service = app(AuthorizationMutationService::class);
@@ -121,7 +114,7 @@ class AuthorizationMutationServiceTest extends TestCase
 
     public function test_custom_role_management_enforces_actor_and_target_boundaries(): void
     {
-        $superAdmin = $this->userWithAccess(User::ROLE_SUPERADMIN);
+        $superAdmin = $this->userWithAccess(User::ROLE_ADMIN);
         $administrator = $this->userWithAccess(User::ROLE_ADMIN);
         $target = $this->userWithAccess(User::ROLE_SERVICE_USER);
         $administratorTarget = $this->userWithAccess(User::ROLE_ADMIN);
@@ -135,24 +128,16 @@ class AuthorizationMutationServiceTest extends TestCase
         $service->grantLocalRole($target, $customRole, $administrator);
         $this->assertTrue($target->fresh()->roles->contains($customRole));
 
-        try {
-            $service->grantLocalRole(
-                $administratorTarget,
-                $customRole,
-                $administrator,
-            );
-            $this->fail('An administrator affected an administrator target.');
-        } catch (DomainException $exception) {
-            $this->assertSame(
-                'Only an active super-admin may affect administrator targets.',
-                $exception->getMessage(),
-            );
-        }
+        $service->grantLocalRole(
+            $administratorTarget,
+            $customRole,
+            $administrator,
+        );
 
         $this->actingAs($superAdmin);
         try {
             $service->grantLocalRole($superAdmin, $customRole, $superAdmin);
-            $this->fail('A super-admin changed their own roles.');
+            $this->fail('An administrator changed their own roles.');
         } catch (DomainException $exception) {
             $this->assertSame(
                 'Actors cannot change their own authorization state.',
@@ -161,7 +146,7 @@ class AuthorizationMutationServiceTest extends TestCase
         }
 
         $this->assertTrue($target->fresh()->roles->contains($customRole));
-        $this->assertFalse(
+        $this->assertTrue(
             $administratorTarget->fresh()->roles->contains($customRole),
         );
         $this->assertFalse($superAdmin->fresh()->roles->contains($customRole));

@@ -42,7 +42,7 @@ class AuthorizationMutationService
                     return;
                 }
 
-                $this->assertNotFinalActiveSuperAdmin($target);
+                $this->assertNotFinalActiveAdministrator($target);
                 $target->forceFill([
                     'suspended_at' => now(),
                     'suspended_by' => $actor->id,
@@ -177,7 +177,7 @@ class AuthorizationMutationService
                 $afterRoleIds = $this->effectiveRoleIds($target);
 
                 if ($beforeRoleIds !== $afterRoleIds) {
-                    $this->assertAnActiveSuperAdminRemains();
+                    $this->assertAnActiveAdministratorRemains();
                     $this->invalidateAuthorization($target);
                 }
 
@@ -321,15 +321,8 @@ class AuthorizationMutationService
         $actorRole = $this->profile->effectiveProtectedRole($actor);
         $targetRole = $this->profile->effectiveProtectedRole($target);
 
-        if ($actorRole === AuthorizationProfile::ROLE_SUPER_ADMIN) {
-            return $targetRole !== null;
-        }
-
         return $actorRole === AuthorizationProfile::ROLE_ADMINISTRATOR
-            && in_array($targetRole, [
-                AuthorizationProfile::ROLE_SERVICE_USER,
-                AuthorizationProfile::ROLE_STAFF,
-            ], true);
+            && $targetRole !== null;
     }
 
     private function assertMayAffectTarget(User $target, User $actor): void
@@ -348,31 +341,11 @@ class AuthorizationMutationService
             $actor,
             'admin.users.manage',
         )
-            || ! in_array($actorRole, [
-                AuthorizationProfile::ROLE_ADMINISTRATOR,
-                AuthorizationProfile::ROLE_SUPER_ADMIN,
-            ], true)
-            || ! $this->authorizer->isEligibleForProtectedRoles(
-                $actor,
-                [
-                    AuthorizationProfile::ROLE_ADMINISTRATOR,
-                    AuthorizationProfile::ROLE_SUPER_ADMIN,
-                ],
-            )) {
+            || $actorRole !== AuthorizationProfile::ROLE_ADMINISTRATOR
+            || ! $this->authorizer->isEligibleAdministrator($actor)) {
             $this->deny(
                 'active_administrator_required',
                 'Only an active administrator may manage users.',
-            );
-        }
-
-        if (in_array($targetRole, [
-            AuthorizationProfile::ROLE_ADMINISTRATOR,
-            AuthorizationProfile::ROLE_SUPER_ADMIN,
-        ], true)
-            && $actorRole !== AuthorizationProfile::ROLE_SUPER_ADMIN) {
-            $this->deny(
-                'administrator_target_requires_super_admin',
-                'Only an active super-admin may affect administrator targets.',
             );
         }
 
@@ -384,23 +357,23 @@ class AuthorizationMutationService
         }
     }
 
-    private function assertNotFinalActiveSuperAdmin(User $target): void
+    private function assertNotFinalActiveAdministrator(User $target): void
     {
-        if (! $this->authorizer->isEligibleSuperAdmin($target)) {
+        if (! $this->authorizer->isEligibleAdministrator($target)) {
             return;
         }
 
-        if ($this->authorizer->eligibleSuperAdminCount() <= 1) {
+        if ($this->authorizer->eligibleAdministratorCount() <= 1) {
             $this->deny(
-                'final_active_super_admin',
-                'At least one active super-admin must remain.',
+                'final_active_administrator',
+                'At least one active administrator must remain.',
             );
         }
     }
 
-    private function assertAnActiveSuperAdminRemains(): void
+    private function assertAnActiveAdministratorRemains(): void
     {
-        $this->authorizer->assertEligibleSuperAdminRemains();
+        $this->authorizer->assertEligibleAdministratorRemains();
     }
 
     private function lockCustomRole(Role $role): Role
@@ -468,7 +441,7 @@ class AuthorizationMutationService
      * provenance and permission pivots.
      *
      * Locking every user before returning fresh actor and target models means
-     * later active-super-admin invariant reads cannot acquire user locks after
+     * later active-administrator invariant reads cannot acquire user locks after
      * role, provenance, or permission-pivot locks.
      *
      * @return array{User, User}

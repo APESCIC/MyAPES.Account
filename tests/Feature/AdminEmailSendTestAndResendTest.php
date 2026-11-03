@@ -21,7 +21,7 @@ class AdminEmailSendTestAndResendTest extends TestCase
     public function test_super_admin_sends_a_test_to_their_own_address_only(): void
     {
         Notification::fake();
-        $superAdmin = User::factory()->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)->create();
+        $superAdmin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
         $bystander = User::factory()->create();
 
         $this->actingAs($superAdmin)
@@ -50,7 +50,7 @@ class AdminEmailSendTestAndResendTest extends TestCase
     public function test_send_test_is_immediate_and_leaves_no_in_app_notification(): void
     {
         Queue::fake();
-        $superAdmin = User::factory()->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)->create();
+        $superAdmin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
 
         $this->actingAs($superAdmin)
             ->post(route('admin.emails.test', 'tickets.ticket_updated'))
@@ -63,7 +63,7 @@ class AdminEmailSendTestAndResendTest extends TestCase
     public function test_send_test_is_rate_limited_per_admin(): void
     {
         Notification::fake();
-        $superAdmin = User::factory()->protectedRole(AuthorizationProfile::ROLE_SUPER_ADMIN)->create();
+        $superAdmin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
 
         for ($i = 0; $i < AdminEmailController::TEST_SENDS_PER_WINDOW; $i++) {
             $this->actingAs($superAdmin)
@@ -80,17 +80,16 @@ class AdminEmailSendTestAndResendTest extends TestCase
         Notification::assertCount(AdminEmailController::TEST_SENDS_PER_WINDOW);
     }
 
-    public function test_administrators_without_manage_cannot_send_tests(): void
+    public function test_staff_cannot_open_emails_or_send_tests(): void
     {
         Notification::fake();
-        $administrator = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
+        $staff = User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create();
 
-        $this->actingAs($administrator)
+        $this->actingAs($staff)
             ->get(route('admin.emails.show', 'auth.verify_email'))
-            ->assertOk()
-            ->assertDontSee('action="'.route('admin.emails.test', 'auth.verify_email').'"', false);
+            ->assertForbidden();
 
-        $this->actingAs($administrator)
+        $this->actingAs($staff)
             ->post(route('admin.emails.test', 'auth.verify_email'))
             ->assertForbidden();
 
