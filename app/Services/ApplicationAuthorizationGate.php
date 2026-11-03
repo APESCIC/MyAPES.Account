@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Contracts\ModuleRegistry;
+use App\Core\Access\GroupAccessMatrix;
 use App\Core\Access\PermissionNaming;
 use App\Core\Accounts\Permission;
 use App\Core\Accounts\User;
@@ -18,6 +19,7 @@ class ApplicationAuthorizationGate
         private readonly Request $request,
         private readonly ModuleRegistry $modules,
         private readonly ServiceEntitlement $entitlement,
+        private readonly GroupAccessMatrix $groupAccess,
     ) {}
 
     public function authorize(User $user, string $ability): ?bool
@@ -39,6 +41,15 @@ class ApplicationAuthorizationGate
                 $user,
                 $modulePermission->subCoreKey,
                 $this->request,
+            )) {
+            return false;
+        }
+
+        if ($modulePermission !== null
+            && $this->groupAccess->denies(
+                $user,
+                $modulePermission->subCoreKey,
+                $modulePermission->moduleKey,
             )) {
             return false;
         }
