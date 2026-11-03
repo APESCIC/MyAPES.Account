@@ -67,14 +67,28 @@ class PublicRecruitmentApplicationController extends Controller
             ]);
         }
 
-        $validated = $request->validate([
-            'statement' => ['required', 'string', 'max:5000'],
-        ]);
+        $questions = $recruitmentRole->questions()->get();
+        $rules = ['statement' => ['required', 'string', 'max:5000'], 'answers' => ['nullable', 'array']];
+        $attributes = [];
+        foreach ($questions as $question) {
+            $rules['answers.'.$question->id] = [$question->required ? 'required' : 'nullable', 'string', 'max:'.$question->maxLength()];
+            $attributes['answers.'.$question->id] = $question->label;
+        }
+
+        $validated = $request->validate($rules, [], $attributes);
+
+        $answers = [];
+        foreach ($questions as $question) {
+            $answer = trim((string) ($validated['answers'][$question->id] ?? ''));
+            if ($answer !== '') {
+                $answers[] = ['question_id' => $question->id, 'label' => $question->label, 'answer' => $answer];
+            }
+        }
 
         $application = RecruitmentApplication::submitAgainstOpenRole(
             $recruitmentRole,
             $request->user(),
-            ['statement' => $validated['statement']],
+            ['statement' => $validated['statement'], 'answers' => $answers === [] ? null : $answers],
         );
 
         $auditLogger->record(

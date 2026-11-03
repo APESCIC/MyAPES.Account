@@ -66,6 +66,11 @@ class RecruitmentRole extends Model
         return $this->hasMany(RecruitmentApplication::class);
     }
 
+    public function questions(): HasMany
+    {
+        return $this->hasMany(RecruitmentRoleQuestion::class)->orderBy('position')->orderBy('id');
+    }
+
     public function scopeOpen(Builder $query): Builder
     {
         return $query->where('status', self::STATUS_OPEN);

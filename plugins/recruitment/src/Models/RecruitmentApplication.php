@@ -16,6 +16,7 @@ use InvalidArgumentException;
     'user_id',
     'status',
     'statement',
+    'answers',
     'staff_notes',
     'submitted_at',
     'reviewed_at',
@@ -101,6 +102,7 @@ class RecruitmentApplication extends Model
     {
         return [
             'submitted_at' => 'datetime',
+            'answers' => 'array',
             'reviewed_at' => 'datetime',
             'decided_at' => 'datetime',
             'withdrawn_at' => 'datetime',
@@ -206,6 +208,7 @@ class RecruitmentApplication extends Model
             'user_id' => $user->id,
             'status' => self::STATUS_SUBMITTED,
             'statement' => $attributes['statement'] ?? null,
+            'answers' => $attributes['answers'] ?? null,
             'submitted_at' => now(),
         ]);
     }

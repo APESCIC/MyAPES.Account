@@ -32,6 +32,15 @@
                 {!! nl2br(e($application->statement)) !!}
             </div>
         @endif
+        @if(! empty($application->answers))
+            <h2>{{ __('recruitment::public.questions.your_answers') }}</h2>
+            <dl class="stack-spaced" data-recruitment-answers>
+                @foreach($application->answers as $answer)
+                    <dt>{{ $answer['label'] }}</dt>
+                    <dd>{!! nl2br(e($answer['answer'])) !!}</dd>
+                @endforeach
+            </dl>
+        @endif
         <div class="actions">
             <a href="{{ route('recruitment.applications.index') }}">{{ __('recruitment::public.show.blade.back_to_my_applications') }}</a>
             @if($application->recruitmentRole?->isOpen())

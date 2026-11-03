@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Plugins\Recruitment\Http\Controllers\RecruitmentApplicationController;
 use Plugins\Recruitment\Http\Controllers\RecruitmentRoleController;
+use Plugins\Recruitment\Http\Controllers\RecruitmentRoleQuestionController;
 
 /*
 | APES CIC Recruitment staff manage (#290).
@@ -45,3 +46,15 @@ Route::post('recruitment/{recruitmentRole}/close', [RecruitmentRoleController::c
     ->defaults('subCoreKey', 'apes-cic')
     ->defaults('moduleKey', 'recruitment')
     ->name('recruitment.close');
+Route::post('recruitment/{recruitmentRole}/questions', [RecruitmentRoleQuestionController::class, 'store'])
+    ->defaults('subCoreKey', 'apes-cic')
+    ->defaults('moduleKey', 'recruitment')
+    ->name('recruitment.questions.store');
+Route::post('recruitment/{recruitmentRole}/questions/{question}/move', [RecruitmentRoleQuestionController::class, 'move'])
+    ->defaults('subCoreKey', 'apes-cic')
+    ->defaults('moduleKey', 'recruitment')
+    ->name('recruitment.questions.move');
+Route::delete('recruitment/{recruitmentRole}/questions/{question}', [RecruitmentRoleQuestionController::class, 'destroy'])
+    ->defaults('subCoreKey', 'apes-cic')
+    ->defaults('moduleKey', 'recruitment')
+    ->name('recruitment.questions.destroy');

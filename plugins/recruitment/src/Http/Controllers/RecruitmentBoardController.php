@@ -75,7 +75,7 @@ class RecruitmentBoardController extends Controller
         }
 
         return view('recruitment::public.show', [
-            'role' => $recruitmentRole,
+            'role' => $recruitmentRole->loadMissing('questions'),
             'categoryLabels' => $this->categoryLabels(),
             'existingApplication' => $existingApplication,
             'canApply' => $canApply,

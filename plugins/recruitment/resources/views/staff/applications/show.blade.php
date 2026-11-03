@@ -56,6 +56,15 @@
                 {!! nl2br(e($application->statement)) !!}
             </div>
         @endif
+        @if(! empty($application->answers))
+            <h2>{{ __('recruitment::staff.questions.answers_heading') }}</h2>
+            <dl class="stack-spaced" data-recruitment-answers>
+                @foreach($application->answers as $answer)
+                    <dt>{{ $answer['label'] }}</dt>
+                    <dd>{!! nl2br(e($answer['answer'])) !!}</dd>
+                @endforeach
+            </dl>
+        @endif
         @if($application->staff_notes && ! $canReview)
             <h2>{{ __('recruitment::staff.staff.show.blade.staff_notes') }}</h2>
             <div class="stack-spaced">
