@@ -11,6 +11,9 @@
         <p class="muted">{{ __('public.legal.help.blade.short_answers_for_public_accounts_staff_sign_in_and_how') }}</p>
         <x-mascot-tip />
         @include('legal._nav')
+        @if($showStaffGuideLink ?? false)
+            <p data-help-staff-link>{{ __('help.public_guide.staff_link_intro') }} <a href="{{ route('help.staff') }}">{{ __('help.public_guide.staff_link') }}</a>.</p>
+        @endif
 
         <section>
             <h2>{{ __('public.legal.help.blade.which_sign_in_should_i_use') }}</h2>

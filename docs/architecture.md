@@ -143,6 +143,18 @@ Live URLs stay. Documented and tabled in `App\Core\Http\LegacyRedirectTable` ([#
 
 Placeholder rows in `LegacyRedirectTable` record paths that Waves 5–7 will move into package route files without changing the URI. A 301 is registered only when a path actually moves.
 
+## Areas
+
+The app has three areas ([#464](https://github.com/APESCIC/MyAPES-Account/issues/464)). `App\Support\Navigation\WorkspaceNavigation` builds one menu panel per area. Hiding a link is never the security boundary: each route keeps its own middleware.
+
+| Area | Who | Home | Help |
+| --- | --- | --- | --- |
+| Public | Anyone, signed in or not | `/` (signed-in users go to `/dashboard`) | `/help` (public guide) |
+| Staff | Every signed-in account; labelled **Staff** for staff, volunteers, students and administrators, and **Account** for public users | `/dashboard` | `/help/staff` (staff guide, staff roles only) |
+| Admin | Administrators and anyone granted an `admin.*` permission | `/admin` | — |
+
+The Staff | Admin switch only appears when a user can use both panels.
+
 ## What is out of this document
 
 Behaviour changes, UX redesigns, RBAC redesign, renaming `shelter_cases` for tidiness, and string extraction ([#264](https://github.com/APESCIC/MyAPES-Account/issues/264)). Those stay in their own issues.
