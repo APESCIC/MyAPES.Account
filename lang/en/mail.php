@@ -8,6 +8,8 @@ return [
         'footer' => [
             'copyright' => '© :year :app. All rights reserved.',
             'help' => 'Need help? Visit the Help page',
+            'no_reply' => 'Replies to this email are not read.',
+            'log_in_to_reply' => 'Log in to reply',
             'salutation' => '— MyAPES Account',
         ],
     ],
