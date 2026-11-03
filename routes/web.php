@@ -415,9 +415,9 @@ Route::middleware([
             Route::post('/modules/{subCoreKey}/{moduleKey}/lists/{listKey}/items/{itemKey}/restore', [AdminManagedListController::class, 'restore'])
                 ->middleware('can:admin.modules.manage')
                 ->name('modules.lists.restore');
-            Route::delete('/modules/{subCoreKey}/{moduleKey}/lists/{listKey}/items/{itemKey}', [AdminManagedListController::class, 'destroy'])
+            Route::post('/modules/{subCoreKey}/{moduleKey}/lists/{listKey}/items/{itemKey}/remove', [AdminManagedListController::class, 'remove'])
                 ->middleware('can:admin.modules.manage')
-                ->name('modules.lists.destroy');
+                ->name('modules.lists.remove');
             Route::post('/modules/{subCoreKey}/{moduleKey}/transition', [AdminModuleController::class, 'transition'])
                 ->middleware('can:admin.modules.manage')
                 ->name('modules.transition');

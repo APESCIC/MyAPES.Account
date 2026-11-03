@@ -74,7 +74,7 @@ class AdminManagedListController extends Controller
         }, 'admin.managed_lists.flash.moved');
     }
 
-    public function destroy(Request $request, string $subCoreKey, string $moduleKey, string $listKey, string $itemKey): RedirectResponse
+    public function remove(Request $request, string $subCoreKey, string $moduleKey, string $listKey, string $itemKey): RedirectResponse
     {
         $list = $this->list($subCoreKey, $moduleKey, $listKey);
         $outcome = ManagedListService::REMOVED;

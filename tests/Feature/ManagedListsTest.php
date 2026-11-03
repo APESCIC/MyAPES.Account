@@ -74,7 +74,7 @@ class ManagedListsTest extends TestCase
         $this->assertSame('volunteer_transport', $areas->serviceAreaKeys('apes-cic')[10]);
 
         $this->actingAs($this->admin)
-            ->delete(route('admin.modules.lists.destroy', [...$base, 'volunteer_transport']))
+            ->post(route('admin.modules.lists.remove', [...$base, 'volunteer_transport']))
             ->assertRedirect()
             ->assertSessionHas('status', 'Row deleted.');
         $this->assertNotContains('volunteer_transport', array_column($areas->allServiceAreas('apes-cic'), 'key'));
@@ -95,7 +95,7 @@ class ManagedListsTest extends TestCase
         ]);
 
         $this->actingAs($this->admin)
-            ->delete(route('admin.modules.lists.destroy', ['apes-cic', 'tickets', 'service_areas', 'fundraising']))
+            ->post(route('admin.modules.lists.remove', ['apes-cic', 'tickets', 'service_areas', 'fundraising']))
             ->assertRedirect()
             ->assertSessionHas('status', 'Row archived because existing records use it.');
 

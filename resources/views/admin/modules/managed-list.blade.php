@@ -76,9 +76,8 @@
                                                 <button type="submit" class="sg-btn-secondary">{{ __('admin.managed_lists.restore') }}</button>
                                             </form>
                                         @else
-                                            <form method="post" action="{{ route('admin.modules.lists.destroy', [$list->subCoreKey, $list->moduleKey, $list->listKey, $item['key']]) }}">
+                                            <form method="post" action="{{ route('admin.modules.lists.remove', [$list->subCoreKey, $list->moduleKey, $list->listKey, $item['key']]) }}">
                                                 @csrf
-                                                @method('delete')
                                                 <button type="submit" class="sg-btn-secondary">{{ $item['in_use'] > 0 ? __('admin.managed_lists.archive') : __('admin.managed_lists.delete') }}</button>
                                             </form>
                                         @endif
