@@ -114,4 +114,71 @@
             <a href="{{ route('apes-cic.recruitment.index') }}">{{ __('recruitment::staff.staff.show.blade.back') }}</a>
         @endif
     </div>
+
+    <div class="panel" id="questions" data-recruitment-questions>
+        <h2>{{ __('recruitment::staff.questions.heading') }}</h2>
+        <p class="muted">{{ __('recruitment::staff.questions.intro') }}</p>
+        @if($role->questions->isEmpty())
+            <p class="muted">{{ __('recruitment::staff.questions.none') }}</p>
+        @else
+            <ol class="stack-spaced">
+                @foreach($role->questions as $question)
+                    <li>
+                        <strong>{{ $question->label }}</strong>
+                        <span class="muted">· {{ $answerTypes[$question->answer_type] ?? $question->answer_type }} · {{ $question->required ? __('recruitment::staff.questions.required') : __('recruitment::staff.questions.optional') }}</span>
+                        @if($question->help_text)
+                            <br><small class="muted">{{ $question->help_text }}</small>
+                        @endif
+                        @if($canUpdate)
+                            <div class="actions">
+                                @unless($loop->first)
+                                    <form method="post" action="{{ route('apes-cic.recruitment.questions.move', [$role, $question]) }}">
+                                        @csrf
+                                        <input type="hidden" name="direction" value="up">
+                                        <button type="submit" class="sg-btn-secondary">{{ __('recruitment::staff.questions.move_up') }}</button>
+                                    </form>
+                                @endunless
+                                @unless($loop->last)
+                                    <form method="post" action="{{ route('apes-cic.recruitment.questions.move', [$role, $question]) }}">
+                                        @csrf
+                                        <input type="hidden" name="direction" value="down">
+                                        <button type="submit" class="sg-btn-secondary">{{ __('recruitment::staff.questions.move_down') }}</button>
+                                    </form>
+                                @endunless
+                                <form method="post" action="{{ route('apes-cic.recruitment.questions.destroy', [$role, $question]) }}">
+                                    @csrf
+                                    @method('delete')
+                                    <button type="submit" class="sg-btn-secondary">{{ __('recruitment::staff.questions.remove') }}</button>
+                                </form>
+                            </div>
+                        @endif
+                    </li>
+                @endforeach
+            </ol>
+        @endif
+
+        @if($canUpdate)
+            <form method="post" action="{{ route('apes-cic.recruitment.questions.store', $role) }}" class="stack-spaced">
+                @csrf
+                <h3>{{ __('recruitment::staff.questions.add_heading') }}</h3>
+                <label for="question_label">{{ __('recruitment::staff.questions.label') }}</label>
+                <input id="question_label" name="label" value="{{ old('label') }}" maxlength="255" required>
+                <label for="question_help">{{ __('recruitment::staff.questions.help_text') }}</label>
+                <input id="question_help" name="help_text" value="{{ old('help_text') }}" maxlength="500">
+                <label for="question_type">{{ __('recruitment::staff.questions.answer_type') }}</label>
+                <select id="question_type" name="answer_type" required>
+                    @foreach($answerTypes as $type => $typeLabel)
+                        <option value="{{ $type }}" @selected(old('answer_type') === $type)>{{ $typeLabel }}</option>
+                    @endforeach
+                </select>
+                <label>
+                    <input type="checkbox" name="required" value="1" @checked(old('required'))>
+                    {{ __('recruitment::staff.questions.make_required') }}
+                </label>
+                <div class="actions">
+                    <button type="submit">{{ __('recruitment::staff.questions.add') }}</button>
+                </div>
+            </form>
+        @endif
+    </div>
 @endsection

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Plugins\Recruitment\Models\RecruitmentRole;
+use Plugins\Recruitment\Models\RecruitmentRoleQuestion;
 
 class RecruitmentRoleController extends Controller
 {
@@ -51,11 +52,15 @@ class RecruitmentRoleController extends Controller
     public function show(RecruitmentRole $recruitmentRole): View
     {
         Gate::authorize('view', $recruitmentRole);
-        $recruitmentRole->loadMissing('creator');
+        $recruitmentRole->loadMissing('creator', 'questions');
         $user = request()->user();
 
         return view('recruitment::staff.show', [
             'role' => $recruitmentRole,
+            'answerTypes' => [
+                RecruitmentRoleQuestion::TYPE_SHORT => __('recruitment::staff.questions.types.short'),
+                RecruitmentRoleQuestion::TYPE_LONG => __('recruitment::staff.questions.types.long'),
+            ],
             'canUpdate' => Gate::allows('update', $recruitmentRole),
             'canPublish' => Gate::allows('publish', $recruitmentRole),
             'canClose' => Gate::allows('close', $recruitmentRole),

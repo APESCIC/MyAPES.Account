@@ -56,6 +56,20 @@
                     @csrf
                     <label for="application_statement">{{ __('recruitment::public.show.blade.why_are_you_interested') }}</label>
                     <textarea id="application_statement" name="statement" required maxlength="5000">{{ old('statement') }}</textarea>
+                    @foreach($role->questions as $question)
+                        <label for="answer_{{ $question->id }}">{{ $question->label }}@if($question->required) <span aria-hidden="true">*</span>@endif</label>
+                        @if($question->help_text)
+                            <p class="muted" id="answer_{{ $question->id }}_help">{{ $question->help_text }}</p>
+                        @endif
+                        @if($question->answer_type === \Plugins\Recruitment\Models\RecruitmentRoleQuestion::TYPE_LONG)
+                            <textarea id="answer_{{ $question->id }}" name="answers[{{ $question->id }}]" maxlength="{{ $question->maxLength() }}" @required($question->required) @if($question->help_text) aria-describedby="answer_{{ $question->id }}_help" @endif>{{ old('answers.'.$question->id) }}</textarea>
+                        @else
+                            <input id="answer_{{ $question->id }}" name="answers[{{ $question->id }}]" value="{{ old('answers.'.$question->id) }}" maxlength="{{ $question->maxLength() }}" @required($question->required) @if($question->help_text) aria-describedby="answer_{{ $question->id }}_help" @endif>
+                        @endif
+                        @error('answers.'.$question->id)
+                            <p class="sg-field__error">{{ $message }}</p>
+                        @enderror
+                    @endforeach
                     <div class="actions">
                         <button type="submit">{{ __('recruitment::public.show.blade.submit_application') }}</button>
                     </div>

@@ -61,4 +61,7 @@ return [
     'validation' => [
         'you_have_already_applied_for_this_role_each_person_may_' => 'You have already applied for this role. Each person may apply once.',
     ],
+    'questions' => [
+        'your_answers' => 'Your answers',
+    ],
 ];
