@@ -1,5 +1,48 @@
 [
   {
+    "version": "0.46.1",
+    "date": "2026-11-03",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Non-admin roles have no admin access",
+    "summary": "Staff, volunteers and students are confirmed to have no admin rights. Only Admins can open Admin pages.",
+    "changes": [
+      "Add an automated check that staff, volunteer and student accounts are refused on every Admin page and action.",
+      "Check that none of these roles holds an admin permission.",
+      "Count the Admin pages, so any new Admin page must be added to the check."
+    ],
+    "affected_areas": [
+      "Admin",
+      "Access"
+    ],
+    "categories": [
+      "security"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch: adds tests only; no change to who can open Admin pages.",
+    "validation": [
+      "New feature test covering all 45 Admin and legacy Super Admin addresses for staff, volunteer and student accounts.",
+      "Full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "Job roles chosen by Admins can still give a staff member selected admin views, by design."
+    ],
+    "rollback": "Redeploy the previous release package. There is no data change.",
+    "provenance": "Milestone v0.46.3 Beta, issue #461 under epic #458, pull request #590.",
+    "references": [
+      {
+        "label": "Issue #461",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/461"
+      },
+      {
+        "label": "Pull request #590",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/590"
+      }
+    ]
+  },
+  {
     "version": "0.46.0",
     "date": "2026-11-02",
     "channel": "stable",
