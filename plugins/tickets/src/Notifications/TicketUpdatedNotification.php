@@ -60,7 +60,7 @@ class TicketUpdatedNotification extends Notification implements ShouldQueue
             ]))
             ->line(__('mail.ticket_updated.line_status', ['status' => WorkflowLabels::status($this->ticket->status)]))
             ->line(__('mail.ticket_updated.line_priority', ['priority' => WorkflowLabels::priority($this->ticket->priority)]))
-            ->action(__('mail.ticket_updated.action'), route($this->showRouteName, $this->ticket));
+            ->action(__('mail.ticket_updated.action'), $this->replyLink($notifiable, route($this->showRouteName, $this->ticket)));
     }
 
     /**

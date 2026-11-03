@@ -2,6 +2,7 @@
 
 namespace App\Core\Mail\Concerns;
 
+use App\Core\Mail\ReplyLink;
 use Illuminate\Notifications\Messages\MailMessage;
 
 trait BuildsBrandedMail
@@ -13,6 +14,11 @@ trait BuildsBrandedMail
                 (string) config('mail.from.address'),
                 __('terms.app_name'),
             );
+    }
+
+    protected function replyLink(object $notifiable, string $itemUrl): string
+    {
+        return app(ReplyLink::class)->to($notifiable, $itemUrl);
     }
 
     protected function recipientName(object $notifiable): string

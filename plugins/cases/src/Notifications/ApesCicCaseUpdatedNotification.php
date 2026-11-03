@@ -49,7 +49,7 @@ class ApesCicCaseUpdatedNotification extends Notification implements ShouldQueue
             ]))
             ->line(__('mail.case_updated.line_status', ['status' => WorkflowLabels::status($this->case->status)]))
             ->line(__('mail.case_updated.line_priority', ['priority' => WorkflowLabels::priority($this->case->priority)]))
-            ->action(__('mail.case_updated.action'), route($this->showRouteName, $this->case));
+            ->action(__('mail.case_updated.action'), $this->replyLink($notifiable, route($this->showRouteName, $this->case)));
     }
 
     public function toArray(object $notifiable): array
