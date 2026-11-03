@@ -89,6 +89,11 @@
             <div class="module-settings-group__header">
                 <h2>{{ $groupLabel }}</h2>
                 <p class="muted">{{ __('admin.plugins.groups_and_subcategories_shown_on_create_and_update_forms') }}</p>
+                @foreach($managedLists ?? [] as $managedList)
+                    @if($managedList->listKey === $groupKey)
+                        <a href="{{ route('admin.modules.lists.show', [$subCoreKey, $moduleKey, $managedList->listKey]) }}" data-managed-list-link>{{ __('admin.managed_lists.manage_rows') }}</a>
+                    @endif
+                @endforeach
             </div>
 
             @foreach(($settings[$groupKey] ?? []) as $groupIndex => $group)
@@ -98,9 +103,15 @@
                             {{ old("$groupKey.$groupIndex.label", $group['label'] ?? 'Category') }}
                         </span>
                         <code class="module-settings-accordion__key">{{ old("$groupKey.$groupIndex.key", $group['key'] ?? '') }}</code>
+                        @if($group['archived'] ?? false)
+                            <x-badge tone="warning">{{ __('admin.managed_lists.archived') }}</x-badge>
+                        @endif
                     </summary>
 
                     <div class="module-settings-accordion__body">
+                        @if($group['archived'] ?? false)
+                            <input type="hidden" name="{{ $groupKey }}[{{ $groupIndex }}][archived]" value="1">
+                        @endif
                         <div class="module-settings-inline-fields">
                             <div>
                                 <label for="group-label-{{ $groupIndex }}">{{ $nameLabel }}</label>

@@ -26,6 +26,19 @@ class CaseCategoryResolver
      */
     public function categories(string $subCoreKey): array
     {
+        return array_values(array_filter(
+            $this->allCategories($subCoreKey),
+            static fn (array $category): bool => ! ($category['archived'] ?? false),
+        ));
+    }
+
+    /**
+     * Includes archived categories (#471) so existing cases keep their labels.
+     *
+     * @return array<int, array{key: string, label: string, subcategories: array<int, array<string, mixed>>}>
+     */
+    public function allCategories(string $subCoreKey): array
+    {
         $settings = $this->settingsFor($subCoreKey);
         $categories = $settings['categories'] ?? [];
 
@@ -62,9 +75,10 @@ class CaseCategoryResolver
     }
 
     /** @return array<string, mixed>|null */
-    public function findSubcategory(string $subCoreKey, string $category, string $subCategory): ?array
+    public function findSubcategory(string $subCoreKey, string $category, string $subCategory, bool $includeArchived = false): ?array
     {
-        foreach ($this->categories($subCoreKey) as $group) {
+        $groups = $includeArchived ? $this->allCategories($subCoreKey) : $this->categories($subCoreKey);
+        foreach ($groups as $group) {
             if (($group['key'] ?? null) !== $category) {
                 continue;
             }
@@ -80,7 +94,7 @@ class CaseCategoryResolver
 
     public function labelForCategory(string $subCoreKey, string $key): string
     {
-        foreach ($this->categories($subCoreKey) as $category) {
+        foreach ($this->allCategories($subCoreKey) as $category) {
             if (($category['key'] ?? null) === $key) {
                 return (string) ($category['label'] ?? $key);
             }
@@ -91,7 +105,7 @@ class CaseCategoryResolver
 
     public function labelForSubcategory(string $subCoreKey, string $categoryKey, string $subKey): string
     {
-        $sub = $this->findSubcategory($subCoreKey, $categoryKey, $subKey);
+        $sub = $this->findSubcategory($subCoreKey, $categoryKey, $subKey, true);
 
         return $sub !== null
             ? (string) ($sub['label'] ?? $subKey)
@@ -120,8 +134,9 @@ class CaseCategoryResolver
         string $category,
         string $subCategory,
         ?string $websiteKey,
+        bool $includeArchived = false,
     ): array {
-        $sub = $this->findSubcategory($subCoreKey, $category, $subCategory);
+        $sub = $this->findSubcategory($subCoreKey, $category, $subCategory, $includeArchived);
         if ($sub === null) {
             throw ValidationException::withMessages([
                 'sub_category' => __('cases::ui.validation.choose_a_valid_subcategory_for_the_selected_category'),
@@ -157,7 +172,7 @@ class CaseCategoryResolver
 
     public function allowsAttachments(string $subCoreKey, string $category, string $subCategory): bool
     {
-        $sub = $this->findSubcategory($subCoreKey, $category, $subCategory);
+        $sub = $this->findSubcategory($subCoreKey, $category, $subCategory, true);
 
         return (bool) ($sub['allows_attachments'] ?? false);
     }
