@@ -1,5 +1,51 @@
 [
   {
+    "version": "0.46.2",
+    "date": "2026-11-03",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Admins choose plugin access per group",
+    "summary": "Admins can choose which plugins staff, volunteers and students may use in each organisation module. Admins always keep full access.",
+    "changes": [
+      "Add a Group access tab under Admin, Access, with one switch per plugin for staff, volunteers and students in each module.",
+      "Turning a plugin off for a group hides it from that group's menu and blocks its pages.",
+      "Switches only take access away from a group's usual access; they never add to it, and Admins are never affected.",
+      "Record every change in the audit log."
+    ],
+    "affected_areas": [
+      "Admin",
+      "Access",
+      "Plugins"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch: adds an Admin setting that starts with today's access for every group, with a new table and no data change.",
+    "validation": [
+      "New feature test for the default access, turning a plugin off for students, Admin access, the audit log and non-Admin refusal.",
+      "Authorization, navigation, Admin access and Recruitment access tests.",
+      "Full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "Switches apply per group, not per person. Switching a plugin off for staff also removes it from staff who hold a job role for it."
+    ],
+    "rollback": "Redeploy the previous release package. The new table can stay; earlier releases ignore it.",
+    "provenance": "Milestone v0.46.3 Beta, issue #460 under epic #458, pull request #591.",
+    "references": [
+      {
+        "label": "Issue #460",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/460"
+      },
+      {
+        "label": "Pull request #591",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/591"
+      }
+    ]
+  },
+  {
     "version": "0.46.1",
     "date": "2026-11-03",
     "channel": "stable",
