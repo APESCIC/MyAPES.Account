@@ -1,5 +1,51 @@
 [
   {
+    "version": "0.47.2",
+    "date": "2026-11-03",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Log in to reply links in ticket and case emails",
+    "summary": "Ticket and case emails now have a Log in to reply button that opens the exact ticket or case after you sign in.",
+    "changes": [
+      "Add a Log in to reply button to ticket and case update emails.",
+      "Signed-out readers go to the right sign-in first, public or staff, then land on the ticket or case.",
+      "Signed-in readers go straight to the ticket or case."
+    ],
+    "affected_areas": [
+      "Email",
+      "Tickets",
+      "Cases"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch: changes the button on three email templates and adds a redirect page, with no data change.",
+    "validation": [
+      "New feature test for the button, staff and public sign-in, the return after sign-in and a tampered link.",
+      "Mail, workflow label, translation and architecture tests.",
+      "Full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "The link does not sign anyone in; readers still sign in as usual. Emails sent before this release keep their old button."
+    ],
+    "rollback": "Redeploy the previous release package. Links in emails sent by this release will then return not found; the item is still reachable from the app.",
+    "provenance": "Milestone v0.47.4 Beta, issue #468 under epic #463, pull request #594.",
+    "references": [
+      {
+        "label": "Issue #468",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/468"
+      },
+      {
+        "label": "Pull request #594",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/594"
+      }
+    ]
+  },
+  {
     "version": "0.47.1",
     "date": "2026-11-03",
     "channel": "stable",
