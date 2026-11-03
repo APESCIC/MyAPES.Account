@@ -308,6 +308,9 @@ Route::middleware([
             Route::post('/access/sync', [AdminAccessController::class, 'sync'])
                 ->middleware('can:admin.group-mappings.manage')
                 ->name('access.sync');
+            Route::put('/access/matrix', [AdminAccessController::class, 'updateMatrix'])
+                ->middleware('can:admin.group-mappings.manage')
+                ->name('access.matrix.update');
             Route::post('/access/groups/{directoryGroup}/mappings', [AdminAccessController::class, 'storeMapping'])
                 ->middleware('can:admin.group-mappings.manage')
                 ->name('access.mappings.store');

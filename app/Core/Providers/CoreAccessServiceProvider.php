@@ -2,6 +2,7 @@
 
 namespace App\Core\Providers;
 
+use App\Core\Access\GroupAccessMatrix;
 use App\Core\Accounts\User;
 use App\Services\ApplicationAuthorizationGate;
 use Illuminate\Support\Facades\Gate;
@@ -12,6 +13,11 @@ use Illuminate\Support\ServiceProvider;
  */
 class CoreAccessServiceProvider extends ServiceProvider
 {
+    public function register(): void
+    {
+        $this->app->scoped(GroupAccessMatrix::class);
+    }
+
     public function boot(): void
     {
         Gate::before(

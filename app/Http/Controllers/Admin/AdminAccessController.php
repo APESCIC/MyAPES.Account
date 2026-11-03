@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Contracts\ModuleRegistry;
+use App\Core\Access\GroupAccessMatrix;
 use App\Core\Accounts\DirectoryGroup;
 use App\Core\Accounts\DirectoryGroupRoleMapping;
 use App\Core\Accounts\Permission;
@@ -41,15 +42,39 @@ class AdminAccessController extends Controller
         }
 
         $validated = $request->validate([
-            'tab' => ['nullable', Rule::in(['groups', 'job-roles', 'permissions'])],
+            'tab' => ['nullable', Rule::in(['groups', 'matrix', 'job-roles', 'permissions'])],
         ]);
         $tab = $validated['tab'] ?? 'groups';
 
         return match ($tab) {
             'groups' => $this->groupsTab($request),
+            'matrix' => $this->matrixTab(),
             'job-roles' => $this->jobRolesTab($request),
             'permissions' => $this->permissionsTab($request),
         };
+    }
+
+    public function updateMatrix(
+        Request $request,
+        GroupAccessMatrix $matrix,
+    ): RedirectResponse {
+        Gate::authorize('admin.group-mappings.manage');
+        $validated = $request->validate([
+            'allowed' => ['sometimes', 'array'],
+            'allowed.*' => ['array'],
+        ]);
+        $allowed = array_intersect_key(
+            $validated['allowed'] ?? [],
+            array_flip(GroupAccessMatrix::GROUPS),
+        );
+
+        $changed = $matrix->update($request->user(), $allowed);
+
+        return redirect()
+            ->route('admin.access.index', ['tab' => 'matrix'])
+            ->with('status', $changed === 0
+                ? __('admin.flash.access_matrix_unchanged')
+                : __('admin.flash.access_matrix_updated'));
     }
 
     public function sync(
@@ -303,6 +328,17 @@ class AdminAccessController extends Controller
                 ->get(),
             'filters' => $filters,
             'catalogueSyncedAt' => $catalogueSyncedAt,
+        ]);
+    }
+
+    private function matrixTab(): View
+    {
+        Gate::authorize('admin.groups.view');
+
+        return view('admin.access.matrix', [
+            'activeTab' => 'matrix',
+            'rows' => app(GroupAccessMatrix::class)->rows(),
+            'groups' => GroupAccessMatrix::GROUPS,
         ]);
     }
 

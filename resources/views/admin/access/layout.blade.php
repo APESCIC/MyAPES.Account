@@ -12,6 +12,8 @@
                 @can('admin.groups.view')
                     <a href="{{ route('admin.access.index', ['tab' => 'groups']) }}"
                        @if(($activeTab ?? 'groups') === 'groups') aria-current="page" @endif>{{ __('admin.access.groups') }}</a>
+                    <a href="{{ route('admin.access.index', ['tab' => 'matrix']) }}"
+                       @if(($activeTab ?? '') === 'matrix') aria-current="page" @endif>{{ __('admin.access.matrix_title') }}</a>
                 @endcan
                 @can('admin.roles.view')
                     <a href="{{ route('admin.access.index', ['tab' => 'job-roles']) }}"
