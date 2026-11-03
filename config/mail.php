@@ -115,4 +115,19 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Global "Reply-To" Address (#467)
+    |--------------------------------------------------------------------------
+    |
+    | Replies to system email are not read (decision D1). Every message gets
+    | this no-reply address; the footer tells people to log in to reply.
+    |
+    */
+
+    'reply_to' => [
+        'address' => env('MAIL_REPLY_TO_ADDRESS', 'no-reply@apes.org.uk'),
+        'name' => env('MAIL_REPLY_TO_NAME', 'MyAPES Account (do not reply)'),
+    ],
+
 ];

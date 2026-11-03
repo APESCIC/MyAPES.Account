@@ -30,6 +30,9 @@
 {{-- Footer --}}
 @slot('footer')
 <x-mail::footer>
+{{ __('mail.brand.footer.no_reply') }}
+<a href="{{ route('dashboard') }}" style="color: #6b7280; text-decoration: underline;">{{ __('mail.brand.footer.log_in_to_reply') }}</a>
+<br>
 {!! __('mail.brand.footer.copyright', [
     'year' => date('Y'),
     'app' => __('terms.app_name'),
