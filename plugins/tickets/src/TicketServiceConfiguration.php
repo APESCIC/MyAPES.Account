@@ -7,6 +7,16 @@ use InvalidArgumentException;
 
 final class TicketServiceConfiguration
 {
+    /**
+     * Built-in areas, used when no managed list is stored (#472).
+     *
+     * @var array<string, list<string>>
+     */
+    public const DEFAULT_SERVICE_AREAS = [
+        'shelter-rescue' => ['adoption', 'surrender', 'rescue', 'fostering', 'animal_welfare', 'other'],
+        'pet-care-clinic' => ['appointment', 'consultation', 'prescription', 'billing', 'follow_up', 'other'],
+    ];
+
     public function __construct(
         private readonly TicketCategoryResolver $categories,
     ) {}
@@ -31,7 +41,7 @@ final class TicketServiceConfiguration
                 'apes-shelter',
                 'APES Shelter and Rescue Tickets',
                 'Support for adoption, surrender, rescue, fostering and animal welfare.',
-                $this->serviceAreaKeys('shelter-rescue', ['adoption', 'surrender', 'rescue', 'fostering', 'animal_welfare', 'other']),
+                $this->serviceAreaKeys('shelter-rescue', self::DEFAULT_SERVICE_AREAS['shelter-rescue']),
                 false,
             ),
             'pet-care-clinic' => new TicketServiceDefinition(
@@ -41,7 +51,7 @@ final class TicketServiceConfiguration
                 'apes-petcare',
                 'APES Pet Care Clinic Tickets',
                 'Support for appointments, consultations, prescriptions, billing and follow-up.',
-                $this->serviceAreaKeys('pet-care-clinic', ['appointment', 'consultation', 'prescription', 'billing', 'follow_up', 'other']),
+                $this->serviceAreaKeys('pet-care-clinic', self::DEFAULT_SERVICE_AREAS['pet-care-clinic']),
                 false,
             ),
             default => throw new InvalidArgumentException('Unknown ticket service.'),

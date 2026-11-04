@@ -107,8 +107,8 @@ class WorkflowLabelMatrixTest extends TestCase
         return [
             'tickets status' => ['status', $this->inRule('plugins/tickets/src/Http/Controllers/TicketController.php', 'open,in_progress')],
             'tickets priority' => ['priority', TicketController::PRIORITIES],
-            'shelter ticket area' => ['ticket_area', app(TicketServiceConfiguration::class)->for('shelter-rescue')->serviceAreas],
-            'pet care ticket area' => ['ticket_area', app(TicketServiceConfiguration::class)->for('pet-care-clinic')->serviceAreas],
+            'shelter ticket area' => ['ticket_area', TicketServiceConfiguration::DEFAULT_SERVICE_AREAS['shelter-rescue']],
+            'pet care ticket area' => ['ticket_area', TicketServiceConfiguration::DEFAULT_SERVICE_AREAS['pet-care-clinic']],
             'apes cic case status' => ['status', $cic->statuses],
             'apes cic case priority' => ['priority', $cic->priorities],
             'shelter case status' => ['status', $shelter->statuses],
