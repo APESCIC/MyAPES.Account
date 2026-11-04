@@ -260,6 +260,7 @@ final class WorkspaceNavigation
             'modules' => [
                 ['admin.modules', __('admin.nav.modules'), route('admin.organisation-modules.index'), 'building-2', ['admin.modules.view'], ['admin.organisation-modules.*']],
                 ['admin.plugins', __('admin.nav.plugins'), route('admin.modules.index'), 'puzzle', ['admin.modules.view'], ['admin.modules.*']],
+                ['admin.versions', __('admin.nav.versions'), route('admin.versions.index'), 'scroll-text', ['admin.modules.view'], ['admin.versions.*']],
             ],
             'system' => [
                 ['admin.emails', __('admin.nav.emails'), route('admin.emails.index'), 'mail', ['admin.emails.view'], ['admin.emails.*']],

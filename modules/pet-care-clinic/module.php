@@ -26,4 +26,5 @@ return new ModuleManifest(
     pluginDefaults: is_array($defaults) ? $defaults : [],
     hubView: 'sub-cores.show',
     packagePath: __DIR__,
+    version: '1.0.0',
 );

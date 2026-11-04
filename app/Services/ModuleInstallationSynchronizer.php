@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Contracts\ModuleRegistry;
+use App\Core\Extensions\ExtensionVersionSynchronizer;
 use App\Modules\ModuleInstanceDefinition;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -18,6 +19,7 @@ class ModuleInstallationSynchronizer
         private readonly AuthorizationProfile $profile,
         private readonly ModuleProjectionCache $cache,
         private readonly ModuleSettingsService $moduleSettings,
+        private readonly ExtensionVersionSynchronizer $versions,
     ) {}
 
     /** @return array{created: int, existing: int} */
@@ -87,6 +89,7 @@ class ModuleInstallationSynchronizer
                 }
 
                 $this->moduleSettings->seedConfigurableDefaults();
+                $this->versions->synchronize();
 
                 return compact('created', 'existing');
             }),

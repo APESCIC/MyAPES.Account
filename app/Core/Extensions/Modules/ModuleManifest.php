@@ -28,6 +28,7 @@ final readonly class ModuleManifest
         public array $pluginDefaults = [],
         public string $hubView = 'sub-cores.show',
         public ?string $packagePath = null,
+        public string $version = '1.0.0',
     ) {}
 
     /**
