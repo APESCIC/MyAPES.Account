@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Core\Accounts\CallerVerificationService;
+use App\Core\Accounts\CallLog;
 use App\Core\Accounts\User;
 use App\Http\Controllers\Controller;
 use App\Services\AuditLogger;
@@ -11,6 +12,7 @@ use App\Services\UkPhoneNumber;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 /**
  * Staff, volunteers, students and administrators find a caller, check
@@ -60,7 +62,31 @@ class CallerController extends Controller
             'lockedForSeconds' => $this->verification->lockedForSeconds($caller),
             'verified' => $unlocked,
             'unlockedUntil' => $unlocked ? $this->verification->unlockedUntil($request->session(), $caller) : null,
+            'callLogs' => CallLog::query()->where('caller_id', $caller->id)->with('staff:id,name')->latest('called_at')->latest('id')->limit(50)->get(),
         ]);
+    }
+
+    public function storeCallLog(Request $request, User $caller, AuditLogger $audit): RedirectResponse
+    {
+        $this->authorizeStaff($request);
+        $this->assertCaller($caller);
+        abort_unless($this->verification->isUnlocked($request->session(), $request->user(), $caller), 403);
+
+        $validated = $request->validate([
+            'direction' => ['required', Rule::in(CallLog::DIRECTIONS)],
+            'summary' => ['required', 'string', 'max:2000'],
+        ]);
+
+        $log = CallLog::query()->create([
+            'caller_id' => $caller->id,
+            'staff_id' => $request->user()->id,
+            'direction' => $validated['direction'],
+            'summary' => $validated['summary'],
+            'called_at' => now(),
+        ]);
+        $audit->record('caller.call_logged', $request->user(), $caller, ['call_log_id' => $log->id]);
+
+        return redirect()->to(route('callers.show', $caller).'#call-logs')->with('status', __('callers.call_log_saved'));
     }
 
     public function verify(Request $request, User $caller): RedirectResponse
