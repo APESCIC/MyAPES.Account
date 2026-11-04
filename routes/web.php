@@ -163,6 +163,7 @@ Route::middleware([
             ->name('verify');
         Route::post('/{caller}/end-call', [CallerController::class, 'endCall'])->whereNumber('caller')->name('end-call');
         Route::put('/{caller}/details', [CallerController::class, 'updateDetails'])->whereNumber('caller')->name('details.update');
+        Route::post('/{caller}/call-logs', [CallerController::class, 'storeCallLog'])->whereNumber('caller')->name('call-logs.store');
     });
     Route::get('/support/attachments/{attachment}', [SupportAttachmentController::class, 'download'])
         ->name('support.attachments.download');

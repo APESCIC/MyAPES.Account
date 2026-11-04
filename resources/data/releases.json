@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.49.3",
+    "date": "2026-11-04",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Call logs on caller profiles",
+    "summary": "Staff, volunteers and students can now log phone calls on a caller's page once the caller is verified. Callers never see these logs.",
+    "changes": [
+      "Add a Call log to the Callers page with the date, direction, a summary and who took the call.",
+      "Calls can only be logged after the caller passes the PIN check.",
+      "Call logs are visible only to staff roles and administrators, never to the caller.",
+      "Each new call log is recorded in the audit log."
+    ],
+    "affected_areas": [
+      "Staff",
+      "Account security"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch: adds a call log table and panel to the Callers page; no existing data changes.",
+    "validation": [
+      "New feature test for logging after verification, invalid input, display and keeping logs from the caller.",
+      "Caller verification, translation and authorisation tests.",
+      "Full PHPUnit suite and the MySQL contract job in CI."
+    ],
+    "known_limitations": [
+      "Call logs cannot be edited or deleted yet. Automatic removal of old logs follows in the next release."
+    ],
+    "rollback": "Redeploy the previous release package. The new table can stay; earlier releases ignore it.",
+    "provenance": "Milestone v0.49.3 Beta, issue #479 under epic #475, pull request #605.",
+    "references": [
+      {
+        "label": "Issue #479",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/479"
+      },
+      {
+        "label": "Pull request #605",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/605"
+      }
+    ]
+  },
+  {
     "version": "0.49.2",
     "date": "2026-11-04",
     "channel": "stable",
