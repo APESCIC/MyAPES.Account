@@ -57,6 +57,11 @@ return [
         'retention_days' => (int) env('AUDIT_LOG_RETENTION_DAYS', 180),
     ],
 
+    'call_logs' => [
+        // UK GDPR retention for staff call logs (#480); owner decision: 24 months.
+        'retention_months' => (int) env('CALL_LOG_RETENTION_MONTHS', 24),
+    ],
+
     'mail' => [
         'log_retention_days' => (int) env('MAIL_LOG_RETENTION_DAYS', 90),
     ],
