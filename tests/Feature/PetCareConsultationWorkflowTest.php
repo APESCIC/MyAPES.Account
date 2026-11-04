@@ -104,7 +104,13 @@ class PetCareConsultationWorkflowTest extends TestCase
             PetProfile::DOMAIN_PETCARE,
             'Invisible create boundary',
         );
-        foreach ([$shelterPet, $otherPet] as $ineligiblePet) {
+        $this->actingAs($owner)
+            ->post(route('petcare.consultations.store'), [
+                'pet_profile_id' => $shelterPet->id,
+                'subject' => 'Shared Shelter pet consultation',
+            ])
+            ->assertRedirect();
+        foreach ([$otherPet] as $ineligiblePet) {
             $this->actingAs($owner)
                 ->post(route('petcare.consultations.store'), [
                     'pet_profile_id' => $ineligiblePet->id,
@@ -129,10 +135,10 @@ class PetCareConsultationWorkflowTest extends TestCase
             'pet_profile_id' => 999999,
             'subject' => '',
         ])->assertForbidden();
-        $this->assertDatabaseCount('pet_care_consultations', 1);
+        $this->assertDatabaseCount('pet_care_consultations', 2);
     }
 
-    public function test_lists_and_routes_require_exact_visibility_and_linked_pet_care_domain(): void
+    public function test_lists_and_routes_require_exact_visibility_and_include_shared_shelter_pets(): void
     {
         $owner = User::factory()->create();
         $otherOwner = User::factory()->create();
@@ -152,7 +158,7 @@ class PetCareConsultationWorkflowTest extends TestCase
             ->assertSee('service-label apes-petcare">APES Pet Care Clinic</span>', false)
             ->assertSee($owned->subject)
             ->assertDontSee($other->subject)
-            ->assertDontSee($malformed->subject);
+            ->assertSee($malformed->subject);
         $this->get(route('petcare.consultations.show', $owned))
             ->assertOk()
             ->assertSee('service-label apes-petcare">APES Pet Care Clinic</span>', false);
@@ -163,7 +169,7 @@ class PetCareConsultationWorkflowTest extends TestCase
             ->assertOk()
             ->assertSee($owned->subject)
             ->assertSee($other->subject)
-            ->assertDontSee($malformed->subject);
+            ->assertSee($malformed->subject);
         $this->put(route('petcare.consultations.update', $other), [
             'notes' => 'Exact staff update-all notes.',
         ])->assertRedirect(route('petcare.consultations.show', $other));
@@ -177,11 +183,11 @@ class PetCareConsultationWorkflowTest extends TestCase
         ]);
         $staff = $staff->fresh();
         $this->get(route('petcare.consultations.show', $malformed))
-            ->assertNotFound();
+            ->assertOk();
         $this->put(route('petcare.consultations.update', $malformed), [
-            'notes' => 'Forbidden cross-domain mutation.',
-        ])->assertNotFound();
-        $this->assertSame('Consultation notes.', $malformed->fresh()->notes);
+            'notes' => 'Shared pet consultation notes.',
+        ])->assertRedirect(route('petcare.consultations.show', $malformed));
+        $this->assertSame('Shared pet consultation notes.', $malformed->fresh()->notes);
 
         $this->removeRolePermissions(AuthorizationProfile::ROLE_STAFF, [
             'pet-care-clinic.consultations.view-own',
@@ -929,7 +935,7 @@ class PetCareConsultationWorkflowTest extends TestCase
         $this->assertSame(0, $snapshot->closureSampleSize);
     }
 
-    public function test_summary_activity_attention_analytics_and_detector_share_domain_and_open_contracts(): void
+    public function test_summary_activity_attention_analytics_and_detector_share_open_contracts(): void
     {
         Carbon::setTestNow('2026-08-14 12:00:00');
         $owner = User::factory()->create();
@@ -939,7 +945,6 @@ class PetCareConsultationWorkflowTest extends TestCase
             ->create();
         $ownerPet = $this->petFor($owner, PetProfile::DOMAIN_PETCARE, 'Provider owner pet');
         $otherPet = $this->petFor($otherOwner, PetProfile::DOMAIN_PETCARE, 'Provider other pet');
-        $shelterPet = $this->petFor($owner, PetProfile::DOMAIN_SHELTER, 'Provider shelter pet');
         $open = $this->consultationFor($owner, $ownerPet, 'Provider strict open', [
             'assigned_to' => null,
             'created_at' => '2026-08-01 23:30:00',
@@ -962,10 +967,6 @@ class PetCareConsultationWorkflowTest extends TestCase
             'created_at' => '2026-08-02 01:00:00',
             'updated_at' => '2026-08-02 11:00:00',
             'closed_at' => null,
-        ]);
-        $foreign = $this->consultationFor($owner, $shelterPet, 'Provider foreign domain', [
-            'created_at' => '2026-08-02 00:15:00',
-            'updated_at' => '2026-08-02 11:30:00',
         ]);
         $this->consultationFor($owner, $ownerPet, 'Provider upper boundary', [
             'created_at' => '2026-08-03 00:00:00',
@@ -1045,12 +1046,6 @@ class PetCareConsultationWorkflowTest extends TestCase
         $this->assertSame(5, $summary->total);
         $this->assertSame(1, $summary->active);
         $this->assertSame('1 open', $summary->detail);
-        $this->assertNotContains($foreign->id, collect($ownerActivity)->pluck('recordId')->all());
-
-        $this->actingAs($staff);
-        foreach (['view', 'update', 'assign', 'close'] as $ability) {
-            $this->assertFalse(Gate::allows($ability, $foreign));
-        }
         $orphan = new PetCareConsultation([
             'pet_profile_id' => 999999,
             'user_id' => $owner->id,
@@ -1078,14 +1073,12 @@ class PetCareConsultationWorkflowTest extends TestCase
         $this->assertSame(0, $empty->closureSampleSize);
     }
 
-    public function test_disablement_ignores_foreign_rows_blocks_strict_open_rows_and_retains_data(): void
+    public function test_disablement_blocks_strict_open_rows_and_retains_data(): void
     {
         $superAdmin = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();
         $owner = User::factory()->create();
-        $shelterPet = $this->petFor($owner, PetProfile::DOMAIN_SHELTER, 'Lifecycle Shelter pet');
-        $foreign = $this->consultationFor($owner, $shelterPet, 'Lifecycle foreign consultation');
         $lifecycle = app(ModuleLifecycleManager::class);
         $installation = $this->installation();
         $this->actingAs($superAdmin);
@@ -1102,14 +1095,12 @@ class PetCareConsultationWorkflowTest extends TestCase
             (int) $installation->lock_version,
         );
         $this->assertFalse($disabled->enabled);
-        $this->assertDatabaseHas('pet_care_consultations', ['id' => $foreign->id]);
         $this->actingAs($owner)
             ->get(route('petcare.consultations.index'))
             ->assertNotFound();
         $this->get(route('petcare.index'))
             ->assertOk()
-            ->assertDontSee('data-module-instance="pet-care-clinic:consultations"', false)
-            ->assertDontSee($foreign->subject);
+            ->assertDontSee('data-module-instance="pet-care-clinic:consultations"', false);
 
         $this->actingAs($superAdmin);
         $enabled = $lifecycle->enable(

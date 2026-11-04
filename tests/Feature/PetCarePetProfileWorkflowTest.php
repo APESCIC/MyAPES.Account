@@ -137,7 +137,7 @@ class PetCarePetProfileWorkflowTest extends TestCase
         $this->assertSame([], Storage::disk('public')->allFiles('pet-profiles'));
     }
 
-    public function test_consultation_index_default_pet_profile_scope_keeps_owned_pet_care_choices_only(): void
+    public function test_consultation_index_offers_owned_pets_from_the_shared_pool_only(): void
     {
         $owner = User::factory()->create();
         $other = User::factory()->create();
@@ -154,7 +154,7 @@ class PetCarePetProfileWorkflowTest extends TestCase
             ->assertOk()
             ->assertSee($owned->name)
             ->assertDontSee($foreign->name)
-            ->assertDontSee($shelter->name);
+            ->assertSee($shelter->name);
     }
 
     public function test_visibility_and_record_access_use_only_exact_pet_care_permissions(): void
@@ -174,7 +174,7 @@ class PetCarePetProfileWorkflowTest extends TestCase
             ->assertSee('service-label apes-petcare">APES Pet Care Clinic</span>', false)
             ->assertSee($owned->name)
             ->assertDontSee($foreign->name)
-            ->assertDontSee($shelter->name);
+            ->assertSee($shelter->name);
         $this->get(route('petcare.pets.show', $owned))
             ->assertOk()
             ->assertSee('service-label apes-petcare">APES Pet Care Clinic</span>', false);
@@ -376,7 +376,10 @@ class PetCarePetProfileWorkflowTest extends TestCase
         );
     }
 
-    public function test_foreign_domain_records_return_404_before_show_update_or_photo_authorization(): void
+    /**
+     * Shared pets (#482): the module a pet is opened in decides access, not where it was added.
+     */
+    public function test_a_shelter_pet_follows_pet_care_permissions_in_pet_care_and_shelter_permissions_in_shelter(): void
     {
         Storage::fake('public');
         $owner = User::factory()->create();
@@ -406,15 +409,13 @@ class PetCarePetProfileWorkflowTest extends TestCase
         $this->assertFalse($owner->can('shelter-rescue.pet-profiles.update-own'));
 
         $this->get(route('petcare.pets.show', $shelter))
-            ->assertNotFound();
-        $this->put(
-            route('petcare.pets.update', $shelter),
-            [
-                ...$this->validUpdate('Cross-domain mutation'),
-                'photo' => $this->image('forbidden-cross-domain.png'),
-            ],
-        )->assertNotFound();
+            ->assertOk()
+            ->assertSee('Private Shelter profile');
         $this->get(route('petcare.pets.photo', $shelter))
+            ->assertOk();
+        $this->get(route('shelter.pets.show', $shelter))
+            ->assertForbidden();
+        $this->get(route('shelter.pets.photo', $shelter))
             ->assertNotFound();
 
         $this->assertSame('Private Shelter profile', $shelter->fresh()->name);

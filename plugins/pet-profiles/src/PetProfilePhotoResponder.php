@@ -9,10 +9,9 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class PetProfilePhotoResponder
 {
-    public function response(PetProfile $pet, string $expectedDomain): StreamedResponse
+    public function response(PetProfile $pet, string $domain): StreamedResponse
     {
-        abort_unless($pet->service_domain === $expectedDomain, 404);
-        abort_unless(Gate::allows('view', $pet), 404);
+        abort_unless(Gate::allows('view', [$pet, $domain]), 404);
 
         $path = $pet->photo_path;
         abort_unless(

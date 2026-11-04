@@ -37,7 +37,6 @@ class PetProfileController extends Controller
         }
 
         $query = PetProfile::query()
-            ->where('service_domain', $area->serviceDomain)
             ->visibleTo($user, $area->serviceDomain)
             ->latest();
 
@@ -113,7 +112,7 @@ class PetProfileController extends Controller
     public function show(PetProfile $pet): View
     {
         $area = $this->area();
-        $this->authorizeDomainPet($pet, $area->serviceDomain, 'view');
+        Gate::authorize('view', [$pet, $area->serviceDomain]);
 
         if ($area->showOwnerMeta) {
             $pet->loadMissing('user');
@@ -121,7 +120,7 @@ class PetProfileController extends Controller
 
         return view('pet-profiles::pets.show', [
             'pet' => $pet,
-            'canUpdatePet' => Gate::allows('update', $pet),
+            'canUpdatePet' => Gate::allows('update', [$pet, $area->serviceDomain]),
             'area' => $area,
         ]);
     }
@@ -142,7 +141,7 @@ class PetProfileController extends Controller
         AuditLogger $auditLogger,
     ): RedirectResponse {
         $area = $this->area();
-        $this->authorizeDomainPet($pet, $area->serviceDomain, 'update');
+        Gate::authorize('update', [$pet, $area->serviceDomain]);
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -193,15 +192,4 @@ class PetProfileController extends Controller
         }
     }
 
-    private function authorizeDomainPet(
-        PetProfile $pet,
-        string $domain,
-        string $ability,
-    ): void {
-        if ($pet->service_domain !== $domain) {
-            abort(404);
-        }
-
-        Gate::authorize($ability, $pet);
-    }
 }

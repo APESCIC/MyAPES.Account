@@ -256,7 +256,7 @@ class ShelterPetProfileWorkflowTest extends TestCase
         $carePet = PetProfile::query()->create([
             'user_id' => $owner->id,
             'service_domain' => PetProfile::DOMAIN_PETCARE,
-            'name' => 'Wrong domain photo',
+            'name' => 'Shared Pet Care photo',
             'species' => 'cat',
             'sex' => 'unknown',
             'neutering_status' => 'unknown',
@@ -272,8 +272,7 @@ class ShelterPetProfileWorkflowTest extends TestCase
 
         $responses = [
             'wrong owner' => $this->actingAs($other)->get(route('shelter.pets.photo', $pet)),
-            'wrong domain' => $this->actingAs($owner)->get(route('shelter.pets.photo', $carePet)),
-            'malformed path' => $this->get(route('shelter.pets.photo', $malformed)),
+            'malformed path' => $this->actingAs($owner)->get(route('shelter.pets.photo', $malformed)),
             'missing file' => $this->get(route('shelter.pets.photo', $missingFile)),
             'absent path' => $this->get(route('shelter.pets.photo', $absentPath)),
             'direct storage' => $this->get('/storage/'.$validPath),
@@ -286,6 +285,9 @@ class ShelterPetProfileWorkflowTest extends TestCase
                 $response->getContent(),
             );
         }
+
+        // Shared pets (#482): the owner's Pet Care pet is also theirs in Shelter.
+        $this->actingAs($owner)->get(route('shelter.pets.photo', $carePet))->assertOk();
     }
 
     public function test_pet_care_photo_route_preserves_legacy_owner_authorization(): void

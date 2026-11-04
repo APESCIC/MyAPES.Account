@@ -38,13 +38,7 @@ class PetCareConsultation extends Model
 
     public function scopeForPetCareDomain(Builder $query): Builder
     {
-        return $query->whereHas(
-            'petProfile',
-            static fn (Builder $pets): Builder => $pets->where(
-                'service_domain',
-                PetProfile::DOMAIN_PETCARE,
-            ),
-        );
+        return $query->whereHas('petProfile');
     }
 
     public function scopeVisibleTo(Builder $query, User $user): Builder

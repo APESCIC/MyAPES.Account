@@ -18,13 +18,10 @@ use Plugins\Cases\Models\CaseUpdate;
 use Plugins\Cases\Models\ShelterCase;
 use Plugins\Cases\Notifications\ApesCicCaseUpdatedNotification;
 use Plugins\Cases\Notifications\ShelterCaseUpdatedNotification;
-use Plugins\PetProfiles\Contracts\PetProfilesContract;
-
 class CaseUpdateController extends Controller
 {
     public function __construct(
         private readonly ModuleContext $moduleContext,
-        private readonly PetProfilesContract $petProfiles,
     ) {}
 
     public function store(
@@ -36,15 +33,11 @@ class CaseUpdateController extends Controller
         $area = $this->area();
         $prefix = $area->permissionPrefix();
         if ($area->isShelter()) {
-            $domain = $this->petProfiles->domainForModule($area->moduleSlug);
             $case = ShelterCase::query()
                 ->forSubCore($area->moduleSlug)
                 ->visibleTo($request->user(), $area->moduleSlug)
                 ->whereKey($case->getKey())
-                ->whereHas(
-                    'petProfile',
-                    static fn ($pets) => $pets->where('service_domain', $domain),
-                )
+                ->whereHas('petProfile')
                 ->firstOrFail();
         } else {
             abort_unless(

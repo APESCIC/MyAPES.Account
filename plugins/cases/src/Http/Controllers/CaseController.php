@@ -497,10 +497,7 @@ class CaseController extends Controller
         $query = ShelterCase::query()
             ->forSubCore($area->moduleSlug)
             ->visibleTo($user, $area->moduleSlug)
-            ->whereHas(
-                'petProfile',
-                static fn ($pets) => $pets->where('service_domain', $domain),
-            )
+            ->whereHas('petProfile')
             ->with(['petProfile', 'assignedTo'])
             ->latest();
 
@@ -533,7 +530,7 @@ class CaseController extends Controller
             $domain,
             (int) $selectedPet['pet_profile_id'],
         );
-        Gate::authorize('view', $pet);
+        Gate::authorize('view', [$pet, $domain]);
         Gate::authorize('createShelterCase', $pet);
 
         $validated = $request->validate([
@@ -711,16 +708,12 @@ class CaseController extends Controller
     private function visibleShelterCase(ShelterCase $case, User $user): ShelterCase
     {
         $area = $this->area();
-        $domain = $this->petProfiles->domainForModule($area->moduleSlug);
 
         return ShelterCase::query()
             ->forSubCore($area->moduleSlug)
             ->visibleTo($user, $area->moduleSlug)
             ->whereKey($case->getKey())
-            ->whereHas(
-                'petProfile',
-                static fn ($pets) => $pets->where('service_domain', $domain),
-            )
+            ->whereHas('petProfile')
             ->firstOrFail();
     }
 

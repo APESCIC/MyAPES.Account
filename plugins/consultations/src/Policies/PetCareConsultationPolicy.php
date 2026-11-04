@@ -5,7 +5,6 @@ namespace Plugins\Consultations\Policies;
 use App\Core\Accounts\User;
 use Plugins\Consultations\Models\PetCareConsultation;
 use App\Services\ModuleState;
-use Plugins\PetProfiles\Models\PetProfile;
 
 class PetCareConsultationPolicy
 {
@@ -64,9 +63,11 @@ class PetCareConsultationPolicy
         return $this->modules->enabled('pet-care-clinic', 'consultations');
     }
 
+    /**
+     * Pets are shared across Shelter and Pet Care (#482), so any linked pet counts.
+     */
     private function isPetCare(PetCareConsultation $consultation): bool
     {
-        return $consultation->petProfile?->service_domain
-            === PetProfile::DOMAIN_PETCARE;
+        return $consultation->petProfile !== null;
     }
 }
