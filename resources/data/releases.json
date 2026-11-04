@@ -1,5 +1,48 @@
 [
   {
+    "version": "0.48.3",
+    "date": "2026-11-04",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Explain the Plugin alerts count on Admin overview",
+    "summary": "The Plugin alerts number on the Admin overview now counts only problems that need action, and links to a list explaining each one.",
+    "changes": [
+      "Plugin alerts now counts only plugins that are turned off or missing from the release.",
+      "Clicking the number opens a list with the reason for each alert and a link to fix it in Plugins.",
+      "Plugins that are not made for a module, or that are in use, are listed separately as notes for information."
+    ],
+    "affected_areas": [
+      "Admin"
+    ],
+    "categories": [
+      "fixed"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch: fixes a misleading count on the Admin overview, with no data change.",
+    "validation": [
+      "New feature test for a healthy install, a turned-off plugin, reasons and fix links.",
+      "Admin and dashboard tests.",
+      "Full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "None."
+    ],
+    "rollback": "Redeploy the previous release package. No data changes.",
+    "provenance": "Milestone v0.48.3 Beta, issue #474 under epic #470, pull request #601.",
+    "references": [
+      {
+        "label": "Issue #474",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/474"
+      },
+      {
+        "label": "Pull request #601",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/601"
+      }
+    ]
+  },
+  {
     "version": "0.48.2",
     "date": "2026-11-04",
     "channel": "stable",
