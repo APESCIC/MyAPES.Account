@@ -5,14 +5,17 @@ namespace App\Http\Controllers\Staff;
 use App\Core\Accounts\CallerVerificationService;
 use App\Core\Accounts\User;
 use App\Http\Controllers\Controller;
+use App\Services\AuditLogger;
 use App\Services\AuthorizationProfile;
+use App\Services\UkPhoneNumber;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 /**
- * Staff, volunteers, students and administrators find a caller and check
- * their identity with two PIN digits (#477).
+ * Staff, volunteers, students and administrators find a caller, check
+ * their identity with two PIN digits (#477), and only then edit their
+ * details until End call or the 60-minute timeout (#478).
  */
 class CallerController extends Controller
 {
@@ -48,12 +51,15 @@ class CallerController extends Controller
     {
         $this->authorizeStaff($request);
         $this->assertCaller($caller);
+        $unlocked = $this->verification->isUnlocked($request->session(), $request->user(), $caller);
 
         return view('callers.show', [
             'caller' => $caller,
-            'positions' => $this->verification->positions($request->session(), $caller),
+            'details' => $caller->profile,
+            'positions' => $unlocked ? null : $this->verification->positions($request->session(), $caller),
             'lockedForSeconds' => $this->verification->lockedForSeconds($caller),
-            'verified' => $request->session()->has($this->verification->sessionKey($caller, 'verified_at')),
+            'verified' => $unlocked,
+            'unlockedUntil' => $unlocked ? $this->verification->unlockedUntil($request->session(), $caller) : null,
         ]);
     }
 
@@ -69,10 +75,6 @@ class CallerController extends Controller
 
         $result = $this->verification->attempt($request->session(), $request->user(), $caller, $digits);
 
-        if ($result === CallerVerificationService::RESULT_VERIFIED) {
-            $request->session()->put($this->verification->sessionKey($caller, 'verified_at'), now()->getTimestamp());
-        }
-
         return redirect()
             ->route('callers.show', $caller)
             ->with('status', match ($result) {
@@ -80,6 +82,48 @@ class CallerController extends Controller
                 CallerVerificationService::RESULT_LOCKED => __('callers.result.locked'),
                 default => __('callers.result.failed'),
             });
+    }
+
+    public function endCall(Request $request, User $caller): RedirectResponse
+    {
+        $this->authorizeStaff($request);
+        $this->assertCaller($caller);
+
+        $this->verification->endCall($request->session(), $request->user(), $caller);
+
+        return redirect()->route('callers.show', $caller)->with('status', __('callers.call_ended'));
+    }
+
+    public function updateDetails(Request $request, User $caller, UkPhoneNumber $phones, AuditLogger $audit): RedirectResponse
+    {
+        $this->authorizeStaff($request);
+        $this->assertCaller($caller);
+        abort_unless($this->verification->isUnlocked($request->session(), $request->user(), $caller), 403);
+
+        $request->merge([
+            'mobile_number' => $phones->normalize($request->input('mobile_number'), 'mobile_number'),
+            'landline_number' => $phones->normalize($request->input('landline_number'), 'landline_number', false),
+        ]);
+        $validated = $request->validate([
+            'address_line_1' => ['required', 'string', 'max:255'],
+            'address_line_2' => ['nullable', 'string', 'max:255'],
+            'town_city' => ['required', 'string', 'max:255'],
+            'county' => ['nullable', 'string', 'max:255'],
+            'postcode' => ['required', 'string', 'max:16', 'regex:/^[A-Za-z]{1,2}\d[A-Za-z\d]?\s*\d[A-Za-z]{2}$/'],
+            'mobile_number' => ['required', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
+            'landline_number' => ['nullable', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
+        ]);
+        $validated['postcode'] = strtoupper((string) preg_replace('/\s+/', ' ', trim($validated['postcode'])));
+        $validated['phone'] = $validated['mobile_number'];
+
+        $profile = $caller->profile()->firstOrNew(['user_id' => $caller->id]);
+        $profile->fill($validated);
+        $changed = array_keys($profile->getDirty());
+        $profile->save();
+
+        $audit->record('caller.details_updated', $request->user(), $caller, ['fields' => $changed]);
+
+        return redirect()->route('callers.show', $caller)->with('status', __('callers.details_saved'));
     }
 
     private function authorizeStaff(Request $request): void
