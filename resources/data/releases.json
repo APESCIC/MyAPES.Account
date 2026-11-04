@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.51.0",
+    "date": "2026-11-04",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Staff and admin help pages",
+    "summary": "Staff and admin help pages. The staff guide covers more of the app, and administrators get a new admin guide.",
+    "changes": [
+      "The staff guide now explains shared pet records, verifying a caller, call logs and the description editor.",
+      "A new admin guide explains the Admin area: overview and plugin alerts, people and access, modules and versions, managed lists, recruitment forms, emails, maintenance and security settings.",
+      "The admin guide is in a new Support group at the end of the Admin menu.",
+      "Each help section has a fixed link, ready for the guided tour."
+    ],
+    "affected_areas": [
+      "Help",
+      "Navigation"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Minor: adds the admin guide and opens the Bookings and guided tour milestone.",
+    "validation": [
+      "New feature test for staff guide sections, admin guide access and the Admin menu link.",
+      "Navigation, translation and route authorisation tests.",
+      "Full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "The guided tour that links to these sections arrives in a later release."
+    ],
+    "rollback": "Redeploy the previous release package. The admin guide and the new staff guide sections are removed; no data changes.",
+    "provenance": "Milestone v0.51.2 Beta, issue #490 under epic #487, pull request #624.",
+    "references": [
+      {
+        "label": "Issue #490",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/490"
+      },
+      {
+        "label": "Pull request #624",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/624"
+      }
+    ]
+  },
+  {
     "version": "0.50.4",
     "date": "2026-11-04",
     "channel": "stable",

@@ -10,6 +10,7 @@ use App\Core\Extensions\Navigation\PublicNavigationRegistry;
 use App\Core\Extensions\Navigation\StaffPluginNavigationItem;
 use App\Core\Extensions\Navigation\StaffPluginNavigationRegistry;
 use App\Core\Extensions\Plugins\PluginRegistry;
+use App\Http\Controllers\HelpController;
 use App\Modules\ModuleNavigationItem;
 use App\Modules\SubCoreNavigation;
 use App\Services\AdminSearchCatalogue;
@@ -272,6 +273,9 @@ final class WorkspaceNavigation
                 ['admin.emails', __('admin.nav.emails'), route('admin.emails.index'), 'mail', ['admin.emails.view'], ['admin.emails.*']],
                 ['admin.maintenance', __('admin.nav.maintenance'), route('admin.maintenance.index'), 'circle-pause', ['admin.maintenance.manage'], ['admin.maintenance.*']],
             ],
+            'support' => [
+                ['help.admin', __('help.nav.admin_guide'), route('help.admin'), 'book-open', HelpController::ADMIN_GUIDE_ABILITIES, ['help.admin']],
+            ],
         ];
 
         $headings = [
@@ -279,6 +283,7 @@ final class WorkspaceNavigation
             'people' => __('workspace.groups.people'),
             'modules' => __('workspace.groups.modules'),
             'system' => __('workspace.groups.system'),
+            'support' => __('workspace.groups.support'),
         ];
 
         $groups = [];
