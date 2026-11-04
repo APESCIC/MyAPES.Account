@@ -122,7 +122,6 @@ class ShelterCaseWorkflowTest extends TestCase
         ])->assertSessionHasErrors('pet_profile_id');
         foreach ([
             999999 => 'Missing pet case',
-            $petCarePet->id => 'Cross-domain case',
             $otherPet->id => 'Non-visible owner case',
         ] as $petId => $title) {
             $response = $this->post(route('shelter.cases.store'), [
@@ -163,6 +162,17 @@ class ShelterCaseWorkflowTest extends TestCase
                 ->firstOrFail()
                 ->context['status'],
         );
+
+        // Shared pets (#482): the owner's Pet Care pet can be linked to a Shelter case.
+        $this->post(route('shelter.cases.store'), [
+            'pet_profile_id' => $petCarePet->id,
+            'case_type' => 'rescue',
+            'title' => 'Shared Pet Care pet case',
+        ])->assertRedirect();
+        $this->assertDatabaseHas('shelter_cases', [
+            'title' => 'Shared Pet Care pet case',
+            'pet_profile_id' => $petCarePet->id,
+        ]);
     }
 
     public function test_shelter_case_update_route_has_instance_defaults_and_no_delete_route(): void
@@ -216,7 +226,7 @@ class ShelterCaseWorkflowTest extends TestCase
             'case_type' => 'rescue',
             'status' => 'open',
             'title' => 'Pet Care linked Shelter case',
-            'details' => 'Must be hidden.',
+            'details' => 'Shared pets (#482) keep this case visible to Shelter staff.',
         ]);
         $missingPetCase = $this->shelterCaseFor($owner, 'Missing pet case');
         PetProfile::query()
@@ -251,7 +261,7 @@ class ShelterCaseWorkflowTest extends TestCase
             ->get(route('shelter.cases.index'))
             ->assertOk()
             ->assertSee($foreignOwnerCase->title)
-            ->assertDontSee($crossDomainCase->title)
+            ->assertSee($crossDomainCase->title)
             ->assertDontSee($missingPetCase->title)
             ->assertDontSee($apesCase->title);
         $this->get(route('shelter.cases.show', $foreignOwnerCase))

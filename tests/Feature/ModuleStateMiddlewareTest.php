@@ -171,7 +171,10 @@ class ModuleStateMiddlewareTest extends TestCase
             ->assertNotFound();
     }
 
-    public function test_shared_pet_profile_bindings_cannot_cross_sub_core_boundaries(): void
+    /**
+     * Pets are one shared pool (#482, decision D4): a pet opens in either module.
+     */
+    public function test_shared_pet_profile_bindings_open_in_both_modules(): void
     {
         $user = User::factory()->create();
         $shelterPet = PetProfile::query()->create([
@@ -193,9 +196,11 @@ class ModuleStateMiddlewareTest extends TestCase
 
         $this->actingAs($user)
             ->get(route('shelter.pets.show', $petCarePet))
-            ->assertNotFound();
+            ->assertOk()
+            ->assertSee('Pet Care profile');
         $this->actingAs($user)
             ->get(route('petcare.pets.show', $shelterPet))
-            ->assertNotFound();
+            ->assertOk()
+            ->assertSee('Shelter profile');
     }
 }

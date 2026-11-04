@@ -18,9 +18,7 @@ final class PetProfiles implements PetProfilesContract
 
     public function visibleQuery(User $user, string $serviceDomain): Builder
     {
-        return PetProfile::query()
-            ->where('service_domain', $serviceDomain)
-            ->visibleTo($user, $serviceDomain);
+        return PetProfile::query()->visibleTo($user, $serviceDomain);
     }
 
     public function visibleOrdered(User $user, string $serviceDomain): Collection
