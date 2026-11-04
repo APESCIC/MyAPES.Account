@@ -2,10 +2,12 @@
 
 namespace App\Core\Providers;
 
+use App\Core\Mail\BrandedMailChannel;
 use App\Core\Mail\CoreMailTemplates;
 use App\Core\Mail\MailCopyOverrides;
 use App\Core\Mail\MailTemplateRegistry;
 use App\Core\Mail\RecordOutboundMail;
+use Illuminate\Notifications\Channels\MailChannel;
 use Illuminate\Notifications\Events\NotificationFailed;
 use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Queue\Events\JobProcessing;
@@ -18,6 +20,7 @@ class CoreMailServiceProvider extends ServiceProvider
     {
         $this->app->singleton(MailTemplateRegistry::class);
         $this->app->singleton(MailCopyOverrides::class);
+        $this->app->bind(MailChannel::class, BrandedMailChannel::class);
     }
 
     public function boot(): void

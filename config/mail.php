@@ -125,6 +125,13 @@ return [
     |
     */
 
+    'markdown' => [
+        'theme' => 'default',
+        'paths' => [
+            resource_path('views/vendor/mail'),
+        ],
+    ],
+
     'reply_to' => [
         'address' => env('MAIL_REPLY_TO_ADDRESS', 'no-reply@apes.org.uk'),
         'name' => env('MAIL_REPLY_TO_NAME', 'MyAPES Account (do not reply)'),

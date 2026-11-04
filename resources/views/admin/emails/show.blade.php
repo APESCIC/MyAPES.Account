@@ -62,6 +62,15 @@
                             <label for="mail-copy-intro">{{ __('admin.emails.copy_intro') }}</label>
                             <textarea id="mail-copy-intro" name="intro" maxlength="1000" placeholder="{{ $shippedIntro }}">{{ old('intro', $override?->intro) }}</textarea>
                         @endif
+                        <label for="mail-copy-body">{{ __('admin.emails.copy_body') }}</label>
+                        <p class="muted" id="mail-copy-body-help">{{ __('admin.emails.copy_body_help') }}</p>
+                        <x-rich-text-editor id="mail-copy-body" name="body" :value="old('body', $override?->body)" aria-describedby="mail-copy-body-help" />
+                        <p class="muted" data-mail-merge-fields>
+                            {{ __('admin.emails.copy_merge_fields') }}
+                            @foreach($mergeFields as $field)
+                                <code>:{{ $field }}</code>
+                            @endforeach
+                        </p>
                         <div class="actions">
                             <button type="submit">{{ __('admin.emails.copy_save') }}</button>
                         </div>

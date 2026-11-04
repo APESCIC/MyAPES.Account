@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Admin-edited subject and intro wording for one template and locale (#361).
- * Plain text only; the Blade view and lang files stay the source of truth.
+ * Subject and intro are plain text; body is sanitised rich text (#486).
  */
-#[Fillable(['template_key', 'locale', 'subject', 'intro', 'lock_version', 'updated_by'])]
+#[Fillable(['template_key', 'locale', 'subject', 'intro', 'body', 'lock_version', 'updated_by'])]
 class MailTemplateOverride extends Model
 {
     public function editor(): BelongsTo

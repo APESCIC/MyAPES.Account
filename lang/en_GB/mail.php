@@ -3,6 +3,7 @@
 return [
     'brand' => [
         'greeting' => 'Hello :name,',
+        'custom_body_action' => 'Open MyAPES Account',
         'greeting_fallback' => 'there',
         'action_fallback' => 'If the button does not work, open this address in your browser: :url',
         'footer' => [
