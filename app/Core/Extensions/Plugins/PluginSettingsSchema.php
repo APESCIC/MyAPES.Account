@@ -11,6 +11,8 @@ final readonly class PluginSettingsSchema
 
     public const SCHEMA_RECRUITMENT_BOARD = 'recruitment_board';
 
+    public const SCHEMA_SERVICE_AREAS = 'service_areas';
+
     public const SCHEMA_NONE = 'none';
 
     public function __construct(

@@ -8,6 +8,10 @@ use App\Core\Extensions\Modules\ModuleStaffArea;
  *
  * Live prefix `/petcare` and route names `petcare.*` stay stable.
  */
+$defaults = is_file(__DIR__.'/config/plugin-defaults.php')
+    ? require __DIR__.'/config/plugin-defaults.php'
+    : [];
+
 return new ModuleManifest(
     slug: 'pet-care-clinic',
     name: 'APES Pet Care Clinic',
@@ -19,6 +23,7 @@ return new ModuleManifest(
     sortOrder: 30,
     staffArea: new ModuleStaffArea('petcare.index'),
     plugins: ['pet-profiles', 'consultations', 'tickets'],
+    pluginDefaults: is_array($defaults) ? $defaults : [],
     hubView: 'sub-cores.show',
     packagePath: __DIR__,
 );

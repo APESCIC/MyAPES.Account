@@ -34,19 +34,21 @@ class TicketsServiceProvider extends PluginServiceProvider
 
         Gate::policy(SupportTicket::class, SupportTicketPolicy::class);
 
-        app(ManagedListRegistry::class)->register('apes-cic', 'tickets', 'service_areas', static fn (): ManagedListDefinition => new ManagedListDefinition(
-            subCoreKey: 'apes-cic',
-            moduleKey: 'tickets',
-            listKey: 'service_areas',
-            label: __('tickets::settings.managed_list_label'),
-            usageCount: static fn (string $key): int => SupportTicket::query()
-                ->where('sub_core_key', 'apes-cic')
-                ->where('service_area', $key)
-                ->count(),
-            newItemDefaults: ['subcategories' => [
-                ['key' => 'general', 'label' => 'General', 'requires_website' => false, 'allows_attachments' => false],
-            ]],
-        ));
+        foreach (['apes-cic', 'shelter-rescue', 'pet-care-clinic'] as $module) {
+            app(ManagedListRegistry::class)->register($module, 'tickets', 'service_areas', static fn (): ManagedListDefinition => new ManagedListDefinition(
+                subCoreKey: $module,
+                moduleKey: 'tickets',
+                listKey: 'service_areas',
+                label: __('tickets::settings.managed_list_label'),
+                usageCount: static fn (string $key): int => SupportTicket::query()
+                    ->where('sub_core_key', $module)
+                    ->where('service_area', $key)
+                    ->count(),
+                newItemDefaults: $module === 'apes-cic' ? ['subcategories' => [
+                    ['key' => 'general', 'label' => 'General', 'requires_website' => false, 'allows_attachments' => false],
+                ]] : [],
+            ));
+        }
 
         app(PublicNavigationRegistry::class)->contribute(static fn (): array => [
             new PublicNavigationItem(
@@ -124,8 +126,18 @@ class TicketsServiceProvider extends PluginServiceProvider
                     groupKey: 'service_areas',
                     groupLabel: 'Service areas',
                 ),
-                'shelter-rescue' => new PluginSettingsSchema(supportsSettings: false),
-                'pet-care-clinic' => new PluginSettingsSchema(supportsSettings: false),
+                'shelter-rescue' => new PluginSettingsSchema(
+                    supportsSettings: true,
+                    schema: PluginSettingsSchema::SCHEMA_SERVICE_AREAS,
+                    groupKey: 'service_areas',
+                    groupLabel: 'Service areas',
+                ),
+                'pet-care-clinic' => new PluginSettingsSchema(
+                    supportsSettings: true,
+                    schema: PluginSettingsSchema::SCHEMA_SERVICE_AREAS,
+                    groupKey: 'service_areas',
+                    groupLabel: 'Service areas',
+                ),
             ],
             translationNamespace: 'tickets',
             searchKeywordsKey: 'tickets::plugin.keywords',

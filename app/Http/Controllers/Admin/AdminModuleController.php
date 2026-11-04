@@ -44,6 +44,7 @@ class AdminModuleController extends Controller
         $view = match ($descriptor->schema) {
             ModuleSettingsDescriptor::SCHEMA_RECRUITMENT_BOARD => 'admin.modules.settings-recruitment',
             ModuleSettingsDescriptor::SCHEMA_WEBSITES_CATEGORIES => 'admin.modules.settings',
+            ModuleSettingsDescriptor::SCHEMA_SERVICE_AREAS => 'admin.modules.settings-service-areas',
             default => abort(404),
         };
 

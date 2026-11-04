@@ -16,7 +16,7 @@ class TicketCategoryResolver
     /** @return array<string, mixed> */
     public function settingsFor(string $subCoreKey): array
     {
-        if ($subCoreKey !== 'apes-cic') {
+        if (! $this->settings->supportsSettings('tickets', $subCoreKey)) {
             return [];
         }
 

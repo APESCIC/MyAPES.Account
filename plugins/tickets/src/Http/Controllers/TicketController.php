@@ -89,6 +89,7 @@ class TicketController extends Controller
             'priorities' => self::createPrioritiesFor($user, $prefix),
             'ticketService' => $ticketService,
             'categoryResolver' => $this->categories,
+            'subCoreKey' => $instance->subCore->key,
         ]);
     }
 
