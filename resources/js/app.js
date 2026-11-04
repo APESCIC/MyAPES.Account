@@ -1,9 +1,11 @@
 import {
     ArrowRight,
     BadgeCheck,
+    BookOpen,
     Briefcase,
     BriefcaseBusiness,
     Building2,
+    Calendar,
     ChevronRight,
     Circle,
     CircleHelp,
@@ -55,9 +57,11 @@ import { initToasts } from './workspace/toasts.js';
 const icons = {
     ArrowRight,
     BadgeCheck,
+    BookOpen,
     Briefcase,
     BriefcaseBusiness,
     Building2,
+    Calendar,
     ChevronRight,
     Circle,
     CircleHelp,

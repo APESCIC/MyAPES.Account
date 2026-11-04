@@ -106,6 +106,7 @@ final class WorkspaceNavigation
             $support[] = new NavItem('help.staff', __('help.nav.staff_guide'), route('help.staff'), 'book-open', ['help.staff'], $this->words('help.keywords.staff_guide'));
         }
 
+        $support[] = $this->bookingsItem();
         $support[] = new NavItem('change-log', __('workspace.nav.change_log'), route('change-log.index'), 'scroll-text', ['change-log.*'], $this->words('workspace.keywords.change_log'));
 
         foreach ($this->publicPlugins->visibleTo($user) as $item) {
@@ -308,6 +309,7 @@ final class WorkspaceNavigation
     private function publicPanel(): NavPanel
     {
         $explore = array_map(fn (PublicNavigationItem $item): NavItem => $this->publicItem($item), $this->publicPlugins->visibleTo(null));
+        $explore[] = $this->bookingsItem();
 
         return new NavPanel(NavPanel::PUBLIC, __('workspace.panels.public'), $this->withoutEmptyGroups([
             new NavGroup('explore', __('workspace.groups.explore'), $explore),
@@ -321,6 +323,11 @@ final class WorkspaceNavigation
                 new NavItem('change-log', __('workspace.nav.change_log'), route('change-log.index'), 'scroll-text', ['change-log.*'], $this->words('workspace.keywords.change_log')),
             ]),
         ]));
+    }
+
+    private function bookingsItem(): NavItem
+    {
+        return new NavItem('bookings', __('bookings.nav'), route('bookings.index'), 'calendar', ['bookings.*'], $this->words('bookings.keywords'));
     }
 
     private function publicItem(PublicNavigationItem $item): NavItem

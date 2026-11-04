@@ -110,7 +110,7 @@ return [
         ],
         'security' => [
             'heading' => 'Security settings',
-            'body' => 'The app sends security headers and a Content Security Policy. The policy can run in report-only mode first, so blocked content is logged without breaking pages.',
+            'body' => 'The app sends security headers and enforces a Content Security Policy, so the browser blocks scripts and frames from sites the app does not trust. Every blocked item is logged. Setting CSP_ENFORCE=false switches back to report-only while you investigate.',
             'editor' => 'The description editor needs its API key in the app environment. Without the key, description fields fall back to a plain text box.',
         ],
     ],

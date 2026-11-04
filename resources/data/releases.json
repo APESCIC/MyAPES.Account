@@ -1,5 +1,56 @@
 [
   {
+    "version": "0.51.1",
+    "date": "2026-11-04",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Microsoft Bookings pages and enforced CSP",
+    "summary": "Book APES meetings and appointments from inside the app, and the security policy now blocks content from untrusted sites.",
+    "changes": [
+      "New Bookings pages for APES, APES Shelter and Rescue and APES Pet Care Clinic, each showing the Microsoft Bookings form.",
+      "Each Bookings page has a Schedule online button that opens Microsoft Bookings in a new tab if the form does not load.",
+      "Bookings is in the public menu, the signed-in Support menu and Ctrl K search.",
+      "The Content Security Policy is now enforced instead of report-only.",
+      "Email template previews and the description editor are allowed by the policy.",
+      "The Staff guide and Admin guide menu items now show their icons."
+    ],
+    "affected_areas": [
+      "Bookings",
+      "Security",
+      "Navigation"
+    ],
+    "categories": [
+      "added",
+      "security"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch within the 0.51 milestone: adds three static pages and turns on an existing security setting.",
+    "validation": [
+      "New feature test for the three Bookings pages, the fallback link, the menus and unknown pages.",
+      "Security header tests updated for enforcement.",
+      "Clean report-only run on the live site and local signed-in pages before enforcing.",
+      "Full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "Bookings made on Microsoft Bookings are not copied into the app."
+    ],
+    "rollback": "Set CSP_ENFORCE=false on the app to return to report-only without a release, or redeploy the previous release package to remove the Bookings pages. No data changes.",
+    "provenance": "Milestone v0.51.2 Beta, issue #488 under epic #487, pull request #631.",
+    "references": [
+      {
+        "label": "Issue #488",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/488"
+      },
+      {
+        "label": "Pull request #631",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/631"
+      }
+    ]
+  },
+  {
     "version": "0.51.0",
     "date": "2026-11-04",
     "channel": "stable",
