@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.48.2",
+    "date": "2026-11-04",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Plugin and module version management",
+    "summary": "Admins can now see the version of every module and plugin, and when each was last updated.",
+    "changes": [
+      "Add an Admin Versions page listing every module and plugin with its installed and code version.",
+      "Each deploy records version changes, so an upgraded plugin shows Update applied with the date.",
+      "Show the recent version history for each module and plugin."
+    ],
+    "affected_areas": [
+      "Admin",
+      "Modules",
+      "Plugins"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch: adds two version-tracking tables and a read-only admin page; no existing data changes.",
+    "validation": [
+      "New feature test for the versions page, recording an upgrade and repeat syncs.",
+      "Module, navigation, admin route denial, seeder and architecture tests.",
+      "Full PHPUnit suite and the MySQL contract job in CI."
+    ],
+    "known_limitations": [
+      "Plugins can only come from the code repository; there is no install from outside."
+    ],
+    "rollback": "Redeploy the previous release package. The new tables can stay; earlier releases ignore them.",
+    "provenance": "Milestone v0.48.3 Beta, issue #473 under epic #470, pull request #600.",
+    "references": [
+      {
+        "label": "Issue #473",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/473"
+      },
+      {
+        "label": "Pull request #600",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/600"
+      }
+    ]
+  },
+  {
     "version": "0.48.1",
     "date": "2026-11-04",
     "channel": "stable",

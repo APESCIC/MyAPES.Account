@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\AdminMaintenanceController;
 use App\Http\Controllers\Admin\AdminModuleController;
 use App\Http\Controllers\Admin\AdminOrganisationModuleController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminVersionController;
 use App\Http\Controllers\Admin\StaffAdminController;
 use App\Http\Controllers\Auth\ConfirmPasswordController;
 use App\Http\Controllers\Auth\EmailChangeController;
@@ -400,6 +401,9 @@ Route::middleware([
             Route::put('/modules/{subCoreKey}/{moduleKey}/settings', [AdminModuleController::class, 'updateSettings'])
                 ->middleware('can:admin.modules.manage')
                 ->name('modules.settings.update');
+            Route::get('/versions', AdminVersionController::class)
+                ->middleware('can:admin.modules.view')
+                ->name('versions.index');
             Route::get('/modules/{subCoreKey}/{moduleKey}/lists/{listKey}', [AdminManagedListController::class, 'show'])
                 ->middleware('can:admin.modules.view')
                 ->name('modules.lists.show');
