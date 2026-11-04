@@ -79,7 +79,7 @@
                     <label for="role_summary">{{ __('recruitment::staff.staff.index.blade.summary') }}</label>
                     <input id="role_summary" name="summary" value="{{ old('summary') }}">
                     <label for="role_description">{{ __('recruitment::staff.staff.index.blade.description') }}</label>
-                    <textarea id="role_description" name="description" required>{{ old('description') }}</textarea>
+                    <x-rich-text-editor id="role_description" name="description" :value="old('description')" required />
                     <button type="submit">{{ __('recruitment::staff.staff.index.blade.save_recruitment_role') }}</button>
                 </form>
             </div>

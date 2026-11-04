@@ -6,7 +6,7 @@
     <div class="panel">
         <span class="service-label {{ $ticketService->presentationClass }}">{{ $ticketService->serviceName }}</span>
         <h1>Ticket #{{ $ticket->id }} - {{ $ticket->subject }}</h1>
-        <p class="muted">{{ $ticket->description }}</p>
+        <x-rich-text class="muted" :value="$ticket->description" />
 
         <dl class="ticket-meta">
             <div>
@@ -82,7 +82,7 @@
                 @endif
                 @if($canCommentTicket)
                     <label for="message">{{ __('tickets::ui.show.blade.add_message') }}</label>
-                    <textarea id="message" name="message"></textarea>
+                    <x-rich-text-editor name="message" :value="old('message')" />
                     @if($canChooseVisibility)
                         <label for="visibility">{{ __('tickets::ui.show.blade.visibility') }}</label>
                         <select id="visibility" name="visibility">
@@ -189,7 +189,7 @@
         <div class="item-divider" data-ticket-activity-opener>
             <strong>{{ ($activityOpenerUser ?? $ticket->user)?->name ?? '—' }}</strong>
             <span class="muted">{{ $ticket->created_at }}</span>
-            <div>{{ $ticket->description }}</div>
+            <x-rich-text :value="$ticket->description" />
         </div>
         @foreach(($messages ?? $ticket->messages) as $message)
             @continue((int) $message->id === (int) ($hiddenCreationMessageId ?? 0))
@@ -199,7 +199,7 @@
                 @if($message->is_staff_note)
                     <span class="status">staff</span>
                 @endif
-                <div>{{ $message->message }}</div>
+                <x-rich-text :value="$message->message" />
             </div>
         @endforeach
     </div>

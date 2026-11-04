@@ -130,7 +130,7 @@
                 <label for="subject">{{ __('tickets::ui.index.blade.subject') }}</label>
                 <input id="subject" name="subject" value="{{ old('subject') }}" required>
                 <label for="description">{{ __('tickets::ui.index.blade.description') }}</label>
-                <textarea id="description" name="description" required>{{ old('description') }}</textarea>
+                <x-rich-text-editor name="description" :value="old('description')" required />
                 @if($usesHierarchicalCategories)
                     <div data-attachment-fields hidden>
                         <label for="screenshots">{{ __('tickets::ui.index.blade.screenshots_optional') }}</label>

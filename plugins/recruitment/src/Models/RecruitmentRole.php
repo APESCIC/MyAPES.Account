@@ -3,6 +3,7 @@
 namespace Plugins\Recruitment\Models;
 
 use App\Core\Accounts\User;
+use App\Core\Content\SanitisedHtml;
 use Database\Factories\RecruitmentRoleFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -51,6 +52,7 @@ class RecruitmentRole extends Model
     protected function casts(): array
     {
         return [
+            'description' => SanitisedHtml::class,
             'published_at' => 'datetime',
             'closed_at' => 'datetime',
         ];

@@ -3,6 +3,7 @@
 namespace Plugins\Consultations\Models;
 
 use App\Core\Accounts\User;
+use App\Core\Content\SanitisedHtml;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -60,6 +61,7 @@ class PetCareConsultation extends Model
     protected function casts(): array
     {
         return [
+            'notes' => SanitisedHtml::class,
             'scheduled_for' => 'datetime',
             'closed_at' => 'datetime',
         ];

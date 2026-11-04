@@ -106,7 +106,7 @@
                 <label for="title">{{ __('cases::ui.index.blade.title') }}</label>
                 <input id="title" name="title" value="{{ old('title') }}" required>
                 <label for="details">{{ __('cases::ui.index.blade.details') }}</label>
-                <textarea id="details" name="details">{{ old('details') }}</textarea>
+                <x-rich-text-editor name="details" :value="old('details')" />
                 <div data-attachment-fields hidden>
                     <label for="screenshots">{{ __('cases::ui.index.blade.evidence_screenshots_optional') }}</label>
                     <input id="screenshots" name="screenshots[]" type="file" accept="image/jpeg,image/png,image/webp" multiple>

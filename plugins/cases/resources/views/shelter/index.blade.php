@@ -46,7 +46,7 @@
                     <label>{{ __('cases::ui.index.blade.title') }}</label>
                     <input name="title">
                     <label>{{ __('cases::ui.index.blade.details') }}</label>
-                    <textarea name="details"></textarea>
+                    <x-rich-text-editor name="details" :value="old('details')" />
                     <button type="submit">{{ __('cases::ui.index.blade.create_case') }}</button>
                     </form>
                 @endif

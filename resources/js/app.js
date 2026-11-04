@@ -49,6 +49,7 @@ import { initOwnerPicker } from './tickets/owner-picker.js';
 import { initCommandPalette } from './workspace/command-palette.js';
 import { initWorkspaceDrawer } from './workspace/drawer.js';
 import { initFormActions } from './workspace/form-actions.js';
+import { initRichTextEditors } from './workspace/rich-text-editor.js';
 import { initToasts } from './workspace/toasts.js';
 
 const icons = {
@@ -132,6 +133,7 @@ initPasskeys();
 initToasts();
 initOwnerPicker();
 initFormActions();
+initRichTextEditors();
 
 document.addEventListener('click', (event) => {
     if (event.target instanceof Element && event.target.closest('[data-theme-toggle]')) {

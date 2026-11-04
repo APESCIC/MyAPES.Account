@@ -55,7 +55,7 @@
                 </div>
                 @if($canUpdate)
                     <label>{{ __('consultations::ui.index.blade.notes') }}</label>
-                    <textarea name="notes">{{ $consultation->notes }}</textarea>
+                    <x-rich-text-editor name="notes" :value="old('notes', $consultation->notes)" />
                 @endif
                 <div class="actions">
                     <button type="submit">{{ __('consultations::ui.show.blade.update_consultation') }}</button>
