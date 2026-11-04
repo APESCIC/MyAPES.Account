@@ -6,7 +6,6 @@ use App\Contracts\ModuleRegistry;
 use App\Core\Extensions\Modules\ModulePackageRegistry;
 use App\Core\Extensions\Plugins\PluginEnablement;
 use App\Http\Controllers\Controller;
-use App\Support\WorkflowLabels;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -78,8 +77,6 @@ class PublicTicketEntryController extends Controller
 
     private function areaLabel(string $service, string $area): string
     {
-        return $service === 'apes-cic'
-            ? $this->categories->labelForArea($service, $area)
-            : WorkflowLabels::label('ticket_area', $area);
+        return $this->categories->labelForArea($service, $area);
     }
 }

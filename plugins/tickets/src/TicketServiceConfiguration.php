@@ -7,6 +7,16 @@ use InvalidArgumentException;
 
 final class TicketServiceConfiguration
 {
+    /**
+     * Built-in areas, used when no managed list is stored (#472).
+     *
+     * @var array<string, list<string>>
+     */
+    public const DEFAULT_SERVICE_AREAS = [
+        'shelter-rescue' => ['adoption', 'surrender', 'rescue', 'fostering', 'animal_welfare', 'other'],
+        'pet-care-clinic' => ['appointment', 'consultation', 'prescription', 'billing', 'follow_up', 'other'],
+    ];
+
     public function __construct(
         private readonly TicketCategoryResolver $categories,
     ) {}
@@ -31,7 +41,7 @@ final class TicketServiceConfiguration
                 'apes-shelter',
                 'APES Shelter and Rescue Tickets',
                 'Support for adoption, surrender, rescue, fostering and animal welfare.',
-                ['adoption', 'surrender', 'rescue', 'fostering', 'animal_welfare', 'other'],
+                $this->serviceAreaKeys('shelter-rescue', self::DEFAULT_SERVICE_AREAS['shelter-rescue']),
                 false,
             ),
             'pet-care-clinic' => new TicketServiceDefinition(
@@ -41,7 +51,7 @@ final class TicketServiceConfiguration
                 'apes-petcare',
                 'APES Pet Care Clinic Tickets',
                 'Support for appointments, consultations, prescriptions, billing and follow-up.',
-                ['appointment', 'consultation', 'prescription', 'billing', 'follow_up', 'other'],
+                $this->serviceAreaKeys('pet-care-clinic', self::DEFAULT_SERVICE_AREAS['pet-care-clinic']),
                 false,
             ),
             default => throw new InvalidArgumentException('Unknown ticket service.'),
@@ -51,10 +61,19 @@ final class TicketServiceConfiguration
     /** @return array<int, string> */
     private function apesCicServiceAreaKeys(): array
     {
-        $keys = $this->categories->serviceAreaKeys('apes-cic');
+        return $this->serviceAreaKeys('apes-cic', ['web_development', 'it_systems', 'other']);
+    }
 
-        return $keys !== []
-            ? $keys
-            : ['web_development', 'it_systems', 'other'];
+    /**
+     * Active managed-list keys (#471 / #472), or the built-in list when none are stored.
+     *
+     * @param  array<int, string>  $fallback
+     * @return array<int, string>
+     */
+    private function serviceAreaKeys(string $subCoreKey, array $fallback): array
+    {
+        $keys = $this->categories->serviceAreaKeys($subCoreKey);
+
+        return $keys !== [] ? $keys : $fallback;
     }
 }

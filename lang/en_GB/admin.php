@@ -610,4 +610,11 @@ return [
             'restored' => 'Row restored.',
         ],
     ],
+    'service_area_settings' => [
+        'intro' => 'The service areas people choose from when they open a ticket in this service.',
+        'edit_areas' => 'Edit service areas',
+        'reset_heading' => 'Reset to defaults',
+        'confirm_reset' => 'I understand this restores the original service areas and removes added rows.',
+        'reset' => 'Reset service areas',
+    ],
 ];

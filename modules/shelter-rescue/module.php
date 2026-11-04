@@ -8,6 +8,10 @@ use App\Core\Extensions\Modules\ModuleStaffArea;
  *
  * Live prefix `/shelter` and route names `shelter.*` stay stable.
  */
+$defaults = is_file(__DIR__.'/config/plugin-defaults.php')
+    ? require __DIR__.'/config/plugin-defaults.php'
+    : [];
+
 return new ModuleManifest(
     slug: 'shelter-rescue',
     name: 'APES Shelter and Rescue',
@@ -19,6 +23,7 @@ return new ModuleManifest(
     sortOrder: 20,
     staffArea: new ModuleStaffArea('shelter.index'),
     plugins: ['pet-profiles', 'cases', 'tickets'],
+    pluginDefaults: is_array($defaults) ? $defaults : [],
     hubView: 'sub-cores.show',
     packagePath: __DIR__,
 );

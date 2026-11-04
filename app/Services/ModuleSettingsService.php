@@ -176,6 +176,7 @@ class ModuleSettingsService
         match ($descriptor->schema) {
             ModuleSettingsDescriptor::SCHEMA_RECRUITMENT_BOARD => $this->validateRecruitmentBoard($settings),
             ModuleSettingsDescriptor::SCHEMA_WEBSITES_CATEGORIES => $this->validateWebsitesCategories($moduleKey, $settings),
+            ModuleSettingsDescriptor::SCHEMA_SERVICE_AREAS => $this->validateServiceAreas($settings),
             default => throw ValidationException::withMessages([
                 'module' => 'This module does not support editable settings.',
             ]),
@@ -264,6 +265,32 @@ class ModuleSettingsService
             throw ValidationException::withMessages([
                 'settings' => 'Category keys must be unique.',
             ]);
+        }
+    }
+
+    /**
+     * Flat list of {key, label} rows (#472), e.g. Shelter ticket areas.
+     *
+     * @param  array<string, mixed>  $settings
+     */
+    private function validateServiceAreas(array $settings): void
+    {
+        $areas = $settings['service_areas'] ?? null;
+        if (! is_array($areas) || $areas === []) {
+            throw ValidationException::withMessages(['settings' => 'At least one service area is required.']);
+        }
+
+        $keys = [];
+        foreach ($areas as $area) {
+            if (! is_array($area) || ! is_string($area['key'] ?? null) || preg_match('/^[a-z0-9_]{1,64}$/', $area['key']) !== 1
+                || ! is_string($area['label'] ?? null) || trim($area['label']) === '') {
+                throw ValidationException::withMessages(['settings' => 'Each service area needs a key and a name.']);
+            }
+            $keys[] = $area['key'];
+        }
+
+        if (count($keys) !== count(array_unique($keys))) {
+            throw ValidationException::withMessages(['settings' => 'Service area keys must be unique.']);
         }
     }
 
