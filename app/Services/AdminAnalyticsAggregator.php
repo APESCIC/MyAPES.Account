@@ -137,7 +137,9 @@ class AdminAnalyticsAggregator
                 'active' => $maintenance['active'],
                 'message' => is_object($currentWindow) ? (string) $currentWindow->message : null,
             ],
-            'module_alerts' => $this->moduleAlerts(),
+            'module_alerts' => $alerts = $this->moduleAlerts(),
+            'module_alerts_action' => array_values(array_filter($alerts, static fn (array $alert): bool => $alert['severity'] === 'action')),
+            'module_alerts_info' => array_values(array_filter($alerts, static fn (array $alert): bool => $alert['severity'] !== 'action')),
             'privileged_events' => $this->privilegedEvents(),
         ];
     }
@@ -183,56 +185,53 @@ class AdminAnalyticsAggregator
     }
 
     /**
-     * @return array<int, array{key: string, label: string, kind: string}>
+     * Plugin alerts (#474). Only "action" alerts count on the Admin overview;
+     * "info" rows explain states that need nothing doing, such as a plugin
+     * that is not made for a module or a plugin already holding records.
+     *
+     * @return list<array{key: string, label: string, kind: string, severity: string, reason: string, fix_url: string, fix_label: string}>
      */
     private function moduleAlerts(): array
     {
         $alerts = [];
         $matrix = $this->catalogue->matrix();
+        $pluginsUrl = route('admin.modules.index');
 
         foreach ($matrix['cells'] as $cell) {
             $definition = $cell['definition'];
             $installation = $cell['installation'];
             $label = $definition->subCore->name.' / '.$definition->module->name;
+            $alert = static fn (string $kind, string $severity, string $reason, string $fixLabel): array => [
+                'key' => $definition->key(),
+                'label' => $label,
+                'kind' => $kind,
+                'severity' => $severity,
+                'reason' => $reason,
+                'fix_url' => $pluginsUrl,
+                'fix_label' => $fixLabel,
+            ];
 
             if ($definition->codeStatus === ModuleCodeStatus::Incompatible) {
-                $alerts[] = [
-                    'key' => $definition->key(),
-                    'label' => $label,
-                    'kind' => 'incompatible',
-                ];
+                $alerts[] = $alert('incompatible', 'info', __('admin.overview.alert_reason.incompatible'), __('admin.overview.alert_fix.view'));
             }
 
             if ($definition->codeStatus === ModuleCodeStatus::CodeNotShipped) {
-                $alerts[] = [
-                    'key' => $definition->key(),
-                    'label' => $label,
-                    'kind' => 'code_not_shipped',
-                ];
+                $alerts[] = $alert('code_not_shipped', 'action', __('admin.overview.alert_reason.code_not_shipped'), __('admin.overview.alert_fix.review'));
             }
 
             if ($installation instanceof ModuleInstallation && ! $installation->enabled) {
-                $alerts[] = [
-                    'key' => $definition->key(),
-                    'label' => $label,
-                    'kind' => 'disabled',
-                ];
+                $alerts[] = $alert('disabled', 'action', __('admin.overview.alert_reason.disabled'), __('admin.overview.alert_fix.enable'));
             }
 
             if ($installation instanceof ModuleInstallation
                 && $installation->enabled
                 && (int) $cell['active_record_count'] > 0) {
-                $alerts[] = [
-                    'key' => $definition->key(),
-                    'label' => $label,
-                    'kind' => 'active-records',
-                ];
+                $alerts[] = $alert('active-records', 'info', __('admin.overview.alert_reason.active_records', ['count' => (int) $cell['active_record_count']]), __('admin.overview.alert_fix.view'));
             }
         }
 
         return $alerts;
     }
-
     /**
      * @return array<int, array{event: string, actor: string, occurred_at: string}>
      */

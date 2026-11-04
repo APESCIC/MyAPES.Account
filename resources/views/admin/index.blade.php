@@ -105,7 +105,7 @@
                 </div>
                 <div class="panel panel-flat" role="listitem">
                     <h3>{{ __('admin.overview.plugin_alerts') }}</h3>
-                    <div data-kpi="module-alerts">{{ count($dashboard['module_alerts']) }}</div>
+                    <div data-kpi="module-alerts"><a href="#plugin-alerts" aria-label="{{ __('admin.overview.plugin_alerts_link', ['count' => count($dashboard['module_alerts_action'])]) }}">{{ count($dashboard['module_alerts_action']) }}</a></div>
                 </div>
             @endif
         </div>
@@ -235,22 +235,41 @@
                     — {{ $dashboard['maintenance']['message'] }}
                 @endif
             </p>
-            <table data-table="module-alerts">
-                <caption>{{ __('admin.overview.disabled_incompatible_code_not_shipped_or_active_record_plug') }}</caption>
-                <thead><tr><th scope="col">{{ __('admin.overview.plugin') }}</th><th scope="col">{{ __('admin.access.status') }}</th></tr></thead>
+            <table data-table="module-alerts" id="plugin-alerts">
+                <caption>{{ __('admin.overview.plugin_alerts_needing_action') }}</caption>
+                <thead><tr><th scope="col">{{ __('admin.overview.plugin') }}</th><th scope="col">{{ __('admin.access.status') }}</th><th scope="col">{{ __('admin.overview.alert_reason_heading') }}</th></tr></thead>
                 <tbody>
-                @forelse($dashboard['module_alerts'] as $alert)
-                    <tr data-alert-kind="{{ $alert['kind'] }}">
+                @forelse($dashboard['module_alerts_action'] as $alert)
+                    <tr data-alert-kind="{{ $alert['kind'] }}" data-alert-severity="action">
                         <th scope="row">{{ $alert['label'] }}</th>
                         <td>{{ $alertLabels[$alert['kind']] ?? $alert['kind'] }}</td>
+                        <td>{{ $alert['reason'] }} <a href="{{ $alert['fix_url'] }}">{{ $alert['fix_label'] }}</a></td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="2">{{ __('admin.overview.no_plugin_warnings') }}</td>
+                        <td colspan="3">{{ __('admin.overview.no_plugin_warnings') }}</td>
                     </tr>
                 @endforelse
                 </tbody>
             </table>
+            @if($dashboard['module_alerts_info'] !== [])
+                <details data-table="module-alerts-info">
+                    <summary>{{ __('admin.overview.plugin_notes', ['count' => count($dashboard['module_alerts_info'])]) }}</summary>
+                    <table>
+                        <caption>{{ __('admin.overview.plugin_notes_caption') }}</caption>
+                        <thead><tr><th scope="col">{{ __('admin.overview.plugin') }}</th><th scope="col">{{ __('admin.access.status') }}</th><th scope="col">{{ __('admin.overview.alert_reason_heading') }}</th></tr></thead>
+                        <tbody>
+                        @foreach($dashboard['module_alerts_info'] as $alert)
+                            <tr data-alert-kind="{{ $alert['kind'] }}" data-alert-severity="info">
+                                <th scope="row">{{ $alert['label'] }}</th>
+                                <td>{{ $alertLabels[$alert['kind']] ?? $alert['kind'] }}</td>
+                                <td>{{ $alert['reason'] }} <a href="{{ $alert['fix_url'] }}">{{ $alert['fix_label'] }}</a></td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </details>
+            @endif
             <table data-table="privileged-events">
                 <caption>{{ __('admin.overview.recent_privileged_audit_events') }}</caption>
                 <thead>
