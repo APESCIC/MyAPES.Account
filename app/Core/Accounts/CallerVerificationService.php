@@ -19,6 +19,9 @@ final class CallerVerificationService
 
     public const LOCK_SECONDS = 900;
 
+    /** A verified caller stays unlocked until End call, or this long at most (decision D3). */
+    public const UNLOCK_SECONDS = 3600;
+
     public const RESULT_VERIFIED = 'verified';
 
     public const RESULT_FAILED = 'failed';
@@ -81,6 +84,8 @@ final class CallerVerificationService
         if ($positions !== [] && $this->pins->matches($caller, $asked)) {
             RateLimiter::clear($limiterKey);
             $this->audit->record('caller.verification_passed', $staff, $caller, ['positions' => $positions]);
+            $session->put($this->sessionKey($caller, 'verified_at'), now()->getTimestamp());
+            $this->audit->record('caller.unlocked', $staff, $caller, ['unlock_seconds' => self::UNLOCK_SECONDS]);
 
             return self::RESULT_VERIFIED;
         }
@@ -98,6 +103,43 @@ final class CallerVerificationService
         }
 
         return self::RESULT_FAILED;
+    }
+
+    /**
+     * Whether this staff session may edit the caller (#478). An unlock older
+     * than UNLOCK_SECONDS is dropped and audited as a timeout.
+     */
+    public function isUnlocked(Session $session, User $staff, User $caller): bool
+    {
+        $key = $this->sessionKey($caller, 'verified_at');
+        $verifiedAt = $session->get($key);
+
+        if (! is_int($verifiedAt)) {
+            return false;
+        }
+
+        if (now()->getTimestamp() - $verifiedAt < self::UNLOCK_SECONDS) {
+            return true;
+        }
+
+        $session->forget($key);
+        $this->audit->record('caller.unlock_timed_out', $staff, $caller, ['unlock_seconds' => self::UNLOCK_SECONDS]);
+
+        return false;
+    }
+
+    public function unlockedUntil(Session $session, User $caller): ?int
+    {
+        $verifiedAt = $session->get($this->sessionKey($caller, 'verified_at'));
+
+        return is_int($verifiedAt) ? $verifiedAt + self::UNLOCK_SECONDS : null;
+    }
+
+    public function endCall(Session $session, User $staff, User $caller): void
+    {
+        $session->forget($this->sessionKey($caller, 'verified_at'));
+        $session->forget($this->sessionKey($caller, 'positions'));
+        $this->audit->record('caller.call_ended', $staff, $caller);
     }
 
     public function lockedForSeconds(User $caller): int
