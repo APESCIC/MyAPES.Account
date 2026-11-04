@@ -13,7 +13,7 @@ final class RichText
 {
     public function clean(?string $html): ?string
     {
-        if ($html === null || trim($html) === '') {
+        if ($html === null || trim($html) === '' || ! $this->looksLikeHtml($html)) {
             return $html;
         }
 
@@ -31,6 +31,19 @@ final class RichText
         }
 
         return new HtmlString((string) $this->clean($value));
+    }
+
+    /**
+     * Value for an editor textarea: stored HTML as-is (escaped by Blade),
+     * legacy plain text turned into paragraphs so line breaks survive.
+     */
+    public function forEditor(?string $value): string
+    {
+        if ($value === null || trim($value) === '' || $this->looksLikeHtml($value)) {
+            return (string) $value;
+        }
+
+        return '<p>'.str_replace("\n", '<br>', e(str_replace("\r\n", "\n", $value))).'</p>';
     }
 
     private function looksLikeHtml(string $value): bool

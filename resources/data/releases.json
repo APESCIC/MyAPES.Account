@@ -1,5 +1,53 @@
 [
   {
+    "version": "0.50.2",
+    "date": "2026-11-04",
+    "channel": "stable",
+    "type": "patch",
+    "title": "TinyMCE 8 editor on description fields",
+    "summary": "Long text fields can now use a rich text editor for headings, lists, links and tables. Everything entered is cleaned on the server before it is saved.",
+    "changes": [
+      "Add the TinyMCE editor to ticket descriptions and replies, case details and updates, consultation notes and recruitment role descriptions.",
+      "Show formatted text safely on tickets, cases, consultations and role pages.",
+      "Existing plain text keeps its line breaks.",
+      "The editor only appears once the TinyMCE key is configured; until then fields stay plain text boxes."
+    ],
+    "affected_areas": [
+      "Tickets",
+      "Cases",
+      "Consultations",
+      "Recruitment"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch: adds an optional editor and sanitising to existing text fields; stored data keeps its shape.",
+    "validation": [
+      "New feature test for the editor with and without a key, sanitised saving, safe display and plain text.",
+      "New frontend test for the editor set-up.",
+      "Ticket, case, consultation, recruitment and security tests; full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "The editor needs TINYMCE_API_KEY and approved domains at tiny.cloud. Recruitment role summaries stay plain text."
+    ],
+    "rollback": "Redeploy the previous release package. Formatted text saved by this release would then show its HTML tags as plain text.",
+    "provenance": "Milestone v0.50.2 Beta, issue #483 under epic #481, pull request #621.",
+    "references": [
+      {
+        "label": "Issue #483",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/483"
+      },
+      {
+        "label": "Pull request #621",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/621"
+      }
+    ]
+  },
+  {
     "version": "0.50.1",
     "date": "2026-11-04",
     "channel": "stable",

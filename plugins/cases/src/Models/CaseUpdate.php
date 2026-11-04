@@ -3,6 +3,7 @@
 namespace Plugins\Cases\Models;
 
 use App\Core\Accounts\User;
+use App\Core\Content\SanitisedHtml;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,6 +19,13 @@ class CaseUpdate extends Model
     public const VISIBILITY_PUBLIC = 'public';
 
     public const VISIBILITY_INTERNAL = 'internal';
+
+    protected function casts(): array
+    {
+        return [
+            'body' => SanitisedHtml::class,
+        ];
+    }
 
     public function shelterCase(): BelongsTo
     {

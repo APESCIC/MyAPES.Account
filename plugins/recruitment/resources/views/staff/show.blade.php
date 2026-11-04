@@ -53,7 +53,7 @@
             </p>
         @endif
         <div class="stack-spaced">
-            {!! nl2br(e($role->description)) !!}
+            <x-rich-text :value="$role->description" />
         </div>
         @if($canPublish || $canClose)
             <div class="actions">
@@ -104,7 +104,7 @@
                 <label for="role_summary">{{ __('recruitment::staff.staff.index.blade.summary') }}</label>
                 <input id="role_summary" name="summary" value="{{ old('summary', $role->summary) }}">
                 <label for="role_description">{{ __('recruitment::staff.staff.index.blade.description') }}</label>
-                <textarea id="role_description" name="description" required>{{ old('description', $role->description) }}</textarea>
+                <x-rich-text-editor id="role_description" name="description" :value="old('description', $role->description)" required />
                 <div class="actions">
                     <button type="submit">{{ __('recruitment::staff.staff.show.blade.update_recruitment_role') }}</button>
                     <a href="{{ route('apes-cic.recruitment.index') }}">{{ __('recruitment::staff.staff.show.blade.back') }}</a>

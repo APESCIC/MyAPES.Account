@@ -4,6 +4,7 @@ namespace Plugins\Cases\Models;
 
 use App\Core\Accounts\User;
 use App\Core\Attachments\SupportAttachment;
+use App\Core\Content\SanitisedHtml;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -66,6 +67,7 @@ class ShelterCase extends Model
     protected function casts(): array
     {
         return [
+            'details' => SanitisedHtml::class,
             'opened_at' => 'datetime',
             'resolved_at' => 'datetime',
             'closed_at' => 'datetime',

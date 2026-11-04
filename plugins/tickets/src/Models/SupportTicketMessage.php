@@ -3,6 +3,7 @@
 namespace Plugins\Tickets\Models;
 
 use App\Core\Accounts\User;
+use App\Core\Content\SanitisedHtml;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,7 @@ class SupportTicketMessage extends Model
     protected function casts(): array
     {
         return [
+            'message' => SanitisedHtml::class,
             'is_staff_note' => 'boolean',
         ];
     }

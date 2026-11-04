@@ -6,7 +6,7 @@
     <div class="panel">
         <span class="service-label apes-cic">{{ __('cases::ui.index.blade.apes_cic') }}</span>
         <h1>Case #{{ $case->id }} - {{ $case->title }}</h1>
-        <p class="muted">{{ $case->details }}</p>
+        <x-rich-text class="muted" :value="$case->details" />
 
         <dl class="ticket-meta">
             <div>
@@ -134,7 +134,7 @@
             <form method="post" action="{{ route('apes-cic.cases.updates.store', $case) }}" @if($allowsAttachments) enctype="multipart/form-data" @endif>
                 @csrf
                 <label for="body">{{ __('cases::ui.show.blade.add_update') }}</label>
-                <textarea id="body" name="body"></textarea>
+                <x-rich-text-editor name="body" :value="old('body')" />
                 @if($canChooseVisibility)
                     <label for="visibility">{{ __('cases::ui.show.blade.visibility') }}</label>
                     <select id="visibility" name="visibility">
@@ -195,7 +195,7 @@
                 <strong>{{ $update->user?->name ?? 'Former user' }}</strong>
                 <span class="muted">{{ $update->created_at }}</span>
                 @if($update->visibility === 'internal')<span class="status">internal</span>@endif
-                <div>{{ $update->body }}</div>
+                <x-rich-text :value="$update->body" />
             </div>
         @empty
             <p class="muted">{{ __('cases::ui.show.blade.no_updates_have_been_added') }}</p>

@@ -54,7 +54,7 @@
                     <label>{{ __('consultations::ui.index.blade.subject') }}</label>
                     <input name="subject">
                     <label>{{ __('consultations::ui.index.blade.notes') }}</label>
-                    <textarea name="notes"></textarea>
+                    <x-rich-text-editor name="notes" :value="old('notes')" />
                     <button type="submit">{{ __('consultations::ui.index.blade.create_consultation') }}</button>
                     </form>
                 @endif

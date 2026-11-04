@@ -11,7 +11,7 @@
         @if(filled($case->details))
             <div>
                 <strong>{{ __('cases::ui.index.blade.details') }}</strong>
-                <p>{{ $case->details }}</p>
+                <x-rich-text :value="$case->details" />
             </div>
         @endif
         @if($canUpdateCase || $canCloseCase)
@@ -53,7 +53,7 @@
                 </div>
                 @if($canUpdateCase)
                     <label for="details">{{ __('cases::ui.index.blade.details') }}</label>
-                    <textarea id="details" name="details">{{ $case->details }}</textarea>
+                    <x-rich-text-editor name="details" :value="old('details', $case->details)" />
                 @endif
                 <button type="submit">{{ __('cases::ui.show.blade.update_case') }}</button>
             </form>
@@ -82,7 +82,7 @@
             <form method="post" action="{{ route('shelter.cases.updates.store', $case) }}">
                 @csrf
                 <label for="body">{{ __('cases::ui.show.blade.add_update') }}</label>
-                <textarea id="body" name="body"></textarea>
+                <x-rich-text-editor name="body" :value="old('body')" />
                 @if($canChooseVisibility)
                     <label for="visibility">{{ __('cases::ui.show.blade.visibility') }}</label>
                     <select id="visibility" name="visibility">
@@ -103,7 +103,7 @@
                 <strong>{{ $update->user?->name ?? 'Former user' }}</strong>
                 <span class="muted">{{ $update->created_at }}</span>
                 @if($update->visibility === 'internal')<span class="status">internal</span>@endif
-                <div>{{ $update->body }}</div>
+                <x-rich-text :value="$update->body" />
             </div>
         @empty
             <p class="muted">{{ __('cases::ui.show.blade.no_updates_have_been_added') }}</p>

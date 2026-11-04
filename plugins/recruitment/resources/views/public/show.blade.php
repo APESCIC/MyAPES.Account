@@ -21,7 +21,7 @@
             </p>
         @endif
         <div class="stack-spaced">
-            {!! nl2br(e($role->description)) !!}
+            <x-rich-text :value="$role->description" />
         </div>
         <div class="actions">
             <a href="{{ route('recruitment.index') }}">{{ __('recruitment::public.show.blade.back_to_open_roles') }}</a>

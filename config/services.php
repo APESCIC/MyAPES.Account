@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    // TinyMCE Cloud (#483). The key is public by design but approved per
+    // domain at tiny.cloud; without it, rich text fields stay plain textareas.
+    'tinymce' => [
+        'api_key' => env('TINYMCE_API_KEY'),
+    ],
+
 ];

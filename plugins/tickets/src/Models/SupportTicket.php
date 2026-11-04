@@ -4,6 +4,7 @@ namespace Plugins\Tickets\Models;
 
 use App\Core\Accounts\User;
 use App\Core\Attachments\SupportAttachment;
+use App\Core\Content\SanitisedHtml;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -59,6 +60,7 @@ class SupportTicket extends Model
     protected function casts(): array
     {
         return [
+            'description' => SanitisedHtml::class,
             'closed_at' => 'datetime',
         ];
     }
