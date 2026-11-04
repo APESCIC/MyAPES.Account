@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.50.0",
+    "date": "2026-11-04",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Server-side HTML sanitising for rich text",
+    "summary": "MyAPES Account can now safely store and show formatted text. Anything unsafe, such as scripts, is removed when text is saved and again when it is shown.",
+    "changes": [
+      "Add server-side cleaning for formatted text, keeping headings, lists, links, tables and images.",
+      "Remove scripts, event handlers, inline styles, embedded frames and unsafe links.",
+      "Older plain text keeps its line breaks and is shown safely."
+    ],
+    "affected_areas": [
+      "Security",
+      "Content"
+    ],
+    "categories": [
+      "added",
+      "security"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Minor: starts the v0.50 rich text epic with an approved new dependency (mews/purifier); no data change.",
+    "validation": [
+      "New feature test for removing scripts, event handlers, unsafe links, frames and styles, keeping safe formatting, cleaning on save and safe display.",
+      "Deployment and architecture tests.",
+      "Full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "No field uses formatted text yet; the editor arrives in a later release."
+    ],
+    "rollback": "Redeploy the previous release package. No data changes.",
+    "provenance": "Milestone v0.50.2 Beta, issue #484 under epic #481, pull request #619.",
+    "references": [
+      {
+        "label": "Issue #484",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/484"
+      },
+      {
+        "label": "Pull request #619",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/619"
+      }
+    ]
+  },
+  {
     "version": "0.49.4",
     "date": "2026-11-04",
     "channel": "stable",
