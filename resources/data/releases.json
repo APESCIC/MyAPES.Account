@@ -1,5 +1,53 @@
 [
   {
+    "version": "0.50.4",
+    "date": "2026-11-04",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Shared pet record across Shelter and Pet Care",
+    "summary": "Pets are now shared between APES Shelter and Rescue and APES Pet Care Clinic. A pet added in either service shows in both, and can have a consultation or a shelter case.",
+    "changes": [
+      "Pet Profiles in Shelter and Pet Care now show the same shared list of pets.",
+      "Pet Care consultations can be booked for any pet, including pets first added in Shelter.",
+      "Shelter cases can be linked to any pet, including pets first added in Pet Care.",
+      "Each service's own permissions still decide who can see and change a pet there.",
+      "Existing pets stay as they are and now appear in both services."
+    ],
+    "affected_areas": [
+      "Pet Profiles",
+      "Consultations",
+      "Cases"
+    ],
+    "categories": [
+      "changed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch: changes which pets each service lists, with no schema change and no data change.",
+    "validation": [
+      "New feature test for shared lists, consultations, cases, existing pets and privacy between owners.",
+      "Pet, case, consultation, dashboard and authorisation tests updated for shared pets.",
+      "Full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "Service dashboards still count pets by the service where they were first added."
+    ],
+    "rollback": "Redeploy the previous release package. Pets go back to showing only in the service where they were added; consultations and cases linked across services stay in the database.",
+    "provenance": "Milestone v0.50.2 Beta, issue #482 under epic #481, pull request #623.",
+    "references": [
+      {
+        "label": "Issue #482",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/482"
+      },
+      {
+        "label": "Pull request #623",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/623"
+      }
+    ]
+  },
+  {
     "version": "0.50.3",
     "date": "2026-11-04",
     "channel": "stable",
