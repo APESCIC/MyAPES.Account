@@ -53,6 +53,7 @@ class AdminEmailController extends Controller
             'override' => $overrides->current($mailTemplate, $locale),
             'shippedSubject' => $mailTemplate->subjectKey === null ? null : $overrides->shipped($mailTemplate->subjectKey, $locale),
             'shippedIntro' => $mailTemplate->introKey === null ? null : $overrides->shipped($mailTemplate->introKey, $locale),
+            'mergeFields' => $overrides->mergeFields($mailTemplate, $locale),
         ]);
     }
 
@@ -64,6 +65,7 @@ class AdminEmailController extends Controller
         $validated = $request->validate([
             'subject' => ['nullable', 'string', 'max:200'],
             'intro' => ['nullable', 'string', 'max:1000'],
+            'body' => ['nullable', 'string', 'max:20000'],
             'lock_version' => ['required', 'integer', 'min:0'],
         ]);
 
@@ -74,6 +76,7 @@ class AdminEmailController extends Controller
             $validated['subject'] ?? null,
             $validated['intro'] ?? null,
             (int) $validated['lock_version'],
+            $validated['body'] ?? null,
         );
 
         return redirect()
@@ -101,10 +104,11 @@ class AdminEmailController extends Controller
     /**
      * Render-only sample for the sandboxed preview frame. Never sends mail.
      */
-    public function preview(Request $request, MailTemplateRegistry $registry, string $template): Response
+    public function preview(Request $request, MailTemplateRegistry $registry, MailCopyOverrides $overrides, string $template): Response
     {
         $mailTemplate = $this->findOrFail($registry, $template);
-        $html = (string) $mailTemplate->sampleNotification($request->user())->toMail($request->user())->render();
+        $mail = $mailTemplate->sampleNotification($request->user())->toMail($request->user());
+        $html = (string) $overrides->applyBody($mail, $mailTemplate, $request->user(), $this->copyLocale())->render();
 
         return response($html, 200, [
             'Content-Type' => 'text/html; charset=UTF-8',

@@ -1,5 +1,51 @@
 [
   {
+    "version": "0.50.3",
+    "date": "2026-11-04",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Editable email template bodies",
+    "summary": "Admins can now rewrite the whole body of an email template, with merge fields such as the recipient's name, a preview and a reset.",
+    "changes": [
+      "Add an Email body field to each editable email template in Admin.",
+      "Bodies can use merge fields, such as the recipient's name and the ticket number, which are filled in when the email is sent.",
+      "The greeting, button, footer and no-reply address stay on edited emails.",
+      "Preview shows the edited body, and Reset returns to the standard email.",
+      "Bodies are cleaned before saving and each change is recorded in the audit log."
+    ],
+    "affected_areas": [
+      "Admin",
+      "Email"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch: adds one nullable column and an optional body override to the existing email copy editor.",
+    "validation": [
+      "New feature test for saving a body, the sent email, merge fields, unknown fields, preview and reset.",
+      "Mail, email and translation tests.",
+      "Full PHPUnit suite and the MySQL contract job in CI."
+    ],
+    "known_limitations": [
+      "Merge fields are limited to the recipient's name, the app name and the values in the template's subject and opening line."
+    ],
+    "rollback": "Redeploy the previous release package. Saved bodies are then ignored and emails use the standard wording.",
+    "provenance": "Milestone v0.50.2 Beta, issue #486 under epic #481, pull request #622.",
+    "references": [
+      {
+        "label": "Issue #486",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/486"
+      },
+      {
+        "label": "Pull request #622",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/622"
+      }
+    ]
+  },
+  {
     "version": "0.50.2",
     "date": "2026-11-04",
     "channel": "stable",

@@ -3,10 +3,13 @@
 namespace App\Core\Mail;
 
 use App\Core\Accounts\User;
+use App\Core\Content\RichText;
 use App\Services\AuditLogger;
 use Illuminate\Contracts\Cache\Repository as Cache;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\HtmlString;
 use Illuminate\Translation\Translator;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -91,15 +94,17 @@ final class MailCopyOverrides
     /**
      * @throws ValidationException
      */
-    public function save(MailTemplate $template, User $actor, string $locale, ?string $subject, ?string $intro, int $lockVersion): MailTemplateOverride
+    public function save(MailTemplate $template, User $actor, string $locale, ?string $subject, ?string $intro, int $lockVersion, ?string $body = null): MailTemplateOverride
     {
         $subject = $this->clean($subject);
         $intro = $this->clean($intro);
+        $body = $this->cleanBody($body);
+        $this->assertBodyMergeFields($body, $template, $locale);
 
         $this->assertPlaceholders('subject', $subject, $template->subjectKey, $locale);
         $this->assertPlaceholders('intro', $intro, $template->introKey, $locale);
 
-        $override = DB::transaction(function () use ($template, $actor, $locale, $subject, $intro, $lockVersion): MailTemplateOverride {
+        $override = DB::transaction(function () use ($template, $actor, $locale, $subject, $intro, $lockVersion, $body): MailTemplateOverride {
             $existing = MailTemplateOverride::query()
                 ->where('template_key', $template->key)
                 ->where('locale', $locale)
@@ -110,11 +115,12 @@ final class MailCopyOverrides
                 throw ValidationException::withMessages(['lock_version' => __('admin.emails.copy_conflict')]);
             }
 
-            $before = ['subject' => $existing?->subject, 'intro' => $existing?->intro];
+            $before = ['subject' => $existing?->subject, 'intro' => $existing?->intro, 'body_length' => mb_strlen((string) $existing?->body)];
             $override = $existing ?? new MailTemplateOverride(['template_key' => $template->key, 'locale' => $locale]);
             $override->fill([
                 'subject' => $template->subjectKey === null ? null : $subject,
                 'intro' => $template->introKey === null ? null : $intro,
+                'body' => $body,
                 'lock_version' => $lockVersion + 1,
                 'updated_by' => $actor->getKey(),
             ])->save();
@@ -123,7 +129,7 @@ final class MailCopyOverrides
                 'template' => $template->key,
                 'locale' => $locale,
                 'before' => $before,
-                'after' => ['subject' => $override->subject, 'intro' => $override->intro],
+                'after' => ['subject' => $override->subject, 'intro' => $override->intro, 'body_length' => mb_strlen((string) $override->body)],
             ]);
 
             return $override;
@@ -147,10 +153,147 @@ final class MailCopyOverrides
         $this->audit->record('admin.emails.copy_reset', $actor, context: [
             'template' => $template->key,
             'locale' => $locale,
-            'before' => ['subject' => $existing->subject, 'intro' => $existing->intro],
+            'before' => ['subject' => $existing->subject, 'intro' => $existing->intro, 'body_length' => mb_strlen((string) $existing->body)],
         ]);
 
         $this->forgetAndApply();
+    }
+
+    public function bodyFor(MailTemplate $template, string $locale): ?string
+    {
+        foreach ($this->rows() as $row) {
+            if ($row['template_key'] === $template->key && $row['locale'] === $locale && is_string($row['body'] ?? null) && $row['body'] !== '') {
+                return $row['body'];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Merge fields an edited body may use (#486): recipient name, app name and
+     * every placeholder in the template's shipped subject and intro.
+     *
+     * @return list<string>
+     */
+    public function mergeFields(MailTemplate $template, string $locale): array
+    {
+        $fields = ['name', 'app'];
+
+        foreach ([$template->subjectKey, $template->introKey] as $langKey) {
+            if ($langKey !== null) {
+                $fields = [...$fields, ...$this->placeholders($this->shipped($langKey, $locale))];
+            }
+        }
+
+        return array_values(array_unique($fields));
+    }
+
+    /**
+     * Swap a built message's content for the admin-edited body, keeping the
+     * greeting, action button, subject and footer.
+     */
+    public function applyBody(MailMessage $message, MailTemplate $template, object $notifiable, string $locale): MailMessage
+    {
+        $body = $this->bodyFor($template, $locale);
+
+        if ($body === null) {
+            return $message;
+        }
+
+        $values = $this->mergeValues($message, $template, $notifiable);
+        $names = $this->mergeFields($template, $locale);
+        usort($names, static fn (string $a, string $b): int => strlen($b) <=> strlen($a));
+
+        foreach ($names as $name) {
+            $body = str_replace(':'.$name, e($values[$name] ?? ''), $body);
+        }
+
+        $data = $message->viewData;
+        $data['customBody'] = new HtmlString(trim((string) preg_replace('/\s*\n\s*/', ' ', $body)));
+
+        return $message->markdown('mail.brand.custom-body', $data);
+    }
+
+    public static function plainText(string $html): string
+    {
+        $text = (string) preg_replace(['/<br\s*\/?>/i', '/<\/(p|h[1-6]|li|tr|blockquote|pre|table)>/i', '/<li[^>]*>/i'], ["\n", "\n\n", '- '], $html);
+
+        return trim(html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function mergeValues(MailMessage $message, MailTemplate $template, object $notifiable): array
+    {
+        $name = $notifiable->name ?? null;
+        $values = [
+            'name' => is_string($name) && trim($name) !== '' ? trim($name) : __('mail.brand.greeting_fallback'),
+            'app' => __('terms.app_name'),
+        ];
+
+        if ($template->subjectKey !== null && is_string($message->subject)) {
+            $values += $this->extract($this->translator->get($template->subjectKey), $message->subject);
+        }
+
+        if ($template->introKey !== null) {
+            foreach ($message->introLines as $line) {
+                $values += $this->extract($this->translator->get($template->introKey), (string) $line);
+            }
+        }
+
+        return $values;
+    }
+
+    /**
+     * Read placeholder values back out of a rendered line, e.g. ":id" from
+     * "Ticket #:id was updated" against "Ticket #1024 was updated".
+     *
+     * @return array<string, string>
+     */
+    private function extract(mixed $pattern, string $rendered): array
+    {
+        if (! is_string($pattern) || $this->placeholders($pattern) === []) {
+            return [];
+        }
+
+        $parts = preg_split('/:([A-Za-z_][A-Za-z0-9_]*)/', $pattern, -1, PREG_SPLIT_DELIM_CAPTURE) ?: [];
+        $regex = '';
+        foreach ($parts as $index => $part) {
+            $regex .= $index % 2 === 0 ? preg_quote($part, '/') : '(?P<'.$part.'>.+?)';
+        }
+
+        if (@preg_match('/^(?J)'.$regex.'$/su', $rendered, $matches) !== 1) {
+            return [];
+        }
+
+        return array_filter($matches, static fn (mixed $value, int|string $key): bool => is_string($key) && is_string($value), ARRAY_FILTER_USE_BOTH);
+    }
+
+    private function cleanBody(?string $body): ?string
+    {
+        $body = $this->clean($body);
+
+        return $body === null ? null : $this->clean(app(RichText::class)->clean($body));
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    private function assertBodyMergeFields(?string $body, MailTemplate $template, string $locale): void
+    {
+        if ($body === null) {
+            return;
+        }
+
+        $unknown = array_diff($this->placeholders(strip_tags($body)), $this->mergeFields($template, $locale));
+
+        if ($unknown !== []) {
+            throw ValidationException::withMessages(['body' => __('admin.emails.copy_unknown_placeholder', [
+                'placeholders' => ':'.implode(', :', $unknown),
+            ])]);
+        }
     }
 
     /**
@@ -176,14 +319,14 @@ final class MailCopyOverrides
      * Boot and build steps (package discovery, first migrate) run before the table or
      * cache exists, so an unavailable store means "no overrides" rather than a failure.
      *
-     * @return list<array{template_key: string, locale: string, subject: string|null, intro: string|null}>
+     * @return list<array{template_key: string, locale: string, subject: string|null, intro: string|null, body?: string|null}>
      */
     private function rows(): array
     {
         try {
             return $this->cache->rememberForever(self::CACHE_KEY, static fn (): array => MailTemplateOverride::query()
-                ->get(['template_key', 'locale', 'subject', 'intro'])
-                ->map(static fn (MailTemplateOverride $row): array => $row->only(['template_key', 'locale', 'subject', 'intro']))
+                ->get(['template_key', 'locale', 'subject', 'intro', 'body'])
+                ->map(static fn (MailTemplateOverride $row): array => $row->only(['template_key', 'locale', 'subject', 'intro', 'body']))
                 ->all());
         } catch (Throwable) {
             return [];
