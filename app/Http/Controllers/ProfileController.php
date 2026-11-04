@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Core\Accounts\PhoneVerificationPinService;
 use App\Core\Accounts\StaffProfile;
 use App\Rules\Username;
 use App\Services\AuditLogger;
@@ -56,6 +57,7 @@ class ProfileController extends Controller
             'selectedServices' => $user->serviceSelections()->pluck('sub_core_key')->all(),
             'canChangeLocalPassword' => $passwordResets->canChangeOwnPassword($user),
             'canChangeLocalUsername' => $user->isLocalPasswordIdentity(),
+            'phonePin' => app(PhoneVerificationPinService::class)->for($user),
             'canChangeLocalEmail' => $canChangeLocalEmail,
             'pendingEmailChange' => $canChangeLocalEmail ? $emailChanges->pendingFor($user) : null,
             'canManageTwoFactor' => $canManageTwoFactor,

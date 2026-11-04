@@ -23,6 +23,7 @@ use App\Http\Controllers\HelpController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MailReplyLinkController;
 use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\PhoneVerificationPinController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RobotsTxtController;
 use App\Http\Controllers\SitemapController;
@@ -165,6 +166,9 @@ Route::middleware([
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])
         ->middleware(['account.step-up', 'throttle:public-password-change'])
         ->name('profile.password.update');
+    Route::put('/profile/phone-pin', [PhoneVerificationPinController::class, 'update'])
+        ->middleware(['account.step-up', 'throttle:6,1'])
+        ->name('profile.phone-pin.update');
     Route::post('/profile/email/change', [EmailChangeController::class, 'store'])
         ->middleware(['account.step-up', 'throttle:public-email-change'])
         ->name('profile.email.change');

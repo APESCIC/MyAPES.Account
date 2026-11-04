@@ -336,4 +336,19 @@ return [
     'errors' => [
         'planned_end' => 'Planned end:',
     ],
+    'phone_pin' => [
+        'heading' => 'Phone verification PIN',
+        'intro' => 'When you phone APES, staff ask for two digits of this PIN to check it is you. They never see the full PIN.',
+        'status_set' => 'Your PIN is set. Last changed :date.',
+        'status_not_set' => 'You have not set a PIN yet.',
+        'pin' => 'PIN',
+        'new_pin' => 'New PIN',
+        'confirm_pin' => 'Confirm PIN',
+        'hint' => 'Use 4 to 8 digits. Avoid your date of birth or repeated digits. You may be asked to confirm your password first.',
+        'save' => 'Save PIN',
+        'change' => 'Change PIN',
+        'saved' => 'Your phone verification PIN is set.',
+        'changed' => 'Your phone verification PIN has been changed.',
+        'invalid' => 'Your PIN must be :min to :max digits.',
+    ],
 ];
