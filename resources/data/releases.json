@@ -1,5 +1,54 @@
 [
   {
+    "version": "0.51.2",
+    "date": "2026-11-04",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Spike's guided tour for new users",
+    "summary": "Spike now gives new users a short guided tour of where things are, with separate tours for public accounts, staff and administrators.",
+    "changes": [
+      "A guided tour starts on the dashboard the first time you sign in after this release.",
+      "Public accounts, staff roles and administrators each get their own tour, with Spike in every step.",
+      "Finishing or skipping the tour is saved, so it does not start again by itself.",
+      "Restart the tour at any time from Help, the Staff guide or Ctrl K search.",
+      "Each step points at something on screen on both desktop and mobile."
+    ],
+    "affected_areas": [
+      "Dashboard",
+      "Help",
+      "Navigation"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch within the 0.51 milestone: adds the guided tour and one nullable user column.",
+    "validation": [
+      "New feature test for each audience, first-login start, skip, restart and access rules.",
+      "New JavaScript tests for step targets and saving the result.",
+      "Browser check of every step at 1280 and 630 pixels wide.",
+      "Full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "The tour covers the menu and main tools; it does not walk through individual forms."
+    ],
+    "rollback": "Redeploy the previous release package. The guided_tours column can stay; nothing reads it in older releases.",
+    "provenance": "Milestone v0.51.2 Beta, issue #489 under epic #487, pull request #632.",
+    "references": [
+      {
+        "label": "Issue #489",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/489"
+      },
+      {
+        "label": "Pull request #632",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/632"
+      }
+    ]
+  },
+  {
     "version": "0.51.1",
     "date": "2026-11-04",
     "channel": "stable",
