@@ -1,5 +1,49 @@
 [
   {
+    "version": "0.49.4",
+    "date": "2026-11-04",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Call log retention rule (UK GDPR)",
+    "summary": "Call logs are now kept for 24 months and then removed automatically, in line with UK GDPR.",
+    "changes": [
+      "Add a daily job that deletes call logs older than 24 months.",
+      "The retention period can be changed with the CALL_LOG_RETENTION_MONTHS setting.",
+      "Each clean-up is recorded in the audit log with how many logs were removed."
+    ],
+    "affected_areas": [
+      "Staff",
+      "Data protection"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch: adds a scheduled clean-up job and one setting; no schema change.",
+    "validation": [
+      "New feature test for the 24-month cut-off, setting and option overrides, and the daily schedule.",
+      "Mail log, deployment settings and translation tests.",
+      "Full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "Removal runs once a day, so a log can be kept up to a day past 24 months."
+    ],
+    "rollback": "Redeploy the previous release package. Logs already removed cannot be restored except from backups.",
+    "provenance": "Milestone v0.49.3 Beta, issue #480 under epic #475, pull request #618.",
+    "references": [
+      {
+        "label": "Issue #480",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/480"
+      },
+      {
+        "label": "Pull request #618",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/618"
+      }
+    ]
+  },
+  {
     "version": "0.49.3",
     "date": "2026-11-04",
     "channel": "stable",
