@@ -27,6 +27,7 @@ use App\Http\Controllers\PhoneVerificationPinController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RobotsTxtController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\Staff\CallerController;
 use App\Http\Controllers\SubCoreController;
 use App\Http\Controllers\SupportAttachmentController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -153,6 +154,14 @@ Route::middleware([
 ])->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/help/staff', [HelpController::class, 'staff'])->name('help.staff');
+    Route::prefix('staff/callers')->name('callers.')->group(function (): void {
+        Route::get('/', [CallerController::class, 'index'])->name('index');
+        Route::get('/{caller}', [CallerController::class, 'show'])->whereNumber('caller')->name('show');
+        Route::post('/{caller}/verify', [CallerController::class, 'verify'])
+            ->whereNumber('caller')
+            ->middleware('throttle:20,1')
+            ->name('verify');
+    });
     Route::get('/support/attachments/{attachment}', [SupportAttachmentController::class, 'download'])
         ->name('support.attachments.download');
 
