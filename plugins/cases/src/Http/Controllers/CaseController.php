@@ -291,7 +291,7 @@ class CaseController extends Controller
         $rules = [];
         if ($metadataRequested) {
             $rules = [
-                'category' => ['required', Rule::in($this->categories->categoryKeys($instance->subCore->key))],
+                'category' => ['required', Rule::in([...$this->categories->categoryKeys($instance->subCore->key), $case->category])],
                 'sub_category' => ['required', 'string', 'max:64'],
                 'affected_website_key' => ['nullable', 'string', 'max:64'],
                 'priority' => ['required', Rule::in($this->area()->priorities)],
@@ -332,6 +332,7 @@ class CaseController extends Controller
                 $validated['category'],
                 $validated['sub_category'],
                 $validated['affected_website_key'] ?? null,
+                includeArchived: $validated['category'] === $case->category,
             );
             $requestedStatus = $validated['status'];
             $statusChanged = $requestedStatus !== $case->status;

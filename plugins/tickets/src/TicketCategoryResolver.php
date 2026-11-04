@@ -28,6 +28,19 @@ class TicketCategoryResolver
      */
     public function serviceAreas(string $subCoreKey): array
     {
+        return array_values(array_filter(
+            $this->allServiceAreas($subCoreKey),
+            static fn (array $area): bool => ! ($area['archived'] ?? false),
+        ));
+    }
+
+    /**
+     * Includes archived areas (#471) so existing tickets keep their labels.
+     *
+     * @return array<int, array{key: string, label: string, subcategories: array<int, array<string, mixed>>}>
+     */
+    public function allServiceAreas(string $subCoreKey): array
+    {
         $settings = $this->settingsFor($subCoreKey);
         $areas = $settings['service_areas'] ?? [];
 
@@ -64,9 +77,10 @@ class TicketCategoryResolver
     }
 
     /** @return array<string, mixed>|null */
-    public function findSubcategory(string $subCoreKey, string $serviceArea, string $subCategory): ?array
+    public function findSubcategory(string $subCoreKey, string $serviceArea, string $subCategory, bool $includeArchived = false): ?array
     {
-        foreach ($this->serviceAreas($subCoreKey) as $area) {
+        $areas = $includeArchived ? $this->allServiceAreas($subCoreKey) : $this->serviceAreas($subCoreKey);
+        foreach ($areas as $area) {
             if (($area['key'] ?? null) !== $serviceArea) {
                 continue;
             }
@@ -82,7 +96,7 @@ class TicketCategoryResolver
 
     public function labelForArea(string $subCoreKey, string $key): string
     {
-        foreach ($this->serviceAreas($subCoreKey) as $area) {
+        foreach ($this->allServiceAreas($subCoreKey) as $area) {
             if (($area['key'] ?? null) === $key) {
                 return (string) ($area['label'] ?? $key);
             }
@@ -93,7 +107,7 @@ class TicketCategoryResolver
 
     public function labelForSubcategory(string $subCoreKey, string $areaKey, string $subKey): string
     {
-        $sub = $this->findSubcategory($subCoreKey, $areaKey, $subKey);
+        $sub = $this->findSubcategory($subCoreKey, $areaKey, $subKey, true);
 
         return $sub !== null
             ? (string) ($sub['label'] ?? $subKey)
@@ -159,7 +173,7 @@ class TicketCategoryResolver
 
     public function allowsAttachments(string $subCoreKey, string $serviceArea, string $subCategory): bool
     {
-        $sub = $this->findSubcategory($subCoreKey, $serviceArea, $subCategory);
+        $sub = $this->findSubcategory($subCoreKey, $serviceArea, $subCategory, true);
 
         return (bool) ($sub['allows_attachments'] ?? false);
     }

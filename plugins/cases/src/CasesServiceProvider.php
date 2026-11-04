@@ -9,6 +9,8 @@ use App\Core\Extensions\Plugins\PluginManifest;
 use App\Core\Extensions\Plugins\PluginNavigationItem;
 use App\Core\Extensions\Plugins\PluginServiceProvider;
 use App\Core\Extensions\Plugins\PluginSettingsSchema;
+use App\Core\Extensions\Settings\ManagedListDefinition;
+use App\Core\Extensions\Settings\ManagedListRegistry;
 use App\Core\Mail\MailCategory;
 use App\Core\Mail\MailTemplate;
 use Illuminate\Support\Facades\Gate;
@@ -31,6 +33,20 @@ class CasesServiceProvider extends PluginServiceProvider
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'cases');
 
         Gate::policy(ShelterCase::class, ShelterCasePolicy::class);
+
+        app(ManagedListRegistry::class)->register('apes-cic', 'cases', 'categories', static fn (): ManagedListDefinition => new ManagedListDefinition(
+            subCoreKey: 'apes-cic',
+            moduleKey: 'cases',
+            listKey: 'categories',
+            label: __('cases::settings.managed_list_label'),
+            usageCount: static fn (string $key): int => ShelterCase::query()
+                ->where('sub_core_key', ShelterCase::SUB_CORE_APES_CIC)
+                ->where('category', $key)
+                ->count(),
+            newItemDefaults: ['subcategories' => [
+                ['key' => 'general', 'label' => 'General', 'requires_website' => false, 'allows_attachments' => false],
+            ]],
+        ));
     }
 
     protected function mailTemplates(): array

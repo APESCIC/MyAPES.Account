@@ -10,6 +10,8 @@ use App\Core\Extensions\Plugins\PluginManifest;
 use App\Core\Extensions\Plugins\PluginNavigationItem;
 use App\Core\Extensions\Plugins\PluginServiceProvider;
 use App\Core\Extensions\Plugins\PluginSettingsSchema;
+use App\Core\Extensions\Settings\ManagedListDefinition;
+use App\Core\Extensions\Settings\ManagedListRegistry;
 use App\Core\Mail\MailCategory;
 use App\Core\Mail\MailTemplate;
 use Illuminate\Support\Facades\Gate;
@@ -31,6 +33,20 @@ class TicketsServiceProvider extends PluginServiceProvider
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'tickets');
 
         Gate::policy(SupportTicket::class, SupportTicketPolicy::class);
+
+        app(ManagedListRegistry::class)->register('apes-cic', 'tickets', 'service_areas', static fn (): ManagedListDefinition => new ManagedListDefinition(
+            subCoreKey: 'apes-cic',
+            moduleKey: 'tickets',
+            listKey: 'service_areas',
+            label: __('tickets::settings.managed_list_label'),
+            usageCount: static fn (string $key): int => SupportTicket::query()
+                ->where('sub_core_key', 'apes-cic')
+                ->where('service_area', $key)
+                ->count(),
+            newItemDefaults: ['subcategories' => [
+                ['key' => 'general', 'label' => 'General', 'requires_website' => false, 'allows_attachments' => false],
+            ]],
+        ));
 
         app(PublicNavigationRegistry::class)->contribute(static fn (): array => [
             new PublicNavigationItem(

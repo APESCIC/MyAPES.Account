@@ -11,6 +11,7 @@ use App\Core\Extensions\Navigation\PublicNavigationRegistry;
 use App\Core\Extensions\Navigation\StaffPluginNavigationRegistry;
 use App\Core\Extensions\Plugins\PluginEnablement;
 use App\Core\Extensions\Plugins\PluginRegistry;
+use App\Core\Extensions\Settings\ManagedListRegistry;
 use App\Modules\FirstPartyModuleRegistry;
 use App\Services\AuthorizationProfile;
 use App\Services\DatabaseModuleLifecycleManager;
@@ -31,6 +32,7 @@ class ExtensionRegistryServiceProvider extends ServiceProvider
         $this->app->singleton(PluginRegistry::class);
         $this->app->singleton(PublicNavigationRegistry::class);
         $this->app->singleton(StaffPluginNavigationRegistry::class);
+        $this->app->singleton(ManagedListRegistry::class);
 
         $this->app->singleton(
             ModuleRegistry::class,

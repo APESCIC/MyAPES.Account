@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Contracts\ModuleLifecycleManager;
+use App\Core\Extensions\Settings\ManagedListRegistry;
 use App\Exceptions\ModuleLifecycleException;
 use App\Http\Controllers\Controller;
 use App\Modules\ModuleSettingsDescriptor;
@@ -55,6 +56,7 @@ class AdminModuleController extends Controller
             'groupKey' => $descriptor->groupKey,
             'groupLabel' => $descriptor->groupLabel,
             'canManage' => request()->user()?->can($descriptor->managePermission) ?? false,
+            'managedLists' => app(ManagedListRegistry::class)->forModule($subCoreKey, $moduleKey),
         ]);
     }
 
@@ -237,6 +239,7 @@ class AdminModuleController extends Controller
             $groupKey => ['required', 'array', 'min:1'],
             "{$groupKey}.*.key" => ['required', 'string', 'max:64', 'regex:/^[a-z0-9_]+$/'],
             "{$groupKey}.*.label" => ['required', 'string', 'max:255'],
+            "{$groupKey}.*.archived" => ['nullable', 'boolean'],
             "{$groupKey}.*.subcategories" => ['required', 'array', 'min:1'],
             "{$groupKey}.*.subcategories.*.key" => ['required', 'string', 'max:64', 'regex:/^[a-z0-9_]+$/'],
             "{$groupKey}.*.subcategories.*.label" => ['required', 'string', 'max:255'],
@@ -269,6 +272,7 @@ class AdminModuleController extends Controller
                                 ])
                                 ->values()
                                 ->all(),
+                            ...(empty($group['archived']) ? [] : ['archived' => true]),
                         ];
                     })
                     ->values()

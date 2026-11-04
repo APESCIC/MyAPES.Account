@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminAccessController;
 use App\Http\Controllers\Admin\AdminEmailController;
 use App\Http\Controllers\Admin\AdminGroupController;
+use App\Http\Controllers\Admin\AdminManagedListController;
 use App\Http\Controllers\Admin\AdminMaintenanceController;
 use App\Http\Controllers\Admin\AdminModuleController;
 use App\Http\Controllers\Admin\AdminOrganisationModuleController;
@@ -399,6 +400,24 @@ Route::middleware([
             Route::put('/modules/{subCoreKey}/{moduleKey}/settings', [AdminModuleController::class, 'updateSettings'])
                 ->middleware('can:admin.modules.manage')
                 ->name('modules.settings.update');
+            Route::get('/modules/{subCoreKey}/{moduleKey}/lists/{listKey}', [AdminManagedListController::class, 'show'])
+                ->middleware('can:admin.modules.view')
+                ->name('modules.lists.show');
+            Route::post('/modules/{subCoreKey}/{moduleKey}/lists/{listKey}/items', [AdminManagedListController::class, 'store'])
+                ->middleware('can:admin.modules.manage')
+                ->name('modules.lists.store');
+            Route::put('/modules/{subCoreKey}/{moduleKey}/lists/{listKey}/items/{itemKey}', [AdminManagedListController::class, 'update'])
+                ->middleware('can:admin.modules.manage')
+                ->name('modules.lists.update');
+            Route::post('/modules/{subCoreKey}/{moduleKey}/lists/{listKey}/items/{itemKey}/move', [AdminManagedListController::class, 'move'])
+                ->middleware('can:admin.modules.manage')
+                ->name('modules.lists.move');
+            Route::post('/modules/{subCoreKey}/{moduleKey}/lists/{listKey}/items/{itemKey}/restore', [AdminManagedListController::class, 'restore'])
+                ->middleware('can:admin.modules.manage')
+                ->name('modules.lists.restore');
+            Route::post('/modules/{subCoreKey}/{moduleKey}/lists/{listKey}/items/{itemKey}/remove', [AdminManagedListController::class, 'remove'])
+                ->middleware('can:admin.modules.manage')
+                ->name('modules.lists.remove');
             Route::post('/modules/{subCoreKey}/{moduleKey}/transition', [AdminModuleController::class, 'transition'])
                 ->middleware('can:admin.modules.manage')
                 ->name('modules.transition');
