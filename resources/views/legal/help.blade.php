@@ -14,6 +14,9 @@
         @if($showStaffGuideLink ?? false)
             <p data-help-staff-link>{{ __('help.public_guide.staff_link_intro') }} <a href="{{ route('help.staff') }}">{{ __('help.public_guide.staff_link') }}</a>.</p>
         @endif
+        @auth
+            <p data-tour-restart>{{ __('tour.restart_intro') }} <a href="{{ route('dashboard', [\App\Support\Tour\GuidedTour::RESTART_QUERY => 1]) }}">{{ __('tour.restart') }}</a>.</p>
+        @endauth
 
         <section>
             <h2>{{ __('public.legal.help.blade.which_sign_in_should_i_use') }}</h2>

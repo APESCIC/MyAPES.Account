@@ -125,7 +125,7 @@
                     @endforeach
                     <a href="{{ route('privacy') }}" @if (request()->routeIs('privacy')) aria-current="page" @endif>{{ __('public.chrome.app.blade.privacy') }}</a>
                     <a href="{{ route('cookies') }}" @if (request()->routeIs('cookies')) aria-current="page" @endif>{{ __('public.chrome.app.blade.cookies') }}</a>
-                    <a href="{{ route('help') }}" @if (request()->routeIs('help')) aria-current="page" @endif>{{ __('public.chrome.app.blade.help') }}</a>
+                    <a href="{{ route('help') }}" data-tour-target="footer-help" @if (request()->routeIs('help')) aria-current="page" @endif>{{ __('public.chrome.app.blade.help') }}</a>
                     <a href="{{ route('terms') }}" @if (request()->routeIs('terms')) aria-current="page" @endif>{{ __('public.chrome.app.blade.terms') }}</a>
                 </nav>
                 <a
@@ -140,5 +140,10 @@
 
 <x-workspace.drawer />
 <x-workspace.command-palette :menu="$workspaceMenu" />
+@auth
+    @if(request()->routeIs('dashboard'))
+        <x-workspace.guided-tour />
+    @endif
+@endauth
 </body>
 </html>

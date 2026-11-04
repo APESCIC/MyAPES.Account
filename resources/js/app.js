@@ -51,6 +51,7 @@ import { initOwnerPicker } from './tickets/owner-picker.js';
 import { initCommandPalette } from './workspace/command-palette.js';
 import { initWorkspaceDrawer } from './workspace/drawer.js';
 import { initFormActions } from './workspace/form-actions.js';
+import { initGuidedTour } from './workspace/guided-tour.js';
 import { initRichTextEditors } from './workspace/rich-text-editor.js';
 import { initToasts } from './workspace/toasts.js';
 
@@ -153,6 +154,7 @@ initCommandPalette({
     createElement,
     beforeOpen: () => drawer.close({ restoreFocus: false }),
 });
+initGuidedTour();
 
 const mascotStorageKey = 'myapes-mascot-dismissed-v2';
 const mascotDock = document.querySelector('[data-mascot-dock]');

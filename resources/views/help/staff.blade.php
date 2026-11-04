@@ -17,6 +17,7 @@
                 @endif
             </ul>
         </nav>
+        <p data-tour-restart>{{ __('tour.restart_intro') }} <a href="{{ route('dashboard', [\App\Support\Tour\GuidedTour::RESTART_QUERY => 1]) }}">{{ __('tour.restart') }}</a>.</p>
 
         <section id="areas">
             <h2>{{ __('help.staff.areas.heading') }}</h2>
