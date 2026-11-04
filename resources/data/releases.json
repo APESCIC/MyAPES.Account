@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.48.1",
+    "date": "2026-11-04",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Tickets settings pages for Shelter and Pet Care",
+    "summary": "APES Shelter and Rescue and APES Pet Care Clinic now have their own Tickets settings page, where admins can edit the service areas people choose when opening a ticket.",
+    "changes": [
+      "Add a Tickets settings page for APES Shelter and Rescue and for APES Pet Care Clinic.",
+      "Admins can add, rename, reorder, archive and restore their service areas, and reset them to the defaults.",
+      "Ticket forms, ticket pages and the public Open a ticket page use the edited names."
+    ],
+    "affected_areas": [
+      "Admin",
+      "Plugins",
+      "Tickets"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch: extends the managed lists from 0.48.0 to two more modules, seeded from today's areas, with no schema change.",
+    "validation": [
+      "New feature test for both settings pages, adding, renaming and archiving areas, reset and the public page.",
+      "Ticket, plugin settings, managed list, admin route denial and architecture tests.",
+      "Full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "Shelter and Pet Care service areas have no subcategories."
+    ],
+    "rollback": "Redeploy the previous release package. The forms return to the built-in areas; stored settings are ignored.",
+    "provenance": "Milestone v0.48.3 Beta, issue #472 under epic #470, pull request #599.",
+    "references": [
+      {
+        "label": "Issue #472",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/472"
+      },
+      {
+        "label": "Pull request #599",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/599"
+      }
+    ]
+  },
+  {
     "version": "0.48.0",
     "date": "2026-11-03",
     "channel": "stable",
