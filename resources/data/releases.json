@@ -1,5 +1,51 @@
 [
   {
+    "version": "0.49.0",
+    "date": "2026-11-04",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Phone verification PIN on the profile",
+    "summary": "Account holders can now set a phone verification PIN on their profile, so APES staff can check who is calling. The PIN is never stored or shown in full.",
+    "changes": [
+      "Add a Phone verification PIN section to the profile, where people set or change a 4 to 8 digit PIN.",
+      "Setting or changing the PIN asks people to confirm their password first.",
+      "The PIN is stored only in a protected form that lets staff check two digits later; it never appears on screen or in logs.",
+      "Record PIN changes in the audit log without the PIN."
+    ],
+    "affected_areas": [
+      "Profile",
+      "Account security"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Minor: starts the v0.49 phone verification epic with a new account feature and a new table.",
+    "validation": [
+      "New feature test for setting and changing a PIN, re-authentication, storage, display, logs and invalid input.",
+      "Profile, authorisation and translation tests.",
+      "Full PHPUnit suite and the MySQL contract job in CI."
+    ],
+    "known_limitations": [
+      "Staff checking the PIN on calls arrives in the next release. Staff and volunteer accounts do not set a PIN."
+    ],
+    "rollback": "Redeploy the previous release package. The new table can stay; earlier releases ignore it.",
+    "provenance": "Milestone v0.49.3 Beta, issue #476 under epic #475, pull request #602.",
+    "references": [
+      {
+        "label": "Issue #476",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/476"
+      },
+      {
+        "label": "Pull request #602",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/602"
+      }
+    ]
+  },
+  {
     "version": "0.48.3",
     "date": "2026-11-04",
     "channel": "stable",
