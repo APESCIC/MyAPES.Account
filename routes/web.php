@@ -158,6 +158,7 @@ Route::middleware([
 ])->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/help/staff', [HelpController::class, 'staff'])->name('help.staff');
+    Route::get('/help/admin', [HelpController::class, 'admin'])->name('help.admin');
     Route::prefix('staff/callers')->name('callers.')->group(function (): void {
         Route::get('/', [CallerController::class, 'index'])->name('index');
         Route::get('/{caller}', [CallerController::class, 'show'])->whereNumber('caller')->name('show');
