@@ -505,7 +505,7 @@ class ShelterCaseWorkflowTest extends TestCase
 
         $valid->assertForbidden();
         $invalid->assertForbidden();
-        $this->assertSame($valid->getContent(), $invalid->getContent());
+        $this->assertSameIgnoringCspNonce($valid->getContent(), $invalid->getContent());
         $this->assertNull($case->fresh()->assigned_to);
         $audits = AuditLog::query()
             ->where('event', 'authorization.assignment_denied')

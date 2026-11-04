@@ -290,11 +290,11 @@ class SecurityRemediationTest extends TestCase
             foreach ([$existing, $missing, $unassign] as $response) {
                 $response->assertForbidden();
             }
-            $this->assertSame(
+            $this->assertSameIgnoringCspNonce(
                 $existing->getContent(),
                 $missing->getContent(),
             );
-            $this->assertSame(
+            $this->assertSameIgnoringCspNonce(
                 $existing->getContent(),
                 $unassign->getContent(),
             );

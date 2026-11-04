@@ -60,6 +60,17 @@ abstract class TestCase extends BaseTestCase
         return $this;
     }
 
+    /**
+     * Probe-equivalence checks compare whole pages; the per-request CSP
+     * nonce (#485) is the only part allowed to differ.
+     */
+    protected function assertSameIgnoringCspNonce(string|false $expected, string|false $actual): void
+    {
+        $normalise = static fn (string|false $html): string => (string) preg_replace('/nonce="[^"]*"/', 'nonce=""', (string) $html);
+
+        $this->assertSame($normalise($expected), $normalise($actual));
+    }
+
     protected function fakeMaintenanceMode(bool $active = true): MaintenanceMode
     {
         $maintenanceMode = new class($active) implements MaintenanceMode

@@ -18,6 +18,7 @@ use App\Http\Controllers\Auth\PublicPasswordResetController;
 use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\ChangeLogController;
+use App\Http\Controllers\CspReportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\LocaleController;
@@ -39,6 +40,9 @@ Route::middleware('guest')->group(function (): void {
 });
 
 Route::get('/robots.txt', RobotsTxtController::class)->name('robots');
+Route::post('/csp-report', CspReportController::class)
+    ->middleware('throttle:30,1')
+    ->name('csp.report');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 
 Route::post('/locale', [LocaleController::class, 'store'])

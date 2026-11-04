@@ -215,7 +215,7 @@
             method="post"
             action="{{ route('admin.modules.settings.update', [$subCoreKey, $moduleKey]) }}"
             class="module-settings-reset"
-            onsubmit="return confirm('Reset all settings for this plugin to defaults?')"
+            data-confirm="Reset all settings for this plugin to defaults?"
         >
             @csrf
             @method('put')

@@ -163,7 +163,7 @@
         @endif
 
         @can('delete', $case)
-            <form method="post" action="{{ route('apes-cic.cases.destroy', $case) }}" onsubmit="return confirm('Delete this case?')">
+            <form method="post" action="{{ route('apes-cic.cases.destroy', $case) }}" data-confirm="Delete this case?">
                 @csrf
                 @method('delete')
                 <button type="submit" class="danger-btn">{{ __('cases::ui.show.blade.delete_case') }}</button>

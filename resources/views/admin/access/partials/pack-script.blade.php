@@ -1,4 +1,4 @@
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
 document.querySelectorAll('[data-pack]').forEach((pack) => {
     pack.addEventListener('change', () => {
         const perms = JSON.parse(pack.dataset.packPermissions || '[]');

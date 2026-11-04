@@ -157,7 +157,7 @@
             <a href="{{ route($ticketService->routePrefix.'.index') }}">{{ __('tickets::ui.show.blade.back') }}</a>
         </div>
         @if($ticketService->supportsDelete && auth()->user()->can('delete', $ticket))
-            <form method="post" action="{{ route($ticketService->routePrefix.'.destroy', $ticket) }}" onsubmit="return confirm('Delete this ticket?')">
+            <form method="post" action="{{ route($ticketService->routePrefix.'.destroy', $ticket) }}" data-confirm="Delete this ticket?">
                 @csrf
                 @method('delete')
                 <button type="submit" class="danger-btn">{{ __('tickets::ui.show.blade.delete_ticket') }}</button>
