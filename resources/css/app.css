@@ -2525,6 +2525,17 @@ caption {
     margin-top: 0.35rem;
 }
 
+.bookings-frame {
+    width: 100%;
+    height: min(80vh, 56rem);
+    min-height: 32rem;
+    margin-top: 1.25rem;
+    display: block;
+    border: 1px solid var(--sg-edge);
+    border-radius: 0.75rem;
+    background: #fff;
+}
+
 .legal-nav {
     margin: 1rem 0 1.45rem;
     padding: 0;

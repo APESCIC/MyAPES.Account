@@ -17,6 +17,7 @@ use App\Http\Controllers\Auth\PublicAuthController;
 use App\Http\Controllers\Auth\PublicPasswordResetController;
 use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\Auth\TwoFactorController;
+use App\Http\Controllers\BookingsController;
 use App\Http\Controllers\ChangeLogController;
 use App\Http\Controllers\CspReportController;
 use App\Http\Controllers\DashboardController;
@@ -53,6 +54,10 @@ Route::get('/change-log', ChangeLogController::class)->name('change-log.index');
 Route::view('/privacy', 'legal.privacy')->name('privacy');
 Route::view('/cookies', 'legal.cookies')->name('cookies');
 Route::get('/help', [HelpController::class, 'public'])->name('help');
+Route::get('/bookings', [BookingsController::class, 'index'])->name('bookings.index');
+Route::get('/bookings/{page}', [BookingsController::class, 'show'])
+    ->where('page', '[a-z-]+')
+    ->name('bookings.show');
 Route::view('/terms', 'legal.terms')->name('terms');
 Route::get('/mail/reply', MailReplyLinkController::class)
     ->middleware(['signed', 'throttle:30,1'])

@@ -58,21 +58,33 @@ return [
     ],
 
     'csp' => [
-        // Report-only until CSP_ENFORCE=true (decision D6). The nonce for
-        // inline scripts and the Vite dev server are added per request.
-        'enforce' => (bool) env('CSP_ENFORCE', false),
+        // Enforced since #488 after a clean report-only run (decision D6);
+        // CSP_ENFORCE=false drops back to report-only. The nonce for inline
+        // scripts and the Vite dev server are added per request. Tiny hosts
+        // follow https://www.tiny.cloud/docs/tinymce/latest/tinymce-and-csp/.
+        'enforce' => (bool) env('CSP_ENFORCE', true),
         'report' => (bool) env('CSP_REPORT', true),
         'directives' => [
             'default-src' => ["'self'"],
-            'script-src' => ["'self'", 'https://cdn.tiny.cloud'],
-            'style-src' => ["'self'", "'unsafe-inline'", 'https://cdn.tiny.cloud'],
-            'img-src' => ["'self'", 'data:', 'https:'],
-            'font-src' => ["'self'", 'data:', 'https://cdn.tiny.cloud'],
-            'connect-src' => ["'self'", 'https://cdn.tiny.cloud'],
-            'frame-src' => ['https://bookings.cloud.microsoft', 'https://outlook.office365.com'],
+            'script-src' => ["'self'", 'https://*.tiny.cloud', 'https://*.tinymce.com'],
+            'style-src' => ["'self'", "'unsafe-inline'", 'https://*.tiny.cloud', 'https://*.tinymce.com'],
+            'img-src' => ["'self'", 'data:', 'blob:', 'https:'],
+            'font-src' => ["'self'", 'data:', 'https://*.tiny.cloud', 'https://*.tinymce.com'],
+            'connect-src' => ["'self'", 'blob:', 'https://*.tiny.cloud', 'https://*.tinymce.com'],
+            'frame-src' => ["'self'", 'https://bookings.cloud.microsoft', 'https://outlook.office365.com'],
             'object-src' => ["'none'"],
             'base-uri' => ["'self'"],
             'frame-ancestors' => ["'self'"],
+        ],
+    ],
+
+    'bookings' => [
+        // Public Microsoft Bookings pages (#488), keyed by the /bookings/{page} slug.
+        // The CSP frame-src above must allow these hosts.
+        'pages' => [
+            'apes' => 'https://bookings.cloud.microsoft/book/APESBookings@apes.org.uk/',
+            'shelter-and-rescue' => 'https://bookings.cloud.microsoft/book/APESShelterRescueBookings@apes.org.uk/',
+            'pet-care-clinic' => 'https://bookings.cloud.microsoft/book/APESPetCareClinicBookings@apes.org.uk/',
         ],
     ],
 
