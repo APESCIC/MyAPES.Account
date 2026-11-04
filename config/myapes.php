@@ -57,6 +57,25 @@ return [
         'retention_days' => (int) env('AUDIT_LOG_RETENTION_DAYS', 180),
     ],
 
+    'csp' => [
+        // Report-only until CSP_ENFORCE=true (decision D6). The nonce for
+        // inline scripts and the Vite dev server are added per request.
+        'enforce' => (bool) env('CSP_ENFORCE', false),
+        'report' => (bool) env('CSP_REPORT', true),
+        'directives' => [
+            'default-src' => ["'self'"],
+            'script-src' => ["'self'", 'https://cdn.tiny.cloud'],
+            'style-src' => ["'self'", "'unsafe-inline'", 'https://cdn.tiny.cloud'],
+            'img-src' => ["'self'", 'data:', 'https:'],
+            'font-src' => ["'self'", 'data:', 'https://cdn.tiny.cloud'],
+            'connect-src' => ["'self'", 'https://cdn.tiny.cloud'],
+            'frame-src' => ['https://bookings.cloud.microsoft', 'https://outlook.office365.com'],
+            'object-src' => ["'none'"],
+            'base-uri' => ["'self'"],
+            'frame-ancestors' => ["'self'"],
+        ],
+    ],
+
     'call_logs' => [
         // UK GDPR retention for staff call logs (#480); owner decision: 24 months.
         'retention_months' => (int) env('CALL_LOG_RETENTION_MONTHS', 24),

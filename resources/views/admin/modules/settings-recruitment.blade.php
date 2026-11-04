@@ -73,7 +73,7 @@
             method="post"
             action="{{ route('admin.modules.settings.update', [$subCoreKey, $moduleKey]) }}"
             class="module-settings-reset"
-            onsubmit="return confirm('Reset Recruitment settings to defaults?')"
+            data-confirm="Reset Recruitment settings to defaults?"
         >
             @csrf
             @method('put')

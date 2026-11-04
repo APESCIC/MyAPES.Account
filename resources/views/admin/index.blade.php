@@ -55,7 +55,7 @@
                 <legend>{{ __('admin.overview.reporting_range_legend') }}</legend>
                 @foreach($ranges as $option)
                     <label>
-                        <input type="radio" name="range" value="{{ $option }}" @checked($range === $option) onchange="this.form.submit()">
+                        <input type="radio" name="range" value="{{ $option }}" @checked($range === $option) data-auto-submit>
                         Last {{ $option }} days
                     </label>
                 @endforeach

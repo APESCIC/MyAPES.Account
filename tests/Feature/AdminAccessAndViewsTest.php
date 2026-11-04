@@ -376,7 +376,7 @@ class AdminAccessAndViewsTest extends TestCase
         foreach ($pairs as [$existing, $missing]) {
             $existing->assertForbidden();
             $missing->assertForbidden();
-            $this->assertSame(
+            $this->assertSameIgnoringCspNonce(
                 $existing->getContent(),
                 $missing->getContent(),
             );
@@ -502,15 +502,15 @@ class AdminAccessAndViewsTest extends TestCase
         ] as $response) {
             $response->assertForbidden();
         }
-        $this->assertSame(
+        $this->assertSameIgnoringCspNonce(
             $roleExisting->getContent(),
             $roleMissing->getContent(),
         );
-        $this->assertSame(
+        $this->assertSameIgnoringCspNonce(
             $roleShowExisting->getContent(),
             $roleShowMissing->getContent(),
         );
-        $this->assertSame(
+        $this->assertSameIgnoringCspNonce(
             $roleDestroyExisting->getContent(),
             $roleDestroyMissing->getContent(),
         );

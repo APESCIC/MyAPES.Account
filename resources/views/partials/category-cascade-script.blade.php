@@ -12,7 +12,7 @@
         ];
     })->values()->all();
 @endphp
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
 (() => {
     const groups = @json($cascadePayload);
     const parent = document.querySelector('[data-category-parent]');

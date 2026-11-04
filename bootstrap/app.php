@@ -11,6 +11,7 @@ use App\Http\Middleware\EnsurePluginEnabled;
 use App\Http\Middleware\EnsureRecentStepUp;
 use App\Http\Middleware\EnsureServiceSelected;
 use App\Http\Middleware\RevalidateDirectoryAccess;
+use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
 use App\Services\MaintenanceResponseFactory;
 use Illuminate\Foundation\Application;
@@ -51,6 +52,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             SetLocale::class,
         ]);
+
+        $middleware->append(SecurityHeaders::class);
+        $middleware->validateCsrfTokens(except: ['csp-report']);
 
         $middleware->alias([
             'admin.denial-audit' => AuditAdminAuthorizationDenial::class,
