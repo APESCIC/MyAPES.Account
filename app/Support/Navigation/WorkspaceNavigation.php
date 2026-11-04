@@ -83,11 +83,17 @@ final class WorkspaceNavigation
      */
     private function staffPanel(User $user, array $moduleNavigation): NavPanel
     {
+        $overview = [
+            new NavItem('dashboard', __('public.chrome.app.blade.dashboard'), route('dashboard'), 'layout-dashboard', ['dashboard'], $this->words('workspace.keywords.dashboard')),
+            new NavItem('profile', __('public.chrome.app.blade.profile'), route('profile.edit'), 'user-round', ['profile.*', 'two-factor.setup'], $this->words('workspace.keywords.profile')),
+        ];
+
+        if ($this->isStaffAccount($user)) {
+            $overview[] = new NavItem('callers', __('callers.nav'), route('callers.index'), 'search', ['callers.*'], ['caller', 'phone', 'call', 'verify', 'pin']);
+        }
+
         $groups = [
-            new NavGroup('overview', __('workspace.groups.overview'), [
-                new NavItem('dashboard', __('public.chrome.app.blade.dashboard'), route('dashboard'), 'layout-dashboard', ['dashboard'], $this->words('workspace.keywords.dashboard')),
-                new NavItem('profile', __('public.chrome.app.blade.profile'), route('profile.edit'), 'user-round', ['profile.*', 'two-factor.setup'], $this->words('workspace.keywords.profile')),
-            ]),
+            new NavGroup('overview', __('workspace.groups.overview'), $overview),
             ...$this->moduleGroups($user, $moduleNavigation),
         ];
 

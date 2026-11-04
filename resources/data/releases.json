@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.49.1",
+    "date": "2026-11-04",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Staff caller verification with a partial PIN",
+    "summary": "Staff can now confirm who is calling by asking for two digits of the caller's phone verification PIN. Staff never see any PIN digit.",
+    "changes": [
+      "Add a Callers page for staff, volunteers and students to find the person on the phone.",
+      "The system asks for two random PIN digits and checks what the caller says.",
+      "Three wrong attempts pause checking for that caller for 15 minutes.",
+      "Every check is recorded in the audit log without any PIN digits."
+    ],
+    "affected_areas": [
+      "Staff",
+      "Account security"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch: adds a staff page on top of the 0.49.0 PIN, with no data change.",
+    "validation": [
+      "New feature test for finding callers, correct and wrong digits, lockout, audit entries and access rules.",
+      "Navigation, PIN, authorisation and translation tests.",
+      "Full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "Editing a caller's details after verification and call logs follow in the next releases. Callers without a PIN need the usual identity checks."
+    ],
+    "rollback": "Redeploy the previous release package. No data changes.",
+    "provenance": "Milestone v0.49.3 Beta, issue #477 under epic #475, pull request #603.",
+    "references": [
+      {
+        "label": "Issue #477",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/477"
+      },
+      {
+        "label": "Pull request #603",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/603"
+      }
+    ]
+  },
+  {
     "version": "0.49.0",
     "date": "2026-11-04",
     "channel": "stable",
