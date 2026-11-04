@@ -1,5 +1,49 @@
 [
   {
+    "version": "0.50.1",
+    "date": "2026-11-04",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Content Security Policy and security headers",
+    "summary": "MyAPES Account now sends a Content Security Policy and other security headers on every page. The policy starts in report-only mode so nothing breaks while it is checked.",
+    "changes": [
+      "Add a Content Security Policy, X-Content-Type-Options and Referrer-Policy to every response.",
+      "The policy allows the TinyMCE editor and Microsoft Bookings pages that arrive in later releases.",
+      "Start in report-only mode and log any reported problems, so the policy can be enforced safely later.",
+      "Replace inline page scripts that a strict policy would block."
+    ],
+    "affected_areas": [
+      "Security"
+    ],
+    "categories": [
+      "security"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch: adds response headers in report-only mode and a report endpoint; no data change.",
+    "validation": [
+      "New feature test for headers on every response, allowed sources, script nonces, enforcement and reports.",
+      "New frontend test for confirm and auto-submit actions.",
+      "Full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "The policy is report-only until CSP_ENFORCE is turned on in a later release."
+    ],
+    "rollback": "Redeploy the previous release package. No data changes.",
+    "provenance": "Milestone v0.50.2 Beta, issue #485 under epic #481, pull request #620.",
+    "references": [
+      {
+        "label": "Issue #485",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/485"
+      },
+      {
+        "label": "Pull request #620",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/620"
+      }
+    ]
+  },
+  {
     "version": "0.50.0",
     "date": "2026-11-04",
     "channel": "stable",
