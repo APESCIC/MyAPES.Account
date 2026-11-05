@@ -142,6 +142,8 @@
                     <button type="submit">{{ __('tickets::ui.index.blade.create_ticket') }}</button>
                 </form>
             </div>
+        @else
+            <x-public-account-required only-staff-side />
         @endif
     </div>
 

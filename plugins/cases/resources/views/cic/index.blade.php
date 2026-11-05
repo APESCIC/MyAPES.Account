@@ -116,6 +116,8 @@
                     <button type="submit">{{ __('cases::ui.index.blade.open_case') }}</button>
                 </form>
             </div>
+        @else
+            <x-public-account-required only-staff-side />
         @endif
     </div>
 

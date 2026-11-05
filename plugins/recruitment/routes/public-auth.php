@@ -10,6 +10,7 @@ use Plugins\Recruitment\Http\Controllers\PublicRecruitmentApplicationController;
 */
 
 Route::get('/recruitment/applications', [PublicRecruitmentApplicationController::class, 'index'])
+    ->middleware('account.public')
     ->name('recruitment.applications.index');
 Route::get('/recruitment/applications/{recruitmentApplication}', [PublicRecruitmentApplicationController::class, 'show'])
     ->name('recruitment.applications.show');
@@ -17,4 +18,5 @@ Route::post('/recruitment/applications/{recruitmentApplication}/withdraw', [Publ
     ->name('recruitment.applications.withdraw');
 Route::post('/recruitment/{recruitmentRole}/apply', [PublicRecruitmentApplicationController::class, 'store'])
     ->whereNumber('recruitmentRole')
+    ->middleware('account.public')
     ->name('recruitment.apply');

@@ -351,4 +351,14 @@ return [
         'changed' => 'Your phone verification PIN has been changed.',
         'invalid' => 'Your PIN must be :min to :max digits.',
     ],
+    'account_separation' => [
+        'title' => 'Use your personal public account',
+        'page_title' => 'Use your personal public account | MyAPES Account',
+        'body' => 'Staff, volunteer, student and admin accounts are for APES work only. To use APES services yourself, such as raising a ticket, adding a pet or applying for a role, use a separate public account with a personal email address.',
+        'steps' => 'Log out of this account first, then sign in to your public account or register one.',
+        'register' => 'Register a public account',
+        'sign_in' => 'Public Login',
+        'log_out' => 'Log out',
+        'learn_more' => 'Why staff need a separate account',
+    ],
 ];

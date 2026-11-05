@@ -16,6 +16,7 @@ Route::get('cases', [CaseController::class, 'index'])
 Route::post('cases', [CaseController::class, 'store'])
     ->defaults('subCoreKey', 'apes-cic')
     ->defaults('moduleKey', 'cases')
+    ->middleware('account.public')
     ->name('cases.store');
 Route::get('cases/{case}', [CaseController::class, 'show'])
     ->defaults('subCoreKey', 'apes-cic')

@@ -16,4 +16,5 @@ Route::get('/recruitment/{recruitmentRole}', [RecruitmentBoardController::class,
     ->name('recruitment.show');
 Route::get('/recruitment/{recruitmentRole}/apply/start', [RecruitmentBoardController::class, 'startApply'])
     ->whereNumber('recruitmentRole')
+    ->middleware('account.public')
     ->name('recruitment.apply.start');

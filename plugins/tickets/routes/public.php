@@ -13,4 +13,5 @@ Route::get('/open-a-ticket', [PublicTicketEntryController::class, 'index'])
     ->name('tickets.public.index');
 Route::get('/open-a-ticket/{service}/{area}/start', [PublicTicketEntryController::class, 'start'])
     ->where(['service' => '[a-z-]+', 'area' => '[a-z_]+'])
+    ->middleware('account.public')
     ->name('tickets.public.start');
