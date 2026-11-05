@@ -38,7 +38,40 @@ class AdminPeopleSplitTest extends TestCase
         $this->assertSame($publicList->viewData('users')->total(), $accounts['public_users']);
         $this->assertSame($staffList->viewData('users')->total(), $accounts['staff_users']);
         $this->assertSame($accounts['total'], $accounts['public_users'] + $accounts['staff_users']);
-        $overview->assertSee('<span data-count="public-users">(1)</span>', false);
+        $overview->assertSee('data-count="public-users"', false)->assertSeeText('Manage public users (1)');
+    }
+
+    public function test_staff_users_role_filter_admin_badge_and_all_accounts_link(): void
+    {
+        $administrator = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create(['name' => 'Ada Admin']);
+        $people = $this->people();
+
+        $expected = [
+            'admin' => [$administrator->id],
+            'staff' => [$people['staff']->id, $people['cloudron']->id, $people['hybrid']->id, $people['pending']->id],
+            'volunteer' => [$people['volunteer']->id],
+            'student' => [$people['student']->id],
+        ];
+
+        foreach ($expected as $type => $ids) {
+            $response = $this->actingAs($administrator)
+                ->get(route('admin.users.index', ['account_type' => 'staff', 'staff_type' => $type]))
+                ->assertOk();
+
+            $this->assertEqualsCanonicalizing($ids, $this->listedIds($response), "Role filter [{$type}]");
+        }
+
+        $this->actingAs($administrator)
+            ->get(route('admin.users.index', ['account_type' => 'staff']))
+            ->assertOk()
+            ->assertSee('id="staff-type"', false)
+            ->assertDontSee('id="protected-role"', false)
+            ->assertSee('data-badge="admin"', false)
+            ->assertSee('href="'.route('admin.users.index').'"', false);
+
+        $this->actingAs($administrator)
+            ->get(route('admin.users.index', ['account_type' => 'staff', 'staff_type' => 'owner']))
+            ->assertSessionHasErrors('staff_type');
     }
 
     /**
