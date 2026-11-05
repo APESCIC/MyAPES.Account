@@ -55,6 +55,7 @@ class AdminUserController extends Controller
                 'nullable',
                 Rule::in($profile->protectedRolesByPrecedence()),
             ],
+            'staff_type' => ['nullable', Rule::in(AccountClassifier::STAFF_SIDE_TYPES)],
         ]);
         $query = User::query()->with([
             'roles' => fn ($query) => $query->orderBy('name'),
@@ -74,7 +75,11 @@ class AdminUserController extends Controller
         }
 
         if (($filters['account_type'] ?? null) === 'staff') {
-            $classifier->scopeStaffSide($query);
+            if (isset($filters['staff_type'])) {
+                $classifier->scopeType($query, $filters['staff_type']);
+            } else {
+                $classifier->scopeStaffSide($query);
+            }
         } elseif (($filters['account_type'] ?? null) === 'public') {
             $classifier->scopePublic($query);
         }
@@ -124,7 +129,9 @@ class AdminUserController extends Controller
                 User::IDENTITY_CLOUDRON_OIDC => 'Cloudron OIDC',
             ],
             'protectedRoles' => $profile->protectedRolesByPrecedence(),
+            'staffTypes' => AccountClassifier::STAFF_SIDE_TYPES,
             'authorizationProfile' => $profile,
+            'accountClassifier' => $classifier,
             'resettableUserIds' => $resettableUserIds,
         ]);
     }
