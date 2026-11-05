@@ -2,6 +2,7 @@
 
 namespace Plugins\PetProfiles;
 
+use App\Core\Accounts\ClientRecords\ClientRecordType;
 use App\Core\Extensions\Plugins\PluginAbilityFactory;
 use App\Core\Extensions\Plugins\PluginManifest;
 use App\Core\Extensions\Plugins\PluginNavigationItem;
@@ -35,6 +36,11 @@ class PetProfilesServiceProvider extends PluginServiceProvider
         Gate::policy(PetProfile::class, PetProfilePolicy::class);
     }
 
+    protected function clientRecords(): array
+    {
+        return [new ClientRecordType('pet-profiles', 'Pet profiles', PetProfile::class)];
+    }
+
     protected function manifest(): PluginManifest
     {
         $a = PluginAbilityFactory::class;
@@ -48,8 +54,8 @@ class PetProfilesServiceProvider extends PluginServiceProvider
             compatibleModules: ['shelter-rescue', 'pet-care-clinic'],
             shippedModules: ['shelter-rescue', 'pet-care-clinic'],
             permissions: [
-                $a::public('view-own', 'View own pet profiles'),
-                $a::public('create', 'Create pet profiles'),
+                $a::client('view-own', 'View own pet profiles'),
+                $a::client('create', 'Create pet profiles'),
                 $a::public('update-own', 'Update own pet profiles'),
                 $a::staff('view-all', 'View all pet profiles'),
                 $a::staff('update-all', 'Update all pet profiles'),

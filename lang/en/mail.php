@@ -69,7 +69,21 @@ return [
                 'name' => 'Staff Login reminder',
                 'description' => 'Sent by an administrator to staff who have not completed their first Staff Login.',
             ],
+            'staff_client_records_archived' => [
+                'name' => 'Staff client records archived',
+                'description' => 'Sent to a staff, volunteer, student or admin account after its personal client records were archived.',
+            ],
         ],
+    ],
+
+    'staff_client_records_archived' => [
+        'subject' => 'Your personal MyAPES records have moved out of your staff account',
+        'greeting' => 'Hello :name,',
+        'line_archived' => 'Staff, volunteer, student and admin accounts can no longer hold personal client records, so we have archived these records on your staff account:',
+        'line_count' => ':label: :count',
+        'line_register' => 'To use APES services yourself, register a separate public account with a personal email address.',
+        'line_recoverable' => 'Nothing has been deleted. If you need a record back, contact an APES administrator.',
+        'action' => 'Register a public account',
     ],
 
     'pending_first_login' => [

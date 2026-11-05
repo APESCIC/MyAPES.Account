@@ -59,6 +59,13 @@ return [
                 'and' => ', and',
                 'use' => 'Use',
             ],
+            'staff_accounts' => [
+                'heading' => 'Staff and personal accounts',
+                'why' => 'Staff, volunteer, student and admin accounts are work accounts. They sign in through APES Cloudron and can see other people\'s records, so you cannot use them to raise tickets, add pets, open cases, book consultations or apply for roles for yourself.',
+                'conflict' => 'This also avoids a conflict of interest: nobody at APES should handle, assign or decide on their own records. Keeping your personal records in a separate public account means another member of staff deals with them.',
+                'how' => 'To use APES services yourself, register a public account with a personal email address, not your APES work email, and sign in to it with Public Login. Keep it separate from your staff account and do not link the two.',
+                'archived' => 'If personal records were found on your staff account, we archived them and emailed you. Nothing was deleted; contact an APES administrator if you need a record back.',
+            ],
         ],
         'privacy' => [
             'blade' => [
@@ -350,5 +357,21 @@ return [
         'saved' => 'Your phone verification PIN is set.',
         'changed' => 'Your phone verification PIN has been changed.',
         'invalid' => 'Your PIN must be :min to :max digits.',
+    ],
+    'account_separation' => [
+        'title' => 'Use your personal public account',
+        'page_title' => 'Use your personal public account | MyAPES Account',
+        'page_heading' => 'This is a work account',
+        'body' => 'Staff, volunteer, student and admin accounts are for APES work only. To use APES services yourself, such as raising a ticket, adding a pet or applying for a role, use a separate public account with a personal email address.',
+        'steps' => 'Log out of this account first, then sign in to your public account or register one.',
+        'register' => 'Register a public account',
+        'sign_in' => 'Public Login',
+        'log_out' => 'Log out',
+        'learn_more' => 'Why staff need a separate account',
+    ],
+    'client_records_notice' => [
+        'title' => 'Your personal records have moved out of this account',
+        'body' => 'This is a work account, so we archived the personal tickets, pets, cases, consultations or job applications it held. Nothing was deleted. Use a separate public account with a personal email for your own requests.',
+        'dismiss' => 'Got it, hide this',
     ],
 ];

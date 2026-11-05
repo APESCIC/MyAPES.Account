@@ -20,7 +20,18 @@ class ShelterCasePolicy
 
     public function create(User $user): bool
     {
-        return $user->can('shelter-rescue.cases.create');
+        return $user->can('shelter-rescue.cases.create')
+            || $user->can('shelter-rescue.cases.create-for-client');
+    }
+
+    /**
+     * Clients open cases for their own pets; staff only for someone else's (#511).
+     */
+    public function createFor(User $user, int $ownerId): bool
+    {
+        return $ownerId === $user->id
+            ? $user->can('shelter-rescue.cases.create')
+            : $user->can('shelter-rescue.cases.create-for-client');
     }
 
     public function view(User $user, ShelterCase $case): bool

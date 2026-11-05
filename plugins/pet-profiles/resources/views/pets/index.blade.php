@@ -60,6 +60,8 @@
                 <button type="submit">{{ __('pet_profiles::ui.index.blade.save_pet_profile') }}</button>
                 </form>
             </div>
+        @else
+            <x-public-account-required only-staff-side />
         @endif
     </div>
 @endsection

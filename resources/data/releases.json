@@ -1,5 +1,63 @@
 [
   {
+    "version": "0.54.0",
+    "date": "2026-11-05",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Separate staff and public accounts",
+    "summary": "Staff, volunteer, student and admin accounts are now for APES work only. Anyone who wants to use APES services for themselves uses a separate public account with a personal email address.",
+    "changes": [
+      "Staff-side accounts can no longer raise their own tickets, add pets, open APES CIC cases or apply for roles. They see a page explaining how to use a personal public account instead.",
+      "Staff can still open Shelter and Rescue cases and Pet Care Clinic consultations for a client's pet.",
+      "Public registration and email changes refuse APES work email addresses and ask for a personal email.",
+      "Cloudron sign-in can no longer turn a public account into a staff account.",
+      "A new admin command finds personal records held by staff-side accounts, shows a report first, and after confirmation archives them and emails the people affected. Nothing is deleted, and a second command restores them.",
+      "The Help page explains why staff need a separate personal account, including the conflict-of-interest rule, and affected staff see a one-off notice they can dismiss."
+    ],
+    "affected_areas": [
+      "Tickets",
+      "Cases",
+      "Pet profiles",
+      "Consultations",
+      "Recruitment",
+      "Registration and sign-in",
+      "Admin",
+      "Help"
+    ],
+    "categories": [
+      "added",
+      "changed",
+      "security"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Minor: adds a staff ability for working on a client's behalf, an archive and restore command, a guidance page and a help section, with additive database changes only.",
+    "validation": [
+      "New feature tests for the ability split, the guidance page, registration and email change, Cloudron sign-in, the archive and restore commands, the help section and the notice.",
+      "Upgrade test confirming the migration removes the old staff grants and keeps staff work abilities.",
+      "Browser check of the guidance page and the Help page.",
+      "Release history validated against main.",
+      "Full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "Existing personal records on staff accounts stay in place until an administrator runs the archive command after this release."
+    ],
+    "rollback": "Redeploy the previous release package. The new columns are nullable and can stay; staff role grants return when the previous release re-syncs permissions.",
+    "provenance": "Milestone v0.54.0 Beta: Separate staff and public accounts, epic #510 with issues #511 to #516, shipped in pull request #660.",
+    "references": [
+      {
+        "label": "Issue #510",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/510"
+      },
+      {
+        "label": "Pull request #660",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/660"
+      }
+    ]
+  },
+  {
     "version": "0.52.0",
     "date": "2026-11-05",
     "channel": "stable",

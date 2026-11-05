@@ -72,6 +72,7 @@ class ConsultationController extends Controller
             $domain,
             (int) $validated['pet_profile_id'],
         );
+        Gate::authorize('createFor', [PetCareConsultation::class, (int) $pet->user_id]);
 
         $consultation = PetCareConsultation::create([
             ...$validated,

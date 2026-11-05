@@ -22,7 +22,19 @@ class PetCareConsultationPolicy
     public function create(User $user): bool
     {
         return $this->enabled()
-            && $user->can(PetCareConsultation::PERMISSION_CREATE);
+            && ($user->can(PetCareConsultation::PERMISSION_CREATE)
+                || $user->can(PetCareConsultation::PERMISSION_CREATE_FOR_CLIENT));
+    }
+
+    /**
+     * Clients book for their own pets; staff only for someone else's (#511).
+     */
+    public function createFor(User $user, int $ownerId): bool
+    {
+        return $this->enabled()
+            && ($ownerId === $user->id
+                ? $user->can(PetCareConsultation::PERMISSION_CREATE)
+                : $user->can(PetCareConsultation::PERMISSION_CREATE_FOR_CLIENT));
     }
 
     public function view(

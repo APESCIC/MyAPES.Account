@@ -2,6 +2,7 @@
 
 namespace Plugins\Recruitment;
 
+use App\Core\Accounts\ClientRecords\ClientRecordType;
 use App\Core\Extensions\Navigation\PublicNavigationItem;
 use App\Core\Extensions\Navigation\PublicNavigationRegistry;
 use App\Core\Extensions\Navigation\StaffPluginNavigationItem;
@@ -38,6 +39,11 @@ class RecruitmentServiceProvider extends PluginServiceProvider
 
         $this->registerPublicNavigation();
         $this->registerStaffNavigation();
+    }
+
+    protected function clientRecords(): array
+    {
+        return [new ClientRecordType('recruitment-applications', 'Job applications', RecruitmentApplication::class)];
     }
 
     protected function manifest(): PluginManifest

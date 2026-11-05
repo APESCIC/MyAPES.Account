@@ -19,6 +19,18 @@ final class PluginAbilityFactory
         ];
     }
 
+    /**
+     * Roles that may own client records; staff-side roles need a separate public account (#511).
+     *
+     * @return list<string>
+     */
+    public static function clientRoles(): array
+    {
+        return [
+            'service-user',
+        ];
+    }
+
     /** @return list<string> */
     public static function staffWorkRoles(): array
     {
@@ -40,17 +52,13 @@ final class PluginAbilityFactory
     }
 
     /**
-     * Public roles that may apply for openings; students and volunteers are excluded.
+     * Roles that may apply for openings; staff apply from a personal public account (#511).
      *
      * @return list<string>
      */
     public static function applicantRoles(): array
     {
-        return [
-            'service-user',
-            'staff',
-            'administrator',
-        ];
+        return self::clientRoles();
     }
 
     /**
@@ -68,6 +76,11 @@ final class PluginAbilityFactory
     public static function public(string $ability, string $label): PluginAbility
     {
         return new PluginAbility($ability, $label, false, self::publicRoles(), public: true);
+    }
+
+    public static function client(string $ability, string $label): PluginAbility
+    {
+        return new PluginAbility($ability, $label, false, self::clientRoles(), public: true);
     }
 
     public static function applicant(string $ability, string $label): PluginAbility

@@ -120,13 +120,14 @@ class StructureTicketsCasesWave6Test extends TestCase
         $this->assertSame('pet-profiles', $cases->dependencies[0]->pluginSlug);
     }
 
-    public function test_staff_can_create_apes_cic_ticket(): void
+    public function test_client_creates_apes_cic_ticket_and_staff_can_view_it(): void
     {
+        $client = User::factory()->create();
         $staff = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_STAFF)
             ->create();
 
-        $this->actingAs($staff)->post(route('apes-cic.tickets.store'), [
+        $this->actingAs($client)->post(route('apes-cic.tickets.store'), [
             'service_area' => 'operations_facilities',
             'sub_category' => 'premises',
             'subject' => 'Wave6 ticket',

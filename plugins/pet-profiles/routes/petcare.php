@@ -21,6 +21,7 @@ Route::get('pets', [PetProfileController::class, 'index'])
 Route::post('pets', [PetProfileController::class, 'store'])
     ->defaults('subCoreKey', 'pet-care-clinic')
     ->defaults('moduleKey', 'pet-profiles')
+    ->middleware('account.public')
     ->name('pets.store');
 Route::get('pets/{pet}', [PetProfileController::class, 'show'])
     ->defaults('subCoreKey', 'pet-care-clinic')

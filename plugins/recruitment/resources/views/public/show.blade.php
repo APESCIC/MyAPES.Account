@@ -74,6 +74,8 @@
                         <button type="submit">{{ __('recruitment::public.show.blade.submit_application') }}</button>
                     </div>
                 </form>
+            @elseif(app(\App\Core\Accounts\AccountClassifier::class)->isStaffSide(auth()->user()))
+                <x-public-account-required />
             @else
                 <p class="muted">{{ __('recruitment::public.show.blade.you_cannot_apply_for_this_role_with_your_current_accoun') }}</p>
             @endif

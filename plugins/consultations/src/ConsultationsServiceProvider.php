@@ -2,6 +2,7 @@
 
 namespace Plugins\Consultations;
 
+use App\Core\Accounts\ClientRecords\ClientRecordType;
 use App\Core\Accounts\User;
 use App\Core\Extensions\Plugins\PluginAbilityFactory;
 use App\Core\Extensions\Plugins\PluginDependency;
@@ -57,6 +58,11 @@ class ConsultationsServiceProvider extends PluginServiceProvider
         ];
     }
 
+    protected function clientRecords(): array
+    {
+        return [new ClientRecordType('consultations', 'Consultations', PetCareConsultation::class)];
+    }
+
     protected function manifest(): PluginManifest
     {
         $a = PluginAbilityFactory::class;
@@ -70,8 +76,9 @@ class ConsultationsServiceProvider extends PluginServiceProvider
             compatibleModules: ['pet-care-clinic'],
             shippedModules: ['pet-care-clinic'],
             permissions: [
-                $a::public('view-own', 'View own consultations'),
-                $a::public('create', 'Create consultations'),
+                $a::client('view-own', 'View own consultations'),
+                $a::client('create', 'Create consultations'),
+                $a::staff('create-for-client', 'Open consultations for a client'),
                 $a::public('update-own', 'Update own consultations'),
                 $a::staff('view-all', 'View all consultations'),
                 $a::staff('update-all', 'Update all consultations'),

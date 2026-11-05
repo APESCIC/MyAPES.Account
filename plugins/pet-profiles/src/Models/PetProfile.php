@@ -2,6 +2,7 @@
 
 namespace Plugins\PetProfiles\Models;
 
+use App\Core\Accounts\ClientRecords\ArchivableClientRecord;
 use App\Core\Accounts\User;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,6 +22,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class PetProfile extends Model
 {
+    use ArchivableClientRecord;
+
     public const DOMAIN_SHELTER = 'shelter';
 
     public const DOMAIN_PETCARE = 'petcare';

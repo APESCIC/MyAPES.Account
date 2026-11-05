@@ -90,7 +90,8 @@ class AuthorizationAccessMatrixTest extends TestCase
         $this->actingAs($user);
 
         $this->assertSame($canViewAll, $user->can('apes-cic.tickets.view-all'));
-        $this->assertSame($canViewAll || $accessLevel === User::ROLE_SERVICE_USER, $user->can('apes-cic.tickets.view-own'));
+        $this->assertSame($accessLevel === User::ROLE_SERVICE_USER, $user->can('apes-cic.tickets.view-own'));
+        $this->assertSame($accessLevel === User::ROLE_SERVICE_USER, $user->can('apes-cic.tickets.create'));
         $this->assertSame($canDelete, $user->can('apes-cic.tickets.delete'));
         $this->assertSame($canAdminUsers, $user->can('admin.users.view'));
         $this->assertSame($canAdminUsers, $user->can('admin.access'));

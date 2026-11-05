@@ -28,7 +28,7 @@ class AdminAccessMatrixTest extends TestCase
             $rows['apes-cic:tickets']['groups'],
         );
         $this->assertSame(
-            ['staff' => true, 'volunteer' => null, 'student' => null],
+            ['staff' => null, 'volunteer' => null, 'student' => null],
             $rows['apes-cic:recruitment']['groups'],
         );
 

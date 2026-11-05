@@ -360,7 +360,7 @@ class StaffOidcAuthenticationTest extends TestCase
         $this->assertSame(['reason' => 'email_already_in_use'], $context);
     }
 
-    public function test_callback_converts_a_subject_linked_local_password_account_to_staff_only(): void
+    public function test_callback_never_converts_a_subject_linked_local_password_account(): void
     {
         $user = User::factory()
             ->accessLevel(User::ROLE_SERVICE_USER)
@@ -380,13 +380,14 @@ class StaffOidcAuthenticationTest extends TestCase
 
         $response = $this->get(route('staff.auth.callback'));
 
-        $response->assertRedirect(route('dashboard'));
+        $response->assertForbidden();
+        $response->assertSeeText(__('auth.oidc.local_account'));
         $user->refresh();
-        $this->assertSame(User::IDENTITY_CLOUDRON_OIDC, $user->identity_type);
+        $this->assertSame(User::IDENTITY_LOCAL, $user->identity_type);
         $this->assertSame($passwordHash, $user->password);
-        $this->assertSame(User::ROLE_STAFF, $user->accessLevel());
-        $this->assertAuthenticatedAs($user);
-        $this->assertNotNull($user->staffProfile);
+        $this->assertSame(User::ROLE_SERVICE_USER, $user->accessLevel());
+        $this->assertGuest();
+        $this->assertNull($user->staffProfile);
     }
 
     public function test_callback_requires_both_email_and_subject_claims(): void

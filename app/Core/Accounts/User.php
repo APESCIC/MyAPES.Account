@@ -127,6 +127,8 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
             'email_verified_at' => 'datetime',
             'onboarding_completed_at' => 'datetime',
             'guided_tours' => 'array',
+            'client_records_archived_at' => 'datetime',
+            'client_records_notice_dismissed_at' => 'datetime',
             'registration_consented_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_secret' => 'encrypted',

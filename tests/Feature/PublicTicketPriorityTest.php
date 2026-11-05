@@ -75,21 +75,16 @@ class PublicTicketPriorityTest extends TestCase
     }
 
     #[DataProvider('publicTicketIndexRoutes')]
-    public function test_staff_ticket_create_form_includes_urgent(string $indexRoute): void
+    public function test_staff_ticket_index_has_no_create_form(string $indexRoute): void
     {
         $staff = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_STAFF)
             ->create();
 
-        $html = $this->actingAs($staff)
+        $this->actingAs($staff)
             ->get(route($indexRoute))
             ->assertOk()
-            ->assertSee('data-ticket-create-form', false)
-            ->getContent();
-
-        $select = $this->prioritySelectHtml($html);
-
-        $this->assertSame(1, preg_match_all('/value="urgent"/', $select));
+            ->assertDontSee('data-ticket-create-form', false);
     }
 
     /**
@@ -120,7 +115,7 @@ class PublicTicketPriorityTest extends TestCase
      * @param  array<string, string>  $categoryFields
      */
     #[DataProvider('publicTicketStoreRoutes')]
-    public function test_staff_ticket_create_accepts_urgent(
+    public function test_staff_cannot_create_tickets_for_themselves(
         string $storeRoute,
         array $categoryFields,
     ): void {
@@ -132,16 +127,13 @@ class PublicTicketPriorityTest extends TestCase
         $this->actingAs($staff)
             ->post(route($storeRoute), [
                 ...$categoryFields,
-                'subject' => 'Staff urgent is allowed',
+                'subject' => 'Staff own ticket',
                 'priority' => 'urgent',
-                'description' => 'Staff create must still accept Urgent.',
+                'description' => 'Staff use a personal public account instead.',
             ])
-            ->assertRedirect();
+            ->assertForbidden();
 
-        $ticket = SupportTicket::query()
-            ->where('subject', 'Staff urgent is allowed')
-            ->firstOrFail();
-        $this->assertSame('urgent', $ticket->priority);
+        $this->assertSame(0, SupportTicket::query()->count());
     }
 
     public function test_public_ticket_create_still_accepts_high(): void

@@ -230,9 +230,7 @@ class ShelterPetProfileWorkflowTest extends TestCase
 
         $this->actingAs($staff->fresh())
             ->get(route('shelter.pets.index'))
-            ->assertOk()
-            ->assertDontSee($first->name)
-            ->assertDontSee($second->name);
+            ->assertForbidden();
         $this->actingAs($administrator)
             ->get(route('shelter.pets.index'))
             ->assertOk()

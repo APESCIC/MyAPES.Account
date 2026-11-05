@@ -2,6 +2,7 @@
 
 namespace Plugins\Recruitment\Models;
 
+use App\Core\Accounts\ClientRecords\ArchivableClientRecord;
 use App\Core\Accounts\User;
 use Database\Factories\RecruitmentApplicationFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -25,6 +26,8 @@ use InvalidArgumentException;
 ])]
 class RecruitmentApplication extends Model
 {
+    use ArchivableClientRecord;
+
     /** @use HasFactory<RecruitmentApplicationFactory> */
     use HasFactory;
 

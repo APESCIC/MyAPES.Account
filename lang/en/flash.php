@@ -15,6 +15,7 @@ return [
     'staff_profile_updated' => 'Staff profile updated.',
     'qa_switched' => 'Switched to QA :role (:email).',
     'saved' => 'Saved.',
+    'client_records_notice_dismissed' => 'Notice hidden. You can read it again on the Help page.',
     'deleted' => 'Deleted.',
     'not_authorised' => 'You are not authorised to perform this action.',
     'dismiss' => 'Dismiss message',

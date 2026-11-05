@@ -53,6 +53,15 @@
             <p>If you cannot sign in, <a href="{{ route('public.register') }}">{{ __('public.legal.help.blade.create_a_public_account') }}</a> first, or contact APES CIC through the <a href="https://www.apes.org.uk" rel="noopener noreferrer">{{ __('public.legal.help.blade.apes_website') }}</a>.</p>
         </section>
 
+        <section id="staff-and-personal-accounts" data-help-staff-accounts>
+            <h2>{{ __('public.legal.help.staff_accounts.heading') }}</h2>
+            <p>{{ __('public.legal.help.staff_accounts.why') }}</p>
+            <p>{{ __('public.legal.help.staff_accounts.conflict') }}</p>
+            <p>{{ __('public.legal.help.staff_accounts.how') }}</p>
+            <p>{{ __('public.legal.help.staff_accounts.archived') }}</p>
+            <p><a href="{{ route('public.register') }}">{{ __('public.account_separation.register') }}</a></p>
+        </section>
+
         <section>
             <h2>{{ __('public.legal.help.blade.notices') }}</h2>
             <p>Read the <a href="{{ route('privacy') }}">{{ __('public.legal.cookies.blade.privacy_notice') }}</a>, <a href="{{ route('cookies') }}">{{ __('public.legal.help.blade.cookie_notice') }}</a>, and <a href="{{ route('terms') }}">{{ __('public.legal.cookies.blade.terms_of_use') }}</a> for how the portal handles information and account use.</p>
