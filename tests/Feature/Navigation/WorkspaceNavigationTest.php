@@ -147,6 +147,27 @@ class WorkspaceNavigationTest extends TestCase
         $this->assertSame('admin.users', $this->menuFor($superAdmin, 'admin.users.show', ['user' => (string) $publicMember->id])->activeItemKey);
     }
 
+    public function test_an_unmapped_cloudron_user_page_activates_staff_users(): void
+    {
+        $superAdmin = User::factory()->protectedRole('administrator')->create();
+        $unmapped = User::factory()->directoryIdentity('nav-unmapped')->create();
+
+        $this->assertSame('admin.staff', $this->menuFor($superAdmin, 'admin.users.show', ['user' => (string) $unmapped->id])->activeItemKey);
+    }
+
+    public function test_an_unmapped_account_does_not_get_staff_only_links(): void
+    {
+        $hybrid = User::factory()->create([
+            'identity_type' => User::IDENTITY_HYBRID,
+            'oidc_sub' => 'nav-hybrid',
+        ]);
+        $panel = $this->menuFor($hybrid, 'dashboard')->panels[NavPanel::STAFF];
+
+        $this->assertSame('Account', $panel->label);
+        $this->assertNotContains('callers', $this->itemKeys($panel));
+        $this->assertNotContains('help.staff', $this->itemKeys($panel));
+    }
+
     public function test_quick_actions_follow_create_permissions_and_panel_access(): void
     {
         foreach (['service-user', 'staff', 'administrator'] as $persona) {
