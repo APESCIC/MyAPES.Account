@@ -1,0 +1,33 @@
+---
+description: APES milestone shipping - finish every issue, then one merge, one release and one deploy per milestone
+alwaysApply: true
+---
+
+# Milestone shipping
+
+Work in this repository ships once per GitHub milestone, not once per change or issue.
+
+## The four stages, in order
+
+1. **Complete the milestone.** Work on the milestone and complete **all** of its issues before moving to the next stage.
+2. **One merge.** All the milestone's work goes to `main` in **one merge**: a merge commit (`gh pr merge <n> --merge`), never a squash or rebase merge.
+3. **Release.** One release for the milestone.
+4. **Deploy.** One deploy for the milestone.
+
+## Branch rules
+
+- Each milestone has one milestone branch, `milestone/<slug>`, created from `main` when work on the milestone starts.
+- Commit and push on the milestone branch (or on issue branches based on it) whenever needed.
+- Nothing reaches `main`, and nothing is tagged, released or deployed, before stage 2.
+- Do not merge, tag, release or deploy after an individual change or issue.
+
+## Definition of done
+
+- An issue is done when its acceptance criteria are met and the work is committed on its branch.
+- The milestone is done only after the single merge, release and deploy.
+
+## Hotfixes
+
+A hotfix may go to `main`, or be released or deployed, outside these stages only with Bambie's written approval recorded on the hotfix issue. Without that approval, the hotfix waits for its milestone.
+
+See the "Milestone shipping" section of `AGENTS.md`.
