@@ -167,9 +167,15 @@ class AdminLocalPublicPasswordResetTest extends TestCase
                 'password' => 'password',
             ]);
 
-        $publicList = $this->actingAs($administrator)
-            ->get(route('admin.users.index', ['account_type' => 'public']));
-        $publicList->assertOk()
+        $this->actingAs($administrator)
+            ->get(route('admin.users.index', ['account_type' => 'public']))
+            ->assertOk()
+            ->assertDontSeeText('Directory Public')
+            ->assertDontSeeText('Pending Directory');
+
+        $staffList = $this->actingAs($administrator)
+            ->get(route('admin.users.index', ['account_type' => 'staff']));
+        $staffList->assertOk()
             ->assertSeeText('Directory Public')
             ->assertSeeText('Pending Directory')
             ->assertDontSee(
@@ -180,7 +186,7 @@ class AdminLocalPublicPasswordResetTest extends TestCase
                 route('admin.users.show', $pendingFirstLogin).'#local-password',
                 false,
             );
-        $this->assertDoesNotOfferImpersonation($publicList->getContent());
+        $this->assertDoesNotOfferImpersonation($staffList->getContent());
 
         $this->actingAs($administrator)
             ->get(route('admin.users.show', $directoryPublic))
