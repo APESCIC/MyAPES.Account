@@ -2,6 +2,7 @@
 
 namespace Plugins\Tickets\Models;
 
+use App\Core\Accounts\ClientRecords\ArchivableClientRecord;
 use App\Core\Accounts\User;
 use App\Core\Attachments\SupportAttachment;
 use App\Core\Content\SanitisedHtml;
@@ -27,6 +28,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 ])]
 class SupportTicket extends Model
 {
+    use ArchivableClientRecord;
+
     public const SUB_CORE_APES_CIC = 'apes-cic';
 
     /** @var array<string, mixed> */

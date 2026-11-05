@@ -2,6 +2,8 @@
 
 namespace App\Core\Extensions\Plugins;
 
+use App\Core\Accounts\ClientRecords\ClientRecordRegistry;
+use App\Core\Accounts\ClientRecords\ClientRecordType;
 use App\Core\Mail\MailTemplate;
 use App\Core\Mail\MailTemplateRegistry;
 use Illuminate\Support\ServiceProvider;
@@ -25,6 +27,16 @@ abstract class PluginServiceProvider extends ServiceProvider
      * @return list<MailTemplate>
      */
     protected function mailTemplates(): array
+    {
+        return [];
+    }
+
+    /**
+     * Client record types this plugin owns, archived when held by staff-side accounts (#514).
+     *
+     * @return list<ClientRecordType>
+     */
+    protected function clientRecords(): array
     {
         return [];
     }
@@ -53,6 +65,9 @@ abstract class PluginServiceProvider extends ServiceProvider
 
         $this->app->make(MailTemplateRegistry::class)
             ->contribute(fn (): array => $this->mailTemplates());
+
+        $this->app->make(ClientRecordRegistry::class)
+            ->contribute(fn (): array => $this->clientRecords());
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace Plugins\Cases;
 
+use App\Core\Accounts\ClientRecords\ClientRecordType;
 use App\Core\Accounts\User;
 use App\Core\Extensions\Plugins\PluginAbilityFactory;
 use App\Core\Extensions\Plugins\PluginDependency;
@@ -94,6 +95,11 @@ class CasesServiceProvider extends PluginServiceProvider
                 introKey: 'mail.shelter_case_updated.line_body',
             ),
         ];
+    }
+
+    protected function clientRecords(): array
+    {
+        return [new ClientRecordType('cases', 'Cases', ShelterCase::class)];
     }
 
     protected function manifest(): PluginManifest

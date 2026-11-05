@@ -2,6 +2,7 @@
 
 namespace Plugins\Consultations\Models;
 
+use App\Core\Accounts\ClientRecords\ArchivableClientRecord;
 use App\Core\Accounts\User;
 use App\Core\Content\SanitisedHtml;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -22,6 +23,8 @@ use Plugins\PetProfiles\Models\PetProfile;
 ])]
 class PetCareConsultation extends Model
 {
+    use ArchivableClientRecord;
+
     public const PERMISSION_VIEW_OWN = 'pet-care-clinic.consultations.view-own';
 
     public const PERMISSION_CREATE = 'pet-care-clinic.consultations.create';

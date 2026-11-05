@@ -1,13 +1,7 @@
-@props(['onlyStaffSide' => false, 'withTitle' => true])
+@props(['onlyStaffSide' => false])
 
-@php
-    $viewer = auth()->user();
-    $showGuidance = ! $onlyStaffSide
-        || ($viewer !== null && app(\App\Core\Accounts\AccountClassifier::class)->isStaffSide($viewer));
-@endphp
-
-@if($showGuidance)
-    <x-alert tone="info" :title="$withTitle ? __('public.account_separation.title') : null" {{ $attributes->merge(['data-public-account-required' => true]) }}>
+@if(! $onlyStaffSide || (auth()->check() && app(\App\Core\Accounts\AccountClassifier::class)->isStaffSide(auth()->user())))
+    <x-alert tone="info" :title="__('public.account_separation.title')" {{ $attributes->merge(['data-public-account-required' => true]) }}>
         <p>{{ __('public.account_separation.body') }}</p>
         <p>{{ __('public.account_separation.steps') }}</p>
         <div class="actions">

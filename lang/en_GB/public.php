@@ -354,6 +354,7 @@ return [
     'account_separation' => [
         'title' => 'Use your personal public account',
         'page_title' => 'Use your personal public account | MyAPES Account',
+        'page_heading' => 'This is a work account',
         'body' => 'Staff, volunteer, student and admin accounts are for APES work only. To use APES services yourself, such as raising a ticket, adding a pet or applying for a role, use a separate public account with a personal email address.',
         'steps' => 'Log out of this account first, then sign in to your public account or register one.',
         'register' => 'Register a public account',

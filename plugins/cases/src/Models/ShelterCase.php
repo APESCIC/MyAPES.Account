@@ -2,6 +2,7 @@
 
 namespace Plugins\Cases\Models;
 
+use App\Core\Accounts\ClientRecords\ArchivableClientRecord;
 use App\Core\Accounts\User;
 use App\Core\Attachments\SupportAttachment;
 use App\Core\Content\SanitisedHtml;
@@ -32,6 +33,8 @@ use Plugins\PetProfiles\Models\PetProfile;
 ])]
 class ShelterCase extends Model
 {
+    use ArchivableClientRecord;
+
     public const SUB_CORE_APES_CIC = 'apes-cic';
 
     public const SUB_CORE_SHELTER_RESCUE = 'shelter-rescue';

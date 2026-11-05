@@ -2,6 +2,7 @@
 
 namespace Plugins\PetProfiles;
 
+use App\Core\Accounts\ClientRecords\ClientRecordType;
 use App\Core\Extensions\Plugins\PluginAbilityFactory;
 use App\Core\Extensions\Plugins\PluginManifest;
 use App\Core\Extensions\Plugins\PluginNavigationItem;
@@ -33,6 +34,11 @@ class PetProfilesServiceProvider extends PluginServiceProvider
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'pet-profiles');
 
         Gate::policy(PetProfile::class, PetProfilePolicy::class);
+    }
+
+    protected function clientRecords(): array
+    {
+        return [new ClientRecordType('pet-profiles', 'Pet profiles', PetProfile::class)];
     }
 
     protected function manifest(): PluginManifest

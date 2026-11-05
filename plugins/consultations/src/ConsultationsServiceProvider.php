@@ -2,6 +2,7 @@
 
 namespace Plugins\Consultations;
 
+use App\Core\Accounts\ClientRecords\ClientRecordType;
 use App\Core\Accounts\User;
 use App\Core\Extensions\Plugins\PluginAbilityFactory;
 use App\Core\Extensions\Plugins\PluginDependency;
@@ -55,6 +56,11 @@ class ConsultationsServiceProvider extends PluginServiceProvider
                 introKey: 'mail.consultation_updated.line_body',
             ),
         ];
+    }
+
+    protected function clientRecords(): array
+    {
+        return [new ClientRecordType('consultations', 'Consultations', PetCareConsultation::class)];
     }
 
     protected function manifest(): PluginManifest

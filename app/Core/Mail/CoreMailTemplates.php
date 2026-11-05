@@ -14,6 +14,7 @@ use App\Notifications\Auth\TwoFactorDisabledNotification;
 use App\Notifications\Auth\TwoFactorEnabledNotification;
 use App\Notifications\Auth\VerifyEmailNotification;
 use App\Notifications\PendingFirstLoginChaseNotification;
+use App\Notifications\StaffClientRecordsArchivedNotification;
 use Closure;
 use Illuminate\Notifications\Notification;
 
@@ -58,6 +59,16 @@ final class CoreMailTemplates
                 sample: static fn (User $recipient): PendingFirstLoginChaseNotification => new PendingFirstLoginChaseNotification($recipient),
                 subjectKey: 'mail.pending_first_login.subject',
                 introKey: 'mail.pending_first_login.line_request',
+            ),
+            new MailTemplate(
+                key: 'accounts.staff_client_records_archived',
+                notification: StaffClientRecordsArchivedNotification::class,
+                category: MailCategory::Service,
+                labelKey: 'mail.templates.accounts.staff_client_records_archived.name',
+                descriptionKey: 'mail.templates.accounts.staff_client_records_archived.description',
+                sample: static fn (): StaffClientRecordsArchivedNotification => new StaffClientRecordsArchivedNotification(['Tickets' => 2, 'Pet profiles' => 1]),
+                subjectKey: 'mail.staff_client_records_archived.subject',
+                introKey: 'mail.staff_client_records_archived.line_archived',
             ),
         ];
     }

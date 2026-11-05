@@ -39,6 +39,7 @@ class MailTemplateMatrixTest extends TestCase
 
     private const TEMPLATE_KEYS = [
         'accounts.pending_first_login_chase',
+        'accounts.staff_client_records_archived',
         'auth.email_change_completed',
         'auth.email_change_confirm',
         'auth.email_change_started',

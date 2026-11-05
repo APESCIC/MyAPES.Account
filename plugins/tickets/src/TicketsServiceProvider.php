@@ -2,6 +2,7 @@
 
 namespace Plugins\Tickets;
 
+use App\Core\Accounts\ClientRecords\ClientRecordType;
 use App\Core\Accounts\User;
 use App\Core\Extensions\Navigation\PublicNavigationItem;
 use App\Core\Extensions\Navigation\PublicNavigationRegistry;
@@ -90,6 +91,11 @@ class TicketsServiceProvider extends PluginServiceProvider
                 introKey: 'mail.ticket_updated.line_body',
             ),
         ];
+    }
+
+    protected function clientRecords(): array
+    {
+        return [new ClientRecordType('tickets', 'Tickets', SupportTicket::class)];
     }
 
     protected function manifest(): PluginManifest
