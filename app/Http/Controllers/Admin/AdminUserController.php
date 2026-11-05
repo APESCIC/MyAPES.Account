@@ -131,7 +131,15 @@ class AdminUserController extends Controller
             'protectedRoles' => $profile->protectedRolesByPrecedence(),
             'staffTypes' => AccountClassifier::STAFF_SIDE_TYPES,
             'authorizationProfile' => $profile,
-            'accountClassifier' => $classifier,
+            'adminUserIds' => $users->getCollection()
+                ->filter(static fn (User $user): bool => $classifier->classify($user) === AccountClassifier::ADMIN)
+                ->pluck('id')
+                ->map(static fn (mixed $id): int => (int) $id)
+                ->all(),
+            'showAllAccountsLink' => $actor instanceof User && $profile->isAdministrator($actor),
+            'clearFiltersUrl' => route('admin.users.index', array_filter([
+                'account_type' => $filters['account_type'] ?? null,
+            ])),
             'resettableUserIds' => $resettableUserIds,
         ]);
     }

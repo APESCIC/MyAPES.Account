@@ -18,7 +18,7 @@
             <a href="{{ route('admin.users.index', ['account_type' => 'public']) }}">{{ __('admin.nav.public_users') }}</a>
             ·
             <a href="{{ route('admin.users.index', ['account_type' => 'staff']) }}">{{ __('admin.nav.staff') }}</a>
-            @if(auth()->user() && $authorizationProfile->isAdministrator(auth()->user()))
+            @if($showAllAccountsLink)
                 ·
                 <a href="{{ route('admin.users.index') }}">{{ __('admin.users.all_accounts') }}</a>
             @endif
@@ -74,7 +74,7 @@
             </div>
             <div class="actions">
                 <button type="submit">{{ __('admin.access.apply_filters') }}</button>
-                <a href="{{ route('admin.users.index', array_filter(['account_type' => $filters['account_type'] ?? null])) }}">{{ __('admin.access.clear_filters') }}</a>
+                <a href="{{ $clearFiltersUrl }}">{{ __('admin.access.clear_filters') }}</a>
             </div>
         </form>
     </section>
@@ -97,7 +97,7 @@
                 <tr>
                     <td>
                         <strong>{{ $user->name }}</strong>
-                        @if($accountClassifier->classify($user) === \App\Core\Accounts\AccountClassifier::ADMIN)
+                        @if(in_array($user->id, $adminUserIds, true))
                             <span class="status" data-badge="admin">{{ __('admin.users.admin_badge') }}</span>
                         @endif
                         <br><span class="muted">{{ $user->email }}</span>
