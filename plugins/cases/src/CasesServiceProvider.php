@@ -109,8 +109,9 @@ class CasesServiceProvider extends PluginServiceProvider
             compatibleModules: ['apes-cic', 'shelter-rescue'],
             shippedModules: ['apes-cic', 'shelter-rescue'],
             permissions: [
-                $a::public('view-own', 'View own cases'),
-                $a::public('create', 'Create cases'),
+                $a::client('view-own', 'View own cases'),
+                $a::client('create', 'Create cases'),
+                $a::staff('create-for-client', 'Open cases for a client'),
                 $a::public('update-own', 'Update own cases'),
                 $a::public('comment-own', 'Comment on own cases'),
                 $a::staff('view-all', 'View all cases'),

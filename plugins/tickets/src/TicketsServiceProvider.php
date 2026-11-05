@@ -105,8 +105,8 @@ class TicketsServiceProvider extends PluginServiceProvider
             compatibleModules: ['apes-cic', 'shelter-rescue', 'pet-care-clinic'],
             shippedModules: ['apes-cic', 'shelter-rescue', 'pet-care-clinic'],
             permissions: [
-                $a::public('view-own', 'View own tickets'),
-                $a::public('create', 'Create tickets'),
+                $a::client('view-own', 'View own tickets'),
+                $a::client('create', 'Create tickets'),
                 $a::public('comment-own', 'Comment on own tickets'),
                 $a::staff('view-all', 'View all tickets'),
                 $a::staff('update-all', 'Update all tickets'),

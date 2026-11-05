@@ -8,7 +8,7 @@ Vacancy model is `RecruitmentRole` (never Spatie `Role`). Live URLs stay `/recru
 
 One **Recruitment** primary in the app chrome, with a page submenu gated by ability (epic #342). Ability strings live in `Plugins\Recruitment\RecruitmentAbilities`:
 
-- **Browse** (`BROWSE`): `apes-cic.recruitment.view-own` — Open roles, apply, My applications.
+- **Browse** (`BROWSE`): `apes-cic.recruitment.view-own` — Open roles, apply, My applications. Only public accounts hold it; staff apply from a personal public account (#511).
 - **Manage** (`MANAGE`): `view-all`, `create`, `update`, `delete`, `review-applications` — Roles and Applications under `/apes-cic/recruitment*`.
 
 | Persona | Primary lands on | Submenu | `/recruitment*` | `/apes-cic/recruitment*` |
@@ -16,10 +16,10 @@ One **Recruitment** primary in the app chrome, with a page submenu gated by abil
 | Guest | Open roles (board on) | Open roles | Board 200; apply/My applications redirect to sign-in | Redirect to sign-in |
 | Service user | Open roles | Open roles, My applications | 200 | 403 |
 | Student, volunteer | No primary | None | 403 | 403 |
-| Staff (no HR grant) | Open roles | Open roles, My applications | 200 | 403 |
-| HR (staff + Human Resources job role) | Roles | Open roles, My applications, Roles, Applications | 200 | 200 |
-| Administrator | Roles | Open roles, My applications, Roles, Applications | 200 | 200 |
-| Review-only (`review-applications` only) | Applications | Open roles, My applications, Applications | 200 | Applications 200; Roles and Roles mutations 403 |
+| Staff (no HR grant) | Open roles | Open roles | Board 200; apply/My applications 403 | 403 |
+| HR (staff + Human Resources job role) | Roles | Open roles, Roles, Applications | Board 200; apply/My applications 403 | 200 |
+| Administrator | Roles | Open roles, Roles, Applications | Board 200; apply/My applications 403 | 200 |
+| Review-only (`review-applications` only) | Applications | Open roles, Applications | Board 200; apply/My applications 403 | Applications 200; Roles and Roles mutations 403 |
 
 Toggles from 0.35.1 still apply on top of the matrix: when the public board is off, Open roles is hidden and the board returns 404; when public apply is off, the apply button is hidden and apply returns 404.
 

@@ -131,6 +131,8 @@
                                 'consultations' => 'Book consultation',
                                 default => 'Create '.$module->label,
                             };
+                            $createsForClient = in_array($permissionPrefix, ['shelter-rescue.cases', 'pet-care-clinic.consultations'], true)
+                                && auth()->user()->can($permissionPrefix.'.create-for-client');
                         @endphp
                         <a
                             href="{{ $module->viewUrl() }}"
@@ -141,7 +143,7 @@
                             {{ __('apes_cic.show.blade.view_module', ['label' => $module->label]) }}
                             <i data-lucide="arrow-right" aria-hidden="true"></i>
                         </a>
-                        @if(auth()->user()->can($permissionPrefix.'.create'))
+                        @if(auth()->user()->can($permissionPrefix.'.create') || $createsForClient)
                             <a
                                 href="{{ $module->createUrl() }}"
                                 class="service-dashboard__quick-link service-dashboard__quick-link--action"

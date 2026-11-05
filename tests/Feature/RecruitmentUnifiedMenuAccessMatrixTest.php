@@ -27,7 +27,7 @@ class RecruitmentUnifiedMenuAccessMatrixTest extends TestCase
     use CreatesRecruitmentPersonas;
     use RefreshDatabase;
 
-    private const ALL_SECTIONS = ['Open roles', 'My applications', 'Roles', 'Applications'];
+    private const MANAGE_SECTIONS = ['Open roles', 'Roles', 'Applications'];
 
     private const BROWSE_SECTIONS = ['Open roles', 'My applications'];
 
@@ -54,10 +54,14 @@ class RecruitmentUnifiedMenuAccessMatrixTest extends TestCase
             'manage.store' => 403,
         ];
         $denied = array_fill_keys(array_keys($applicant), 403);
+        $staffBrowser = [
+            ...$applicant,
+            'my-applications' => 403,
+        ];
         $manager = [
             'board' => 200,
             'board.show' => 200,
-            'my-applications' => 200,
+            'my-applications' => 403,
             'manage.roles' => 200,
             'manage.applications' => 200,
             'manage.application' => 200,
@@ -77,9 +81,9 @@ class RecruitmentUnifiedMenuAccessMatrixTest extends TestCase
             'service user' => ['service-user', 'recruitment.index', self::BROWSE_SECTIONS, $applicant],
             'student' => ['student', null, null, $denied],
             'volunteer' => ['volunteer', null, null, $denied],
-            'staff without HR' => ['staff', 'recruitment.index', self::BROWSE_SECTIONS, $applicant],
-            'HR staff' => ['hr', 'apes-cic.recruitment.index', self::ALL_SECTIONS, $manager],
-            'administrator' => ['administrator', 'apes-cic.recruitment.index', self::ALL_SECTIONS, $manager],
+            'staff without HR' => ['staff', 'recruitment.index', ['Open roles'], $staffBrowser],
+            'HR staff' => ['hr', 'apes-cic.recruitment.index', self::MANAGE_SECTIONS, $manager],
+            'administrator' => ['administrator', 'apes-cic.recruitment.index', self::MANAGE_SECTIONS, $manager],
             'review only' => ['review-only', 'apes-cic.recruitment.applications.index', ['Open roles', 'Applications'], [
                 'board' => 200,
                 'board.show' => 200,
@@ -172,7 +176,7 @@ class RecruitmentUnifiedMenuAccessMatrixTest extends TestCase
             $this->actingAs($hr)->get(route('dashboard'))->assertOk()->getContent(),
         ));
         $this->assertSame(
-            ['My applications', 'Roles', 'Applications'],
+            ['Roles', 'Applications'],
             $this->recruitmentSubmenuLabels(
                 $this->actingAs($hr)->get(route('apes-cic.recruitment.index'))->assertOk()->getContent(),
             ),

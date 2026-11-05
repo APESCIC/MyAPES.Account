@@ -505,7 +505,7 @@ class CaseController extends Controller
 
         return view($area->view('index'), [
             'cases' => $query->paginate(20)->fragment('list'),
-            'canCreateCase' => $user->can($area->permission('create')),
+            'canCreateCase' => Gate::allows('create', ShelterCase::class),
             'petProfiles' => $petProfiles,
             ...StaffPetCreateReturn::emptySelectViewData(
                 $user,
@@ -532,6 +532,7 @@ class CaseController extends Controller
         );
         Gate::authorize('view', [$pet, $domain]);
         Gate::authorize('createShelterCase', $pet);
+        Gate::authorize('createFor', [ShelterCase::class, (int) $pet->user_id]);
 
         $validated = $request->validate([
             'pet_profile_id' => ['required', 'integer'],

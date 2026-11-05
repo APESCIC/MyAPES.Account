@@ -9,9 +9,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Plugins\PetProfiles\Models\PetProfile;
 use Plugins\PetProfiles\Support\StaffPetCreateReturn;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class StaffEmptyPetSelectTest extends TestCase
@@ -30,7 +27,6 @@ class StaffEmptyPetSelectTest extends TestCase
      *     petsIndexRoute: string,
      *     petsStoreRoute: string,
      *     returnKey: string,
-     *     createPetPermission: string,
      *     domain: string
      * }}>
      */
@@ -42,7 +38,6 @@ class StaffEmptyPetSelectTest extends TestCase
                 'petsIndexRoute' => 'shelter.pets.index',
                 'petsStoreRoute' => 'shelter.pets.store',
                 'returnKey' => StaffPetCreateReturn::SHELTER_CASES,
-                'createPetPermission' => 'shelter-rescue.pet-profiles.create',
                 'domain' => PetProfile::DOMAIN_SHELTER,
             ]],
             'pet care consultations' => [[
@@ -50,7 +45,6 @@ class StaffEmptyPetSelectTest extends TestCase
                 'petsIndexRoute' => 'petcare.pets.index',
                 'petsStoreRoute' => 'petcare.pets.store',
                 'returnKey' => StaffPetCreateReturn::PETCARE_CONSULTATIONS,
-                'createPetPermission' => 'pet-care-clinic.pet-profiles.create',
                 'domain' => PetProfile::DOMAIN_PETCARE,
             ]],
         ];
@@ -62,60 +56,34 @@ class StaffEmptyPetSelectTest extends TestCase
      *     petsIndexRoute: string,
      *     petsStoreRoute: string,
      *     returnKey: string,
-     *     createPetPermission: string,
      *     domain: string
      * }  $flow
      */
     #[DataProvider('staffCreateFlows')]
-    public function test_staff_empty_pet_select_explains_the_gap_and_returns_after_adding_a_pet(
+    public function test_staff_empty_pet_select_explains_the_gap_without_an_add_pet_link(
         array $flow,
     ): void {
         $staff = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_STAFF)
             ->create();
-        $addPetUrl = route($flow['petsIndexRoute'], [
-            'return_to' => $flow['returnKey'],
-        ]).'#create';
 
         $this->actingAs($staff)
             ->get(route($flow['createIndexRoute']))
             ->assertOk()
             ->assertSee('data-empty-pet-select', false)
             ->assertSeeText('No pet profiles are available yet.')
-            ->assertSeeText('Add a pet first')
-            ->assertSee('href="'.$addPetUrl.'"', false)
+            ->assertDontSee('data-add-pet-first', false)
+            ->assertDontSeeText('Add a pet first')
             ->assertDontSee('name="pet_profile_id"', false);
 
-        $this->get(route($flow['petsIndexRoute'], [
-            'return_to' => $flow['returnKey'],
-        ]))
-            ->assertOk()
-            ->assertSee('name="return_to"', false)
-            ->assertSee('value="'.$flow['returnKey'].'"', false)
-            ->assertSeeText('After you save this pet, you will return to the form you started.');
-
-        $response = $this->post(route($flow['petsStoreRoute']), [
-            'name' => 'Return-path pet',
+        $this->post(route($flow['petsStoreRoute']), [
+            'name' => 'Staff-owned pet',
             'sex' => 'unknown',
             'neutering_status' => 'unknown',
             'return_to' => $flow['returnKey'],
-        ]);
+        ])->assertForbidden();
 
-        $pet = PetProfile::query()->where('name', 'Return-path pet')->firstOrFail();
-        $response->assertRedirect(route($flow['createIndexRoute'], [
-            'pet_profile_id' => $pet->id,
-        ]).'#create');
-        $this->assertSame($staff->id, $pet->user_id);
-        $this->assertSame($flow['domain'], $pet->service_domain);
-
-        $this->get(route($flow['createIndexRoute'], [
-            'pet_profile_id' => $pet->id,
-        ]))
-            ->assertOk()
-            ->assertDontSee('data-empty-pet-select', false)
-            ->assertSee('name="pet_profile_id"', false)
-            ->assertSee('value="'.$pet->id.'" selected', false)
-            ->assertSeeText('Return-path pet');
+        $this->assertSame(0, PetProfile::query()->count());
     }
 
     /**
@@ -124,7 +92,6 @@ class StaffEmptyPetSelectTest extends TestCase
      *     petsIndexRoute: string,
      *     petsStoreRoute: string,
      *     returnKey: string,
-     *     createPetPermission: string,
      *     domain: string
      * }  $flow
      */
@@ -149,21 +116,21 @@ class StaffEmptyPetSelectTest extends TestCase
      *     petsIndexRoute: string,
      *     petsStoreRoute: string,
      *     returnKey: string,
-     *     createPetPermission: string,
      *     domain: string
      * }  $flow
      */
     #[DataProvider('staffCreateFlows')]
-    public function test_staff_with_pets_keep_the_dropdown_and_do_not_see_the_empty_state(
+    public function test_staff_with_client_pets_keep_the_dropdown_and_do_not_see_the_empty_state(
         array $flow,
     ): void {
+        $client = User::factory()->create();
         $staff = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_STAFF)
             ->create();
         $pet = PetProfile::query()->create([
-            'user_id' => $staff->id,
+            'user_id' => $client->id,
             'service_domain' => $flow['domain'],
-            'name' => 'Existing staff pet',
+            'name' => 'Existing client pet',
             'species' => 'dog',
             'sex' => 'unknown',
             'neutering_status' => 'unknown',
@@ -175,48 +142,15 @@ class StaffEmptyPetSelectTest extends TestCase
             ->assertDontSee('data-empty-pet-select', false)
             ->assertDontSeeText('Add a pet first')
             ->assertSee('name="pet_profile_id"', false)
-            ->assertSeeText('Existing staff pet')
+            ->assertSeeText('Existing client pet')
             ->assertSee('value="'.$pet->id.'"', false);
-    }
-
-    /**
-     * @param  array{
-     *     createIndexRoute: string,
-     *     petsIndexRoute: string,
-     *     petsStoreRoute: string,
-     *     returnKey: string,
-     *     createPetPermission: string,
-     *     domain: string
-     * }  $flow
-     */
-    #[DataProvider('staffCreateFlows')]
-    public function test_staff_without_pet_create_permission_still_see_the_empty_state_without_the_add_link(
-        array $flow,
-    ): void {
-        $staff = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
-            ->create();
-        $this->removeRolePermission(
-            AuthorizationProfile::ROLE_STAFF,
-            $flow['createPetPermission'],
-        );
-
-        $this->actingAs($staff->fresh())
-            ->get(route($flow['createIndexRoute']))
-            ->assertOk()
-            ->assertSee('data-empty-pet-select', false)
-            ->assertSeeText('No pet profiles are available yet.')
-            ->assertDontSee('data-add-pet-first', false)
-            ->assertDontSeeText('Add a pet first');
     }
 
     public function test_unsafe_return_to_does_not_redirect_away_from_the_new_pet(): void
     {
-        $staff = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
-            ->create();
+        $owner = User::factory()->create();
 
-        $response = $this->actingAs($staff)->post(route('shelter.pets.store'), [
+        $response = $this->actingAs($owner)->post(route('shelter.pets.store'), [
             'name' => 'Unsafe return pet',
             'sex' => 'unknown',
             'neutering_status' => 'unknown',
@@ -225,19 +159,5 @@ class StaffEmptyPetSelectTest extends TestCase
 
         $pet = PetProfile::query()->where('name', 'Unsafe return pet')->firstOrFail();
         $response->assertRedirect(route('shelter.pets.show', $pet));
-    }
-
-    private function removeRolePermission(string $roleName, string $permissionName): void
-    {
-        $role = Role::query()
-            ->where('guard_name', 'web')
-            ->where('name', $roleName)
-            ->firstOrFail();
-        $permission = Permission::query()
-            ->where('guard_name', 'web')
-            ->where('name', $permissionName)
-            ->firstOrFail();
-        $role->permissions()->detach($permission->id);
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 }

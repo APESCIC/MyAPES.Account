@@ -31,19 +31,19 @@ class ServiceHubQuickLinksTest extends TestCase
 
         $hubs = [
             '/apes-cic' => [
-                'tickets' => route('apes-cic.tickets.index'),
-                'cases' => route('apes-cic.cases.index'),
-                'recruitment' => route('apes-cic.recruitment.index'),
+                'tickets' => [route('apes-cic.tickets.index'), false],
+                'cases' => [route('apes-cic.cases.index'), false],
+                'recruitment' => [route('apes-cic.recruitment.index'), true],
             ],
             '/shelter' => [
-                'pet-profiles' => route('shelter.pets.index'),
-                'tickets' => route('shelter.tickets.index'),
-                'cases' => route('shelter.cases.index'),
+                'pet-profiles' => [route('shelter.pets.index'), false],
+                'tickets' => [route('shelter.tickets.index'), false],
+                'cases' => [route('shelter.cases.index'), true],
             ],
             '/petcare' => [
-                'pet-profiles' => route('petcare.pets.index'),
-                'tickets' => route('petcare.tickets.index'),
-                'consultations' => route('petcare.consultations.index'),
+                'pet-profiles' => [route('petcare.pets.index'), false],
+                'tickets' => [route('petcare.tickets.index'), false],
+                'consultations' => [route('petcare.consultations.index'), true],
             ],
         ];
 
@@ -53,11 +53,20 @@ class ServiceHubQuickLinksTest extends TestCase
                 ->assertOk()
                 ->getContent();
 
-            foreach ($modules as $moduleKey => $listUrl) {
+            foreach ($modules as $moduleKey => [$listUrl, $staffCanCreate]) {
                 $viewHref = $this->hubActionHref($html, 'view', $moduleKey);
-                $createHref = $this->hubActionHref($html, 'create', $moduleKey);
-
                 $this->assertSame($listUrl.'#list', $viewHref);
+
+                if (! $staffCanCreate) {
+                    $this->assertFalse(
+                        $this->hasHubAction($html, 'create', $moduleKey),
+                        "Staff should not see a create link for {$moduleKey} on {$hubPath}.",
+                    );
+
+                    continue;
+                }
+
+                $createHref = $this->hubActionHref($html, 'create', $moduleKey);
                 $this->assertSame($listUrl.'#create', $createHref);
                 $this->assertNotSame($viewHref, $createHref);
             }
@@ -75,10 +84,10 @@ class ServiceHubQuickLinksTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        $listUrl = 'http://localhost/shelter/pets';
+        $listUrl = route('shelter.pets.index');
 
         $this->assertSame($listUrl.'#list', $this->hubActionHref($html, 'view', 'pet-profiles'));
-        $this->assertSame($listUrl.'#create', $this->hubActionHref($html, 'create', 'pet-profiles'));
+        $this->assertFalse($this->hasHubAction($html, 'create', 'pet-profiles'));
         $this->assertSame($listUrl.'#list', $this->hubLabelHref($html, 'pet-profiles'));
         $this->assertStringNotContainsString('/shelter/pet-profiles', $html);
     }
@@ -99,7 +108,7 @@ class ServiceHubQuickLinksTest extends TestCase
             ->followingRedirects()
             ->get('/shelter/pet-profiles')
             ->assertOk()
-            ->assertSee('id="create"', false)
+            ->assertDontSee('id="create"', false)
             ->assertSee('id="list"', false)
             ->assertSeeText('Pet profiles');
     }
@@ -122,7 +131,7 @@ class ServiceHubQuickLinksTest extends TestCase
             ->create();
         $this->removeRolePermission(
             AuthorizationProfile::ROLE_STAFF,
-            'shelter-rescue.pet-profiles.create',
+            'shelter-rescue.cases.create-for-client',
         );
 
         $html = $this->actingAs($staff->fresh())
@@ -131,13 +140,25 @@ class ServiceHubQuickLinksTest extends TestCase
             ->getContent();
 
         $this->assertSame(
-            'http://localhost/shelter/pets#list',
-            $this->hubActionHref($html, 'view', 'pet-profiles'),
+            route('shelter.cases.index').'#list',
+            $this->hubActionHref($html, 'view', 'cases'),
         );
-        $this->assertSame(0, preg_match(
-            '/data-hub-action="create"[^>]*data-module-key="pet-profiles"|data-module-key="pet-profiles"[^>]*data-hub-action="create"/',
-            $html,
-        ));
+        $this->assertFalse($this->hasHubAction($html, 'create', 'cases'));
+    }
+
+    public function test_public_hub_keeps_client_create_links(): void
+    {
+        $owner = User::factory()->create();
+
+        $html = $this->actingAs($owner)
+            ->get('/shelter')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertSame(
+            route('shelter.pets.index').'#create',
+            $this->hubActionHref($html, 'create', 'pet-profiles'),
+        );
     }
 
     public function test_service_index_pagination_keeps_the_list_fragment(): void
@@ -204,6 +225,18 @@ class ServiceHubQuickLinksTest extends TestCase
         );
 
         return html_entity_decode($matches[1], ENT_QUOTES);
+    }
+
+    private function hasHubAction(string $html, string $action, string $moduleKey): bool
+    {
+        return preg_match(
+            sprintf(
+                '/data-hub-action="%1$s"[^>]*data-module-key="%2$s"|data-module-key="%2$s"[^>]*data-hub-action="%1$s"/',
+                preg_quote($action, '/'),
+                preg_quote($moduleKey, '/'),
+            ),
+            $html,
+        ) === 1;
     }
 
     private function hubLabelHref(string $html, string $moduleKey): string

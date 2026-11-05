@@ -237,8 +237,10 @@ class ModuleRegistryTest extends TestCase
             $permissions,
         );
 
-        $this->assertCount(65, $permissions);
-        $this->assertCount(65, array_unique($names));
+        $this->assertCount(68, $permissions);
+        $this->assertCount(68, array_unique($names));
+        $this->assertContains('shelter-rescue.cases.create-for-client', $names);
+        $this->assertContains('pet-care-clinic.consultations.create-for-client', $names);
         $this->assertContains('apes-cic.cases.comment-own', $names);
         $this->assertContains('apes-cic.cases.delete', $names);
         $this->assertContains('apes-cic.recruitment.view-own', $names);
@@ -272,6 +274,7 @@ class ModuleRegistryTest extends TestCase
                     'close',
                     'delete',
                     'review-applications',
+                    'create-for-client',
                 ],
                 true,
             ) || ($permission->moduleKey === 'recruitment'
@@ -300,6 +303,18 @@ class ModuleRegistryTest extends TestCase
             'apes-cic.recruitment.create',
             $matrix[AuthorizationProfile::ROLE_STAFF],
         );
+        foreach ([
+            AuthorizationProfile::ROLE_STUDENT,
+            AuthorizationProfile::ROLE_VOLUNTEER,
+            AuthorizationProfile::ROLE_STAFF,
+            AuthorizationProfile::ROLE_ADMINISTRATOR,
+        ] as $staffSideRole) {
+            $this->assertNotContains('apes-cic.tickets.create', $matrix[$staffSideRole]);
+            $this->assertNotContains('apes-cic.tickets.view-own', $matrix[$staffSideRole]);
+            $this->assertNotContains('apes-cic.recruitment.view-own', $matrix[$staffSideRole]);
+            $this->assertContains('apes-cic.tickets.comment-own', $matrix[$staffSideRole]);
+            $this->assertContains('shelter-rescue.cases.create-for-client', $matrix[$staffSideRole]);
+        }
         $this->assertContains(
             'apes-cic.recruitment.create',
             $matrix[AuthorizationProfile::ROLE_ADMINISTRATOR],
@@ -339,7 +354,7 @@ class ModuleRegistryTest extends TestCase
         $this->assertTrue(
             $profile->isAdministratorOnlyPermission('admin.modules.manage'),
         );
-        $this->assertCount(82, $profile->permissions());
+        $this->assertCount(85, $profile->permissions());
         $this->assertFalse(
             $profile->isApplicationPermission('superadmin.access'),
         );

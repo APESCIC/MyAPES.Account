@@ -231,7 +231,7 @@ class RecruitmentApplicationManageTest extends TestCase
         $this->assertTrue($application->isTerminal());
     }
 
-    public function test_managers_my_applications_lists_only_their_own_applications(): void
+    public function test_managers_have_no_my_applications_and_review_through_the_staff_pages(): void
     {
         $role = RecruitmentRole::factory()->open()->create(['title' => 'Shared opening']);
         $someoneElse = User::factory()
@@ -253,13 +253,11 @@ class RecruitmentApplicationManageTest extends TestCase
 
             $this->actingAs($manager)
                 ->get(route('recruitment.applications.index'))
-                ->assertOk()
-                ->assertSeeText("Own opening {$manager->id}")
-                ->assertDontSeeText('Shared opening');
+                ->assertForbidden();
 
             $this->actingAs($manager)
                 ->get(route('recruitment.applications.show', $own))
-                ->assertOk();
+                ->assertForbidden();
             $this->actingAs($manager)
                 ->get(route('recruitment.applications.show', $othersApplication))
                 ->assertForbidden();

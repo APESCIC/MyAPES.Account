@@ -88,13 +88,14 @@ class StructurePetProfilesWave5Test extends TestCase
         );
     }
 
-    public function test_staff_can_create_pets_in_both_modules(): void
+    public function test_clients_create_pets_in_both_modules_and_staff_can_view_them(): void
     {
+        $client = User::factory()->create();
         $staff = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_STAFF)
             ->create();
 
-        $this->actingAs($staff)->post(route('shelter.pets.store'), [
+        $this->actingAs($client)->post(route('shelter.pets.store'), [
             'name' => 'Wave5 Shelter Pet',
             'species' => 'dog',
             'sex' => 'male',
@@ -112,7 +113,7 @@ class StructurePetProfilesWave5Test extends TestCase
             ->assertSee('Wave5 Shelter Pet')
             ->assertSee('Owner');
 
-        $createClinic = $this->actingAs($staff)->post(route('petcare.pets.store'), [
+        $createClinic = $this->actingAs($client)->post(route('petcare.pets.store'), [
             'name' => 'Wave5 Clinic Pet',
             'species' => 'cat',
             'sex' => 'female',

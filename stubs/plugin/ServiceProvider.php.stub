@@ -36,8 +36,8 @@ class {{ studly }}ServiceProvider extends PluginServiceProvider
             compatibleModules: {{ modulesList }},
             shippedModules: {{ modulesList }},
             permissions: [
-                $a::public('view-own', 'View own {{ name }} records'),
-                $a::public('create', 'Create {{ name }} records'),
+                $a::client('view-own', 'View own {{ name }} records'),
+                $a::client('create', 'Create {{ name }} records'),
                 $a::staff('view-all', 'View all {{ name }} records'),
                 $a::staff('update-all', 'Update all {{ name }} records'),
             ],

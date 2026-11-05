@@ -83,15 +83,38 @@ class StaffListUxTest extends TestCase
     public static function listBeforeCreateIndexes(): array
     {
         return [
+            'shelter cases' => ['shelter.cases.index'],
+            'petcare consultations' => ['petcare.consultations.index'],
+        ];
+    }
+
+    /**
+     * @return array<string, array{0: string}>
+     */
+    public static function clientOnlyCreateIndexes(): array
+    {
+        return [
             'apes cic tickets' => ['apes-cic.tickets.index'],
             'shelter tickets' => ['shelter.tickets.index'],
             'petcare tickets' => ['petcare.tickets.index'],
             'shelter pets' => ['shelter.pets.index'],
             'petcare pets' => ['petcare.pets.index'],
             'apes cic cases' => ['apes-cic.cases.index'],
-            'shelter cases' => ['shelter.cases.index'],
-            'petcare consultations' => ['petcare.consultations.index'],
         ];
+    }
+
+    #[DataProvider('clientOnlyCreateIndexes')]
+    public function test_staff_indexes_show_the_list_without_a_client_create_form(string $routeName): void
+    {
+        $staff = User::factory()
+            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
+            ->create();
+
+        $this->actingAs($staff)
+            ->get(route($routeName))
+            ->assertOk()
+            ->assertSee('id="list"', false)
+            ->assertDontSee('id="create"', false);
     }
 
     #[DataProvider('listBeforeCreateIndexes')]

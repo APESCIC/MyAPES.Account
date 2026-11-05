@@ -89,7 +89,7 @@ class StructurePermsUrlsWave3Test extends TestCase
             ->firstOrFail();
         $permission = Permission::query()
             ->where('guard_name', 'web')
-            ->where('name', 'apes-cic.tickets.view-own')
+            ->where('name', 'apes-cic.tickets.comment-own')
             ->firstOrFail();
 
         DB::table('role_has_permissions')->insertOrIgnore([
@@ -128,7 +128,7 @@ class StructurePermsUrlsWave3Test extends TestCase
         $this->assertSame($beforeAbilities, $afterAbilities);
         $this->assertDatabaseHas('permissions', [
             'id' => $permission->id,
-            'name' => 'apes-cic.tickets.view-own',
+            'name' => 'apes-cic.tickets.comment-own',
         ]);
     }
 
