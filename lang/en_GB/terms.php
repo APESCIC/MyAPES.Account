@@ -22,6 +22,7 @@ return [
     'public_user' => 'Public user|Public users',
     'public_users' => 'Public users',
     'staff' => 'Staff',
+    'staff_users' => 'Staff users',
 
     'job_role' => 'Job role|Job roles',
     'job_roles' => 'Job roles',

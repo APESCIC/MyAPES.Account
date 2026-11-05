@@ -1,18 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Admin users | MyAPES Account')
+@section('title', $listTitle.' | '.__('workspace.app_name'))
 
 @section('content')
     <section class="panel" aria-labelledby="admin-users-title">
-        <h1 id="admin-users-title">
-            @if(($filters['account_type'] ?? '') === 'staff')
-                Staff
-            @elseif(($filters['account_type'] ?? '') === 'public')
-                Public users
-            @else
-                Users
-            @endif
-        </h1>
+        <h1 id="admin-users-title">{{ $listTitle }}</h1>
         <p class="muted">{{ __('admin.users.search_accounts_and_review_their_identity_status_and_effecti') }}</p>
         <p>
             <a href="{{ route('admin.users.index', ['account_type' => 'public']) }}">{{ __('admin.nav.public_users') }}</a>

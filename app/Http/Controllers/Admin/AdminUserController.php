@@ -137,6 +137,11 @@ class AdminUserController extends Controller
                 ->map(static fn (mixed $id): int => (int) $id)
                 ->all(),
             'showAllAccountsLink' => $actor instanceof User && $profile->isAdministrator($actor),
+            'listTitle' => match ($filters['account_type'] ?? null) {
+                'staff' => __('terms.staff_users'),
+                'public' => __('terms.public_users'),
+                default => __('admin.users.all_accounts'),
+            },
             'clearFiltersUrl' => route('admin.users.index', array_filter([
                 'account_type' => $filters['account_type'] ?? null,
             ])),

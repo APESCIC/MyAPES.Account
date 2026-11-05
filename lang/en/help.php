@@ -83,7 +83,7 @@ return [
         ],
         'people' => [
             'heading' => 'People and access',
-            'body' => 'Public users and Staff list every account by type. Open an account to check its profile and roles.',
+            'body' => 'Public users and Staff users list every account by type. Open an account to check its profile and roles.',
             'access' => 'Access holds groups, roles and permissions. Give access to a group rather than one person, so that everyone doing the same job sees the same things.',
         ],
         'modules' => [
