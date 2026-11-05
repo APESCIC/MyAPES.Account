@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Contracts\ModuleRegistry;
+use App\Core\Accounts\AccountClassifier;
 use App\Core\Accounts\AuditLog;
 use App\Core\Accounts\Role;
 use App\Core\Accounts\RoleSource;
@@ -36,6 +37,7 @@ class AdminUserController extends Controller
     public function index(
         Request $request,
         AuthorizationProfile $profile,
+        AccountClassifier $classifier,
         LocalPublicPasswordResetService $passwordResets,
     ): View {
         $filters = $request->validate([
@@ -71,21 +73,10 @@ class AdminUserController extends Controller
             $query->where('identity_type', $filters['identity_type']);
         }
 
-        $staffRoles = $profile->directoryProtectedRoles();
         if (($filters['account_type'] ?? null) === 'staff') {
-            $query->whereHas(
-                'roles',
-                static fn ($query) => $query
-                    ->where('roles.guard_name', 'web')
-                    ->whereIn('roles.name', $staffRoles),
-            );
+            $classifier->scopeStaffSide($query);
         } elseif (($filters['account_type'] ?? null) === 'public') {
-            $query->whereDoesntHave(
-                'roles',
-                static fn ($query) => $query
-                    ->where('roles.guard_name', 'web')
-                    ->whereIn('roles.name', $staffRoles),
-            );
+            $classifier->scopePublic($query);
         }
 
         if (($filters['status'] ?? null) === 'active') {
