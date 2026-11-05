@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Contracts\ModuleRegistry;
+use App\Core\Accounts\AccountClassifier;
 use App\Core\Accounts\AuditLog;
 use App\Core\Accounts\Role;
 use App\Core\Accounts\RoleSource;
@@ -36,6 +37,7 @@ class AdminUserController extends Controller
     public function index(
         Request $request,
         AuthorizationProfile $profile,
+        AccountClassifier $classifier,
         LocalPublicPasswordResetService $passwordResets,
     ): View {
         $filters = $request->validate([
@@ -53,6 +55,7 @@ class AdminUserController extends Controller
                 'nullable',
                 Rule::in($profile->protectedRolesByPrecedence()),
             ],
+            'staff_type' => ['nullable', Rule::in(AccountClassifier::STAFF_SIDE_TYPES)],
         ]);
         $query = User::query()->with([
             'roles' => fn ($query) => $query->orderBy('name'),
@@ -71,21 +74,14 @@ class AdminUserController extends Controller
             $query->where('identity_type', $filters['identity_type']);
         }
 
-        $staffRoles = $profile->directoryProtectedRoles();
         if (($filters['account_type'] ?? null) === 'staff') {
-            $query->whereHas(
-                'roles',
-                static fn ($query) => $query
-                    ->where('roles.guard_name', 'web')
-                    ->whereIn('roles.name', $staffRoles),
-            );
+            if (isset($filters['staff_type'])) {
+                $classifier->scopeType($query, $filters['staff_type']);
+            } else {
+                $classifier->scopeStaffSide($query);
+            }
         } elseif (($filters['account_type'] ?? null) === 'public') {
-            $query->whereDoesntHave(
-                'roles',
-                static fn ($query) => $query
-                    ->where('roles.guard_name', 'web')
-                    ->whereIn('roles.name', $staffRoles),
-            );
+            $classifier->scopePublic($query);
         }
 
         if (($filters['status'] ?? null) === 'active') {
@@ -133,7 +129,30 @@ class AdminUserController extends Controller
                 User::IDENTITY_CLOUDRON_OIDC => 'Cloudron OIDC',
             ],
             'protectedRoles' => $profile->protectedRolesByPrecedence(),
+            'staffTypes' => AccountClassifier::STAFF_SIDE_TYPES,
             'authorizationProfile' => $profile,
+            'adminUserIds' => $users->getCollection()
+                ->filter(static fn (User $user): bool => $classifier->classify($user) === AccountClassifier::ADMIN)
+                ->pluck('id')
+                ->map(static fn (mixed $id): int => (int) $id)
+                ->all(),
+            'unmappedUserIds' => $users->getCollection()
+                ->filter(static fn (User $user): bool => $classifier->isUnmapped($user))
+                ->pluck('id')
+                ->map(static fn (mixed $id): int => (int) $id)
+                ->all(),
+            'accessGroupsUrl' => $actor instanceof User && $actor->can('admin.groups.view')
+                ? route('admin.access.index', ['tab' => 'groups'])
+                : null,
+            'showAllAccountsLink' => $actor instanceof User && $profile->isAdministrator($actor),
+            'listTitle' => match ($filters['account_type'] ?? null) {
+                'staff' => __('terms.staff_users'),
+                'public' => __('terms.public_users'),
+                default => __('admin.users.all_accounts'),
+            },
+            'clearFiltersUrl' => route('admin.users.index', array_filter([
+                'account_type' => $filters['account_type'] ?? null,
+            ])),
             'resettableUserIds' => $resettableUserIds,
         ]);
     }

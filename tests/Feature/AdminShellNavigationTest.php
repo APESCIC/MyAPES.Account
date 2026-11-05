@@ -64,7 +64,7 @@ class AdminShellNavigationTest extends TestCase
             ->assertSee('data-lucide="layout-dashboard"', false)
             ->assertSee('>Overview</span>', false)
             ->assertSee('>Public users</span>', false)
-            ->assertSee('>Staff</span>', false)
+            ->assertSee('>Staff users</span>', false)
             ->assertSee('>Access</span>', false)
             ->assertSee('>Plugins</span>', false)
             ->assertSee('>Maintenance</span>', false);
@@ -79,7 +79,7 @@ class AdminShellNavigationTest extends TestCase
             ->assertOk()
             ->assertSee('>Overview</span>', false)
             ->assertSee('>Public users</span>', false)
-            ->assertSee('>Staff</span>', false)
+            ->assertSee('>Staff users</span>', false)
             ->assertSee('>Access</span>', false)
             ->assertSee('>Plugins</span>', false)
             ->assertSee('>Maintenance</span>', false);

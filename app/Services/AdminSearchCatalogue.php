@@ -140,7 +140,7 @@ final class AdminSearchCatalogue
             ],
             [
                 'id' => 'admin.staff',
-                'label' => __('terms.staff'),
+                'label' => __('terms.staff_users'),
                 'description' => __('admin.search.sections.staff'),
                 'url' => route('admin.users.index', ['account_type' => 'staff']),
                 'keywords_key' => 'admin.search.keywords.staff',

@@ -1,25 +1,19 @@
 @extends('layouts.app')
 
-@section('title', 'Admin users | MyAPES Account')
+@section('title', $listTitle.' | '.__('workspace.app_name'))
 
 @section('content')
     <section class="panel" aria-labelledby="admin-users-title">
-        <h1 id="admin-users-title">
-            @if(($filters['account_type'] ?? '') === 'staff')
-                Staff
-            @elseif(($filters['account_type'] ?? '') === 'public')
-                Public users
-            @else
-                Users
-            @endif
-        </h1>
+        <h1 id="admin-users-title">{{ $listTitle }}</h1>
         <p class="muted">{{ __('admin.users.search_accounts_and_review_their_identity_status_and_effecti') }}</p>
         <p>
             <a href="{{ route('admin.users.index', ['account_type' => 'public']) }}">{{ __('admin.nav.public_users') }}</a>
             ·
             <a href="{{ route('admin.users.index', ['account_type' => 'staff']) }}">{{ __('admin.nav.staff') }}</a>
-            ·
-            <a href="{{ route('admin.users.index') }}">{{ __('admin.users.all_accounts') }}</a>
+            @if($showAllAccountsLink)
+                ·
+                <a href="{{ route('admin.users.index') }}">{{ __('admin.users.all_accounts') }}</a>
+            @endif
         </p>
 
         <form method="get" action="{{ route('admin.users.index') }}">
@@ -48,19 +42,31 @@
                         <option value="suspended" @selected(($filters['status'] ?? '') === 'suspended')>{{ __('admin.overview.suspended') }}</option>
                     </select>
                 </div>
-                <div>
-                    <label for="protected-role">{{ __('admin.users.protected_role') }}</label>
-                    <select id="protected-role" name="protected_role">
-                        <option value="">{{ __('admin.users.all_protected_roles') }}</option>
-                        @foreach($protectedRoles as $role)
-                            <option value="{{ $role }}" @selected(($filters['protected_role'] ?? '') === $role)>{{ $role }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                @if(($filters['account_type'] ?? '') === 'staff')
+                    <div>
+                        <label for="staff-type">{{ __('admin.users.staff_role') }}</label>
+                        <select id="staff-type" name="staff_type">
+                            <option value="">{{ __('admin.users.all_staff_roles') }}</option>
+                            @foreach($staffTypes as $type)
+                                <option value="{{ $type }}" @selected(($filters['staff_type'] ?? '') === $type)>{{ __('admin.users.staff_types')[$type] }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @else
+                    <div>
+                        <label for="protected-role">{{ __('admin.users.protected_role') }}</label>
+                        <select id="protected-role" name="protected_role">
+                            <option value="">{{ __('admin.users.all_protected_roles') }}</option>
+                            @foreach($protectedRoles as $role)
+                                <option value="{{ $role }}" @selected(($filters['protected_role'] ?? '') === $role)>{{ $role }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
             </div>
             <div class="actions">
                 <button type="submit">{{ __('admin.access.apply_filters') }}</button>
-                <a href="{{ route('admin.users.index') }}">{{ __('admin.access.clear_filters') }}</a>
+                <a href="{{ $clearFiltersUrl }}">{{ __('admin.access.clear_filters') }}</a>
             </div>
         </form>
     </section>
@@ -81,7 +87,20 @@
             <tbody>
             @forelse($users as $user)
                 <tr>
-                    <td><strong>{{ $user->name }}</strong><br><span class="muted">{{ $user->email }}</span></td>
+                    <td>
+                        <strong>{{ $user->name }}</strong>
+                        @if(in_array($user->id, $adminUserIds, true))
+                            <span class="status" data-badge="admin">{{ __('admin.users.admin_badge') }}</span>
+                        @endif
+                        @if(in_array($user->id, $unmappedUserIds, true))
+                            @if($accessGroupsUrl !== null)
+                                <a class="status" data-badge="unmapped" href="{{ $accessGroupsUrl }}">{{ __('admin.users.no_cloudron_group_mapped') }}</a>
+                            @else
+                                <span class="status" data-badge="unmapped">{{ __('admin.users.no_cloudron_group_mapped') }}</span>
+                            @endif
+                        @endif
+                        <br><span class="muted">{{ $user->email }}</span>
+                    </td>
                     <td>
                         {{ $identityTypes[$user->identity_type] ?? 'Unknown' }}
                         @if($user->identity_type === \App\Core\Accounts\User::IDENTITY_CLOUDRON_OIDC && blank($user->oidc_sub))

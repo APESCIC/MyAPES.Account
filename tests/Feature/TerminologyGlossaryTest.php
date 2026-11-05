@@ -23,6 +23,7 @@ class TerminologyGlossaryTest extends TestCase
         $this->assertSame('Public user', trans_choice('terms.public_user', 1));
         $this->assertSame('Public users', trans_choice('terms.public_user', 2));
         $this->assertSame('Staff', __('terms.staff'));
+        $this->assertSame('Staff users', __('terms.staff_users'));
         $this->assertSame('Role', trans_choice('terms.recruitment_role', 1));
         $this->assertSame('Roles', trans_choice('terms.recruitment_role', 2));
         $this->assertSame('Job role', trans_choice('terms.job_role', 1));

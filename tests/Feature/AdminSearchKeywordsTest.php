@@ -37,7 +37,7 @@ class AdminSearchKeywordsTest extends TestCase
             'neutering' => 'Pet Profiles',
             'check-up' => 'Consultations',
             'reactivate' => __('terms.public_users'),
-            'employees' => __('terms.staff'),
+            'employees' => __('terms.staff_users'),
             'group mappings' => __('admin.nav.access'),
             'code not shipped' => __('admin.nav.plugins'),
             'mail log' => __('admin.nav.emails'),

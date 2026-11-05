@@ -4,6 +4,7 @@ namespace App\Support\Navigation;
 
 use App\Contracts\ModuleNavigationProvider;
 use App\Contracts\ModuleRegistry;
+use App\Core\Accounts\AccountClassifier;
 use App\Core\Accounts\User;
 use App\Core\Extensions\Navigation\PublicNavigationItem;
 use App\Core\Extensions\Navigation\PublicNavigationRegistry;
@@ -36,6 +37,7 @@ final class WorkspaceNavigation
         private readonly AdminSearchCatalogue $adminSearch,
         private readonly AuthorizationProfile $profile,
         private readonly Gate $gate,
+        private readonly AccountClassifier $accounts,
     ) {}
 
     public function forRequest(?User $user, Request $request): WorkspaceMenu
@@ -90,7 +92,7 @@ final class WorkspaceNavigation
             new NavItem('profile', __('public.chrome.app.blade.profile'), route('profile.edit'), 'user-round', ['profile.*', 'two-factor.setup'], $this->words('workspace.keywords.profile')),
         ];
 
-        if ($this->isStaffAccount($user)) {
+        if ($this->accounts->hasStaffSideRole($user)) {
             $overview[] = new NavItem('callers', __('callers.nav'), route('callers.index'), 'search', ['callers.*'], ['caller', 'phone', 'call', 'verify', 'pin']);
         }
 
@@ -103,7 +105,7 @@ final class WorkspaceNavigation
             new NavItem('help', __('public.chrome.app.blade.help'), route('help'), 'circle-help', ['help'], $this->words('workspace.keywords.help')),
         ];
 
-        if ($this->isStaffAccount($user)) {
+        if ($this->accounts->hasStaffSideRole($user)) {
             $support[] = new NavItem('help.staff', __('help.nav.staff_guide'), route('help.staff'), 'book-open', ['help.staff'], $this->words('help.keywords.staff_guide'));
         }
 
@@ -116,7 +118,7 @@ final class WorkspaceNavigation
 
         $groups[] = new NavGroup('support', __('workspace.groups.support'), $support);
 
-        $label = $this->isStaffAccount($user) ? __('workspace.panels.staff') : __('workspace.panels.account');
+        $label = $this->accounts->hasStaffSideRole($user) ? __('workspace.panels.staff') : __('workspace.panels.account');
 
         return new NavPanel(NavPanel::STAFF, $label, $this->withoutEmptyGroups($groups));
     }
@@ -263,7 +265,7 @@ final class WorkspaceNavigation
             ],
             'people' => [
                 ['admin.users', __('terms.public_users'), route('admin.users.index', ['account_type' => 'public']), 'user-round', ['admin.users.view'], ['admin.users.*'], ['account_type' => 'public']],
-                ['admin.staff', __('terms.staff'), route('admin.users.index', ['account_type' => 'staff']), 'badge-check', ['admin.users.view'], ['admin.users.*'], ['account_type' => 'staff']],
+                ['admin.staff', __('terms.staff_users'), route('admin.users.index', ['account_type' => 'staff']), 'badge-check', ['admin.users.view'], ['admin.users.*'], ['account_type' => 'staff']],
                 ['admin.access', __('admin.nav.access'), route('admin.access.index'), 'shield-check', ['admin.groups.view', 'admin.roles.view', 'admin.permissions.view'], ['admin.access.*', 'admin.groups.*', 'admin.roles.*', 'admin.permissions.*']],
             ],
             'modules' => [
@@ -427,11 +429,12 @@ final class WorkspaceNavigation
     }
 
     /**
-     * Same split as the Admin users list: a directory protected role makes a staff account.
+     * Same split as the Admin users list (#492). The signed-in user's own
+     * staff links use hasStaffSideRole() instead, matching their route gates.
      */
     private function isStaffAccount(User $user): bool
     {
-        return in_array($this->profile->effectiveProtectedRole($user), $this->profile->directoryProtectedRoles(), true);
+        return $this->accounts->isStaffSide($user);
     }
 
     /**
