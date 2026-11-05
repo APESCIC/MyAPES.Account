@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.51.3",
+    "date": "2026-11-05",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Ship once per milestone",
+    "summary": "MyAPES Account updates now ship once per milestone: all the work is finished first, then it is merged, released and deployed together.",
+    "changes": [
+      "Updates are grouped by milestone and reach the live site together, in one release.",
+      "A new contributing guide explains how work ships.",
+      "Developer and agent guides now describe one merge, one release and one deploy per milestone."
+    ],
+    "affected_areas": [
+      "Documentation",
+      "Release process"
+    ],
+    "categories": [
+      "changed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch: process and documentation changes only, with no change to application behaviour.",
+    "validation": [
+      "Release history validated against main.",
+      "Full local pre-PR checks.",
+      "Full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "None. The app itself is unchanged."
+    ],
+    "rollback": "Redeploy the previous release package. Nothing in the app depends on this release.",
+    "provenance": "Milestone Ship once per milestone: issues #625, #627, #628 and #629, shipped by issue #630 in pull request #633.",
+    "references": [
+      {
+        "label": "Issue #630",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/630"
+      },
+      {
+        "label": "Pull request #633",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/633"
+      }
+    ]
+  },
+  {
     "version": "0.51.2",
     "date": "2026-11-04",
     "channel": "stable",
