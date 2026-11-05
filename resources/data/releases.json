@@ -1,5 +1,58 @@
 [
   {
+    "version": "0.52.0",
+    "date": "2026-11-05",
+    "channel": "stable",
+    "type": "minor",
+    "title": "People split: Public users and Staff users",
+    "summary": "Administrators now see two separate lists under People: Public users for public accounts only, and Staff users for staff, volunteers, students and admins.",
+    "changes": [
+      "Public users now lists only public accounts. Staff-side and Cloudron accounts are no longer mixed in.",
+      "The People item that was called Staff is now called Staff users, in the menu, page title, breadcrumb and search.",
+      "Staff users has a role filter for staff, volunteers, students and admins, and shows an Admin badge.",
+      "Cloudron accounts that no Cloudron group maps to a role are listed under Staff users with a No Cloudron group mapped badge that links to Access.",
+      "The admin overview shows how many public users and staff users there are.",
+      "A new admin command reports accounts in the wrong list and, after confirmation, refreshes Cloudron accounts from their groups.",
+      "Agents and contributors now pull the latest main before starting any work."
+    ],
+    "affected_areas": [
+      "Admin",
+      "People",
+      "Navigation",
+      "Documentation"
+    ],
+    "categories": [
+      "added",
+      "changed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Minor: adds the Staff users role filter, badges, overview counts and an admin command, with no database changes.",
+    "validation": [
+      "New feature tests for the account classifier, both People lists, the rename, the badges and the admin command.",
+      "Browser check of Public users, Staff users and the admin overview.",
+      "Release history validated against main.",
+      "Full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "The admin command only refreshes Cloudron accounts. Local accounts that appear in a Cloudron group are listed for review and are not changed."
+    ],
+    "rollback": "Redeploy the previous release package. There are no migrations, and nothing stored depends on this release.",
+    "provenance": "Milestone v0.52.0 Beta: People, epic #491 with issues #492 to #498, plus #648 and #650, shipped in pull request #652.",
+    "references": [
+      {
+        "label": "Issue #491",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/491"
+      },
+      {
+        "label": "Pull request #652",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/652"
+      }
+    ]
+  },
+  {
     "version": "0.51.3",
     "date": "2026-11-05",
     "channel": "stable",
