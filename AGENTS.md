@@ -35,6 +35,17 @@ The owner's working copy is Laragon on Windows.
 - Full local check: `composer pre-pr-verify` (PowerShell) or `bash scripts/local/pre-pr-verify.sh`.
 - In Windows PowerShell 5.1, pass `gh` bodies with `--body-file`, because inline double quotes get stripped.
 
+## Before you start
+
+Pull the latest `main` before any new issue, task or job, and before creating any branch. The Cursor rule [`.cursor/rules/sync-before-work.mdc`](.cursor/rules/sync-before-work.mdc) has the exact steps:
+
+1. `git status`: if there are uncommitted changes, stop and report them. Don't stash, reset or discard them.
+2. `git fetch origin --prune`, then `git checkout main` and `git pull --ff-only origin main`.
+3. Merge `origin/main` into the milestone branch (or create it from the updated `main` and push it), or into the issue branch you're resuming.
+4. Only then create a new issue branch from the milestone branch.
+
+If the pull isn't a fast-forward or a merge conflicts, stop and report it. Never force-push, `reset --hard` or rebase shared branches to get past it.
+
 ## Issues and milestones
 
 - Live milestones: https://github.com/APESCIC/MyAPES.Account/milestones. Read the live titles before assigning work.
@@ -56,7 +67,7 @@ Work ships once per milestone, not once per change or issue. The Cursor rule [`.
 3. Release.
 4. Deploy.
 
-- Each milestone has one branch, `milestone/<slug>` (or a name the owner gives), created from `main` when work starts. Commit and push on it whenever needed.
+- Each milestone has one branch, `milestone/<slug>` (or a name the owner gives), created from an up-to-date `main` when work starts (see [Before you start](#before-you-start)). Commit and push on it whenever needed.
 - Nothing reaches `main`, and nothing is tagged, released or deployed, before stage 2.
 - Stages 3 and 4 run together: `deploy-cloudron.yml` deploys, then publishes the GitHub Release.
 - Hotfixes skip these stages only with Bambie's written approval recorded on the hotfix issue.
