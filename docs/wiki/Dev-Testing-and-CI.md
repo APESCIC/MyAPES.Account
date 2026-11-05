@@ -22,4 +22,4 @@
 ## Rules
 - Every action is pinned to a full commit SHA with a version comment.
 - Tests use seeded fake data only; never real people, pets or cases.
-- Every PR bumps the version (see [[Release and Cloudron deploy|Dev-Release-and-Cloudron-deploy]]), or the SQLite job fails.
+- Every PR into `main` bumps the version, or the SQLite job fails. Work ships once per milestone, so that is one PR and one bump per milestone (see [[Release and Cloudron deploy|Dev-Release-and-Cloudron-deploy]]).

@@ -407,7 +407,7 @@ Every future change merged to `main` must:
 5. Use a minor version for a new backward-compatible capability and a patch version for a compatible fix. While the application remains pre-1.0, document a breaking change explicitly and advance the minor version.
 6. Keep public notes free of credentials, personal data, private operational identifiers, exploitable security detail, and unnecessary infrastructure detail.
 
-Preferred workflow (agents and humans): scaffold the next release in the same pull request as the feature or fix:
+Preferred workflow (agents and humans): work ships once per milestone (see [Milestone shipping](AGENTS.md#milestone-shipping)), so scaffold the next release in the milestone's pull request into `main`:
 
 ```powershell
 php artisan myapes:changelog-prepare --type=patch --title="Short public title" --issue=<n> --pr=<n>

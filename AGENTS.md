@@ -44,12 +44,28 @@ The owner's working copy is Laragon on Windows.
 - Title prefix `[v0.N.x] NN` with a two-digit index. `00` is the epic; its body keeps a checklist of sub-issues (`- [ ] #123 Short title`), and each child is linked as a sub-issue.
 - Labels: only `area:admin`, `area:public`, `area:auth`, `area:tests`, `area:cloudron`.
 - Assignee: `apescic-director`.
-- Branch from `main` (`cursor/{feature|fix|chore}/<issue>-<slug>`, or a name the owner gives). Never commit on `main`.
-- Update the issue as work goes: comment with the branch, progress and the pull request. `Closes #<n>` on the pull request closes finished issues; close the epic when every child is done.
+- Commit issue work on the milestone branch (see [Milestone shipping](#milestone-shipping)), not on branches from `main`. Never commit on `main`.
+- Update the issue as work goes: comment with the branch, commits and progress. Close each issue with a comment giving the commit SHA once its acceptance criteria are committed on the milestone branch. The milestone pull request uses `Closes #<n>` for the ship issue. Close the epic when every child is done.
 
-## Release metadata (every pull request)
+## Milestone shipping
 
-Every pull request bumps to the **next free patch version** (minor for a new capability) and prepends **exactly one** record to `resources/data/releases.json`. In the same pull request:
+Work ships once per milestone, not once per change or issue. The Cursor rule [`.cursor/rules/milestone-shipping.mdc`](.cursor/rules/milestone-shipping.mdc) says the same.
+
+1. Complete **all** the milestone's issues before the next stage.
+2. All the milestone's work goes to `main` in **one merge**: a merge commit, never a squash.
+3. Release.
+4. Deploy.
+
+- Each milestone has one branch, `milestone/<slug>` (or a name the owner gives), created from `main` when work starts. Commit and push on it whenever needed.
+- Nothing reaches `main`, and nothing is tagged, released or deployed, before stage 2.
+- Stages 3 and 4 run together: `deploy-cloudron.yml` deploys, then publishes the GitHub Release.
+- Hotfixes skip these stages only with Bambie's written approval recorded on the hotfix issue.
+
+**Definition of done:** an issue is done when its acceptance criteria are met and committed on its branch. The milestone is done only after the single merge, release and deploy.
+
+## Release metadata (once per milestone)
+
+The milestone pull request into `main` bumps to the **next free patch version** (minor for a new capability) and prepends **exactly one** record to `resources/data/releases.json`. Issue commits on the milestone branch do not bump the version. In the same pull request:
 
 - `VERSION`
 - `resources/data/module-runtime-contract.json` (`application_version`)
@@ -69,9 +85,11 @@ php artisan myapes:changelog-validate --base-ref=origin/main
 
 ## Ship flow
 
-1. Commit, push, open the pull request.
+Run this once per milestone, after every other issue in the milestone is closed.
+
+1. Open one pull request from the milestone branch into `main`, with the release metadata above.
 2. CI green: `gh pr checks <n> --watch`. Fix failures; re-run a job only for a proven flaky test, and log an issue for it.
-3. Merge with a merge commit: `gh pr merge <n> --merge`.
+3. Wait for Bambie's review or approval on the ship issue, then merge with a merge commit: `gh pr merge <n> --merge`.
 4. Deploy by hand. A green `main` does not deploy itself. First check that no deploy is queued or running, and that `/healthz` does not already report the new version:
    ```bash
    gh run list -R APESCIC/MyAPES.Account -w deploy-cloudron.yml -L 3
