@@ -38,7 +38,7 @@ class AdminPeopleSplitTest extends TestCase
         $this->assertSame($publicList->viewData('users')->total(), $accounts['public_users']);
         $this->assertSame($staffList->viewData('users')->total(), $accounts['staff_users']);
         $this->assertSame($accounts['total'], $accounts['public_users'] + $accounts['staff_users']);
-        $overview->assertSee('<span data-count="public-users">1</span>', false);
+        $overview->assertSee('<span data-count="public-users">(1)</span>', false);
     }
 
     /**
