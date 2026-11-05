@@ -136,6 +136,14 @@ class AdminUserController extends Controller
                 ->pluck('id')
                 ->map(static fn (mixed $id): int => (int) $id)
                 ->all(),
+            'unmappedUserIds' => $users->getCollection()
+                ->filter(static fn (User $user): bool => $classifier->isUnmapped($user))
+                ->pluck('id')
+                ->map(static fn (mixed $id): int => (int) $id)
+                ->all(),
+            'accessGroupsUrl' => $actor instanceof User && $actor->can('admin.groups.view')
+                ? route('admin.access.index', ['tab' => 'groups'])
+                : null,
             'showAllAccountsLink' => $actor instanceof User && $profile->isAdministrator($actor),
             'listTitle' => match ($filters['account_type'] ?? null) {
                 'staff' => __('terms.staff_users'),

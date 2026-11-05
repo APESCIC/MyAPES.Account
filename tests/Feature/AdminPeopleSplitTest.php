@@ -74,6 +74,30 @@ class AdminPeopleSplitTest extends TestCase
             ->assertSessionHasErrors('staff_type');
     }
 
+    public function test_unmapped_cloudron_accounts_get_a_badge_linking_to_access(): void
+    {
+        $administrator = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
+        $this->people();
+
+        $content = $this->actingAs($administrator)
+            ->get(route('admin.users.index', ['account_type' => 'staff']))
+            ->assertOk()
+            ->assertSee('href="'.route('admin.access.index', ['tab' => 'groups']).'"', false)
+            ->assertSeeText('No Cloudron group mapped')
+            ->getContent();
+
+        $this->assertSame(3, substr_count($content, 'data-badge="unmapped"'));
+
+        $this->actingAs($administrator)
+            ->get(route('admin.users.index', ['account_type' => 'staff', 'staff_type' => 'volunteer']))
+            ->assertOk()
+            ->assertDontSee('data-badge="unmapped"', false);
+
+        $this->actingAs($administrator)
+            ->get(route('admin.access.index', ['tab' => 'groups']))
+            ->assertOk();
+    }
+
     public function test_staff_list_is_called_staff_users_everywhere(): void
     {
         $administrator = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();

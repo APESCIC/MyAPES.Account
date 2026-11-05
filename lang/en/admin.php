@@ -278,6 +278,7 @@ return [
             'student' => 'Student',
         ],
         'admin_badge' => 'Admin',
+        'no_cloudron_group_mapped' => 'No Cloudron group mapped',
         'user_results' => 'User results',
         'organisation' => 'Organisation',
         'avatar_photo' => 'Avatar photo',

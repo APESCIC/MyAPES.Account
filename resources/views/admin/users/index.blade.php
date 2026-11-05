@@ -92,6 +92,13 @@
                         @if(in_array($user->id, $adminUserIds, true))
                             <span class="status" data-badge="admin">{{ __('admin.users.admin_badge') }}</span>
                         @endif
+                        @if(in_array($user->id, $unmappedUserIds, true))
+                            @if($accessGroupsUrl !== null)
+                                <a class="status" data-badge="unmapped" href="{{ $accessGroupsUrl }}">{{ __('admin.users.no_cloudron_group_mapped') }}</a>
+                            @else
+                                <span class="status" data-badge="unmapped">{{ __('admin.users.no_cloudron_group_mapped') }}</span>
+                            @endif
+                        @endif
                         <br><span class="muted">{{ $user->email }}</span>
                     </td>
                     <td>
