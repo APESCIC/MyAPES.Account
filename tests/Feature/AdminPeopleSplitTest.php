@@ -74,6 +74,24 @@ class AdminPeopleSplitTest extends TestCase
             ->assertSessionHasErrors('staff_type');
     }
 
+    public function test_staff_list_is_called_staff_users_everywhere(): void
+    {
+        $administrator = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
+
+        $this->actingAs($administrator)
+            ->get(route('admin.users.index', ['account_type' => 'staff']))
+            ->assertOk()
+            ->assertSee('<title>Staff users | MyAPES Account</title>', false)
+            ->assertSee('<h1 id="admin-users-title">Staff users</h1>', false)
+            ->assertSee('>Staff users</span>', false)
+            ->assertSeeInOrder(['aria-label="Breadcrumb"', '>People<', '>Staff users<'], false);
+
+        $search = collect(app(\App\Services\AdminSearchCatalogue::class)->entriesFor($administrator))->firstWhere('id', 'admin.staff');
+        $this->assertSame('Staff users', $search['label']);
+
+        $this->assertSame('Staff', __('workspace.panels.staff'));
+    }
+
     /**
      * @return list<int>
      */
