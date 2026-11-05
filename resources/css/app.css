@@ -2525,6 +2525,35 @@ caption {
     margin-top: 0.35rem;
 }
 
+.driver-popover.myapes-tour {
+    max-width: min(22rem, calc(100vw - 2rem));
+    border-radius: 1rem;
+    color: #12343b;
+    font-family: inherit;
+}
+
+.driver-popover.myapes-tour .driver-popover-title {
+    font-size: 1.05rem;
+}
+
+.driver-popover.myapes-tour .driver-popover-footer button {
+    border-radius: 999px;
+    padding: 0.35rem 0.85rem;
+    text-shadow: none;
+}
+
+.tour-spike {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+}
+
+.tour-spike img {
+    flex: none;
+    width: 3.5rem;
+    height: 3.5rem;
+}
+
 .bookings-frame {
     width: 100%;
     height: min(80vh, 56rem);

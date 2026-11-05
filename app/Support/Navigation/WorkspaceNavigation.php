@@ -15,6 +15,7 @@ use App\Modules\ModuleNavigationItem;
 use App\Modules\SubCoreNavigation;
 use App\Services\AdminSearchCatalogue;
 use App\Services\AuthorizationProfile;
+use App\Support\Tour\GuidedTour;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -479,6 +480,7 @@ final class WorkspaceNavigation
 
         $actions[] = new QuickAction('view-site', __('workspace.header.view_site'), route('home'), 'external-link', '', $this->words('workspace.keywords.view_site'));
         $actions[] = new QuickAction('account', __('workspace.quick.your_account'), route('profile.edit'), 'circle-user-round', '', $this->words('workspace.keywords.profile'));
+        $actions[] = new QuickAction('tour.restart', __('tour.restart'), route('dashboard', [GuidedTour::RESTART_QUERY => 1]), 'compass', '', $this->words('tour.keywords'));
 
         return $actions;
     }

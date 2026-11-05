@@ -21,6 +21,7 @@ use App\Http\Controllers\BookingsController;
 use App\Http\Controllers\ChangeLogController;
 use App\Http\Controllers\CspReportController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GuidedTourController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MailReplyLinkController;
@@ -32,6 +33,7 @@ use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Staff\CallerController;
 use App\Http\Controllers\SubCoreController;
 use App\Http\Controllers\SupportAttachmentController;
+use App\Support\Tour\GuidedTour;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -164,6 +166,10 @@ Route::middleware([
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/help/staff', [HelpController::class, 'staff'])->name('help.staff');
     Route::get('/help/admin', [HelpController::class, 'admin'])->name('help.admin');
+    Route::post('/tour/{audience}/complete', [GuidedTourController::class, 'complete'])
+        ->whereIn('audience', GuidedTour::AUDIENCES)
+        ->middleware('throttle:20,1')
+        ->name('tour.complete');
     Route::prefix('staff/callers')->name('callers.')->group(function (): void {
         Route::get('/', [CallerController::class, 'index'])->name('index');
         Route::get('/{caller}', [CallerController::class, 'show'])->whereNumber('caller')->name('show');
