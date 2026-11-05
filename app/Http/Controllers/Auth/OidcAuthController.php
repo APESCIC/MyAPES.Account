@@ -101,6 +101,13 @@ class OidcAuthController extends Controller
 
         $knownUser = User::query()->where('oidc_sub', $sub)->first();
 
+        if ($knownUser?->identity_type === User::IDENTITY_LOCAL) {
+            $auditLogger->record('auth.oidc_local_account_denied', $knownUser, $knownUser, [
+                'reason' => 'local_public_account',
+            ]);
+            abort(403, __('auth.oidc.local_account'));
+        }
+
         if ($knownUser === null) {
             $knownUser = User::query()
                 ->whereRaw('LOWER(email) = ?', [$email])

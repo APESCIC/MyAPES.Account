@@ -53,6 +53,14 @@ return [
         'sync_lock_seconds' => (int) env('DIRECTORY_SYNC_LOCK_SECONDS', 300),
     ],
 
+    'accounts' => [
+        // Public registration and email change refuse these domains and their subdomains (#513).
+        'staff_email_domains' => array_map(
+            'strtolower',
+            $parseCsv(env('MYAPES_STAFF_EMAIL_DOMAINS', 'apes.org.uk')),
+        ),
+    ],
+
     'audit' => [
         'retention_days' => (int) env('AUDIT_LOG_RETENTION_DAYS', 180),
     ],

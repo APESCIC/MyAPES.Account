@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Core\Accounts\AccountClassifier;
 use App\Core\Accounts\User;
 use App\Http\Controllers\Controller;
 use App\Rules\AvailablePublicEmail;
+use App\Rules\NotStaffEmail;
 use App\Services\SecureEmailChangeService;
 use DomainException;
 use Illuminate\Http\RedirectResponse;
@@ -17,6 +19,7 @@ class EmailChangeController extends Controller
 {
     public function __construct(
         private readonly SecureEmailChangeService $emailChanges,
+        private readonly AccountClassifier $classifier,
     ) {}
 
     public function store(Request $request): RedirectResponse
@@ -38,6 +41,7 @@ class EmailChangeController extends Controller
                 'email',
                 'max:255',
                 Rule::notIn([strtolower(trim((string) $user->email))]),
+                ...($this->classifier->isStaffSide($user) ? [] : [new NotStaffEmail]),
                 new AvailablePublicEmail,
             ],
         ], [

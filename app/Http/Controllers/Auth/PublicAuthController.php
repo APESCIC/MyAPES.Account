@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Core\Accounts\User;
 use App\Http\Controllers\Controller;
 use App\Rules\AvailablePublicEmail;
+use App\Rules\NotStaffEmail;
 use App\Rules\Username;
 use App\Services\AuditLogger;
 use App\Services\AuthorizationAccountSynchronizer;
@@ -159,7 +160,7 @@ class PublicAuthController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', new Username],
-            'email' => ['required', 'string', 'email', 'max:255', new AvailablePublicEmail],
+            'email' => ['required', 'string', 'email', 'max:255', new NotStaffEmail, new AvailablePublicEmail],
             'password' => ['required', 'confirmed', Password::defaults()],
             'services' => ['required', 'array', 'min:1'],
             'services.*' => [

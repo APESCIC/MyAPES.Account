@@ -20,6 +20,7 @@ return [
         'no_directory_group' => 'Your Cloudron account does not have a MyAPES Account directory group.',
         'directory_unavailable' => 'Staff access verification is temporarily unavailable.',
         'email_conflict' => 'An account with this email already exists. Use a different Cloudron or work email for staff access.',
+        'local_account' => 'This email belongs to a public account. Staff sign in with Cloudron using a separate account; keep your public account for personal use.',
     ],
 
     'common' => [
@@ -77,6 +78,7 @@ return [
         'password_guidance' => 'At least 12 characters. Avoid passwords that have appeared in known data breaches.',
         'email_guidance' => 'Use an email you can access. We will send a verification link before you can continue.',
         'email_unavailable' => 'Unable to create an account with this email. If you already have an account, sign in or reset your password.',
+        'staff_email_domain' => 'This looks like an APES work email. Public accounts need a personal email address, so use one that is not linked to your staff account.',
         'consent_required' => 'You must accept the terms of use and privacy notice to create an account.',
         'services_legend' => 'Select at least one MyAPES service',
         'consent_legend' => 'Consent',
