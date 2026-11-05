@@ -49,7 +49,7 @@ class ReclassifyAccounts extends Command
                 $finding['user']->email,
                 $finding['user']->identity_type,
                 $finding['finding'],
-                $finding['action'] === self::ACTION_RESYNC ? 'Resync to '.$finding['role'] : ucfirst($finding['action']),
+                $finding['action'] === self::ACTION_RESYNC ? 'Resync to '.$finding['mapped_role'] : ucfirst($finding['action']),
             ])->all(),
         );
 
@@ -80,7 +80,7 @@ class ReclassifyAccounts extends Command
             $audit->record('accounts.reclassified', null, $user, [
                 'command' => 'myapes:accounts:reclassify',
                 'previous_role' => $result->previousProtectedRole,
-                'role' => $result->protectedRole,
+                'new_role' => $result->protectedRole,
             ]);
         }
 
@@ -90,7 +90,7 @@ class ReclassifyAccounts extends Command
     }
 
     /**
-     * @return Collection<int, array{user: User, finding: string, action: string, role: ?string}>
+     * @return Collection<int, array{user: User, finding: string, action: string, mapped_role: ?string}>
      */
     private function findings(AccountClassifier $classifier, DirectoryRoleSynchronizer $directory): Collection
     {
@@ -102,7 +102,7 @@ class ReclassifyAccounts extends Command
                     'user' => $user,
                     'finding' => 'Cloudron account with no role',
                     'action' => $role === null ? self::ACTION_UNMAPPED : self::ACTION_RESYNC,
-                    'role' => $role,
+                    'mapped_role' => $role,
                 ];
             });
 
@@ -115,7 +115,7 @@ class ReclassifyAccounts extends Command
                     'user' => $user,
                     'finding' => 'Public account in a mapped Cloudron group',
                     'action' => self::ACTION_REVIEW,
-                    'role' => $role,
+                    'mapped_role' => $role,
                 ];
             })
             ->filter();
