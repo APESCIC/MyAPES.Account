@@ -158,9 +158,9 @@
                 </tbody>
             </table>
             <p class="actions">
-                <a href="{{ route('admin.users.index', ['account_type' => 'public']) }}">{{ __('admin.overview.manage_public_users') }}</a>
+                <a href="{{ route('admin.users.index', ['account_type' => 'public']) }}">{{ __('admin.overview.manage_public_users') }} <span data-count="public-users">({{ $accounts['public_users'] }})</span></a>
                 ·
-                <a href="{{ route('admin.users.index', ['account_type' => 'staff']) }}">{{ __('admin.overview.manage_staff') }}</a>
+                <a href="{{ route('admin.users.index', ['account_type' => 'staff']) }}">{{ __('admin.overview.manage_staff') }} <span data-count="staff-users">({{ $accounts['staff_users'] }})</span></a>
             </p>
         </div>
     @endcan

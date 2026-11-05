@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Contracts\ModuleAnalyticsProvider;
 use App\Contracts\ModuleRegistry;
+use App\Core\Accounts\AccountClassifier;
 use App\Core\Accounts\AuditLog;
 use App\Core\Accounts\User;
 use App\Core\Extensions\Models\ModuleInstallation;
@@ -27,6 +28,7 @@ class AdminAnalyticsAggregator
         private readonly ModuleProjectionCache $projections,
         private readonly ReleaseHistoryRepository $releases,
         private readonly AuthorizationProfile $authorization,
+        private readonly AccountClassifier $accounts,
     ) {}
 
     public function normalizeRange(mixed $range): int
@@ -179,6 +181,8 @@ class AdminAnalyticsAggregator
                 ->where('created_at', '<', $to)
                 ->count(),
             'suspended' => User::query()->whereNotNull('suspended_at')->count(),
+            'public_users' => $this->accounts->scopePublic(User::query())->count(),
+            'staff_users' => $this->accounts->scopeStaffSide(User::query())->count(),
             'by_identity_type' => $identityTypes,
             'by_access_class' => $accessClasses,
         ];
