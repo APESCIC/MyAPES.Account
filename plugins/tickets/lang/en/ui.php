@@ -33,6 +33,7 @@ return [
             'public' => 'Public',
             'kb' => '( KB)',
             'back' => 'Back',
+            'related_records' => 'Related records',
         ],
     ],
     'index' => [

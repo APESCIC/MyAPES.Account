@@ -7,10 +7,12 @@ use App\Services\AuthorizationProfile;
 use App\Services\ModuleInstallationSynchronizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Concerns\CreatesClinicalPersonas;
 use Tests\TestCase;
 
 class StaffListUxTest extends TestCase
 {
+    use CreatesClinicalPersonas;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -100,6 +102,7 @@ class StaffListUxTest extends TestCase
             'shelter pets' => ['shelter.pets.index'],
             'petcare pets' => ['petcare.pets.index'],
             'apes cic cases' => ['apes-cic.cases.index'],
+            'petcare consultations for non-clinical staff' => ['petcare.consultations.index'],
         ];
     }
 
@@ -120,9 +123,9 @@ class StaffListUxTest extends TestCase
     #[DataProvider('listBeforeCreateIndexes')]
     public function test_staff_indexes_put_list_before_create(string $routeName): void
     {
-        $staff = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
-            ->create();
+        $staff = $routeName === 'petcare.consultations.index'
+            ? $this->vetStaff()
+            : User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create();
 
         $html = $this->actingAs($staff)
             ->get(route($routeName))

@@ -8,6 +8,19 @@
         <span class="service-label apes-petcare">{{ __('consultations::ui.index.blade.apes_pet_care_clinic') }}</span>
         <h1>Consultation #{{ $consultation->id }} - {{ $consultation->subject }}</h1>
         <p class="muted">Pet: {{ $consultation->petProfile->name }}</p>
+        @if($consultation->needsVetReview() && ($canUpdate || $canAssign))
+            <div class="alert" data-vet-review-notice>
+                <p><strong>{{ __('consultations::ui.index.blade.needs_vet_review') }}</strong> {{ __('consultations::ui.show.blade.needs_vet_review_body') }}</p>
+                @if($canUpdate)
+                    <form id="consultation-vet-review-form" method="post" action="{{ route('petcare.consultations.vet-review', $consultation) }}">
+                        @csrf
+                        <button type="submit">{{ __('consultations::ui.show.blade.mark_reviewed') }}</button>
+                    </form>
+                @endif
+            </div>
+        @elseif($consultation->vet_reviewed_at !== null && ($canUpdate || $canAssign))
+            <p class="muted" data-vet-reviewed>{{ __('consultations::ui.show.blade.vet_reviewed_by', ['name' => $consultation->vetReviewedBy?->name ?? __('consultations::ui.show.blade.not_recorded'), 'date' => $ukDateTime->format($consultation->vet_reviewed_at)]) }}</p>
+        @endif
         <dl>
             <dt>{{ __('consultations::ui.index.blade.status') }}</dt>
             <dd>{{ \App\Support\WorkflowLabels::status($consultation->status) }}</dd>
@@ -15,6 +28,14 @@
             <dd>{{ $ukDateTime->format($consultation->scheduled_for) ?? 'Not scheduled' }}</dd>
             <dt>{{ __('consultations::ui.index.blade.notes') }}</dt>
             <dd>{{ $consultation->notes ?: 'No notes recorded.' }}</dd>
+            @if($ticketUrl !== null)
+                <dt>{{ __('consultations::ui.show.blade.from_ticket') }}</dt>
+                <dd><a href="{{ $ticketUrl }}" data-consultation-ticket-link>{{ __('consultations::ui.show.blade.ticket_number', ['id' => $consultation->support_ticket_id]) }}</a></dd>
+            @endif
+            <dt>{{ __('consultations::ui.show.blade.created_by') }}</dt>
+            <dd data-consultation-created-by>{{ $consultation->createdBy?->name ?? __('consultations::ui.show.blade.not_recorded') }}</dd>
+            <dt>{{ __('consultations::ui.show.blade.last_edited_by') }}</dt>
+            <dd data-consultation-updated-by>{{ $consultation->updatedBy?->name ?? __('consultations::ui.show.blade.not_recorded') }}</dd>
             @if($canAssign)
                 <dt>{{ __('consultations::ui.show.blade.assigned_staff') }}</dt>
                 <dd>

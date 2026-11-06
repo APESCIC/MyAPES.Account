@@ -42,7 +42,7 @@ class StaffAbilityMigrationTest extends TestCase
         $this->assertTrue($this->holds($staff, 'apes-cic.tickets.view-all'));
         $this->assertTrue($this->holds($staff, 'apes-cic.tickets.comment-own'));
         $this->assertTrue($this->holds($staff, 'shelter-rescue.cases.create-for-client'));
-        $this->assertTrue($this->holds($staff, 'pet-care-clinic.consultations.create-for-client'));
+        $this->assertTrue($this->holds($staff, 'pet-care-clinic.consultations.view-all'));
 
         $client = User::factory()->create();
         $this->assertTrue($this->holds($client, 'apes-cic.tickets.create'));

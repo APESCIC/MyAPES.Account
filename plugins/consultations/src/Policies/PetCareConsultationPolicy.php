@@ -3,8 +3,8 @@
 namespace Plugins\Consultations\Policies;
 
 use App\Core\Accounts\User;
-use Plugins\Consultations\Models\PetCareConsultation;
 use App\Services\ModuleState;
+use Plugins\Consultations\Models\PetCareConsultation;
 
 class PetCareConsultationPolicy
 {
@@ -19,22 +19,22 @@ class PetCareConsultationPolicy
                 || $user->can(PetCareConsultation::PERMISSION_VIEW_ALL));
     }
 
+    /**
+     * Only Vet, Vet Nurse and admins create consultations; clients ask through a ticket (#536).
+     */
     public function create(User $user): bool
     {
         return $this->enabled()
-            && ($user->can(PetCareConsultation::PERMISSION_CREATE)
-                || $user->can(PetCareConsultation::PERMISSION_CREATE_FOR_CLIENT));
+            && $user->can(PetCareConsultation::PERMISSION_CREATE);
     }
 
     /**
-     * Clients book for their own pets; staff only for someone else's (#511).
+     * Clinicians only create for a client's pet, never their own (#511).
      */
     public function createFor(User $user, int $ownerId): bool
     {
-        return $this->enabled()
-            && ($ownerId === $user->id
-                ? $user->can(PetCareConsultation::PERMISSION_CREATE)
-                : $user->can(PetCareConsultation::PERMISSION_CREATE_FOR_CLIENT));
+        return $ownerId !== $user->id
+            && $this->create($user);
     }
 
     public function view(
@@ -53,9 +53,7 @@ class PetCareConsultationPolicy
         PetCareConsultation $consultation,
     ): bool {
         return $this->view($user, $consultation)
-            && ($user->can(PetCareConsultation::PERMISSION_UPDATE_ALL)
-                || ($consultation->user_id === $user->id
-                    && $user->can(PetCareConsultation::PERMISSION_UPDATE_OWN)));
+            && $user->can(PetCareConsultation::PERMISSION_UPDATE_ALL);
     }
 
     public function assign(User $user, PetCareConsultation $consultation): bool

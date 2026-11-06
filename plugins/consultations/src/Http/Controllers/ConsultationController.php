@@ -14,9 +14,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
 use Plugins\Consultations\Models\PetCareConsultation;
 use Plugins\Consultations\Notifications\ConsultationUpdatedNotification;
+use Plugins\Consultations\Support\PetCareTicketLookup;
 use Plugins\PetProfiles\Contracts\PetProfilesContract;
 use Plugins\PetProfiles\Support\StaffPetCreateReturn;
 
@@ -25,24 +27,44 @@ class ConsultationController extends Controller
     public function __construct(
         private readonly UkDateTime $ukDateTime,
         private readonly PetProfilesContract $petProfiles,
+        private readonly PetCareTicketLookup $tickets,
     ) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        $user = request()->user();
+        $user = $request->user();
         Gate::authorize('viewAny', PetCareConsultation::class);
+        $canReview = $user->can(PetCareConsultation::PERMISSION_UPDATE_ALL);
+        $reviewFilter = $canReview && $request->query('review') === 'needed';
         $query = PetCareConsultation::query()
             ->forPetCareDomain()
             ->visibleTo($user)
+            ->when($reviewFilter, static fn ($query) => $query->needsVetReview())
             ->with(['petProfile', 'assignedTo'])
             ->latest();
 
         $domain = $this->petProfiles->domainForModule('pet-care-clinic');
         $petProfiles = $this->petProfiles->visibleOrdered($user, $domain);
+        $canCreate = Gate::allows('create', PetCareConsultation::class);
+        $fromTicket = $canCreate ? $this->tickets->findForStaff($user, $request->query('ticket')) : null;
+
+        if ($fromTicket !== null) {
+            $petProfiles = $petProfiles->where('user_id', $fromTicket->user_id)->values();
+        }
 
         return view('consultations::index', [
-            'consultations' => $query->paginate(20)->fragment('list'),
-            'canCreate' => Gate::allows('create', PetCareConsultation::class),
+            'fromTicket' => $fromTicket,
+            'consultations' => $query->paginate(20)->withQueryString()->fragment('list'),
+            'reviewFilter' => $reviewFilter,
+            'reviewCount' => $canReview
+                ? PetCareConsultation::query()->forPetCareDomain()->visibleTo($user)->needsVetReview()->count()
+                : null,
+            'canCreate' => $canCreate,
+            'requestConsultationUrl' => ! $canCreate
+                && $user->can(PetCareConsultation::PERMISSION_VIEW_OWN)
+                && Route::has('tickets.public.start')
+                    ? route('tickets.public.start', ['service' => 'pet-care-clinic', 'area' => 'consultation'])
+                    : null,
             'petProfiles' => $petProfiles,
             ...StaffPetCreateReturn::emptySelectViewData(
                 $user,
@@ -63,8 +85,11 @@ class ConsultationController extends Controller
             'subject' => ['required', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
             'scheduled_for' => ['nullable', new UkDateTimeFormat],
+            'support_ticket_id' => ['nullable', 'integer'],
         ]);
         $validated = $this->normalizeValidatedSchedule($validated);
+        $ticketId = $validated['support_ticket_id'] ?? null;
+        unset($validated['support_ticket_id']);
 
         $domain = $this->petProfiles->domainForModule('pet-care-clinic');
         $pet = $this->petProfiles->findVisibleOrFail(
@@ -74,10 +99,25 @@ class ConsultationController extends Controller
         );
         Gate::authorize('createFor', [PetCareConsultation::class, (int) $pet->user_id]);
 
-        $consultation = PetCareConsultation::create([
+        if ($ticketId !== null) {
+            $ticket = $this->tickets->findForStaff($request->user(), $ticketId);
+
+            if ($ticket === null || (int) $ticket->user_id !== (int) $pet->user_id) {
+                throw ValidationException::withMessages([
+                    'support_ticket_id' => __('consultations::ui.validation.ticket_does_not_match_pet'),
+                ]);
+            }
+        }
+
+        $consultation = new PetCareConsultation([
             ...$validated,
             'user_id' => $pet->user_id,
         ]);
+        $consultation->forceFill([
+            'support_ticket_id' => $ticketId,
+            'created_by' => $request->user()->id,
+            'updated_by' => $request->user()->id,
+        ])->save();
 
         $this->notifyConsultationStakeholders($consultation, $request->user(), 'created');
         $auditLogger->record('petcare.consultation.created', $request->user(), $consultation, [
@@ -99,7 +139,7 @@ class ConsultationController extends Controller
         $canUpdate = Gate::allows('update', $consultation);
         $canAssign = Gate::allows('assign', $consultation);
         $canClose = Gate::allows('close', $consultation);
-        $consultation->load(['petProfile', 'assignedTo']);
+        $consultation->load(['petProfile', 'assignedTo', 'createdBy', 'updatedBy', 'vetReviewedBy']);
         $eligibleStaff = User::query()
             ->eligibleStaff()
             ->withAuthorizationPermission(
@@ -112,6 +152,9 @@ class ConsultationController extends Controller
 
         return view('consultations::show', [
             'consultation' => $consultation,
+            'ticketUrl' => $consultation->support_ticket_id !== null
+                ? $this->tickets->showUrl(request()->user(), (int) $consultation->support_ticket_id, (int) $consultation->user_id)
+                : null,
             'canUpdate' => $canUpdate,
             'canAssign' => $canAssign,
             'canClose' => $canClose,
@@ -191,18 +234,51 @@ class ConsultationController extends Controller
         }
 
         $consultation->fill($updates);
+        $consultation->forceFill(['updated_by' => $request->user()->id]);
         $consultation->save();
 
         $this->notifyConsultationStakeholders($consultation, $request->user(), 'updated');
         $auditLogger->record('petcare.consultation.updated', $request->user(), $consultation, [
             'status' => $consultation->status,
             'assigned_to' => $consultation->assigned_to,
+            'updated_by' => $consultation->updated_by,
             'scheduled_for' => $consultation->scheduled_for,
             'sub_core_key' => 'pet-care-clinic',
             'module_key' => 'consultations',
         ]);
 
         return redirect()->route('petcare.consultations.show', $consultation)->with('status', __('consultations::ui.flash.consultation_updated'));
+    }
+
+    /**
+     * A Vet, Vet Nurse or admin clears the "Needs vet review" flag (#539).
+     */
+    public function markVetReviewed(
+        Request $request,
+        PetCareConsultation $consultation,
+        AuditLogger $auditLogger,
+    ): RedirectResponse {
+        $consultation = $this->petCareConsultation($consultation);
+        Gate::authorize('update', $consultation);
+
+        if (! $consultation->needsVetReview()) {
+            throw ValidationException::withMessages([
+                'consultation' => __('consultations::ui.validation.not_flagged_for_vet_review'),
+            ]);
+        }
+
+        $consultation->forceFill([
+            'vet_reviewed_at' => now(),
+            'vet_reviewed_by' => $request->user()->id,
+        ])->save();
+        $auditLogger->record('petcare.consultation.vet_reviewed', $request->user(), $consultation, [
+            'flagged_at' => $consultation->vet_review_flagged_at,
+            'sub_core_key' => 'pet-care-clinic',
+            'module_key' => 'consultations',
+        ]);
+
+        return redirect()->route('petcare.consultations.show', $consultation)
+            ->with('status', __('consultations::ui.flash.vet_review_cleared'));
     }
 
     private function notifyConsultationStakeholders(PetCareConsultation $consultation, User $actor, string $eventLabel): void

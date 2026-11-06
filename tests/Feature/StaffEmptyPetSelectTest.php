@@ -9,10 +9,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Plugins\PetProfiles\Models\PetProfile;
 use Plugins\PetProfiles\Support\StaffPetCreateReturn;
+use Tests\Concerns\CreatesClinicalPersonas;
 use Tests\TestCase;
 
 class StaffEmptyPetSelectTest extends TestCase
 {
+    use CreatesClinicalPersonas;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -27,7 +29,8 @@ class StaffEmptyPetSelectTest extends TestCase
      *     petsIndexRoute: string,
      *     petsStoreRoute: string,
      *     returnKey: string,
-     *     domain: string
+     *     domain: string,
+     *     clinical: bool
      * }}>
      */
     public static function staffCreateFlows(): array
@@ -39,6 +42,7 @@ class StaffEmptyPetSelectTest extends TestCase
                 'petsStoreRoute' => 'shelter.pets.store',
                 'returnKey' => StaffPetCreateReturn::SHELTER_CASES,
                 'domain' => PetProfile::DOMAIN_SHELTER,
+                'clinical' => false,
             ]],
             'pet care consultations' => [[
                 'createIndexRoute' => 'petcare.consultations.index',
@@ -46,8 +50,21 @@ class StaffEmptyPetSelectTest extends TestCase
                 'petsStoreRoute' => 'petcare.pets.store',
                 'returnKey' => StaffPetCreateReturn::PETCARE_CONSULTATIONS,
                 'domain' => PetProfile::DOMAIN_PETCARE,
+                'clinical' => true,
             ]],
         ];
+    }
+
+    /**
+     * Consultations are created only by Vet, Vet Nurse and admins (#536).
+     *
+     * @param  array{clinical: bool}  $flow
+     */
+    private function creatorFor(array $flow): User
+    {
+        return $flow['clinical']
+            ? $this->vetStaff()
+            : User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create();
     }
 
     /**
@@ -56,16 +73,15 @@ class StaffEmptyPetSelectTest extends TestCase
      *     petsIndexRoute: string,
      *     petsStoreRoute: string,
      *     returnKey: string,
-     *     domain: string
+     *     domain: string,
+     *     clinical: bool
      * }  $flow
      */
     #[DataProvider('staffCreateFlows')]
     public function test_staff_empty_pet_select_explains_the_gap_without_an_add_pet_link(
         array $flow,
     ): void {
-        $staff = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
-            ->create();
+        $staff = $this->creatorFor($flow);
 
         $this->actingAs($staff)
             ->get(route($flow['createIndexRoute']))
@@ -92,7 +108,8 @@ class StaffEmptyPetSelectTest extends TestCase
      *     petsIndexRoute: string,
      *     petsStoreRoute: string,
      *     returnKey: string,
-     *     domain: string
+     *     domain: string,
+     *     clinical: bool
      * }  $flow
      */
     #[DataProvider('staffCreateFlows')]
@@ -101,13 +118,18 @@ class StaffEmptyPetSelectTest extends TestCase
     ): void {
         $owner = User::factory()->create();
 
-        $this->actingAs($owner)
+        $response = $this->actingAs($owner)
             ->get(route($flow['createIndexRoute']))
             ->assertOk()
-            ->assertSee('name="pet_profile_id"', false)
             ->assertDontSee('data-empty-pet-select', false)
             ->assertDontSeeText('Add a pet first')
             ->assertDontSee('return_to='.$flow['returnKey']);
+
+        if ($flow['clinical']) {
+            $response->assertDontSee('name="pet_profile_id"', false);
+        } else {
+            $response->assertSee('name="pet_profile_id"', false);
+        }
     }
 
     /**
@@ -116,7 +138,8 @@ class StaffEmptyPetSelectTest extends TestCase
      *     petsIndexRoute: string,
      *     petsStoreRoute: string,
      *     returnKey: string,
-     *     domain: string
+     *     domain: string,
+     *     clinical: bool
      * }  $flow
      */
     #[DataProvider('staffCreateFlows')]
@@ -124,9 +147,7 @@ class StaffEmptyPetSelectTest extends TestCase
         array $flow,
     ): void {
         $client = User::factory()->create();
-        $staff = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
-            ->create();
+        $staff = $this->creatorFor($flow);
         $pet = PetProfile::query()->create([
             'user_id' => $client->id,
             'service_domain' => $flow['domain'],

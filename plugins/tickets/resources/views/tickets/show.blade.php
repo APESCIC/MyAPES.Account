@@ -153,7 +153,20 @@
                 <button type="submit">{{ __('tickets::ui.show.blade.update_ownership') }}</button>
             </form>
         @endif
+        @if(! empty($ticketRelatedLinks))
+            <div data-ticket-related-links>
+                <h2>{{ __('tickets::ui.show.blade.related_records') }}</h2>
+                <ul>
+                    @foreach($ticketRelatedLinks as $relatedLink)
+                        <li><a href="{{ $relatedLink['url'] }}">{{ $relatedLink['label'] }}</a></li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         <div class="actions">
+            @foreach($ticketRelatedActions ?? [] as $relatedAction)
+                <a href="{{ $relatedAction['url'] }}" data-ticket-related-action>{{ $relatedAction['label'] }}</a>
+            @endforeach
             <a href="{{ route($ticketService->routePrefix.'.index') }}">{{ __('tickets::ui.show.blade.back') }}</a>
         </div>
         @if($ticketService->supportsDelete && auth()->user()->can('delete', $ticket))

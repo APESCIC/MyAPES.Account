@@ -8,10 +8,12 @@ use Illuminate\Support\Facades\RateLimiter;
 use Plugins\PetProfiles\Models\PetProfile;
 use Plugins\Tickets\Models\SupportTicket;
 use Plugins\Tickets\Models\SupportTicketMessage;
+use Tests\Concerns\CreatesClinicalPersonas;
 use Tests\TestCase;
 
 class ReviewFeedbackFixesTest extends TestCase
 {
+    use CreatesClinicalPersonas;
     use RefreshDatabase;
 
     public function test_service_user_cannot_see_staff_only_ticket_notes(): void
@@ -113,6 +115,12 @@ class ReviewFeedbackFixesTest extends TestCase
         ]);
 
         $this->actingAs($staffUser)->post(route('petcare.consultations.store'), [
+            'pet_profile_id' => $pet->id,
+            'subject' => 'Wellness check',
+            'notes' => 'Assess diet',
+        ])->assertForbidden();
+
+        $this->actingAs($this->vetStaff())->post(route('petcare.consultations.store'), [
             'pet_profile_id' => $pet->id,
             'subject' => 'Wellness check',
             'notes' => 'Assess diet',

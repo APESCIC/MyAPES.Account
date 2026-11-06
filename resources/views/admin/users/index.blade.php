@@ -92,6 +92,9 @@
                         @if(in_array($user->id, $adminUserIds, true))
                             <span class="status" data-badge="admin">{{ __('admin.users.admin_badge') }}</span>
                         @endif
+                        @foreach($clinicalBadges[$user->id] ?? [] as $clinicalTitle)
+                            <span class="status" data-badge="clinical">{{ $clinicalTitle }}</span>
+                        @endforeach
                         @if(in_array($user->id, $unmappedUserIds, true))
                             @if($accessGroupsUrl !== null)
                                 <a class="status" data-badge="unmapped" href="{{ $accessGroupsUrl }}">{{ __('admin.users.no_cloudron_group_mapped') }}</a>

@@ -29,10 +29,6 @@ class PetCareConsultation extends Model
 
     public const PERMISSION_CREATE = 'pet-care-clinic.consultations.create';
 
-    public const PERMISSION_CREATE_FOR_CLIENT = 'pet-care-clinic.consultations.create-for-client';
-
-    public const PERMISSION_UPDATE_OWN = 'pet-care-clinic.consultations.update-own';
-
     public const PERMISSION_VIEW_ALL = 'pet-care-clinic.consultations.view-all';
 
     public const PERMISSION_UPDATE_ALL = 'pet-care-clinic.consultations.update-all';
@@ -44,6 +40,16 @@ class PetCareConsultation extends Model
     public function scopeForPetCareDomain(Builder $query): Builder
     {
         return $query->whereHas('petProfile');
+    }
+
+    public function scopeNeedsVetReview(Builder $query): Builder
+    {
+        return $query->whereNotNull('vet_review_flagged_at')->whereNull('vet_reviewed_at');
+    }
+
+    public function needsVetReview(): bool
+    {
+        return $this->vet_review_flagged_at !== null && $this->vet_reviewed_at === null;
     }
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
@@ -63,6 +69,8 @@ class PetCareConsultation extends Model
             'notes' => SanitisedHtml::class,
             'scheduled_for' => 'datetime',
             'closed_at' => 'datetime',
+            'vet_review_flagged_at' => 'datetime',
+            'vet_reviewed_at' => 'datetime',
         ];
     }
 
@@ -79,5 +87,20 @@ class PetCareConsultation extends Model
     public function assignedTo(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function vetReviewedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'vet_reviewed_by');
     }
 }

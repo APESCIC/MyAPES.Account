@@ -43,7 +43,7 @@ class ServiceHubQuickLinksTest extends TestCase
             '/petcare' => [
                 'pet-profiles' => [route('petcare.pets.index'), false],
                 'tickets' => [route('petcare.tickets.index'), false],
-                'consultations' => [route('petcare.consultations.index'), true],
+                'consultations' => [route('petcare.consultations.index'), false],
             ],
         ];
 

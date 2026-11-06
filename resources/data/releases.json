@@ -1,5 +1,57 @@
 [
   {
+    "version": "0.57.0",
+    "date": "2026-11-06",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Consultations by Vet and Vet Nurse only",
+    "summary": "Only the Vet and Vet Nurse team, and admins, now create and edit Pet Care Clinic consultations. Pet owners still see their own pets' consultations and ask for one by opening a Pet Care Clinic ticket.",
+    "changes": [
+      "New Vet and Vet Nurse job roles, with the same rights, mapped from the Cloudron groups myapesaccount.vet and myapesaccount.vetnurse. Admins can also assign them by hand, and Staff users shows a Vet or Vet Nurse badge.",
+      "Creating and editing consultations is limited to Vet, Vet Nurse and admins. Other staff, volunteers and students can view consultations, and assign or close them when their group allows it.",
+      "Public users no longer see the create form or edit controls. The consultations page links to a Pet Care Clinic ticket to request a consultation instead.",
+      "Each consultation records who created it and who last edited it, and shows both on the consultation page.",
+      "A Vet or Vet Nurse can create a consultation straight from a Pet Care Clinic ticket, with the owner's pets pre-filled. The ticket and the consultation link to each other.",
+      "Older consultations created by non-clinical users can be flagged 'Needs vet review' with a new admin command. Vets see them in a review queue and mark each one as reviewed. Nothing is archived or deleted."
+    ],
+    "affected_areas": [
+      "Consultations",
+      "Tickets",
+      "Roles and access",
+      "Staff users"
+    ],
+    "categories": [
+      "added",
+      "changed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Minor: new clinical roles, a vet review queue and creating consultations from tickets, plus a change to who may create and edit consultations. Released as 0.57.0 to match the milestone; 0.55.0 and 0.56.0 are not used yet.",
+    "validation": [
+      "Feature tests for vet-only create and edit, the public request link, created and last edited by, the flag command dry run and confirmation, the vet review queue, and creating a consultation from a ticket.",
+      "Migration test that the old public create and own-edit grants are revoked and that Vet, Vet Nurse and admins keep create and edit.",
+      "Full PHPUnit suite locally and in CI; release history validated against main."
+    ],
+    "known_limitations": [
+      "The Cloudron groups myapesaccount.vet and myapesaccount.vetnurse must exist, and vets must also be in myapesaccount.staff, for the roles to apply automatically.",
+      "Older consultations with no recorded creator are reported by the flag command but not flagged."
+    ],
+    "rollback": "Redeploy the previous release package. The new columns are nullable and can stay; the previous release restores the old consultation permissions on its next authorization sync.",
+    "provenance": "Milestone v0.57.0 Beta: Consultations by Vet and Vet Nurse only, epic #533 with sub-issues #534 to #541, pull request #680.",
+    "references": [
+      {
+        "label": "Issue #533",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/533"
+      },
+      {
+        "label": "Pull request #680",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/680"
+      }
+    ]
+  },
+  {
     "version": "0.54.1",
     "date": "2026-11-06",
     "channel": "stable",

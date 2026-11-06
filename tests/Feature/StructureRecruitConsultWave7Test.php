@@ -19,11 +19,13 @@ use Plugins\Recruitment\Http\Controllers\RecruitmentApplicationController;
 use Plugins\Recruitment\Http\Controllers\RecruitmentBoardController;
 use Plugins\Recruitment\Http\Controllers\RecruitmentRoleController;
 use Plugins\Recruitment\Models\RecruitmentRole;
+use Tests\Concerns\CreatesClinicalPersonas;
 use Tests\Concerns\CreatesRecruitmentPersonas;
 use Tests\TestCase;
 
 class StructureRecruitConsultWave7Test extends TestCase
 {
+    use CreatesClinicalPersonas;
     use CreatesRecruitmentPersonas;
     use RefreshDatabase;
 
@@ -151,11 +153,9 @@ class StructureRecruitConsultWave7Test extends TestCase
             ->assertSee('Wave7 volunteer');
     }
 
-    public function test_staff_can_create_petcare_consultation(): void
+    public function test_vet_can_create_petcare_consultation(): void
     {
-        $staff = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
-            ->create();
+        $staff = $this->vetStaff();
 
         $owner = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_SERVICE_USER)

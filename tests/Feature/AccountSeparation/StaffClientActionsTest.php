@@ -14,10 +14,12 @@ use Plugins\PetProfiles\Models\PetProfile;
 use Plugins\Recruitment\Models\RecruitmentApplication;
 use Plugins\Recruitment\Models\RecruitmentRole;
 use Plugins\Tickets\Models\SupportTicket;
+use Tests\Concerns\CreatesClinicalPersonas;
 use Tests\TestCase;
 
 class StaffClientActionsTest extends TestCase
 {
+    use CreatesClinicalPersonas;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -184,7 +186,6 @@ class StaffClientActionsTest extends TestCase
         $clientShelterPet = $this->petFor($client, PetProfile::DOMAIN_SHELTER, 'Client shelter pet');
         $clientCarePet = $this->petFor($client, PetProfile::DOMAIN_PETCARE, 'Client care pet');
         $staffShelterPet = $this->petFor($staff, PetProfile::DOMAIN_SHELTER, 'Legacy staff shelter pet');
-        $staffCarePet = $this->petFor($staff, PetProfile::DOMAIN_PETCARE, 'Legacy staff care pet');
 
         $this->actingAs($staff)
             ->post(route('shelter.cases.store'), [
@@ -203,15 +204,24 @@ class StaffClientActionsTest extends TestCase
         $this->actingAs($staff)
             ->post(route('petcare.consultations.store'), [
                 'pet_profile_id' => $clientCarePet->id,
+                'subject' => 'Consultation by non-clinical staff',
+            ])
+            ->assertForbidden();
+        $vet = $this->vetStaff();
+        $vetCarePet = $this->petFor($vet, PetProfile::DOMAIN_PETCARE, 'Legacy vet care pet');
+        $this->actingAs($vet)
+            ->post(route('petcare.consultations.store'), [
+                'pet_profile_id' => $clientCarePet->id,
                 'subject' => 'Consultation for a client',
             ])
             ->assertRedirect();
-        $this->actingAs($staff)
+        $this->actingAs($vet)
             ->post(route('petcare.consultations.store'), [
-                'pet_profile_id' => $staffCarePet->id,
+                'pet_profile_id' => $vetCarePet->id,
                 'subject' => 'Consultation for own pet',
             ])
             ->assertForbidden();
+        $this->assertDatabaseMissing('pet_care_consultations', ['subject' => 'Consultation by non-clinical staff']);
 
         $this->assertSame($client->id, ShelterCase::query()->where('title', 'Case for a client')->sole()->user_id);
         $this->assertDatabaseMissing('shelter_cases', ['title' => 'Case for own pet']);
