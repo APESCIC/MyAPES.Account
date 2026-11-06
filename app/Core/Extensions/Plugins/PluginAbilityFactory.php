@@ -102,4 +102,12 @@ final class PluginAbilityFactory
     {
         return new PluginAbility($ability, $label, true, self::managerRoles());
     }
+
+    /**
+     * Clinical work held by administrators by default; Vet and Vet Nurse job roles carry it (#535).
+     */
+    public static function clinical(string $ability, string $label): PluginAbility
+    {
+        return new PluginAbility($ability, $label, true, self::managerRoles());
+    }
 }

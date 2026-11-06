@@ -77,11 +77,9 @@ class ConsultationsServiceProvider extends PluginServiceProvider
             shippedModules: ['pet-care-clinic'],
             permissions: [
                 $a::client('view-own', 'View own consultations'),
-                $a::client('create', 'Create consultations'),
-                $a::staff('create-for-client', 'Open consultations for a client'),
-                $a::public('update-own', 'Update own consultations'),
+                $a::clinical('create', 'Create consultations'),
                 $a::staff('view-all', 'View all consultations'),
-                $a::staff('update-all', 'Update all consultations'),
+                $a::clinical('update-all', 'Update all consultations'),
                 $a::staff('assign', 'Assign consultations'),
                 $a::staff('close', 'Close consultations'),
             ],
