@@ -36,7 +36,7 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
-        <env name="APP_KEY" value="base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="/>
+        <env name="APP_KEY" value="base64:cGhwdW5pdC10ZXN0LWtleS1ub3QtYS1zZWNyZXQhIQ=="/>
         <env name="APP_LOCALE" value="en_GB"/>
         <env name="APP_FALLBACK_LOCALE" value="en"/>
         <env name="APP_FAKER_LOCALE" value="en_GB"/>
