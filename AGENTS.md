@@ -34,6 +34,8 @@ The owner's working copy is Laragon on Windows.
 - Local QA accounts come from `database/seeders/LocalQaSeeder.php` (local and testing only). Never copy their passwords anywhere.
 - Full local check: `composer pre-pr-verify` (PowerShell) or `bash scripts/local/pre-pr-verify.sh`.
 - In Windows PowerShell 5.1, pass `gh` bodies with `--body-file`, because inline double quotes get stripped.
+- Node/npm for Vite builds: use **npm 11.10 or newer** (Laragon's Node 22 ships npm 10 by default — upgrade with `npm install -g npm@11` before `npm ci`). Repo `.npmrc` sets `min-release-age=7`.
+- Every GitHub Actions `uses:` must be pinned to a full 40-character commit SHA with a version comment (`action@<sha> # vX.Y.Z`). Mutable tags such as `@v2` are not allowed.
 
 ## Before you start
 

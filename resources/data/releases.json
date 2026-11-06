@@ -1,5 +1,57 @@
 [
   {
+    "version": "0.54.1",
+    "date": "2026-11-06",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Semgrep and private-storage hotfix",
+    "summary": "Hardens supply-chain checks in CI, keeps ticket and case attachments off the public disk, and fixes the ticket owner search so staff always see a full list of matches.",
+    "changes": [
+      "Ticket and case attachments are stored on a private disk and can only be downloaded through the authorised route. A new command moves existing files, with a dry-run first.",
+      "GitHub Actions that set up PHP are pinned to full commit SHAs, Dependabot keeps those pins current, and CI installs npm 11.10+ so the seven-day package release age setting applies.",
+      "Pull requests and pushes to main run an in-repo Semgrep scan, with triage guidance in the security policy.",
+      "Ticket owner search excludes the current owner before applying the ten-result limit, so staff always see up to ten other matches."
+    ],
+    "affected_areas": [
+      "Tickets",
+      "Cases",
+      "Attachments",
+      "CI",
+      "Security"
+    ],
+    "categories": [
+      "fixed",
+      "security"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch: privacy and supply-chain hardening plus a small owner-search bug fix, with no new product capability.",
+    "validation": [
+      "Feature tests for private attachment storage, authorised downloads, the move command, and the owner picker including a matching-owner regression.",
+      "TicketOwnerPickerTest stability loop (20 passes).",
+      "Release history validated against main.",
+      "Full PHPUnit suite in CI."
+    ],
+    "known_limitations": [
+      "Existing attachments on the public disk stay there until an administrator runs attachments:move-to-private on Cloudron after deploy.",
+      "Closing remediated findings in the Semgrep organisation UI remains a manual ops step."
+    ],
+    "rollback": "Redeploy the previous release package. New uploads would again use the public disk default from that release; run attachments:move-to-private --reverse if files were already moved.",
+    "provenance": "Milestone v0.44.x Hotfix: Semgrep security findings (#60), epic #563, ship issue #677, pull request #678.",
+    "references": [
+      {
+        "label": "Issue #677",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/677"
+      },
+      {
+        "label": "Pull request #678",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/678"
+      }
+    ]
+  },
+  {
     "version": "0.54.0",
     "date": "2026-11-05",
     "channel": "stable",
