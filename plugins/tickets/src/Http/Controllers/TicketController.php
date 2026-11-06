@@ -232,9 +232,7 @@ class TicketController extends Controller
         $creationMarker = $this->ticketCreationMarker($ticket, $messages);
         $ownerSearch = $canChangeAssignment ? (string) $request->query('owner_q', '') : '';
         $ownerMatches = $canChangeAssignment
-            ? $this->ownerCandidates->search($prefix, $ownerSearch)
-                ->reject(static fn (User $candidate): bool => (int) $candidate->id === (int) $ticket->user_id)
-                ->values()
+            ? $this->ownerCandidates->search($prefix, $ownerSearch, (int) $ticket->user_id)
             : collect();
 
         return view('tickets::tickets.show', [
@@ -286,8 +284,7 @@ class TicketController extends Controller
         Gate::authorize($prefix.'assign');
 
         $matches = $this->ownerCandidates
-            ->search($prefix, (string) $request->query('q', ''))
-            ->reject(static fn (User $candidate): bool => (int) $candidate->id === (int) $ticket->user_id)
+            ->search($prefix, (string) $request->query('q', ''), (int) $ticket->user_id)
             ->map(static fn (User $candidate): array => [
                 'id' => (int) $candidate->id,
                 'label' => $candidate->name.' ('.$candidate->email.')',

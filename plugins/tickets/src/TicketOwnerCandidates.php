@@ -19,7 +19,7 @@ final class TicketOwnerCandidates
     /**
      * @return Collection<int, User>
      */
-    public function search(string $permissionPrefix, string $term): Collection
+    public function search(string $permissionPrefix, string $term, ?int $excludeUserId = null): Collection
     {
         $term = trim($term);
         if (mb_strlen($term) < self::MIN_TERM_LENGTH) {
@@ -27,12 +27,20 @@ final class TicketOwnerCandidates
         }
 
         $like = '%'.addcslashes($term, '\\%_').'%';
-        $matching = static fn (Builder $query): Builder => $query->where(
-            static fn (Builder $match): Builder => $match
-                ->where('name', 'like', $like)
-                ->orWhere('email', 'like', $like)
-                ->orWhere('username', 'like', $like),
-        );
+        $matching = static function (Builder $query) use ($like, $excludeUserId): Builder {
+            $query->where(
+                static fn (Builder $match): Builder => $match
+                    ->where('name', 'like', $like)
+                    ->orWhere('email', 'like', $like)
+                    ->orWhere('username', 'like', $like),
+            );
+
+            if ($excludeUserId !== null) {
+                $query->whereKeyNot($excludeUserId);
+            }
+
+            return $query;
+        };
 
         return $this->eligible($permissionPrefix, $matching)
             ->sortBy(static fn (User $user): string => mb_strtolower($user->name))
