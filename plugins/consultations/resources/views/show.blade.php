@@ -8,6 +8,19 @@
         <span class="service-label apes-petcare">{{ __('consultations::ui.index.blade.apes_pet_care_clinic') }}</span>
         <h1>Consultation #{{ $consultation->id }} - {{ $consultation->subject }}</h1>
         <p class="muted">Pet: {{ $consultation->petProfile->name }}</p>
+        @if($consultation->needsVetReview() && ($canUpdate || $canAssign))
+            <div class="alert" data-vet-review-notice>
+                <p><strong>{{ __('consultations::ui.index.blade.needs_vet_review') }}</strong> {{ __('consultations::ui.show.blade.needs_vet_review_body') }}</p>
+                @if($canUpdate)
+                    <form id="consultation-vet-review-form" method="post" action="{{ route('petcare.consultations.vet-review', $consultation) }}">
+                        @csrf
+                        <button type="submit">{{ __('consultations::ui.show.blade.mark_reviewed') }}</button>
+                    </form>
+                @endif
+            </div>
+        @elseif($consultation->vet_reviewed_at !== null && ($canUpdate || $canAssign))
+            <p class="muted" data-vet-reviewed>{{ __('consultations::ui.show.blade.vet_reviewed_by', ['name' => $consultation->vetReviewedBy?->name ?? __('consultations::ui.show.blade.not_recorded'), 'date' => $ukDateTime->format($consultation->vet_reviewed_at)]) }}</p>
+        @endif
         <dl>
             <dt>{{ __('consultations::ui.index.blade.status') }}</dt>
             <dd>{{ \App\Support\WorkflowLabels::status($consultation->status) }}</dd>

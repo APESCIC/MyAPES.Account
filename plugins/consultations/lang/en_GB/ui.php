@@ -15,11 +15,15 @@ return [
             'created_by' => 'Created by',
             'last_edited_by' => 'Last edited by',
             'not_recorded' => 'Not recorded',
+            'needs_vet_review_body' => 'This consultation was created before only vets could create them. A Vet or Vet Nurse should check it.',
+            'mark_reviewed' => 'Mark as reviewed',
+            'vet_reviewed_by' => 'Reviewed by :name on :date.',
             'back' => 'Back',
         ],
     ],
     'validation' => [
         'no_consultation_changes_were_requested' => 'No consultation changes were requested.',
+        'not_flagged_for_vet_review' => 'This consultation does not need a vet review.',
     ],
     'index' => [
         'blade' => [
@@ -41,6 +45,9 @@ return [
             'id' => 'ID',
             'scheduled_for_label' => 'Scheduled for',
             'request_consultation' => 'Request a consultation',
+            'all_consultations' => 'All consultations',
+            'needs_vet_review' => 'Needs vet review',
+            'needs_vet_review_count' => 'Needs vet review (:count)',
             'request_consultation_body' => 'Consultations are booked by our Vet and Vet Nurse team. Open a Pet Care Clinic ticket and we will arrange one for your pet.',
             'request_consultation_action' => 'Open a Pet Care Clinic ticket',
         ],
@@ -48,5 +55,6 @@ return [
     'flash' => [
         'consultation_created' => 'Consultation created.',
         'consultation_updated' => 'Consultation updated.',
+        'vet_review_cleared' => 'Marked as reviewed.',
     ],
 ];

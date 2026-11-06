@@ -40,7 +40,7 @@ The Vet and Vet Nurse mappings are created once, when the roles are first added.
 | Staff, volunteers, students | View consultations; assign and close when their group allows it |
 | Public users | View their own pets' consultations, and ask for one by opening a Pet Care Clinic ticket |
 
-Consultations created by public users before v0.57 are kept. An admin can flag them for vet review with `php artisan consultations:flag-public-created --dry-run`, then run it again without `--dry-run` to confirm.
+Consultations created before v0.57 by public users, or by staff without the Vet or Vet Nurse role, are kept. An admin lists them with `php artisan consultations:flag-public-created --dry-run`, then runs it again without `--dry-run` and confirms to flag them "Needs vet review". Vets find them under **Consultations > Needs vet review** and mark each one as reviewed. Consultations with no recorded creator are reported but not flagged.
 
 ## Per-group access
 

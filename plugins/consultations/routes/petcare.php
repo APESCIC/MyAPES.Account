@@ -24,3 +24,7 @@ Route::match(['put', 'patch'], 'consultations/{consultation}', [ConsultationCont
     ->defaults('subCoreKey', 'pet-care-clinic')
     ->defaults('moduleKey', 'consultations')
     ->name('consultations.update');
+Route::post('consultations/{consultation}/vet-review', [ConsultationController::class, 'markVetReviewed'])
+    ->defaults('subCoreKey', 'pet-care-clinic')
+    ->defaults('moduleKey', 'consultations')
+    ->name('consultations.vet-review');

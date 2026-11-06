@@ -11,6 +11,17 @@
         </div>
         <div class="panel" id="list">
             <h2>{{ __('consultations::ui.index.blade.consultations') }}</h2>
+            @if($reviewCount !== null)
+                <p data-vet-review-filter>
+                    @if($reviewFilter)
+                        <a href="{{ route('petcare.consultations.index') }}#list">{{ __('consultations::ui.index.blade.all_consultations') }}</a>
+                        · <strong>{{ __('consultations::ui.index.blade.needs_vet_review_count', ['count' => $reviewCount]) }}</strong>
+                    @else
+                        <strong>{{ __('consultations::ui.index.blade.all_consultations') }}</strong>
+                        · <a href="{{ route('petcare.consultations.index', ['review' => 'needed']) }}#list">{{ __('consultations::ui.index.blade.needs_vet_review_count', ['count' => $reviewCount]) }}</a>
+                    @endif
+                </p>
+            @endif
             @if($consultations->isEmpty())
                 <x-mascot-tip
                     variant="empty"
@@ -25,7 +36,12 @@
                         <tr>
                             <td>#{{ $consultation->id }}</td>
                             <td>{{ $consultation->subject }}</td>
-                            <td><span class="status">{{ \App\Support\WorkflowLabels::status($consultation->status) }}</span></td>
+                            <td>
+                                <span class="status">{{ \App\Support\WorkflowLabels::status($consultation->status) }}</span>
+                                @if($reviewCount !== null && $consultation->needsVetReview())
+                                    <span class="status" data-badge="needs-vet-review">{{ __('consultations::ui.index.blade.needs_vet_review') }}</span>
+                                @endif
+                            </td>
                             <td>{{ $consultation->petProfile->name }}</td>
                             <td>{{ $ukDateTime->format($consultation->scheduled_for) }}</td>
                             <td><a href="{{ route('petcare.consultations.show', $consultation) }}">{{ __('consultations::ui.index.blade.open') }}</a></td>

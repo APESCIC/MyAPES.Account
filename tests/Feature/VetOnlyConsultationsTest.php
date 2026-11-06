@@ -4,10 +4,12 @@ namespace Tests\Feature;
 
 use App\Core\Accounts\AuditLog;
 use App\Core\Accounts\User;
+use App\Services\AuditLogger;
 use App\Services\AuthorizationProfile;
 use App\Services\ModuleInstallationSynchronizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Plugins\Consultations\Models\PetCareConsultation;
 use Plugins\PetProfiles\Models\PetProfile;
 use Tests\Concerns\CreatesClinicalPersonas;
@@ -186,6 +188,120 @@ class VetOnlyConsultationsTest extends TestCase
             ->assertSee('<dd data-consultation-created-by>Not recorded</dd>', false);
     }
 
+    public function test_flag_command_dry_run_reports_and_changes_nothing(): void
+    {
+        $this->legacyConsultations();
+
+        $this->artisan('consultations:flag-public-created', ['--dry-run' => true])
+            ->expectsOutputToContain('Dry run: 2 consultation(s) would be flagged for vet review. Nothing was changed.')
+            ->expectsOutputToContain('1 consultation(s) have no recorded creator and are reported only.')
+            ->assertSuccessful();
+
+        $this->assertSame(0, PetCareConsultation::query()->whereNotNull('vet_review_flagged_at')->count());
+        $this->assertCount(1, Storage::disk('local')->files('reports'));
+    }
+
+    public function test_flag_command_needs_confirmation_then_flags_and_logs_without_deleting(): void
+    {
+        [$publicCreated, $vetCreated, $unknown, $staffCreated] = $this->legacyConsultations();
+        $count = PetCareConsultation::query()->count();
+
+        $this->artisan('consultations:flag-public-created')
+            ->expectsConfirmation('Flag 2 consultation(s) for vet review?', 'no')
+            ->expectsOutputToContain('Cancelled. Nothing was changed.')
+            ->assertFailed();
+        $this->assertNull($publicCreated->fresh()->vet_review_flagged_at);
+
+        $this->artisan('consultations:flag-public-created')
+            ->expectsConfirmation('Flag 2 consultation(s) for vet review?', 'yes')
+            ->expectsOutputToContain('Flagged 2 consultation(s) for vet review. Nothing was archived or deleted.')
+            ->assertSuccessful();
+
+        $this->assertTrue($publicCreated->fresh()->needsVetReview());
+        $this->assertTrue($staffCreated->fresh()->needsVetReview());
+        $this->assertFalse($vetCreated->fresh()->needsVetReview());
+        $this->assertFalse($unknown->fresh()->needsVetReview());
+        $this->assertSame($count, PetCareConsultation::query()->count());
+        $this->assertSame(2, AuditLog::query()->where('event', 'petcare.consultation.flagged_for_vet_review')->count());
+
+        $this->artisan('consultations:flag-public-created', ['--force' => true])
+            ->expectsOutputToContain('Nothing to flag.')
+            ->assertSuccessful();
+    }
+
+    public function test_vets_see_the_review_queue_and_clear_the_flag(): void
+    {
+        $owner = User::factory()->create();
+        $flagged = $this->consultationFor($owner, $this->petFor($owner), ['subject' => 'Flagged one', 'vet_review_flagged_at' => now()]);
+        $this->consultationFor($owner, $this->petFor($owner), ['subject' => 'Not flagged']);
+        $vet = $this->vetStaff(['name' => 'Vera Vet']);
+        $staff = User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create();
+
+        $this->actingAs($vet)
+            ->get(route('petcare.consultations.index', ['review' => 'needed']))
+            ->assertOk()
+            ->assertSeeText('Flagged one')
+            ->assertDontSeeText('Not flagged')
+            ->assertSeeText('Needs vet review (1)');
+        $this->actingAs($owner)
+            ->get(route('petcare.consultations.index', ['review' => 'needed']))
+            ->assertOk()
+            ->assertSeeText('Not flagged')
+            ->assertDontSee('data-vet-review-filter', false);
+
+        $this->actingAs($staff)
+            ->get(route('petcare.consultations.show', $flagged))
+            ->assertSee('data-vet-review-notice', false)
+            ->assertDontSee('id="consultation-vet-review-form"', false);
+        $this->actingAs($staff)
+            ->post(route('petcare.consultations.vet-review', $flagged))
+            ->assertForbidden();
+        $this->actingAs($owner)
+            ->post(route('petcare.consultations.vet-review', $flagged))
+            ->assertForbidden();
+
+        $this->actingAs($vet)
+            ->get(route('petcare.consultations.show', $flagged))
+            ->assertSee('id="consultation-vet-review-form"', false);
+        $this->actingAs($vet)
+            ->post(route('petcare.consultations.vet-review', $flagged))
+            ->assertRedirect(route('petcare.consultations.show', $flagged));
+
+        $flagged->refresh();
+        $this->assertFalse($flagged->needsVetReview());
+        $this->assertSame($vet->id, $flagged->vet_reviewed_by);
+        $this->assertTrue(AuditLog::query()->where('event', 'petcare.consultation.vet_reviewed')->where('user_id', $vet->id)->exists());
+        $this->actingAs($vet)
+            ->get(route('petcare.consultations.show', $flagged))
+            ->assertSee('data-vet-reviewed', false)
+            ->assertSeeText('Reviewed by Vera Vet');
+        $this->actingAs($vet)
+            ->post(route('petcare.consultations.vet-review', $flagged))
+            ->assertSessionHasErrors('consultation');
+    }
+
+    /**
+     * @return array{PetCareConsultation, PetCareConsultation, PetCareConsultation, PetCareConsultation}
+     */
+    private function legacyConsultations(): array
+    {
+        Storage::fake('local');
+        $owner = User::factory()->create();
+        $pet = $this->petFor($owner);
+        $vet = $this->vetStaff();
+        $staff = User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create();
+
+        $publicCreated = $this->consultationFor($owner, $pet, ['subject' => 'Public created']);
+        app(AuditLogger::class)->record('petcare.consultation.created', $owner, $publicCreated, []);
+        $vetCreated = $this->consultationFor($owner, $pet, ['subject' => 'Vet created']);
+        $vetCreated->forceFill(['created_by' => $vet->id])->save();
+        $unknown = $this->consultationFor($owner, $pet, ['subject' => 'Unknown creator']);
+        $staffCreated = $this->consultationFor($owner, $pet, ['subject' => 'Staff created']);
+        app(AuditLogger::class)->record('petcare.consultation.created', $staff, $staffCreated, []);
+
+        return [$publicCreated, $vetCreated, $unknown, $staffCreated];
+    }
+
     private function petFor(User $owner, string $domain = PetProfile::DOMAIN_PETCARE): PetProfile
     {
         return PetProfile::query()->create([
@@ -203,12 +319,15 @@ class VetOnlyConsultationsTest extends TestCase
      */
     private function consultationFor(User $owner, PetProfile $pet, array $attributes = []): PetCareConsultation
     {
-        return PetCareConsultation::query()->create(array_merge([
+        $consultation = (new PetCareConsultation)->forceFill(array_merge([
             'pet_profile_id' => $pet->id,
             'user_id' => $owner->id,
             'subject' => 'Annual check',
             'status' => 'open',
             'notes' => 'Consultation notes.',
-        ], $attributes))->fresh();
+        ], $attributes));
+        $consultation->save();
+
+        return $consultation->fresh();
     }
 }

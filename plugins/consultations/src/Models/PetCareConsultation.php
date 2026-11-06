@@ -42,6 +42,16 @@ class PetCareConsultation extends Model
         return $query->whereHas('petProfile');
     }
 
+    public function scopeNeedsVetReview(Builder $query): Builder
+    {
+        return $query->whereNotNull('vet_review_flagged_at')->whereNull('vet_reviewed_at');
+    }
+
+    public function needsVetReview(): bool
+    {
+        return $this->vet_review_flagged_at !== null && $this->vet_reviewed_at === null;
+    }
+
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
         if ($user->can(self::PERMISSION_VIEW_ALL)) {
@@ -59,6 +69,8 @@ class PetCareConsultation extends Model
             'notes' => SanitisedHtml::class,
             'scheduled_for' => 'datetime',
             'closed_at' => 'datetime',
+            'vet_review_flagged_at' => 'datetime',
+            'vet_reviewed_at' => 'datetime',
         ];
     }
 
@@ -85,5 +97,10 @@ class PetCareConsultation extends Model
     public function updatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function vetReviewedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'vet_reviewed_by');
     }
 }
