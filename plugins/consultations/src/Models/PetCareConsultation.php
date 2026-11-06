@@ -76,4 +76,14 @@ class PetCareConsultation extends Model
     {
         return $this->belongsTo(User::class, 'assigned_to');
     }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
 }

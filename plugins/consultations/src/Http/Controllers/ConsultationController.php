@@ -81,10 +81,14 @@ class ConsultationController extends Controller
         );
         Gate::authorize('createFor', [PetCareConsultation::class, (int) $pet->user_id]);
 
-        $consultation = PetCareConsultation::create([
+        $consultation = new PetCareConsultation([
             ...$validated,
             'user_id' => $pet->user_id,
         ]);
+        $consultation->forceFill([
+            'created_by' => $request->user()->id,
+            'updated_by' => $request->user()->id,
+        ])->save();
 
         $this->notifyConsultationStakeholders($consultation, $request->user(), 'created');
         $auditLogger->record('petcare.consultation.created', $request->user(), $consultation, [
@@ -106,7 +110,7 @@ class ConsultationController extends Controller
         $canUpdate = Gate::allows('update', $consultation);
         $canAssign = Gate::allows('assign', $consultation);
         $canClose = Gate::allows('close', $consultation);
-        $consultation->load(['petProfile', 'assignedTo']);
+        $consultation->load(['petProfile', 'assignedTo', 'createdBy', 'updatedBy']);
         $eligibleStaff = User::query()
             ->eligibleStaff()
             ->withAuthorizationPermission(
@@ -198,12 +202,14 @@ class ConsultationController extends Controller
         }
 
         $consultation->fill($updates);
+        $consultation->forceFill(['updated_by' => $request->user()->id]);
         $consultation->save();
 
         $this->notifyConsultationStakeholders($consultation, $request->user(), 'updated');
         $auditLogger->record('petcare.consultation.updated', $request->user(), $consultation, [
             'status' => $consultation->status,
             'assigned_to' => $consultation->assigned_to,
+            'updated_by' => $consultation->updated_by,
             'scheduled_for' => $consultation->scheduled_for,
             'sub_core_key' => 'pet-care-clinic',
             'module_key' => 'consultations',

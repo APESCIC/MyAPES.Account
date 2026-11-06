@@ -15,6 +15,10 @@
             <dd>{{ $ukDateTime->format($consultation->scheduled_for) ?? 'Not scheduled' }}</dd>
             <dt>{{ __('consultations::ui.index.blade.notes') }}</dt>
             <dd>{{ $consultation->notes ?: 'No notes recorded.' }}</dd>
+            <dt>{{ __('consultations::ui.show.blade.created_by') }}</dt>
+            <dd data-consultation-created-by>{{ $consultation->createdBy?->name ?? __('consultations::ui.show.blade.not_recorded') }}</dd>
+            <dt>{{ __('consultations::ui.show.blade.last_edited_by') }}</dt>
+            <dd data-consultation-updated-by>{{ $consultation->updatedBy?->name ?? __('consultations::ui.show.blade.not_recorded') }}</dd>
             @if($canAssign)
                 <dt>{{ __('consultations::ui.show.blade.assigned_staff') }}</dt>
                 <dd>

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Core\Accounts\AuditLog;
 use App\Core\Accounts\User;
 use App\Services\AuthorizationProfile;
 use App\Services\ModuleInstallationSynchronizer;
@@ -142,6 +143,47 @@ class VetOnlyConsultationsTest extends TestCase
             ->assertOk()
             ->assertSee('action="'.route('petcare.consultations.store').'"', false)
             ->assertDontSee('href="'.$ticketUrl.'"', false);
+    }
+
+    public function test_created_by_and_updated_by_are_recorded_shown_and_audited(): void
+    {
+        $owner = User::factory()->create();
+        $pet = $this->petFor($owner);
+        $vet = $this->vetStaff(['name' => 'Vera Vet']);
+        $nurse = $this->vetNurseStaff(['name' => 'Nina Nurse']);
+
+        $this->actingAs($vet)
+            ->post(route('petcare.consultations.store'), ['pet_profile_id' => $pet->id, 'subject' => 'Tracked'])
+            ->assertRedirect();
+        $consultation = PetCareConsultation::query()->where('subject', 'Tracked')->firstOrFail();
+        $this->assertSame($vet->id, $consultation->created_by);
+        $this->assertSame($vet->id, $consultation->updated_by);
+
+        $this->actingAs($nurse)
+            ->patch(route('petcare.consultations.update', $consultation), ['notes' => 'Nurse follow-up'])
+            ->assertRedirect();
+        $consultation->refresh();
+        $this->assertSame($vet->id, $consultation->created_by);
+        $this->assertSame($nurse->id, $consultation->updated_by);
+
+        $audit = AuditLog::query()
+            ->where('event', 'petcare.consultation.updated')
+            ->where('auditable_id', $consultation->id)
+            ->latest('id')
+            ->firstOrFail();
+        $this->assertSame($nurse->id, $audit->user_id);
+        $this->assertSame($nurse->id, $audit->context['updated_by']);
+
+        $this->actingAs($owner)
+            ->get(route('petcare.consultations.show', $consultation))
+            ->assertOk()
+            ->assertSee('<dd data-consultation-created-by>Vera Vet</dd>', false)
+            ->assertSee('<dd data-consultation-updated-by>Nina Nurse</dd>', false);
+
+        $legacy = $this->consultationFor($owner, $pet);
+        $this->actingAs($owner)
+            ->get(route('petcare.consultations.show', $legacy))
+            ->assertSee('<dd data-consultation-created-by>Not recorded</dd>', false);
     }
 
     private function petFor(User $owner, string $domain = PetProfile::DOMAIN_PETCARE): PetProfile
