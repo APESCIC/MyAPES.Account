@@ -112,6 +112,38 @@ class VetOnlyConsultationsTest extends TestCase
         $this->assertSame('closed', $consultation->status);
     }
 
+    public function test_public_users_see_a_ticket_link_instead_of_create_and_edit_controls(): void
+    {
+        $owner = User::factory()->create();
+        $consultation = $this->consultationFor($owner, $this->petFor($owner), ['subject' => 'Owner can read this']);
+        $otherConsultation = $this->consultationFor($other = User::factory()->create(), $this->petFor($other), ['subject' => 'Someone else']);
+        $ticketUrl = route('tickets.public.start', ['service' => 'pet-care-clinic', 'area' => 'consultation']);
+
+        $this->actingAs($owner)
+            ->get(route('petcare.consultations.index'))
+            ->assertOk()
+            ->assertSeeText('Owner can read this')
+            ->assertDontSeeText('Someone else')
+            ->assertDontSee('action="'.route('petcare.consultations.store').'"', false)
+            ->assertSee('href="'.$ticketUrl.'"', false)
+            ->assertSeeText('Open a Pet Care Clinic ticket');
+
+        $this->actingAs($owner)
+            ->get(route('petcare.consultations.show', $consultation))
+            ->assertOk()
+            ->assertDontSee('id="consultation-update-form"', false)
+            ->assertDontSee('id="consultation-assignment-form"', false);
+        $this->actingAs($owner)
+            ->get(route('petcare.consultations.show', $otherConsultation))
+            ->assertForbidden();
+
+        $this->actingAs($this->vetStaff())
+            ->get(route('petcare.consultations.index'))
+            ->assertOk()
+            ->assertSee('action="'.route('petcare.consultations.store').'"', false)
+            ->assertDontSee('href="'.$ticketUrl.'"', false);
+    }
+
     private function petFor(User $owner, string $domain = PetProfile::DOMAIN_PETCARE): PetProfile
     {
         return PetProfile::query()->create([

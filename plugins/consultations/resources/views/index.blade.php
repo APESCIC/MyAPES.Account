@@ -59,6 +59,14 @@
                     </form>
                 @endif
             </div>
+        @elseif($requestConsultationUrl !== null)
+            <div class="panel" id="request">
+                <h2>{{ __('consultations::ui.index.blade.request_consultation') }}</h2>
+                <p>{{ __('consultations::ui.index.blade.request_consultation_body') }}</p>
+                <div class="actions">
+                    <a href="{{ $requestConsultationUrl }}">{{ __('consultations::ui.index.blade.request_consultation_action') }}</a>
+                </div>
+            </div>
         @endif
     </div>
 @endsection

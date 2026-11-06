@@ -26,7 +26,7 @@ return [
             'dd_mm_yyyy_hh_mm_ss' => 'dd/mm/yyyy HH:mm:ss',
             'consultations' => 'Consultations',
             'no_consultations_yet' => 'No consultations are available to you yet',
-            'no_consultations_body' => 'When a consultation is booked for one of your pets, or you create one, it will appear here.',
+            'no_consultations_body' => 'When a vet books a consultation for one of your pets, it will appear here.',
             'scheduled_for' => 'Scheduled for',
             'dd_mm_yyyy' => '(dd/mm/yyyy)',
             'scheduled' => 'Scheduled',
@@ -37,6 +37,9 @@ return [
             'pet' => 'Pet',
             'id' => 'ID',
             'scheduled_for_label' => 'Scheduled for',
+            'request_consultation' => 'Request a consultation',
+            'request_consultation_body' => 'Consultations are booked by our Vet and Vet Nurse team. Open a Pet Care Clinic ticket and we will arrange one for your pet.',
+            'request_consultation_action' => 'Open a Pet Care Clinic ticket',
         ],
     ],
     'flash' => [

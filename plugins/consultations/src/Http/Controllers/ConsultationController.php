@@ -14,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
 use Plugins\Consultations\Models\PetCareConsultation;
 use Plugins\Consultations\Notifications\ConsultationUpdatedNotification;
@@ -39,10 +40,16 @@ class ConsultationController extends Controller
 
         $domain = $this->petProfiles->domainForModule('pet-care-clinic');
         $petProfiles = $this->petProfiles->visibleOrdered($user, $domain);
+        $canCreate = Gate::allows('create', PetCareConsultation::class);
 
         return view('consultations::index', [
             'consultations' => $query->paginate(20)->fragment('list'),
-            'canCreate' => Gate::allows('create', PetCareConsultation::class),
+            'canCreate' => $canCreate,
+            'requestConsultationUrl' => ! $canCreate
+                && $user->can(PetCareConsultation::PERMISSION_VIEW_OWN)
+                && Route::has('tickets.public.start')
+                    ? route('tickets.public.start', ['service' => 'pet-care-clinic', 'area' => 'consultation'])
+                    : null,
             'petProfiles' => $petProfiles,
             ...StaffPetCreateReturn::emptySelectViewData(
                 $user,
