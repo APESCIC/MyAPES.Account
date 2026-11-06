@@ -237,10 +237,11 @@ class ModuleRegistryTest extends TestCase
             $permissions,
         );
 
-        $this->assertCount(68, $permissions);
-        $this->assertCount(68, array_unique($names));
+        $this->assertCount(66, $permissions);
+        $this->assertCount(66, array_unique($names));
         $this->assertContains('shelter-rescue.cases.create-for-client', $names);
-        $this->assertContains('pet-care-clinic.consultations.create-for-client', $names);
+        $this->assertNotContains('pet-care-clinic.consultations.create-for-client', $names);
+        $this->assertNotContains('pet-care-clinic.consultations.update-own', $names);
         $this->assertContains('apes-cic.cases.comment-own', $names);
         $this->assertContains('apes-cic.cases.delete', $names);
         $this->assertContains('apes-cic.recruitment.view-own', $names);
@@ -277,7 +278,7 @@ class ModuleRegistryTest extends TestCase
                     'create-for-client',
                 ],
                 true,
-            ) || ($permission->moduleKey === 'recruitment'
+            ) || (in_array($permission->moduleKey, ['recruitment', 'consultations'], true)
                 && $permission->ability === 'create');
             $this->assertSame(
                 $expectsDirectoryContext,
@@ -314,7 +315,19 @@ class ModuleRegistryTest extends TestCase
             $this->assertNotContains('apes-cic.recruitment.view-own', $matrix[$staffSideRole]);
             $this->assertContains('apes-cic.tickets.comment-own', $matrix[$staffSideRole]);
             $this->assertContains('shelter-rescue.cases.create-for-client', $matrix[$staffSideRole]);
+            $this->assertContains('pet-care-clinic.consultations.view-all', $matrix[$staffSideRole]);
         }
+        foreach ([
+            AuthorizationProfile::ROLE_SERVICE_USER,
+            AuthorizationProfile::ROLE_STUDENT,
+            AuthorizationProfile::ROLE_VOLUNTEER,
+            AuthorizationProfile::ROLE_STAFF,
+        ] as $nonClinicalRole) {
+            $this->assertNotContains('pet-care-clinic.consultations.create', $matrix[$nonClinicalRole]);
+            $this->assertNotContains('pet-care-clinic.consultations.update-all', $matrix[$nonClinicalRole]);
+        }
+        $this->assertContains('pet-care-clinic.consultations.create', $matrix[AuthorizationProfile::ROLE_ADMINISTRATOR]);
+        $this->assertContains('pet-care-clinic.consultations.update-all', $matrix[AuthorizationProfile::ROLE_ADMINISTRATOR]);
         $this->assertContains(
             'apes-cic.recruitment.create',
             $matrix[AuthorizationProfile::ROLE_ADMINISTRATOR],
@@ -354,7 +367,7 @@ class ModuleRegistryTest extends TestCase
         $this->assertTrue(
             $profile->isAdministratorOnlyPermission('admin.modules.manage'),
         );
-        $this->assertCount(85, $profile->permissions());
+        $this->assertCount(83, $profile->permissions());
         $this->assertFalse(
             $profile->isApplicationPermission('superadmin.access'),
         );

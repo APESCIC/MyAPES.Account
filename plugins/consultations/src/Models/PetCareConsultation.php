@@ -29,10 +29,6 @@ class PetCareConsultation extends Model
 
     public const PERMISSION_CREATE = 'pet-care-clinic.consultations.create';
 
-    public const PERMISSION_CREATE_FOR_CLIENT = 'pet-care-clinic.consultations.create-for-client';
-
-    public const PERMISSION_UPDATE_OWN = 'pet-care-clinic.consultations.update-own';
-
     public const PERMISSION_VIEW_ALL = 'pet-care-clinic.consultations.view-all';
 
     public const PERMISSION_UPDATE_ALL = 'pet-care-clinic.consultations.update-all';
