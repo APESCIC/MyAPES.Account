@@ -17,8 +17,23 @@ final class DefaultJobRoles
 
     public const HUMAN_RESOURCES = 'human-resources';
 
+    public const VET = 'vet';
+
+    public const VET_NURSE = 'vet-nurse';
+
     /**
-     * @return array<string, array{title: string, permissions: array<int, string>}>
+     * Consultation abilities shared by Vet and Vet Nurse (#534, #535).
+     *
+     * @var array<int, string>
+     */
+    private const CLINICAL_PERMISSIONS = [
+        'pet-care-clinic.consultations.create',
+        'pet-care-clinic.consultations.update-all',
+        'pet-care-clinic.consultations.view-all',
+    ];
+
+    /**
+     * @return array<string, array{title: string, permissions: array<int, string>, directory_group?: string}>
      */
     public static function catalogue(): array
     {
@@ -58,7 +73,38 @@ final class DefaultJobRoles
                     'apes-cic.recruitment.view-all',
                 ],
             ],
+            self::VET => [
+                'title' => 'Vet',
+                'permissions' => self::CLINICAL_PERMISSIONS,
+                'directory_group' => 'myapesaccount.vet',
+            ],
+            self::VET_NURSE => [
+                'title' => 'Vet Nurse',
+                'permissions' => self::CLINICAL_PERMISSIONS,
+                'directory_group' => 'myapesaccount.vetnurse',
+            ],
         ];
+    }
+
+    /**
+     * Job roles that create and edit consultations.
+     *
+     * @return array<int, string>
+     */
+    public static function clinicalRoles(): array
+    {
+        return [
+            self::VET,
+            self::VET_NURSE,
+        ];
+    }
+
+    /**
+     * Managed Cloudron group seeded as a mutable mapping when the role is first created.
+     */
+    public static function directoryGroup(string $name): ?string
+    {
+        return self::catalogue()[$name]['directory_group'] ?? null;
     }
 
     /**

@@ -21,6 +21,7 @@ use App\Services\SecureUploadService;
 use App\Services\StaffProfilePhotoResponder;
 use App\Services\UkPhoneNumber;
 use App\Services\VerificationResendService;
+use App\Support\DefaultJobRoles;
 use App\Support\JobRoleCapabilityPacks;
 use DomainException;
 use Illuminate\Contracts\View\View;
@@ -140,6 +141,17 @@ class AdminUserController extends Controller
                 ->filter(static fn (User $user): bool => $classifier->isUnmapped($user))
                 ->pluck('id')
                 ->map(static fn (mixed $id): int => (int) $id)
+                ->all(),
+            'clinicalBadges' => $users->getCollection()
+                ->mapWithKeys(static fn (User $user): array => [
+                    (int) $user->id => $user->roles
+                        ->pluck('name')
+                        ->intersect(DefaultJobRoles::clinicalRoles())
+                        ->map(static fn (string $name): string => DefaultJobRoles::title($name))
+                        ->values()
+                        ->all(),
+                ])
+                ->filter()
                 ->all(),
             'accessGroupsUrl' => $actor instanceof User && $actor->can('admin.groups.view')
                 ? route('admin.access.index', ['tab' => 'groups'])

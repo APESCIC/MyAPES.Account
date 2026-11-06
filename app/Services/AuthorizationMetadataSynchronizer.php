@@ -139,6 +139,8 @@ class AuthorizationMetadataSynchronizer
                     DB::table('role_has_permissions')->insert($rows);
                 }
 
+                $this->seedJobRoleMapping($role);
+
                 continue;
             }
 
@@ -150,39 +152,73 @@ class AuthorizationMetadataSynchronizer
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 
+    /**
+     * Seeded once, with the role, so an administrator may later remove or change it (#534).
+     */
+    private function seedJobRoleMapping(Role $role): void
+    {
+        $groupName = DefaultJobRoles::directoryGroup($role->name);
+
+        if ($groupName === null) {
+            return;
+        }
+
+        $group = $this->findOrCreateDirectoryGroup($groupName);
+
+        $exists = DirectoryGroupRoleMapping::query()
+            ->whereBelongsTo($group)
+            ->whereBelongsTo($role)
+            ->exists();
+
+        if (! $exists) {
+            (new DirectoryGroupRoleMapping)->forceFill([
+                'directory_group_id' => $group->getKey(),
+                'role_id' => $role->getKey(),
+                'is_immutable' => false,
+            ])->save();
+        }
+    }
+
+    private function findOrCreateDirectoryGroup(string $groupName): DirectoryGroup
+    {
+        $group = DirectoryGroup::query()
+            ->where('name', $groupName)
+            ->first();
+
+        if ($group === null) {
+            $attributes = [
+                'name' => $groupName,
+                'external_id' => null,
+                'member_count' => null,
+                'status' => DirectoryGroup::STATUS_MISSING,
+                'first_seen_at' => null,
+                'last_seen_at' => null,
+                'last_synced_at' => null,
+            ];
+
+            if (Schema::hasColumn('directory_groups', 'app_enabled')) {
+                $attributes['app_enabled'] = true;
+            }
+
+            return DirectoryGroup::query()->create($attributes);
+        }
+
+        if (Schema::hasColumn('directory_groups', 'app_enabled')
+            && ! $group->app_enabled) {
+            $group->forceFill([
+                'app_enabled' => true,
+            ])->save();
+        }
+
+        return $group;
+    }
+
     private function synchronizeMappings(): void
     {
         $expectedMappingIds = [];
 
         foreach (DirectoryImmutableMappings::all() as $groupName => $roleName) {
-            $group = DirectoryGroup::query()
-                ->where('name', $groupName)
-                ->first();
-
-            if ($group === null) {
-                $attributes = [
-                    'name' => $groupName,
-                    'external_id' => null,
-                    'member_count' => null,
-                    'status' => DirectoryGroup::STATUS_MISSING,
-                    'first_seen_at' => null,
-                    'last_seen_at' => null,
-                    'last_synced_at' => null,
-                ];
-
-                if (Schema::hasColumn('directory_groups', 'app_enabled')) {
-                    $attributes['app_enabled'] = true;
-                }
-
-                $group = DirectoryGroup::query()->create($attributes);
-            } elseif (
-                Schema::hasColumn('directory_groups', 'app_enabled')
-                && ! $group->app_enabled
-            ) {
-                $group->forceFill([
-                    'app_enabled' => true,
-                ])->save();
-            }
+            $group = $this->findOrCreateDirectoryGroup($groupName);
 
             $role = Role::query()
                 ->where('guard_name', 'web')

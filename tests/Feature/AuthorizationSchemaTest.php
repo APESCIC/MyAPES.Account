@@ -143,6 +143,8 @@ class AuthorizationSchemaTest extends TestCase
             ['name' => 'service-user', 'guard_name' => 'web', 'is_protected' => 1],
             ['name' => 'staff', 'guard_name' => 'web', 'is_protected' => 1],
             ['name' => 'student', 'guard_name' => 'web', 'is_protected' => 1],
+            ['name' => 'vet', 'guard_name' => 'web', 'is_protected' => 0],
+            ['name' => 'vet-nurse', 'guard_name' => 'web', 'is_protected' => 0],
             ['name' => 'volunteer', 'guard_name' => 'web', 'is_protected' => 1],
         ], DB::table('roles')
             ->orderBy('name')
@@ -168,6 +170,8 @@ class AuthorizationSchemaTest extends TestCase
             ['group_name' => 'myapesaccount.admin', 'role_name' => 'administrator', 'is_immutable' => 1],
             ['group_name' => 'myapesaccount.staff', 'role_name' => 'staff', 'is_immutable' => 1],
             ['group_name' => 'myapesaccount.student', 'role_name' => 'student', 'is_immutable' => 1],
+            ['group_name' => 'myapesaccount.vet', 'role_name' => 'vet', 'is_immutable' => 0],
+            ['group_name' => 'myapesaccount.vetnurse', 'role_name' => 'vet-nurse', 'is_immutable' => 0],
             ['group_name' => 'myapesaccount.volunteer', 'role_name' => 'volunteer', 'is_immutable' => 1],
         ], DB::table('directory_group_role_mappings')
             ->join('directory_groups', 'directory_groups.id', '=', 'directory_group_role_mappings.directory_group_id')
