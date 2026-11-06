@@ -136,6 +136,12 @@ jobs:
           node-version: '22'
           cache: npm
 
+      - name: Install npm 11.10+ for min-release-age
+        run: |
+          npm install --global npm@11.21.1
+          npm --version
+          npm config get min-release-age
+
       - name: Install application dependencies
         run: |
           composer install --no-interaction --prefer-dist
