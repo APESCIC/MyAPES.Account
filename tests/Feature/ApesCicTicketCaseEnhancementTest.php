@@ -24,6 +24,7 @@ class ApesCicTicketCaseEnhancementTest extends TestCase
         parent::setUp();
         app(ModuleInstallationSynchronizer::class)->synchronize();
         Storage::fake('public');
+        Storage::fake('private');
     }
 
     public function test_cic_ticket_create_form_does_not_preselect_service_area_while_subcategory_is_placeholder(): void

@@ -38,6 +38,7 @@ class SupportAttachmentService
                 $file,
                 $directory,
                 'screenshots',
+                'private',
             );
             $created->push($this->createRecord(
                 $attachable,
@@ -53,6 +54,7 @@ class SupportAttachmentService
                 $screencast,
                 $directory,
                 'screencast',
+                'private',
             );
             $created->push($this->createRecord(
                 $attachable,
@@ -77,7 +79,7 @@ class SupportAttachmentService
             'attachable_type' => $attachable->getMorphClass(),
             'attachable_id' => $attachable->getKey(),
             'user_id' => $uploader->id,
-            'disk' => 'public',
+            'disk' => 'private',
             'path' => $path,
             'original_name' => $file->getClientOriginalName(),
             'mime_type' => (string) $file->getMimeType(),
