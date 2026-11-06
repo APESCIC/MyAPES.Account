@@ -28,10 +28,12 @@ class AuthorizationPolicyTest extends TestCase
         [$ticket, $pet, $case, $consultation] = $this->resourcesFor($owner);
 
         $this->actingAsWithQaContext($owner);
-        foreach ([$ticket, $pet, $case, $consultation] as $resource) {
+        foreach ([$ticket, $pet, $case] as $resource) {
             $this->assertTrue(Gate::allows('view', $resource));
             $this->assertTrue(Gate::allows('update', $resource));
         }
+        $this->assertTrue(Gate::allows('view', $consultation));
+        $this->assertFalse(Gate::allows('update', $consultation));
         $this->assertFalse(Gate::allows('delete', $ticket));
 
         $this->actingAsWithQaContext($other);
@@ -48,10 +50,14 @@ class AuthorizationPolicyTest extends TestCase
         [$ticket, $pet, $case, $consultation] = $this->resourcesFor($owner);
         $this->actingAsWithQaContext($staff);
 
-        foreach ([$ticket, $pet, $case, $consultation] as $resource) {
+        foreach ([$ticket, $pet, $case] as $resource) {
             $this->assertTrue(Gate::allows('view', $resource));
             $this->assertTrue(Gate::allows('update', $resource));
         }
+        $this->assertTrue(Gate::allows('view', $consultation));
+        $this->assertFalse(Gate::allows('update', $consultation));
+        $this->assertTrue(Gate::allows('assign', $consultation));
+        $this->assertTrue(Gate::allows('close', $consultation));
         $this->assertTrue(Gate::allows('delete', $ticket));
     }
 

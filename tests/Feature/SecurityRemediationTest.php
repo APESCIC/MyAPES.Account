@@ -20,10 +20,12 @@ use Plugins\Consultations\Notifications\ConsultationUpdatedNotification;
 use Plugins\PetProfiles\Models\PetProfile;
 use Plugins\Tickets\Models\SupportTicket;
 use Plugins\Tickets\Notifications\TicketUpdatedNotification;
+use Tests\Concerns\CreatesClinicalPersonas;
 use Tests\TestCase;
 
 class SecurityRemediationTest extends TestCase
 {
+    use CreatesClinicalPersonas;
     use RefreshDatabase;
 
     public function test_owner_comment_only_updates_preserve_assignments_and_ticket_state(): void
@@ -47,7 +49,7 @@ class SecurityRemediationTest extends TestCase
         $this->actingAs($owner)->put(
             route('petcare.consultations.update', $consultation),
             ['status' => 'in_progress', 'notes' => 'Owner update'],
-        )->assertRedirect();
+        )->assertForbidden();
 
         $ticket->refresh();
         $this->assertSame($staff->id, $ticket->assigned_to);
@@ -326,7 +328,7 @@ class SecurityRemediationTest extends TestCase
     {
         Notification::fake();
         $owner = $this->user(User::ROLE_SERVICE_USER);
-        $actor = $this->user(User::ROLE_STAFF);
+        $actor = $this->grantClinicalRole($this->user(User::ROLE_STAFF));
         $ordinary = $this->user(User::ROLE_SERVICE_USER);
         $suspended = $this->user(User::ROLE_STAFF, [
             'suspended_at' => now(),
@@ -412,7 +414,7 @@ class SecurityRemediationTest extends TestCase
     {
         Notification::fake();
         $owner = $this->user(User::ROLE_SERVICE_USER);
-        $actor = $this->user(User::ROLE_STAFF);
+        $actor = $this->grantClinicalRole($this->user(User::ROLE_STAFF));
         $eligibleRecipient = $this->user(User::ROLE_STAFF);
         $permissionOnly = $this->permissionOnlyUser();
         $suspended = $this->user(User::ROLE_STAFF, [
@@ -582,7 +584,7 @@ class SecurityRemediationTest extends TestCase
         );
 
         $owner = $this->user(User::ROLE_SERVICE_USER);
-        $actor = $this->user(User::ROLE_STAFF);
+        $actor = $this->grantClinicalRole($this->user(User::ROLE_STAFF));
         $assignee = $this->user(User::ROLE_STAFF, [
             'name' => 'Directory-eligible assignment identity',
         ]);

@@ -35,10 +35,19 @@ trait CreatesClinicalPersonas
      */
     private function clinicalStaff(string $roleName, array $attributes): User
     {
-        $clinician = User::factory()
-            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
-            ->create($attributes);
+        return $this->grantClinicalRole(
+            User::factory()
+                ->protectedRole(AuthorizationProfile::ROLE_STAFF)
+                ->create($attributes),
+            $roleName,
+        );
+    }
 
+    /**
+     * Adds a clinical job role to an existing staff-side account.
+     */
+    protected function grantClinicalRole(User $clinician, string $roleName = DefaultJobRoles::VET): User
+    {
         $actor = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
             ->create();

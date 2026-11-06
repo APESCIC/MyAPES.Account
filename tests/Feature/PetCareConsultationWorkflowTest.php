@@ -18,6 +18,7 @@ use App\Exceptions\ModuleLifecycleException;
 use App\Services\AuthorizationProfile;
 use App\Services\AuthorizationRoleMaterializer;
 use App\Services\ModuleInstallationSynchronizer;
+use App\Support\DefaultJobRoles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
@@ -26,10 +27,12 @@ use Plugins\Consultations\Models\PetCareConsultation;
 use Plugins\Consultations\Notifications\ConsultationUpdatedNotification;
 use Plugins\PetProfiles\Models\PetProfile;
 use Spatie\Permission\PermissionRegistrar;
+use Tests\Concerns\CreatesClinicalPersonas;
 use Tests\TestCase;
 
 class PetCareConsultationWorkflowTest extends TestCase
 {
+    use CreatesClinicalPersonas;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -46,8 +49,9 @@ class PetCareConsultationWorkflowTest extends TestCase
             ->protectedRole(AuthorizationProfile::ROLE_STAFF)
             ->create();
         $pet = $this->petFor($owner, PetProfile::DOMAIN_PETCARE, 'Clinic creation pet');
+        $vet = $this->vetStaff();
 
-        $response = $this->actingAs($owner)->post(route('petcare.consultations.store'), [
+        $response = $this->actingAs($vet)->post(route('petcare.consultations.store'), [
             'pet_profile_id' => $pet->id,
             'subject' => 'Stable consultation identity',
             'notes' => 'Private creation notes.',
@@ -81,7 +85,8 @@ class PetCareConsultationWorkflowTest extends TestCase
             'Private creation notes.',
             json_encode($audit->context, JSON_THROW_ON_ERROR),
         );
-        Notification::assertNotSentTo($owner, ConsultationUpdatedNotification::class);
+        Notification::assertNotSentTo($vet, ConsultationUpdatedNotification::class);
+        Notification::assertSentTo($owner, ConsultationUpdatedNotification::class);
         Notification::assertSentTo(
             $staffRecipient,
             ConsultationUpdatedNotification::class,
@@ -99,35 +104,28 @@ class PetCareConsultationWorkflowTest extends TestCase
         );
 
         $shelterPet = $this->petFor($owner, PetProfile::DOMAIN_SHELTER, 'Shelter create boundary');
-        $otherPet = $this->petFor(
-            User::factory()->create(),
-            PetProfile::DOMAIN_PETCARE,
-            'Invisible create boundary',
-        );
-        $this->actingAs($owner)
+        $this->actingAs($vet)
             ->post(route('petcare.consultations.store'), [
                 'pet_profile_id' => $shelterPet->id,
                 'subject' => 'Shared Shelter pet consultation',
             ])
             ->assertRedirect();
-        foreach ([$otherPet] as $ineligiblePet) {
-            $this->actingAs($owner)
-                ->post(route('petcare.consultations.store'), [
-                    'pet_profile_id' => $ineligiblePet->id,
-                    'subject' => 'Forbidden pet lookup consultation',
-                ])
-                ->assertNotFound();
-        }
+        $this->actingAs($vet)
+            ->post(route('petcare.consultations.store'), [
+                'pet_profile_id' => 999999,
+                'subject' => 'Forbidden pet lookup consultation',
+            ])
+            ->assertNotFound();
         $this->assertDatabaseMissing('pet_care_consultations', [
             'subject' => 'Forbidden pet lookup consultation',
         ]);
 
         $this->removeRolePermissions(
-            AuthorizationProfile::ROLE_SERVICE_USER,
+            DefaultJobRoles::VET,
             ['pet-care-clinic.consultations.create'],
         );
-        $owner = $owner->fresh();
-        $this->actingAs($owner)
+        $vet = $vet->fresh();
+        $this->actingAs($vet)
             ->get(route('petcare.consultations.index'))
             ->assertOk()
             ->assertDontSee('action="'.route('petcare.consultations.store').'"', false);
@@ -171,9 +169,13 @@ class PetCareConsultationWorkflowTest extends TestCase
             ->assertSee($other->subject)
             ->assertSee($malformed->subject);
         $this->put(route('petcare.consultations.update', $other), [
-            'notes' => 'Exact staff update-all notes.',
+            'notes' => 'Staff without the vet role cannot edit.',
+        ])->assertForbidden();
+        $vet = $this->vetStaff();
+        $this->actingAs($vet)->put(route('petcare.consultations.update', $other), [
+            'notes' => 'Exact vet update-all notes.',
         ])->assertRedirect(route('petcare.consultations.show', $other));
-        $this->assertSame('Exact staff update-all notes.', $other->fresh()->notes);
+        $this->assertSame('Exact vet update-all notes.', $other->fresh()->notes);
 
         $this->removeRolePermissions(AuthorizationProfile::ROLE_STAFF, [
             'shelter-rescue.pet-profiles.view-own',
@@ -182,9 +184,9 @@ class PetCareConsultationWorkflowTest extends TestCase
             'shelter-rescue.pet-profiles.update-all',
         ]);
         $staff = $staff->fresh();
-        $this->get(route('petcare.consultations.show', $malformed))
+        $this->actingAs($staff)->get(route('petcare.consultations.show', $malformed))
             ->assertOk();
-        $this->put(route('petcare.consultations.update', $malformed), [
+        $this->actingAs($vet->fresh())->put(route('petcare.consultations.update', $malformed), [
             'notes' => 'Shared pet consultation notes.',
         ])->assertRedirect(route('petcare.consultations.show', $malformed));
         $this->assertSame('Shared pet consultation notes.', $malformed->fresh()->notes);
@@ -221,8 +223,13 @@ class PetCareConsultationWorkflowTest extends TestCase
         $consultation = $this->consultationFor($owner, $pet, 'Ordinary update consultation', [
             'scheduled_for' => '2026-08-20 12:00:00',
         ]);
+        $vet = $this->vetStaff();
 
         $this->actingAs($owner)
+            ->put(route('petcare.consultations.update', $consultation), ['notes' => 'Owner cannot edit.'])
+            ->assertForbidden();
+
+        $this->actingAs($vet)
             ->put(route('petcare.consultations.update', $consultation), [
                 'notes' => 'Owner changed notes.',
                 'scheduled_for' => null,
@@ -260,11 +267,11 @@ class PetCareConsultationWorkflowTest extends TestCase
         Notification::assertNothingSent();
 
         $this->removeRolePermissions(
-            AuthorizationProfile::ROLE_SERVICE_USER,
-            ['pet-care-clinic.consultations.update-own'],
+            DefaultJobRoles::VET,
+            ['pet-care-clinic.consultations.update-all'],
         );
-        $owner = $owner->fresh();
-        $this->actingAs($owner)
+        $vet = $vet->fresh();
+        $this->actingAs($vet)
             ->get(route('petcare.consultations.show', $consultation))
             ->assertOk()
             ->assertSee('In Progress')
@@ -285,7 +292,7 @@ class PetCareConsultationWorkflowTest extends TestCase
             'scheduled_for' => '2026-08-20 12:34:56',
         ]);
 
-        $response = $this->actingAs($owner)
+        $response = $this->actingAs($this->vetStaff())
             ->get(route('petcare.consultations.show', $consultation));
         $response->assertOk();
         $updateForm = $this->renderedForm($response->getContent(), 'consultation-update-form');
@@ -309,7 +316,7 @@ class PetCareConsultationWorkflowTest extends TestCase
         $owner = User::factory()->create();
         $pet = $this->petFor($owner, PetProfile::DOMAIN_PETCARE, 'UK schedule pet');
 
-        $this->actingAs($owner)->post(route('petcare.consultations.store'), [
+        $this->actingAs($this->vetStaff())->post(route('petcare.consultations.store'), [
             'pet_profile_id' => $pet->id,
             'subject' => 'UK scheduled date',
             'scheduled_for' => '05/03/2026 14:30:00',

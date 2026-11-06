@@ -8,6 +8,7 @@ use App\Services\ModuleInstallationSynchronizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Plugins\Consultations\Models\PetCareConsultation;
 use Plugins\PetProfiles\Models\PetProfile;
+use Tests\Concerns\CreatesClinicalPersonas;
 use Tests\TestCase;
 
 /**
@@ -15,6 +16,7 @@ use Tests\TestCase;
  */
 class SharedPetRecordsTest extends TestCase
 {
+    use CreatesClinicalPersonas;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -47,7 +49,7 @@ class SharedPetRecordsTest extends TestCase
             ->assertSeeText('Shared Tortoise');
         $this->actingAs($owner)->get(route('petcare.pets.show', $pet))->assertOk();
 
-        $vet = User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create();
+        $vet = $this->vetStaff();
         $this->actingAs($vet)
             ->get(route('petcare.pets.index'))
             ->assertOk()

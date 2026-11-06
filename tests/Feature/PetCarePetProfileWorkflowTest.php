@@ -17,10 +17,12 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Plugins\PetProfiles\Models\PetProfile;
 use Spatie\Permission\PermissionRegistrar;
+use Tests\Concerns\CreatesClinicalPersonas;
 use Tests\TestCase;
 
 class PetCarePetProfileWorkflowTest extends TestCase
 {
+    use CreatesClinicalPersonas;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -137,7 +139,7 @@ class PetCarePetProfileWorkflowTest extends TestCase
         $this->assertSame([], Storage::disk('public')->allFiles('pet-profiles'));
     }
 
-    public function test_consultation_index_offers_owned_pets_from_the_shared_pool_only(): void
+    public function test_consultation_index_offers_clinicians_the_shared_pet_pool_and_owners_no_form(): void
     {
         $owner = User::factory()->create();
         $other = User::factory()->create();
@@ -149,12 +151,18 @@ class PetCarePetProfileWorkflowTest extends TestCase
             PetProfile::DOMAIN_SHELTER,
         );
 
-        $this->actingAs($owner)
+        $this->actingAs($this->vetStaff())
             ->get(route('petcare.consultations.index'))
             ->assertOk()
             ->assertSee($owned->name)
-            ->assertDontSee($foreign->name)
+            ->assertSee($foreign->name)
             ->assertSee($shelter->name);
+
+        $this->actingAs($owner)
+            ->get(route('petcare.consultations.index'))
+            ->assertOk()
+            ->assertDontSee('name="pet_profile_id"', false)
+            ->assertDontSee($foreign->name);
     }
 
     public function test_visibility_and_record_access_use_only_exact_pet_care_permissions(): void
