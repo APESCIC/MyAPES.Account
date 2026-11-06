@@ -4,6 +4,9 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Wait before proposing updates to newly published action versions (#560 / Semgrep cooldown rule).
+    cooldown:
+      default-days: 7
     groups:
       github-actions:
         patterns:

@@ -19,8 +19,10 @@ jobs:
     name: Semgrep scan
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # No SEMGREP_APP_TOKEN required: OSS ruleset p/default only.
+    # Pin by digest (amd64) so the job does not float on the mutable 1.184.0 tag.
     container:
-      image: semgrep/semgrep:1.184.0
+      image: docker.io/semgrep/semgrep@sha256:83b9e9ee3df8ab1482dd7680cc78f25f6d9619a0caab7a687cf9eed31e88e4a1 # 1.184.0 linux/amd64
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -28,5 +30,5 @@ jobs:
           persist-credentials: false
 
       - name: Run Semgrep (OSS rules)
-        # p/default works with metrics off; --config auto requires metrics.
+        # p/default works with metrics off; --config auto requires metrics and is flake-prone here.
         run: semgrep scan --config p/default --error --metrics=off
