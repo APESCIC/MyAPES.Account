@@ -28,6 +28,10 @@
             <dd>{{ $ukDateTime->format($consultation->scheduled_for) ?? 'Not scheduled' }}</dd>
             <dt>{{ __('consultations::ui.index.blade.notes') }}</dt>
             <dd>{{ $consultation->notes ?: 'No notes recorded.' }}</dd>
+            @if($ticketUrl !== null)
+                <dt>{{ __('consultations::ui.show.blade.from_ticket') }}</dt>
+                <dd><a href="{{ $ticketUrl }}" data-consultation-ticket-link>{{ __('consultations::ui.show.blade.ticket_number', ['id' => $consultation->support_ticket_id]) }}</a></dd>
+            @endif
             <dt>{{ __('consultations::ui.show.blade.created_by') }}</dt>
             <dd data-consultation-created-by>{{ $consultation->createdBy?->name ?? __('consultations::ui.show.blade.not_recorded') }}</dd>
             <dt>{{ __('consultations::ui.show.blade.last_edited_by') }}</dt>

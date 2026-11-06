@@ -15,6 +15,8 @@ return [
             'created_by' => 'Created by',
             'last_edited_by' => 'Last edited by',
             'not_recorded' => 'Not recorded',
+            'from_ticket' => 'From ticket',
+            'ticket_number' => 'Ticket #:id',
             'needs_vet_review_body' => 'This consultation was created before only vets could create them. A Vet or Vet Nurse should check it.',
             'mark_reviewed' => 'Mark as reviewed',
             'vet_reviewed_by' => 'Reviewed by :name on :date.',
@@ -24,6 +26,7 @@ return [
     'validation' => [
         'no_consultation_changes_were_requested' => 'No consultation changes were requested.',
         'not_flagged_for_vet_review' => 'This consultation does not need a vet review.',
+        'ticket_does_not_match_pet' => 'Choose a pet that belongs to the ticket owner.',
     ],
     'index' => [
         'blade' => [
@@ -45,12 +48,17 @@ return [
             'id' => 'ID',
             'scheduled_for_label' => 'Scheduled for',
             'request_consultation' => 'Request a consultation',
+            'from_ticket' => 'Creating from Pet Care Clinic ticket #:id: :subject. Choose a pet that belongs to the ticket owner.',
             'all_consultations' => 'All consultations',
             'needs_vet_review' => 'Needs vet review',
             'needs_vet_review_count' => 'Needs vet review (:count)',
             'request_consultation_body' => 'Consultations are booked by our Vet and Vet Nurse team. Open a Pet Care Clinic ticket and we will arrange one for your pet.',
             'request_consultation_action' => 'Open a Pet Care Clinic ticket',
         ],
+    ],
+    'ticket' => [
+        'create_consultation' => 'Create consultation',
+        'consultation_link' => 'Consultation #:id: :subject',
     ],
     'flash' => [
         'consultation_created' => 'Consultation created.',

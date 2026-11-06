@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Plugins\Consultations\Models\PetCareConsultation;
 use Plugins\PetProfiles\Models\PetProfile;
+use Plugins\Tickets\Models\SupportTicket;
 use Tests\Concerns\CreatesClinicalPersonas;
 use Tests\TestCase;
 
@@ -278,6 +279,104 @@ class VetOnlyConsultationsTest extends TestCase
         $this->actingAs($vet)
             ->post(route('petcare.consultations.vet-review', $flagged))
             ->assertSessionHasErrors('consultation');
+    }
+
+    public function test_vet_creates_a_consultation_from_a_pet_care_ticket_and_both_records_link(): void
+    {
+        $owner = User::factory()->create(['name' => 'Olive Owner']);
+        $ownerPet = $this->petFor($owner);
+        $otherPet = $this->petFor(User::factory()->create());
+        $ticket = $this->petCareTicket($owner, 'Limping since Tuesday');
+        $vet = $this->vetStaff();
+        $ticketUrl = route('petcare.tickets.show', $ticket->id);
+        $formUrl = route('petcare.consultations.index', ['ticket' => $ticket->id]).'#create';
+
+        $this->actingAs($vet)
+            ->get($ticketUrl)
+            ->assertOk()
+            ->assertSee('href="'.e($formUrl).'"', false)
+            ->assertSeeText('Create consultation');
+
+        $form = $this->actingAs($vet)
+            ->get(route('petcare.consultations.index', ['ticket' => $ticket->id]))
+            ->assertOk()
+            ->assertSee('name="support_ticket_id" value="'.$ticket->id.'"', false)
+            ->assertSee('value="Limping since Tuesday"', false)
+            ->getContent();
+        $this->assertStringContainsString('<option value="'.$ownerPet->id.'"', $form);
+        $this->assertStringNotContainsString('<option value="'.$otherPet->id.'"', $form);
+
+        $this->actingAs($vet)
+            ->post(route('petcare.consultations.store'), [
+                'pet_profile_id' => $otherPet->id,
+                'subject' => 'Wrong pet',
+                'support_ticket_id' => $ticket->id,
+            ])
+            ->assertSessionHasErrors('support_ticket_id');
+
+        $this->actingAs($vet)
+            ->post(route('petcare.consultations.store'), [
+                'pet_profile_id' => $ownerPet->id,
+                'subject' => 'Limping since Tuesday',
+                'support_ticket_id' => $ticket->id,
+            ])
+            ->assertRedirect();
+        $consultation = PetCareConsultation::query()->where('support_ticket_id', $ticket->id)->firstOrFail();
+
+        $this->actingAs($owner)
+            ->get(route('petcare.consultations.show', $consultation))
+            ->assertSee('href="'.$ticketUrl.'" data-consultation-ticket-link', false);
+        $this->actingAs($owner)
+            ->get($ticketUrl)
+            ->assertOk()
+            ->assertSee('href="'.route('petcare.consultations.show', $consultation).'"', false)
+            ->assertDontSee('data-ticket-related-action', false);
+    }
+
+    public function test_create_from_ticket_button_is_only_for_clinical_roles_and_pet_care_tickets(): void
+    {
+        $owner = User::factory()->create();
+        $ticket = $this->petCareTicket($owner, 'Needs a check-up');
+        $administrator = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
+        $staff = User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create();
+
+        $this->actingAs($staff)
+            ->get(route('petcare.tickets.show', $ticket->id))
+            ->assertOk()
+            ->assertDontSee('data-ticket-related-action', false);
+        $this->actingAs($this->vetNurseStaff())
+            ->get(route('petcare.tickets.show', $ticket->id))
+            ->assertSee('data-ticket-related-action', false);
+        $this->actingAs($administrator)
+            ->get(route('petcare.tickets.show', $ticket->id))
+            ->assertSee('data-ticket-related-action', false);
+
+        $cicTicket = SupportTicket::query()->create([
+            'sub_core_key' => SupportTicket::SUB_CORE_APES_CIC,
+            'user_id' => $owner->id,
+            'service_area' => 'it_support',
+            'subject' => 'Website issue',
+            'priority' => 'medium',
+            'status' => 'open',
+            'description' => 'Not a clinic ticket.',
+        ]);
+        $this->actingAs($administrator)
+            ->get(route('petcare.consultations.index', ['ticket' => $cicTicket->id]))
+            ->assertOk()
+            ->assertDontSee('name="support_ticket_id"', false);
+    }
+
+    private function petCareTicket(User $owner, string $subject): SupportTicket
+    {
+        return SupportTicket::query()->create([
+            'sub_core_key' => 'pet-care-clinic',
+            'user_id' => $owner->id,
+            'service_area' => 'consultation',
+            'subject' => $subject,
+            'priority' => 'medium',
+            'status' => 'open',
+            'description' => 'Please book a consultation.',
+        ]);
     }
 
     /**

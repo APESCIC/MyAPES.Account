@@ -13,6 +13,7 @@ use App\Core\Extensions\Plugins\PluginSettingsSchema;
 use App\Core\Mail\MailCategory;
 use App\Core\Mail\MailTemplate;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\View;
 use Plugins\Consultations\Console\FlagPublicCreatedConsultations;
 use Plugins\Consultations\Dashboard\ConsultationAttentionProvider;
 use Plugins\Consultations\Dashboard\PetCareConsultationActiveRecordDetector;
@@ -22,6 +23,7 @@ use Plugins\Consultations\Dashboard\PetCareConsultationSummaryProvider;
 use Plugins\Consultations\Models\PetCareConsultation;
 use Plugins\Consultations\Notifications\ConsultationUpdatedNotification;
 use Plugins\Consultations\Policies\PetCareConsultationPolicy;
+use Plugins\Consultations\View\TicketConsultationsComposer;
 
 class ConsultationsServiceProvider extends PluginServiceProvider
 {
@@ -32,6 +34,7 @@ class ConsultationsServiceProvider extends PluginServiceProvider
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'consultations');
 
         Gate::policy(PetCareConsultation::class, PetCareConsultationPolicy::class);
+        View::composer('tickets::tickets.show', TicketConsultationsComposer::class);
 
         if ($this->app->runningInConsole()) {
             $this->commands([FlagPublicCreatedConsultations::class]);

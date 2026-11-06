@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
 use Plugins\Consultations\Models\PetCareConsultation;
 use Plugins\Consultations\Notifications\ConsultationUpdatedNotification;
+use Plugins\Consultations\Support\PetCareTicketLookup;
 use Plugins\PetProfiles\Contracts\PetProfilesContract;
 use Plugins\PetProfiles\Support\StaffPetCreateReturn;
 
@@ -26,6 +27,7 @@ class ConsultationController extends Controller
     public function __construct(
         private readonly UkDateTime $ukDateTime,
         private readonly PetProfilesContract $petProfiles,
+        private readonly PetCareTicketLookup $tickets,
     ) {}
 
     public function index(Request $request): View
@@ -44,8 +46,14 @@ class ConsultationController extends Controller
         $domain = $this->petProfiles->domainForModule('pet-care-clinic');
         $petProfiles = $this->petProfiles->visibleOrdered($user, $domain);
         $canCreate = Gate::allows('create', PetCareConsultation::class);
+        $fromTicket = $canCreate ? $this->tickets->findForStaff($user, $request->query('ticket')) : null;
+
+        if ($fromTicket !== null) {
+            $petProfiles = $petProfiles->where('user_id', $fromTicket->user_id)->values();
+        }
 
         return view('consultations::index', [
+            'fromTicket' => $fromTicket,
             'consultations' => $query->paginate(20)->withQueryString()->fragment('list'),
             'reviewFilter' => $reviewFilter,
             'reviewCount' => $canReview
@@ -77,8 +85,11 @@ class ConsultationController extends Controller
             'subject' => ['required', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
             'scheduled_for' => ['nullable', new UkDateTimeFormat],
+            'support_ticket_id' => ['nullable', 'integer'],
         ]);
         $validated = $this->normalizeValidatedSchedule($validated);
+        $ticketId = $validated['support_ticket_id'] ?? null;
+        unset($validated['support_ticket_id']);
 
         $domain = $this->petProfiles->domainForModule('pet-care-clinic');
         $pet = $this->petProfiles->findVisibleOrFail(
@@ -88,11 +99,22 @@ class ConsultationController extends Controller
         );
         Gate::authorize('createFor', [PetCareConsultation::class, (int) $pet->user_id]);
 
+        if ($ticketId !== null) {
+            $ticket = $this->tickets->findForStaff($request->user(), $ticketId);
+
+            if ($ticket === null || (int) $ticket->user_id !== (int) $pet->user_id) {
+                throw ValidationException::withMessages([
+                    'support_ticket_id' => __('consultations::ui.validation.ticket_does_not_match_pet'),
+                ]);
+            }
+        }
+
         $consultation = new PetCareConsultation([
             ...$validated,
             'user_id' => $pet->user_id,
         ]);
         $consultation->forceFill([
+            'support_ticket_id' => $ticketId,
             'created_by' => $request->user()->id,
             'updated_by' => $request->user()->id,
         ])->save();
@@ -130,6 +152,9 @@ class ConsultationController extends Controller
 
         return view('consultations::show', [
             'consultation' => $consultation,
+            'ticketUrl' => $consultation->support_ticket_id !== null
+                ? $this->tickets->showUrl(request()->user(), (int) $consultation->support_ticket_id, (int) $consultation->user_id)
+                : null,
             'canUpdate' => $canUpdate,
             'canAssign' => $canAssign,
             'canClose' => $canClose,

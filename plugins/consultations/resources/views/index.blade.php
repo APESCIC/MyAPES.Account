@@ -60,6 +60,10 @@
                 @else
                     <form method="post" action="{{ route('petcare.consultations.store') }}">
                     @csrf
+                    @if($fromTicket !== null)
+                        <input type="hidden" name="support_ticket_id" value="{{ $fromTicket->id }}">
+                        <p class="muted" data-consultation-from-ticket>{{ __('consultations::ui.index.blade.from_ticket', ['id' => $fromTicket->id, 'subject' => $fromTicket->subject]) }}</p>
+                    @endif
                     <div class="row">
                         @include('pet-profiles::partials.pet-profile-select')
                         <div>
@@ -68,7 +72,7 @@
                         </div>
                     </div>
                     <label>{{ __('consultations::ui.index.blade.subject') }}</label>
-                    <input name="subject">
+                    <input name="subject" value="{{ old('subject', $fromTicket?->subject) }}">
                     <label>{{ __('consultations::ui.index.blade.notes') }}</label>
                     <x-rich-text-editor name="notes" :value="old('notes')" />
                     <button type="submit">{{ __('consultations::ui.index.blade.create_consultation') }}</button>
