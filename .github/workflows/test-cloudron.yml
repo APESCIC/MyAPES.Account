@@ -123,7 +123,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Set up PHP 8.4
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: '8.4'
           extensions: mbstring, pdo_mysql, redis, sqlite3
@@ -247,7 +247,7 @@ jobs:
           fetch-depth: 1
 
       - name: Set up PHP 8.4 with MySQL support
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: '8.4'
           extensions: mbstring, pcntl, pdo_mysql, sqlite3
