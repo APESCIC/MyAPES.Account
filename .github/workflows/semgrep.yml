@@ -28,4 +28,5 @@ jobs:
           persist-credentials: false
 
       - name: Run Semgrep (OSS rules)
-        run: semgrep scan --config auto --error --metrics=off
+        # p/default works with metrics off; --config auto requires metrics.
+        run: semgrep scan --config p/default --error --metrics=off
