@@ -96,6 +96,8 @@
                     <input id="screenshots" name="screenshots[]" type="file" accept="image/jpeg,image/png,image/webp" multiple>
                     <label for="screencast">{{ __('tickets::ui.show.blade.add_screencast') }}</label>
                     <input id="screencast" name="screencast" type="file" accept="video/mp4,video/webm">
+                    <label for="documents">{{ __('attachments.fields.add_documents') }}</label>
+                    <input id="documents" name="documents[]" type="file" accept=".pdf,.docx,.xlsx,.odt,.ods,.txt,.csv" multiple>
                 @endif
                 <div class="actions">
                     <button type="submit">{{ $canUpdateTicket ? 'Save ticket' : 'Add message' }}</button>
@@ -179,18 +181,9 @@
     </div>
 
     @if($ticket->attachments->isNotEmpty())
-        <div class="panel">
+        <div class="panel" data-ticket-attachments>
             <h2>{{ __('tickets::ui.show.blade.attachments') }}</h2>
-            <ul class="attachment-list">
-                @foreach($ticket->attachments as $attachment)
-                    <li>
-                        <strong>{{ $attachment->kind }}</strong>
-                        — {{ $attachment->original_name }}
-                        <span class="muted">({{ number_format($attachment->size_bytes / 1024, 1) }} KB)</span>
-                        <a href="{{ route('support.attachments.download', $attachment) }}">{{ __('tickets::ui.index.blade.open') }}</a>
-                    </li>
-                @endforeach
-            </ul>
+            <x-attachment-list :attachments="$ticket->attachments" />
         </div>
     @endif
 
@@ -213,6 +206,7 @@
                     <span class="status">staff</span>
                 @endif
                 <x-rich-text :value="$message->message" />
+                <x-attachment-list :attachments="$ticket->attachments->filter(fn ($attachment) => $attachment->isContextOf($message))" />
             </div>
         @endforeach
     </div>

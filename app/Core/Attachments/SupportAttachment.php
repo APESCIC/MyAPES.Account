@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Storage;
     'mime_type',
     'size_bytes',
     'kind',
+    'context_type',
+    'context_id',
 ])]
 class SupportAttachment extends Model
 {
@@ -42,6 +44,35 @@ class SupportAttachment extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function context(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    public function isContextOf(Model $model): bool
+    {
+        return $this->context_type === $model->getMorphClass()
+            && (int) $this->context_id === (int) $model->getKey();
+    }
+
+    public function icon(): string
+    {
+        return match ($this->kind) {
+            self::KIND_SCREENSHOT => 'image',
+            self::KIND_SCREENCAST => 'video',
+            default => 'file-text',
+        };
+    }
+
+    public function humanSize(): string
+    {
+        $bytes = (int) $this->size_bytes;
+
+        return $bytes >= 1048576
+            ? number_format($bytes / 1048576, 1).' MB'
+            : number_format(max($bytes, 0) / 1024, 1).' KB';
     }
 
     public function deleteFile(): void

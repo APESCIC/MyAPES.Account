@@ -20,6 +20,11 @@ return [
         'not_available' => 'Attachments are not available here.',
     ],
 
+    'fields' => [
+        'documents_optional' => 'Documents (optional)',
+        'add_documents' => 'Add documents',
+    ],
+
     'types' => [
         'screenshots' => 'screenshots',
         'screencasts' => 'screencasts',

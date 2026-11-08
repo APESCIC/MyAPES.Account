@@ -89,6 +89,17 @@ class SupportAttachmentService
         return $created;
     }
 
+    /**
+     * @param  Collection<int, SupportAttachment>  $attachments
+     */
+    public function linkTo(Collection $attachments, Model $context): void
+    {
+        $attachments->each(fn (SupportAttachment $attachment) => $attachment->forceFill([
+            'context_type' => $context->getMorphClass(),
+            'context_id' => $context->getKey(),
+        ])->save());
+    }
+
     private function createRecord(
         Model $attachable,
         User $uploader,

@@ -1237,9 +1237,27 @@ form.inline {
 
 .attachment-list {
     margin: 0;
-    padding-left: 1.1rem;
+    padding-left: 0;
+    list-style: none;
     display: grid;
     gap: 0.45rem;
+}
+
+.attachment-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.attachment-item svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    flex-shrink: 0;
+}
+
+.attachment-item form {
+    margin: 0;
 }
 
 .visually-hidden {

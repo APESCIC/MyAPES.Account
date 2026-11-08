@@ -121,6 +121,8 @@ class TicketController extends Controller
                 'mimetypes:video/mp4,video/webm',
                 'max:'.SecureUploadService::SCREENCAST_MAX_KB,
             ];
+            $rules['documents'] = ['nullable', 'array', 'max:10'];
+            $rules['documents.*'] = ['file', 'max:'.SecureUploadService::DOCUMENT_MAX_KB, 'extensions:pdf,docx,xlsx,odt,ods,txt,csv'];
         }
 
         $validated = $request->validate($rules);
@@ -144,7 +146,7 @@ class TicketController extends Controller
                 $categoryFields['sub_category'],
             );
             if (! $allowsAttachments && (
-                $request->hasFile('screenshots') || $request->hasFile('screencast')
+                $request->hasFile('screenshots') || $request->hasFile('screencast') || $request->hasFile('documents')
             )) {
                 throw ValidationException::withMessages([
                     'screenshots' => __('tickets::ui.validation.attachments_are_not_available_for_this_subcategory'),
@@ -181,6 +183,7 @@ class TicketController extends Controller
                 $request->user(),
                 $request->file('screenshots'),
                 $request->file('screencast'),
+                $request->file('documents'),
             );
         }
 
@@ -312,7 +315,8 @@ class TicketController extends Controller
             || array_key_exists('priority', $input);
         $messageRequested = array_key_exists('message', $input);
         $attachmentRequested = $request->hasFile('screenshots')
-            || $request->hasFile('screencast');
+            || $request->hasFile('screencast')
+            || $request->hasFile('documents');
         $canChooseVisibility = $request->user()->can(
             $prefix.'view-all',
         );
@@ -400,6 +404,8 @@ class TicketController extends Controller
                 'mimetypes:video/mp4,video/webm',
                 'max:'.SecureUploadService::SCREENCAST_MAX_KB,
             ];
+            $rules['documents'] = ['nullable', 'array', 'max:10'];
+            $rules['documents.*'] = ['file', 'max:'.SecureUploadService::DOCUMENT_MAX_KB, 'extensions:pdf,docx,xlsx,odt,ods,txt,csv'];
         }
         $validated = $request->validate($rules);
 
@@ -455,6 +461,7 @@ class TicketController extends Controller
                 $request->user(),
                 $request->file('screenshots'),
                 $request->file('screencast'),
+                $request->file('documents'),
             );
         }
         $hasAttachments = $storedAttachments->isNotEmpty();
@@ -470,12 +477,15 @@ class TicketController extends Controller
         }
 
         if ($hasMessage) {
-            $ticket->messages()->create([
+            $createdMessage = $ticket->messages()->create([
                 'user_id' => $request->user()->id,
                 'message' => $message,
                 'is_staff_note' => $canChooseVisibility
                     && ($validated['visibility'] ?? 'public') === 'internal',
             ]);
+            if ($hasAttachments) {
+                $this->attachments->linkTo($storedAttachments, $createdMessage);
+            }
         }
 
         $internalMessage = $hasMessage

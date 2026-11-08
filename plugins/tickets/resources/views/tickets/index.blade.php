@@ -137,6 +137,8 @@
                         <input id="screenshots" name="screenshots[]" type="file" accept="image/jpeg,image/png,image/webp" multiple>
                         <label for="screencast">{{ __('tickets::ui.index.blade.screencast_optional') }}</label>
                         <input id="screencast" name="screencast" type="file" accept="video/mp4,video/webm">
+                        <label for="documents">{{ __('attachments.fields.documents_optional') }}</label>
+                        <input id="documents" name="documents[]" type="file" accept=".pdf,.docx,.xlsx,.odt,.ods,.txt,.csv" multiple>
                     </div>
                 @endif
                     <button type="submit">{{ __('tickets::ui.index.blade.create_ticket') }}</button>
