@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Core\Attachments\AttachmentLimits;
 use App\Core\Attachments\DocumentInspector;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -10,9 +11,9 @@ use Illuminate\Validation\ValidationException;
 
 class SecureUploadService
 {
-    public const SCREENCAST_MAX_KB = 51200;
+    public const SCREENCAST_MAX_KB = AttachmentLimits::SCREENCAST_MAX_KB;
 
-    public const DOCUMENT_MAX_KB = 10240;
+    public const DOCUMENT_MAX_KB = AttachmentLimits::DOCUMENT_MAX_KB;
 
     public function __construct(
         private readonly DocumentInspector $documents = new DocumentInspector,
@@ -86,7 +87,7 @@ class SecureUploadService
             throw ValidationException::withMessages([
                 $fieldName => __('attachments.validation.file_too_large', [
                     'name' => $file->getClientOriginalName(),
-                    'size' => $this->megabytes($maxKilobytes),
+                    'size' => AttachmentLimits::megabytes($maxKilobytes),
                 ]),
             ]);
         }
@@ -115,10 +116,5 @@ class SecureUploadService
         if (Storage::disk($disk)->exists($path)) {
             Storage::disk($disk)->delete($path);
         }
-    }
-
-    private function megabytes(int $kilobytes): string
-    {
-        return rtrim(rtrim(number_format($kilobytes / 1024, 1), '0'), '.').' MB';
     }
 }

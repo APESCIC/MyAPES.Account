@@ -6,8 +6,8 @@ use App\Core\Accounts\User;
 use App\Core\Extensions\Modules\ModuleContext;
 use App\Http\Controllers\Controller;
 use App\Modules\ModuleInstanceDefinition;
+use App\Core\Attachments\AttachmentLimits;
 use App\Services\AuditLogger;
-use App\Services\SecureUploadService;
 use App\Services\SupportAttachmentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -59,9 +59,7 @@ class CaseUpdateController extends Controller
             ]);
         }
 
-        $attachmentRequested = $request->hasFile('screenshots')
-            || $request->hasFile('screencast')
-            || $request->hasFile('documents');
+        $attachmentRequested = AttachmentLimits::requested($request);
         if ($attachmentRequested) {
             abort_unless($this->allowsAttachments($case, $area), 403);
         }
@@ -77,31 +75,23 @@ class CaseUpdateController extends Controller
             ],
         ];
         if ($attachmentRequested) {
-            $rules['screenshots'] = ['nullable', 'array', 'max:5'];
-            $rules['screenshots.*'] = ['image', 'mimes:jpg,jpeg,png,webp', 'max:3072'];
-            $rules['screencast'] = [
-                'nullable',
-                'file',
-                'mimetypes:video/mp4,video/webm',
-                'max:'.SecureUploadService::SCREENCAST_MAX_KB,
-            ];
-            $rules['documents'] = ['nullable', 'array', 'max:10'];
-            $rules['documents.*'] = ['file', 'max:'.SecureUploadService::DOCUMENT_MAX_KB, 'extensions:pdf,docx,xlsx,odt,ods,txt,csv'];
+            $rules = [...$rules, ...AttachmentLimits::rules()];
         }
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, AttachmentLimits::messages());
+        if ($attachmentRequested) {
+            AttachmentLimits::assertSubmissionWithinLimits($request);
+        }
         $isStaffViewer = $request->user()->can($prefix.'view-all');
         $visibility = $isStaffViewer
             ? ($validated['visibility'] ?? CaseUpdate::VISIBILITY_PUBLIC)
             : CaseUpdate::VISIBILITY_PUBLIC;
         $storedAttachments = collect();
         if ($attachmentRequested) {
-            $storedAttachments = $this->attachments->storeFor(
+            $storedAttachments = $this->attachments->storeFromRequest(
                 $case,
                 $case->sub_core_key,
                 $request->user(),
-                $request->file('screenshots'),
-                $request->file('screencast'),
-                $request->file('documents'),
+                $request,
             );
         }
         $update = $case->updates()->create([

@@ -10,7 +10,7 @@ use App\Rules\EligibleRecordOwner;
 use App\Rules\EligibleStaffAssignee;
 use App\Services\AssignmentAuthorization;
 use App\Services\AuditLogger;
-use App\Services\SecureUploadService;
+use App\Core\Attachments\AttachmentLimits;
 use App\Services\SupportAttachmentService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -121,17 +121,9 @@ class CaseController extends Controller
             'priority' => ['required', Rule::in($this->area()->priorities)],
             'title' => ['required', 'string', 'max:255'],
             'details' => ['nullable', 'string'],
-            'screenshots' => ['nullable', 'array', 'max:5'],
-            'screenshots.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
-            'screencast' => [
-                'nullable',
-                'file',
-                'mimetypes:video/mp4,video/webm',
-                'max:'.SecureUploadService::SCREENCAST_MAX_KB,
-            ],
-            'documents' => ['nullable', 'array', 'max:10'],
-            'documents.*' => ['file', 'max:'.SecureUploadService::DOCUMENT_MAX_KB, 'extensions:pdf,docx,xlsx,odt,ods,txt,csv'],
-        ]);
+            ...AttachmentLimits::rules(),
+        ], AttachmentLimits::messages());
+        AttachmentLimits::assertSubmissionWithinLimits($request);
 
         $categoryFields = $this->categories->validateSelection(
             $instance->subCore->key,
@@ -145,9 +137,7 @@ class CaseController extends Controller
             $categoryFields['category'],
             $categoryFields['sub_category'],
         );
-        if (! $allowsAttachments && (
-            $request->hasFile('screenshots') || $request->hasFile('screencast') || $request->hasFile('documents')
-        )) {
+        if (! $allowsAttachments && AttachmentLimits::requested($request)) {
             throw ValidationException::withMessages([
                 'screenshots' => __('cases::ui.validation.attachments_are_not_available_for_this_subcategory'),
             ]);
@@ -167,13 +157,11 @@ class CaseController extends Controller
         ]);
 
         if ($allowsAttachments) {
-            $this->attachments->storeFor(
+            $this->attachments->storeFromRequest(
                 $case,
                 $instance->subCore->key,
                 $request->user(),
-                $request->file('screenshots'),
-                $request->file('screencast'),
-                $request->file('documents'),
+                $request,
             );
         }
 
@@ -262,9 +250,7 @@ class CaseController extends Controller
             || $request->exists('priority')
             || $request->exists('status')
             || $request->exists('sub_category');
-        $attachmentRequested = $request->hasFile('screenshots')
-            || $request->hasFile('screencast')
-            || $request->hasFile('documents');
+        $attachmentRequested = AttachmentLimits::requested($request);
 
         if (! $metadataRequested && ! $assignmentRequested && ! $ownerRequested && ! $attachmentRequested) {
             throw ValidationException::withMessages([
@@ -318,18 +304,12 @@ class CaseController extends Controller
             ];
         }
         if ($attachmentRequested) {
-            $rules['screenshots'] = ['nullable', 'array', 'max:5'];
-            $rules['screenshots.*'] = ['image', 'mimes:jpg,jpeg,png,webp', 'max:3072'];
-            $rules['screencast'] = [
-                'nullable',
-                'file',
-                'mimetypes:video/mp4,video/webm',
-                'max:'.SecureUploadService::SCREENCAST_MAX_KB,
-            ];
-            $rules['documents'] = ['nullable', 'array', 'max:10'];
-            $rules['documents.*'] = ['file', 'max:'.SecureUploadService::DOCUMENT_MAX_KB, 'extensions:pdf,docx,xlsx,odt,ods,txt,csv'];
+            $rules = [...$rules, ...AttachmentLimits::rules()];
         }
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, AttachmentLimits::messages());
+        if ($attachmentRequested) {
+            AttachmentLimits::assertSubmissionWithinLimits($request);
+        }
 
         $updates = [];
         if ($metadataRequested) {
@@ -375,13 +355,11 @@ class CaseController extends Controller
 
         $storedAttachments = collect();
         if ($attachmentRequested) {
-            $storedAttachments = $this->attachments->storeFor(
+            $storedAttachments = $this->attachments->storeFromRequest(
                 $case,
                 $instance->subCore->key,
                 $request->user(),
-                $request->file('screenshots'),
-                $request->file('screencast'),
-                $request->file('documents'),
+                $request,
             );
         }
 

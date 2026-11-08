@@ -10,7 +10,7 @@ use App\Rules\EligibleRecordOwner;
 use App\Rules\EligibleStaffAssignee;
 use App\Services\AssignmentAuthorization;
 use App\Services\AuditLogger;
-use App\Services\SecureUploadService;
+use App\Core\Attachments\AttachmentLimits;
 use App\Services\SupportAttachmentService;
 use Closure;
 use Illuminate\Contracts\View\View;
@@ -113,19 +113,11 @@ class TicketController extends Controller
         if ($isApesCic) {
             $rules['sub_category'] = ['required', 'string', 'max:64'];
             $rules['affected_website_key'] = ['nullable', 'string', 'max:64'];
-            $rules['screenshots'] = ['nullable', 'array', 'max:5'];
-            $rules['screenshots.*'] = ['image', 'mimes:jpg,jpeg,png,webp', 'max:3072'];
-            $rules['screencast'] = [
-                'nullable',
-                'file',
-                'mimetypes:video/mp4,video/webm',
-                'max:'.SecureUploadService::SCREENCAST_MAX_KB,
-            ];
-            $rules['documents'] = ['nullable', 'array', 'max:10'];
-            $rules['documents.*'] = ['file', 'max:'.SecureUploadService::DOCUMENT_MAX_KB, 'extensions:pdf,docx,xlsx,odt,ods,txt,csv'];
+            $rules = [...$rules, ...AttachmentLimits::rules()];
         }
 
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, AttachmentLimits::messages());
+        AttachmentLimits::assertSubmissionWithinLimits($request);
 
         $categoryFields = [
             'service_area' => $validated['service_area'],
@@ -145,9 +137,7 @@ class TicketController extends Controller
                 $categoryFields['service_area'],
                 $categoryFields['sub_category'],
             );
-            if (! $allowsAttachments && (
-                $request->hasFile('screenshots') || $request->hasFile('screencast') || $request->hasFile('documents')
-            )) {
+            if (! $allowsAttachments && AttachmentLimits::requested($request)) {
                 throw ValidationException::withMessages([
                     'screenshots' => __('tickets::ui.validation.attachments_are_not_available_for_this_subcategory'),
                 ]);
@@ -177,13 +167,11 @@ class TicketController extends Controller
             $categoryFields['service_area'],
             (string) $categoryFields['sub_category'],
         )) {
-            $this->attachments->storeFor(
+            $this->attachments->storeFromRequest(
                 $ticket,
                 $instance->subCore->key,
                 $request->user(),
-                $request->file('screenshots'),
-                $request->file('screencast'),
-                $request->file('documents'),
+                $request,
             );
         }
 
@@ -314,9 +302,7 @@ class TicketController extends Controller
         $ticketUpdateRequested = array_key_exists('status', $input)
             || array_key_exists('priority', $input);
         $messageRequested = array_key_exists('message', $input);
-        $attachmentRequested = $request->hasFile('screenshots')
-            || $request->hasFile('screencast')
-            || $request->hasFile('documents');
+        $attachmentRequested = AttachmentLimits::requested($request);
         $canChooseVisibility = $request->user()->can(
             $prefix.'view-all',
         );
@@ -396,18 +382,12 @@ class TicketController extends Controller
             ];
         }
         if ($attachmentRequested) {
-            $rules['screenshots'] = ['nullable', 'array', 'max:5'];
-            $rules['screenshots.*'] = ['image', 'mimes:jpg,jpeg,png,webp', 'max:3072'];
-            $rules['screencast'] = [
-                'nullable',
-                'file',
-                'mimetypes:video/mp4,video/webm',
-                'max:'.SecureUploadService::SCREENCAST_MAX_KB,
-            ];
-            $rules['documents'] = ['nullable', 'array', 'max:10'];
-            $rules['documents.*'] = ['file', 'max:'.SecureUploadService::DOCUMENT_MAX_KB, 'extensions:pdf,docx,xlsx,odt,ods,txt,csv'];
+            $rules = [...$rules, ...AttachmentLimits::rules()];
         }
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, AttachmentLimits::messages());
+        if ($attachmentRequested) {
+            AttachmentLimits::assertSubmissionWithinLimits($request);
+        }
 
         $updates = [];
         if ($ticketUpdateRequested) {
@@ -455,13 +435,11 @@ class TicketController extends Controller
         $ticketChanged = $updates !== [];
         $storedAttachments = collect();
         if ($attachmentRequested) {
-            $storedAttachments = $this->attachments->storeFor(
+            $storedAttachments = $this->attachments->storeFromRequest(
                 $ticket,
                 $instance->subCore->key,
                 $request->user(),
-                $request->file('screenshots'),
-                $request->file('screencast'),
-                $request->file('documents'),
+                $request,
             );
         }
         $hasAttachments = $storedAttachments->isNotEmpty();

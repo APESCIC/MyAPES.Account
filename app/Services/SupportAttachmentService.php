@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Core\Accounts\User;
+use App\Core\Attachments\AttachmentLimits;
 use App\Core\Attachments\SupportAttachment;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 
@@ -15,15 +17,38 @@ class SupportAttachmentService
     ) {}
 
     /**
+     * Stores every file field from a validated request (#546).
+     *
+     * @return Collection<int, SupportAttachment>
+     */
+    public function storeFromRequest(
+        Model $attachable,
+        string $subCoreKey,
+        User $uploader,
+        Request $request,
+    ): Collection {
+        return $this->storeFor(
+            $attachable,
+            $subCoreKey,
+            $uploader,
+            AttachmentLimits::files($request, 'screenshots'),
+            AttachmentLimits::screencasts($request),
+            AttachmentLimits::files($request, 'documents'),
+        );
+    }
+
+    /**
      * @param  array<int, UploadedFile>|null  $screenshots
+     * @param  UploadedFile|array<int, UploadedFile>|null  $screencasts
      * @param  array<int, UploadedFile>|null  $documents
+     * @return Collection<int, SupportAttachment>
      */
     public function storeFor(
         Model $attachable,
         string $subCoreKey,
         User $uploader,
         ?array $screenshots = null,
-        ?UploadedFile $screencast = null,
+        UploadedFile|array|null $screencasts = null,
         ?array $documents = null,
     ): Collection {
         $directory = $this->uploads->supportAttachmentDirectory(
@@ -51,11 +76,14 @@ class SupportAttachmentService
             ));
         }
 
-        if ($screencast instanceof UploadedFile) {
+        foreach (is_array($screencasts) ? $screencasts : [$screencasts] as $screencast) {
+            if (! $screencast instanceof UploadedFile) {
+                continue;
+            }
             $path = $this->uploads->storeScreencast(
                 $screencast,
                 $directory,
-                'screencast',
+                'screencasts',
                 'private',
             );
             $created->push($this->createRecord(
