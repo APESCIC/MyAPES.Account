@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Core\Attachments\AttachmentLimits;
 use App\Core\Attachments\DocumentInspector;
+use App\Core\Attachments\ImageOptimiser;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -17,6 +18,7 @@ class SecureUploadService
 
     public function __construct(
         private readonly DocumentInspector $documents = new DocumentInspector,
+        private readonly ImageOptimiser $images = new ImageOptimiser,
     ) {}
 
     /**
@@ -37,7 +39,7 @@ class SecureUploadService
             ]);
         }
 
-        return $file->store($directory, $disk);
+        return $this->images->optimise($file)->store($directory, $disk);
     }
 
     /**

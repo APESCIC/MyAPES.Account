@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 class SupportAttachmentService
 {
@@ -155,7 +156,7 @@ class SupportAttachmentService
             'path' => $path,
             'original_name' => mb_substr($file->getClientOriginalName(), 0, 255),
             'mime_type' => (string) $file->getMimeType(),
-            'size_bytes' => (int) $file->getSize(),
+            'size_bytes' => (int) (Storage::disk('private')->size($path) ?: $file->getSize()),
             'kind' => $kind,
             'visibility' => $visibility,
             'scan_status' => $scan ? SupportAttachment::SCAN_PENDING : SupportAttachment::SCAN_NOT_SCANNED,
