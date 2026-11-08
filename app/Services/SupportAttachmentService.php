@@ -16,6 +16,7 @@ class SupportAttachmentService
 
     /**
      * @param  array<int, UploadedFile>|null  $screenshots
+     * @param  array<int, UploadedFile>|null  $documents
      */
     public function storeFor(
         Model $attachable,
@@ -23,6 +24,7 @@ class SupportAttachmentService
         User $uploader,
         ?array $screenshots = null,
         ?UploadedFile $screencast = null,
+        ?array $documents = null,
     ): Collection {
         $directory = $this->uploads->supportAttachmentDirectory(
             $subCoreKey,
@@ -45,7 +47,7 @@ class SupportAttachmentService
                 $uploader,
                 $path,
                 $file,
-                'screenshot',
+                SupportAttachment::KIND_SCREENSHOT,
             ));
         }
 
@@ -61,7 +63,26 @@ class SupportAttachmentService
                 $uploader,
                 $path,
                 $screencast,
-                'screencast',
+                SupportAttachment::KIND_SCREENCAST,
+            ));
+        }
+
+        foreach ($documents ?? [] as $file) {
+            if (! $file instanceof UploadedFile) {
+                continue;
+            }
+            $path = $this->uploads->storeDocument(
+                $file,
+                $directory,
+                'documents',
+                'private',
+            );
+            $created->push($this->createRecord(
+                $attachable,
+                $uploader,
+                $path,
+                $file,
+                SupportAttachment::KIND_DOCUMENT,
             ));
         }
 
@@ -81,7 +102,7 @@ class SupportAttachmentService
             'user_id' => $uploader->id,
             'disk' => 'private',
             'path' => $path,
-            'original_name' => $file->getClientOriginalName(),
+            'original_name' => mb_substr($file->getClientOriginalName(), 0, 255),
             'mime_type' => (string) $file->getMimeType(),
             'size_bytes' => (int) $file->getSize(),
             'kind' => $kind,

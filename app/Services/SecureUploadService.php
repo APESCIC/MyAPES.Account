@@ -2,13 +2,21 @@
 
 namespace App\Services;
 
+use App\Core\Attachments\DocumentInspector;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class SecureUploadService
 {
     public const SCREENCAST_MAX_KB = 51200;
+
+    public const DOCUMENT_MAX_KB = 10240;
+
+    public function __construct(
+        private readonly DocumentInspector $documents = new DocumentInspector,
+    ) {}
 
     /**
      * @param  array<int, string>  $allowedMimes
@@ -59,6 +67,35 @@ class SecureUploadService
         return $file->store($directory, $disk);
     }
 
+    public function storeDocument(
+        UploadedFile $file,
+        string $directory,
+        string $fieldName = 'documents',
+        string $disk = 'private',
+        int $maxKilobytes = self::DOCUMENT_MAX_KB,
+    ): string {
+        $problem = $this->documents->problem($file);
+
+        if ($problem !== null) {
+            throw ValidationException::withMessages([
+                $fieldName => __($problem, ['name' => $file->getClientOriginalName()]),
+            ]);
+        }
+
+        if ($file->getSize() > $maxKilobytes * 1024) {
+            throw ValidationException::withMessages([
+                $fieldName => __('attachments.validation.file_too_large', [
+                    'name' => $file->getClientOriginalName(),
+                    'size' => $this->megabytes($maxKilobytes),
+                ]),
+            ]);
+        }
+
+        $extension = strtolower($file->getClientOriginalExtension());
+
+        return $file->storeAs($directory, Str::random(40).'.'.$extension, $disk);
+    }
+
     public function supportAttachmentDirectory(string $subCoreKey, int|string $attachableId): string
     {
         return sprintf(
@@ -78,5 +115,10 @@ class SecureUploadService
         if (Storage::disk($disk)->exists($path)) {
             Storage::disk($disk)->delete($path);
         }
+    }
+
+    private function megabytes(int $kilobytes): string
+    {
+        return rtrim(rtrim(number_format($kilobytes / 1024, 1), '0'), '.').' MB';
     }
 }

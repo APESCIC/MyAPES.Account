@@ -22,6 +22,18 @@ use Illuminate\Support\Facades\Storage;
 ])]
 class SupportAttachment extends Model
 {
+    public const KIND_SCREENSHOT = 'screenshot';
+
+    public const KIND_SCREENCAST = 'screencast';
+
+    public const KIND_DOCUMENT = 'document';
+
+    public const KINDS = [
+        self::KIND_SCREENSHOT,
+        self::KIND_SCREENCAST,
+        self::KIND_DOCUMENT,
+    ];
+
     public function attachable(): MorphTo
     {
         return $this->morphTo();
