@@ -1,0 +1,19 @@
+{
+    auto_https off
+}
+
+:80 {
+    encode gzip
+
+    # The avatars link in public/storage may be a Windows junction, which Linux cannot follow.
+    handle_path /storage/avatars/* {
+        root * /app/storage/app/public/avatars
+        file_server
+    }
+
+    handle {
+        root * /app/public
+        php_fastcgi app:9000
+        file_server
+    }
+}

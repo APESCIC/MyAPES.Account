@@ -38,7 +38,7 @@ php artisan lang:check --fail-on-missing
 
 | Setting | Value | Where |
 | --- | --- | --- |
-| `APP_LOCALE` | `en_GB` | `.env.example`, `.env.local.example`, `.env.laragon.example`, `scripts/deploy/production.env.example`, `phpunit.xml`, Cloudron shared `.env` (upserted on activate) |
+| `APP_LOCALE` | `en_GB` | `.env.example`, `.env.local.example`, `.env.docker.example`, `scripts/deploy/production.env.example`, `phpunit.xml`, Cloudron shared `.env` (upserted on activate) |
 | `APP_FALLBACK_LOCALE` | `en` | Same |
 | `APP_FAKER_LOCALE` | `en_GB` | Same |
 | Config defaults | `en_GB` / `en` / `en_GB` | `config/app.php` |

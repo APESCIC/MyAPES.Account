@@ -20,21 +20,26 @@ The owner is Bambie Murphy. Cursor does the coding. Write UK English (organisati
 
 ## Local development
 
-The owner's working copy is Laragon on Windows.
+Local development runs in Docker, not Laragon (decided by Bambie on 8 November 2026, #716). The Cursor rule [`.cursor/rules/docker-local-dev.mdc`](.cursor/rules/docker-local-dev.mdc) has the details and takes precedence over the Laragon defaults in the `live-preview-gate` and `laragon-local-preview` skills.
 
 | Item | Value |
 | --- | --- |
-| Clone | `C:\laragon\www\myapes-account` |
-| App URL | `http://myapes-account.test` |
-| Daily loop | Start Laragon (Apache), then `composer run dev:laragon` |
-| First bootstrap | `powershell -ExecutionPolicy Bypass -File .\scripts\local\bootstrap.ps1 -Laragon -Fresh` |
-| Env file | `.env.laragon.example` (copied by `-Laragon`) |
+| Clone | `C:\Users\BambieMurphy\Documents\GitHub\MyAPES.Account` (no Laragon link) |
+| App URL | `http://myaccount.myapes.test:8081` (hosts entry `127.0.0.1 myaccount.myapes.test`) |
+| Vite hot reload | `myaccount.myapes.test:5175` |
+| Containers | `compose.yaml`: `web` (Caddy), `app` (PHP 8.4 FPM, Composer), `node` (Vite, npm 11) |
+| Daily loop | `composer run dev:docker` (runs `scripts/local/docker-preview.ps1`) |
+| First run | `powershell -ExecutionPolicy Bypass -File .\scripts\local\docker-preview.ps1 -Build -Fresh` |
+| Env file | `.env.docker.example` (copied only when `.env` is missing) |
 
-- Cloud and Linux agents have no Laragon: use `bash scripts/local/dev.sh` and `http://127.0.0.1:8000/` for UI checks.
+- **Always check for containers before creating any.** Run `docker compose ps -a`, then `scripts/local/docker-preview.ps1`, which reuses running containers, starts stopped ones and only creates containers when none exist. Never start a second copy of the stack.
+- Run PHP, Artisan, Composer, test and Pint commands as `docker compose exec app ...`, and npm as `docker compose exec node ...`.
+- Live preview gate: `repo-sync`, check and reuse the containers, open `http://myaccount.myapes.test:8081` in Cursor's browser, confirm it loaded, then say "Preview ready, starting work".
+- Cloud and Linux agents without Docker: use `bash scripts/local/dev.sh` and `http://127.0.0.1:8000/` for UI checks.
 - Local QA accounts come from `database/seeders/LocalQaSeeder.php` (local and testing only). Never copy their passwords anywhere.
-- Full local check: `composer pre-pr-verify` (PowerShell) or `bash scripts/local/pre-pr-verify.sh`.
+- Full local check: `composer pre-pr-verify` (PowerShell; add `-Docker` through `powershell -File .\scripts\local\pre-pr-verify.ps1 -Docker` to smoke-test the Docker preview) or `bash scripts/local/pre-pr-verify.sh`.
 - In Windows PowerShell 5.1, pass `gh` bodies with `--body-file`, because inline double quotes get stripped.
-- Node/npm for Vite builds: use **npm 11.10 or newer** (Laragon's Node 22 ships npm 10 by default — upgrade with `npm install -g npm@11` before `npm ci`). Repo `.npmrc` sets `min-release-age=7`.
+- Node/npm for Vite builds: use **npm 11.10 or newer** (the `node` container installs npm 11; on a host, upgrade with `npm install -g npm@11` before `npm ci`). Repo `.npmrc` sets `min-release-age=7`.
 - Every GitHub Actions `uses:` must be pinned to a full 40-character commit SHA with a version comment (`action@<sha> # vX.Y.Z`). Mutable tags such as `@v2` are not allowed.
 
 ## Before you start

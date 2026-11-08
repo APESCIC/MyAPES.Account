@@ -60,9 +60,9 @@
             "Composer\\Config::disableProcessTimeout",
             "node scripts/local/dev-runner.mjs"
         ],
-        "dev:laragon": [
+        "dev:docker": [
             "Composer\\Config::disableProcessTimeout",
-            "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/local/dev-laragon.ps1"
+            "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/local/docker-preview.ps1"
         ],
         "test": [
             "@php artisan config:clear --ansi @no_additional_args",

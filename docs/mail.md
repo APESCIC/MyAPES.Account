@@ -86,7 +86,7 @@ Transport is unchanged: Cloudron's SMTP add-on.
 
 - `config/mail.php` falls back to `CLOUDRON_MAIL_SMTP_SERVER`, `CLOUDRON_MAIL_SMTP_PORT`, `CLOUDRON_MAIL_SMTP_USERNAME` and `CLOUDRON_MAIL_SMTP_PASSWORD`, and to `CLOUDRON_MAIL_FROM` for the sender address. The sender name always comes from `terms.app_name`.
 - Mail is queued. `scripts/deploy/cloudron-run.sh` starts the Redis `queue:work` worker and `schedule:work`, which runs `mail:prune-log` and `audit:prune`.
-- Locally, `.env.example` sends SMTP to `127.0.0.1`, where Laragon's Mailpit catches it. With no `MAIL_MAILER` set, the default `log` mailer writes messages to `storage/logs`.
+- Locally, the Docker preview (`.env.docker.example`) uses the `log` mailer, which writes messages to `storage/logs`. `.env.example` sends SMTP to `127.0.0.1` for anyone running their own mail catcher, such as Mailpit.
 
 ## Tests
 

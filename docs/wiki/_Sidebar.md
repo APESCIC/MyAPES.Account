@@ -20,7 +20,7 @@
 - [[Consultations|Plugin-Consultations]]
 
 **Developers**
-- [[Local setup (Laragon)|Dev-Local-setup-Laragon]]
+- [[Local setup (Docker)|Dev-Local-setup-Docker]]
 - [[Architecture|Dev-Architecture]]
 - [[Building a plugin|Dev-Building-a-plugin]]
 - [[Testing and CI|Dev-Testing-and-CI]]

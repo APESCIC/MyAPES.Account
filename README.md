@@ -234,6 +234,77 @@ The interface uses a light-first desert theme with a sun-baked earth sidebar, sa
 
 ## Local environment setup
 
+Local development runs in Docker (see [Local development with Docker](#local-development-with-docker) below). The host bootstrap that follows is for machines without Docker, such as cloud and Linux agents, which serve the app with `php artisan serve` on `http://127.0.0.1:8000`.
+
+### Local development with Docker
+
+The Docker Compose stack in [`compose.yaml`](compose.yaml) serves MyAPES Account at **`http://myaccount.myapes.test:8081`**. It has three services:
+
+| Service | What it runs |
+| --- | --- |
+| `web` | Caddy on host port `8081`, serving `public/` |
+| `app` | PHP 8.4 FPM with Composer (`docker/php`) |
+| `node` | Vite hot reload on `myaccount.myapes.test:5175`, with its own Linux `node_modules` volume (`docker/node`, npm 11) |
+
+SQLite (`database/database.sqlite`), file cache and file sessions stay the same as before; MySQL and Redis are not needed. Mail uses the `log` mailer, which writes to `storage/logs`.
+
+**One-time setup**
+
+1. Install Docker Desktop and start it.
+2. Add the hosts entry in an elevated PowerShell:
+
+   ```powershell
+   Add-Content -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Value "127.0.0.1`tmyaccount.myapes.test"
+   ```
+
+3. From the repository root, build the images and load the QA data (this wipes local data):
+
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\scripts\local\docker-preview.ps1 -Build -Fresh
+   ```
+
+**Daily loop**
+
+```powershell
+composer run dev:docker
+```
+
+`composer run dev:docker` runs [`scripts/local/docker-preview.ps1`](scripts/local/docker-preview.ps1) (`bash scripts/local/docker-preview.sh` on macOS and Linux). The script always checks for existing containers first:
+
+- If the `app`, `web` and `node` containers are running, it reuses them.
+- If they exist but are stopped, it starts them.
+- It only creates containers when none exist.
+
+It then creates `.env` from [`.env.docker.example`](.env.docker.example) if it is missing, creates the SQLite file, runs `composer install` if `vendor/` is missing, generates the app key if it is empty, and waits for `/healthz`.
+
+| Switch | Effect |
+| --- | --- |
+| `-Build` / `--build` | Rebuild the images after a change under `docker/` |
+| `-Migrate` / `--migrate` | Apply pending migrations (otherwise the script only warns about them) |
+| `-Fresh` / `--fresh` | Destructive QA reset: `migrate:fresh --seed` |
+
+**Commands run in the containers**
+
+| Task | Command |
+| --- | --- |
+| Artisan | `docker compose exec app php artisan <command>` |
+| Composer | `docker compose exec app composer <command>` |
+| Tests | `docker compose exec app php artisan test` |
+| Pint | `docker compose exec app vendor/bin/pint` |
+| npm | `docker compose exec node npm <command>` |
+| Logs | `docker compose logs -f app web node` |
+
+`docker compose stop` stops the stack and keeps the containers for the next run. `docker compose down` removes the containers but keeps the SQLite file, because it lives in the repository folder.
+
+**Troubleshooting**
+
+- **The site does not resolve:** check the hosts entry above. `http://127.0.0.1:8081` always reaches the stack.
+- **Unstyled pages:** check `docker compose logs node`; the first start runs `npm ci`, which takes a minute. `public/hot` appears once Vite is ready.
+- **Passkeys / WebAuthn locally:** browsers only allow passkeys in a secure context, and `http://localhost` counts as one. For passkey checks, open `http://localhost:8081` and set `APP_URL=http://localhost:8081` in `.env` (and in `compose.yaml` while testing). Live Cloudron uses `https://myaccount.myapes.me.uk` (changing rpId invalidates existing passkeys).
+- **URL or OIDC callback mismatch:** `compose.yaml` sets `APP_URL`, `OIDC_REDIRECT_URI` and `DB_DATABASE` for the `app` container, so they win over `.env`.
+
+### Host bootstrap (no Docker)
+
 Run the bootstrap script from the repository root. It installs PHP/Node dependencies, creates a local `.env` from `.env.local.example`, configures SQLite plus file-backed cache/sessions, generates the app key once, migrates, seeds, and builds the frontend.
 
 The script refuses to rewrite an environment unless `APP_ENV` is already `local` or `testing`. Local development does not require MySQL or Redis.
@@ -265,50 +336,6 @@ bash scripts/local/bootstrap.sh --seed
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\local\bootstrap.ps1 -Seed
 ```
-
-### Local development with Laragon (Windows)
-
-Use Laragon when you prefer an Apache virtual host (for example `http://myapes-account.test`) instead of `php artisan serve` on port `8000`. The Laragon profile keeps the same SQLite QA stack; MySQL and Redis are not required for local testing.
-
-**Prerequisites**
-
-- Laragon running with **PHP 8.3+** (prefer **8.4** to match CI)
-- Typical Laravel PHP extensions enabled in Laragon (`pdo_sqlite`, `openssl`, `mbstring`, `curl`, `fileinfo`, and related defaults)
-- `php`, `composer`, `node`, and `npm` available in the Laragon terminal
-
-**Virtual host**
-
-- The owner's clone is `C:\laragon\www\myapes-account`, which Laragon serves as `http://myapes-account.test`
-- Document root must be **`{repo}/public`** (Laragon “Quick app → Laravel” or an equivalent manual vhost)
-- Restart Apache after vhost changes
-
-**One-time Laragon bootstrap**
-
-```powershell
-cd C:\laragon\www\myapes-account
-powershell -ExecutionPolicy Bypass -File .\scripts\local\bootstrap.ps1 -Laragon -Fresh
-```
-
-Use `-AppUrl http://your-vhost.test` when the auto-generated hostname differs from `myapes-account.test`. The bootstrap copies [`.env.laragon.example`](.env.laragon.example), sets `VITE_DEV_SERVER_URL=http://127.0.0.1:5173`, and keeps SQLite plus file-backed cache and sessions.
-
-**Daily dev loop**
-
-1. Start Laragon (Apache)
-2. In the repo terminal: `composer run dev:laragon` (or `powershell -ExecutionPolicy Bypass -File .\scripts\local\dev-laragon.ps1`)
-3. Open `http://myapes-account.test` (or your `-AppUrl` value)
-4. Use the seeded QA accounts below (`/login` auto-login in local)
-
-**Testing**
-
-- Feature and unit tests: `php artisan test` or `composer test`
-- Pre-merge validation: `composer pre-merge`
-
-**Troubleshooting**
-
-- **404 or wrong site:** confirm the vhost document root is `public/`, not the repository root
-- **Unstyled pages:** ensure `composer run dev:laragon` is running, or run `npm run build`
-- **Passkeys / WebAuthn locally:** browsers require a secure context. Prefer Laragon HTTPS (`https://myapes-account.test`) with a trusted local certificate, and set `APP_URL` to that HTTPS origin so `relying_party_id` / allowed origins match. Plain `http://127.0.0.1:8000` will not complete device ceremonies. Live Cloudron uses `https://myaccount.myapes.me.uk` (changing rpId invalidates existing passkeys).
-- **URL or OIDC callback mismatch:** re-run bootstrap with `-Laragon`, or align `APP_URL`, `OIDC_REDIRECT_URI`, and `VITE_DEV_SERVER_URL` in `.env`
 
 Both local bootstrap scripts enforce the tracked selective-media boundary at
 `public/storage/.myapes-selective-media`. They refuse marker changes or
@@ -381,7 +408,7 @@ The launcher automatically uses Laravel Pail for logs on macOS and Linux. On nat
 
 Set `APP_PORT` before starting the launcher to use a Laravel port other than `8000`. The platform wrappers below delegate to `composer run dev` and remain available when you prefer an OS-specific entry point.
 
-On Laragon with an Apache virtual host, skip `composer run dev` and use `composer run dev:laragon` instead; see “Local development with Laragon (Windows)” above.
+With Docker, skip `composer run dev` and use `composer run dev:docker` instead; see “Local development with Docker” above.
 
 ### macOS / Linux
 

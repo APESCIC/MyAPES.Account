@@ -11,19 +11,6 @@ function commandNamed(commands, name) {
     return commands.find((command) => command.name === name);
 }
 
-test('Laragon mode omits artisan serve because Apache serves HTTP', () => {
-    const commands = buildDevCommands({
-        platform: 'win32',
-        laragon: true,
-    });
-
-    assert.deepEqual(
-        commands.map((command) => command.name),
-        ['queue', 'logs', 'vite'],
-    );
-    assert.equal(commandNamed(commands, 'server'), undefined);
-});
-
 test('native Windows uses a PowerShell log tail and never starts Pail', () => {
     const commands = buildDevCommands({
         platform: 'win32',

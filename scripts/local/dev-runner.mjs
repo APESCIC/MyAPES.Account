@@ -25,7 +25,6 @@ export function resolveAppPort(value = '8000') {
 export function buildDevCommands({
     platform = process.platform,
     appPort = process.env.APP_PORT,
-    laragon = process.env.LARAGON === '1',
 } = {}) {
     const port = resolveAppPort(appPort);
     const logCommand =
@@ -33,17 +32,12 @@ export function buildDevCommands({
             ? 'powershell -NoProfile -ExecutionPolicy Bypass -File scripts/local/tail-log.ps1'
             : 'php artisan pail --timeout=0';
 
-    const commands = [];
-
-    if (!laragon) {
-        commands.push({
+    return [
+        {
             command: `php artisan serve --host=127.0.0.1 --port=${port}`,
             name: 'server',
             prefixColor: '#93c5fd',
-        });
-    }
-
-    commands.push(
+        },
         {
             command: 'php artisan queue:listen --tries=1 --timeout=0',
             name: 'queue',
@@ -59,9 +53,7 @@ export function buildDevCommands({
             name: 'vite',
             prefixColor: '#fdba74',
         },
-    );
-
-    return commands;
+    ];
 }
 
 export function buildDevRunnerOptions({ cwd = repositoryRoot } = {}) {

@@ -1,0 +1,37 @@
+---
+description: Local development, preview and tests run in the Docker containers, not Laragon; always check for and reuse containers first
+alwaysApply: true
+---
+
+# Docker local development
+
+Decided by Bambie on 8 November 2026 (#716). This repository runs locally in Docker (`compose.yaml`), not Laragon. This rule takes precedence over the Laragon defaults in the `live-preview-gate`, `laragon-local-preview` and `cursor-browser-preview` skills.
+
+## Preview
+
+- The live preview is <http://myaccount.myapes.test:8081> (hosts entry `127.0.0.1 myaccount.myapes.test`). Vite hot reload is on `myaccount.myapes.test:5175`.
+- Live preview gate:
+  1. Run `repo-sync`.
+  2. **Check for containers first:** `docker compose ps -a`. Never create containers before checking.
+  3. Run `powershell -ExecutionPolicy Bypass -File .\scripts\local\docker-preview.ps1` (or `composer run dev:docker`). It reuses running containers, starts stopped ones, and only creates containers when none exist. Add `-Build` only after a change under `docker/`.
+  4. Open the preview in Cursor's browser, confirm it loaded, and say "Preview ready, starting work".
+- Do not link this repository into `C:\laragon\www`, start Laragon for it, run a second copy of the stack, or use `php artisan serve` on Windows.
+- Cloud and Linux agents without Docker keep `bash scripts/local/dev.sh` and `http://127.0.0.1:8000/`.
+
+## Commands
+
+Run everything in the containers, from the repository root:
+
+| Task | Command |
+| --- | --- |
+| Artisan | `docker compose exec app php artisan <command>` |
+| Composer | `docker compose exec app composer <command>` |
+| Tests | `docker compose exec app php artisan test` |
+| Pint | `docker compose exec app vendor/bin/pint` |
+| npm | `docker compose exec node npm <command>` |
+| Logs | `docker compose logs -f app web node` |
+
+- The `node` container keeps its own Linux `node_modules` in a volume and runs `npm ci` itself on start.
+- `docker compose exec app composer install` may run without asking when `vendor/` is missing.
+- Ask with AskQuestion before: `docker-preview.ps1 -Migrate` or `-Fresh` (`-Fresh` wipes local data), `docker compose down -v` (deletes the `node_modules` volume), editing the hosts file, or installing any system tool.
+- Fake data only in the local database. Full guide: README "Local development with Docker".
