@@ -129,6 +129,8 @@ class CaseController extends Controller
                 'mimetypes:video/mp4,video/webm',
                 'max:'.SecureUploadService::SCREENCAST_MAX_KB,
             ],
+            'documents' => ['nullable', 'array', 'max:10'],
+            'documents.*' => ['file', 'max:'.SecureUploadService::DOCUMENT_MAX_KB, 'extensions:pdf,docx,xlsx,odt,ods,txt,csv'],
         ]);
 
         $categoryFields = $this->categories->validateSelection(
@@ -144,7 +146,7 @@ class CaseController extends Controller
             $categoryFields['sub_category'],
         );
         if (! $allowsAttachments && (
-            $request->hasFile('screenshots') || $request->hasFile('screencast')
+            $request->hasFile('screenshots') || $request->hasFile('screencast') || $request->hasFile('documents')
         )) {
             throw ValidationException::withMessages([
                 'screenshots' => __('cases::ui.validation.attachments_are_not_available_for_this_subcategory'),
@@ -171,6 +173,7 @@ class CaseController extends Controller
                 $request->user(),
                 $request->file('screenshots'),
                 $request->file('screencast'),
+                $request->file('documents'),
             );
         }
 
@@ -260,7 +263,8 @@ class CaseController extends Controller
             || $request->exists('status')
             || $request->exists('sub_category');
         $attachmentRequested = $request->hasFile('screenshots')
-            || $request->hasFile('screencast');
+            || $request->hasFile('screencast')
+            || $request->hasFile('documents');
 
         if (! $metadataRequested && ! $assignmentRequested && ! $ownerRequested && ! $attachmentRequested) {
             throw ValidationException::withMessages([
@@ -322,6 +326,8 @@ class CaseController extends Controller
                 'mimetypes:video/mp4,video/webm',
                 'max:'.SecureUploadService::SCREENCAST_MAX_KB,
             ];
+            $rules['documents'] = ['nullable', 'array', 'max:10'];
+            $rules['documents.*'] = ['file', 'max:'.SecureUploadService::DOCUMENT_MAX_KB, 'extensions:pdf,docx,xlsx,odt,ods,txt,csv'];
         }
         $validated = $request->validate($rules);
 
@@ -375,6 +381,7 @@ class CaseController extends Controller
                 $request->user(),
                 $request->file('screenshots'),
                 $request->file('screencast'),
+                $request->file('documents'),
             );
         }
 

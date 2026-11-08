@@ -7,12 +7,15 @@ use App\Core\Extensions\Modules\ModuleContext;
 use App\Http\Controllers\Controller;
 use App\Modules\ModuleInstanceDefinition;
 use App\Services\AuditLogger;
+use App\Services\SecureUploadService;
+use App\Services\SupportAttachmentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
+use Plugins\Cases\CaseCategoryResolver;
 use Plugins\Cases\CasesArea;
 use Plugins\Cases\Models\CaseUpdate;
 use Plugins\Cases\Models\ShelterCase;
@@ -22,6 +25,8 @@ class CaseUpdateController extends Controller
 {
     public function __construct(
         private readonly ModuleContext $moduleContext,
+        private readonly CaseCategoryResolver $categories,
+        private readonly SupportAttachmentService $attachments,
     ) {}
 
     public function store(
@@ -54,7 +59,14 @@ class CaseUpdateController extends Controller
             ]);
         }
 
-        $validated = $request->validate([
+        $attachmentRequested = $request->hasFile('screenshots')
+            || $request->hasFile('screencast')
+            || $request->hasFile('documents');
+        if ($attachmentRequested) {
+            abort_unless($this->allowsAttachments($case, $area), 403);
+        }
+
+        $rules = [
             'body' => ['required', 'string'],
             'visibility' => [
                 'nullable',
@@ -63,16 +75,41 @@ class CaseUpdateController extends Controller
                     CaseUpdate::VISIBILITY_INTERNAL,
                 ]),
             ],
-        ]);
+        ];
+        if ($attachmentRequested) {
+            $rules['screenshots'] = ['nullable', 'array', 'max:5'];
+            $rules['screenshots.*'] = ['image', 'mimes:jpg,jpeg,png,webp', 'max:3072'];
+            $rules['screencast'] = [
+                'nullable',
+                'file',
+                'mimetypes:video/mp4,video/webm',
+                'max:'.SecureUploadService::SCREENCAST_MAX_KB,
+            ];
+            $rules['documents'] = ['nullable', 'array', 'max:10'];
+            $rules['documents.*'] = ['file', 'max:'.SecureUploadService::DOCUMENT_MAX_KB, 'extensions:pdf,docx,xlsx,odt,ods,txt,csv'];
+        }
+        $validated = $request->validate($rules);
         $isStaffViewer = $request->user()->can($prefix.'view-all');
         $visibility = $isStaffViewer
             ? ($validated['visibility'] ?? CaseUpdate::VISIBILITY_PUBLIC)
             : CaseUpdate::VISIBILITY_PUBLIC;
-        $case->updates()->create([
+        $storedAttachments = collect();
+        if ($attachmentRequested) {
+            $storedAttachments = $this->attachments->storeFor(
+                $case,
+                $case->sub_core_key,
+                $request->user(),
+                $request->file('screenshots'),
+                $request->file('screencast'),
+                $request->file('documents'),
+            );
+        }
+        $update = $case->updates()->create([
             'user_id' => $request->user()->id,
             'body' => $validated['body'],
             'visibility' => $visibility,
         ]);
+        $this->attachments->linkTo($storedAttachments, $update);
         if ($visibility === CaseUpdate::VISIBILITY_PUBLIC) {
             $case->touch();
         }
@@ -113,10 +150,22 @@ class CaseUpdateController extends Controller
             'sub_core_key' => $case->sub_core_key,
             'module_key' => $instance->module->key,
             'visibility' => $visibility,
+            'attachments_added' => $storedAttachments->count(),
         ]);
 
         return redirect()->route($area->showRouteName(), $case)
             ->with('status', __('cases::ui.flash.case_update_added'));
+    }
+
+    private function allowsAttachments(ShelterCase $case, CasesArea $area): bool
+    {
+        return $area->supportsAttachments
+            && is_string($case->sub_category)
+            && $this->categories->allowsAttachments(
+                $case->sub_core_key,
+                (string) $case->category,
+                $case->sub_category,
+            );
     }
 
     private function instance(Request $request): ModuleInstanceDefinition

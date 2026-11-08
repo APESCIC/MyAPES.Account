@@ -36,7 +36,6 @@ return [
     ],
     'show' => [
         'blade' => [
-            'to_add_evidence_files_use_save_case_after_uploading_on_' => 'To add evidence files, use Save case after uploading on a separate update path, or attach when opening the case.',
             'reopen_this_case_before_adding_another_update' => 'Reopen this case before adding another update.',
             'no_updates_have_been_added' => 'No updates have been added.',
             'add_evidence_screenshots' => 'Add evidence screenshots',
@@ -44,7 +43,6 @@ return [
             'internal_staff_only' => 'Internal staff only',
             'update_assignment' => 'Update assignment',
             'related_website' => 'Related website',
-            'upload_evidence' => 'Upload evidence',
             'assigned_staff' => 'Assigned staff',
             'pet_type' => 'Pet: | Type:',
             'attachments' => 'Attachments',

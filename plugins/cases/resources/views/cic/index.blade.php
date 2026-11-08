@@ -112,6 +112,8 @@
                     <input id="screenshots" name="screenshots[]" type="file" accept="image/jpeg,image/png,image/webp" multiple>
                     <label for="screencast">{{ __('cases::ui.index.blade.evidence_screencast_optional') }}</label>
                     <input id="screencast" name="screencast" type="file" accept="video/mp4,video/webm">
+                    <label for="documents">{{ __('attachments.fields.documents_optional') }}</label>
+                    <input id="documents" name="documents[]" type="file" accept=".pdf,.docx,.xlsx,.odt,.ods,.txt,.csv" multiple>
                 </div>
                     <button type="submit">{{ __('cases::ui.index.blade.open_case') }}</button>
                 </form>
