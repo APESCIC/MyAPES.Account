@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
@@ -19,11 +20,14 @@ use Illuminate\Support\Facades\Storage;
     'mime_type',
     'size_bytes',
     'kind',
+    'visibility',
     'context_type',
     'context_id',
 ])]
 class SupportAttachment extends Model
 {
+    use SoftDeletes;
+
     public const KIND_SCREENSHOT = 'screenshot';
 
     public const KIND_SCREENCAST = 'screencast';
@@ -34,6 +38,15 @@ class SupportAttachment extends Model
         self::KIND_SCREENSHOT,
         self::KIND_SCREENCAST,
         self::KIND_DOCUMENT,
+    ];
+
+    public const VISIBILITY_PUBLIC = 'public';
+
+    public const VISIBILITY_INTERNAL = 'internal';
+
+    /** @var array<string, mixed> */
+    protected $attributes = [
+        'visibility' => self::VISIBILITY_PUBLIC,
     ];
 
     public function attachable(): MorphTo
@@ -55,6 +68,11 @@ class SupportAttachment extends Model
     {
         return $this->context_type === $model->getMorphClass()
             && (int) $this->context_id === (int) $model->getKey();
+    }
+
+    public function isInternal(): bool
+    {
+        return $this->visibility === self::VISIBILITY_INTERNAL;
     }
 
     public function kindLabel(): string
@@ -95,7 +113,7 @@ class SupportAttachment extends Model
 
     protected static function booted(): void
     {
-        static::deleting(function (SupportAttachment $attachment): void {
+        static::forceDeleting(function (SupportAttachment $attachment): void {
             $attachment->deleteFile();
         });
     }

@@ -7,6 +7,7 @@ use App\Core\Extensions\Modules\ModuleContext;
 use App\Http\Controllers\Controller;
 use App\Modules\ModuleInstanceDefinition;
 use App\Core\Attachments\AttachmentLimits;
+use App\Core\Attachments\SupportAttachment;
 use App\Services\AuditLogger;
 use App\Services\SupportAttachmentService;
 use Illuminate\Http\RedirectResponse;
@@ -61,6 +62,7 @@ class CaseUpdateController extends Controller
 
         $attachmentRequested = AttachmentLimits::requested($request);
         if ($attachmentRequested) {
+            Gate::authorize('create', [SupportAttachment::class, $case]);
             abort_unless($this->allowsAttachments($case, $area), 403);
         }
 
@@ -92,6 +94,9 @@ class CaseUpdateController extends Controller
                 $case->sub_core_key,
                 $request->user(),
                 $request,
+                $visibility === CaseUpdate::VISIBILITY_INTERNAL
+                    ? SupportAttachment::VISIBILITY_INTERNAL
+                    : SupportAttachment::VISIBILITY_PUBLIC,
             );
         }
         $update = $case->updates()->create([

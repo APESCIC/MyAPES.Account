@@ -37,6 +37,17 @@ return [
         'upload_failed' => 'The upload did not finish. Check your files and try again.',
     ],
 
+    'list' => [
+        'staff_only' => 'Staff only',
+        'delete' => 'Delete',
+        'delete_named' => 'Delete :name',
+        'confirm_delete' => 'Delete this attachment?',
+    ],
+
+    'flash' => [
+        'deleted' => ':name was deleted.',
+    ],
+
     'types' => [
         'screenshots' => 'screenshots',
         'screencasts' => 'screencasts',

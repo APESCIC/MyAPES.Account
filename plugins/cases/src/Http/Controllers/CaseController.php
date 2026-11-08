@@ -11,6 +11,8 @@ use App\Rules\EligibleStaffAssignee;
 use App\Services\AssignmentAuthorization;
 use App\Services\AuditLogger;
 use App\Core\Attachments\AttachmentLimits;
+use App\Core\Attachments\SupportAttachment;
+use Closure;
 use App\Services\SupportAttachmentService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -210,7 +212,7 @@ class CaseController extends Controller
         }
 
         return view($this->area()->view('show'), [
-            'case' => $case->load(['user', 'assignedTo', 'attachments']),
+            'case' => $case->load(['user', 'assignedTo', 'attachments' => $this->visibleAttachments($canViewAll)]),
             'updates' => $updates->get(),
             'categoryGroups' => $this->categories->categories($instance->subCore->key),
             'websites' => $this->categories->websites($instance->subCore->key),
@@ -271,6 +273,7 @@ class CaseController extends Controller
         }
         if ($attachmentRequested) {
             Gate::authorize($prefix.'comment-own');
+            Gate::authorize('create', [SupportAttachment::class, $case]);
             abort_unless(
                 $this->attachmentGate->allows(
                     $this->area(),
@@ -416,11 +419,18 @@ class CaseController extends Controller
             'priority' => $case->priority,
             'status' => $case->status,
         ]);
-        $case->attachments()->each(fn ($attachment) => $attachment->delete());
+        $case->attachments()->withTrashed()->get()->each(fn (SupportAttachment $attachment) => $attachment->forceDelete());
         $case->delete();
 
         return redirect()->route($this->area()->indexRouteName())
             ->with('status', __('cases::ui.flash.case_deleted'));
+    }
+
+    private function visibleAttachments(bool $canViewAll): Closure
+    {
+        return static fn ($query) => $canViewAll
+            ? $query
+            : $query->where('visibility', SupportAttachment::VISIBILITY_PUBLIC);
     }
 
     private function requireCaseForInstance(
@@ -578,7 +588,7 @@ class CaseController extends Controller
         }
 
         return view($area->view('show'), [
-            'case' => $case->load(['petProfile', 'assignedTo', 'attachments']),
+            'case' => $case->load(['petProfile', 'assignedTo', 'attachments' => $this->visibleAttachments($canViewAll)]),
             'updates' => $updates->get(),
             'allowsAttachments' => $this->attachmentGate->allows($area, $area->moduleSlug, null, null),
             'caseTypes' => $area->caseTypes,

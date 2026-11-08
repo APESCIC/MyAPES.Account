@@ -3,11 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Core\Attachments\SupportAttachment;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
-use Plugins\Cases\Models\ShelterCase;
-use Plugins\Tickets\Models\SupportTicket;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SupportAttachmentController extends Controller
@@ -16,9 +15,7 @@ class SupportAttachmentController extends Controller
         Request $request,
         SupportAttachment $attachment,
     ): StreamedResponse {
-        $attachable = $attachment->attachable;
-        abort_unless($attachable instanceof SupportTicket || $attachable instanceof ShelterCase, 404);
-        Gate::authorize('view', $attachable);
+        Gate::authorize('download', $attachment);
 
         abort_unless(
             Storage::disk($attachment->disk)->exists($attachment->path),
@@ -32,5 +29,17 @@ class SupportAttachmentController extends Controller
                 'Content-Type' => $attachment->mime_type,
             ],
         );
+    }
+
+    public function destroy(
+        Request $request,
+        SupportAttachment $attachment,
+    ): RedirectResponse {
+        Gate::authorize('delete', $attachment);
+
+        $attachment->forceFill(['deleted_by' => $request->user()->id])->save();
+        $attachment->delete();
+
+        return back()->with('status', __('attachments.flash.deleted', ['name' => $attachment->original_name]));
     }
 }

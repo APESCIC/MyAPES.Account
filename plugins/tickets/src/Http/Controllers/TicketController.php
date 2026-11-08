@@ -11,6 +11,7 @@ use App\Rules\EligibleStaffAssignee;
 use App\Services\AssignmentAuthorization;
 use App\Services\AuditLogger;
 use App\Core\Attachments\AttachmentLimits;
+use App\Core\Attachments\SupportAttachment;
 use App\Core\Attachments\UploadSettings;
 use App\Services\SupportAttachmentService;
 use Closure;
@@ -228,7 +229,13 @@ class TicketController extends Controller
             : collect();
 
         return view('tickets::tickets.show', [
-            'ticket' => $ticket->load(['user', 'assignedTo', 'attachments']),
+            'ticket' => $ticket->load([
+                'user',
+                'assignedTo',
+                'attachments' => fn ($query) => $canChooseVisibility
+                    ? $query
+                    : $query->where('visibility', SupportAttachment::VISIBILITY_PUBLIC),
+            ]),
             'messages' => $messages,
             'activityOpenerUser' => $creationMarker?->user ?? $ticket->user,
             'hiddenCreationMessageId' => $creationMarker?->id,
@@ -327,6 +334,7 @@ class TicketController extends Controller
 
         if ($attachmentRequested) {
             Gate::authorize($prefix.'comment-own');
+            Gate::authorize('create', [SupportAttachment::class, $ticket]);
             abort_unless(
                 $this->attachmentsAllowed(
                     $instance->subCore->key,
@@ -345,7 +353,7 @@ class TicketController extends Controller
                 'string',
             ],
         ];
-        if ($messageRequested) {
+        if ($messageRequested || $attachmentRequested) {
             $rules['visibility'] = ['nullable', 'in:public,internal'];
         }
         if ($ticketUpdateRequested) {
@@ -431,6 +439,8 @@ class TicketController extends Controller
         $message = $validated['message'] ?? null;
         $hasMessage = is_string($message) && $message !== '';
         $ticketChanged = $updates !== [];
+        $internal = $canChooseVisibility
+            && ($validated['visibility'] ?? 'public') === 'internal';
         $storedAttachments = collect();
         if ($attachmentRequested) {
             $storedAttachments = $this->attachments->storeFromRequest(
@@ -438,6 +448,7 @@ class TicketController extends Controller
                 $instance->subCore->key,
                 $request->user(),
                 $request,
+                $internal ? SupportAttachment::VISIBILITY_INTERNAL : SupportAttachment::VISIBILITY_PUBLIC,
             );
         }
         $hasAttachments = $storedAttachments->isNotEmpty();
@@ -456,18 +467,14 @@ class TicketController extends Controller
             $createdMessage = $ticket->messages()->create([
                 'user_id' => $request->user()->id,
                 'message' => $message,
-                'is_staff_note' => $canChooseVisibility
-                    && ($validated['visibility'] ?? 'public') === 'internal',
+                'is_staff_note' => $internal,
             ]);
             if ($hasAttachments) {
                 $this->attachments->linkTo($storedAttachments, $createdMessage);
             }
         }
 
-        $internalMessage = $hasMessage
-            && $canChooseVisibility
-            && ($validated['visibility'] ?? 'public') === 'internal';
-        if (($hasMessage && ! $internalMessage && ! $ticketChanged) || $hasAttachments) {
+        if (($hasMessage && ! $internal && ! $ticketChanged) || ($hasAttachments && ! $internal)) {
             $ticket->touch();
         }
         $this->notifyTicketStakeholders(
@@ -475,7 +482,7 @@ class TicketController extends Controller
             $request->user(),
             'updated',
             $instance,
-            $internalMessage && ! $ticketChanged && ! $hasAttachments,
+            $internal && ! $ticketChanged,
         );
         $auditLogger->record("{$ticketService->auditPrefix}.updated", $request->user(), $ticket, [
             'status' => $ticket->status,
@@ -507,7 +514,7 @@ class TicketController extends Controller
             'sub_core_key' => $ticket->sub_core_key,
             'module_key' => $instance->module->key,
         ]);
-        $ticket->attachments()->each(fn ($attachment) => $attachment->delete());
+        $ticket->attachments()->withTrashed()->get()->each(fn (SupportAttachment $attachment) => $attachment->forceDelete());
         $ticket->delete();
 
         return redirect()->route($this->area()->indexRouteName())

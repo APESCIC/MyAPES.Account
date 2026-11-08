@@ -26,6 +26,7 @@ class SupportAttachmentService
         string $subCoreKey,
         User $uploader,
         Request $request,
+        string $visibility = SupportAttachment::VISIBILITY_PUBLIC,
     ): Collection {
         return $this->storeFor(
             $attachable,
@@ -34,6 +35,7 @@ class SupportAttachmentService
             AttachmentLimits::files($request, 'screenshots'),
             AttachmentLimits::screencasts($request),
             AttachmentLimits::files($request, 'documents'),
+            $visibility,
         );
     }
 
@@ -50,6 +52,7 @@ class SupportAttachmentService
         ?array $screenshots = null,
         UploadedFile|array|null $screencasts = null,
         ?array $documents = null,
+        string $visibility = SupportAttachment::VISIBILITY_PUBLIC,
     ): Collection {
         $directory = $this->uploads->supportAttachmentDirectory(
             $subCoreKey,
@@ -73,6 +76,7 @@ class SupportAttachmentService
                 $path,
                 $file,
                 SupportAttachment::KIND_SCREENSHOT,
+                $visibility,
             ));
         }
 
@@ -92,6 +96,7 @@ class SupportAttachmentService
                 $path,
                 $screencast,
                 SupportAttachment::KIND_SCREENCAST,
+                $visibility,
             ));
         }
 
@@ -111,6 +116,7 @@ class SupportAttachmentService
                 $path,
                 $file,
                 SupportAttachment::KIND_DOCUMENT,
+                $visibility,
             ));
         }
 
@@ -134,6 +140,7 @@ class SupportAttachmentService
         string $path,
         UploadedFile $file,
         string $kind,
+        string $visibility,
     ): SupportAttachment {
         return SupportAttachment::query()->create([
             'attachable_type' => $attachable->getMorphClass(),
@@ -145,6 +152,7 @@ class SupportAttachmentService
             'mime_type' => (string) $file->getMimeType(),
             'size_bytes' => (int) $file->getSize(),
             'kind' => $kind,
+            'visibility' => $visibility,
         ]);
     }
 }

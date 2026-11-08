@@ -187,6 +187,8 @@ Route::middleware([
     });
     Route::get('/support/attachments/{attachment}', [SupportAttachmentController::class, 'download'])
         ->name('support.attachments.download');
+    Route::delete('/support/attachments/{attachment}', [SupportAttachmentController::class, 'destroy'])
+        ->name('support.attachments.destroy');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
