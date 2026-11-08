@@ -4,6 +4,7 @@ namespace App\Core\Attachments;
 
 use GdImage;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -58,11 +59,7 @@ class ImageOptimiser
             return $file;
         }
 
-        register_shutdown_function(static function () use ($target): void {
-            if (is_file($target)) {
-                @unlink($target);
-            }
-        });
+        register_shutdown_function(static fn (): bool => File::delete($target));
 
         return new UploadedFile($target, $file->getClientOriginalName(), $mime, null, true);
     }
