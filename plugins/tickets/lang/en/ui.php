@@ -20,9 +20,7 @@ return [
             'search' => 'Search',
             'keep_current_owner' => 'Keep current owner',
             'no_owner_matches' => 'No matching people can use this service.',
-            'add_screenshots' => 'Add screenshots',
             'assigned_staff' => 'Assigned staff',
-            'add_screencast' => 'Add screencast',
             'delete_ticket' => 'Delete ticket',
             'attachments' => 'Attachments',
             'add_message' => 'Add message',
@@ -39,8 +37,6 @@ return [
     'index' => [
         'blade' => [
             'no_tickets_are_available_to_you_yet' => 'No tickets are available to you yet.',
-            'screenshots_optional' => 'Screenshots (optional)',
-            'screencast_optional' => 'Screencast (optional)',
             'select_service_area' => 'Select service area',
             'select_subcategory' => 'Select subcategory',
             'affected_website' => 'Affected website',

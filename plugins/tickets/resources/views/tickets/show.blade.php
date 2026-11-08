@@ -92,12 +92,7 @@
                     @endif
                 @endif
                 @if($allowsAttachments && $canCommentTicket)
-                    <label for="screenshots">{{ __('tickets::ui.show.blade.add_screenshots') }}</label>
-                    <input id="screenshots" name="screenshots[]" type="file" accept="image/jpeg,image/png,image/webp" multiple>
-                    <label for="screencast">{{ __('tickets::ui.show.blade.add_screencast') }}</label>
-                    <input id="screencast" name="screencast" type="file" accept="video/mp4,video/webm">
-                    <label for="documents">{{ __('attachments.fields.add_documents') }}</label>
-                    <input id="documents" name="documents[]" type="file" accept=".pdf,.docx,.xlsx,.odt,.ods,.txt,.csv" multiple>
+                    <x-attachment-uploads id-prefix="ticket-reply" />
                 @endif
                 <div class="actions">
                     <button type="submit">{{ $canUpdateTicket ? 'Save ticket' : 'Add message' }}</button>

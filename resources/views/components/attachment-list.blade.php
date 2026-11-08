@@ -4,7 +4,7 @@
         @foreach($attachments as $attachment)
             <li class="attachment-item" data-attachment-kind="{{ $attachment->kind }}">
                 <i data-lucide="{{ $attachment->icon() }}" aria-hidden="true"></i>
-                <span class="visually-hidden">{{ __('attachments.kinds.'.$attachment->kind) }}:</span>
+                <span class="visually-hidden">{{ $attachment->kindLabel() }}:</span>
                 <a href="{{ route('support.attachments.download', $attachment) }}">{{ $attachment->original_name }}</a>
                 <span class="muted">({{ $attachment->humanSize() }})</span>
             </li>

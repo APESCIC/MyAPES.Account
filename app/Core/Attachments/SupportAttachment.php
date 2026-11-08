@@ -57,6 +57,15 @@ class SupportAttachment extends Model
             && (int) $this->context_id === (int) $model->getKey();
     }
 
+    public function kindLabel(): string
+    {
+        return match ($this->kind) {
+            self::KIND_SCREENSHOT => __('attachments.kinds.screenshot'),
+            self::KIND_SCREENCAST => __('attachments.kinds.screencast'),
+            default => __('attachments.kinds.document'),
+        };
+    }
+
     public function icon(): string
     {
         return match ($this->kind) {
@@ -68,11 +77,13 @@ class SupportAttachment extends Model
 
     public function humanSize(): string
     {
-        $bytes = (int) $this->size_bytes;
+        $bytes = max((int) $this->size_bytes, 0);
 
-        return $bytes >= 1048576
-            ? number_format($bytes / 1048576, 1).' MB'
-            : number_format(max($bytes, 0) / 1024, 1).' KB';
+        return match (true) {
+            $bytes >= 1048576 => number_format($bytes / 1048576, 1).' MB',
+            $bytes >= 1024 => number_format($bytes / 1024, 1).' KB',
+            default => $bytes.' bytes',
+        };
     }
 
     public function deleteFile(): void

@@ -2,6 +2,7 @@
 
 namespace App\Core\Attachments;
 
+use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\ValidationException;
@@ -48,7 +49,7 @@ final class AttachmentLimits
     }
 
     /**
-     * @return array<string, list<string>>
+     * @return array<string, list<mixed>>
      */
     public static function rules(): array
     {
@@ -61,7 +62,20 @@ final class AttachmentLimits
             'screencasts.*' => ['file', 'mimetypes:'.$videoTypes, 'max:'.self::SCREENCAST_MAX_KB],
             'screencast' => ['nullable', 'file', 'mimetypes:'.$videoTypes, 'max:'.self::SCREENCAST_MAX_KB],
             'documents' => ['nullable', 'array', 'max:'.self::DOCUMENT_MAX_FILES],
-            'documents.*' => ['file', 'extensions:'.implode(',', self::DOCUMENT_EXTENSIONS), 'max:'.self::DOCUMENT_MAX_KB],
+            'documents.*' => [
+                'file',
+                'extensions:'.implode(',', self::DOCUMENT_EXTENSIONS),
+                'max:'.self::DOCUMENT_MAX_KB,
+                static function (string $attribute, mixed $value, Closure $fail): void {
+                    if (! $value instanceof UploadedFile) {
+                        return;
+                    }
+                    $problem = app(DocumentInspector::class)->problem($value);
+                    if ($problem !== null) {
+                        $fail(__($problem, ['name' => $value->getClientOriginalName()]));
+                    }
+                },
+            ],
         ];
     }
 

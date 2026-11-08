@@ -56,6 +56,7 @@ import { initPasskeys } from './passkeys.js';
 import { initOwnerPicker } from './tickets/owner-picker.js';
 import { initCommandPalette } from './workspace/command-palette.js';
 import { initWorkspaceDrawer } from './workspace/drawer.js';
+import { initFileUploads } from './workspace/file-upload.js';
 import { initFormActions } from './workspace/form-actions.js';
 import { initGuidedTour } from './workspace/guided-tour.js';
 import { initRichTextEditors } from './workspace/rich-text-editor.js';
@@ -150,6 +151,7 @@ initPasskeys();
 initToasts();
 initOwnerPicker();
 initFormActions();
+initFileUploads();
 initRichTextEditors();
 
 document.addEventListener('click', (event) => {

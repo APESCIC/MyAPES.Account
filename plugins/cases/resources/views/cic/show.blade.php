@@ -143,12 +143,7 @@
                     </select>
                 @endif
                 @if($allowsAttachments)
-                    <label for="case-screenshots">{{ __('cases::ui.show.blade.add_evidence_screenshots') }}</label>
-                    <input id="case-screenshots" name="screenshots[]" type="file" accept="image/jpeg,image/png,image/webp" multiple>
-                    <label for="case-screencast">{{ __('cases::ui.show.blade.add_evidence_screencast') }}</label>
-                    <input id="case-screencast" name="screencast" type="file" accept="video/mp4,video/webm">
-                    <label for="case-documents">{{ __('attachments.fields.add_documents') }}</label>
-                    <input id="case-documents" name="documents[]" type="file" accept=".pdf,.docx,.xlsx,.odt,.ods,.txt,.csv" multiple>
+                    <x-attachment-uploads id-prefix="case-update" :legend="__('cases::ui.show.blade.add_evidence')" />
                 @endif
                 <button type="submit">{{ __('cases::ui.show.blade.add_update') }}</button>
             </form>

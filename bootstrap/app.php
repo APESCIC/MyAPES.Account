@@ -11,6 +11,7 @@ use App\Http\Middleware\EnsureModuleAvailable;
 use App\Http\Middleware\EnsurePluginEnabled;
 use App\Http\Middleware\EnsureRecentStepUp;
 use App\Http\Middleware\EnsureServiceSelected;
+use App\Http\Middleware\RedirectTargetForUploadProgress;
 use App\Http\Middleware\RevalidateDirectoryAccess;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
@@ -52,6 +53,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             SetLocale::class,
+            RedirectTargetForUploadProgress::class,
         ]);
 
         $middleware->append(SecurityHeaders::class);

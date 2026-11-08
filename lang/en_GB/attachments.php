@@ -20,9 +20,21 @@ return [
         'not_available' => 'Attachments are not available here.',
     ],
 
-    'fields' => [
-        'documents_optional' => 'Documents (optional)',
-        'add_documents' => 'Add documents',
+    'component' => [
+        'legend' => 'Attachments (optional)',
+        'screenshots' => 'Screenshots',
+        'screencasts' => 'Screencasts',
+        'documents' => 'Documents',
+        'limits' => 'Up to :max files, :size each. :types.',
+        'total_limit' => 'All files together can be up to :size.',
+        'drop_or_choose' => 'Drop files here or choose files',
+        'selected' => ':count selected.',
+        'remove' => 'Remove :name',
+        'rejected_type' => ':name was not added: use :types.',
+        'rejected_size' => ':name was not added: it is larger than :size.',
+        'rejected_count' => ':name was not added: you can attach up to :max files here.',
+        'rejected_total' => ':name was not added: all files together must be :total or less.',
+        'upload_failed' => 'The upload did not finish. Check your files and try again.',
     ],
 
     'types' => [
