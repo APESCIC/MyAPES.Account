@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Storage;
     'size_bytes',
     'kind',
     'visibility',
+    'scan_status',
     'context_type',
     'context_id',
 ])]
@@ -44,10 +45,41 @@ class SupportAttachment extends Model
 
     public const VISIBILITY_INTERNAL = 'internal';
 
+    public const SCAN_PENDING = 'pending';
+
+    public const SCAN_CLEAN = 'clean';
+
+    public const SCAN_INFECTED = 'infected';
+
+    public const SCAN_NOT_SCANNED = 'not_scanned';
+
     /** @var array<string, mixed> */
     protected $attributes = [
         'visibility' => self::VISIBILITY_PUBLIC,
+        'scan_status' => self::SCAN_NOT_SCANNED,
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'scanned_at' => 'datetime',
+        ];
+    }
+
+    /**
+     * Pending and infected files cannot be downloaded (#550).
+     */
+    public function isDownloadable(): bool
+    {
+        return in_array($this->scan_status, [self::SCAN_CLEAN, self::SCAN_NOT_SCANNED], true);
+    }
+
+    public function recordUrl(): ?string
+    {
+        $attachable = $this->attachable;
+
+        return $attachable instanceof HasSupportAttachments ? $attachable->attachmentRecordUrl() : null;
+    }
 
     public function attachable(): MorphTo
     {

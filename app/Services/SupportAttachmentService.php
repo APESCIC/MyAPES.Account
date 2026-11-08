@@ -4,7 +4,9 @@ namespace App\Services;
 
 use App\Core\Accounts\User;
 use App\Core\Attachments\AttachmentLimits;
+use App\Core\Attachments\Scanning\VirusScanner;
 use App\Core\Attachments\SupportAttachment;
+use App\Jobs\ScanSupportAttachment;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -14,6 +16,7 @@ class SupportAttachmentService
 {
     public function __construct(
         private readonly SecureUploadService $uploads,
+        private readonly VirusScanner $scanner,
     ) {}
 
     /**
@@ -142,7 +145,8 @@ class SupportAttachmentService
         string $kind,
         string $visibility,
     ): SupportAttachment {
-        return SupportAttachment::query()->create([
+        $scan = $this->scanner->enabled();
+        $attachment = SupportAttachment::query()->create([
             'attachable_type' => $attachable->getMorphClass(),
             'attachable_id' => $attachable->getKey(),
             'user_id' => $uploader->id,
@@ -153,6 +157,13 @@ class SupportAttachmentService
             'size_bytes' => (int) $file->getSize(),
             'kind' => $kind,
             'visibility' => $visibility,
+            'scan_status' => $scan ? SupportAttachment::SCAN_PENDING : SupportAttachment::SCAN_NOT_SCANNED,
         ]);
+
+        if ($scan) {
+            ScanSupportAttachment::dispatch((int) $attachment->id);
+        }
+
+        return $attachment;
     }
 }

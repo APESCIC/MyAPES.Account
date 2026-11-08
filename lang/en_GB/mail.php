@@ -118,6 +118,13 @@ return [
         'action' => 'Log in to reply',
     ],
 
+    'attachment_quarantined' => [
+        'subject' => 'A file you uploaded was blocked',
+        'line_body' => 'Our virus check found a problem with :name, so it has been blocked and nobody can download it.',
+        'line_next' => 'Check the file on your device with up-to-date antivirus software, then upload a clean copy if you still need to share it.',
+        'action' => 'Log in to view',
+    ],
+
     'consultation_updated' => [
         'subject' => 'APES Pet Care Clinic consultation #:id :event',
         'line_body' => 'Consultation #:id (:subject) was :event by :actor.',

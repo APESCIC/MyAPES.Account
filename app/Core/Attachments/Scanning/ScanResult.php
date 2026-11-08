@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Core\Attachments\Scanning;
+
+final readonly class ScanResult
+{
+    private function __construct(
+        public bool $infected,
+        public ?string $signature,
+    ) {}
+
+    public static function clean(): self
+    {
+        return new self(false, null);
+    }
+
+    public static function infected(string $signature): self
+    {
+        return new self(true, $signature);
+    }
+}

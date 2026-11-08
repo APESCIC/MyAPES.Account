@@ -49,7 +49,7 @@ class SupportAttachmentPolicy
 
     public function download(User $user, SupportAttachment $attachment): bool
     {
-        return $this->view($user, $attachment);
+        return $attachment->isDownloadable() && $this->view($user, $attachment);
     }
 
     public function delete(User $user, SupportAttachment $attachment): bool

@@ -25,6 +25,7 @@
 - [[Building a plugin|Dev-Building-a-plugin]]
 - [[Testing and CI|Dev-Testing-and-CI]]
 - [[Release and Cloudron deploy|Dev-Release-and-Cloudron-deploy]]
+- [[Attachments and virus scanning|Dev-Attachments-and-virus-scanning]]
 - [[Working with Cursor|Dev-Working-with-Cursor]]
 
 **More**

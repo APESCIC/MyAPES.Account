@@ -44,6 +44,11 @@ return [
         'confirm_delete' => 'Delete this attachment?',
     ],
 
+    'scan' => [
+        'pending' => 'Checking for viruses',
+        'infected' => 'Blocked: a virus was found',
+    ],
+
     'flash' => [
         'deleted' => ':name was deleted.',
     ],
