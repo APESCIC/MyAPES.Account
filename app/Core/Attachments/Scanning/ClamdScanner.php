@@ -24,23 +24,35 @@ final class ClamdScanner implements VirusScanner
         return $this->host !== '';
     }
 
-    public function scan($stream): ScanResult
+    public function ping(): bool
     {
-        $errorCode = 0;
-        $errorMessage = '';
-        $socket = @stream_socket_client(
-            "tcp://{$this->host}:{$this->port}",
-            $errorCode,
-            $errorMessage,
-            $this->timeoutSeconds,
-        );
-
-        if ($socket === false) {
-            throw new ScannerUnavailable("Could not reach clamd: {$errorMessage}");
+        if (! $this->enabled()) {
+            return false;
         }
 
         try {
-            stream_set_timeout($socket, $this->timeoutSeconds);
+            $socket = $this->connect();
+        } catch (ScannerUnavailable) {
+            return false;
+        }
+
+        try {
+            $this->write($socket, "zPING\0");
+            $reply = trim((string) stream_get_contents($socket), "\0\r\n ");
+        } catch (ScannerUnavailable) {
+            return false;
+        } finally {
+            fclose($socket);
+        }
+
+        return $reply === 'PONG';
+    }
+
+    public function scan($stream): ScanResult
+    {
+        $socket = $this->connect();
+
+        try {
             $this->write($socket, "zINSTREAM\0");
 
             while (! feof($stream)) {
@@ -74,6 +86,29 @@ final class ClamdScanner implements VirusScanner
         }
 
         throw new ScannerUnavailable('Unexpected clamd reply.');
+    }
+
+    /**
+     * @return resource
+     */
+    private function connect()
+    {
+        $errorCode = 0;
+        $errorMessage = '';
+        $socket = @stream_socket_client(
+            "tcp://{$this->host}:{$this->port}",
+            $errorCode,
+            $errorMessage,
+            $this->timeoutSeconds,
+        );
+
+        if ($socket === false) {
+            throw new ScannerUnavailable("Could not reach clamd: {$errorMessage}");
+        }
+
+        stream_set_timeout($socket, $this->timeoutSeconds);
+
+        return $socket;
     }
 
     /**

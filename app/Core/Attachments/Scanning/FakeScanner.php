@@ -17,6 +17,11 @@ final class FakeScanner implements VirusScanner
         return true;
     }
 
+    public function ping(): bool
+    {
+        return ! $this->unavailable;
+    }
+
     public function scan($stream): ScanResult
     {
         if ($this->unavailable) {
