@@ -10,7 +10,10 @@ use App\Rules\EligibleRecordOwner;
 use App\Rules\EligibleStaffAssignee;
 use App\Services\AssignmentAuthorization;
 use App\Services\AuditLogger;
-use App\Services\SecureUploadService;
+use App\Core\Attachments\AttachmentFeedback;
+use App\Core\Attachments\AttachmentLimits;
+use App\Core\Attachments\SupportAttachment;
+use Closure;
 use App\Services\SupportAttachmentService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -18,6 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Plugins\Cases\CaseAttachmentGate;
 use Plugins\Cases\CaseCategoryResolver;
 use Plugins\Cases\CasesArea;
 use Plugins\Cases\Models\ShelterCase;
@@ -33,6 +37,7 @@ class CaseController extends Controller
         private readonly CaseCategoryResolver $categories,
         private readonly SupportAttachmentService $attachments,
         private readonly PetProfilesContract $petProfiles,
+        private readonly CaseAttachmentGate $attachmentGate,
     ) {}
 
     public function index(Request $request): View
@@ -104,6 +109,7 @@ class CaseController extends Controller
             'canCreateCase' => $user->can($prefix.'create'),
             'revealAssigneeIdentity' => $user->can($prefix.'view-all'),
             'categoryResolver' => $this->categories,
+            'uploadsEnabled' => $this->attachmentGate->uploadsEnabled($this->area()),
         ]);
     }
 
@@ -121,15 +127,9 @@ class CaseController extends Controller
             'priority' => ['required', Rule::in($this->area()->priorities)],
             'title' => ['required', 'string', 'max:255'],
             'details' => ['nullable', 'string'],
-            'screenshots' => ['nullable', 'array', 'max:5'],
-            'screenshots.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
-            'screencast' => [
-                'nullable',
-                'file',
-                'mimetypes:video/mp4,video/webm',
-                'max:'.SecureUploadService::SCREENCAST_MAX_KB,
-            ],
-        ]);
+            ...AttachmentLimits::rules(),
+        ], AttachmentLimits::validationMessages());
+        AttachmentLimits::assertSubmissionWithinLimits($request);
 
         $categoryFields = $this->categories->validateSelection(
             $instance->subCore->key,
@@ -138,16 +138,15 @@ class CaseController extends Controller
             $validated['affected_website_key'] ?? null,
         );
 
-        $allowsAttachments = $this->categories->allowsAttachments(
+        $allowsAttachments = $this->attachmentGate->allows(
+            $this->area(),
             $instance->subCore->key,
             $categoryFields['category'],
             $categoryFields['sub_category'],
         );
-        if (! $allowsAttachments && (
-            $request->hasFile('screenshots') || $request->hasFile('screencast')
-        )) {
+        if (! $allowsAttachments && AttachmentLimits::requested($request)) {
             throw ValidationException::withMessages([
-                'screenshots' => __('cases::ui.validation.attachments_are_not_available_for_this_subcategory'),
+                'screenshots' => $this->attachmentGate->refusalMessage($this->area()),
             ]);
         }
 
@@ -164,17 +163,17 @@ class CaseController extends Controller
             'opened_at' => now(),
         ]);
 
+        $storedAttachments = collect();
         if ($allowsAttachments) {
-            $this->attachments->storeFor(
+            $storedAttachments = $this->attachments->storeFromRequest(
                 $case,
                 $instance->subCore->key,
                 $request->user(),
-                $request->file('screenshots'),
-                $request->file('screencast'),
+                $request,
             );
         }
 
-        $this->notifyStakeholders($case, $request->user(), 'created', $instance);
+        $this->notifyStakeholders($case, $request->user(), 'created', $instance, $storedAttachments->count());
         $auditLogger->record("{$this->area()->auditEventPrefix}.created", $request->user(), $case, [
             'sub_core_key' => $case->sub_core_key,
             'module_key' => $instance->module->key,
@@ -186,7 +185,7 @@ class CaseController extends Controller
         ]);
 
         return redirect()->route($this->area()->showRouteName(), $case)
-            ->with('status', __('cases::ui.flash.case_created'));
+            ->with('status', AttachmentFeedback::status(__('cases::ui.flash.case_created'), $storedAttachments->count()));
     }
 
     private function cicShow(
@@ -202,12 +201,12 @@ class CaseController extends Controller
         $canViewAll = $user->can($prefix.'view-all');
         $canChangeAssignment = $assignments->allows($user)
             && $user->can($prefix.'assign');
-        $allowsAttachments = is_string($case->sub_category)
-            && $this->categories->allowsAttachments(
-                $instance->subCore->key,
-                (string) $case->category,
-                $case->sub_category,
-            );
+        $allowsAttachments = $this->attachmentGate->allows(
+            $this->area(),
+            $instance->subCore->key,
+            $case->category,
+            $case->sub_category,
+        );
 
         $updates = $case->updates()->with('user')->oldest();
         if (! $canViewAll) {
@@ -215,7 +214,7 @@ class CaseController extends Controller
         }
 
         return view($this->area()->view('show'), [
-            'case' => $case->load(['user', 'assignedTo', 'attachments']),
+            'case' => $case->load(['user', 'assignedTo', 'attachments' => $this->visibleAttachments($canViewAll)]),
             'updates' => $updates->get(),
             'categoryGroups' => $this->categories->categories($instance->subCore->key),
             'websites' => $this->categories->websites($instance->subCore->key),
@@ -259,8 +258,7 @@ class CaseController extends Controller
             || $request->exists('priority')
             || $request->exists('status')
             || $request->exists('sub_category');
-        $attachmentRequested = $request->hasFile('screenshots')
-            || $request->hasFile('screencast');
+        $attachmentRequested = AttachmentLimits::requested($request);
 
         if (! $metadataRequested && ! $assignmentRequested && ! $ownerRequested && ! $attachmentRequested) {
             throw ValidationException::withMessages([
@@ -277,11 +275,12 @@ class CaseController extends Controller
         }
         if ($attachmentRequested) {
             Gate::authorize($prefix.'comment-own');
+            Gate::authorize('create', [SupportAttachment::class, $case]);
             abort_unless(
-                is_string($case->sub_category)
-                && $this->categories->allowsAttachments(
+                $this->attachmentGate->allows(
+                    $this->area(),
                     $instance->subCore->key,
-                    (string) $case->category,
+                    $case->category,
                     $case->sub_category,
                 ),
                 403,
@@ -314,16 +313,12 @@ class CaseController extends Controller
             ];
         }
         if ($attachmentRequested) {
-            $rules['screenshots'] = ['nullable', 'array', 'max:5'];
-            $rules['screenshots.*'] = ['image', 'mimes:jpg,jpeg,png,webp', 'max:3072'];
-            $rules['screencast'] = [
-                'nullable',
-                'file',
-                'mimetypes:video/mp4,video/webm',
-                'max:'.SecureUploadService::SCREENCAST_MAX_KB,
-            ];
+            $rules = [...$rules, ...AttachmentLimits::rules()];
         }
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, AttachmentLimits::validationMessages());
+        if ($attachmentRequested) {
+            AttachmentLimits::assertSubmissionWithinLimits($request);
+        }
 
         $updates = [];
         if ($metadataRequested) {
@@ -369,12 +364,11 @@ class CaseController extends Controller
 
         $storedAttachments = collect();
         if ($attachmentRequested) {
-            $storedAttachments = $this->attachments->storeFor(
+            $storedAttachments = $this->attachments->storeFromRequest(
                 $case,
                 $instance->subCore->key,
                 $request->user(),
-                $request->file('screenshots'),
-                $request->file('screencast'),
+                $request,
             );
         }
 
@@ -394,7 +388,7 @@ class CaseController extends Controller
             ]);
         }
 
-        $this->notifyStakeholders($case, $request->user(), 'updated', $instance);
+        $this->notifyStakeholders($case, $request->user(), 'updated', $instance, $storedAttachments->count());
         $auditLogger->record("{$this->area()->auditEventPrefix}.updated", $request->user(), $case, [
             'sub_core_key' => $case->sub_core_key,
             'module_key' => $instance->module->key,
@@ -408,7 +402,7 @@ class CaseController extends Controller
         ]);
 
         return redirect()->route($this->area()->showRouteName(), $case)
-            ->with('status', __('cases::ui.flash.case_updated'));
+            ->with('status', AttachmentFeedback::status(__('cases::ui.flash.case_updated'), $storedAttachments->count()));
     }
 
     private function cicDestroy(
@@ -427,11 +421,18 @@ class CaseController extends Controller
             'priority' => $case->priority,
             'status' => $case->status,
         ]);
-        $case->attachments()->each(fn ($attachment) => $attachment->delete());
+        $case->attachments()->withTrashed()->get()->each(fn (SupportAttachment $attachment) => $attachment->forceDelete());
         $case->delete();
 
         return redirect()->route($this->area()->indexRouteName())
             ->with('status', __('cases::ui.flash.case_deleted'));
+    }
+
+    private function visibleAttachments(bool $canViewAll): Closure
+    {
+        return static fn ($query) => $canViewAll
+            ? $query
+            : $query->where('visibility', SupportAttachment::VISIBILITY_PUBLIC);
     }
 
     private function requireCaseForInstance(
@@ -449,6 +450,7 @@ class CaseController extends Controller
         User $actor,
         string $eventLabel,
         ModuleInstanceDefinition $instance,
+        int $attachmentCount = 0,
     ): void {
         $prefix = $this->area()->permissionPrefix();
         $recipients = User::query()
@@ -469,6 +471,7 @@ class CaseController extends Controller
                     $eventLabel,
                     $instance->subCore->key,
                     $this->area()->showRouteName(),
+                    $attachmentCount,
                 ),
             ));
     }
@@ -506,6 +509,7 @@ class CaseController extends Controller
         return view($area->view('index'), [
             'cases' => $query->paginate(20)->fragment('list'),
             'canCreateCase' => Gate::allows('create', ShelterCase::class),
+            'uploadsEnabled' => $this->attachmentGate->uploadsEnabled($area),
             'petProfiles' => $petProfiles,
             ...StaffPetCreateReturn::emptySelectViewData(
                 $user,
@@ -539,23 +543,35 @@ class CaseController extends Controller
             'case_type' => ['required', Rule::in($area->caseTypes)],
             'title' => ['required', 'string', 'max:255'],
             'details' => ['nullable', 'string'],
-        ]);
+            ...AttachmentLimits::rules(),
+        ], AttachmentLimits::validationMessages());
+        AttachmentLimits::assertSubmissionWithinLimits($request);
+        $allowsAttachments = $this->attachmentGate->allows($area, $area->moduleSlug, null, null);
+        if (! $allowsAttachments && AttachmentLimits::requested($request)) {
+            throw ValidationException::withMessages([
+                'screenshots' => $this->attachmentGate->refusalMessage($area),
+            ]);
+        }
 
         $case = ShelterCase::create([
-            ...$validated,
+            ...collect($validated)->only(['pet_profile_id', 'case_type', 'title', 'details'])->all(),
             'sub_core_key' => $area->moduleSlug,
             'user_id' => $pet->user_id,
             'status' => 'open',
         ]);
 
-        $this->notifyShelterStakeholders($case, $request->user(), 'created');
+        $storedAttachments = $allowsAttachments
+            ? $this->attachments->storeFromRequest($case, $area->moduleSlug, $request->user(), $request)
+            : collect();
+
+        $this->notifyShelterStakeholders($case, $request->user(), 'created', $storedAttachments->count());
         $auditLogger->record("{$area->auditEventPrefix}.created", $request->user(), $case, [
             'case_type' => $case->case_type,
             'status' => $case->status,
         ]);
 
         return redirect()->route($area->showRouteName(), $case)
-            ->with('status', __('cases::ui.flash.case_created'));
+            ->with('status', AttachmentFeedback::status(__('cases::ui.flash.case_created'), $storedAttachments->count()));
     }
 
     private function shelterShow(
@@ -576,8 +592,9 @@ class CaseController extends Controller
         }
 
         return view($area->view('show'), [
-            'case' => $case->load(['petProfile', 'assignedTo']),
+            'case' => $case->load(['petProfile', 'assignedTo', 'attachments' => $this->visibleAttachments($canViewAll)]),
             'updates' => $updates->get(),
+            'allowsAttachments' => $this->attachmentGate->allows($area, $area->moduleSlug, null, null),
             'caseTypes' => $area->caseTypes,
             'statuses' => $area->statuses,
             'canChangeAssignment' => $canChangeAssignment,
@@ -718,7 +735,7 @@ class CaseController extends Controller
             ->firstOrFail();
     }
 
-    private function notifyShelterStakeholders(ShelterCase $case, User $actor, string $eventLabel): void
+    private function notifyShelterStakeholders(ShelterCase $case, User $actor, string $eventLabel, int $attachmentCount = 0): void
     {
         $area = $this->area();
         $prefix = $area->permissionPrefix();
@@ -736,7 +753,7 @@ class CaseController extends Controller
             ->reject(fn (User $recipient): bool => $recipient->id === $actor->id);
 
         foreach ($recipients as $recipient) {
-            $recipient->notify(new ShelterCaseUpdatedNotification($case, $actor, $eventLabel));
+            $recipient->notify(new ShelterCaseUpdatedNotification($case, $actor, $eventLabel, $attachmentCount));
         }
     }
 }

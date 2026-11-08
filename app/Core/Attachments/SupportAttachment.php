@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
@@ -19,9 +20,67 @@ use Illuminate\Support\Facades\Storage;
     'mime_type',
     'size_bytes',
     'kind',
+    'visibility',
+    'scan_status',
+    'context_type',
+    'context_id',
 ])]
 class SupportAttachment extends Model
 {
+    use SoftDeletes;
+
+    public const KIND_SCREENSHOT = 'screenshot';
+
+    public const KIND_SCREENCAST = 'screencast';
+
+    public const KIND_DOCUMENT = 'document';
+
+    public const KINDS = [
+        self::KIND_SCREENSHOT,
+        self::KIND_SCREENCAST,
+        self::KIND_DOCUMENT,
+    ];
+
+    public const VISIBILITY_PUBLIC = 'public';
+
+    public const VISIBILITY_INTERNAL = 'internal';
+
+    public const SCAN_PENDING = 'pending';
+
+    public const SCAN_CLEAN = 'clean';
+
+    public const SCAN_INFECTED = 'infected';
+
+    public const SCAN_NOT_SCANNED = 'not_scanned';
+
+    /** @var array<string, mixed> */
+    protected $attributes = [
+        'visibility' => self::VISIBILITY_PUBLIC,
+        'scan_status' => self::SCAN_NOT_SCANNED,
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'scanned_at' => 'datetime',
+        ];
+    }
+
+    /**
+     * Pending and infected files cannot be downloaded (#550).
+     */
+    public function isDownloadable(): bool
+    {
+        return in_array($this->scan_status, [self::SCAN_CLEAN, self::SCAN_NOT_SCANNED], true);
+    }
+
+    public function recordUrl(): ?string
+    {
+        $attachable = $this->attachable;
+
+        return $attachable instanceof HasSupportAttachments ? $attachable->attachmentRecordUrl() : null;
+    }
+
     public function attachable(): MorphTo
     {
         return $this->morphTo();
@@ -30,6 +89,51 @@ class SupportAttachment extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function context(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    public function isContextOf(Model $model): bool
+    {
+        return $this->context_type === $model->getMorphClass()
+            && (int) $this->context_id === (int) $model->getKey();
+    }
+
+    public function isInternal(): bool
+    {
+        return $this->visibility === self::VISIBILITY_INTERNAL;
+    }
+
+    public function kindLabel(): string
+    {
+        return match ($this->kind) {
+            self::KIND_SCREENSHOT => __('attachments.kinds.screenshot'),
+            self::KIND_SCREENCAST => __('attachments.kinds.screencast'),
+            default => __('attachments.kinds.document'),
+        };
+    }
+
+    public function icon(): string
+    {
+        return match ($this->kind) {
+            self::KIND_SCREENSHOT => 'image',
+            self::KIND_SCREENCAST => 'video',
+            default => 'file-text',
+        };
+    }
+
+    public function humanSize(): string
+    {
+        $bytes = max((int) $this->size_bytes, 0);
+
+        return match (true) {
+            $bytes >= 1048576 => number_format($bytes / 1048576, 1).' MB',
+            $bytes >= 1024 => number_format($bytes / 1024, 1).' KB',
+            default => $bytes.' bytes',
+        };
     }
 
     public function deleteFile(): void
@@ -41,7 +145,7 @@ class SupportAttachment extends Model
 
     protected static function booted(): void
     {
-        static::deleting(function (SupportAttachment $attachment): void {
+        static::forceDeleting(function (SupportAttachment $attachment): void {
             $attachment->deleteFile();
         });
     }

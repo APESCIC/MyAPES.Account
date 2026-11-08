@@ -18,10 +18,12 @@ import {
     createElement,
     createIcons,
     ExternalLink,
+    FileText,
     Github,
     Heart,
     HeartPulse,
     House,
+    Image,
     Inbox,
     LayoutDashboard,
     Leaf,
@@ -37,12 +39,16 @@ import {
     ScrollText,
     Search,
     Settings,
+    ShieldAlert,
     ShieldCheck,
     Sprout,
     Sun,
     Ticket,
+    Trash2,
+    Upload,
     UserPlus,
     UserRound,
+    Video,
     X,
 } from 'lucide';
 import { initChangeLog } from './change-log.js';
@@ -50,6 +56,7 @@ import { initPasskeys } from './passkeys.js';
 import { initOwnerPicker } from './tickets/owner-picker.js';
 import { initCommandPalette } from './workspace/command-palette.js';
 import { initWorkspaceDrawer } from './workspace/drawer.js';
+import { initFileUploads } from './workspace/file-upload.js';
 import { initFormActions } from './workspace/form-actions.js';
 import { initGuidedTour } from './workspace/guided-tour.js';
 import { initRichTextEditors } from './workspace/rich-text-editor.js';
@@ -73,10 +80,12 @@ const icons = {
     ClipboardList,
     Compass,
     ExternalLink,
+    FileText,
     Github,
     Heart,
     HeartPulse,
     House,
+    Image,
     Inbox,
     LayoutDashboard,
     Leaf,
@@ -92,12 +101,16 @@ const icons = {
     ScrollText,
     Search,
     Settings,
+    ShieldAlert,
     ShieldCheck,
     Sprout,
     Sun,
     Ticket,
+    Trash2,
+    Upload,
     UserPlus,
     UserRound,
+    Video,
     X,
 };
 
@@ -138,6 +151,7 @@ initPasskeys();
 initToasts();
 initOwnerPicker();
 initFormActions();
+initFileUploads();
 initRichTextEditors();
 
 document.addEventListener('click', (event) => {

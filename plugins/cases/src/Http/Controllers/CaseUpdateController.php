@@ -6,13 +6,18 @@ use App\Core\Accounts\User;
 use App\Core\Extensions\Modules\ModuleContext;
 use App\Http\Controllers\Controller;
 use App\Modules\ModuleInstanceDefinition;
+use App\Core\Attachments\AttachmentFeedback;
+use App\Core\Attachments\AttachmentLimits;
+use App\Core\Attachments\SupportAttachment;
 use App\Services\AuditLogger;
+use App\Services\SupportAttachmentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
+use Plugins\Cases\CaseAttachmentGate;
 use Plugins\Cases\CasesArea;
 use Plugins\Cases\Models\CaseUpdate;
 use Plugins\Cases\Models\ShelterCase;
@@ -22,6 +27,8 @@ class CaseUpdateController extends Controller
 {
     public function __construct(
         private readonly ModuleContext $moduleContext,
+        private readonly CaseAttachmentGate $attachmentGate,
+        private readonly SupportAttachmentService $attachments,
     ) {}
 
     public function store(
@@ -54,7 +61,13 @@ class CaseUpdateController extends Controller
             ]);
         }
 
-        $validated = $request->validate([
+        $attachmentRequested = AttachmentLimits::requested($request);
+        if ($attachmentRequested) {
+            Gate::authorize('create', [SupportAttachment::class, $case]);
+            abort_unless($this->allowsAttachments($case, $area), 403);
+        }
+
+        $rules = [
             'body' => ['required', 'string'],
             'visibility' => [
                 'nullable',
@@ -63,16 +76,36 @@ class CaseUpdateController extends Controller
                     CaseUpdate::VISIBILITY_INTERNAL,
                 ]),
             ],
-        ]);
+        ];
+        if ($attachmentRequested) {
+            $rules = [...$rules, ...AttachmentLimits::rules()];
+        }
+        $validated = $request->validate($rules, AttachmentLimits::validationMessages());
+        if ($attachmentRequested) {
+            AttachmentLimits::assertSubmissionWithinLimits($request);
+        }
         $isStaffViewer = $request->user()->can($prefix.'view-all');
         $visibility = $isStaffViewer
             ? ($validated['visibility'] ?? CaseUpdate::VISIBILITY_PUBLIC)
             : CaseUpdate::VISIBILITY_PUBLIC;
-        $case->updates()->create([
+        $storedAttachments = collect();
+        if ($attachmentRequested) {
+            $storedAttachments = $this->attachments->storeFromRequest(
+                $case,
+                $case->sub_core_key,
+                $request->user(),
+                $request,
+                $visibility === CaseUpdate::VISIBILITY_INTERNAL
+                    ? SupportAttachment::VISIBILITY_INTERNAL
+                    : SupportAttachment::VISIBILITY_PUBLIC,
+            );
+        }
+        $update = $case->updates()->create([
             'user_id' => $request->user()->id,
             'body' => $validated['body'],
             'visibility' => $visibility,
         ]);
+        $this->attachments->linkTo($storedAttachments, $update);
         if ($visibility === CaseUpdate::VISIBILITY_PUBLIC) {
             $case->touch();
         }
@@ -99,6 +132,7 @@ class CaseUpdateController extends Controller
                         $case,
                         $request->user(),
                         'updated',
+                        $storedAttachments->count(),
                     )
                     : new ApesCicCaseUpdatedNotification(
                         $case,
@@ -106,6 +140,7 @@ class CaseUpdateController extends Controller
                         'updated',
                         $instance->subCore->key,
                         $area->showRouteName(),
+                        $storedAttachments->count(),
                     ),
             ));
 
@@ -113,10 +148,16 @@ class CaseUpdateController extends Controller
             'sub_core_key' => $case->sub_core_key,
             'module_key' => $instance->module->key,
             'visibility' => $visibility,
+            ...($attachmentRequested ? ['attachments_added' => $storedAttachments->count()] : []),
         ]);
 
         return redirect()->route($area->showRouteName(), $case)
-            ->with('status', __('cases::ui.flash.case_update_added'));
+            ->with('status', AttachmentFeedback::status(__('cases::ui.flash.case_update_added'), $storedAttachments->count()));
+    }
+
+    private function allowsAttachments(ShelterCase $case, CasesArea $area): bool
+    {
+        return $this->attachmentGate->allows($area, $case->sub_core_key, $case->category, $case->sub_category);
     }
 
     private function instance(Request $request): ModuleInstanceDefinition

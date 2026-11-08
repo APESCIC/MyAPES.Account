@@ -4,6 +4,7 @@ namespace Plugins\Cases\Notifications;
 
 use App\Core\Accounts\User;
 use App\Core\Mail\Concerns\BuildsBrandedMail;
+use App\Core\Mail\Concerns\MentionsAttachments;
 use App\Support\WorkflowLabels;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -14,6 +15,7 @@ use Plugins\Cases\Models\ShelterCase;
 class ShelterCaseUpdatedNotification extends Notification implements ShouldQueue
 {
     use BuildsBrandedMail;
+    use MentionsAttachments;
     use Queueable;
 
     public bool $deleteWhenMissingModels = true;
@@ -22,6 +24,7 @@ class ShelterCaseUpdatedNotification extends Notification implements ShouldQueue
         private readonly ShelterCase $case,
         private readonly User $actor,
         private readonly string $eventLabel,
+        private readonly int $attachmentCount = 0,
     ) {
         $this->afterCommit();
     }
@@ -41,7 +44,7 @@ class ShelterCaseUpdatedNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        return $this->brandedMail()
+        $mail = $this->brandedMail()
             ->markdown('mail.brand.notification')
             ->greeting(__('mail.brand.greeting', ['name' => $this->recipientName($notifiable)]))
             ->subject(__('mail.shelter_case_updated.subject', [
@@ -55,7 +58,9 @@ class ShelterCaseUpdatedNotification extends Notification implements ShouldQueue
                 'actor' => $this->actor->name,
             ]))
             ->line(__('mail.shelter_case_updated.line_case_type', ['type' => $this->case->case_type]))
-            ->line(__('mail.shelter_case_updated.line_status', ['status' => WorkflowLabels::status($this->case->status)]))
+            ->line(__('mail.shelter_case_updated.line_status', ['status' => WorkflowLabels::status($this->case->status)]));
+
+        return $this->withAttachmentLine($mail, $this->attachmentCount)
             ->action(__('mail.shelter_case_updated.action'), $this->replyLink($notifiable, route('shelter.cases.show', $this->case)));
     }
 

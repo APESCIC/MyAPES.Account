@@ -346,6 +346,13 @@ return [
         'plugins_for' => 'Plugins for',
         'enabled' => 'Enabled',
         'disabled' => 'Disabled',
+        'uploads_state' => 'Ticket and case uploads: :state',
+        'uploads_on' => 'On',
+        'uploads_off' => 'Off',
+        'turn_uploads_on' => 'Turn uploads on',
+        'turn_uploads_off' => 'Turn uploads off',
+        'uploads_turned_on' => 'Uploads turned on for :module.',
+        'uploads_turned_off' => 'Uploads turned off for :module.',
         'available' => 'Available',
         'code_status' => [
             'shipped' => 'Shipped',

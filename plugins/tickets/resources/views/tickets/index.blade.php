@@ -71,7 +71,7 @@
                 <form
                     method="post"
                     action="{{ route($ticketService->routePrefix.'.store') }}"
-                    @if($usesHierarchicalCategories) enctype="multipart/form-data" @endif
+                    @if($uploadsEnabled ?? false) enctype="multipart/form-data" @endif
                     data-ticket-create-form
                 >
                 @csrf
@@ -131,13 +131,12 @@
                 <input id="subject" name="subject" value="{{ old('subject') }}" required>
                 <label for="description">{{ __('tickets::ui.index.blade.description') }}</label>
                 <x-rich-text-editor name="description" :value="old('description')" required />
-                @if($usesHierarchicalCategories)
+                @if(($uploadsEnabled ?? false) && $usesHierarchicalCategories)
                     <div data-attachment-fields hidden>
-                        <label for="screenshots">{{ __('tickets::ui.index.blade.screenshots_optional') }}</label>
-                        <input id="screenshots" name="screenshots[]" type="file" accept="image/jpeg,image/png,image/webp" multiple>
-                        <label for="screencast">{{ __('tickets::ui.index.blade.screencast_optional') }}</label>
-                        <input id="screencast" name="screencast" type="file" accept="video/mp4,video/webm">
+                        <x-attachment-uploads id-prefix="ticket-create" />
                     </div>
+                @elseif($uploadsEnabled ?? false)
+                    <x-attachment-uploads id-prefix="ticket-create" />
                 @endif
                     <button type="submit">{{ __('tickets::ui.index.blade.create_ticket') }}</button>
                 </form>

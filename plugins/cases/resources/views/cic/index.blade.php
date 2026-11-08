@@ -107,12 +107,11 @@
                 <input id="title" name="title" value="{{ old('title') }}" required>
                 <label for="details">{{ __('cases::ui.index.blade.details') }}</label>
                 <x-rich-text-editor name="details" :value="old('details')" />
-                <div data-attachment-fields hidden>
-                    <label for="screenshots">{{ __('cases::ui.index.blade.evidence_screenshots_optional') }}</label>
-                    <input id="screenshots" name="screenshots[]" type="file" accept="image/jpeg,image/png,image/webp" multiple>
-                    <label for="screencast">{{ __('cases::ui.index.blade.evidence_screencast_optional') }}</label>
-                    <input id="screencast" name="screencast" type="file" accept="video/mp4,video/webm">
-                </div>
+                @if($uploadsEnabled ?? false)
+                    <div data-attachment-fields hidden>
+                        <x-attachment-uploads id-prefix="case-create" :legend="__('cases::ui.index.blade.evidence_optional')" />
+                    </div>
+                @endif
                     <button type="submit">{{ __('cases::ui.index.blade.open_case') }}</button>
                 </form>
             </div>

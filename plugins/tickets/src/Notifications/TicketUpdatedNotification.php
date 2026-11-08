@@ -4,6 +4,7 @@ namespace Plugins\Tickets\Notifications;
 
 use App\Core\Accounts\User;
 use App\Core\Mail\Concerns\BuildsBrandedMail;
+use App\Core\Mail\Concerns\MentionsAttachments;
 use App\Support\WorkflowLabels;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -14,6 +15,7 @@ use Plugins\Tickets\Models\SupportTicket;
 class TicketUpdatedNotification extends Notification implements ShouldQueue
 {
     use BuildsBrandedMail;
+    use MentionsAttachments;
     use Queueable;
 
     public bool $deleteWhenMissingModels = true;
@@ -25,6 +27,7 @@ class TicketUpdatedNotification extends Notification implements ShouldQueue
         private readonly string $subCoreKey,
         private readonly string $showRouteName,
         private readonly string $serviceName,
+        private readonly int $attachmentCount = 0,
     ) {
         $this->afterCommit();
     }
@@ -44,7 +47,7 @@ class TicketUpdatedNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        return $this->brandedMail()
+        $mail = $this->brandedMail()
             ->markdown('mail.brand.notification')
             ->greeting(__('mail.brand.greeting', ['name' => $this->recipientName($notifiable)]))
             ->subject(__('mail.ticket_updated.subject', [
@@ -59,7 +62,9 @@ class TicketUpdatedNotification extends Notification implements ShouldQueue
                 'actor' => $this->actor->name,
             ]))
             ->line(__('mail.ticket_updated.line_status', ['status' => WorkflowLabels::status($this->ticket->status)]))
-            ->line(__('mail.ticket_updated.line_priority', ['priority' => WorkflowLabels::priority($this->ticket->priority)]))
+            ->line(__('mail.ticket_updated.line_priority', ['priority' => WorkflowLabels::priority($this->ticket->priority)]));
+
+        return $this->withAttachmentLine($mail, $this->attachmentCount)
             ->action(__('mail.ticket_updated.action'), $this->replyLink($notifiable, route($this->showRouteName, $this->ticket)));
     }
 

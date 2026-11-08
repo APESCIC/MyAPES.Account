@@ -23,3 +23,11 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# Upload limits (#546): 3 x 50 MB screencasts, 10 x 5 MB screenshots and
+# 10 x 10 MB documents, at most 100 MB per submission.
+<IfModule php_module>
+    php_value upload_max_filesize 52M
+    php_value post_max_size 110M
+    php_value max_file_uploads 30
+</IfModule>

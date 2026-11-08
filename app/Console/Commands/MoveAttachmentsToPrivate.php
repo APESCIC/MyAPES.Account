@@ -41,6 +41,7 @@ class MoveAttachmentsToPrivate extends Command
         $direction = $reverse ? 'private → public' : 'public → private';
 
         $attachments = SupportAttachment::query()
+            ->withTrashed()
             ->where('disk', $fromDisk)
             ->orderBy('id')
             ->get();

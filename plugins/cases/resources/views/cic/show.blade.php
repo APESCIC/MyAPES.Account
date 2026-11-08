@@ -143,21 +143,10 @@
                     </select>
                 @endif
                 @if($allowsAttachments)
-                    <p class="muted">{{ __('cases::ui.show.blade.to_add_evidence_files_use_save_case_after_uploading_on_') }}</p>
+                    <x-attachment-uploads id-prefix="case-update" :legend="__('cases::ui.show.blade.add_evidence')" />
                 @endif
                 <button type="submit">{{ __('cases::ui.show.blade.add_update') }}</button>
             </form>
-            @if($allowsAttachments)
-                <form method="post" action="{{ route('apes-cic.cases.update', $case) }}" enctype="multipart/form-data">
-                    @csrf
-                    @method('patch')
-                    <label for="case-screenshots">{{ __('cases::ui.show.blade.add_evidence_screenshots') }}</label>
-                    <input id="case-screenshots" name="screenshots[]" type="file" accept="image/jpeg,image/png,image/webp" multiple>
-                    <label for="case-screencast">{{ __('cases::ui.show.blade.add_evidence_screencast') }}</label>
-                    <input id="case-screencast" name="screencast" type="file" accept="video/mp4,video/webm">
-                    <button type="submit">{{ __('cases::ui.show.blade.upload_evidence') }}</button>
-                </form>
-            @endif
         @elseif($case->status === 'closed')
             <p class="muted">{{ __('cases::ui.show.blade.reopen_this_case_before_adding_another_update') }}</p>
         @endif
@@ -173,18 +162,9 @@
     </div>
 
     @if($case->attachments->isNotEmpty())
-        <div class="panel">
+        <div class="panel" data-case-attachments>
             <h2>{{ __('cases::ui.show.blade.attachments') }}</h2>
-            <ul class="attachment-list">
-                @foreach($case->attachments as $attachment)
-                    <li>
-                        <strong>{{ $attachment->kind }}</strong>
-                        — {{ $attachment->original_name }}
-                        <span class="muted">({{ number_format($attachment->size_bytes / 1024, 1) }} KB)</span>
-                        <a href="{{ route('support.attachments.download', $attachment) }}">{{ __('cases::ui.index.blade.open') }}</a>
-                    </li>
-                @endforeach
-            </ul>
+            <x-attachment-list :attachments="$case->attachments" />
         </div>
     @endif
 
@@ -196,6 +176,7 @@
                 <span class="muted">{{ $update->created_at }}</span>
                 @if($update->visibility === 'internal')<span class="status">internal</span>@endif
                 <x-rich-text :value="$update->body" />
+                <x-attachment-list :attachments="$case->attachments->filter(fn ($attachment) => $attachment->isContextOf($update))" />
             </div>
         @empty
             <p class="muted">{{ __('cases::ui.show.blade.no_updates_have_been_added') }}</p>

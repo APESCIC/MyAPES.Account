@@ -187,6 +187,8 @@ Route::middleware([
     });
     Route::get('/support/attachments/{attachment}', [SupportAttachmentController::class, 'download'])
         ->name('support.attachments.download');
+    Route::delete('/support/attachments/{attachment}', [SupportAttachmentController::class, 'destroy'])
+        ->name('support.attachments.destroy');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -427,6 +429,9 @@ Route::middleware([
             Route::post('/organisation-modules/{slug}/transition', [AdminOrganisationModuleController::class, 'transition'])
                 ->middleware('can:admin.modules.manage')
                 ->name('organisation-modules.transition');
+            Route::post('/organisation-modules/{slug}/uploads', [AdminOrganisationModuleController::class, 'uploads'])
+                ->middleware('can:admin.modules.manage')
+                ->name('organisation-modules.uploads');
 
             Route::get('/modules', [AdminModuleController::class, 'index'])
                 ->middleware('can:admin.modules.view')

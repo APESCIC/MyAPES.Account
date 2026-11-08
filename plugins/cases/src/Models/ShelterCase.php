@@ -4,6 +4,7 @@ namespace Plugins\Cases\Models;
 
 use App\Core\Accounts\ClientRecords\ArchivableClientRecord;
 use App\Core\Accounts\User;
+use App\Core\Attachments\HasSupportAttachments;
 use App\Core\Attachments\SupportAttachment;
 use App\Core\Content\SanitisedHtml;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Plugins\Cases\CasesArea;
 use Plugins\PetProfiles\Models\PetProfile;
 
 #[Fillable([
@@ -31,7 +33,7 @@ use Plugins\PetProfiles\Models\PetProfile;
     'resolved_at',
     'closed_at',
 ])]
-class ShelterCase extends Model
+class ShelterCase extends Model implements HasSupportAttachments
 {
     use ArchivableClientRecord;
 
@@ -100,5 +102,20 @@ class ShelterCase extends Model
     public function attachments(): MorphMany
     {
         return $this->morphMany(SupportAttachment::class, 'attachable');
+    }
+
+    public function attachmentPermissionPrefix(): string
+    {
+        return "{$this->sub_core_key}.cases.";
+    }
+
+    public function attachmentOwnerId(): ?int
+    {
+        return $this->user_id === null ? null : (int) $this->user_id;
+    }
+
+    public function attachmentRecordUrl(): ?string
+    {
+        return route(CasesArea::forModule((string) $this->sub_core_key)->showRouteName(), $this);
     }
 }

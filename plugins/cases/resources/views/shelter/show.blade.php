@@ -79,7 +79,7 @@
         </div>
 
         @if($canCommentCase)
-            <form method="post" action="{{ route('shelter.cases.updates.store', $case) }}">
+            <form method="post" action="{{ route('shelter.cases.updates.store', $case) }}" @if($allowsAttachments ?? false) enctype="multipart/form-data" @endif>
                 @csrf
                 <label for="body">{{ __('cases::ui.show.blade.add_update') }}</label>
                 <x-rich-text-editor name="body" :value="old('body')" />
@@ -90,12 +90,21 @@
                         <option value="internal">{{ __('cases::ui.show.blade.internal_staff_only') }}</option>
                     </select>
                 @endif
+                @if($allowsAttachments ?? false)
+                    <x-attachment-uploads id-prefix="shelter-case-update" />
+                @endif
                 <button type="submit">{{ __('cases::ui.show.blade.add_update') }}</button>
             </form>
         @elseif($case->status === 'closed')
             <p class="muted">{{ __('cases::ui.show.blade.reopen_this_case_before_adding_another_update') }}</p>
         @endif
     </div>
+    @if($case->attachments->isNotEmpty())
+        <div class="panel" data-case-attachments>
+            <h2>{{ __('cases::ui.show.blade.attachments') }}</h2>
+            <x-attachment-list :attachments="$case->attachments" />
+        </div>
+    @endif
     <div class="panel">
         <h2>{{ __('cases::ui.show.blade.activity') }}</h2>
         @forelse($updates as $update)
@@ -104,6 +113,7 @@
                 <span class="muted">{{ $update->created_at }}</span>
                 @if($update->visibility === 'internal')<span class="status">internal</span>@endif
                 <x-rich-text :value="$update->body" />
+                <x-attachment-list :attachments="$case->attachments->filter(fn ($attachment) => $attachment->isContextOf($update))" />
             </div>
         @empty
             <p class="muted">{{ __('cases::ui.show.blade.no_updates_have_been_added') }}</p>

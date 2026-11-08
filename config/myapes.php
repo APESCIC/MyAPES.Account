@@ -65,6 +65,16 @@ return [
         'retention_days' => (int) env('AUDIT_LOG_RETENTION_DAYS', 180),
     ],
 
+    'attachments' => [
+        // Virus scanning for ticket and case uploads (#550): disabled, clamd or fake (tests only).
+        'scanner' => env('ATTACHMENT_SCANNER', 'disabled'),
+        'clamd' => [
+            'host' => env('CLAMD_HOST', ''),
+            'port' => (int) env('CLAMD_PORT', 3310),
+            'timeout' => (int) env('CLAMD_TIMEOUT', 30),
+        ],
+    ],
+
     'csp' => [
         // Enforced since #488 after a clean report-only run (decision D6);
         // CSP_ENFORCE=false drops back to report-only. The nonce for inline

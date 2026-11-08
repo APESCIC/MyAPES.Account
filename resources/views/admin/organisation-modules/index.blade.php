@@ -17,14 +17,19 @@
                 $manifest = $row['manifest'];
                 $record = $row['record'];
                 $enabled = (bool) $record->enabled;
+                $uploadsOn = $record->uploads_enabled !== false;
                 $plugins = $row['plugins'];
             @endphp
             <li class="module-registry__row module-registry__row--shipped module-registry__row--{{ $enabled ? 'enabled' : 'disabled' }}">
-                <div>
+                <div class="module-registry__status-rail" aria-hidden="true"></div>
+                <div class="module-registry__card-body">
                     <h2>{{ $manifest->name }}</h2>
                     <p class="muted"><code>{{ $manifest->slug }}</code> · {{ $manifest->routePrefix }}</p>
                     <p>{{ $manifest->description }}</p>
                     <p class="muted">State: {{ $enabled ? __('admin.plugins.enabled') : __('admin.plugins.disabled') }}</p>
+                    <p class="muted" data-uploads-state="{{ $uploadsOn ? 'on' : 'off' }}">
+                        {{ __('admin.plugins.uploads_state', ['state' => $uploadsOn ? __('admin.plugins.uploads_on') : __('admin.plugins.uploads_off')]) }}
+                    </p>
                     @if($plugins !== [])
                         <ul class="module-registry__chips" aria-label="{{ __('admin.plugins.plugins_for') }} {{ $manifest->name }}">
                             @foreach($plugins as $plugin)
@@ -38,16 +43,25 @@
                             @endforeach
                         </ul>
                     @endif
+                    @can('admin.modules.manage')
+                        <div class="module-registry__row-actions">
+                            <form method="post" action="{{ route('admin.organisation-modules.transition', $manifest->slug) }}">
+                                @csrf
+                                <input type="hidden" name="action" value="{{ $enabled ? 'disable' : 'enable' }}">
+                                <button type="submit" class="button {{ $enabled ? 'button-secondary' : '' }}">
+                                    {{ $enabled ? 'Disable' : 'Enable' }}
+                                </button>
+                            </form>
+                            <form method="post" action="{{ route('admin.organisation-modules.uploads', $manifest->slug) }}">
+                                @csrf
+                                <input type="hidden" name="uploads_enabled" value="{{ $uploadsOn ? 0 : 1 }}">
+                                <button type="submit" class="button button-secondary">
+                                    {{ $uploadsOn ? __('admin.plugins.turn_uploads_off') : __('admin.plugins.turn_uploads_on') }}
+                                </button>
+                            </form>
+                        </div>
+                    @endcan
                 </div>
-                @can('admin.modules.manage')
-                    <form method="post" action="{{ route('admin.organisation-modules.transition', $manifest->slug) }}">
-                        @csrf
-                        <input type="hidden" name="action" value="{{ $enabled ? 'disable' : 'enable' }}">
-                        <button type="submit" class="button {{ $enabled ? 'button-secondary' : '' }}">
-                            {{ $enabled ? 'Disable' : 'Enable' }}
-                        </button>
-                    </form>
-                @endcan
             </li>
         @endforeach
     </ul>

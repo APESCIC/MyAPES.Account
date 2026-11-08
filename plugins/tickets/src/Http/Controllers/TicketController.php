@@ -10,7 +10,10 @@ use App\Rules\EligibleRecordOwner;
 use App\Rules\EligibleStaffAssignee;
 use App\Services\AssignmentAuthorization;
 use App\Services\AuditLogger;
-use App\Services\SecureUploadService;
+use App\Core\Attachments\AttachmentFeedback;
+use App\Core\Attachments\AttachmentLimits;
+use App\Core\Attachments\SupportAttachment;
+use App\Core\Attachments\UploadSettings;
 use App\Services\SupportAttachmentService;
 use Closure;
 use Illuminate\Contracts\View\View;
@@ -52,6 +55,7 @@ class TicketController extends Controller
         private readonly TicketCategoryResolver $categories,
         private readonly SupportAttachmentService $attachments,
         private readonly TicketOwnerCandidates $ownerCandidates,
+        private readonly UploadSettings $uploads,
     ) {}
 
     public function index(Request $request): View
@@ -84,6 +88,8 @@ class TicketController extends Controller
                 ? $this->categories->websites($instance->subCore->key)
                 : [],
             'usesHierarchicalCategories' => $isApesCic,
+            'uploadsEnabled' => $this->area()->supportsAttachments
+                && $this->uploads->enabledFor($this->area()->moduleSlug),
             'canCreateTicket' => $user->can($prefix.'create'),
             'revealAssigneeIdentity' => $user->can($prefix.'view-all'),
             'priorities' => self::createPrioritiesFor($user, $prefix),
@@ -113,17 +119,11 @@ class TicketController extends Controller
         if ($isApesCic) {
             $rules['sub_category'] = ['required', 'string', 'max:64'];
             $rules['affected_website_key'] = ['nullable', 'string', 'max:64'];
-            $rules['screenshots'] = ['nullable', 'array', 'max:5'];
-            $rules['screenshots.*'] = ['image', 'mimes:jpg,jpeg,png,webp', 'max:3072'];
-            $rules['screencast'] = [
-                'nullable',
-                'file',
-                'mimetypes:video/mp4,video/webm',
-                'max:'.SecureUploadService::SCREENCAST_MAX_KB,
-            ];
         }
+        $rules = [...$rules, ...AttachmentLimits::rules()];
 
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, AttachmentLimits::validationMessages());
+        AttachmentLimits::assertSubmissionWithinLimits($request);
 
         $categoryFields = [
             'service_area' => $validated['service_area'],
@@ -138,18 +138,19 @@ class TicketController extends Controller
                 $validated['sub_category'],
                 $validated['affected_website_key'] ?? null,
             );
-            $allowsAttachments = $this->categories->allowsAttachments(
-                $instance->subCore->key,
-                $categoryFields['service_area'],
-                $categoryFields['sub_category'],
-            );
-            if (! $allowsAttachments && (
-                $request->hasFile('screenshots') || $request->hasFile('screencast')
-            )) {
-                throw ValidationException::withMessages([
-                    'screenshots' => __('tickets::ui.validation.attachments_are_not_available_for_this_subcategory'),
-                ]);
-            }
+        }
+
+        $allowsAttachments = $this->attachmentsAllowed(
+            $instance->subCore->key,
+            $categoryFields['service_area'],
+            $categoryFields['sub_category'],
+        );
+        if (! $allowsAttachments && AttachmentLimits::requested($request)) {
+            throw ValidationException::withMessages([
+                'screenshots' => $this->uploads->enabledFor($this->area()->moduleSlug)
+                    ? __('tickets::ui.validation.attachments_are_not_available_for_this_subcategory')
+                    : __('attachments.validation.uploads_disabled'),
+            ]);
         }
 
         $ticket = SupportTicket::create([
@@ -170,21 +171,17 @@ class TicketController extends Controller
             'is_staff_note' => false,
         ]);
 
-        if ($isApesCic && $this->categories->allowsAttachments(
-            $instance->subCore->key,
-            $categoryFields['service_area'],
-            (string) $categoryFields['sub_category'],
-        )) {
-            $this->attachments->storeFor(
+        $storedAttachments = collect();
+        if ($allowsAttachments) {
+            $storedAttachments = $this->attachments->storeFromRequest(
                 $ticket,
                 $instance->subCore->key,
                 $request->user(),
-                $request->file('screenshots'),
-                $request->file('screencast'),
+                $request,
             );
         }
 
-        $this->notifyTicketStakeholders($ticket, $request->user(), 'created', $instance);
+        $this->notifyTicketStakeholders($ticket, $request->user(), 'created', $instance, attachmentCount: $storedAttachments->count());
         $auditLogger->record("{$ticketService->auditPrefix}.created", $request->user(), $ticket, [
             'service_area' => $ticket->service_area,
             'sub_category' => $ticket->sub_category,
@@ -195,7 +192,10 @@ class TicketController extends Controller
         ]);
 
         return redirect()->route($this->area()->showRouteName(), $ticket)
-            ->with('status', __('tickets::ui.flash.your_ticket_has_been_saved'));
+            ->with('status', AttachmentFeedback::status(
+                __('tickets::ui.flash.your_ticket_has_been_saved'),
+                $storedAttachments->count(),
+            ));
     }
 
     public function show(
@@ -216,13 +216,11 @@ class TicketController extends Controller
         $canCommentTicket = $user->can($prefix.'comment-own');
         $canChooseVisibility = $user->can($prefix.'view-all');
         $isApesCic = $this->area()->usesHierarchicalCategories;
-        $allowsAttachments = $isApesCic
-            && is_string($ticket->sub_category)
-            && $this->categories->allowsAttachments(
-                $instance->subCore->key,
-                $ticket->service_area,
-                $ticket->sub_category,
-            );
+        $allowsAttachments = $this->attachmentsAllowed(
+            $instance->subCore->key,
+            $ticket->service_area,
+            $ticket->sub_category,
+        );
 
         $messagesQuery = $ticket->messages()->with('user')->latest('created_at');
         if (! $user->can($prefix.'view-all')) {
@@ -236,7 +234,13 @@ class TicketController extends Controller
             : collect();
 
         return view('tickets::tickets.show', [
-            'ticket' => $ticket->load(['user', 'assignedTo', 'attachments']),
+            'ticket' => $ticket->load([
+                'user',
+                'assignedTo',
+                'attachments' => fn ($query) => $canChooseVisibility
+                    ? $query
+                    : $query->where('visibility', SupportAttachment::VISIBILITY_PUBLIC),
+            ]),
             'messages' => $messages,
             'activityOpenerUser' => $creationMarker?->user ?? $ticket->user,
             'hiddenCreationMessageId' => $creationMarker?->id,
@@ -311,12 +315,10 @@ class TicketController extends Controller
         $ticketUpdateRequested = array_key_exists('status', $input)
             || array_key_exists('priority', $input);
         $messageRequested = array_key_exists('message', $input);
-        $attachmentRequested = $request->hasFile('screenshots')
-            || $request->hasFile('screencast');
+        $attachmentRequested = AttachmentLimits::requested($request);
         $canChooseVisibility = $request->user()->can(
             $prefix.'view-all',
         );
-        $isApesCic = $this->area()->usesHierarchicalCategories;
 
         if ($assignmentRequested || $ownerRequested) {
             $assignments->authorizeChange(
@@ -337,10 +339,9 @@ class TicketController extends Controller
 
         if ($attachmentRequested) {
             Gate::authorize($prefix.'comment-own');
+            Gate::authorize('create', [SupportAttachment::class, $ticket]);
             abort_unless(
-                $isApesCic
-                && is_string($ticket->sub_category)
-                && $this->categories->allowsAttachments(
+                $this->attachmentsAllowed(
                     $instance->subCore->key,
                     $ticket->service_area,
                     $ticket->sub_category,
@@ -357,7 +358,7 @@ class TicketController extends Controller
                 'string',
             ],
         ];
-        if ($messageRequested) {
+        if ($messageRequested || $attachmentRequested) {
             $rules['visibility'] = ['nullable', 'in:public,internal'];
         }
         if ($ticketUpdateRequested) {
@@ -392,16 +393,12 @@ class TicketController extends Controller
             ];
         }
         if ($attachmentRequested) {
-            $rules['screenshots'] = ['nullable', 'array', 'max:5'];
-            $rules['screenshots.*'] = ['image', 'mimes:jpg,jpeg,png,webp', 'max:3072'];
-            $rules['screencast'] = [
-                'nullable',
-                'file',
-                'mimetypes:video/mp4,video/webm',
-                'max:'.SecureUploadService::SCREENCAST_MAX_KB,
-            ];
+            $rules = [...$rules, ...AttachmentLimits::rules()];
         }
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, AttachmentLimits::validationMessages());
+        if ($attachmentRequested) {
+            AttachmentLimits::assertSubmissionWithinLimits($request);
+        }
 
         $updates = [];
         if ($ticketUpdateRequested) {
@@ -447,14 +444,16 @@ class TicketController extends Controller
         $message = $validated['message'] ?? null;
         $hasMessage = is_string($message) && $message !== '';
         $ticketChanged = $updates !== [];
+        $internal = $canChooseVisibility
+            && ($validated['visibility'] ?? 'public') === 'internal';
         $storedAttachments = collect();
         if ($attachmentRequested) {
-            $storedAttachments = $this->attachments->storeFor(
+            $storedAttachments = $this->attachments->storeFromRequest(
                 $ticket,
                 $instance->subCore->key,
                 $request->user(),
-                $request->file('screenshots'),
-                $request->file('screencast'),
+                $request,
+                $internal ? SupportAttachment::VISIBILITY_INTERNAL : SupportAttachment::VISIBILITY_PUBLIC,
             );
         }
         $hasAttachments = $storedAttachments->isNotEmpty();
@@ -470,18 +469,17 @@ class TicketController extends Controller
         }
 
         if ($hasMessage) {
-            $ticket->messages()->create([
+            $createdMessage = $ticket->messages()->create([
                 'user_id' => $request->user()->id,
                 'message' => $message,
-                'is_staff_note' => $canChooseVisibility
-                    && ($validated['visibility'] ?? 'public') === 'internal',
+                'is_staff_note' => $internal,
             ]);
+            if ($hasAttachments) {
+                $this->attachments->linkTo($storedAttachments, $createdMessage);
+            }
         }
 
-        $internalMessage = $hasMessage
-            && $canChooseVisibility
-            && ($validated['visibility'] ?? 'public') === 'internal';
-        if (($hasMessage && ! $internalMessage && ! $ticketChanged) || $hasAttachments) {
+        if (($hasMessage && ! $internal && ! $ticketChanged) || ($hasAttachments && ! $internal)) {
             $ticket->touch();
         }
         $this->notifyTicketStakeholders(
@@ -489,7 +487,8 @@ class TicketController extends Controller
             $request->user(),
             'updated',
             $instance,
-            $internalMessage && ! $ticketChanged && ! $hasAttachments,
+            $internal && ! $ticketChanged,
+            $storedAttachments->count(),
         );
         $auditLogger->record("{$ticketService->auditPrefix}.updated", $request->user(), $ticket, [
             'status' => $ticket->status,
@@ -502,7 +501,10 @@ class TicketController extends Controller
         ]);
 
         return redirect()->route($this->area()->showRouteName(), $ticket)
-            ->with('status', __('tickets::ui.flash.your_update_has_been_saved'));
+            ->with('status', AttachmentFeedback::status(
+                __('tickets::ui.flash.your_update_has_been_saved'),
+                $storedAttachments->count(),
+            ));
     }
 
     public function destroy(
@@ -521,7 +523,7 @@ class TicketController extends Controller
             'sub_core_key' => $ticket->sub_core_key,
             'module_key' => $instance->module->key,
         ]);
-        $ticket->attachments()->each(fn ($attachment) => $attachment->delete());
+        $ticket->attachments()->withTrashed()->get()->each(fn (SupportAttachment $attachment) => $attachment->forceDelete());
         $ticket->delete();
 
         return redirect()->route($this->area()->indexRouteName())
@@ -534,6 +536,7 @@ class TicketController extends Controller
         string $eventLabel,
         ModuleInstanceDefinition $instance,
         bool $staffOnly = false,
+        int $attachmentCount = 0,
     ): void {
         $prefix = $this->area()->permissionPrefix();
         $ticketService = $this->ticketServices->for($instance->subCore->key);
@@ -558,8 +561,24 @@ class TicketController extends Controller
                 $instance->subCore->key,
                 $this->area()->showRouteName(),
                 $ticketService->serviceName,
+                $attachmentCount,
             ));
         }
+    }
+
+    private function attachmentsAllowed(string $subCoreKey, string $serviceArea, ?string $subCategory): bool
+    {
+        $area = $this->area();
+        if (! $area->supportsAttachments || ! $this->uploads->enabledFor($area->moduleSlug)) {
+            return false;
+        }
+
+        if (! $area->usesHierarchicalCategories) {
+            return true;
+        }
+
+        return is_string($subCategory)
+            && $this->categories->allowsAttachments($subCoreKey, $serviceArea, $subCategory);
     }
 
     private function requireTicketForInstance(

@@ -16,6 +16,7 @@ class OrganisationModule extends Model
     protected $fillable = [
         'slug',
         'enabled',
+        'uploads_enabled',
         'enabled_at',
         'enabled_by',
         'disabled_at',
@@ -26,6 +27,7 @@ class OrganisationModule extends Model
     {
         return [
             'enabled' => 'boolean',
+            'uploads_enabled' => 'boolean',
             'enabled_at' => 'datetime',
             'disabled_at' => 'datetime',
         ];

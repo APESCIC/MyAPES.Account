@@ -18,7 +18,7 @@ class NonAdminRolesAdminRouteDenialTest extends TestCase
      * Every /admin and legacy /superadmin route. A new admin route must raise
      * this number so it is covered by the denial matrix below.
      */
-    private const ADMIN_ROUTE_COUNT = 53;
+    private const ADMIN_ROUTE_COUNT = 54;
 
     /**
      * @var array<string, string>

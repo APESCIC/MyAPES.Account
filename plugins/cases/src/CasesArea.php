@@ -67,7 +67,7 @@ final readonly class CasesArea
                 usesCategories: false,
                 usesPetProfiles: true,
                 supportsDelete: false,
-                supportsAttachments: false,
+                supportsAttachments: true,
             ),
             default => throw new InvalidArgumentException(
                 "Cases is not configured for module [{$moduleSlug}].",

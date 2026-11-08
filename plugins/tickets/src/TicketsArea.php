@@ -31,14 +31,14 @@ final readonly class TicketsArea
                 moduleSlug: 'shelter-rescue',
                 routeNamePrefix: 'shelter.tickets',
                 usesHierarchicalCategories: false,
-                supportsAttachments: false,
+                supportsAttachments: true,
                 supportsDelete: false,
             ),
             'pet-care-clinic' => new self(
                 moduleSlug: 'pet-care-clinic',
                 routeNamePrefix: 'petcare.tickets',
                 usesHierarchicalCategories: false,
-                supportsAttachments: false,
+                supportsAttachments: true,
                 supportsDelete: false,
             ),
             default => throw new InvalidArgumentException(
