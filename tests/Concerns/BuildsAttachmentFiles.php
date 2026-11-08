@@ -5,6 +5,7 @@ namespace Tests\Concerns;
 use App\Core\Accounts\User;
 use Illuminate\Http\UploadedFile;
 use Plugins\Cases\Models\ShelterCase;
+use Plugins\PetProfiles\Models\PetProfile;
 use Plugins\Tickets\Models\SupportTicket;
 
 trait BuildsAttachmentFiles
@@ -57,6 +58,29 @@ trait BuildsAttachmentFiles
             'title' => 'Attachment case',
             'details' => 'Case for attachment tests.',
             'opened_at' => now(),
+            ...$overrides,
+        ]);
+    }
+
+    protected function shelterCaseFor(User $owner, array $overrides = []): ShelterCase
+    {
+        $pet = PetProfile::query()->create([
+            'user_id' => $owner->id,
+            'service_domain' => PetProfile::DOMAIN_SHELTER,
+            'name' => 'Attachment pet',
+            'species' => 'dog',
+            'sex' => 'unknown',
+            'neutering_status' => 'unknown',
+        ]);
+
+        return ShelterCase::query()->create([
+            'sub_core_key' => ShelterCase::SUB_CORE_SHELTER_RESCUE,
+            'pet_profile_id' => $pet->id,
+            'user_id' => $owner->id,
+            'case_type' => 'rescue',
+            'status' => 'open',
+            'title' => 'Shelter attachment case',
+            'details' => 'Shelter case for attachment tests.',
             ...$overrides,
         ]);
     }

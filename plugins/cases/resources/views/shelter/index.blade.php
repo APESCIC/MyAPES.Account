@@ -34,7 +34,7 @@
                 @if($showEmptyPetSelect)
                     @include('pet-profiles::partials.staff-empty-pet-select')
                 @else
-                    <form method="post" action="{{ route('shelter.cases.store') }}">
+                    <form method="post" action="{{ route('shelter.cases.store') }}" @if($uploadsEnabled ?? false) enctype="multipart/form-data" @endif>
                     @csrf
                     <div class="row">
                         @include('pet-profiles::partials.pet-profile-select')
@@ -47,6 +47,9 @@
                     <input name="title">
                     <label>{{ __('cases::ui.index.blade.details') }}</label>
                     <x-rich-text-editor name="details" :value="old('details')" />
+                    @if($uploadsEnabled ?? false)
+                        <x-attachment-uploads id-prefix="shelter-case-create" />
+                    @endif
                     <button type="submit">{{ __('cases::ui.index.blade.create_case') }}</button>
                     </form>
                 @endif

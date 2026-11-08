@@ -107,9 +107,11 @@
                 <input id="title" name="title" value="{{ old('title') }}" required>
                 <label for="details">{{ __('cases::ui.index.blade.details') }}</label>
                 <x-rich-text-editor name="details" :value="old('details')" />
-                <div data-attachment-fields hidden>
-                    <x-attachment-uploads id-prefix="case-create" :legend="__('cases::ui.index.blade.evidence_optional')" />
-                </div>
+                @if($uploadsEnabled ?? false)
+                    <div data-attachment-fields hidden>
+                        <x-attachment-uploads id-prefix="case-create" :legend="__('cases::ui.index.blade.evidence_optional')" />
+                    </div>
+                @endif
                     <button type="submit">{{ __('cases::ui.index.blade.open_case') }}</button>
                 </form>
             </div>

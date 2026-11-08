@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Plugins\Cases\CaseAttachmentGate;
 use Plugins\Cases\CaseCategoryResolver;
 use Plugins\Cases\CasesArea;
 use Plugins\Cases\Models\ShelterCase;
@@ -33,6 +34,7 @@ class CaseController extends Controller
         private readonly CaseCategoryResolver $categories,
         private readonly SupportAttachmentService $attachments,
         private readonly PetProfilesContract $petProfiles,
+        private readonly CaseAttachmentGate $attachmentGate,
     ) {}
 
     public function index(Request $request): View
@@ -104,6 +106,7 @@ class CaseController extends Controller
             'canCreateCase' => $user->can($prefix.'create'),
             'revealAssigneeIdentity' => $user->can($prefix.'view-all'),
             'categoryResolver' => $this->categories,
+            'uploadsEnabled' => $this->attachmentGate->uploadsEnabled($this->area()),
         ]);
     }
 
@@ -132,14 +135,15 @@ class CaseController extends Controller
             $validated['affected_website_key'] ?? null,
         );
 
-        $allowsAttachments = $this->categories->allowsAttachments(
+        $allowsAttachments = $this->attachmentGate->allows(
+            $this->area(),
             $instance->subCore->key,
             $categoryFields['category'],
             $categoryFields['sub_category'],
         );
         if (! $allowsAttachments && AttachmentLimits::requested($request)) {
             throw ValidationException::withMessages([
-                'screenshots' => __('cases::ui.validation.attachments_are_not_available_for_this_subcategory'),
+                'screenshots' => $this->attachmentGate->refusalMessage($this->area()),
             ]);
         }
 
@@ -193,12 +197,12 @@ class CaseController extends Controller
         $canViewAll = $user->can($prefix.'view-all');
         $canChangeAssignment = $assignments->allows($user)
             && $user->can($prefix.'assign');
-        $allowsAttachments = is_string($case->sub_category)
-            && $this->categories->allowsAttachments(
-                $instance->subCore->key,
-                (string) $case->category,
-                $case->sub_category,
-            );
+        $allowsAttachments = $this->attachmentGate->allows(
+            $this->area(),
+            $instance->subCore->key,
+            $case->category,
+            $case->sub_category,
+        );
 
         $updates = $case->updates()->with('user')->oldest();
         if (! $canViewAll) {
@@ -268,10 +272,10 @@ class CaseController extends Controller
         if ($attachmentRequested) {
             Gate::authorize($prefix.'comment-own');
             abort_unless(
-                is_string($case->sub_category)
-                && $this->categories->allowsAttachments(
+                $this->attachmentGate->allows(
+                    $this->area(),
                     $instance->subCore->key,
-                    (string) $case->category,
+                    $case->category,
                     $case->sub_category,
                 ),
                 403,
@@ -491,6 +495,7 @@ class CaseController extends Controller
         return view($area->view('index'), [
             'cases' => $query->paginate(20)->fragment('list'),
             'canCreateCase' => Gate::allows('create', ShelterCase::class),
+            'uploadsEnabled' => $this->attachmentGate->uploadsEnabled($area),
             'petProfiles' => $petProfiles,
             ...StaffPetCreateReturn::emptySelectViewData(
                 $user,
@@ -524,14 +529,26 @@ class CaseController extends Controller
             'case_type' => ['required', Rule::in($area->caseTypes)],
             'title' => ['required', 'string', 'max:255'],
             'details' => ['nullable', 'string'],
-        ]);
+            ...AttachmentLimits::rules(),
+        ], AttachmentLimits::messages());
+        AttachmentLimits::assertSubmissionWithinLimits($request);
+        $allowsAttachments = $this->attachmentGate->allows($area, $area->moduleSlug, null, null);
+        if (! $allowsAttachments && AttachmentLimits::requested($request)) {
+            throw ValidationException::withMessages([
+                'screenshots' => $this->attachmentGate->refusalMessage($area),
+            ]);
+        }
 
         $case = ShelterCase::create([
-            ...$validated,
+            ...collect($validated)->only(['pet_profile_id', 'case_type', 'title', 'details'])->all(),
             'sub_core_key' => $area->moduleSlug,
             'user_id' => $pet->user_id,
             'status' => 'open',
         ]);
+
+        if ($allowsAttachments) {
+            $this->attachments->storeFromRequest($case, $area->moduleSlug, $request->user(), $request);
+        }
 
         $this->notifyShelterStakeholders($case, $request->user(), 'created');
         $auditLogger->record("{$area->auditEventPrefix}.created", $request->user(), $case, [
@@ -561,8 +578,9 @@ class CaseController extends Controller
         }
 
         return view($area->view('show'), [
-            'case' => $case->load(['petProfile', 'assignedTo']),
+            'case' => $case->load(['petProfile', 'assignedTo', 'attachments']),
             'updates' => $updates->get(),
+            'allowsAttachments' => $this->attachmentGate->allows($area, $area->moduleSlug, null, null),
             'caseTypes' => $area->caseTypes,
             'statuses' => $area->statuses,
             'canChangeAssignment' => $canChangeAssignment,

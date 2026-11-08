@@ -110,4 +110,40 @@ class AdminOrganisationModuleController extends Controller
                 ? "Module [{$slug}] enabled."
                 : "Module [{$slug}] disabled.");
     }
+
+    public function uploads(
+        Request $request,
+        string $slug,
+        ModulePackageRegistry $modules,
+        AuditLogger $audit,
+    ): RedirectResponse {
+        abort_unless($modules->has($slug), 404);
+
+        $validated = $request->validate([
+            'uploads_enabled' => ['required', 'boolean'],
+        ]);
+
+        $enabled = (bool) $validated['uploads_enabled'];
+        $record = OrganisationModule::query()->firstOrNew(['slug' => $slug]);
+        if (! $record->exists) {
+            $record->enabled = $modules->module($slug)->enabledByDefault;
+        }
+        $record->uploads_enabled = $enabled;
+        $record->save();
+
+        $audit->record(
+            $enabled ? 'organisation_module.uploads_enabled' : 'organisation_module.uploads_disabled',
+            $request->user(),
+            null,
+            ['slug' => $slug],
+        );
+
+        $name = $modules->module($slug)->name;
+
+        return redirect()
+            ->route('admin.organisation-modules.index')
+            ->with('status', $enabled
+                ? __('admin.plugins.uploads_turned_on', ['module' => $name])
+                : __('admin.plugins.uploads_turned_off', ['module' => $name]));
+    }
 }

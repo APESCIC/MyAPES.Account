@@ -427,6 +427,9 @@ Route::middleware([
             Route::post('/organisation-modules/{slug}/transition', [AdminOrganisationModuleController::class, 'transition'])
                 ->middleware('can:admin.modules.manage')
                 ->name('organisation-modules.transition');
+            Route::post('/organisation-modules/{slug}/uploads', [AdminOrganisationModuleController::class, 'uploads'])
+                ->middleware('can:admin.modules.manage')
+                ->name('organisation-modules.uploads');
 
             Route::get('/modules', [AdminModuleController::class, 'index'])
                 ->middleware('can:admin.modules.view')

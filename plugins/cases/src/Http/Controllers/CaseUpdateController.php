@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
-use Plugins\Cases\CaseCategoryResolver;
+use Plugins\Cases\CaseAttachmentGate;
 use Plugins\Cases\CasesArea;
 use Plugins\Cases\Models\CaseUpdate;
 use Plugins\Cases\Models\ShelterCase;
@@ -25,7 +25,7 @@ class CaseUpdateController extends Controller
 {
     public function __construct(
         private readonly ModuleContext $moduleContext,
-        private readonly CaseCategoryResolver $categories,
+        private readonly CaseAttachmentGate $attachmentGate,
         private readonly SupportAttachmentService $attachments,
     ) {}
 
@@ -140,7 +140,7 @@ class CaseUpdateController extends Controller
             'sub_core_key' => $case->sub_core_key,
             'module_key' => $instance->module->key,
             'visibility' => $visibility,
-            'attachments_added' => $storedAttachments->count(),
+            ...($attachmentRequested ? ['attachments_added' => $storedAttachments->count()] : []),
         ]);
 
         return redirect()->route($area->showRouteName(), $case)
@@ -149,13 +149,7 @@ class CaseUpdateController extends Controller
 
     private function allowsAttachments(ShelterCase $case, CasesArea $area): bool
     {
-        return $area->supportsAttachments
-            && is_string($case->sub_category)
-            && $this->categories->allowsAttachments(
-                $case->sub_core_key,
-                (string) $case->category,
-                $case->sub_category,
-            );
+        return $this->attachmentGate->allows($area, $case->sub_core_key, $case->category, $case->sub_category);
     }
 
     private function instance(Request $request): ModuleInstanceDefinition
