@@ -1,5 +1,62 @@
 [
   {
+    "version": "0.58.0",
+    "date": "2026-11-08",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Documents and multiple uploads",
+    "summary": "Tickets and cases in every service now take documents as well as screenshots and screencasts, several files at a time, with a new drag-and-drop upload box that shows each file's progress.",
+    "changes": [
+      "Attach documents (PDF, DOCX, XLSX, ODT, ODS, TXT and CSV) when you open a ticket or case, reply to a ticket or add a case update. Files with macros, older Word and Excel formats and programs are refused.",
+      "Attach up to 10 screenshots of 5 MB each, 3 screencasts of 50 MB each and 10 documents of 10 MB each, up to 100 MB in one go.",
+      "A new upload box on every ticket and case form: drag and drop or choose files, remove a file before sending, see the limits up front and follow each file's progress. It works with a keyboard and screen readers.",
+      "Uploads now work in APES Shelter and Rescue and APES Pet Care Clinic as well as APES CIC. Admins can turn uploads off for a service on Admin, Modules.",
+      "Files added with a staff-only note or an internal case update are visible to staff only. The person who uploaded a file, or an admin, can delete it.",
+      "Uploads can be checked for viruses before anyone can download them, and blocked files are held back with a message to the uploader.",
+      "Screenshots and photos are resized to at most 2560 pixels and saved without location data or other hidden image details.",
+      "Uploads, downloads and deletions are recorded in the audit log. The save message says how many files were uploaded, and update emails say how many new attachments there are, with a link to log in and view them."
+    ],
+    "affected_areas": [
+      "Tickets",
+      "Cases",
+      "Attachments",
+      "Admin modules",
+      "Emails"
+    ],
+    "categories": [
+      "added",
+      "changed",
+      "security"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Minor: new capabilities (document uploads, multiple files, uploads in every service, virus scanning support and an admin upload switch) with no breaking changes.",
+    "validation": [
+      "Feature tests for document types and macros, upload limits, the shared upload component, uploads in every service, attachment permissions and staff-only files, virus scan states and quarantine, audit entries, email wording and image resizing.",
+      "Frontend unit tests for the upload component with node --test, and a browser check of ticket and admin pages on Laragon.",
+      "Full PHPUnit suite locally and in CI; release history validated against main."
+    ],
+    "known_limitations": [
+      "Virus scanning needs a ClamAV daemon that the app can reach. Until one is configured, new files are marked not scanned and can be downloaded; see the Attachments and virus scanning wiki page.",
+      "Files uploaded before this release are marked not scanned.",
+      "The older single screencast field is still accepted for this release only."
+    ],
+    "rollback": "Redeploy the previous release package. The new attachment columns have defaults and can stay; documents and staff-only files uploaded on this release would then show to anyone who can see the record, so turn uploads off on Admin, Modules first if a rollback is needed.",
+    "provenance": "Milestone v0.58.0 Beta: Documents and multiple uploads, epic #542 with sub-issues #543 to #553, pull request #695.",
+    "references": [
+      {
+        "label": "Issue #542",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/542"
+      },
+      {
+        "label": "Pull request #695",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/695"
+      }
+    ]
+  },
+  {
     "version": "0.57.0",
     "date": "2026-11-06",
     "channel": "stable",
