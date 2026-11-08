@@ -5,6 +5,8 @@ namespace App\Core\Attachments;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\MessageBag;
+use Illuminate\Support\ViewErrorBag;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -82,25 +84,28 @@ final class AttachmentLimits
     /**
      * @return array<string, string>
      */
-    public static function messages(): array
+    public static function validationMessages(): array
     {
         $screenshots = __('attachments.types.screenshots');
+        $imageTypes = __('attachments.type_lists.screenshots');
+        $videoTypes = __('attachments.type_lists.screencasts');
+        $documentTypes = __('attachments.type_lists.documents');
         $screencasts = __('attachments.types.screencasts');
         $documents = __('attachments.types.documents');
 
         return [
             'screenshots.max' => __('attachments.validation.too_many', ['max' => self::SCREENSHOT_MAX_FILES, 'type' => $screenshots]),
             'screenshots.*.max' => __('attachments.validation.each_too_large', ['type' => $screenshots, 'size' => self::megabytes(self::SCREENSHOT_MAX_KB)]),
-            'screenshots.*.image' => __('attachments.validation.wrong_type', ['type' => $screenshots, 'types' => 'JPEG, PNG, WebP']),
-            'screenshots.*.mimes' => __('attachments.validation.wrong_type', ['type' => $screenshots, 'types' => 'JPEG, PNG, WebP']),
+            'screenshots.*.image' => __('attachments.validation.wrong_type', ['type' => $screenshots, 'types' => $imageTypes]),
+            'screenshots.*.mimes' => __('attachments.validation.wrong_type', ['type' => $screenshots, 'types' => $imageTypes]),
             'screencasts.max' => __('attachments.validation.too_many', ['max' => self::SCREENCAST_MAX_FILES, 'type' => $screencasts]),
             'screencasts.*.max' => __('attachments.validation.each_too_large', ['type' => $screencasts, 'size' => self::megabytes(self::SCREENCAST_MAX_KB)]),
-            'screencasts.*.mimetypes' => __('attachments.validation.wrong_type', ['type' => $screencasts, 'types' => 'MP4, WebM']),
+            'screencasts.*.mimetypes' => __('attachments.validation.wrong_type', ['type' => $screencasts, 'types' => $videoTypes]),
             'screencast.max' => __('attachments.validation.each_too_large', ['type' => $screencasts, 'size' => self::megabytes(self::SCREENCAST_MAX_KB)]),
-            'screencast.mimetypes' => __('attachments.validation.wrong_type', ['type' => $screencasts, 'types' => 'MP4, WebM']),
+            'screencast.mimetypes' => __('attachments.validation.wrong_type', ['type' => $screencasts, 'types' => $videoTypes]),
             'documents.max' => __('attachments.validation.too_many', ['max' => self::DOCUMENT_MAX_FILES, 'type' => $documents]),
             'documents.*.max' => __('attachments.validation.each_too_large', ['type' => $documents, 'size' => self::megabytes(self::DOCUMENT_MAX_KB)]),
-            'documents.*.extensions' => __('attachments.validation.wrong_type', ['type' => $documents, 'types' => 'PDF, DOCX, XLSX, ODT, ODS, TXT, CSV']),
+            'documents.*.extensions' => __('attachments.validation.wrong_type', ['type' => $documents, 'types' => $documentTypes]),
         ];
     }
 
@@ -163,6 +168,25 @@ final class AttachmentLimits
             ...self::screencasts($request),
             ...self::files($request, 'documents'),
         ];
+    }
+
+    /**
+     * Error messages for the given fields, including their per-file keys.
+     *
+     * @return list<string>
+     */
+    public static function fieldErrors(ViewErrorBag|MessageBag $errors, string ...$fields): array
+    {
+        $messages = [];
+        foreach ($fields as $field) {
+            foreach ([$field, $field.'.*'] as $key) {
+                foreach ($errors->get($key) as $message) {
+                    array_push($messages, ...(array) $message);
+                }
+            }
+        }
+
+        return array_values(array_unique($messages));
     }
 
     public static function megabytes(int $kilobytes): string

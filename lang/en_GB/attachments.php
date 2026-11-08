@@ -54,6 +54,12 @@ return [
         'uploaded' => '1 file uploaded.|:count files uploaded.',
     ],
 
+    'type_lists' => [
+        'screenshots' => 'JPEG, PNG, WebP',
+        'screencasts' => 'MP4, WebM',
+        'documents' => 'PDF, DOCX, XLSX, ODT, ODS, TXT, CSV',
+    ],
+
     'types' => [
         'screenshots' => 'screenshots',
         'screencasts' => 'screencasts',

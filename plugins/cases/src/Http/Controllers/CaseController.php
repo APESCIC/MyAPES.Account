@@ -128,7 +128,7 @@ class CaseController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'details' => ['nullable', 'string'],
             ...AttachmentLimits::rules(),
-        ], AttachmentLimits::messages());
+        ], AttachmentLimits::validationMessages());
         AttachmentLimits::assertSubmissionWithinLimits($request);
 
         $categoryFields = $this->categories->validateSelection(
@@ -315,7 +315,7 @@ class CaseController extends Controller
         if ($attachmentRequested) {
             $rules = [...$rules, ...AttachmentLimits::rules()];
         }
-        $validated = $request->validate($rules, AttachmentLimits::messages());
+        $validated = $request->validate($rules, AttachmentLimits::validationMessages());
         if ($attachmentRequested) {
             AttachmentLimits::assertSubmissionWithinLimits($request);
         }
@@ -544,7 +544,7 @@ class CaseController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'details' => ['nullable', 'string'],
             ...AttachmentLimits::rules(),
-        ], AttachmentLimits::messages());
+        ], AttachmentLimits::validationMessages());
         AttachmentLimits::assertSubmissionWithinLimits($request);
         $allowsAttachments = $this->attachmentGate->allows($area, $area->moduleSlug, null, null);
         if (! $allowsAttachments && AttachmentLimits::requested($request)) {

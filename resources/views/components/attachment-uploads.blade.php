@@ -2,6 +2,7 @@
 @php
     $limits = \App\Core\Attachments\AttachmentLimits::forComponent();
     $total = \App\Core\Attachments\AttachmentLimits::megabytes(\App\Core\Attachments\AttachmentLimits::SUBMISSION_MAX_KB);
+    $groupErrors = \App\Core\Attachments\AttachmentLimits::fieldErrors($errors, 'attachments', 'screencast');
 @endphp
 <fieldset
     {{ $attributes->class(['attachment-uploads']) }}
@@ -17,7 +18,7 @@
         :max-files="$limits['screenshots']['maxFiles']"
         :max-bytes="$limits['screenshots']['maxBytes']"
         :accept="$limits['screenshots']['accept']"
-        types="JPEG, PNG, WebP"
+        :types="__('attachments.type_lists.screenshots')"
     />
     <x-file-upload
         name="screencasts"
@@ -26,7 +27,7 @@
         :max-files="$limits['screencasts']['maxFiles']"
         :max-bytes="$limits['screencasts']['maxBytes']"
         :accept="$limits['screencasts']['accept']"
-        types="MP4, WebM"
+        :types="__('attachments.type_lists.screencasts')"
     />
     <x-file-upload
         name="documents"
@@ -35,9 +36,9 @@
         :max-files="$limits['documents']['maxFiles']"
         :max-bytes="$limits['documents']['maxBytes']"
         :accept="$limits['documents']['accept']"
-        types="PDF, DOCX, XLSX, ODT, ODS, TXT, CSV"
+        :types="__('attachments.type_lists.documents')"
     />
-    @foreach(collect($errors->get('attachments'))->merge($errors->get('screencast')) as $message)
+    @foreach($groupErrors as $message)
         <p class="sg-field__error">{{ $message }}</p>
     @endforeach
     <p class="muted" role="status" aria-live="assertive" data-file-upload-group-status data-label-failed="{{ __('attachments.component.upload_failed') }}"></p>

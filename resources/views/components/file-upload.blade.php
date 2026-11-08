@@ -1,9 +1,9 @@
 @props(['name', 'id', 'label', 'maxFiles', 'maxBytes', 'accept', 'types'])
 @php
+    $fieldErrors = \App\Core\Attachments\AttachmentLimits::fieldErrors($errors, $name);
+    $size = \App\Core\Attachments\AttachmentLimits::megabytes(intdiv((int) $maxBytes, 1024));
     $hintId = $id.'-hint';
     $statusId = $id.'-status';
-    $size = \App\Core\Attachments\AttachmentLimits::megabytes(intdiv((int) $maxBytes, 1024));
-    $fieldErrors = collect($errors->get($name))->merge($errors->get($name.'.*'))->flatten();
 @endphp
 <div
     {{ $attributes->class(['file-upload']) }}
@@ -32,7 +32,7 @@
             accept="{{ $accept }}"
             multiple
             aria-describedby="{{ $hintId }} {{ $statusId }}"
-            @if($fieldErrors->isNotEmpty()) aria-invalid="true" @endif
+            @if($fieldErrors !== []) aria-invalid="true" @endif
         >
     </div>
     <ul class="file-upload__list" data-file-upload-list role="list"></ul>

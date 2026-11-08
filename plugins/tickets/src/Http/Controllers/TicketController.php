@@ -122,7 +122,7 @@ class TicketController extends Controller
         }
         $rules = [...$rules, ...AttachmentLimits::rules()];
 
-        $validated = $request->validate($rules, AttachmentLimits::messages());
+        $validated = $request->validate($rules, AttachmentLimits::validationMessages());
         AttachmentLimits::assertSubmissionWithinLimits($request);
 
         $categoryFields = [
@@ -395,7 +395,7 @@ class TicketController extends Controller
         if ($attachmentRequested) {
             $rules = [...$rules, ...AttachmentLimits::rules()];
         }
-        $validated = $request->validate($rules, AttachmentLimits::messages());
+        $validated = $request->validate($rules, AttachmentLimits::validationMessages());
         if ($attachmentRequested) {
             AttachmentLimits::assertSubmissionWithinLimits($request);
         }
