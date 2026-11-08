@@ -13,6 +13,11 @@ interface VirusScanner
     public function enabled(): bool;
 
     /**
+     * True when the scanner answers right now (#697).
+     */
+    public function ping(): bool;
+
+    /**
      * @param  resource  $stream
      *
      * @throws ScannerUnavailable when the scanner cannot give an answer.

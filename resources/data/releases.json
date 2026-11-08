@@ -1,5 +1,48 @@
 [
   {
+    "version": "0.58.1",
+    "date": "2026-11-08",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Upload diagnostics and ClamAV runbook",
+    "summary": "A new admin check for the upload set-up, and the steps for turning on virus scanning for ticket and case uploads.",
+    "changes": [
+      "New attachments:diagnose command for administrators. It checks whether the virus scanner answers and whether the server's upload limits allow the sizes introduced in 0.58.0.",
+      "The Attachments and virus scanning wiki page now has the full steps for running the virus scanner alongside the app, checking it, keeping it up to date and turning scanning on."
+    ],
+    "affected_areas": [
+      "Attachments",
+      "Administration",
+      "Documentation"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch: an administrator command and documentation that complete the 0.58.0 upload work. No change to what users see.",
+    "validation": [
+      "Feature tests for the diagnostics command: scanner off, scanner answering, scanner not answering, upload limits too low and size parsing.",
+      "Read-only checks on the live app confirmed the web upload limits apply. Full PHPUnit suite in CI; release history validated against main."
+    ],
+    "known_limitations": [
+      "Virus scanning stays off until the scanner is set up on the server and turned on, which follows this release."
+    ],
+    "rollback": "Redeploy the previous release package. Nothing in the database changes in this release.",
+    "provenance": "Milestone v0.58.1 Beta: Upload scanning and limits on Cloudron, epic #696 with sub-issues #697 to #701, pull request #702.",
+    "references": [
+      {
+        "label": "Issue #696",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/696"
+      },
+      {
+        "label": "Pull request #702",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/702"
+      }
+    ]
+  },
+  {
     "version": "0.58.0",
     "date": "2026-11-08",
     "channel": "stable",
