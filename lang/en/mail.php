@@ -118,6 +118,10 @@ return [
         'action' => 'Log in to reply',
     ],
 
+    'attachments' => [
+        'line_new' => '1 new attachment – log in to view.|:count new attachments – log in to view.',
+    ],
+
     'attachment_quarantined' => [
         'subject' => 'A file you uploaded was blocked',
         'line_body' => 'Our virus check found a problem with :name, so it has been blocked and nobody can download it.',

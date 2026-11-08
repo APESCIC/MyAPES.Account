@@ -10,6 +10,7 @@ use App\Rules\EligibleRecordOwner;
 use App\Rules\EligibleStaffAssignee;
 use App\Services\AssignmentAuthorization;
 use App\Services\AuditLogger;
+use App\Core\Attachments\AttachmentFeedback;
 use App\Core\Attachments\AttachmentLimits;
 use App\Core\Attachments\SupportAttachment;
 use App\Core\Attachments\UploadSettings;
@@ -170,8 +171,9 @@ class TicketController extends Controller
             'is_staff_note' => false,
         ]);
 
+        $storedAttachments = collect();
         if ($allowsAttachments) {
-            $this->attachments->storeFromRequest(
+            $storedAttachments = $this->attachments->storeFromRequest(
                 $ticket,
                 $instance->subCore->key,
                 $request->user(),
@@ -179,7 +181,7 @@ class TicketController extends Controller
             );
         }
 
-        $this->notifyTicketStakeholders($ticket, $request->user(), 'created', $instance);
+        $this->notifyTicketStakeholders($ticket, $request->user(), 'created', $instance, attachmentCount: $storedAttachments->count());
         $auditLogger->record("{$ticketService->auditPrefix}.created", $request->user(), $ticket, [
             'service_area' => $ticket->service_area,
             'sub_category' => $ticket->sub_category,
@@ -190,7 +192,10 @@ class TicketController extends Controller
         ]);
 
         return redirect()->route($this->area()->showRouteName(), $ticket)
-            ->with('status', __('tickets::ui.flash.your_ticket_has_been_saved'));
+            ->with('status', AttachmentFeedback::status(
+                __('tickets::ui.flash.your_ticket_has_been_saved'),
+                $storedAttachments->count(),
+            ));
     }
 
     public function show(
@@ -483,6 +488,7 @@ class TicketController extends Controller
             'updated',
             $instance,
             $internal && ! $ticketChanged,
+            $storedAttachments->count(),
         );
         $auditLogger->record("{$ticketService->auditPrefix}.updated", $request->user(), $ticket, [
             'status' => $ticket->status,
@@ -495,7 +501,10 @@ class TicketController extends Controller
         ]);
 
         return redirect()->route($this->area()->showRouteName(), $ticket)
-            ->with('status', __('tickets::ui.flash.your_update_has_been_saved'));
+            ->with('status', AttachmentFeedback::status(
+                __('tickets::ui.flash.your_update_has_been_saved'),
+                $storedAttachments->count(),
+            ));
     }
 
     public function destroy(
@@ -527,6 +536,7 @@ class TicketController extends Controller
         string $eventLabel,
         ModuleInstanceDefinition $instance,
         bool $staffOnly = false,
+        int $attachmentCount = 0,
     ): void {
         $prefix = $this->area()->permissionPrefix();
         $ticketService = $this->ticketServices->for($instance->subCore->key);
@@ -551,6 +561,7 @@ class TicketController extends Controller
                 $instance->subCore->key,
                 $this->area()->showRouteName(),
                 $ticketService->serviceName,
+                $attachmentCount,
             ));
         }
     }

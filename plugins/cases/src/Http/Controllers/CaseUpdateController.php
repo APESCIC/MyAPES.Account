@@ -6,6 +6,7 @@ use App\Core\Accounts\User;
 use App\Core\Extensions\Modules\ModuleContext;
 use App\Http\Controllers\Controller;
 use App\Modules\ModuleInstanceDefinition;
+use App\Core\Attachments\AttachmentFeedback;
 use App\Core\Attachments\AttachmentLimits;
 use App\Core\Attachments\SupportAttachment;
 use App\Services\AuditLogger;
@@ -131,6 +132,7 @@ class CaseUpdateController extends Controller
                         $case,
                         $request->user(),
                         'updated',
+                        $storedAttachments->count(),
                     )
                     : new ApesCicCaseUpdatedNotification(
                         $case,
@@ -138,6 +140,7 @@ class CaseUpdateController extends Controller
                         'updated',
                         $instance->subCore->key,
                         $area->showRouteName(),
+                        $storedAttachments->count(),
                     ),
             ));
 
@@ -149,7 +152,7 @@ class CaseUpdateController extends Controller
         ]);
 
         return redirect()->route($area->showRouteName(), $case)
-            ->with('status', __('cases::ui.flash.case_update_added'));
+            ->with('status', AttachmentFeedback::status(__('cases::ui.flash.case_update_added'), $storedAttachments->count()));
     }
 
     private function allowsAttachments(ShelterCase $case, CasesArea $area): bool

@@ -17,6 +17,7 @@ class SupportAttachmentService
     public function __construct(
         private readonly SecureUploadService $uploads,
         private readonly VirusScanner $scanner,
+        private readonly AuditLogger $audit,
     ) {}
 
     /**
@@ -158,6 +159,14 @@ class SupportAttachmentService
             'kind' => $kind,
             'visibility' => $visibility,
             'scan_status' => $scan ? SupportAttachment::SCAN_PENDING : SupportAttachment::SCAN_NOT_SCANNED,
+        ]);
+
+        $this->audit->record('support_attachment.uploaded', $uploader, $attachment, [
+            'kind' => $kind,
+            'size_bytes' => $attachment->size_bytes,
+            'visibility' => $visibility,
+            'attachable_type' => $attachment->attachable_type,
+            'attachable_id' => $attachment->attachable_id,
         ]);
 
         if ($scan) {

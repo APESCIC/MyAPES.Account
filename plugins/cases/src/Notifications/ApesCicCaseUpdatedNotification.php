@@ -4,6 +4,7 @@ namespace Plugins\Cases\Notifications;
 
 use App\Core\Accounts\User;
 use App\Core\Mail\Concerns\BuildsBrandedMail;
+use App\Core\Mail\Concerns\MentionsAttachments;
 use App\Support\WorkflowLabels;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -14,6 +15,7 @@ use Plugins\Cases\Models\ShelterCase;
 class ApesCicCaseUpdatedNotification extends Notification implements ShouldQueue
 {
     use BuildsBrandedMail;
+    use MentionsAttachments;
     use Queueable;
 
     public bool $deleteWhenMissingModels = true;
@@ -24,6 +26,7 @@ class ApesCicCaseUpdatedNotification extends Notification implements ShouldQueue
         private readonly string $eventLabel,
         private readonly string $subCoreKey,
         private readonly string $showRouteName,
+        private readonly int $attachmentCount = 0,
     ) {
         $this->afterCommit();
     }
@@ -35,7 +38,7 @@ class ApesCicCaseUpdatedNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        return $this->brandedMail()
+        $mail = $this->brandedMail()
             ->markdown('mail.brand.notification')
             ->greeting(__('mail.brand.greeting', ['name' => $this->recipientName($notifiable)]))
             ->subject(__('mail.case_updated.subject', [
@@ -48,7 +51,9 @@ class ApesCicCaseUpdatedNotification extends Notification implements ShouldQueue
                 'actor' => $this->actor->name,
             ]))
             ->line(__('mail.case_updated.line_status', ['status' => WorkflowLabels::status($this->case->status)]))
-            ->line(__('mail.case_updated.line_priority', ['priority' => WorkflowLabels::priority($this->case->priority)]))
+            ->line(__('mail.case_updated.line_priority', ['priority' => WorkflowLabels::priority($this->case->priority)]));
+
+        return $this->withAttachmentLine($mail, $this->attachmentCount)
             ->action(__('mail.case_updated.action'), $this->replyLink($notifiable, route($this->showRouteName, $this->case)));
     }
 

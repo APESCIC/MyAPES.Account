@@ -51,6 +51,7 @@ return [
 
     'flash' => [
         'deleted' => ':name was deleted.',
+        'uploaded' => '1 file uploaded.|:count files uploaded.',
     ],
 
     'types' => [

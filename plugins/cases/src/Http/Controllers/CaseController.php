@@ -10,6 +10,7 @@ use App\Rules\EligibleRecordOwner;
 use App\Rules\EligibleStaffAssignee;
 use App\Services\AssignmentAuthorization;
 use App\Services\AuditLogger;
+use App\Core\Attachments\AttachmentFeedback;
 use App\Core\Attachments\AttachmentLimits;
 use App\Core\Attachments\SupportAttachment;
 use Closure;
@@ -162,8 +163,9 @@ class CaseController extends Controller
             'opened_at' => now(),
         ]);
 
+        $storedAttachments = collect();
         if ($allowsAttachments) {
-            $this->attachments->storeFromRequest(
+            $storedAttachments = $this->attachments->storeFromRequest(
                 $case,
                 $instance->subCore->key,
                 $request->user(),
@@ -171,7 +173,7 @@ class CaseController extends Controller
             );
         }
 
-        $this->notifyStakeholders($case, $request->user(), 'created', $instance);
+        $this->notifyStakeholders($case, $request->user(), 'created', $instance, $storedAttachments->count());
         $auditLogger->record("{$this->area()->auditEventPrefix}.created", $request->user(), $case, [
             'sub_core_key' => $case->sub_core_key,
             'module_key' => $instance->module->key,
@@ -183,7 +185,7 @@ class CaseController extends Controller
         ]);
 
         return redirect()->route($this->area()->showRouteName(), $case)
-            ->with('status', __('cases::ui.flash.case_created'));
+            ->with('status', AttachmentFeedback::status(__('cases::ui.flash.case_created'), $storedAttachments->count()));
     }
 
     private function cicShow(
@@ -386,7 +388,7 @@ class CaseController extends Controller
             ]);
         }
 
-        $this->notifyStakeholders($case, $request->user(), 'updated', $instance);
+        $this->notifyStakeholders($case, $request->user(), 'updated', $instance, $storedAttachments->count());
         $auditLogger->record("{$this->area()->auditEventPrefix}.updated", $request->user(), $case, [
             'sub_core_key' => $case->sub_core_key,
             'module_key' => $instance->module->key,
@@ -400,7 +402,7 @@ class CaseController extends Controller
         ]);
 
         return redirect()->route($this->area()->showRouteName(), $case)
-            ->with('status', __('cases::ui.flash.case_updated'));
+            ->with('status', AttachmentFeedback::status(__('cases::ui.flash.case_updated'), $storedAttachments->count()));
     }
 
     private function cicDestroy(
@@ -448,6 +450,7 @@ class CaseController extends Controller
         User $actor,
         string $eventLabel,
         ModuleInstanceDefinition $instance,
+        int $attachmentCount = 0,
     ): void {
         $prefix = $this->area()->permissionPrefix();
         $recipients = User::query()
@@ -468,6 +471,7 @@ class CaseController extends Controller
                     $eventLabel,
                     $instance->subCore->key,
                     $this->area()->showRouteName(),
+                    $attachmentCount,
                 ),
             ));
     }
@@ -556,18 +560,18 @@ class CaseController extends Controller
             'status' => 'open',
         ]);
 
-        if ($allowsAttachments) {
-            $this->attachments->storeFromRequest($case, $area->moduleSlug, $request->user(), $request);
-        }
+        $storedAttachments = $allowsAttachments
+            ? $this->attachments->storeFromRequest($case, $area->moduleSlug, $request->user(), $request)
+            : collect();
 
-        $this->notifyShelterStakeholders($case, $request->user(), 'created');
+        $this->notifyShelterStakeholders($case, $request->user(), 'created', $storedAttachments->count());
         $auditLogger->record("{$area->auditEventPrefix}.created", $request->user(), $case, [
             'case_type' => $case->case_type,
             'status' => $case->status,
         ]);
 
         return redirect()->route($area->showRouteName(), $case)
-            ->with('status', __('cases::ui.flash.case_created'));
+            ->with('status', AttachmentFeedback::status(__('cases::ui.flash.case_created'), $storedAttachments->count()));
     }
 
     private function shelterShow(
@@ -731,7 +735,7 @@ class CaseController extends Controller
             ->firstOrFail();
     }
 
-    private function notifyShelterStakeholders(ShelterCase $case, User $actor, string $eventLabel): void
+    private function notifyShelterStakeholders(ShelterCase $case, User $actor, string $eventLabel, int $attachmentCount = 0): void
     {
         $area = $this->area();
         $prefix = $area->permissionPrefix();
@@ -749,7 +753,7 @@ class CaseController extends Controller
             ->reject(fn (User $recipient): bool => $recipient->id === $actor->id);
 
         foreach ($recipients as $recipient) {
-            $recipient->notify(new ShelterCaseUpdatedNotification($case, $actor, $eventLabel));
+            $recipient->notify(new ShelterCaseUpdatedNotification($case, $actor, $eventLabel, $attachmentCount));
         }
     }
 }
