@@ -343,14 +343,14 @@ The current application version is stored in the root `VERSION` file without a d
 
 Every future change merged to `main` must:
 
-1. Prepend exactly one higher semantic version to `resources/data/releases.json`. That version is the milestone's version: the `vMAJOR.MINOR.PATCH` at the start of its GitHub milestone title (see [`.cursor/rules/milestone-versioning.mdc`](.cursor/rules/milestone-versioning.mdc)).
+1. Prepend exactly one higher semantic version to `resources/data/releases.json`. That version is the milestone's version: the `vMAJOR.MINOR.PATCH` at the start of its GitHub milestone title (see [`.cursor/rules/version-shipping.mdc`](.cursor/rules/version-shipping.mdc)).
 2. Update `VERSION` to that same version.
 3. Keep `resources/data/module-runtime-contract.json` → `application_version` in sync with `VERSION`.
 4. Leave every previously published record unchanged and in the same order.
 5. Milestones are titled with a minor version for a new backward-compatible capability and a patch version for a compatible fix. While the application remains pre-1.0, document a breaking change explicitly and advance the minor version.
 6. Keep public notes free of credentials, personal data, private operational identifiers, exploitable security detail, and unnecessary infrastructure detail.
 
-Preferred workflow (agents and humans): work ships once per milestone (see [Milestone shipping](AGENTS.md#milestone-shipping)), so scaffold the next release in the milestone's pull request into `main`:
+Preferred workflow (agents and humans): work ships once per milestone (see [Shipping and versioning](AGENTS.md#shipping-and-versioning)), so scaffold the next release in the milestone's pull request into `main`:
 
 ```powershell
 php artisan myapes:changelog-prepare --type=<patch|minor|major> --title="Short public title" --issue=<n> --pr=<n>
@@ -373,7 +373,7 @@ Pull-request and `main` workflows perform the same append-only comparison. Manua
 
 ### GitHub Release tags
 
-Every documented app version in `releases.json` has a matching GitHub Release tag `v{VERSION}` (for example `v0.31.6` for `VERSION` `0.31.6`). The Change Log Hub and `/healthz` `version` field read from `VERSION` / `releases.json`; GitHub Releases are the external mirror on [the repository Releases page](https://github.com/APESCIC/MyAPES-Account/releases). Deploy sets the release **display name** to `v{VERSION} {suffix}`, for example `v0.58.3 Dev`. Releases published before this change keep their old `{VERSION} Beta` titles.
+Every documented app version in `releases.json` has a matching GitHub Release tag `v{VERSION}` (for example `v0.31.6` for `VERSION` `0.31.6`). The Change Log Hub and `/healthz` `version` field read from `VERSION` / `releases.json`; GitHub Releases are the external mirror on [the repository Releases page](https://github.com/APESCIC/MyAPES-Account/releases). `release.yml` publishes the GitHub Release when the `v{VERSION}` tag is pushed, titled `v{VERSION} <milestone name>`, for example `v0.60.0 Client account search and management`. Releases published before this change keep their old titles.
 
 - Map versions to merge commits: `node scripts/local/map-release-commits.mjs --write`
 - Backfill or verify releases: `node scripts/local/backfill-github-releases.mjs --dry-run` then `node scripts/local/backfill-github-releases.mjs --resume`
@@ -386,8 +386,8 @@ Deployments are handled by `.github/workflows/deploy-cloudron.yml`.
 
 ### Deployment triggers
 
-1. Deploy runs only on manual `workflow_dispatch` (for example `gh workflow run "Deploy MyAPES Account to Cloudron" --ref main`). There is no auto-deploy after a green `main` test run.
-2. Run local dev verify on the PR branch before merge (`composer pre-pr-verify` or ship-gate steps). Prefer Cloudron deploy only after `test-cloudron.yml` has succeeded for the target `main` revision, local verify passed, and changelog metadata on `main` is confirmed. Cloudron is the **last** post-merge deploy step; pass `app_version` from `VERSION` when dispatching (ship-gate).
+1. Deploy runs only on manual `workflow_dispatch` on a published release tag: `gh workflow run deploy-cloudron.yml --ref vX.Y.Z`. It refuses `main`, a branch, a tag without a published GitHub Release, or a tag whose commit is not on `main`. There is no auto-deploy after a green `main` test run.
+2. Run local dev verify on the PR branch before merge (`composer pre-pr-verify` or ship-gate steps). Prefer Cloudron deploy only after `test-cloudron.yml` has succeeded for the target `main` revision, local verify passed, and changelog metadata on `main` is confirmed. Cloudron is the **last** step, after the merge and the release (ship-gate).
 3. After a successful Cloudron deploy, the app Change Log Hub at `/change-log` shows the head `releases.json` record, and the deploy workflow publishes GitHub Release `v{VERSION} {suffix}` with tag `v{VERSION}`. Sibling APES websites keep separate changelogs; update those only when the operator asks (ship-gate).
 
 ### Target app
