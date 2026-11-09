@@ -29,8 +29,8 @@
                 <label for="inbound-status">{{ __('admin.emails.inbound.filter_label') }}</label>
                 <select id="inbound-status" name="status">
                     <option value="">{{ __('admin.emails.inbound.filter_all') }}</option>
-                    @foreach($statuses as $option)
-                        <option value="{{ $option }}" @selected($status === $option)>{{ __('admin.emails.inbound.statuses.'.$option) }}</option>
+                    @foreach($statuses as $option => $label)
+                        <option value="{{ $option }}" @selected($status === $option)>{{ $label }}</option>
                     @endforeach
                 </select>
                 <button type="submit" class="button button-secondary">{{ __('admin.emails.inbound.filter_apply') }}</button>
@@ -63,7 +63,7 @@
                                         @endif
                                     </td>
                                     <td>{{ $email->record_prefix !== null ? $email->record_prefix.'-'.$email->record_id : '—' }}</td>
-                                    <td><span class="status">{{ __('admin.emails.inbound.statuses.'.$email->status) }}</span></td>
+                                    <td><span class="status">{{ $email->statusLabel() }}</span></td>
                                     <td>{{ $email->reasonLabel() ?? '—' }}</td>
                                     <td><a href="{{ route('admin.emails.inbound.show', $email) }}">{{ __('admin.emails.inbound.view') }}</a></td>
                                 </tr>

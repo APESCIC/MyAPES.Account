@@ -101,7 +101,9 @@ final class InboundAttachmentSorter
         }
 
         if ($alreadyAccepted >= $maxFiles) {
-            return __('attachments.validation.too_many', ['max' => $maxFiles, 'type' => __('attachments.types.'.$kind)]).' ('.$name.')';
+            $typeKey = 'attachments.types.'.$kind;
+
+            return __('attachments.validation.too_many', ['max' => $maxFiles, 'type' => __($typeKey)]).' ('.$name.')';
         }
 
         if ($totalBytes + $size > AttachmentLimits::SUBMISSION_MAX_KB * 1024) {

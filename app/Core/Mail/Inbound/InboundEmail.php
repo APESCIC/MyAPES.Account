@@ -123,7 +123,25 @@ class InboundEmail extends Model
 
     public function reasonLabel(): ?string
     {
-        return $this->reason === null ? null : __('admin.emails.inbound.reasons.'.$this->reason);
+        if ($this->reason === null) {
+            return null;
+        }
+
+        $key = 'admin.emails.inbound.reasons.'.$this->reason;
+
+        return __($key);
+    }
+
+    public function statusLabel(): string
+    {
+        return self::labelForStatus((string) $this->status);
+    }
+
+    public static function labelForStatus(string $status): string
+    {
+        $key = 'admin.emails.inbound.statuses.'.$status;
+
+        return __($key);
     }
 
     public static function hashAddress(string $address): string

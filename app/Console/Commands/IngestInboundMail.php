@@ -43,7 +43,7 @@ class IngestInboundMail extends Command
         }
 
         $this->components->twoColumnDetail('Inbound email', '#'.$email->id);
-        $this->components->twoColumnDetail('Status', __('admin.emails.inbound.statuses.'.$email->status));
+        $this->components->twoColumnDetail('Status', $email->statusLabel());
         $this->components->twoColumnDetail('Reason', $email->reasonLabel() ?? '—');
         $this->components->twoColumnDetail('Record', $email->record_prefix === null ? '—' : $email->record_prefix.'-'.$email->record_id);
 

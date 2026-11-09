@@ -39,7 +39,7 @@ class AdminInboundEmailController extends Controller
                 ->paginate(50)
                 ->withQueryString(),
             'status' => $status,
-            'statuses' => InboundEmail::STATUSES,
+            'statuses' => array_combine(InboundEmail::STATUSES, array_map(InboundEmail::labelForStatus(...), InboundEmail::STATUSES)),
             'repliesEnabled' => $settings->repliesEnabled(),
             'pollingConfigured' => $settings->pollingConfigured(),
             'address' => $settings->address(),
@@ -48,8 +48,10 @@ class AdminInboundEmailController extends Controller
         ]);
     }
 
-    public function show(InboundEmail $inboundEmail, InboundMailSettings $settings, InboundReplyRegistry $registry): View
+    public function show(string $inboundEmail, InboundMailSettings $settings, InboundReplyRegistry $registry): View
     {
+        $inboundEmail = $this->findOrFail($inboundEmail);
+
         return view('admin.emails.inbound.show', [
             'email' => $inboundEmail->load('user'),
             'recordUrl' => $this->recordUrl($inboundEmail, $registry),
@@ -57,8 +59,10 @@ class AdminInboundEmailController extends Controller
         ]);
     }
 
-    public function retry(Request $request, InboundEmail $inboundEmail, AuditLogger $audit): RedirectResponse
+    public function retry(Request $request, AuditLogger $audit, string $inboundEmail): RedirectResponse
     {
+        $inboundEmail = $this->findOrFail($inboundEmail);
+
         if (! $inboundEmail->isActionable()) {
             return back()->withErrors(['inbound' => __('admin.emails.inbound.not_actionable')]);
         }
@@ -79,8 +83,9 @@ class AdminInboundEmailController extends Controller
             ->with('status', __('admin.emails.inbound.retried'));
     }
 
-    public function discard(Request $request, InboundEmail $inboundEmail, AuditLogger $audit): RedirectResponse
+    public function discard(Request $request, AuditLogger $audit, string $inboundEmail): RedirectResponse
     {
+        $inboundEmail = $this->findOrFail($inboundEmail);
         $request->validate(['confirm_discard' => ['accepted']]);
 
         if (! $inboundEmail->isActionable()) {
@@ -187,6 +192,11 @@ class AdminInboundEmailController extends Controller
         }
 
         return $services;
+    }
+
+    private function findOrFail(string $id): InboundEmail
+    {
+        return InboundEmail::query()->findOrFail((int) $id);
     }
 
     private function recordUrl(InboundEmail $email, InboundReplyRegistry $registry): ?string

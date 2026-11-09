@@ -30,7 +30,7 @@
                         @if($recordUrl)<br><a href="{{ $recordUrl }}">{{ __('admin.emails.inbound.detail_open_record') }}</a>@endif
                     </dd>
                 </div>
-                <div><dt>{{ __('admin.emails.inbound.status') }}</dt><dd><span class="status" data-inbound-status>{{ __('admin.emails.inbound.statuses.'.$email->status) }}</span></dd></div>
+                <div><dt>{{ __('admin.emails.inbound.status') }}</dt><dd><span class="status" data-inbound-status>{{ $email->statusLabel() }}</span></dd></div>
                 <div><dt>{{ __('admin.emails.inbound.reason') }}</dt><dd>{{ $email->reasonLabel() ?? '—' }}</dd></div>
                 <div>
                     <dt>{{ __('admin.emails.inbound.detail_auth') }}</dt>

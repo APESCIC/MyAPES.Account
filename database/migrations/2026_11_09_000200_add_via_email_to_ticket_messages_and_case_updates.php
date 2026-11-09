@@ -22,12 +22,12 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('support_ticket_messages', function (Blueprint $table): void {
-            $table->dropColumn('via_email');
-        });
-
-        Schema::table('case_updates', function (Blueprint $table): void {
-            $table->dropColumn('via_email');
-        });
+        foreach (['support_ticket_messages', 'case_updates'] as $tableName) {
+            if (Schema::hasTable($tableName) && Schema::hasColumn($tableName, 'via_email')) {
+                Schema::table($tableName, function (Blueprint $table): void {
+                    $table->dropColumn('via_email');
+                });
+            }
+        }
     }
 };

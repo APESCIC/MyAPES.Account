@@ -39,11 +39,13 @@ class EmailReplyNotPostedNotification extends Notification implements ShouldQueu
 
     public function toMail(object $notifiable): MailMessage
     {
+        $reasonKey = 'mail.reply_not_posted.line_'.$this->reason;
+
         return $this->brandedMail()
             ->markdown('mail.brand.notification')
             ->subject(__('mail.reply_not_posted.subject', ['reference' => $this->reference]))
             ->greeting(__('mail.brand.greeting', ['name' => $this->recipientName($notifiable)]))
-            ->line(__('mail.reply_not_posted.line_'.$this->reason, ['reference' => $this->reference]))
+            ->line(__($reasonKey, ['reference' => $this->reference]))
             ->line(__('mail.reply_not_posted.line_next'))
             ->action(__('mail.reply_not_posted.action'), $this->replyLink($notifiable, $this->recordUrl))
             ->withSymfonyMessage(static function (Email $email): void {
