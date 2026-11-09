@@ -164,7 +164,7 @@ final class GitHubClient implements GitHub
      */
     private static function run(array $command): array
     {
-        $process = @proc_open($command, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+        $process = @proc_open($command, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes); // nosemgrep: php.lang.security.exec-use.exec-use -- fixed gh/git argument list, run without a shell
         if (! is_resource($process)) {
             throw new RuntimeException(sprintf('Could not run %s. Is it installed and on PATH?', $command[0]));
         }

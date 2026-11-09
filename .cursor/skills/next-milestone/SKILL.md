@@ -11,7 +11,7 @@ disable-model-invocation: true
 3. Then show these formats, filled in with the printed version (example: milestone `v1.3.0 Beta: Reporting`, issue #42):
 
    | What | Format | Example |
-   |------|--------|---------|
+   | --- | --- | --- |
    | Milestone branch | `milestone/vX-Y-Z-<slug>` | `milestone/v1-3-0-reporting` |
    | Issue branch | `<type>/<issue>-<slug>` | `chore/42-fix-login` |
    | PR title | `[vX.Y.Z] Summary (#issue)` | `[v1.3.0] Fix login (#42)` |
