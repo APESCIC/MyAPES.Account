@@ -307,6 +307,7 @@ class DemoDataSeeder extends Seeder
         $users = [];
 
         for ($index = 1; $index <= self::SERVICE_USER_COUNT; $index++) {
+            $this->reseed("service-user:{$index}");
             $first = $this->faker->firstName();
             $last = $this->faker->lastName();
             $domain = $index % 2 === 0 ? 'example.org' : 'example.com';
@@ -374,6 +375,7 @@ class DemoDataSeeder extends Seeder
     private function upsertUserProfile(User $user, string $preferredName): void
     {
         $index = $this->phoneIndex++;
+        $this->reseed("profile:{$user->email}");
 
         UserProfile::query()->updateOrCreate(
             ['user_id' => $user->id],
@@ -438,10 +440,12 @@ class DemoDataSeeder extends Seeder
      */
     private function upsertTicket(string $subCoreKey, int $index, string $area, ?string $subCategory, ?string $website, string $topic, array $owners, array $staff): SupportTicket
     {
+        $this->reseed("ticket:{$subCoreKey}:{$index}");
         $owner = $this->ownerFor($index, $owners, 3);
         $status = $this->faker->randomElement(['open', 'open', 'in_progress', 'in_progress', 'resolved', 'closed']);
         $assignee = $status === 'open' && $this->faker->boolean(40) ? null : $this->faker->randomElement($staff);
         $updatedAt = $this->baseTime->subHours($this->faker->numberBetween(1, 24 * 90));
+        $messageCount = $this->faker->numberBetween(2, 4);
 
         $ticket = SupportTicket::query()->updateOrCreate(
             [
@@ -461,8 +465,8 @@ class DemoDataSeeder extends Seeder
             ],
         );
 
-        $messageCount = $this->faker->numberBetween(2, 4);
         for ($message = 1; $message <= $messageCount; $message++) {
+            $this->reseed("ticket:{$subCoreKey}:{$index}:message:{$message}");
             $fromStaff = $message % 2 === 0;
             $author = $fromStaff ? ($assignee ?? $staff[0]) : $owner;
             $fixture = $ticket->messages()->updateOrCreate(
@@ -485,6 +489,7 @@ class DemoDataSeeder extends Seeder
     {
         for ($index = 1; $index <= self::CASES_PER_SERVICE; $index++) {
             [$category, $subCategory, $website, $topic] = self::CIC_CASE_TOPICS[($index - 1) % count(self::CIC_CASE_TOPICS)];
+            $this->reseed("cic-case:{$index}");
             $status = $this->faker->randomElement(['open', 'in_progress', 'in_progress', 'waiting_on_user', 'resolved', 'closed']);
             $openedAt = $this->baseTime->subDays($this->faker->numberBetween(2, 120));
             $updatedAt = $openedAt->addDays($this->faker->numberBetween(0, 2));
@@ -525,7 +530,9 @@ class DemoDataSeeder extends Seeder
         $pets = [];
 
         for ($index = 0; $index < self::PETS_PER_SERVICE; $index++) {
+            $this->reseed("pet:{$domain}:{$index}");
             $owner = $index < 2 ? $owners[0] : $owners[($index * 3 + $nameOffset) % count($owners)];
+            $addedAt = $this->baseTime->subDays($this->faker->numberBetween(5, 200));
             $pet = PetProfile::query()->updateOrCreate(
                 [
                     'service_domain' => $domain,
@@ -541,7 +548,7 @@ class DemoDataSeeder extends Seeder
                     'photo_path' => null,
                 ],
             );
-            $this->setTimestamps($pet, $this->baseTime->subDays($this->faker->numberBetween(5, 200)));
+            $this->setTimestamps($pet, $addedAt);
             $pets[] = $pet;
         }
 
@@ -557,6 +564,7 @@ class DemoDataSeeder extends Seeder
         for ($index = 1; $index <= self::CASES_PER_SERVICE; $index++) {
             $pet = $pets[($index - 1) % count($pets)];
             $caseType = self::SHELTER_CASE_TYPES[($index - 1) % count(self::SHELTER_CASE_TYPES)];
+            $this->reseed("shelter-case:{$index}");
             $status = $this->faker->randomElement(['open', 'in_review', 'in_review', 'closed']);
             $updatedAt = $this->baseTime->subDays($this->faker->numberBetween(1, 90));
 
@@ -586,9 +594,11 @@ class DemoDataSeeder extends Seeder
      */
     private function seedCaseUpdates(ShelterCase $case, array $staff, CarbonImmutable $updatedAt): void
     {
+        $this->reseed("case-updates:{$case->sub_core_key}:{$case->title}");
         $count = $this->faker->numberBetween(1, 3);
 
         for ($update = 1; $update <= $count; $update++) {
+            $this->reseed("case-update:{$case->sub_core_key}:{$case->title}:{$update}");
             $internal = $update % 2 === 0;
             $fixture = $case->updates()->updateOrCreate(
                 [
@@ -611,6 +621,7 @@ class DemoDataSeeder extends Seeder
 
         for ($index = 1; $index <= self::CONSULTATION_COUNT; $index++) {
             $pet = $pets[($index - 1) % count($pets)];
+            $this->reseed("consultation:{$index}");
             $status = $this->faker->randomElement(['open', 'in_progress', 'closed']);
             $scheduledFor = $this->baseTime->addDays($this->faker->numberBetween(-60, 30))->setTime(9 + $this->faker->numberBetween(0, 7), 0);
 
@@ -648,6 +659,7 @@ class DemoDataSeeder extends Seeder
                 $index >= self::RECRUITMENT_ROLE_COUNT - 2 => RecruitmentRole::STATUS_DRAFT,
                 default => RecruitmentRole::STATUS_OPEN,
             };
+            $this->reseed("recruitment-role:{$index}");
             $publishedAt = $this->baseTime->subDays($this->faker->numberBetween(3, 60));
 
             $role = RecruitmentRole::query()->updateOrCreate(
@@ -674,6 +686,7 @@ class DemoDataSeeder extends Seeder
             $role = $roles[$index % count($roles)];
             $applicant = $applicants[($index * 7) % count($applicants)];
             $status = RecruitmentApplication::STATUSES[$index % count(RecruitmentApplication::STATUSES)];
+            $this->reseed("recruitment-application:{$index}");
             $submittedAt = $this->baseTime->subDays($this->faker->numberBetween(1, 30));
             $reviewed = ! in_array($status, [RecruitmentApplication::STATUS_SUBMITTED, RecruitmentApplication::STATUS_WITHDRAWN], true);
             $decided = in_array($status, [RecruitmentApplication::STATUS_REJECTED, RecruitmentApplication::STATUS_ACCEPTED, RecruitmentApplication::STATUS_CLOSED], true);
@@ -701,6 +714,7 @@ class DemoDataSeeder extends Seeder
     private function seedCallLogs(array $callers, array $staff): void
     {
         for ($index = 0; $index < self::CALL_LOG_COUNT; $index++) {
+            $this->reseed("call-log:{$index}");
             $calledAt = $this->baseTime->subHours($this->faker->numberBetween(1, 24 * 60));
             $call = CallLog::query()->updateOrCreate(
                 ['caller_id' => $callers[($index * 5) % count($callers)]->id, 'called_at' => $calledAt],
@@ -754,6 +768,15 @@ class DemoDataSeeder extends Seeder
         $randomOwner = $this->faker->randomElement($owners);
 
         return $index <= $memberRecords ? $owners[0] : $randomOwner;
+    }
+
+    /**
+     * Faker shares PHP's global Mersenne Twister with the framework, so each record
+     * re-seeds from its own stable key to stay identical however many records ran before.
+     */
+    private function reseed(string $key): void
+    {
+        $this->faker->seed(self::SEED + crc32($key));
     }
 
     private function placeholderPng(): string
