@@ -8,6 +8,7 @@
 /.codex
 /.cursor/*
 !/.cursor/rules/
+!/.cursor/skills/
 /.idea
 /.nova
 /.phpunit.cache
