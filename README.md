@@ -266,35 +266,50 @@ bash scripts/local/bootstrap.sh --seed
 powershell -ExecutionPolicy Bypass -File .\scripts\local\bootstrap.ps1 -Seed
 ```
 
-### Local development with Laragon (Windows)
+### Local development with WampServer (Windows)
 
-Use Laragon when you prefer an Apache virtual host (for example `http://myapes-account.test`) instead of `php artisan serve` on port `8000`. The Laragon profile keeps the same SQLite QA stack; MySQL and Redis are not required for local testing.
+Use WampServer when you prefer an Apache virtual host (for example `http://myapes-account.test`) instead of `php artisan serve` on port `8000`. The WampServer profile keeps the same SQLite QA stack; MySQL and Redis are not required for local testing.
 
 **Prerequisites**
 
-- Laragon running with **PHP 8.3+** (prefer **8.4** to match CI)
-- Typical Laravel PHP extensions enabled in Laragon (`pdo_sqlite`, `openssl`, `mbstring`, `curl`, `fileinfo`, and related defaults)
-- `php`, `composer`, `node`, and `npm` available in the Laragon terminal
+- WampServer 3.4 (64-bit) with Apache's PHP set to **8.3+** (prefer **8.4** to match CI) in the tray menu (PHP > Version)
+- Typical Laravel PHP extensions enabled for Apache in the tray menu (PHP > PHP extensions): `pdo_sqlite`, `openssl`, `mbstring`, `curl`, `fileinfo`, and related defaults
+- `php`, `composer`, `node`, and `npm` on your PATH (WampServer's PHP lives in `C:\wamp64\bin\php\php8.4.*` if you need it)
+- Laragon, if still installed, must stay stopped: it also uses port 80
 
 **Virtual host**
 
-- The owner's clone is `C:\laragon\www\myapes-account`, which Laragon serves as `http://myapes-account.test`
-- Document root must be **`{repo}/public`** (Laragon “Quick app → Laravel” or an equivalent manual vhost)
-- Restart Apache after vhost changes
+- The owner's clone is `C:\Users\BambieMurphy\Documents\GitHub\MyAPES.Account`. WampServer serves it straight from that folder; no junction is needed
+- Add this block to `C:\wamp64\bin\apache\apache2.4.65\conf\extra\httpd-vhosts.conf` (adjust the path to your clone). Document root must be **`{repo}/public`**:
 
-**One-time Laragon bootstrap**
-
-```powershell
-cd C:\laragon\www\myapes-account
-powershell -ExecutionPolicy Bypass -File .\scripts\local\bootstrap.ps1 -Laragon -Fresh
+```apache
+<VirtualHost *:80>
+  ServerName myapes-account.test
+  DocumentRoot "c:/users/<you>/documents/github/myapes.account/public"
+  <Directory "c:/users/<you>/documents/github/myapes.account/public/">
+    Options +FollowSymLinks
+    AllowOverride All
+    Require local
+  </Directory>
+</VirtualHost>
 ```
 
-Use `-AppUrl http://your-vhost.test` when the auto-generated hostname differs from `myapes-account.test`. The bootstrap copies [`.env.laragon.example`](.env.laragon.example), sets `VITE_DEV_SERVER_URL=http://127.0.0.1:5173`, and keeps SQLite plus file-backed cache and sessions.
+- Add `127.0.0.1 myapes-account.test` to `C:\Windows\System32\drivers\etc\hosts` from an elevated editor
+- Check the config with `C:\wamp64\bin\apache\apache2.4.65\bin\httpd.exe -t`, then restart Apache (tray menu: Restart All Services)
+
+**One-time WampServer bootstrap**
+
+```powershell
+cd C:\Users\<you>\Documents\GitHub\MyAPES.Account
+powershell -ExecutionPolicy Bypass -File .\scripts\local\bootstrap.ps1 -Wamp -Fresh
+```
+
+Use `-AppUrl http://your-vhost.test` when your hostname differs from `myapes-account.test`. The bootstrap copies [`.env.wamp.example`](.env.wamp.example), sets `VITE_DEV_SERVER_URL=http://127.0.0.1:5173`, and keeps SQLite plus file-backed cache and sessions.
 
 **Daily dev loop**
 
-1. Start Laragon (Apache)
-2. In the repo terminal: `composer run dev:laragon` (or `powershell -ExecutionPolicy Bypass -File .\scripts\local\dev-laragon.ps1`)
+1. Make sure WampServer's services are running (green tray icon)
+2. In the repo terminal: `composer run dev:wamp` (or `powershell -ExecutionPolicy Bypass -File .\scripts\local\dev-wamp.ps1`)
 3. Open `http://myapes-account.test` (or your `-AppUrl` value)
 4. Use the seeded QA accounts below (`/login` auto-login in local)
 
@@ -305,10 +320,12 @@ Use `-AppUrl http://your-vhost.test` when the auto-generated hostname differs fr
 
 **Troubleshooting**
 
+- **WampServer home page instead of the app:** Apache has not loaded the vhost yet (restart it), or the hosts entry does not match `ServerName`
 - **404 or wrong site:** confirm the vhost document root is `public/`, not the repository root
-- **Unstyled pages:** ensure `composer run dev:laragon` is running, or run `npm run build`
-- **Passkeys / WebAuthn locally:** browsers require a secure context. Prefer Laragon HTTPS (`https://myapes-account.test`) with a trusted local certificate, and set `APP_URL` to that HTTPS origin so `relying_party_id` / allowed origins match. Plain `http://127.0.0.1:8000` will not complete device ceremonies. Live Cloudron uses `https://myaccount.myapes.me.uk` (changing rpId invalidates existing passkeys).
-- **URL or OIDC callback mismatch:** re-run bootstrap with `-Laragon`, or align `APP_URL`, `OIDC_REDIRECT_URI`, and `VITE_DEV_SERVER_URL` in `.env`
+- **403 Forbidden:** `Require local` only allows this machine; open the site by its `.test` name
+- **Unstyled pages:** ensure `composer run dev:wamp` is running, or run `npm run build`
+- **Passkeys / WebAuthn locally:** browsers require a secure context. Prefer an HTTPS WampServer vhost (`https://myapes-account.test`) with a trusted local certificate, and set `APP_URL` to that HTTPS origin so `relying_party_id` / allowed origins match. Plain `http://127.0.0.1:8000` will not complete device ceremonies. Live Cloudron uses `https://myaccount.myapes.me.uk` (changing rpId invalidates existing passkeys).
+- **URL or OIDC callback mismatch:** re-run bootstrap with `-Wamp`, or align `APP_URL`, `OIDC_REDIRECT_URI`, and `VITE_DEV_SERVER_URL` in `.env`
 
 Both local bootstrap scripts enforce the tracked selective-media boundary at
 `public/storage/.myapes-selective-media`. They refuse marker changes or
@@ -381,7 +398,7 @@ The launcher automatically uses Laravel Pail for logs on macOS and Linux. On nat
 
 Set `APP_PORT` before starting the launcher to use a Laravel port other than `8000`. The platform wrappers below delegate to `composer run dev` and remain available when you prefer an OS-specific entry point.
 
-On Laragon with an Apache virtual host, skip `composer run dev` and use `composer run dev:laragon` instead; see “Local development with Laragon (Windows)” above.
+On WampServer with an Apache virtual host, skip `composer run dev` and use `composer run dev:wamp` instead; see “Local development with WampServer (Windows)” above.
 
 ### macOS / Linux
 
