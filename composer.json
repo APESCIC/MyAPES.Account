@@ -44,25 +44,29 @@
     },
     "autoload-dev": {
         "psr-4": {
+            "Scripts\\MilestoneVersion\\": "scripts/MilestoneVersion/",
             "Tests\\": "tests/"
         }
     },
     "scripts": {
         "setup": [
-            "composer install",
-            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
-            "@php artisan key:generate",
-            "@php artisan migrate --force",
-            "npm install --ignore-scripts",
-            "npm run build"
+            "Composer\\Config::disableProcessTimeout",
+            "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/laragon-setup.ps1"
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
             "node scripts/local/dev-runner.mjs"
         ],
-        "dev:wamp": [
+        "build": [
+            "npm run build"
+        ],
+        "demo:seed": [
             "Composer\\Config::disableProcessTimeout",
-            "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/local/dev-wamp.ps1"
+            "@php artisan myapes:demo-data"
+        ],
+        "demo:reset": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php artisan myapes:demo-data --reset"
         ],
         "test": [
             "@php artisan config:clear --ansi @no_additional_args",
@@ -76,6 +80,12 @@
             "Composer\\Config::disableProcessTimeout",
             "powershell -ExecutionPolicy Bypass -File scripts/local/pre-pr-verify.ps1"
         ],
+        "milestone:next": "@php scripts/milestone-version next",
+        "milestone:branch": "@php scripts/milestone-version branch",
+        "milestone:pr-title": "@php scripts/milestone-version pr-title",
+        "milestone:check-title": "@php scripts/milestone-version check-title",
+        "milestone:check-branch": "@php scripts/milestone-version check-branch",
+        "milestone:check-release": "@php scripts/milestone-version check-release",
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

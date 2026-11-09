@@ -18,23 +18,26 @@ The owner is Bambie Murphy. Cursor does the coding. Write UK English (organisati
 - Recruitment vacancies use `RecruitmentRole`, never Spatie's `Role` (and not an Access job role).
 - Follow the conventions of sibling files, reuse existing components, and do not change dependencies without approval.
 
-## Local development
+## Local development (Laragon)
 
-The owner's working copy is WampServer on Windows. Laragon is retired and must stay stopped, because it also uses port 80.
+Laragon 8 on Windows is the only supported local setup. Use this project's own Laragon project, profile, demo data and commands, and test against the demo data. Never suggest another local stack, container or virtual machine for local development. Guide: [docs/laragon.md](docs/laragon.md).
 
 | Item | Value |
 | --- | --- |
-| Clone | `C:\Users\BambieMurphy\Documents\GitHub\MyAPES.Account` (served directly; no junction) |
-| App URL | `http://myapes-account.test` |
-| Virtual host | `C:\wamp64\bin\apache\apache2.4.65\conf\extra\httpd-vhosts.conf`, document root `{repo}/public` |
-| Daily loop | WampServer services running (green tray icon), then `composer run dev:wamp` |
-| First bootstrap | `powershell -ExecutionPolicy Bypass -File .\scripts\local\bootstrap.ps1 -Wamp -Fresh` |
-| Env file | `.env.wamp.example` (copied by `-Wamp`) |
+| Project folder | `C:\laragon\www\myapes-account` (on the owner's PC, a junction to `C:\Users\BambieMurphy\Documents\GitHub\MyAPES.Account`) |
+| App URL | `http://myapes-account.test`, document root `public/` (Laragon Auto Virtual Hosts) |
+| Profile | [docs/laragon/profile.md](docs/laragon/profile.md): PHP 8.4, MySQL 8.4 (`myapes_account_local`, root, empty password), Node 22, npm 11.10+, Vite port 5175 |
+| Setup | `composer setup` (runs `scripts/laragon-setup.ps1`; safe to run twice) |
+| Daily loop | Laragon started (**Start All**), then `composer run dev` for Vite hot reload |
+| Demo data | `composer demo:seed` to load, `composer demo:reset` to wipe and reload; logins in [docs/laragon/demo-data.md](docs/laragon/demo-data.md) |
+| Env file | `.env.example` (Laragon values) |
 
-- Restarting WampServer's Apache (`wampapache64`) and editing the hosts file need admin rights; the agent shell is not elevated, so ask the owner.
-- Cloud and Linux agents have no WampServer: use `bash scripts/local/dev.sh` and `http://127.0.0.1:8000/` for UI checks.
-- Local QA accounts come from `database/seeders/LocalQaSeeder.php` (local and testing only). Never copy their passwords anywhere.
-- Full local check: `composer pre-pr-verify` (PowerShell) or `bash scripts/local/pre-pr-verify.sh`.
+- The agent shell's `php` and `node` may not be Laragon's. Run `scripts/laragon-setup.ps1`, or put `C:\laragon\bin\php\php-8.4.*`, `C:\laragon\bin\mysql\mysql-8.4.*\bin` and `C:\laragon\bin\nodejs\node-v22` first on `PATH`.
+- Laragon's settings (PHP version, SSL, restarts) and the hosts file belong to the owner: ask before changing them, and never touch other projects' folders, databases or vhosts.
+- Demo data refuses to run unless `APP_ENV=local`. Never point it at production or Cloudron, and never copy real data into it.
+- Local QA accounts come from `database/seeders/LocalQaSeeder.php` (local and testing only) and drive the in-app QA role switcher. Never copy their passwords anywhere.
+- Cursor cloud and Linux agents have no Laragon. Their agent-only path is `bash scripts/local/bootstrap.sh --fresh` and `bash scripts/local/dev.sh`, with `http://127.0.0.1:8000/` for UI checks. It is not a developer setup.
+- Full local check: `composer pre-pr-verify` (PowerShell) or `bash scripts/local/pre-pr-verify.sh` (agent-only).
 - In Windows PowerShell 5.1, pass `gh` bodies with `--body-file`, because inline double quotes get stripped.
 - Node/npm for Vite builds: use **npm 11.10 or newer** (Node 22 ships npm 10 by default — upgrade with `npm install -g npm@11` before `npm ci`). Repo `.npmrc` sets `min-release-age=7`.
 - Every GitHub Actions `uses:` must be pinned to a full 40-character commit SHA with a version comment (`action@<sha> # vX.Y.Z`). Mutable tags such as `@v2` are not allowed.
@@ -56,6 +59,7 @@ If the pull isn't a fast-forward or a merge conflicts, stop and report it. Never
   ```bash
   gh api 'repos/APESCIC/MyAPES.Account/milestones?state=open&per_page=50' --jq '.[] | {number,title,open_issues}'
   ```
+- A milestone's version, which milestone is next, and the branch, pull request, tag and release names all come from the milestone title, as set out in [`.cursor/rules/milestone-versioning.mdc`](.cursor/rules/milestone-versioning.mdc). Never use GitHub's milestone number in a name.
 - Title prefix `[v0.N.x] NN` with a two-digit index. `00` is the epic; its body keeps a checklist of sub-issues (`- [ ] #123 Short title`), and each child is linked as a sub-issue.
 - Labels: only `area:admin`, `area:public`, `area:auth`, `area:tests`, `area:cloudron`.
 - Assignee: `apescic-director`.
@@ -71,23 +75,32 @@ Work ships once per milestone, not once per change or issue. The Cursor rule [`.
 3. Release.
 4. Deploy.
 
-- Each milestone has one branch, `milestone/<slug>` (or a name the owner gives), created from an up-to-date `main` when work starts (see [Before you start](#before-you-start)). Commit and push on it whenever needed.
+- Each milestone has one branch, named from its version as in [`milestone-versioning.mdc`](.cursor/rules/milestone-versioning.mdc) (for example `milestone/v0-58-3-laragon-local-dev`), created from an up-to-date `main` when work starts (see [Before you start](#before-you-start)). Commit and push on it whenever needed.
 - Nothing reaches `main`, and nothing is tagged, released or deployed, before stage 2.
 - Stages 3 and 4 run together: `deploy-cloudron.yml` deploys, then publishes the GitHub Release.
 - Hotfixes skip these stages only with Bambie's written approval recorded on the hotfix issue.
 
 **Definition of done:** an issue is done when its acceptance criteria are met and committed on its branch. The milestone is done only after the single merge, release and deploy.
 
+## Milestone versioning
+
+Every milestone, branch, PR title, release-history record, tag and release uses the milestone's version (`v0.58.3`), never GitHub's milestone number. The rule is [`.cursor/rules/milestone-versioning.mdc`](.cursor/rules/milestone-versioning.mdc).
+
+- `composer milestone:next` prints the next milestone (the lowest open version above the latest tag) and its branch name. `composer milestone:pr-title -- <issue>` prints the PR title.
+- `composer milestone:check-title -- "<title>"`, `milestone:check-branch -- "<branch>"` and `milestone:check-release -- vX.Y.Z "<release title>"` fail with the reason. CI runs the title and branch checks on every PR (`.github/workflows/milestone-version-check.yml`).
+- Skills: [`start-next-milestone`](.cursor/skills/start-next-milestone/SKILL.md), [`milestone-release-titles`](.cursor/skills/milestone-release-titles/SKILL.md) and `/next-milestone`. Script: `scripts/milestone-version`.
+- Optional local check before each push: `git config core.hooksPath .githooks`.
+
 ## Release metadata (once per milestone)
 
-The milestone pull request into `main` bumps to the **next free patch version** (minor for a new capability) and prepends **exactly one** record to `resources/data/releases.json`. Issue commits on the milestone branch do not bump the version. In the same pull request:
+The milestone pull request into `main` bumps to **the milestone's version** (from its title; see [`milestone-versioning.mdc`](.cursor/rules/milestone-versioning.mdc)) and prepends **exactly one** record to `resources/data/releases.json`. Issue commits on the milestone branch do not bump the version. In the same pull request:
 
 - `VERSION`
 - `resources/data/module-runtime-contract.json` (`application_version`)
 - one new head record in `resources/data/releases.json`; never edit or reorder published records
 - the version-pinned tests: `ChangeLogPageTest`, `HealthAndThemeTest`, `ModuleRollbackCompatibilityTest`, `ReleaseHistoryCommandTest` (version list, the `$releases[N]['date']` indexes, the tail `array_slice`, the current record's references and text)
 
-`php artisan myapes:changelog-prepare --type=patch --title="…" --issue=<n> --pr=<n>` writes most of this. Then check:
+`php artisan myapes:changelog-prepare --type=<patch|minor|major> --title="…" --issue=<n> --pr=<n>` writes most of this. Pick the `--type` that produces the milestone's version (check with `--dry-run` first). Then check:
 
 ```bash
 git fetch origin
@@ -96,13 +109,13 @@ php artisan myapes:changelog-validate --base-ref=origin/main
 
 - Release links must start with `https://github.com/APESCIC/MyAPES-Account/` (hyphen). The validator rejects other forms, even though the repository is `MyAPES.Account`.
 - No credentials, personal data or exploitable detail in release notes.
-- **If main moves** and your version is taken: rebase on the latest `main`, take the next free patch number, redo the bump and record, wait for CI again, then merge.
+- **If main moves** and the milestone's version is already taken, stop and report it to the owner. Don't pick another number or rename the milestone yourself.
 
 ## Ship flow
 
 Run this once per milestone, after every other issue in the milestone is closed.
 
-1. Open one pull request from the milestone branch into `main`, with the release metadata above.
+1. Open one pull request from the milestone branch into `main`, titled from the milestone's version (for example `v0.58.3: Laragon local development`), with the release metadata above.
 2. CI green: `gh pr checks <n> --watch`. Fix failures; re-run a job only for a proven flaky test, and log an issue for it.
 3. Wait for Bambie's review or approval on the ship issue, then merge with a merge commit: `gh pr merge <n> --merge`.
 4. Deploy by hand. A green `main` does not deploy itself. First check that no deploy is queued or running, and that `/healthz` does not already report the new version:
@@ -111,7 +124,7 @@ Run this once per milestone, after every other issue in the milestone is closed.
    gh workflow run deploy-cloudron.yml -R APESCIC/MyAPES.Account --ref main -f app_version="$(git show origin/main:VERSION | tr -d '\r\n')"
    gh run watch <run-id> -R APESCIC/MyAPES.Account --exit-status
    ```
-   After a successful deploy, the workflow publishes the GitHub Release (`v{VERSION}`). Do not create that release by hand.
+   After a successful deploy, the workflow publishes the GitHub Release with tag `v{VERSION}` and title `v{VERSION} {suffix}` (for example `v0.58.3 Dev`). Do not create that release by hand.
 5. Verify live: `curl -s https://myaccount.myapes.me.uk/healthz` must show `status: ok`, `version` equal to `VERSION`, and `release` equal to the merge SHA.
 
 Deploy secrets (`CLOUDRON_FQDN`, `CLOUDRON_TOKEN`) live in the `cloudron-deploy` environment. If a run needs a secret, a permission or an approval, stop and tell the owner.

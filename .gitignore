@@ -8,6 +8,7 @@
 /.codex
 /.cursor/*
 !/.cursor/rules/
+!/.cursor/skills/
 /.idea
 /.nova
 /.phpunit.cache
@@ -24,6 +25,4 @@
 /storage/pail
 /vendor
 _ide_helper.php
-Homestead.json
-Homestead.yaml
 Thumbs.db

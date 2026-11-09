@@ -1,4 +1,6 @@
 *.sh text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
+/.githooks/* text eol=lf
+/scripts/milestone-version text eol=lf
 /public/storage/.myapes-selective-media text eol=lf

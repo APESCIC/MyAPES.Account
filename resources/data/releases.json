@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.58.3",
+    "date": "2026-11-09",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Laragon local development",
+    "summary": "Local development for MyAPES Account runs on Laragon again, with demo data and a live preview, and milestones and releases are now named after their version.",
+    "changes": [
+      "Laragon 8 on Windows is the supported local setup, replacing WampServer. The app runs as its own Laragon project at http://myapes-account.test, with a recorded profile, a composer setup script, repeatable en_GB demo data (composer demo:seed and demo:reset) and Vite hot reload on port 5175.",
+      "Milestone branches, pull requests, release records, tags and release titles are now named from the version at the start of the milestone title, never from GitHub's milestone number. A new agent rule sets this out, and the agent instructions, contributing guide and developer wiki point to it.",
+      "GitHub Releases are now titled with the version and the milestone's label, for example v0.58.3 Dev, instead of the version followed by Beta.",
+      "New composer milestone commands show the next milestone and check pull request titles, branch names and release titles, and a CI check runs the title and branch checks on every pull request."
+    ],
+    "affected_areas": [
+      "Developer tooling",
+      "Release process",
+      "Documentation"
+    ],
+    "categories": [
+      "changed"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch: developer tooling, release naming and documentation only. No change to what users see or to the live app.",
+    "validation": [
+      "The full pre-PR verification (release history against main, version-pinned and contract tests, frontend tests and build, Laragon setup) passed locally, and the app loaded at http://myapes-account.test on Laragon.",
+      "The release title step was checked against the live milestone titles, and the deploy workflow contract tests cover it."
+    ],
+    "known_limitations": [
+      "Three open milestones (v0.53.0, v0.55.0 and v0.56.0) have versions at or below the latest release and need retitling before they can ship."
+    ],
+    "rollback": "Redeploy the previous release package. Nothing in the database changes in this release.",
+    "provenance": "Milestone v0.58.3 Dev: Laragon local development, epic #723 with sub-issues #722, #725 and #726, pull requests #724, #727, #728 and #729.",
+    "references": [
+      {
+        "label": "Issue #723",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/723"
+      },
+      {
+        "label": "Pull request #729",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/729"
+      }
+    ]
+  },
+  {
     "version": "0.58.2",
     "date": "2026-11-09",
     "channel": "stable",

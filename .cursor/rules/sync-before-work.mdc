@@ -8,7 +8,7 @@ Before starting any new issue, task or job, and before creating any branch:
 2. Run `git fetch origin --prune`.
 3. Run `git checkout main` then `git pull --ff-only origin main`.
 4. Bring the latest main into the branch you'll work from:
-   - Milestone branch: `git checkout milestone/<milestone-slug>` then `git merge origin/main`. If the branch doesn't exist, create it from the updated main and push it.
+   - Milestone branch: `git checkout milestone/<milestone-slug>` then `git merge origin/main`. If the branch doesn't exist, create it from the updated main, named as `milestone-versioning.mdc` says, and push it.
    - Existing issue branch you're resuming: check it out and run `git merge origin/main`.
 5. Only then create a new issue branch from the milestone branch, or carry on with the resumed one.
 If the pull isn't a fast-forward or a merge hits conflicts, stop and report it. Never force-push, reset --hard or rebase shared branches to get past it.

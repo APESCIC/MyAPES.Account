@@ -232,108 +232,57 @@ The interface uses a light-first desert theme with a sun-baked earth sidebar, sa
 | `public/site.webmanifest` | Web app manifest |
 | `public/browserconfig.xml` | Microsoft tile metadata |
 
-## Local environment setup
+## Local development with Laragon
 
-Run the bootstrap script from the repository root. It installs PHP/Node dependencies, creates a local `.env` from `.env.local.example`, configures SQLite plus file-backed cache/sessions, generates the app key once, migrates, seeds, and builds the frontend.
+Laragon 8 on Windows is the **only supported local development setup**. MyAPES Account runs as its own Laragon project at `http://myapes-account.test` (document root `public/`), on PHP 8.4, MySQL 8.4 (database `myapes_account_local`), Node 22 and a Vite dev server on port 5175. The full guide is [docs/laragon.md](docs/laragon.md). It covers prerequisites, applying the profile, running several APESCIC projects side by side and common fixes. The project's values are in [docs/laragon/profile.md](docs/laragon/profile.md).
 
-The script refuses to rewrite an environment unless `APP_ENV` is already `local` or `testing`. Local development does not require MySQL or Redis.
+**Prerequisites:** Laragon 8 (Full) at `C:\laragon` with Auto Virtual Hosts on, the [project profile](docs/laragon/profile.md#applying-the-profile) applied (PHP 8.4, MySQL 8.4, Node 22), and npm 11.10 or newer (`npm install -g npm@11` in a Laragon terminal).
 
-### One-command local QA bootstrap (deterministic test data)
-
-Use a fresh migration+seed reset when you need the same test accounts and records every time.
-
-### macOS / Linux
-
-```bash
-bash scripts/local/bootstrap.sh --fresh
-```
-
-### Windows PowerShell
+**First run**
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\local\bootstrap.ps1 -Fresh
+cd C:\laragon\www
+git clone https://github.com/APESCIC/MyAPES.Account.git myapes-account
+cd myapes-account
+composer setup   # runs scripts/laragon-setup.ps1
 ```
 
-The `--fresh` / `-Fresh` option is destructive for local data (`migrate:fresh --seed`) and is intended for QA resets.
+Start Laragon (**Start All**) first. The setup script checks Laragon's PHP, Composer, Node, npm and MySQL against the profile, and warns if Laragon is set to the wrong PHP version. It copies `.env.example` to `.env` if missing and installs dependencies. It also creates the `myapes_account_local` database, runs the migrations and offers to load the demo data. It is safe to run again and only touches this project.
 
-If you need non-destructive seeding, use:
-
-```bash
-bash scripts/local/bootstrap.sh --seed
-```
+**Demo data and test logins**
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\local\bootstrap.ps1 -Seed
+composer demo:seed    # load or refresh the demo data
+composer demo:reset   # wipe myapes_account_local, migrate and reload it
 ```
 
-### Local development with WampServer (Windows)
+The demo data is deterministic, en_GB and clearly fake. It includes test logins for every role (`admin@example.test`, `staff@example.test`, `member@example.test` and more) with one shared local-only password. [docs/laragon/demo-data.md](docs/laragon/demo-data.md) lists everything, including the logins. Both commands refuse to run unless `APP_ENV=local`.
 
-Use WampServer when you prefer an Apache virtual host (for example `http://myapes-account.test`) instead of `php artisan serve` on port `8000`. The WampServer profile keeps the same SQLite QA stack; MySQL and Redis are not required for local testing.
-
-**Prerequisites**
-
-- WampServer 3.4 (64-bit) with Apache's PHP set to **8.3+** (prefer **8.4** to match CI) in the tray menu (PHP > Version)
-- Typical Laravel PHP extensions enabled for Apache in the tray menu (PHP > PHP extensions): `pdo_sqlite`, `openssl`, `mbstring`, `curl`, `fileinfo`, and related defaults
-- `php`, `composer`, `node`, and `npm` on your PATH (WampServer's PHP lives in `C:\wamp64\bin\php\php8.4.*` if you need it)
-- Laragon, if still installed, must stay stopped: it also uses port 80
-
-**Virtual host**
-
-- The owner's clone is `C:\Users\BambieMurphy\Documents\GitHub\MyAPES.Account`. WampServer serves it straight from that folder; no junction is needed
-- Add this block to `C:\wamp64\bin\apache\apache2.4.65\conf\extra\httpd-vhosts.conf` (adjust the path to your clone). Document root must be **`{repo}/public`**:
-
-```apache
-<VirtualHost *:80>
-  ServerName myapes-account.test
-  DocumentRoot "c:/users/<you>/documents/github/myapes.account/public"
-  <Directory "c:/users/<you>/documents/github/myapes.account/public/">
-    Options +FollowSymLinks
-    AllowOverride All
-    Require local
-  </Directory>
-</VirtualHost>
-```
-
-- Add `127.0.0.1 myapes-account.test` to `C:\Windows\System32\drivers\etc\hosts` from an elevated editor
-- Check the config with `C:\wamp64\bin\apache\apache2.4.65\bin\httpd.exe -t`, then restart Apache (tray menu: Restart All Services)
-
-**One-time WampServer bootstrap**
+**Live preview**
 
 ```powershell
-cd C:\Users\<you>\Documents\GitHub\MyAPES.Account
-powershell -ExecutionPolicy Bypass -File .\scripts\local\bootstrap.ps1 -Wamp -Fresh
+composer run dev
 ```
 
-Use `-AppUrl http://your-vhost.test` when your hostname differs from `myapes-account.test`. The bootstrap copies [`.env.wamp.example`](.env.wamp.example), sets `VITE_DEV_SERVER_URL=http://127.0.0.1:5173`, and keeps SQLite plus file-backed cache and sessions.
-
-**Daily dev loop**
-
-1. Make sure WampServer's services are running (green tray icon)
-2. In the repo terminal: `composer run dev:wamp` (or `powershell -ExecutionPolicy Bypass -File .\scripts\local\dev-wamp.ps1`)
-3. Open `http://myapes-account.test` (or your `-AppUrl` value)
-4. Use the seeded QA accounts below (`/login` auto-login in local)
+This starts Vite on port 5175, the queue listener and a log tail; Laragon's Apache serves the pages. Saving a Blade template, CSS or JavaScript file updates the browser without a rebuild. On native Windows the log tail follows `storage/logs/laravel.log` with PowerShell, because PHP's Unix-only `pcntl` extension is not available.
 
 **Testing**
 
-- Feature and unit tests: `php artisan test` or `composer test`
+- Feature and unit tests: `composer test` (in-memory SQLite; never touches `myapes_account_local`)
 - Pre-merge validation: `composer pre-merge`
+- Pre-PR check: `composer pre-pr-verify` (add `-Fresh` through `scripts/local/pre-pr-verify.ps1` to reset the demo data too)
 
-**Troubleshooting**
+**Troubleshooting:** see [Common fixes](docs/laragon.md#common-fixes). It covers the wrong PHP version, ports 80, 443, 3306 or 5175 in use, `.test` not resolving, unstyled pages, file permissions, passkeys over HTTPS and Mailpit.
 
-- **WampServer home page instead of the app:** Apache has not loaded the vhost yet (restart it), or the hosts entry does not match `ServerName`
-- **404 or wrong site:** confirm the vhost document root is `public/`, not the repository root
-- **403 Forbidden:** `Require local` only allows this machine; open the site by its `.test` name
-- **Unstyled pages:** ensure `composer run dev:wamp` is running, or run `npm run build`
-- **Passkeys / WebAuthn locally:** browsers require a secure context. Prefer an HTTPS WampServer vhost (`https://myapes-account.test`) with a trusted local certificate, and set `APP_URL` to that HTTPS origin so `relying_party_id` / allowed origins match. Plain `http://127.0.0.1:8000` will not complete device ceremonies. Live Cloudron uses `https://myaccount.myapes.me.uk` (changing rpId invalidates existing passkeys).
-- **URL or OIDC callback mismatch:** re-run bootstrap with `-Wamp`, or align `APP_URL`, `OIDC_REDIRECT_URI`, and `VITE_DEV_SERVER_URL` in `.env`
-
-Both local bootstrap scripts enforce the tracked selective-media boundary at
-`public/storage/.myapes-selective-media`. They refuse marker changes or
-unexpected entries and create only `public/storage/avatars`, targeting
+The Laragon setup script enforces the tracked selective-media boundary at
+`public/storage/.myapes-selective-media`. It refuses marker changes or
+unexpected entries and creates only `public/storage/avatars`, targeting
 `storage/app/public/avatars`. Pet Profile photos remain in
 `storage/app/public/pet-profiles` but are delivered only through authenticated,
 authorization-checked Shelter or APES Pet Care Clinic routes; they are never exposed by a
 public-storage link.
+
+**Cursor cloud agents only:** agents without Laragon use `bash scripts/local/bootstrap.sh --fresh` and `bash scripts/local/dev.sh` (SQLite and `php artisan serve` on `http://127.0.0.1:8000`, from `.env.local.example`). This agent-only path is not a supported developer setup.
 
 ### Seeded local QA accounts
 
@@ -388,50 +337,26 @@ Separation rules:
 - APES Pet Care Clinic: a seeded Pet Profile with two open/in-progress Consultations plus a closed example, and three deterministic Tickets covering appointment/open/unassigned/low, prescription/in-progress/staff/high, and billing/closed/admin/medium states with one public and one internal message each
 - Profiles: the public QA account has a `UserProfile`; student, volunteer, staff, and admin QA accounts have `StaffProfile` workplace details. Repeated non-destructive seeding preserves Ticket/Case parent and child IDs, owners, pets, assignees, values, and timestamps without cross-sub-core overwrite
 
-Start Laravel, the queue listener, application logs, and Vite together with the cross-platform Composer script:
-
-```powershell
-composer run dev
-```
-
-The launcher automatically uses Laravel Pail for logs on macOS and Linux. On native Windows it follows `storage/logs/laravel.log` with PowerShell instead, because PHP's Unix-only `pcntl` extension is not available there; do not try to install `pcntl` on native Windows.
-
-Set `APP_PORT` before starting the launcher to use a Laravel port other than `8000`. The platform wrappers below delegate to `composer run dev` and remain available when you prefer an OS-specific entry point.
-
-On WampServer with an Apache virtual host, skip `composer run dev` and use `composer run dev:wamp` instead; see “Local development with WampServer (Windows)” above.
-
-### macOS / Linux
-
-```bash
-bash scripts/local/dev.sh
-```
-
-### Windows PowerShell
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\local\dev.ps1
-```
-
 ## Release history and semantic versioning
 
 The current application version is stored in the root `VERSION` file without a display-only `v` prefix. Reviewed public release records live in `resources/data/releases.json`; the newest record is authoritative and must match `VERSION`. The shared footer links the displayed version to the public `/change-log` hub.
 
 Every future change merged to `main` must:
 
-1. Prepend exactly one higher semantic version to `resources/data/releases.json`.
+1. Prepend exactly one higher semantic version to `resources/data/releases.json`. That version is the milestone's version: the `vMAJOR.MINOR.PATCH` at the start of its GitHub milestone title (see [`.cursor/rules/milestone-versioning.mdc`](.cursor/rules/milestone-versioning.mdc)).
 2. Update `VERSION` to that same version.
 3. Keep `resources/data/module-runtime-contract.json` → `application_version` in sync with `VERSION`.
 4. Leave every previously published record unchanged and in the same order.
-5. Use a minor version for a new backward-compatible capability and a patch version for a compatible fix. While the application remains pre-1.0, document a breaking change explicitly and advance the minor version.
+5. Milestones are titled with a minor version for a new backward-compatible capability and a patch version for a compatible fix. While the application remains pre-1.0, document a breaking change explicitly and advance the minor version.
 6. Keep public notes free of credentials, personal data, private operational identifiers, exploitable security detail, and unnecessary infrastructure detail.
 
 Preferred workflow (agents and humans): work ships once per milestone (see [Milestone shipping](AGENTS.md#milestone-shipping)), so scaffold the next release in the milestone's pull request into `main`:
 
 ```powershell
-php artisan myapes:changelog-prepare --type=patch --title="Short public title" --issue=<n> --pr=<n>
+php artisan myapes:changelog-prepare --type=<patch|minor|major> --title="Short public title" --issue=<n> --pr=<n>
 ```
 
-Replace every `TODO:` field in the new head record, then validate:
+Pick the `--type` that produces the milestone's version; run it with `--dry-run` first. Replace every `TODO:` field in the new head record, then validate:
 
 ```powershell
 php artisan myapes:changelog-validate
@@ -444,15 +369,15 @@ git fetch origin
 php artisan myapes:changelog-validate --base-ref=origin/main
 ```
 
-Pull-request and `main` workflows perform the same append-only comparison. Manual workflow dispatch of the test workflow performs structural validation without requiring another version. In-PR release metadata does not create Git tags automatically. Agents run local dev verify on the PR branch before merge. A successful Cloudron deploy (last post-merge step) creates the GitHub Release with display title `{VERSION} Beta` and tag `v{VERSION}` on the deployed SHA. See ship-gate.
+Pull-request and `main` workflows perform the same append-only comparison. Manual workflow dispatch of the test workflow performs structural validation without requiring another version. In-PR release metadata does not create Git tags automatically. Agents run local dev verify on the PR branch before merge. A successful Cloudron deploy (last post-merge step) creates the GitHub Release with display title `v{VERSION} {suffix}` and tag `v{VERSION}` on the deployed SHA. The suffix is the word before the colon in the milestone title (for example `Dev` or `Beta`), and falls back to `Beta`. See ship-gate.
 
 ### GitHub Release tags
 
-Every documented app version in `releases.json` has a matching GitHub Release tag `v{VERSION}` (for example `v0.31.6` for `VERSION` `0.31.6`). The Change Log Hub and `/healthz` `version` field read from `VERSION` / `releases.json`; GitHub Releases are the external mirror on [the repository Releases page](https://github.com/APESCIC/MyAPES-Account/releases). Deploy sets the release **display name** to `{VERSION} Beta`.
+Every documented app version in `releases.json` has a matching GitHub Release tag `v{VERSION}` (for example `v0.31.6` for `VERSION` `0.31.6`). The Change Log Hub and `/healthz` `version` field read from `VERSION` / `releases.json`; GitHub Releases are the external mirror on [the repository Releases page](https://github.com/APESCIC/MyAPES-Account/releases). Deploy sets the release **display name** to `v{VERSION} {suffix}`, for example `v0.58.3 Dev`. Releases published before this change keep their old `{VERSION} Beta` titles.
 
 - Map versions to merge commits: `node scripts/local/map-release-commits.mjs --write`
 - Backfill or verify releases: `node scripts/local/backfill-github-releases.mjs --dry-run` then `node scripts/local/backfill-github-releases.mjs --resume`
-- Rename display titles to `{VERSION} Beta`: `bash scripts/github/rename-release-titles.sh`
+- `bash scripts/github/rename-release-titles.sh` is a historical one-off that renamed past releases to `{VERSION} Beta`. Don't run it again: it would overwrite the current `v{VERSION} {suffix}` titles.
 - `/healthz` `release` remains the immutable **deploy commit SHA**; the GitHub tag points at the **version introduction commit** on `main`. Neither replaces the other.
 
 ## Cloudron deployment automation
@@ -463,7 +388,7 @@ Deployments are handled by `.github/workflows/deploy-cloudron.yml`.
 
 1. Deploy runs only on manual `workflow_dispatch` (for example `gh workflow run "Deploy MyAPES Account to Cloudron" --ref main`). There is no auto-deploy after a green `main` test run.
 2. Run local dev verify on the PR branch before merge (`composer pre-pr-verify` or ship-gate steps). Prefer Cloudron deploy only after `test-cloudron.yml` has succeeded for the target `main` revision, local verify passed, and changelog metadata on `main` is confirmed. Cloudron is the **last** post-merge deploy step; pass `app_version` from `VERSION` when dispatching (ship-gate).
-3. After a successful Cloudron deploy, the app Change Log Hub at `/change-log` shows the head `releases.json` record, and the deploy workflow publishes GitHub Release `{VERSION} Beta` with tag `v{VERSION}`. Sibling APES websites keep separate changelogs; update those only when the operator asks (ship-gate).
+3. After a successful Cloudron deploy, the app Change Log Hub at `/change-log` shows the head `releases.json` record, and the deploy workflow publishes GitHub Release `v{VERSION} {suffix}` with tag `v{VERSION}`. Sibling APES websites keep separate changelogs; update those only when the operator asks (ship-gate).
 
 ### Target app
 
@@ -857,7 +782,7 @@ Rotating MySQL, Redis, SMTP, and LDAP credentials are read from Cloudron-provide
   - The scheduler is configured to run pruning daily
 - **Session hardening defaults** in `.env.example`:
   - `SESSION_ENCRYPT=true`
-  - `SESSION_SECURE_COOKIE=true` in the template for HTTPS deployments; local bootstrap rewrites the copied `.env` to `false` for localhost QA
+  - `SESSION_SECURE_COOKIE=true` in `scripts/deploy/production.env.example` for HTTPS deployments; the Laragon `.env.example` uses `false` for `http://myapes-account.test`
   - `SESSION_HTTP_ONLY=true`
 - **Upload safeguards**:
   - Avatar and pet photo uploads are restricted to JPEG/PNG/WebP

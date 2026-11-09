@@ -8,7 +8,7 @@
 ## Flow
 1. A report is approved before anything is added to GitHub.
 2. Issues: title prefix `[v0.N.x] NN`, labels `area:admin`, `area:public`, `area:auth`, `area:tests` or `area:cloudron`, assignee apescic-director, added to a milestone.
-3. Cursor works on a branch, updates the issue as it goes and opens a PR with a release record.
+3. Cursor works on the milestone branch, updates the issue as it goes, and ships the milestone in one PR with a release record. Milestone versions, branch names and PR, tag and release titles follow [milestone-versioning.mdc](https://github.com/APESCIC/MyAPES.Account/blob/main/.cursor/rules/milestone-versioning.mdc), never GitHub's milestone number.
 4. CI must pass; local verify on the PR branch (`composer pre-pr-verify`).
 5. Merge, then deploy to Cloudron (see [[Release and Cloudron deploy|Dev-Release-and-Cloudron-deploy]]), then verify live.
 
