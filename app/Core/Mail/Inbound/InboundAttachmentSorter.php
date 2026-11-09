@@ -6,6 +6,7 @@ use App\Core\Attachments\AttachmentLimits;
 use App\Core\Attachments\DocumentInspector;
 use App\Core\Mail\Inbound\Parsing\InboundAttachmentPart;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\File;
 
 /**
  * Applies the v0.58 upload rules to email attachments (#584): the same
@@ -62,11 +63,7 @@ final class InboundAttachmentSorter
 
     public function cleanUp(): void
     {
-        foreach ($this->temporaryFiles as $path) {
-            if (is_file($path)) {
-                @unlink($path);
-            }
-        }
+        File::delete($this->temporaryFiles);
 
         $this->temporaryFiles = [];
     }
