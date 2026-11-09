@@ -96,6 +96,8 @@ return [
                 'why_we_use_it' => 'Why we use it',
                 'your_rights' => 'Your rights',
                 'who_we_are' => 'Who we are',
+                'email_replies' => 'Replies by email',
+                'email_replies_body' => 'You can reply to ticket and case emails instead of logging in. Your reply goes to our communications mailbox; we check that it came from the address on your account, add the text and any allowed attachments to the ticket or case, and delete it from the mailbox straight away. We keep the full email for :days days so we can check problems, then delete it and keep only a record of when it arrived, whether it was added and why.',
             ],
         ],
         'terms' => [

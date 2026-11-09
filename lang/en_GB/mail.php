@@ -74,6 +74,12 @@ return [
                 'description' => 'Sent to a staff, volunteer, student or admin account after its personal client records were archived.',
             ],
         ],
+        'inbound' => [
+            'reply_not_posted' => [
+                'name' => 'Email reply not added',
+                'description' => 'Sent, at most once an hour, when someone replies by email to a closed ticket or case.',
+            ],
+        ],
     ],
 
     'staff_client_records_archived' => [
@@ -116,6 +122,21 @@ return [
         'line_case_type' => 'Case type: :type',
         'line_status' => 'Status: :status',
         'action' => 'Log in to reply',
+    ],
+
+    'reply_by_email' => [
+        'marker' => '—— Reply above this line ——',
+        'line' => 'Reply to this email, or log in to reply.',
+        'footer' => 'Reply to this email, or:',
+        'badge' => 'by email',
+        'attachments_only' => 'Sent attachments by email.',
+    ],
+
+    'reply_not_posted' => [
+        'subject' => 'Your email reply to :reference was not added',
+        'line_closed' => ':reference is closed, so your email reply was not added.',
+        'line_next' => 'If you still need help, log in to see the latest, or open a new request.',
+        'action' => 'Log in to view',
     ],
 
     'attachments' => [

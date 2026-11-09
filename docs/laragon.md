@@ -79,6 +79,28 @@ composer pre-merge     # release metadata, build and tests, as CI runs them
 composer pre-pr-verify # pre-merge, then the Laragon setup; -Fresh also runs demo:reset
 ```
 
+## Replies by email
+
+Ticket and case replies by email ([`mail.md`](mail.md#replies-by-email)) work locally without a real mailbox:
+
+```powershell
+php artisan inbound-mail:key --enable     # once: writes INBOUND_MAIL_TOKEN_KEY and turns replies on in .env
+php artisan config:clear
+```
+
+1. Update a ticket or case in the app. The email lands in Mailpit (`http://127.0.0.1:8025`) with a `communications+t…` Reply-To, a `[MYAPES-T-12]` subject tag and the "Reply above this line" marker.
+2. Write a reply as that person, then feed it in:
+
+   ```powershell
+   php artisan tickets:inbound-sample T12 owner@example.org --body="It works now."
+   php artisan tickets:inbound-ingest storage\app\inbound-samples\reply-T12-<time>.eml
+   ```
+
+   You can also save a real reply from Gmail or Outlook as `.eml` and ingest that. Set `INBOUND_MAIL_REQUIRE_AUTH=false` in `.env` if the saved file has no `Authentication-Results` header.
+3. The reply appears on the ticket marked **by email**; anything that was not posted is on **Admin → Emails → Inbound** with the reason.
+
+Leave the `INBOUND_MAIL_IMAP_*` settings empty locally; the every-minute poll then does nothing.
+
 ## Several APESCIC projects side by side
 
 Every APESCIC repository is its own Laragon project:

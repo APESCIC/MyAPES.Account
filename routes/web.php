@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminAccessController;
 use App\Http\Controllers\Admin\AdminEmailController;
 use App\Http\Controllers\Admin\AdminGroupController;
+use App\Http\Controllers\Admin\AdminInboundEmailController;
 use App\Http\Controllers\Admin\AdminManagedListController;
 use App\Http\Controllers\Admin\AdminMaintenanceController;
 use App\Http\Controllers\Admin\AdminModuleController;
@@ -399,6 +400,24 @@ Route::middleware([
             Route::get('/emails/log', [AdminEmailController::class, 'log'])
                 ->middleware('can:admin.emails.view')
                 ->name('emails.log');
+            Route::get('/emails/inbound', [AdminInboundEmailController::class, 'index'])
+                ->middleware('can:admin.emails.view')
+                ->name('emails.inbound.index');
+            Route::put('/emails/inbound/services', [AdminInboundEmailController::class, 'updateServices'])
+                ->middleware('can:admin.emails.manage')
+                ->name('emails.inbound.services.update');
+            Route::get('/emails/inbound/{inboundEmail}', [AdminInboundEmailController::class, 'show'])
+                ->middleware('can:admin.emails.view')
+                ->whereNumber('inboundEmail')
+                ->name('emails.inbound.show');
+            Route::post('/emails/inbound/{inboundEmail}/retry', [AdminInboundEmailController::class, 'retry'])
+                ->middleware('can:admin.emails.manage')
+                ->whereNumber('inboundEmail')
+                ->name('emails.inbound.retry');
+            Route::post('/emails/inbound/{inboundEmail}/discard', [AdminInboundEmailController::class, 'discard'])
+                ->middleware('can:admin.emails.manage')
+                ->whereNumber('inboundEmail')
+                ->name('emails.inbound.discard');
             Route::get('/emails/{template}', [AdminEmailController::class, 'show'])
                 ->middleware('can:admin.emails.view')
                 ->where('template', '[a-z0-9_]+\.[a-z0-9_]+')

@@ -58,6 +58,11 @@ class SessionAuthorizationContext
 
     public function authenticationMethod(Request $request): ?string
     {
+        // Queue workers and console commands (e.g. replies by email, #580) have no session.
+        if (! $request->hasSession()) {
+            return null;
+        }
+
         $method = $request->session()->get(self::AUTHENTICATION_METHOD_KEY);
 
         return is_string($method) ? $method : null;

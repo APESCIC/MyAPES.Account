@@ -5,6 +5,7 @@ namespace Plugins\Tickets\Notifications;
 use App\Core\Accounts\User;
 use App\Core\Mail\Concerns\BuildsBrandedMail;
 use App\Core\Mail\Concerns\MentionsAttachments;
+use App\Core\Mail\Concerns\OffersEmailReply;
 use App\Support\WorkflowLabels;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -16,6 +17,7 @@ class TicketUpdatedNotification extends Notification implements ShouldQueue
 {
     use BuildsBrandedMail;
     use MentionsAttachments;
+    use OffersEmailReply;
     use Queueable;
 
     public bool $deleteWhenMissingModels = true;
@@ -64,7 +66,7 @@ class TicketUpdatedNotification extends Notification implements ShouldQueue
             ->line(__('mail.ticket_updated.line_status', ['status' => WorkflowLabels::status($this->ticket->status)]))
             ->line(__('mail.ticket_updated.line_priority', ['priority' => WorkflowLabels::priority($this->ticket->priority)]));
 
-        return $this->withAttachmentLine($mail, $this->attachmentCount)
+        return $this->withEmailReply($this->withAttachmentLine($mail, $this->attachmentCount), $notifiable, 'T', $this->ticket)
             ->action(__('mail.ticket_updated.action'), $this->replyLink($notifiable, route($this->showRouteName, $this->ticket)));
     }
 

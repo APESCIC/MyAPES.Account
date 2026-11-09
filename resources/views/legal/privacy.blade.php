@@ -45,6 +45,11 @@
             <p>We keep account and service records while you use MyAPES Account and for as long as we need them to deliver support, meet safeguarding or animal-welfare duties, or meet a legal requirement. Audit records are retained for a limited period and then removed.</p>
         </section>
 
+        <section data-privacy-email-replies>
+            <h2>{{ __('public.legal.privacy.blade.email_replies') }}</h2>
+            <p>{{ __('public.legal.privacy.blade.email_replies_body', ['days' => (int) config('inbound-mail.retention_days', 30)]) }}</p>
+        </section>
+
         <section>
             <h2>{{ __('public.legal.privacy.blade.your_rights') }}</h2>
             <p>You can ask APES CIC for a copy of the personal information we hold, and you can ask us to correct it or, where the law allows, delete it or limit how we use it. You can also complain to the Information Commissioner's Office if you are unhappy with how we handle your information.</p>

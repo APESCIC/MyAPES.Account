@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'user_id',
     'body',
     'visibility',
+    'via_email',
 ])]
 class CaseUpdate extends Model
 {
@@ -24,6 +25,7 @@ class CaseUpdate extends Model
     {
         return [
             'body' => SanitisedHtml::class,
+            'via_email' => 'boolean',
         ];
     }
 

@@ -1,0 +1,25 @@
+Return-Path: <{{FROM}}>
+Authentication-Results: {{AUTH}}
+From: Ann Owner <{{FROM}}>
+Content-Type: text/plain;
+	charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3826.200.121\))
+Subject: {{SUBJECT}}
+Message-Id: <{{MESSAGE_ID}}>
+In-Reply-To: {{IN_REPLY_TO}}
+References: {{IN_REPLY_TO}}
+Date: Mon, 9 Nov 2026 10:15:00 +0000
+To: {{TO}}
+
+{{BODY}}
+
+Sent from my iPhone
+
+> On 9 Nov 2026, at 09:00, MyAPES Account <no-reply@apes.org.uk> wrote:
+>=20
+> =E2=80=94=E2=80=94 Reply above this line =E2=80=94=E2=80=94
+>=20
+> Hello Ann,
+>=20
+> Ticket #1 (Boiler is broken) was updated by Sam Staff.

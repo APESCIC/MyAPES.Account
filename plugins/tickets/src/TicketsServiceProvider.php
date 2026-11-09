@@ -21,6 +21,7 @@ use Plugins\Tickets\Dashboard\SupportTicketAnalyticsProvider;
 use Plugins\Tickets\Dashboard\SupportTicketAttentionProvider;
 use Plugins\Tickets\Dashboard\SupportTicketRecentActivityProvider;
 use Plugins\Tickets\Dashboard\SupportTicketSummaryProvider;
+use Plugins\Tickets\Inbound\TicketEmailReplyHandler;
 use Plugins\Tickets\Models\SupportTicket;
 use Plugins\Tickets\Notifications\TicketUpdatedNotification;
 use Plugins\Tickets\Policies\SupportTicketPolicy;
@@ -91,6 +92,11 @@ class TicketsServiceProvider extends PluginServiceProvider
                 introKey: 'mail.ticket_updated.line_body',
             ),
         ];
+    }
+
+    protected function inboundReplyHandlers(): array
+    {
+        return [TicketEmailReplyHandler::class];
     }
 
     protected function clientRecords(): array

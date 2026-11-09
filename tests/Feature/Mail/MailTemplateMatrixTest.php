@@ -3,6 +3,7 @@
 namespace Tests\Feature\Mail;
 
 use App\Core\Accounts\User;
+use App\Core\Mail\Concerns\OffersEmailReply;
 use App\Core\Mail\MailCategory;
 use App\Core\Mail\MailTemplateRegistry;
 use App\Core\Mail\OutboundMailLog;
@@ -53,8 +54,16 @@ class MailTemplateMatrixTest extends TestCase
         'cases.apes_cic_case_updated',
         'cases.shelter_case_updated',
         'consultations.consultation_updated',
+        'inbound.reply_not_posted',
         'recruitment.application_received',
         'recruitment.application_status',
+        'tickets.ticket_updated',
+    ];
+
+    /** Templates that can be answered by replying to the email (#578). */
+    private const REPLYABLE_KEYS = [
+        'cases.apes_cic_case_updated',
+        'cases.shelter_case_updated',
         'tickets.ticket_updated',
     ];
 
@@ -92,6 +101,22 @@ class MailTemplateMatrixTest extends TestCase
         foreach (['sample-preview-token', 'token=', 'password:', 'secret', 'totp', 'signature='] as $needle) {
             $this->assertStringNotContainsString($needle, $subject, "{$key} subject contains {$needle}");
         }
+    }
+
+    #[DataProvider('templateKeys')]
+    public function test_only_ticket_and_case_templates_offer_replies_by_email(string $key): void
+    {
+        config(['inbound-mail.enabled' => true, 'inbound-mail.token_key' => 'matrix-key']);
+        $template = app(MailTemplateRegistry::class)->find($key);
+        $recipient = $this->recipient(emailPreference: true);
+        $mail = $template->sampleNotification($recipient)->toMail($recipient);
+
+        $this->assertSame(
+            in_array($key, self::REPLYABLE_KEYS, true),
+            in_array(OffersEmailReply::class, class_uses_recursive($template->notification), true),
+        );
+        $this->assertStringNotContainsString('matrix-key', (string) $mail->subject);
+        $this->assertStringNotContainsString('communications+', $mail->render());
     }
 
     #[DataProvider('templateKeys')]

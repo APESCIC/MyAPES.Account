@@ -2,7 +2,6 @@
 
 namespace Plugins\Cases\Http\Controllers;
 
-use App\Core\Accounts\User;
 use App\Core\Extensions\Modules\ModuleContext;
 use App\Http\Controllers\Controller;
 use App\Modules\ModuleInstanceDefinition;
@@ -19,16 +18,17 @@ use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 use Plugins\Cases\CaseAttachmentGate;
 use Plugins\Cases\CasesArea;
+use Plugins\Cases\CaseUpdateNotifier;
 use Plugins\Cases\Models\CaseUpdate;
 use Plugins\Cases\Models\ShelterCase;
-use Plugins\Cases\Notifications\ApesCicCaseUpdatedNotification;
-use Plugins\Cases\Notifications\ShelterCaseUpdatedNotification;
+
 class CaseUpdateController extends Controller
 {
     public function __construct(
         private readonly ModuleContext $moduleContext,
         private readonly CaseAttachmentGate $attachmentGate,
         private readonly SupportAttachmentService $attachments,
+        private readonly CaseUpdateNotifier $notifier,
     ) {}
 
     public function store(
@@ -110,39 +110,7 @@ class CaseUpdateController extends Controller
             $case->touch();
         }
 
-        $recipients = User::query()
-            ->eligibleStaff()
-            ->withAuthorizationPermission($prefix.'view-all')
-            ->get();
-        if ($visibility === CaseUpdate::VISIBILITY_PUBLIC
-            && $case->user?->can('view', $case)) {
-            $recipients->push($case->user);
-        }
-        if ($area->isShelter()
-            && $visibility === CaseUpdate::VISIBILITY_INTERNAL) {
-            $recipients = $recipients->reject(
-                fn (User $recipient): bool => $recipient->id === $case->user_id,
-            );
-        }
-        $recipients->unique('id')
-            ->reject(fn (User $recipient): bool => $recipient->id === $request->user()->id)
-            ->each(fn (User $recipient) => $recipient->notify(
-                $area->isShelter()
-                    ? new ShelterCaseUpdatedNotification(
-                        $case,
-                        $request->user(),
-                        'updated',
-                        $storedAttachments->count(),
-                    )
-                    : new ApesCicCaseUpdatedNotification(
-                        $case,
-                        $request->user(),
-                        'updated',
-                        $instance->subCore->key,
-                        $area->showRouteName(),
-                        $storedAttachments->count(),
-                    ),
-            ));
+        $this->notifier->notify($case, $request->user(), $visibility, $storedAttachments->count());
 
         $auditLogger->record("{$area->auditEventPrefix}.update_added", $request->user(), $case, [
             'sub_core_key' => $case->sub_core_key,

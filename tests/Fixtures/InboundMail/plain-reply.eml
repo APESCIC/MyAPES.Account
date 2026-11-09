@@ -1,0 +1,21 @@
+Return-Path: <{{FROM}}>
+Authentication-Results: {{AUTH}}
+From: Ann Owner <{{FROM}}>
+To: {{TO}}
+Subject: {{SUBJECT}}
+Date: Mon, 9 Nov 2026 10:15:00 +0000
+Message-ID: <{{MESSAGE_ID}}>
+In-Reply-To: {{IN_REPLY_TO}}
+References: {{IN_REPLY_TO}}
+X-Mailer: Fixture{{EXTRA}}
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+{{BODY}}
+
+—— Reply above this line ——
+
+Hello Ann,
+
+Ticket #1 (Boiler is broken) was updated by Sam Staff.

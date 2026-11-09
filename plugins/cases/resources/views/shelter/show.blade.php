@@ -112,6 +112,7 @@
                 <strong>{{ $update->user?->name ?? 'Former user' }}</strong>
                 <span class="muted">{{ $update->created_at }}</span>
                 @if($update->visibility === 'internal')<span class="status">internal</span>@endif
+                @if($update->via_email)<span class="status" data-via-email>{{ __('mail.reply_by_email.badge') }}</span>@endif
                 <x-rich-text :value="$update->body" />
                 <x-attachment-list :attachments="$case->attachments->filter(fn ($attachment) => $attachment->isContextOf($update))" />
             </div>

@@ -2,7 +2,11 @@
     Admin-edited email body (#486) on the shared brand shell. The body is
     sanitised rich text with merge fields already filled in.
 --}}
-@component('mail.brand.message')
+@component('mail.brand.message', ['replyByEmail' => $replyByEmail ?? false])
+@if (! empty($replyByEmail))
+{{ __('mail.reply_by_email.marker') }}
+
+@endif
 @if (! empty($greeting))
 {{ $greeting }}
 

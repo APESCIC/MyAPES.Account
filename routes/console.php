@@ -67,6 +67,8 @@ Artisan::command('call-logs:prune {--months= : Number of months of call logs to 
 Schedule::command('audit:prune')->daily();
 Schedule::command('call-logs:prune')->daily();
 Schedule::command('mail:prune-log')->daily();
+Schedule::command('tickets:inbound-poll')->everyMinute()->withoutOverlapping(10);
+Schedule::command('inbound-mail:prune')->daily();
 Schedule::job(new RunDirectorySync(DirectorySyncRun::SOURCE_SCHEDULED))
     ->hourly()
     ->withoutOverlapping();

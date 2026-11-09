@@ -54,8 +54,10 @@ Admin → Emails (`/admin/emails`).
 
 | Permission | Roles | Allows |
 | --- | --- | --- |
-| `admin.emails.view` | Administrator | List templates, open a template, preview it, read the outbound log |
-| `admin.emails.manage` | Administrator only | Send a test, edit and reset wording |
+| `admin.emails.view` | Administrator | List templates, open a template, preview it, read the outbound log and the Inbound tab |
+| `admin.emails.manage` | Administrator only | Send a test, edit and reset wording, retry or discard inbound replies, switch replies by email per service |
+
+The page has three tabs: **Templates**, **Outbound log** and **Inbound** (see [Replies by email](#replies-by-email)).
 
 - **Preview** renders the sample with the viewing admin's name inside a sandboxed iframe (`/admin/emails/{key}/preview`, served with its own `sandbox` Content Security Policy). Nothing is sent.
 - **Send test** sends the sample to the acting admin's own address only, immediately and on the mail channel only, so no in-app notification is written. Limited to 5 tests per admin every 10 minutes and audited as `admin.emails.test_sent`.
@@ -85,8 +87,71 @@ Every mail-channel send writes one row to `outbound_mail_logs` (listener `App\Co
 Transport is unchanged: Cloudron's SMTP add-on.
 
 - `config/mail.php` falls back to `CLOUDRON_MAIL_SMTP_SERVER`, `CLOUDRON_MAIL_SMTP_PORT`, `CLOUDRON_MAIL_SMTP_USERNAME` and `CLOUDRON_MAIL_SMTP_PASSWORD`, and to `CLOUDRON_MAIL_FROM` for the sender address. The sender name always comes from `terms.app_name`.
-- Mail is queued. `scripts/deploy/cloudron-run.sh` starts the Redis `queue:work` worker and `schedule:work`, which runs `mail:prune-log` and `audit:prune`.
+- Mail is queued. `scripts/deploy/cloudron-run.sh` starts the Redis `queue:work` worker and `schedule:work`, which runs `mail:prune-log`, `audit:prune`, `inbound-mail:prune` and, every minute, `tickets:inbound-poll`.
 - Locally, `.env.example` (the Laragon profile) sends SMTP to Laragon's Mailpit on `127.0.0.1:1025`; read the messages at `http://127.0.0.1:8025`. Nothing is delivered. The agent-only profile (`.env.local.example`) uses the `log` mailer, which writes messages to `storage/logs`, and so does the default when no `MAIL_MAILER` is set.
+
+## Replies by email
+
+Ticket and case owners and staff can answer a ticket or case email by replying to it ([#589](https://github.com/APESCIC/MyAPES-Account/issues/589), v0.59.0). Replies go to one mailbox, `communications@myapes.me.uk`, which the app polls over IMAPS. User-facing guide: wiki [Replies by email](https://github.com/APESCIC/MyAPES.Account/wiki/Replies-by-email).
+
+### Settings
+
+Everything comes from the environment (`config/inbound-mail.php`); nothing secret is committed. With `INBOUND_MAIL_ENABLED=false` or no token key, outgoing mail keeps the no-reply Reply-To and the poller does nothing.
+
+| Variable | Meaning |
+| --- | --- |
+| `INBOUND_MAIL_ENABLED` | Turns replies by email on |
+| `INBOUND_MAIL_ADDRESS` | The mailbox, default `communications@myapes.me.uk` |
+| `INBOUND_MAIL_PLUS_ADDRESSING` | `true` when the mail server delivers `communications+token@` to the mailbox. When `false`, Reply-To is the plain address and matching uses the subject tag and In-Reply-To |
+| `INBOUND_MAIL_TOKEN_KEY` | Dedicated HMAC key for reply tokens. Never `APP_KEY`. Locally: `php artisan inbound-mail:key --enable` |
+| `INBOUND_MAIL_AUTHSERV_ID` | The receiving server's name in `Authentication-Results`. Only that header is trusted; empty trusts the topmost header |
+| `INBOUND_MAIL_REQUIRE_AUTH` | Require SPF or DKIM to pass with DMARC not failing (default `true`) |
+| `INBOUND_MAIL_IMAP_HOST`, `_PORT`, `_USERNAME`, `_PASSWORD` | The mailbox over IMAPS (port 993). Empty means no polling |
+| `INBOUND_MAIL_RETENTION_DAYS` | Days raw messages are kept (default 30) |
+
+### Outgoing ticket and case emails
+
+`TicketUpdatedNotification`, `ApesCicCaseUpdatedNotification` and `ShelterCaseUpdatedNotification` use `App\Core\Mail\Concerns\OffersEmailReply`. When replies are on for that service, each message gets:
+
+- `Reply-To: communications+t1234.<token>@myapes.me.uk`. The token is the first 20 hex characters of an HMAC-SHA256 of the record prefix, record id and recipient's user id under `INBOUND_MAIL_TOKEN_KEY`, so it only works for that person and that record (`App\Core\Mail\Inbound\ReplyToken`).
+- A `[MYAPES-T-1234]` subject tag (`C` for cases).
+- A stored `Message-ID` (`mail_reply_threads`), so In-Reply-To and References can be matched.
+- `Auto-Submitted: auto-generated` and `X-Auto-Response-Suppress: All` (these two are always set).
+- A "Reply above this line" marker at the top and footer wording "Reply to this email, or: Log in to reply".
+
+### How a reply is handled
+
+1. `tickets:inbound-poll` (every minute, no overlap) fetches up to 50 messages, stores each raw message on the private disk with an `inbound_emails` row keyed by a hash of its Message-ID, queues `ProcessInboundEmail`, and only then deletes it from the mailbox. A duplicate Message-ID is never stored twice; an IMAP outage or a failed store leaves mail in the mailbox for the next poll.
+2. `App\Core\Mail\Inbound\InboundMailProcessor`:
+   1. **Ignore** machine mail (`Protection\LoopGuard`): `Auto-Submitted` other than `no`, `X-Autoreply` and similar, `Precedence: bulk/list/junk`, `List-Id`, bounces (`Return-Path: <>`, `MAILER-DAEMON`, `multipart/report`), out-of-office subjects, and our own addresses. Ignored mail is never answered.
+   2. **Match** the record (`Matching\ReplyMatcher`): token in To/Cc/Delivered-To, then subject tag, then In-Reply-To/References.
+   3. **Service switch**: off means quarantined (`service_off`).
+   4. **Check the sender** (`Verification\SenderVerifier`): SPF or DKIM pass and DMARC not `fail`; an account with the From address; not suspended; the token's or thread's recipient; and owner or eligible staff (`Verification\InboundReplyEligibility`, which checks roles and service choices directly because the queue worker has no sign-in session).
+   5. **Closed** record: rejected, with one `EmailReplyNotPostedNotification` (marked `Auto-Submitted: auto-replied`) at most once an hour per sender.
+   6. **Hourly limits** (`Protection\InboundRateLimits`): 20 posts per sender, 30 per record (`INBOUND_MAIL_SENDER_LIMIT`, `INBOUND_MAIL_RECORD_LIMIT`).
+   7. **Extract** the text (`Parsing\ReplyTextExtractor`): cut at the marker, drop quoted text and signatures with `willdurand/email-reply-parser`, and convert HTML-only mail to text. Empty replies are rejected. The text is stored escaped; no sender HTML is kept.
+   8. **Attachments** (`InboundAttachmentSorter`): the v0.58 types, sizes, counts and 100 MB total, private disk, normal scan status and download rules. Inline signature images are skipped; others are turned away with a reason in `detail`.
+   9. **Post** through the plugin's `InboundReplyHandler` (`TicketEmailReplyHandler`, `CaseEmailReplyHandler`): always a public ticket message or case update with `via_email = true`, shown with a **by email** badge, and the usual notifications.
+
+Plugins register handlers with `PluginServiceProvider::inboundReplyHandlers()`; Core never imports plugin classes.
+
+### Statuses
+
+`received`, `posted`, `ignored`, `quarantined`, `rejected`, `failed`, `discarded`. The reason codes and their wording are in `lang/en_GB/admin.php` under `emails.inbound.reasons`. Quarantined and failed mail can be retried or discarded on Admin → Emails → Inbound (audited as `admin.emails.inbound_retried` and `admin.emails.inbound_discarded`); switching a service is audited as `admin.emails.inbound_service_changed`.
+
+### Retention
+
+`inbound-mail:prune` runs daily. After `INBOUND_MAIL_RETENTION_DAYS` it deletes the raw message and clears the subject, address, name, notes and Message-ID, keeping status, reason, record, sender account id, hashed address and domain. Message-ID threads are deleted after 180 days. The privacy notice has a "Replies by email" section.
+
+### Cloudron setup
+
+1. Create the `communications@myapes.me.uk` mailbox on Cloudron and check that mail to `communications+test@myapes.me.uk` arrives (plus-addressing). Record the result on the ticket.
+2. Set the `INBOUND_MAIL_*` variables in the app's `/app/data/.env` (never in the repository or in chat), including a new `INBOUND_MAIL_TOKEN_KEY` (`openssl rand -hex 32`) and `INBOUND_MAIL_AUTHSERV_ID` set to the name the Cloudron mail server writes in `Authentication-Results`.
+3. Restart the app, send a real reply, and check it on Admin → Emails → Inbound.
+
+### Local testing
+
+See [Laragon: Replies by email](laragon.md#replies-by-email): `inbound-mail:key --enable`, `tickets:inbound-sample` and `tickets:inbound-ingest` run the whole flow without a mailbox.
 
 ## Tests
 
@@ -103,3 +168,4 @@ Transport is unchanged: Cloudron's SMTP add-on.
 | Outbound log and retention | `tests/Feature/Mail/OutboundMailLogTest.php` |
 | Email preference | `tests/Feature/Mail/OptionalMailPreferenceTest.php` |
 | Wording overrides | `tests/Feature/Mail/MailCopyOverridesTest.php` |
+| Replies by email: outgoing headers, poller, matching and sender checks, text extraction, loop and rate limits, posting, attachments, Admin Inbound, retention, local harness | `tests/Feature/Mail/Inbound/*Test.php` with fixtures in `tests/Fixtures/InboundMail/` |

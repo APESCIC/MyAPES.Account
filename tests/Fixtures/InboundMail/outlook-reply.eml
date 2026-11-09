@@ -1,0 +1,48 @@
+Return-Path: <{{FROM}}>
+Authentication-Results: {{AUTH}}
+From: Ann Owner <{{FROM}}>
+To: {{TO}}
+Subject: {{SUBJECT}}
+Date: Mon, 9 Nov 2026 10:15:00 +0000
+Message-ID: <{{MESSAGE_ID}}>
+In-Reply-To: {{IN_REPLY_TO}}
+References: {{IN_REPLY_TO}}
+Thread-Topic: Ticket update
+X-MS-Has-Attach:
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="_000_outlookboundary_"
+
+--_000_outlookboundary_
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+
+{{BODY}}
+
+Kind regards
+Ann
+
+________________________________
+From: MyAPES Account <no-reply@apes.org.uk>
+Sent: 09 November 2026 09:00
+To: Ann Owner <owner@example.org>
+Subject: APES CIC ticket #1 updated
+
+Reply above this line
+
+Hello Ann,
+
+Ticket #1 (Boiler is broken) was updated by Sam Staff.
+
+--_000_outlookboundary_
+Content-Type: text/html; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+
+<html><head><style>p { margin: 0; }</style></head><body>
+<div>{{BODY}}</div><div>Kind regards<br>Ann</div>
+<div id="appendonsend"></div>
+<hr>
+<div id="divRplyFwdMsg"><b>From:</b> MyAPES Account<br><b>Sent:</b> 09 November 2026 09:00</div>
+<div>Reply above this line</div>
+</body></html>
+
+--_000_outlookboundary_--

@@ -12,6 +12,8 @@
         </div>
     </header>
 
+    @include('admin.emails._tabs', ['activeTab' => 'templates'])
+
     <div class="panel-stack">
         <section class="panel" aria-labelledby="email-templates-heading">
             <h2 id="email-templates-heading">{{ __('admin.emails.templates') }}</h2>

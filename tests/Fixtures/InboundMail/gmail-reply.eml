@@ -1,0 +1,38 @@
+Return-Path: <{{FROM}}>
+Authentication-Results: {{AUTH}}
+From: Ann Owner <{{FROM}}>
+To: {{TO}}
+Subject: {{SUBJECT}}
+Date: Mon, 9 Nov 2026 10:15:00 +0000
+Message-ID: <{{MESSAGE_ID}}>
+In-Reply-To: {{IN_REPLY_TO}}
+References: {{IN_REPLY_TO}}
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="000000000000gmailboundary"
+
+--000000000000gmailboundary
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+{{BODY}}
+
+On Mon, 9 Nov 2026 at 09:00, MyAPES Account <no-reply@apes.org.uk> wrote:
+
+> =E2=80=94=E2=80=94 Reply above this line =E2=80=94=E2=80=94
+>
+> Hello Ann,
+>
+> Ticket #1 (Boiler is broken) was updated by Sam Staff.
+>
+
+--000000000000gmailboundary
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">{{BODY}}</div><br><div class=3D"gmail_quote"><div dir=3D"=
+ltr" class=3D"gmail_attr">On Mon, 9 Nov 2026 at 09:00, MyAPES Account &lt;<a=
+ href=3D"mailto:no-reply@apes.org.uk">no-reply@apes.org.uk</a>&gt; wrote:<b=
+r></div><blockquote class=3D"gmail_quote">Reply above this line<br>Hello Ann=
+,</blockquote></div>
+
+--000000000000gmailboundary--
