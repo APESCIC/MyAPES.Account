@@ -1,0 +1,139 @@
+<?php
+
+namespace Scripts\MilestoneVersion;
+
+use RuntimeException;
+
+/**
+ * Sets every version field listed in scripts/MilestoneVersion/fields.json to the milestone version, so the
+ * fields are never edited by hand. Each field is one of:
+ *
+ *   {"file": "VERSION", "type": "plain"}                                  the whole file is the version
+ *   {"file": "CloudronManifest.json", "type": "json", "key": "version"}   the first "key": "..." value
+ *   {"file": "config/app.php", "type": "regex", "pattern": "..."}         capture group 1 of the pattern
+ *
+ * "format" is "plain" (1.3.0, the default) or "tag" (v1.3.0). An optional "releaseNote" copies a template
+ * to a new file for the version when none exists yet.
+ */
+final class VersionFields
+{
+    /**
+     * @param  array{fields?: list<array<string, string>>, releaseNote?: array{template: string, path: string}, notes?: list<string>}  $config
+     */
+    public function __construct(private readonly string $root, private readonly array $config) {}
+
+    public static function load(string $root): self
+    {
+        $file = $root.'/scripts/MilestoneVersion/fields.json';
+        if (! is_file($file)) {
+            throw new RuntimeException('scripts/MilestoneVersion/fields.json is missing. It lists the version fields to set.');
+        }
+
+        $config = json_decode((string) file_get_contents($file), true);
+        if (! is_array($config)) {
+            throw new RuntimeException('scripts/MilestoneVersion/fields.json is not valid JSON.');
+        }
+
+        return new self($root, $config);
+    }
+
+    /**
+     * @return list<array{file: string, from: ?string, to: string}>
+     */
+    public function bump(SemVer $version, bool $dryRun = false): array
+    {
+        $changes = [];
+        foreach ($this->config['fields'] ?? [] as $field) {
+            $path = $this->path($field['file']);
+            $value = self::format($version, $field['format'] ?? 'plain');
+            $contents = (string) file_get_contents($path);
+            [$from, $updated] = $this->replace($field, $contents, $value);
+            if ($updated !== $contents && ! $dryRun) {
+                file_put_contents($path, $updated);
+            }
+            $changes[] = ['file' => $field['file'], 'from' => $from, 'to' => $value];
+        }
+
+        if (isset($this->config['releaseNote'])) {
+            $note = $this->config['releaseNote'];
+            $target = str_replace(['{tag}', '{plain}'], [$version->tag(), self::format($version, 'plain')], $note['path']);
+            $targetPath = $this->root.'/'.$target;
+            if (! is_file($targetPath)) {
+                $template = (string) file_get_contents($this->path($note['template']));
+                $contents = preg_replace('/"version"\s*:\s*"[^"]*"/', '"version": "'.$version->tag().'"', $template, 1) ?? $template;
+                if (! $dryRun) {
+                    file_put_contents($targetPath, $contents);
+                }
+                $changes[] = ['file' => $target, 'from' => null, 'to' => 'new release note from '.$note['template']];
+            }
+        }
+
+        return $changes;
+    }
+
+    /**
+     * @return list<string> Fields that do not hold the version.
+     */
+    public function mismatches(SemVer $version): array
+    {
+        $problems = [];
+        foreach ($this->config['fields'] ?? [] as $field) {
+            $value = self::format($version, $field['format'] ?? 'plain');
+            [$from] = $this->replace($field, (string) file_get_contents($this->path($field['file'])), $value);
+            if ($from !== $value) {
+                $problems[] = sprintf('%s holds "%s", not %s.', $field['file'], $from ?? '', $value);
+            }
+        }
+
+        return $problems;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function notes(): array
+    {
+        return $this->config['notes'] ?? [];
+    }
+
+    /**
+     * @param  array<string, string>  $field
+     * @return array{?string, string}
+     */
+    private function replace(array $field, string $contents, string $value): array
+    {
+        $type = $field['type'] ?? 'plain';
+        $pattern = match ($type) {
+            'plain' => null,
+            'json' => '/"'.preg_quote($field['key'], '/').'"\s*:\s*"([^"]*)"/',
+            'regex' => '/'.$field['pattern'].'/',
+            default => throw new RuntimeException(sprintf('Unknown field type "%s" for %s.', $type, $field['file'])),
+        };
+
+        if ($pattern === null) {
+            return [trim($contents), $value."\n"];
+        }
+
+        if (preg_match($pattern, $contents, $match, PREG_OFFSET_CAPTURE) !== 1 || ! isset($match[1])) {
+            throw new RuntimeException(sprintf('%s has no version value matching fields.json.', $field['file']));
+        }
+        [$from, $offset] = $match[1];
+
+        return [$from, substr_replace($contents, $value, $offset, strlen($from))];
+    }
+
+    private function path(string $file): string
+    {
+        $path = $this->root.'/'.$file;
+        if (! is_file($path)) {
+            throw new RuntimeException(sprintf('%s, listed in fields.json, does not exist.', $file));
+        }
+
+        return $path;
+    }
+
+    private static function format(SemVer $version, string $format): string
+    {
+        return $format === 'tag' ? $version->tag() : ltrim($version->tag(), 'v');
+    }
+}

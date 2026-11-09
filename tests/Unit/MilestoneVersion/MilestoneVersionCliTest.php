@@ -12,6 +12,8 @@ class MilestoneVersionCliTest extends TestCase
     /**
      * @return array{int, string, string}
      */
+    private ?string $root = null;
+
     private function cli(string ...$argv): array
     {
         $github = new class implements GitHub
@@ -50,7 +52,7 @@ class MilestoneVersionCliTest extends TestCase
 
         $out = fopen('php://memory', 'w+');
         $err = fopen('php://memory', 'w+');
-        $exitCode = (new Cli(fn (): GitHub => $github, $out, $err))->run($argv);
+        $exitCode = (new Cli(fn (): GitHub => $github, $out, $err, $this->root))->run($argv);
         rewind($out);
         rewind($err);
 
@@ -129,13 +131,63 @@ class MilestoneVersionCliTest extends TestCase
 
     public function test_check_release(): void
     {
-        $this->assertSame(Cli::OK, $this->cli('check-release', 'v1.9.0', 'v1.9.0 Beta', '--changelog', '## [1.9.0] - 2026-11-09')[0]);
-        $this->assertSame(Cli::OK, $this->cli('check-release', 'v1.9.0', 'v1.9.0')[0]);
+        $this->assertSame(Cli::OK, $this->cli('check-release', 'v1.9.0', 'v1.9.0 Reporting and exports', '--changelog', '## [1.9.0] - 2026-11-09')[0]);
+        $this->assertSame(Cli::OK, $this->cli('check-release', 'v1.9.0', 'v1.9.0 Reporting and exports', '--version', 'v1.9.0')[0]);
 
-        [$exitCode, , $err] = $this->cli('check-release', 'v1.9.1', 'v1.9.0 Beta', '--changelog', '## [1.8.0]');
+        [$exitCode, , $err] = $this->cli('check-release', 'v1.9.0', 'v1.9.0 Beta');
+        $this->assertSame(Cli::FAILED, $exitCode);
+        $this->assertStringContainsString('The release title should be "v1.9.0 Reporting and exports"', $err);
+
+        [$exitCode, , $err] = $this->cli('check-release', 'v1.9.1', 'v1.9.0 Reporting and exports', '--changelog', '## [1.8.0]');
         $this->assertSame(Cli::FAILED, $exitCode);
         $this->assertStringContainsString('Tag v1.9.1 does not match the milestone version v1.9.0', $err);
         $this->assertStringContainsString('does not contain 1.9.0', $err);
+    }
+
+    public function test_next_prints_the_milestone_pr_and_release_titles(): void
+    {
+        [, $out] = $this->cli('next');
+
+        $this->assertStringContainsString('Milestone PR:     v1.9.0: Reporting and exports', $out);
+        $this->assertStringContainsString('Release title:    v1.9.0 Reporting and exports', $out);
+    }
+
+    public function test_check_title_rejects_milestone_numbers_and_wrong_versions(): void
+    {
+        $this->assertSame(Cli::OK, $this->cli('check-title', '[v1.3.0] Fix login (#42)', '--version', 'v1.3.0')[0]);
+
+        foreach (['Milestone 7: Fix login', '[#7] Fix login', '[v1.4.0] Fix login', 'Fix login'] as $title) {
+            $this->assertSame(Cli::FAILED, $this->cli('check-title', $title, '--version', 'v1.3.0')[0], $title);
+        }
+    }
+
+    public function test_bump_sets_the_fields_for_the_next_milestone_only(): void
+    {
+        $this->root = sys_get_temp_dir().'/milestone-bump-'.bin2hex(random_bytes(4));
+        mkdir($this->root.'/scripts/MilestoneVersion', recursive: true);
+        file_put_contents($this->root.'/VERSION', "1.8.10\n");
+        file_put_contents($this->root.'/scripts/MilestoneVersion/fields.json', '{"fields": [{"file": "VERSION", "type": "plain"}], "notes": ["Update the changelog."]}');
+
+        try {
+            [$exitCode, , $err] = $this->cli('bump', 'v1.10.0');
+            $this->assertSame(Cli::FAILED, $exitCode);
+            $this->assertStringContainsString('v1.10.0 is not the next milestone\'s version', $err);
+            $this->assertSame(Cli::FAILED, $this->cli('bump', 'v1.9.0', '--check')[0]);
+
+            [$exitCode, $out] = $this->cli('bump', 'v1.9.0');
+            $this->assertSame(Cli::OK, $exitCode);
+            $this->assertStringContainsString('Set VERSION: 1.8.10 -> 1.9.0', $out);
+            $this->assertStringContainsString('Next: Update the changelog.', $out);
+            $this->assertSame(Cli::OK, $this->cli('bump', 'v1.9.0', '--check')[0]);
+            $this->assertSame(Cli::OK, $this->cli('bump', 'v2.0.0', '--offline', '--dry-run')[0]);
+            $this->assertSame("1.9.0\n", file_get_contents($this->root.'/VERSION'));
+        } finally {
+            unlink($this->root.'/scripts/MilestoneVersion/fields.json');
+            unlink($this->root.'/VERSION');
+            rmdir($this->root.'/scripts/MilestoneVersion');
+            rmdir($this->root.'/scripts');
+            rmdir($this->root);
+        }
     }
 
     public function test_unknown_command_is_a_usage_error(): void

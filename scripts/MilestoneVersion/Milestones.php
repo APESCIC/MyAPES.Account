@@ -69,6 +69,26 @@ final class Milestones
         return trim(preg_replace('/^[A-Za-z]+:\s+/', '', $name) ?? '');
     }
 
+    /**
+     * "v1.3.0 Beta: Public UX & compliance" gives "v1.3.0 Public UX & compliance".
+     */
+    public static function releaseTitle(SemVer $version, string $title): string
+    {
+        $name = self::name($title);
+
+        return $name === '' ? $version->tag() : $version->tag().' '.$name;
+    }
+
+    /**
+     * "v1.3.0 Beta: Public UX & compliance" gives "v1.3.0: Public UX & compliance".
+     */
+    public static function pullRequestTitle(SemVer $version, string $title): string
+    {
+        $name = self::name($title);
+
+        return $version->tag().': '.($name === '' ? '<summary>' : $name);
+    }
+
     public static function branch(SemVer $version, string $title): string
     {
         $slug = self::slug(self::name($title));

@@ -88,6 +88,7 @@
         "milestone:check-title": "@php scripts/milestone-version check-title",
         "milestone:check-branch": "@php scripts/milestone-version check-branch",
         "milestone:check-release": "@php scripts/milestone-version check-release",
+        "milestone:bump": "@php scripts/milestone-version bump",
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
