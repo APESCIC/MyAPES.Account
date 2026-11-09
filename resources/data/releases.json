@@ -1,5 +1,56 @@
 [
   {
+    "version": "0.59.0",
+    "date": "2026-11-09",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Ticket and case replies by email",
+    "summary": "Ticket and case owners and staff can answer a ticket or case update by replying to its email, and the reply appears on the record marked by email.",
+    "changes": [
+      "Ticket and case update emails can now be answered by replying. Each email has its own reply address and a reference in the subject, and a Reply above this line marker shows where to write. The emails still offer Log in to reply.",
+      "Replies are added as public messages on the ticket or case, marked by email, and the usual update emails go out. Staff replies by email are always public; internal notes stay in the app.",
+      "Only the new text is added: quoted mail and signatures are left out, and HTML-only mail becomes plain text. Allowed attachments are stored with the same rules as uploads in the app.",
+      "Replies are only added when they come from the account the email was sent to, or from staff who can see the record, and pass the usual sender checks. Replies to closed tickets or cases are not added, and the sender gets one email saying so.",
+      "Automatic replies, out-of-office messages, bounces and bulk mail are ignored and never answered, and there is an hourly limit on replies.",
+      "Admin Emails has a new Inbound tab listing every reply received and what happened to it, with retry and discard for replies that need a person, and a switch to turn replies by email off for each service.",
+      "The full email is kept for 30 days and then deleted, keeping only a record of what happened. The privacy notice explains replies by email."
+    ],
+    "affected_areas": [
+      "Tickets",
+      "Cases",
+      "Email",
+      "Admin"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Minor: a new feature (replies by email) with new database tables and an admin page, and no breaking change. Replies by email stay off until the mailbox is configured.",
+    "validation": [
+      "New feature tests cover outgoing headers, polling, matching, sender checks, text extraction from Gmail, Outlook and Apple Mail replies, loop and rate limits, posting, attachments, the Admin Inbound tab and retention, alongside the existing mail, ticket, case and authorisation suites.",
+      "The full pre-PR verification (release history against main, version-pinned and contract tests, frontend tests and build, Laragon setup) passed locally."
+    ],
+    "known_limitations": [
+      "Replies by email start working once the communications mailbox and its settings are added on Cloudron after this release; until then emails keep the no-reply address.",
+      "Internal notes and case updates marked internal cannot be sent by email."
+    ],
+    "rollback": "Redeploy the previous release package. The new tables and columns are additive and can stay; turning INBOUND_MAIL_ENABLED off returns emails to the no-reply address.",
+    "provenance": "Milestone v0.59.0 Beta: Ticket and case replies by email, epic #589 with sub-issues #578 to #588, pull request #730. Mailbox set-up (#577) follows the deploy.",
+    "references": [
+      {
+        "label": "Issue #589",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/589"
+      },
+      {
+        "label": "Pull request #730",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/730"
+      }
+    ]
+  },
+  {
     "version": "0.58.3",
     "date": "2026-11-09",
     "channel": "stable",
