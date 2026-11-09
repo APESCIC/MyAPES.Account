@@ -7,15 +7,19 @@ use App\Core\Mail\Inbound\Parsing\InboundEmailParser;
 use App\Core\Mail\Inbound\Parsing\ParsedInboundEmail;
 use App\Core\Mail\Inbound\Parsing\ReplyTextExtractor;
 use App\Core\Mail\Inbound\Parsing\UnparseableEmail;
+use App\Core\Mail\Inbound\Protection\InboundRateLimits;
+use App\Core\Mail\Inbound\Protection\LoopGuard;
 use App\Core\Mail\Inbound\Verification\AuthenticationResults;
 use App\Core\Mail\Inbound\Verification\SenderVerifier;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 /**
  * Works out what a stored inbound email is and what to do with it (#579).
  *
- * Order: parse, match the record (#580), check the sender (#580), extract
- * the reply text (#581), then post it through the plugin's handler. Each step that fails records a
+ * Order: parse, ignore machine mail (#583), match the record (#580), check
+ * the sender (#580), apply hourly limits (#583), extract the reply text
+ * (#581), then post it through the plugin's handler. Each step that fails records a
  * status and a reason; nothing doubtful is ever posted.
  */
 final class InboundMailProcessor
@@ -27,6 +31,8 @@ final class InboundMailProcessor
         private readonly ReplyMatcher $matcher,
         private readonly SenderVerifier $verifier,
         private readonly ReplyTextExtractor $extractor,
+        private readonly LoopGuard $loopGuard,
+        private readonly InboundRateLimits $limits,
     ) {}
 
     public function process(InboundEmail $email): void
@@ -35,6 +41,14 @@ final class InboundMailProcessor
         $parsed = $this->parse($email);
 
         if ($parsed === null) {
+            return;
+        }
+
+        $ignore = $this->loopGuard->reasonToIgnore($parsed);
+
+        if ($ignore !== null) {
+            $this->finish($email, InboundEmail::STATUS_IGNORED, $ignore);
+
             return;
         }
 
@@ -65,6 +79,16 @@ final class InboundMailProcessor
 
         if (! $sender->passes()) {
             $this->finish($email, (string) $sender->status, $sender->reason);
+
+            return;
+        }
+
+        if ($this->limits->senderOverLimit($sender->user) || $this->limits->recordOverLimit($match->prefix, $match->recordId)) {
+            Log::notice('Inbound email ignored: hourly rate limit reached.', [
+                'inbound_email_id' => $email->id,
+                'record' => $match->prefix.$match->recordId,
+            ]);
+            $this->finish($email, InboundEmail::STATUS_IGNORED, 'rate_limited');
 
             return;
         }

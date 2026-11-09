@@ -1,0 +1,15 @@
+Return-Path: <{{FROM}}>
+Authentication-Results: {{AUTH}}
+From: Ann Owner <{{FROM}}>
+To: {{TO}}
+Subject: Automatic reply: {{SUBJECT}}
+Date: Mon, 9 Nov 2026 10:15:00 +0000
+Message-ID: <{{MESSAGE_ID}}>
+In-Reply-To: {{IN_REPLY_TO}}
+Auto-Submitted: auto-replied
+X-Auto-Response-Suppress: All
+X-MS-Exchange-Inbox-Rules-Loop: owner@example.org
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+
+I am out of the office until Monday with limited access to email.

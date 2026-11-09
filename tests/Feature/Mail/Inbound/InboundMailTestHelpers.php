@@ -113,6 +113,7 @@ trait InboundMailTestHelpers
             'IN_REPLY_TO' => '<none@example.test>',
             'AUTH' => 'mx.example.test; spf=pass smtp.mailfrom=example.org; dkim=pass header.d=example.org; dmarc=pass header.from=example.org',
             'BODY' => 'Thanks, that fixed it.',
+            'EXTRA' => '',
         ];
 
         foreach ($values as $key => $value) {
