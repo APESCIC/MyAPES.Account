@@ -13,6 +13,7 @@ use App\Notifications\Auth\ResetPasswordNotification;
 use App\Notifications\Auth\TwoFactorDisabledNotification;
 use App\Notifications\Auth\TwoFactorEnabledNotification;
 use App\Notifications\Auth\VerifyEmailNotification;
+use App\Notifications\EmailReplyNotPostedNotification;
 use App\Notifications\PendingFirstLoginChaseNotification;
 use App\Notifications\StaffClientRecordsArchivedNotification;
 use Closure;
@@ -69,6 +70,16 @@ final class CoreMailTemplates
                 sample: static fn (): StaffClientRecordsArchivedNotification => new StaffClientRecordsArchivedNotification(['Tickets' => 2, 'Pet profiles' => 1]),
                 subjectKey: 'mail.staff_client_records_archived.subject',
                 introKey: 'mail.staff_client_records_archived.line_archived',
+            ),
+            new MailTemplate(
+                key: 'inbound.reply_not_posted',
+                notification: EmailReplyNotPostedNotification::class,
+                category: MailCategory::Service,
+                labelKey: 'mail.templates.inbound.reply_not_posted.name',
+                descriptionKey: 'mail.templates.inbound.reply_not_posted.description',
+                sample: static fn (): EmailReplyNotPostedNotification => new EmailReplyNotPostedNotification('Ticket #1024', url('/apes-cic/tickets/1024')),
+                subjectKey: 'mail.reply_not_posted.subject',
+                introKey: 'mail.reply_not_posted.line_closed',
             ),
         ];
     }

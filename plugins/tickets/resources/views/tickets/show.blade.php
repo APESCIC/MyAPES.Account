@@ -200,6 +200,9 @@
                 @if($message->is_staff_note)
                     <span class="status">staff</span>
                 @endif
+                @if($message->via_email)
+                    <span class="status" data-via-email>{{ __('mail.reply_by_email.badge') }}</span>
+                @endif
                 <x-rich-text :value="$message->message" />
                 <x-attachment-list :attachments="$ticket->attachments->filter(fn ($attachment) => $attachment->isContextOf($message))" />
             </div>

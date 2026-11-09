@@ -11,6 +11,7 @@ use App\Core\Mail\Inbound\Protection\InboundRateLimits;
 use App\Core\Mail\Inbound\Protection\LoopGuard;
 use App\Core\Mail\Inbound\Verification\AuthenticationResults;
 use App\Core\Mail\Inbound\Verification\SenderVerifier;
+use App\Notifications\EmailReplyNotPostedNotification;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -18,8 +19,9 @@ use Illuminate\Support\Facades\Storage;
  * Works out what a stored inbound email is and what to do with it (#579).
  *
  * Order: parse, ignore machine mail (#583), match the record (#580), check
- * the sender (#580), apply hourly limits (#583), extract the reply text
- * (#581), then post it through the plugin's handler. Each step that fails records a
+ * the sender (#580), turn away replies to closed records (#582), apply
+ * hourly limits (#583), extract the reply text (#581), then post it as a
+ * public message through the plugin's handler (#582). Each step that fails records a
  * status and a reason; nothing doubtful is ever posted.
  */
 final class InboundMailProcessor
@@ -79,6 +81,18 @@ final class InboundMailProcessor
 
         if (! $sender->passes()) {
             $this->finish($email, (string) $sender->status, $sender->reason);
+
+            return;
+        }
+
+        if ($handler->isClosed($record)) {
+            $notify = $this->limits->mayNotify($sender->user);
+
+            if ($notify) {
+                $sender->user->notify(new EmailReplyNotPostedNotification($handler->reference($record), $handler->url($record)));
+            }
+
+            $this->finish($email, InboundEmail::STATUS_REJECTED, 'closed', ['notice_sent' => $notify]);
 
             return;
         }
