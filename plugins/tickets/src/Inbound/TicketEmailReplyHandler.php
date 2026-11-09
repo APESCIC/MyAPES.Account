@@ -8,11 +8,11 @@ use App\Core\Attachments\UploadSettings;
 use App\Core\Mail\Inbound\Contracts\InboundReplyHandler;
 use App\Core\Mail\Inbound\InboundAttachmentSet;
 use App\Core\Mail\Inbound\InboundReplyText;
+use App\Core\Mail\Inbound\Verification\InboundReplyEligibility;
 use App\Services\AuditLogger;
 use App\Services\SupportAttachmentService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use InvalidArgumentException;
 use Plugins\Tickets\Models\SupportTicket;
 use Plugins\Tickets\TicketCategoryResolver;
@@ -32,6 +32,7 @@ final class TicketEmailReplyHandler implements InboundReplyHandler
         private readonly TicketServiceConfiguration $ticketServices,
         private readonly UploadSettings $uploads,
         private readonly AuditLogger $audit,
+        private readonly InboundReplyEligibility $eligibility,
     ) {}
 
     public function prefix(): string
@@ -57,11 +58,9 @@ final class TicketEmailReplyHandler implements InboundReplyHandler
     public function canReply(Model $record, User $sender): bool
     {
         $ticket = $this->ticket($record);
-        $area = $this->area($ticket);
 
-        return $area !== null
-            && Gate::forUser($sender)->allows('view', $ticket)
-            && $sender->can($area->permission('comment-own'));
+        return $this->area($ticket) !== null
+            && $this->eligibility->mayReply($sender, (string) $ticket->sub_core_key, 'tickets', $ticket->user_id === null ? null : (int) $ticket->user_id);
     }
 
     public function isClosed(Model $record): bool

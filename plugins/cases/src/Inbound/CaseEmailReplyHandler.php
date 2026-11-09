@@ -7,11 +7,11 @@ use App\Core\Attachments\SupportAttachment;
 use App\Core\Mail\Inbound\Contracts\InboundReplyHandler;
 use App\Core\Mail\Inbound\InboundAttachmentSet;
 use App\Core\Mail\Inbound\InboundReplyText;
+use App\Core\Mail\Inbound\Verification\InboundReplyEligibility;
 use App\Services\AuditLogger;
 use App\Services\SupportAttachmentService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use InvalidArgumentException;
 use Plugins\Cases\CaseAttachmentGate;
 use Plugins\Cases\CasesArea;
@@ -29,6 +29,7 @@ final class CaseEmailReplyHandler implements InboundReplyHandler
         private readonly SupportAttachmentService $attachments,
         private readonly CaseAttachmentGate $attachmentGate,
         private readonly AuditLogger $audit,
+        private readonly InboundReplyEligibility $eligibility,
     ) {}
 
     public function prefix(): string
@@ -60,8 +61,7 @@ final class CaseEmailReplyHandler implements InboundReplyHandler
             return false;
         }
 
-        return Gate::forUser($sender)->allows('view', $case)
-            && $sender->can($area->permission('comment-own'));
+        return $this->eligibility->mayReply($sender, (string) $case->sub_core_key, 'cases', $case->user_id === null ? null : (int) $case->user_id);
     }
 
     public function isClosed(Model $record): bool
