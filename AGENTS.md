@@ -59,6 +59,7 @@ If the pull isn't a fast-forward or a merge conflicts, stop and report it. Never
   ```bash
   gh api 'repos/APESCIC/MyAPES.Account/milestones?state=open&per_page=50' --jq '.[] | {number,title,open_issues}'
   ```
+- A milestone's version, which milestone is next, and the branch, pull request, tag and release names all come from the milestone title, as set out in [`.cursor/rules/milestone-versioning.mdc`](.cursor/rules/milestone-versioning.mdc). Never use GitHub's milestone number in a name.
 - Title prefix `[v0.N.x] NN` with a two-digit index. `00` is the epic; its body keeps a checklist of sub-issues (`- [ ] #123 Short title`), and each child is linked as a sub-issue.
 - Labels: only `area:admin`, `area:public`, `area:auth`, `area:tests`, `area:cloudron`.
 - Assignee: `apescic-director`.
@@ -74,7 +75,7 @@ Work ships once per milestone, not once per change or issue. The Cursor rule [`.
 3. Release.
 4. Deploy.
 
-- Each milestone has one branch, `milestone/<slug>` (or a name the owner gives), created from an up-to-date `main` when work starts (see [Before you start](#before-you-start)). Commit and push on it whenever needed.
+- Each milestone has one branch, named from its version as in [`milestone-versioning.mdc`](.cursor/rules/milestone-versioning.mdc) (for example `milestone/v0-58-3-laragon-local-dev`), created from an up-to-date `main` when work starts (see [Before you start](#before-you-start)). Commit and push on it whenever needed.
 - Nothing reaches `main`, and nothing is tagged, released or deployed, before stage 2.
 - Stages 3 and 4 run together: `deploy-cloudron.yml` deploys, then publishes the GitHub Release.
 - Hotfixes skip these stages only with Bambie's written approval recorded on the hotfix issue.
@@ -83,14 +84,14 @@ Work ships once per milestone, not once per change or issue. The Cursor rule [`.
 
 ## Release metadata (once per milestone)
 
-The milestone pull request into `main` bumps to the **next free patch version** (minor for a new capability) and prepends **exactly one** record to `resources/data/releases.json`. Issue commits on the milestone branch do not bump the version. In the same pull request:
+The milestone pull request into `main` bumps to **the milestone's version** (from its title; see [`milestone-versioning.mdc`](.cursor/rules/milestone-versioning.mdc)) and prepends **exactly one** record to `resources/data/releases.json`. Issue commits on the milestone branch do not bump the version. In the same pull request:
 
 - `VERSION`
 - `resources/data/module-runtime-contract.json` (`application_version`)
 - one new head record in `resources/data/releases.json`; never edit or reorder published records
 - the version-pinned tests: `ChangeLogPageTest`, `HealthAndThemeTest`, `ModuleRollbackCompatibilityTest`, `ReleaseHistoryCommandTest` (version list, the `$releases[N]['date']` indexes, the tail `array_slice`, the current record's references and text)
 
-`php artisan myapes:changelog-prepare --type=patch --title="…" --issue=<n> --pr=<n>` writes most of this. Then check:
+`php artisan myapes:changelog-prepare --type=<patch|minor|major> --title="…" --issue=<n> --pr=<n>` writes most of this. Pick the `--type` that produces the milestone's version (check with `--dry-run` first). Then check:
 
 ```bash
 git fetch origin
@@ -99,13 +100,13 @@ php artisan myapes:changelog-validate --base-ref=origin/main
 
 - Release links must start with `https://github.com/APESCIC/MyAPES-Account/` (hyphen). The validator rejects other forms, even though the repository is `MyAPES.Account`.
 - No credentials, personal data or exploitable detail in release notes.
-- **If main moves** and your version is taken: rebase on the latest `main`, take the next free patch number, redo the bump and record, wait for CI again, then merge.
+- **If main moves** and the milestone's version is already taken, stop and report it to the owner. Don't pick another number or rename the milestone yourself.
 
 ## Ship flow
 
 Run this once per milestone, after every other issue in the milestone is closed.
 
-1. Open one pull request from the milestone branch into `main`, with the release metadata above.
+1. Open one pull request from the milestone branch into `main`, titled from the milestone's version (for example `v0.58.3: Laragon local development`), with the release metadata above.
 2. CI green: `gh pr checks <n> --watch`. Fix failures; re-run a job only for a proven flaky test, and log an issue for it.
 3. Wait for Bambie's review or approval on the ship issue, then merge with a merge commit: `gh pr merge <n> --merge`.
 4. Deploy by hand. A green `main` does not deploy itself. First check that no deploy is queued or running, and that `/healthz` does not already report the new version:
@@ -114,7 +115,7 @@ Run this once per milestone, after every other issue in the milestone is closed.
    gh workflow run deploy-cloudron.yml -R APESCIC/MyAPES.Account --ref main -f app_version="$(git show origin/main:VERSION | tr -d '\r\n')"
    gh run watch <run-id> -R APESCIC/MyAPES.Account --exit-status
    ```
-   After a successful deploy, the workflow publishes the GitHub Release (`v{VERSION}`). Do not create that release by hand.
+   After a successful deploy, the workflow publishes the GitHub Release with tag `v{VERSION}` and title `v{VERSION} {suffix}` (for example `v0.58.3 Dev`). Do not create that release by hand.
 5. Verify live: `curl -s https://myaccount.myapes.me.uk/healthz` must show `status: ok`, `version` equal to `VERSION`, and `release` equal to the merge SHA.
 
 Deploy secrets (`CLOUDRON_FQDN`, `CLOUDRON_TOKEN`) live in the `cloudron-deploy` environment. If a run needs a secret, a permission or an approval, stop and tell the owner.

@@ -17,7 +17,7 @@ If the pull or the merge fails, stop and ask for help. Don't force-push, `reset 
 
 Work ships once per GitHub milestone, not once per change. There are four stages, in order:
 
-1. **Complete the milestone.** Every issue in the milestone is finished and committed on the milestone branch (`milestone/<slug>`, created from an up-to-date `main`).
+1. **Complete the milestone.** Every issue in the milestone is finished and committed on the milestone branch (for example `milestone/v0-58-3-laragon-local-dev`, created from an up-to-date `main`).
 2. **One merge.** The milestone branch goes to `main` in one merge commit (no squash), after Bambie has approved it.
 3. **Release.** One release for the milestone.
 4. **Deploy.** One deploy for the milestone.
@@ -25,3 +25,7 @@ Work ships once per GitHub milestone, not once per change. There are four stages
 Nothing reaches `main`, and nothing is tagged, released or deployed, before stage 2. A hotfix can skip these stages only with Bambie's written approval on its issue.
 
 The full rules, including the definition of done and release metadata, are in [AGENTS.md](AGENTS.md#milestone-shipping).
+
+## Versions and titles
+
+Each milestone's version is the `vMAJOR.MINOR.PATCH` at the start of its GitHub milestone title, for example `v0.58.3 Dev: Laragon local development`. The milestone branch, pull requests, tag and release are all named from that version, never from GitHub's milestone number. The formats, and how to tell which milestone is next, are in [`.cursor/rules/milestone-versioning.mdc`](.cursor/rules/milestone-versioning.mdc).

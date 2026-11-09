@@ -1185,9 +1185,9 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: write
+      issues: read
     env:
       APP_VERSION: ${{ needs.resolve-release.outputs.app_version }}
-      RELEASE_DISPLAY_TITLE: ${{ needs.resolve-release.outputs.app_version }} Beta
       RELEASE_SHA: ${{ needs.resolve-release.outputs.release_sha }}
     steps:
       - name: Checkout deployed revision
@@ -1202,6 +1202,24 @@ jobs:
           set -euo pipefail
           bash scripts/deploy/github-release-notes.sh resources/data/releases.json > release-notes.md
           test -s release-notes.md
+
+      - name: Resolve GitHub Release title
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          milestone_title="$(gh api "repos/${GITHUB_REPOSITORY}/milestones?state=all&per_page=100" --paginate \
+            --jq '.[] | .title | select(startswith("v" + env.APP_VERSION + " ") or startswith("v" + env.APP_VERSION + ":"))' \
+            | head -n1 || true)"
+          suffix="${milestone_title#"v${APP_VERSION}"}"
+          suffix="${suffix%%:*}"
+          suffix="$(sed -E 's/^[[:space:]]+|[[:space:]]+$//g' <<<"$suffix")"
+          if [[ ! "$suffix" =~ ^[A-Za-z][A-Za-z0-9-]{0,19}$ ]]; then
+            suffix="Beta"
+          fi
+          echo "RELEASE_DISPLAY_TITLE=v${APP_VERSION} ${suffix}" >> "$GITHUB_ENV"
+          echo "GitHub Release title: v${APP_VERSION} ${suffix}"
 
       - name: Resolve GitHub Release state
         id: release_state
@@ -1239,9 +1257,9 @@ jobs:
         shell: bash
         env:
           RELEASE_ACTION: ${{ steps.release_state.outputs.action }}
-          RELEASE_DISPLAY_TITLE: ${{ needs.resolve-release.outputs.app_version }} Beta
         run: |
           set -euo pipefail
+          RELEASE_DISPLAY_TITLE="${RELEASE_DISPLAY_TITLE:-unresolved}"
           {
             echo "## GitHub Release"
             echo "- Display title: \`${RELEASE_DISPLAY_TITLE}\`"

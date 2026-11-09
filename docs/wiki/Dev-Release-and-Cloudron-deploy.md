@@ -7,23 +7,25 @@
 
 Work ships once per milestone: all the milestone's issues are completed on the milestone branch, then the branch goes to `main` in one merge commit, followed by one release and one deploy. See [Milestone shipping in AGENTS.md](https://github.com/APESCIC/MyAPES.Account/blob/main/AGENTS.md#milestone-shipping).
 
+The milestone's version is the `vMAJOR.MINOR.PATCH` at the start of its GitHub milestone title, for example `v0.58.3 Dev: Laragon local development`. Branch, pull request, tag and release names all come from it, never from GitHub's milestone number. See [milestone-versioning.mdc](https://github.com/APESCIC/MyAPES.Account/blob/main/.cursor/rules/milestone-versioning.mdc).
+
 ## The milestone pull request
-1. Prepend exactly one new, higher version to `resources/data/releases.json`:
+1. Prepend exactly one new record, at the milestone's version, to `resources/data/releases.json`:
    ```powershell
-   php artisan myapes:changelog-prepare --type=patch --title="Short public title" --issue=<n> --pr=<n>
+   php artisan myapes:changelog-prepare --type=<patch|minor|major> --title="Short public title" --issue=<n> --pr=<n>
    ```
-   Replace every `TODO:` field.
+   Pick the `--type` that produces the milestone's version (try `--dry-run` first). Replace every `TODO:` field.
 2. Set `VERSION` and `resources/data/module-runtime-contract.json` `application_version` to the same version.
 3. Update the version-pinned tests (change log, health, rollback, release history).
 4. Validate: `php artisan myapes:changelog-validate --base-ref=origin/main`.
-5. Patch for fixes, minor for new features. Public notes never contain credentials, personal data or exploitable detail.
+5. Public notes never contain credentials, personal data or exploitable detail.
 
 ## After merge
 Merge with a merge commit (no squash), only after Bambie has approved the milestone.
 
 1. Wait for [test-cloudron.yml](https://github.com/APESCIC/MyAPES.Account/blob/main/.github/workflows/test-cloudron.yml) to pass on `main`.
 2. Deploy by hand: `gh workflow run "Deploy MyAPES Account to Cloudron" --ref main` ([deploy-cloudron.yml](https://github.com/APESCIC/MyAPES.Account/blob/main/.github/workflows/deploy-cloudron.yml)).
-3. The deploy creates GitHub Release `{VERSION} Beta` with tag `v{VERSION}`.
+3. The deploy creates GitHub Release `v{VERSION} {suffix}` (for example `v0.58.3 Dev`, where the suffix is the milestone-title word before the colon) with tag `v{VERSION}`.
 4. Check `/healthz` and the change log at https://myaccount.myapes.me.uk/change-log.
 
 Deploy secrets live in the `cloudron-deploy` GitHub environment. Never print or commit them. Rollback is forward-only; see the README's maintenance section.
