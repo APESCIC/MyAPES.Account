@@ -1229,56 +1229,37 @@ class DeploymentAuthenticationContractTest extends TestCase
         $this->assertStringNotContainsString('pull_request:', $deployWorkflow);
     }
 
-    public function test_deploy_workflow_stamps_versioned_deployments_and_github_releases(): void
+    public function test_deploy_workflow_deploys_only_a_published_release_tag(): void
     {
         $workflow = $this->deployWorkflow();
 
-        $this->assertStringContainsString('run-name: ${{ github.event.inputs.app_version || \'from-ref\' }} Beta', $workflow);
-        $this->assertStringNotContainsString('run-name: Deploy v', $workflow);
-        $this->assertStringContainsString('app_version:', $workflow);
+        $this->assertStringContainsString('run-name: Deploy ${{ github.ref_name }}', $workflow);
+        $this->assertStringNotContainsString('inputs:', $workflow);
+        $this->assertStringContainsString('if [[ "$GITHUB_REF_TYPE" != "tag" || "$GITHUB_REF_NAME" != "v$app_version" ]]; then', $workflow);
+        $this->assertStringContainsString('gh api "repos/$GITHUB_REPOSITORY/compare/$release_sha...main" --jq \'.status\'', $workflow);
+        $this->assertStringContainsString('gh release view "$GITHUB_REF_NAME" --json isDraft --jq \'.isDraft\'', $workflow);
         $this->assertStringContainsString('chrnorm/deployment-action@500aa6a23c81ffa1acf71072aee3cfa2cc2e556a', $workflow);
-        $this->assertStringContainsString('RELEASE_DISPLAY_TITLE:', $workflow);
+        $this->assertStringContainsString('RELEASE_DISPLAY_TITLE: v${{ needs.resolve-release.outputs.app_version }}', $workflow);
         $this->assertStringContainsString('description: ${{ env.RELEASE_DISPLAY_TITLE }}', $workflow);
-        $this->assertStringNotContainsString('description: v${{ env.APP_VERSION }} (${{ env.RELEASE_SHA }})', $workflow);
         $this->assertStringContainsString('deployments: write', $workflow);
-        $this->assertStringContainsString('publish-github-release:', $workflow);
-        $this->assertStringContainsString('needs: [resolve-release, deploy-cloudron]', $workflow);
-        $this->assertStringContainsString('if: needs.deploy-cloudron.result == \'success\'', $workflow);
-        $this->assertStringContainsString('scripts/deploy/github-release-notes.sh', $workflow);
-        $this->assertStringContainsString('tag_name: v${{ env.APP_VERSION }}', $workflow);
-        $this->assertStringContainsString('name: ${{ env.RELEASE_DISPLAY_TITLE }}', $workflow);
-        $this->assertDoesNotMatchRegularExpression(
-            '/^\s*name:\s*v\$\{\{\s*env\.APP_VERSION\s*\}\}/m',
-            $workflow,
-        );
-        $this->assertStringContainsString('target_commitish: ${{ env.RELEASE_SHA }}', $workflow);
-        $this->assertStringContainsString('softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631', $workflow);
-
-        $this->assertMatchesRegularExpression(
-            '/publish-github-release:[\s\S]*?permissions:\s*\R\s*contents: write/m',
-            $workflow,
-        );
-        $this->assertDoesNotMatchRegularExpression(
-            '/Create GitHub Release[\s\S]*?name:\s*\$\{\{\s*needs\.resolve-release\.outputs\.release_title/s',
-            $workflow,
-        );
-
-        $this->assertMatchesRegularExpression(
-            '/publish-github-release:[\s\S]*?permissions:\s*\R\s*contents: write\s*\R\s*issues: read/m',
-            $workflow,
-        );
-        $this->assertMatchesRegularExpression(
-            '/- name: Resolve GitHub Release title[\s\S]*?- name: Create GitHub Release/',
-            $workflow,
-        );
-        $this->assertStringContainsString('repos/${GITHUB_REPOSITORY}/milestones?state=all', $workflow);
-        $this->assertStringContainsString('select(startswith("v" + env.APP_VERSION + " ") or startswith("v" + env.APP_VERSION + ":"))', $workflow);
-        $this->assertStringContainsString('suffix="Beta"', $workflow);
-        $this->assertStringContainsString('echo "RELEASE_DISPLAY_TITLE=v${APP_VERSION} ${suffix}" >> "$GITHUB_ENV"', $workflow);
+        $this->assertStringNotContainsString('publish-github-release:', $workflow);
+        $this->assertStringNotContainsString('softprops/action-gh-release', $workflow);
         $this->assertStringNotContainsString('milestone.number', $workflow);
+    }
 
-        $publishJob = substr($workflow, (int) strpos($workflow, 'publish-github-release:'));
-        $this->assertStringNotContainsString('RELEASE_DISPLAY_TITLE: ${{ needs.resolve-release.outputs.app_version }} Beta', $publishJob);
+    public function test_release_workflow_publishes_the_release_when_the_tag_is_pushed(): void
+    {
+        $workflow = $this->read('.github/workflows/release.yml');
+
+        $this->assertMatchesRegularExpression("/push:\s*\R\s*tags:\s*\R\s*- 'v\*\.\*\.\*'/", $workflow);
+        $this->assertMatchesRegularExpression('/permissions:\s*\R\s*contents: write\s*\R\s*issues: read/m', $workflow);
+        $this->assertStringContainsString('if [[ "$GITHUB_REF_NAME" != "v$app_version" ]]; then', $workflow);
+        $this->assertStringContainsString('compare/$GITHUB_SHA...main', $workflow);
+        $this->assertStringContainsString('scripts/deploy/github-release-notes.sh resources/data/releases.json', $workflow);
+        $this->assertStringContainsString('repos/$GITHUB_REPOSITORY/milestones?state=all', $workflow);
+        $this->assertStringContainsString('select(startswith("v" + env.APP_VERSION + " ") or startswith("v" + env.APP_VERSION + ":"))', $workflow);
+        $this->assertStringContainsString('gh release create "$GITHUB_REF_NAME" --verify-tag --title "$RELEASE_TITLE"', $workflow);
+        $this->assertStringNotContainsString('milestone.number', $workflow);
     }
 
     public function test_workflow_pins_supported_node_24_first_party_actions(): void
@@ -1286,7 +1267,7 @@ class DeploymentAuthenticationContractTest extends TestCase
         $workflow = $this->combinedWorkflows();
 
         foreach ([
-            'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1' => 5,
+            'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1' => 4,
             'actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0' => 2,
         ] as $reference => $expectedOccurrences) {
             $this->assertSame(
@@ -1481,7 +1462,7 @@ class DeploymentAuthenticationContractTest extends TestCase
         $workflow = $this->read('.github/workflows/deploy-cloudron.yml');
         $packaging = $workflow."\n".$this->deploymentScripts();
 
-        $this->assertStringContainsString('app_version:', $workflow);
+        $this->assertStringContainsString('app_version: ${{ steps.release.outputs.app_version }}', $workflow);
         $this->assertStringContainsString('app_version=', $workflow);
         $this->assertStringContainsString('scripts/deploy/package-release.sh', $workflow);
         $this->assertStringContainsString("grep -qx './VERSION' build/archive-list.txt", $packaging);
