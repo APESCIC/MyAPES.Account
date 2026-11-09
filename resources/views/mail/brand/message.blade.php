@@ -30,7 +30,11 @@
 {{-- Footer --}}
 @slot('footer')
 <x-mail::footer>
+@if (! empty($replyByEmail))
+{{ __('mail.reply_by_email.footer') }}
+@else
 {{ __('mail.brand.footer.no_reply') }}
+@endif
 <a href="{{ route('dashboard') }}" style="color: #6b7280; text-decoration: underline;">{{ __('mail.brand.footer.log_in_to_reply') }}</a>
 <br>
 {!! __('mail.brand.footer.copyright', [

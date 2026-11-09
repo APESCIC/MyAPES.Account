@@ -118,6 +118,13 @@ return [
         'action' => 'Log in to reply',
     ],
 
+    'reply_by_email' => [
+        'marker' => '—— Reply above this line ——',
+        'line' => 'Reply to this email, or log in to reply.',
+        'footer' => 'Reply to this email, or:',
+        'badge' => 'by email',
+    ],
+
     'attachments' => [
         'line_new' => '1 new attachment – log in to view.|:count new attachments – log in to view.',
     ],

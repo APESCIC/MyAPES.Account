@@ -4,6 +4,8 @@ namespace App\Core\Extensions\Plugins;
 
 use App\Core\Accounts\ClientRecords\ClientRecordRegistry;
 use App\Core\Accounts\ClientRecords\ClientRecordType;
+use App\Core\Mail\Inbound\Contracts\InboundReplyHandler;
+use App\Core\Mail\Inbound\InboundReplyRegistry;
 use App\Core\Mail\MailTemplate;
 use App\Core\Mail\MailTemplateRegistry;
 use Illuminate\Support\ServiceProvider;
@@ -27,6 +29,16 @@ abstract class PluginServiceProvider extends ServiceProvider
      * @return list<MailTemplate>
      */
     protected function mailTemplates(): array
+    {
+        return [];
+    }
+
+    /**
+     * Handlers that post replies by email on this plugin's records (#589).
+     *
+     * @return list<class-string<InboundReplyHandler>>
+     */
+    protected function inboundReplyHandlers(): array
     {
         return [];
     }
@@ -68,6 +80,11 @@ abstract class PluginServiceProvider extends ServiceProvider
 
         $this->app->make(ClientRecordRegistry::class)
             ->contribute(fn (): array => $this->clientRecords());
+
+        foreach ($this->inboundReplyHandlers() as $handler) {
+            $this->app->make(InboundReplyRegistry::class)
+                ->contribute(fn (): InboundReplyHandler => $this->app->make($handler));
+        }
     }
 
     /**

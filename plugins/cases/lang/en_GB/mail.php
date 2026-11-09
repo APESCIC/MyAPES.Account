@@ -11,4 +11,5 @@ return [
             'description' => 'Sent to the case owner and staff when an APES Shelter case is created or updated.',
         ],
     ],
+    'reply_reference' => 'Case #:id',
 ];

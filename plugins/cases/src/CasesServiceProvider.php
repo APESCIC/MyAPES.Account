@@ -20,6 +20,7 @@ use Plugins\Cases\Dashboard\CaseAttentionProvider;
 use Plugins\Cases\Dashboard\CaseRecentActivityProvider;
 use Plugins\Cases\Dashboard\ShelterCaseActiveRecordDetector;
 use Plugins\Cases\Dashboard\ShelterCaseSummaryProvider;
+use Plugins\Cases\Inbound\CaseEmailReplyHandler;
 use Plugins\Cases\Models\ShelterCase;
 use Plugins\Cases\Notifications\ApesCicCaseUpdatedNotification;
 use Plugins\Cases\Notifications\ShelterCaseUpdatedNotification;
@@ -95,6 +96,11 @@ class CasesServiceProvider extends PluginServiceProvider
                 introKey: 'mail.shelter_case_updated.line_body',
             ),
         ];
+    }
+
+    protected function inboundReplyHandlers(): array
+    {
+        return [CaseEmailReplyHandler::class];
     }
 
     protected function clientRecords(): array

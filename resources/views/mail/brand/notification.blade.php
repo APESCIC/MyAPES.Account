@@ -2,7 +2,11 @@
     Line-based MailMessage (greeting, lines, action) on the shared brand shell (#355).
     Used by MailMessage::markdown('mail.brand.notification') instead of Laravel's stock theme.
 --}}
-@component('mail.brand.message')
+@component('mail.brand.message', ['replyByEmail' => $replyByEmail ?? false])
+@if (! empty($replyByEmail))
+{{ __('mail.reply_by_email.marker') }}
+
+@endif
 @if (! empty($greeting))
 {{ $greeting }}
 @endif

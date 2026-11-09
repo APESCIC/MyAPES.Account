@@ -5,6 +5,7 @@ namespace Plugins\Cases\Notifications;
 use App\Core\Accounts\User;
 use App\Core\Mail\Concerns\BuildsBrandedMail;
 use App\Core\Mail\Concerns\MentionsAttachments;
+use App\Core\Mail\Concerns\OffersEmailReply;
 use App\Support\WorkflowLabels;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -16,6 +17,7 @@ class ShelterCaseUpdatedNotification extends Notification implements ShouldQueue
 {
     use BuildsBrandedMail;
     use MentionsAttachments;
+    use OffersEmailReply;
     use Queueable;
 
     public bool $deleteWhenMissingModels = true;
@@ -60,7 +62,7 @@ class ShelterCaseUpdatedNotification extends Notification implements ShouldQueue
             ->line(__('mail.shelter_case_updated.line_case_type', ['type' => $this->case->case_type]))
             ->line(__('mail.shelter_case_updated.line_status', ['status' => WorkflowLabels::status($this->case->status)]));
 
-        return $this->withAttachmentLine($mail, $this->attachmentCount)
+        return $this->withEmailReply($this->withAttachmentLine($mail, $this->attachmentCount), $notifiable, 'C', $this->case)
             ->action(__('mail.shelter_case_updated.action'), $this->replyLink($notifiable, route('shelter.cases.show', $this->case)));
     }
 

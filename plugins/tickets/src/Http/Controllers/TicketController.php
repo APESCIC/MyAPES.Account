@@ -27,11 +27,11 @@ use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 use Plugins\Tickets\Models\SupportTicket;
 use Plugins\Tickets\Models\SupportTicketMessage;
-use Plugins\Tickets\Notifications\TicketUpdatedNotification;
 use Plugins\Tickets\TicketCategoryResolver;
 use Plugins\Tickets\TicketOwnerCandidates;
 use Plugins\Tickets\TicketsArea;
 use Plugins\Tickets\TicketServiceConfiguration;
+use Plugins\Tickets\TicketStakeholderNotifier;
 
 class TicketController extends Controller
 {
@@ -56,6 +56,7 @@ class TicketController extends Controller
         private readonly SupportAttachmentService $attachments,
         private readonly TicketOwnerCandidates $ownerCandidates,
         private readonly UploadSettings $uploads,
+        private readonly TicketStakeholderNotifier $notifier,
     ) {}
 
     public function index(Request $request): View
@@ -181,7 +182,7 @@ class TicketController extends Controller
             );
         }
 
-        $this->notifyTicketStakeholders($ticket, $request->user(), 'created', $instance, attachmentCount: $storedAttachments->count());
+        $this->notifier->notify($ticket, $request->user(), 'created', attachmentCount: $storedAttachments->count());
         $auditLogger->record("{$ticketService->auditPrefix}.created", $request->user(), $ticket, [
             'service_area' => $ticket->service_area,
             'sub_category' => $ticket->sub_category,
@@ -482,11 +483,10 @@ class TicketController extends Controller
         if (($hasMessage && ! $internal && ! $ticketChanged) || ($hasAttachments && ! $internal)) {
             $ticket->touch();
         }
-        $this->notifyTicketStakeholders(
+        $this->notifier->notify(
             $ticket,
             $request->user(),
             'updated',
-            $instance,
             $internal && ! $ticketChanged,
             $storedAttachments->count(),
         );
@@ -528,42 +528,6 @@ class TicketController extends Controller
 
         return redirect()->route($this->area()->indexRouteName())
             ->with('status', __('tickets::ui.flash.ticket_deleted'));
-    }
-
-    private function notifyTicketStakeholders(
-        SupportTicket $ticket,
-        User $actor,
-        string $eventLabel,
-        ModuleInstanceDefinition $instance,
-        bool $staffOnly = false,
-        int $attachmentCount = 0,
-    ): void {
-        $prefix = $this->area()->permissionPrefix();
-        $ticketService = $this->ticketServices->for($instance->subCore->key);
-        $staffRecipients = User::query()
-            ->eligibleStaff()
-            ->withAuthorizationPermission($prefix.'view-all')
-            ->get();
-
-        if (! $staffOnly && $ticket->user?->can('view', $ticket)) {
-            $staffRecipients->push($ticket->user);
-        }
-
-        $ticketRecipients = $staffRecipients
-            ->unique('id')
-            ->reject(fn (User $recipient): bool => $recipient->id === $actor->id);
-
-        foreach ($ticketRecipients as $recipient) {
-            $recipient->notify(new TicketUpdatedNotification(
-                $ticket,
-                $actor,
-                $eventLabel,
-                $instance->subCore->key,
-                $this->area()->showRouteName(),
-                $ticketService->serviceName,
-                $attachmentCount,
-            ));
-        }
     }
 
     private function attachmentsAllowed(string $subCoreKey, string $serviceArea, ?string $subCategory): bool

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['support_ticket_id', 'user_id', 'message', 'is_staff_note'])]
+#[Fillable(['support_ticket_id', 'user_id', 'message', 'is_staff_note', 'via_email'])]
 class SupportTicketMessage extends Model
 {
     protected function casts(): array
@@ -16,6 +16,7 @@ class SupportTicketMessage extends Model
         return [
             'message' => SanitisedHtml::class,
             'is_staff_note' => 'boolean',
+            'via_email' => 'boolean',
         ];
     }
 

@@ -7,4 +7,5 @@ return [
             'description' => 'Sent to the ticket owner and staff when a ticket is created or updated.',
         ],
     ],
+    'reply_reference' => 'Ticket #:id',
 ];

@@ -4,6 +4,9 @@ namespace App\Core\Providers;
 
 use App\Core\Mail\BrandedMailChannel;
 use App\Core\Mail\CoreMailTemplates;
+use App\Core\Mail\Inbound\InboundMailSettings;
+use App\Core\Mail\Inbound\InboundReplyRegistry;
+use App\Core\Mail\Inbound\ReplyToken;
 use App\Core\Mail\MailCopyOverrides;
 use App\Core\Mail\MailTemplateRegistry;
 use App\Core\Mail\RecordOutboundMail;
@@ -20,6 +23,9 @@ class CoreMailServiceProvider extends ServiceProvider
     {
         $this->app->singleton(MailTemplateRegistry::class);
         $this->app->singleton(MailCopyOverrides::class);
+        $this->app->singleton(InboundReplyRegistry::class);
+        $this->app->singleton(InboundMailSettings::class);
+        $this->app->singleton(ReplyToken::class);
         $this->app->bind(MailChannel::class, BrandedMailChannel::class);
     }
 
