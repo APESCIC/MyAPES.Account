@@ -1,0 +1,42 @@
+---
+description: Milestone versioning - every milestone, branch, PR title, changelog heading, tag and release uses the milestone's semantic version, never GitHub's milestone number
+alwaysApply: true
+---
+
+# Milestone versioning
+
+Every milestone ships under its semantic version, `vMAJOR.MINOR.PATCH`. GitHub's milestone number (the `7` in `/milestone/7`) is an internal ID: it never appears in a title, branch, commit subject, changelog heading, tag or release name.
+
+## Read the version from the milestone title
+
+- A milestone title starts with its full version, then the name: `vX.Y.Z Name`, optionally with a label such as `Beta:` or `Dev:` (`v1.3.0 Beta: Reporting`).
+- A milestone whose title does not start with `vX.Y.Z` is not ready for work. Stop and ask for it to be retitled; never guess a version.
+
+## Pick the next milestone
+
+- The next milestone is the **open milestone with the lowest version above the latest `vX.Y.Z` tag**, compared as semver (`v1.10.0` is above `v1.9.0`; `v1.0.0-beta.2` is below `v1.0.0`).
+- Find it with `composer milestone:next`. Open milestones at or below the latest tag are stale and are reported, not used.
+
+## Names, using one example (milestone `v1.3.0 Beta: Reporting`, issue #42)
+
+| What | Form | Example |
+|------|------|---------|
+| Milestone branch | `milestone/vX-Y-Z-<slug>` | `milestone/v1-3-0-reporting` |
+| Issue branch | `<type>/<issue>-<slug>` | `chore/42-fix-login` |
+| PR title | `[vX.Y.Z] Summary (#issue)` | `[v1.3.0] Fix login (#42)` |
+| Issue title | `[Type]` or the repo's `[vX.Y.x] NN` prefix | `[v1.3.x] 07 Fix login` |
+| Changelog or release history | the version without `v`, as the repo's format needs | `## [1.3.0] - 2026-11-09` |
+| Tag | `vX.Y.Z` | `v1.3.0` |
+| Release title | `vX.Y.Z`, optionally with the label | `v1.3.0 Beta` |
+
+- Use the version of the milestone the issue belongs to, not the version you expect to ship next.
+- Never write `Milestone 7`, `[#7]` or `M7`. `(#42)` at the end of a PR title is the issue number and is fine.
+- Set the version fields (for example `VERSION`) once per milestone, in the milestone's release commit.
+
+## Check before you push, open a PR or tag
+
+- `composer milestone:pr-title -- <issue>` and `composer milestone:branch` print the right names.
+- `composer milestone:check-title -- "<title>"`, `composer milestone:check-branch -- "<branch>"` and `composer milestone:check-release -- vX.Y.Z "<release title>"` fail with the reason when something is wrong.
+- CI runs `check-title` and `check-branch` on every pull request (`.github/workflows/milestone-version-check.yml`).
+
+Skills: `start-next-milestone` (starting a milestone), `milestone-release-titles` (release time) and `/next-milestone`. Script: `scripts/milestone-version`.
