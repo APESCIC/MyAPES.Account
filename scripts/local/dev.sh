@@ -19,4 +19,6 @@ if [[ ! -f scripts/local/dev-runner.mjs ]]; then
   exit 1
 fi
 
+# Agent-only path for Cursor cloud and Linux agents without Laragon: artisan serves on APP_PORT.
+export APP_SERVE=1
 exec composer run dev

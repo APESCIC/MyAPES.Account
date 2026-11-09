@@ -1,6 +1,6 @@
 # Contributing to MyAPES Account
 
-Thank you for helping. Please write in UK English, follow the [Code of Conduct](CODE_OF_CONDUCT.md), and report security issues as described in [SECURITY.md](SECURITY.md). The [developer guide](docs/developer-guide.md) covers local setup and testing.
+Thank you for helping. Please write in UK English, follow the [Code of Conduct](CODE_OF_CONDUCT.md), and report security issues as described in [SECURITY.md](SECURITY.md). Local development uses Laragon only; see [Local development with Laragon](docs/laragon.md). The [developer guide](docs/developer-guide.md) covers modules, plugins and testing.
 
 ## Before you start
 

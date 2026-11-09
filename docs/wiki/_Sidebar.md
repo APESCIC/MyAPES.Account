@@ -20,7 +20,7 @@
 - [[Consultations|Plugin-Consultations]]
 
 **Developers**
-- [[Local setup (WampServer)|Dev-Local-setup-WampServer]]
+- [[Local setup (Laragon)|Dev-Local-setup-Laragon]]
 - [[Architecture|Dev-Architecture]]
 - [[Building a plugin|Dev-Building-a-plugin]]
 - [[Testing and CI|Dev-Testing-and-CI]]

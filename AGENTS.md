@@ -18,23 +18,26 @@ The owner is Bambie Murphy. Cursor does the coding. Write UK English (organisati
 - Recruitment vacancies use `RecruitmentRole`, never Spatie's `Role` (and not an Access job role).
 - Follow the conventions of sibling files, reuse existing components, and do not change dependencies without approval.
 
-## Local development
+## Local development (Laragon)
 
-The owner's working copy is WampServer on Windows. Laragon is retired and must stay stopped, because it also uses port 80.
+Laragon 8 on Windows is the only supported local setup. Use this project's own Laragon project, profile, demo data and commands, and test against the demo data. Never suggest another local stack, container or virtual machine for local development. Guide: [docs/laragon.md](docs/laragon.md).
 
 | Item | Value |
 | --- | --- |
-| Clone | `C:\Users\BambieMurphy\Documents\GitHub\MyAPES.Account` (served directly; no junction) |
-| App URL | `http://myapes-account.test` |
-| Virtual host | `C:\wamp64\bin\apache\apache2.4.65\conf\extra\httpd-vhosts.conf`, document root `{repo}/public` |
-| Daily loop | WampServer services running (green tray icon), then `composer run dev:wamp` |
-| First bootstrap | `powershell -ExecutionPolicy Bypass -File .\scripts\local\bootstrap.ps1 -Wamp -Fresh` |
-| Env file | `.env.wamp.example` (copied by `-Wamp`) |
+| Project folder | `C:\laragon\www\myapes-account` (on the owner's PC, a junction to `C:\Users\BambieMurphy\Documents\GitHub\MyAPES.Account`) |
+| App URL | `http://myapes-account.test`, document root `public/` (Laragon Auto Virtual Hosts) |
+| Profile | [docs/laragon/profile.md](docs/laragon/profile.md): PHP 8.4, MySQL 8.4 (`myapes_account_local`, root, empty password), Node 22, npm 11.10+, Vite port 5175 |
+| Setup | `composer setup` (runs `scripts/laragon-setup.ps1`; safe to run twice) |
+| Daily loop | Laragon started (**Start All**), then `composer run dev` for Vite hot reload |
+| Demo data | `composer demo:seed` to load, `composer demo:reset` to wipe and reload; logins in [docs/laragon/demo-data.md](docs/laragon/demo-data.md) |
+| Env file | `.env.example` (Laragon values) |
 
-- Restarting WampServer's Apache (`wampapache64`) and editing the hosts file need admin rights; the agent shell is not elevated, so ask the owner.
-- Cloud and Linux agents have no WampServer: use `bash scripts/local/dev.sh` and `http://127.0.0.1:8000/` for UI checks.
-- Local QA accounts come from `database/seeders/LocalQaSeeder.php` (local and testing only). Never copy their passwords anywhere.
-- Full local check: `composer pre-pr-verify` (PowerShell) or `bash scripts/local/pre-pr-verify.sh`.
+- The agent shell's `php` and `node` may not be Laragon's. Run `scripts/laragon-setup.ps1`, or put `C:\laragon\bin\php\php-8.4.*`, `C:\laragon\bin\mysql\mysql-8.4.*\bin` and `C:\laragon\bin\nodejs\node-v22` first on `PATH`.
+- Laragon's settings (PHP version, SSL, restarts) and the hosts file belong to the owner: ask before changing them, and never touch other projects' folders, databases or vhosts.
+- Demo data refuses to run unless `APP_ENV=local`. Never point it at production or Cloudron, and never copy real data into it.
+- Local QA accounts come from `database/seeders/LocalQaSeeder.php` (local and testing only) and drive the in-app QA role switcher. Never copy their passwords anywhere.
+- Cursor cloud and Linux agents have no Laragon. Their agent-only path is `bash scripts/local/bootstrap.sh --fresh` and `bash scripts/local/dev.sh`, with `http://127.0.0.1:8000/` for UI checks. It is not a developer setup.
+- Full local check: `composer pre-pr-verify` (PowerShell) or `bash scripts/local/pre-pr-verify.sh` (agent-only).
 - In Windows PowerShell 5.1, pass `gh` bodies with `--body-file`, because inline double quotes get stripped.
 - Node/npm for Vite builds: use **npm 11.10 or newer** (Node 22 ships npm 10 by default — upgrade with `npm install -g npm@11` before `npm ci`). Repo `.npmrc` sets `min-release-age=7`.
 - Every GitHub Actions `uses:` must be pinned to a full 40-character commit SHA with a version comment (`action@<sha> # vX.Y.Z`). Mutable tags such as `@v2` are not allowed.
