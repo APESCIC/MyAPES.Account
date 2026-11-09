@@ -6,6 +6,7 @@ use App\Core\Mail\Inbound\Contracts\InboundReplyHandler;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use LogicException;
+use Throwable;
 
 /**
  * Plugins register their reply handlers here (#589), so Core never imports
@@ -66,6 +67,25 @@ final class InboundReplyRegistry
 
     public function offersRepliesFor(string $prefix, Model $record): bool
     {
-        return $this->handler($prefix) !== null;
+        $handler = $this->handler($prefix);
+
+        return $handler !== null && $this->enabledFor($handler->moduleSlug($record), $handler->plugin());
+    }
+
+    /**
+     * The per-service switch on Admin → Emails → Inbound (#585). On unless an admin turned it off.
+     */
+    public function enabledFor(string $subCoreKey, string $plugin): bool
+    {
+        try {
+            $enabled = InboundReplySetting::query()
+                ->where('sub_core_key', $subCoreKey)
+                ->where('plugin', $plugin)
+                ->value('enabled');
+        } catch (Throwable) {
+            return true;
+        }
+
+        return $enabled === null || (bool) $enabled;
     }
 }

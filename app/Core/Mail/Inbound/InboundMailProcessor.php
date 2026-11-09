@@ -77,6 +77,13 @@ final class InboundMailProcessor
         }
 
         $email->forceFill(['module_slug' => $handler->moduleSlug($record)]);
+
+        if (! $this->handlers->enabledFor($handler->moduleSlug($record), $handler->plugin())) {
+            $this->finish($email, InboundEmail::STATUS_QUARANTINED, 'service_off');
+
+            return;
+        }
+
         $sender = $this->verifier->check($parsed, $auth, $match, $handler, $record);
         $email->forceFill(['user_id' => $sender->user?->id]);
 

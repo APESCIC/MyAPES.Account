@@ -11,6 +11,8 @@
         </div>
     </header>
 
+    @include('admin.emails._tabs', ['activeTab' => 'log'])
+
     <div class="panel-stack">
         <section class="panel" aria-labelledby="email-log-heading">
             <h2 id="email-log-heading">{{ __('admin.emails.log_recent') }}</h2>

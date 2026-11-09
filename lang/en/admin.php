@@ -527,6 +527,7 @@ return [
             'auth_unknown' => 'none',
             'detail_heading' => 'Inbound email #:id',
             'detail_subject' => 'Subject',
+            'detail_message' => 'Message',
             'detail_auth' => 'Sender checks',
             'detail_attachments' => 'Attachments',
             'detail_detail' => 'Notes',
@@ -548,6 +549,7 @@ return [
             'toggle_off' => 'Off',
             'toggle_save' => 'Save',
             'toggle_saved' => 'Replies by email for :service are now :state.',
+            'toggle_no_changes' => 'Nothing changed.',
             'toggle_service' => ':plugin for :module',
             'statuses' => [
                 'received' => 'Waiting',
