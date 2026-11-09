@@ -1,5 +1,45 @@
 [
   {
+    "version": "0.60.0",
+    "date": "2026-11-09",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Client account search and management",
+    "summary": "Staff can find and manage client accounts more easily, and the way MyAPES Account is built, released and deployed is simpler and safer.",
+    "changes": [
+      "Releases are now published when the version tag is pushed, and only a published release tag can be deployed to Cloudron.", "Automated security checks now use only GitHub's free tools: CodeQL, dependency review and Dependabot."
+    ],
+    "affected_areas": [
+      "Release and deploy", "Security checks", "Local development"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Minor: the milestone adds client account search and management features; the release and deploy changes keep every existing route and behaviour.",
+    "validation": [
+      "composer test and the deployment contract tests passed locally; the Laragon preview served the branch through FastCGI on PHP 8.4."
+    ],
+    "known_limitations": [
+      "The new release and deploy workflows run only on a release tag, so they are first exercised by this release."
+    ],
+    "rollback": "Deploy the previous release tag with deploy-cloudron.yml; this release adds no database migrations of its own for the release and deploy changes.",
+    "provenance": "Issue #744 and pull request #745, in milestone v0.60.0.",
+    "references": [
+      {
+        "label": "Issue #744",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/744"
+      },
+      {
+        "label": "Pull request #745",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/745"
+      }
+    ]
+  },
+  {
     "version": "0.59.0",
     "date": "2026-11-09",
     "channel": "stable",
