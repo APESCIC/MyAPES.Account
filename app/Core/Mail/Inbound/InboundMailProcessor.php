@@ -20,8 +20,8 @@ use Illuminate\Support\Facades\Storage;
  *
  * Order: parse, ignore machine mail (#583), match the record (#580), check
  * the sender (#580), turn away replies to closed records (#582), apply
- * hourly limits (#583), extract the reply text (#581), then post it as a
- * public message through the plugin's handler (#582). Each step that fails records a
+ * hourly limits (#583), extract the reply text (#581) and attachments
+ * (#584), then post it as a public message through the plugin's handler (#582). Each step that fails records a
  * status and a reason; nothing doubtful is ever posted.
  */
 final class InboundMailProcessor
@@ -35,6 +35,7 @@ final class InboundMailProcessor
         private readonly ReplyTextExtractor $extractor,
         private readonly LoopGuard $loopGuard,
         private readonly InboundRateLimits $limits,
+        private readonly InboundAttachmentSorter $attachments,
     ) {}
 
     public function process(InboundEmail $email): void
@@ -107,20 +108,38 @@ final class InboundMailProcessor
             return;
         }
 
-        $body = $this->extractor->extract($parsed);
+        try {
+            $body = $this->extractor->extract($parsed);
+            $attachments = $this->attachments->sort($parsed->attachments, $handler->attachmentsAllowed($record));
 
-        if ($body === '') {
-            $this->finish($email, InboundEmail::STATUS_REJECTED, 'empty_reply');
+            if ($body === '' && $attachments->isEmpty()) {
+                $this->finish($email, InboundEmail::STATUS_REJECTED, 'empty_reply', $this->attachmentAttributes($attachments));
 
-            return;
+                return;
+            }
+
+            $posted = $handler->post($record, $sender->user, $body !== '' ? $body : __('mail.reply_by_email.attachments_only'), $attachments);
+
+            $this->finish($email, InboundEmail::STATUS_POSTED, null, [
+                ...$this->attachmentAttributes($attachments),
+                'posted_type' => $posted->getMorphClass(),
+                'posted_id' => $posted->getKey(),
+            ]);
+        } finally {
+            $this->attachments->cleanUp();
         }
+    }
 
-        $posted = $handler->post($record, $sender->user, $body, InboundAttachmentSet::none());
-
-        $this->finish($email, InboundEmail::STATUS_POSTED, null, [
-            'posted_type' => $posted->getMorphClass(),
-            'posted_id' => $posted->getKey(),
-        ]);
+    /**
+     * @return array<string, mixed>
+     */
+    private function attachmentAttributes(InboundAttachmentSet $attachments): array
+    {
+        return [
+            'attachments_stored' => $attachments->count(),
+            'attachments_rejected' => count($attachments->rejected),
+            'detail' => $attachments->rejected === [] ? null : mb_substr(implode(' ', $attachments->rejected), 0, 500),
+        ];
     }
 
     private function parse(InboundEmail $email): ?ParsedInboundEmail

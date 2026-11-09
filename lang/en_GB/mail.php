@@ -129,6 +129,7 @@ return [
         'line' => 'Reply to this email, or log in to reply.',
         'footer' => 'Reply to this email, or:',
         'badge' => 'by email',
+        'attachments_only' => 'Sent attachments by email.',
     ],
 
     'reply_not_posted' => [

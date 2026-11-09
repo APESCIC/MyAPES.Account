@@ -1,0 +1,61 @@
+Return-Path: <{{FROM}}>
+Authentication-Results: {{AUTH}}
+From: Ann Owner <{{FROM}}>
+To: {{TO}}
+Subject: {{SUBJECT}}
+Date: Mon, 9 Nov 2026 10:15:00 +0000
+Message-ID: <{{MESSAGE_ID}}>
+In-Reply-To: {{IN_REPLY_TO}}
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="mixed1"
+
+--mixed1
+Content-Type: multipart/related; boundary="related1"
+
+--related1
+Content-Type: multipart/alternative; boundary="alt1"
+
+--alt1
+Content-Type: text/plain; charset=UTF-8
+
+{{BODY}}
+
+--alt1
+Content-Type: text/html; charset=UTF-8
+
+<p>{{BODY}}</p><p><img src="cid:logo@example.org"></p>
+
+--alt1--
+
+--related1
+Content-Type: image/png; name="logo.png"
+Content-Disposition: inline; filename="logo.png"
+Content-ID: <logo@example.org>
+Content-Transfer-Encoding: base64
+
+iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==
+
+--related1--
+
+--mixed1
+Content-Type: application/pdf; name="report.pdf"
+Content-Disposition: attachment; filename="report.pdf"
+Content-Transfer-Encoding: base64
+
+JVBERi0xLjQKMSAwIG9iago8PC9UeXBlL0NhdGFsb2cvUGFnZXMgMiAwIFI+PgplbmRvYmoKMiAwIG9iago8PC9UeXBlL1BhZ2VzL0tpZHNbXS9Db3VudCAwPj4KZW5kb2JqCnRyYWlsZXIKPDwvUm9vdCAxIDAgUj4+CiUlRU9GCg==
+
+--mixed1
+Content-Type: image/png; name="boiler.png"
+Content-Disposition: attachment; filename="boiler.png"
+Content-Transfer-Encoding: base64
+
+iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==
+
+--mixed1
+Content-Type: application/octet-stream; name="setup.exe"
+Content-Disposition: attachment; filename="setup.exe"
+Content-Transfer-Encoding: base64
+
+TVqQAAMAAAAEAAAA//8AALgAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAA==
+
+--mixed1--
