@@ -275,7 +275,7 @@ composer run dev:docker
 - If they exist but are stopped, it starts them.
 - It only creates containers when none exist.
 
-It then creates `.env` from [`.env.docker.example`](.env.docker.example) if it is missing, creates the SQLite file, runs `composer install` if `vendor/` is missing, generates the app key if it is empty, and waits for `/healthz`.
+It then creates `.env` from [`.env.docker.example`](.env.docker.example) if it is missing, sets the Docker URL and database path in `.env`, creates the SQLite file, runs `composer install` if `vendor/` is missing, generates the app key if it is empty, and waits for `/healthz`.
 
 | Switch | Effect |
 | --- | --- |
@@ -296,12 +296,16 @@ It then creates `.env` from [`.env.docker.example`](.env.docker.example) if it i
 
 `docker compose stop` stops the stack and keeps the containers for the next run. `docker compose down` removes the containers but keeps the SQLite file, because it lives in the repository folder.
 
+`vendor/` (Linux Composer packages) and `storage/framework` (compiled views, file sessions and file cache) live in container volumes, because PHP reads them slowly through a Windows bind mount. The script runs `composer install` in the container whenever `composer.lock` changes. The host `vendor/` folder is left alone for your editor.
+
 **Troubleshooting**
 
 - **The site does not resolve:** check the hosts entry above. `http://127.0.0.1:8081` always reaches the stack.
+- **Pages take a second or two:** expected on Windows, because PHP re-checks the app files through the bind mount. The first request after a change compiles views and is slower.
+- **Pint reports `line_ending` on every file:** the Windows checkout has CRLF line endings (`core.autocrlf=true`) while the repository stores LF. Committed content is unaffected. Either ignore `line_ending` locally or run `git config core.autocrlf input` and re-checkout.
 - **Unstyled pages:** check `docker compose logs node`; the first start runs `npm ci`, which takes a minute. `public/hot` appears once Vite is ready.
 - **Passkeys / WebAuthn locally:** browsers only allow passkeys in a secure context, and `http://localhost` counts as one. For passkey checks, open `http://localhost:8081` and set `APP_URL=http://localhost:8081` in `.env` (and in `compose.yaml` while testing). Live Cloudron uses `https://myaccount.myapes.me.uk` (changing rpId invalidates existing passkeys).
-- **URL or OIDC callback mismatch:** `compose.yaml` sets `APP_URL`, `OIDC_REDIRECT_URI` and `DB_DATABASE` for the `app` container, so they win over `.env`.
+- **URL or OIDC callback mismatch:** the script sets `APP_URL`, `OIDC_REDIRECT_URI`, `DB_CONNECTION`, `DB_DATABASE` and `VITE_DEV_SERVER_URL` in `.env` on every run (local or testing `.env` only). Do not set them as container environment variables in `compose.yaml`: they would override `phpunit.xml` and point the tests at the local database.
 
 ### Host bootstrap (no Docker)
 

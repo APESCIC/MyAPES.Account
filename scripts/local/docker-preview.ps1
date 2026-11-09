@@ -41,6 +41,27 @@ function Get-ComposeServices {
     return @($output | ForEach-Object { "$_".Trim() } | Where-Object { $_ })
 }
 
+function Get-ChangedServices {
+    $expected = @{}
+    foreach ($line in @(& docker compose config --hash "*")) {
+        $parts = "$line".Trim() -split '\s+'
+        if ($parts.Count -eq 2) {
+            $expected[$parts[0]] = $parts[1]
+        }
+    }
+
+    $changed = @()
+    foreach ($line in @(& docker compose ps -a --format "{{.Service}} {{.Labels}}")) {
+        $service = ("$line" -split ' ')[0]
+        $actual = [regex]::Match("$line", 'com\.docker\.compose\.config-hash=([0-9a-f]+)').Groups[1].Value
+        if ($expected.ContainsKey($service) -and $expected[$service] -ne $actual) {
+            $changed += $service
+        }
+    }
+
+    return $changed
+}
+
 function Invoke-App {
     & docker compose exec -T app @args
     if ($LASTEXITCODE -ne 0) {
@@ -65,11 +86,16 @@ $existing = Get-ComposeServices
 $running = Get-ComposeServices -Running
 $missing = @($Services | Where-Object { $existing -notcontains $_ })
 $stopped = @($Services | Where-Object { ($existing -contains $_) -and ($running -notcontains $_) })
+$changed = @(Get-ChangedServices)
 
 if ($Build) {
     Write-Host "Rebuilding images; docker compose keeps any container whose image and config are unchanged."
     Invoke-Compose up -d --build
     $containerState = "rebuilt"
+} elseif ($changed.Count -gt 0) {
+    Write-Host "compose.yaml changed for: $($changed -join ', '). Recreating only those containers."
+    Invoke-Compose up -d
+    $containerState = "updated"
 } elseif ($missing.Count -eq 0 -and $stopped.Count -eq 0) {
     Write-Host "Reusing running containers: $($Services -join ', ')."
     $containerState = "reused"
@@ -104,6 +130,29 @@ if ($appEnvironment -notin @("local", "testing")) {
     throw "Refusing to prepare the app because APP_ENV is '$appEnvironment'. The Docker preview only accepts local or testing."
 }
 
+$dockerEnvValues = [ordered]@{
+    APP_URL = "http://${HostName}:$Port"
+    OIDC_REDIRECT_URI = "http://${HostName}:$Port/staff/auth/callback"
+    DB_CONNECTION = "sqlite"
+    DB_DATABASE = "/app/database/database.sqlite"
+    VITE_DEV_SERVER_URL = "http://${HostName}:$VitePort"
+}
+$updatedEnvContent = $envContent
+foreach ($key in $dockerEnvValues.Keys) {
+    $line = "$key=$($dockerEnvValues[$key])"
+    $pattern = "(?m)^$([regex]::Escape($key))=.*$"
+    if ([regex]::IsMatch($updatedEnvContent, $pattern)) {
+        $updatedEnvContent = [regex]::Replace($updatedEnvContent, $pattern, $line, 1)
+    } else {
+        $updatedEnvContent = $updatedEnvContent.TrimEnd("`r", "`n") + "`n$line`n"
+    }
+}
+if ($updatedEnvContent -cne $envContent) {
+    [System.IO.File]::WriteAllText($envPath, $updatedEnvContent, [System.Text.UTF8Encoding]::new($false))
+    $envContent = $updatedEnvContent
+    Write-Host "Updated .env with the Docker preview URL and database path."
+}
+
 $sqlitePath = Join-Path $RootDir "database\database.sqlite"
 $databaseCreated = $false
 if (-not (Test-Path -LiteralPath $sqlitePath)) {
@@ -112,8 +161,13 @@ if (-not (Test-Path -LiteralPath $sqlitePath)) {
     Write-Host "Created database\database.sqlite."
 }
 
-if (-not (Test-Path -LiteralPath (Join-Path $RootDir "vendor\autoload.php"))) {
+# vendor/ lives in a container volume; reinstall when it is empty or composer.lock has changed.
+$lockHash = (Get-FileHash -LiteralPath (Join-Path $RootDir "composer.lock") -Algorithm SHA256).Hash.ToLowerInvariant()
+$installedHash = (& docker compose exec -T app sh -c "cat vendor/.composer-lock.sha256 2>/dev/null" | Out-String).Trim()
+if ($installedHash -ne $lockHash) {
+    Write-Host "Installing Composer packages in the app container."
     Invoke-App composer install --no-interaction --prefer-dist
+    Invoke-App sh -c "echo $lockHash > vendor/.composer-lock.sha256"
 }
 
 if ($envContent -match '(?m)^APP_KEY=\s*$') {
@@ -126,8 +180,8 @@ if ($Fresh) {
 } elseif ($Migrate -or $databaseCreated) {
     Invoke-App php artisan migrate --force
 } else {
-    $pending = & docker compose exec -T app php artisan migrate:status --pending 2>$null
-    if ($LASTEXITCODE -eq 0 -and ($pending -join "`n") -match 'Pending') {
+    $pending = & docker compose exec -T app sh -c "php artisan migrate:status --pending 2>/dev/null"
+    if ($LASTEXITCODE -eq 0 -and ($pending -join "`n") -cmatch '\bPending\b') {
         Write-Warning "There are pending migrations. Run this script again with -Migrate to apply them."
     }
 }

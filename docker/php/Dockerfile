@@ -12,6 +12,11 @@ RUN apt-get update \
 COPY php.ini /usr/local/etc/php/conf.d/zz-myapes-account.ini
 COPY fpm-pool.conf /usr/local/etc/php-fpm.d/zz-myapes-account.conf
 
-RUN git config --system --add safe.directory /app
+RUN git config --system --add safe.directory /app \
+    && mkdir -p /app/storage/framework/cache/data /app/storage/framework/sessions \
+        /app/storage/framework/views /app/storage/framework/testing
 
 WORKDIR /app
+
+# FPM workers run as root, like `docker compose exec`, so both can write the same cache files.
+CMD ["php-fpm", "--allow-to-run-as-root"]

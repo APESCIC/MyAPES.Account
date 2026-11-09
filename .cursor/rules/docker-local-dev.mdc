@@ -31,7 +31,8 @@ Run everything in the containers, from the repository root:
 | npm | `docker compose exec node npm <command>` |
 | Logs | `docker compose logs -f app web node` |
 
-- The `node` container keeps its own Linux `node_modules` in a volume and runs `npm ci` itself on start.
+- The `node` container keeps its own Linux `node_modules` in a volume and runs `npm ci` itself on start. The `app` container keeps `vendor/` and `storage/framework` in volumes; the preview script reinstalls Composer packages when `composer.lock` changes.
+- Pint in the container reports `line_ending` on a Windows checkout with `core.autocrlf=true`; that is the checkout, not the change. Judge Pint on the other rules, or rely on CI.
 - `docker compose exec app composer install` may run without asking when `vendor/` is missing.
-- Ask with AskQuestion before: `docker-preview.ps1 -Migrate` or `-Fresh` (`-Fresh` wipes local data), `docker compose down -v` (deletes the `node_modules` volume), editing the hosts file, or installing any system tool.
+- Ask with AskQuestion before: `docker-preview.ps1 -Migrate` or `-Fresh` (`-Fresh` wipes local data), `docker compose down -v` (deletes the `node_modules`, `vendor` and `framework` volumes), editing the hosts file, or installing any system tool.
 - Fake data only in the local database. Full guide: README "Local development with Docker".

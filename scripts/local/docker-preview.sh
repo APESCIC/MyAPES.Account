@@ -60,10 +60,25 @@ for service in "${SERVICES[@]}"; do
   fi
 done
 
+changed=()
+while read -r service expected_hash; do
+  [[ -z "$service" ]] && continue
+  actual_hash="$(docker compose ps -a --format '{{.Service}} {{.Labels}}' \
+    | awk -v s="$service" '$1 == s' \
+    | grep -o 'com\.docker\.compose\.config-hash=[0-9a-f]*' | cut -d= -f2 || true)"
+  if [[ -n "$actual_hash" && "$actual_hash" != "$expected_hash" ]]; then
+    changed+=("$service")
+  fi
+done < <(docker compose config --hash '*')
+
 if [[ "$build" == true ]]; then
   echo "Rebuilding images; docker compose keeps any container whose image and config are unchanged."
   docker compose up -d --build
   container_state="rebuilt"
+elif [[ ${#changed[@]} -gt 0 ]]; then
+  echo "compose.yaml changed for: ${changed[*]}. Recreating only those containers."
+  docker compose up -d
+  container_state="updated"
 elif [[ ${#missing[@]} -eq 0 && ${#stopped[@]} -eq 0 ]]; then
   echo "Reusing running containers: ${SERVICES[*]}."
   container_state="reused"
@@ -92,6 +107,25 @@ if [[ "$app_environment" != "local" && "$app_environment" != "testing" ]]; then
   exit 1
 fi
 
+set_env_value() {
+  local key="$1" value="$2"
+  if grep -Eq "^${key}=" .env; then
+    if [[ "$(grep -E "^${key}=" .env | head -n 1)" != "${key}=${value}" ]]; then
+      sed -i.bak "s#^${key}=.*#${key}=${value}#" .env && rm -f .env.bak
+      echo "Set ${key} in .env."
+    fi
+  else
+    printf '\n%s=%s\n' "$key" "$value" >> .env
+    echo "Added ${key} to .env."
+  fi
+}
+
+set_env_value APP_URL "http://${HOST_NAME}:${PORT}"
+set_env_value OIDC_REDIRECT_URI "http://${HOST_NAME}:${PORT}/staff/auth/callback"
+set_env_value DB_CONNECTION sqlite
+set_env_value DB_DATABASE /app/database/database.sqlite
+set_env_value VITE_DEV_SERVER_URL "http://${HOST_NAME}:${VITE_PORT}"
+
 database_created=false
 if [[ ! -f database/database.sqlite ]]; then
   touch database/database.sqlite
@@ -99,8 +133,13 @@ if [[ ! -f database/database.sqlite ]]; then
   echo "Created database/database.sqlite."
 fi
 
-if [[ ! -f vendor/autoload.php ]]; then
+# vendor/ lives in a container volume; reinstall when it is empty or composer.lock has changed.
+lock_hash="$(sha256sum composer.lock | cut -d' ' -f1)"
+installed_hash="$(docker compose exec -T app sh -c 'cat vendor/.composer-lock.sha256 2>/dev/null' | tr -d '[:space:]' || true)"
+if [[ "$installed_hash" != "$lock_hash" ]]; then
+  echo "Installing Composer packages in the app container."
   docker compose exec -T app composer install --no-interaction --prefer-dist
+  docker compose exec -T app sh -c "echo $lock_hash > vendor/.composer-lock.sha256"
 fi
 
 if grep -Eq '^APP_KEY=[[:space:]]*$' .env; then
@@ -112,7 +151,7 @@ if [[ "$fresh" == true ]]; then
   docker compose exec -T app php artisan migrate:fresh --seed --force
 elif [[ "$migrate" == true || "$database_created" == true ]]; then
   docker compose exec -T app php artisan migrate --force
-elif docker compose exec -T app php artisan migrate:status --pending 2>/dev/null | grep -q 'Pending'; then
+elif docker compose exec -T app php artisan migrate:status --pending 2>/dev/null | grep -qw 'Pending'; then
   echo "Warning: there are pending migrations. Run this script again with --migrate to apply them." >&2
 fi
 

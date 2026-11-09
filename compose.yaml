@@ -8,14 +8,12 @@ services:
         build: docker/php
         volumes:
             - .:/app
-        environment:
-            # Real environment variables win over .env, so these keep the container working
-            # even when .env still holds host-only paths.
-            APP_URL: http://myaccount.myapes.test:8081
-            OIDC_REDIRECT_URI: http://myaccount.myapes.test:8081/staff/auth/callback
-            DB_CONNECTION: sqlite
-            DB_DATABASE: /app/database/database.sqlite
-            VITE_DEV_SERVER_URL: http://myaccount.myapes.test:5175
+            # Linux Composer packages in a volume: PHP on a Windows bind mount is too slow for vendor/.
+            - vendor:/app/vendor
+            # Compiled views, file sessions and file cache, for the same reason.
+            - framework:/app/storage/framework
+        # No app settings here: container environment variables would override phpunit.xml
+        # and point the test suite at the local database. docker-preview sets them in .env.
 
     web:
         image: caddy:2-alpine
@@ -45,3 +43,5 @@ services:
 
 volumes:
     node_modules:
+    vendor:
+    framework:
