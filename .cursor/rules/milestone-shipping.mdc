@@ -16,7 +16,8 @@ Work in this repository ships once per GitHub milestone, not once per change or 
 
 ## Branch rules
 
-- Each milestone has one milestone branch, `milestone/<slug>`, created from an up-to-date `main` when work on the milestone starts. Pull `main` first, as `sync-before-work.mdc` says.
+- Each milestone has one milestone branch, named from its version as `milestone-versioning.mdc` says, created from an up-to-date `main` when work on the milestone starts. Pull `main` first, as `sync-before-work.mdc` says.
+- The milestone's version, and the names of its pull requests, tag and release, come from `milestone-versioning.mdc`.
 - Commit and push on the milestone branch (or on issue branches based on it) whenever needed.
 - Nothing reaches `main`, and nothing is tagged, released or deployed, before stage 2.
 - Do not merge, tag, release or deploy after an individual change or issue.

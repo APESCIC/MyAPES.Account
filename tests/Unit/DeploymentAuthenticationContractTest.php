@@ -1262,6 +1262,23 @@ class DeploymentAuthenticationContractTest extends TestCase
             '/Create GitHub Release[\s\S]*?name:\s*\$\{\{\s*needs\.resolve-release\.outputs\.release_title/s',
             $workflow,
         );
+
+        $this->assertMatchesRegularExpression(
+            '/publish-github-release:[\s\S]*?permissions:\s*\R\s*contents: write\s*\R\s*issues: read/m',
+            $workflow,
+        );
+        $this->assertMatchesRegularExpression(
+            '/- name: Resolve GitHub Release title[\s\S]*?- name: Create GitHub Release/',
+            $workflow,
+        );
+        $this->assertStringContainsString('repos/${GITHUB_REPOSITORY}/milestones?state=all', $workflow);
+        $this->assertStringContainsString('select(startswith("v" + env.APP_VERSION + " ") or startswith("v" + env.APP_VERSION + ":"))', $workflow);
+        $this->assertStringContainsString('suffix="Beta"', $workflow);
+        $this->assertStringContainsString('echo "RELEASE_DISPLAY_TITLE=v${APP_VERSION} ${suffix}" >> "$GITHUB_ENV"', $workflow);
+        $this->assertStringNotContainsString('milestone.number', $workflow);
+
+        $publishJob = substr($workflow, (int) strpos($workflow, 'publish-github-release:'));
+        $this->assertStringNotContainsString('RELEASE_DISPLAY_TITLE: ${{ needs.resolve-release.outputs.app_version }} Beta', $publishJob);
     }
 
     public function test_workflow_pins_supported_node_24_first_party_actions(): void
