@@ -4,6 +4,8 @@ namespace App\Core\Providers;
 
 use App\Core\Mail\BrandedMailChannel;
 use App\Core\Mail\CoreMailTemplates;
+use App\Core\Mail\Inbound\Contracts\InboundMailbox;
+use App\Core\Mail\Inbound\ImapMailbox;
 use App\Core\Mail\Inbound\InboundMailSettings;
 use App\Core\Mail\Inbound\InboundReplyRegistry;
 use App\Core\Mail\Inbound\ReplyToken;
@@ -26,6 +28,7 @@ class CoreMailServiceProvider extends ServiceProvider
         $this->app->singleton(InboundReplyRegistry::class);
         $this->app->singleton(InboundMailSettings::class);
         $this->app->singleton(ReplyToken::class);
+        $this->app->bind(InboundMailbox::class, ImapMailbox::class);
         $this->app->bind(MailChannel::class, BrandedMailChannel::class);
     }
 
