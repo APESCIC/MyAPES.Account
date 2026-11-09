@@ -6,9 +6,10 @@ namespace Scripts\MilestoneVersion;
  * Checks PR, issue, changelog and release titles against the milestone version rule.
  *
  * Accepted forms, where the version must be the milestone's:
- *   [v1.3.0] Fix login (#42)        PR titles (the preferred form)
+ *   [v1.3.0] Fix login (#42)        issue PRs into the milestone branch
  *   [v1.3.x] 07 Fix login           numbered issue titles (major and minor must match)
  *   [Epic] v1.3.0 Reporting         typed Epic or issue titles
+ *   v1.3.0: Reporting               the milestone PR into main
  *   v1.3.0 Beta                     release and milestone titles
  */
 final class TitleRules
@@ -102,6 +103,9 @@ final class TitleRules
         $problems = [];
 
         if (preg_match('/\bmilestone\s*#?\s*\d+\b/i', $title, $m) === 1) {
+            $problems[] = sprintf('"%s" is a GitHub milestone number. Refer to the milestone by its version instead.', $m[0]);
+        }
+        if (preg_match('#/milestones?/\d+\b#i', $title, $m) === 1) {
             $problems[] = sprintf('"%s" is a GitHub milestone number. Refer to the milestone by its version instead.', $m[0]);
         }
         if (preg_match('/\[#\d+\]/', $title, $m) === 1) {
