@@ -1,0 +1,13 @@
+Return-Path: <{{FROM}}>
+Authentication-Results: {{AUTH}}
+From: Ann Owner <{{FROM}}>
+To: {{TO}}
+Subject: {{SUBJECT}}
+Date: Mon, 9 Nov 2026 10:15:00 +0000
+Message-ID: <{{MESSAGE_ID}}>
+In-Reply-To: {{IN_REPLY_TO}}
+MIME-Version: 1.0
+Content-Type: text/html; charset=UTF-8
+
+<html><body><p>{{BODY}}</p><p>It is <b>much</b> warmer now &amp; quiet.</p><script>alert('x')</script>
+<blockquote>Reply above this line<br>Hello Ann</blockquote></body></html>

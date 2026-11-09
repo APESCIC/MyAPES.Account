@@ -5,6 +5,7 @@ namespace App\Core\Mail\Inbound;
 use App\Core\Mail\Inbound\Matching\ReplyMatcher;
 use App\Core\Mail\Inbound\Parsing\InboundEmailParser;
 use App\Core\Mail\Inbound\Parsing\ParsedInboundEmail;
+use App\Core\Mail\Inbound\Parsing\ReplyTextExtractor;
 use App\Core\Mail\Inbound\Parsing\UnparseableEmail;
 use App\Core\Mail\Inbound\Verification\AuthenticationResults;
 use App\Core\Mail\Inbound\Verification\SenderVerifier;
@@ -13,8 +14,8 @@ use Illuminate\Support\Facades\Storage;
 /**
  * Works out what a stored inbound email is and what to do with it (#579).
  *
- * Order: parse, match the record (#580), check the sender (#580), then post
- * the reply through the plugin's handler. Each step that fails records a
+ * Order: parse, match the record (#580), check the sender (#580), extract
+ * the reply text (#581), then post it through the plugin's handler. Each step that fails records a
  * status and a reason; nothing doubtful is ever posted.
  */
 final class InboundMailProcessor
@@ -25,6 +26,7 @@ final class InboundMailProcessor
         private readonly InboundReplyRegistry $handlers,
         private readonly ReplyMatcher $matcher,
         private readonly SenderVerifier $verifier,
+        private readonly ReplyTextExtractor $extractor,
     ) {}
 
     public function process(InboundEmail $email): void
@@ -67,7 +69,15 @@ final class InboundMailProcessor
             return;
         }
 
-        $posted = $handler->post($record, $sender->user, trim($parsed->textBody), InboundAttachmentSet::none());
+        $body = $this->extractor->extract($parsed);
+
+        if ($body === '') {
+            $this->finish($email, InboundEmail::STATUS_REJECTED, 'empty_reply');
+
+            return;
+        }
+
+        $posted = $handler->post($record, $sender->user, $body, InboundAttachmentSet::none());
 
         $this->finish($email, InboundEmail::STATUS_POSTED, null, [
             'posted_type' => $posted->getMorphClass(),
