@@ -11,10 +11,10 @@ function commandNamed(commands, name) {
     return commands.find((command) => command.name === name);
 }
 
-test('WampServer mode omits artisan serve because Apache serves HTTP', () => {
+test('Laragon default omits artisan serve because Apache serves HTTP', () => {
     const commands = buildDevCommands({
         platform: 'win32',
-        wamp: true,
+        serve: false,
     });
 
     assert.deepEqual(
@@ -28,6 +28,7 @@ test('native Windows uses a PowerShell log tail and never starts Pail', () => {
     const commands = buildDevCommands({
         platform: 'win32',
         appPort: '8123',
+        serve: true,
     });
 
     assert.deepEqual(
@@ -58,7 +59,7 @@ test('native Windows uses a PowerShell log tail and never starts Pail', () => {
 
 test('Unix-like platforms retain Laravel Pail for application logs', () => {
     for (const platform of ['linux', 'darwin']) {
-        const commands = buildDevCommands({ platform });
+        const commands = buildDevCommands({ platform, serve: true });
 
         assert.equal(
             commandNamed(commands, 'logs').command,

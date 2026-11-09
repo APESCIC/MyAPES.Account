@@ -1,16 +1,10 @@
 #!/usr/bin/env bash
+# Agent-only path for Cursor cloud and Linux agents without Laragon.
+# Developers on Windows use Laragon: composer pre-pr-verify (scripts/local/pre-pr-verify.ps1).
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT_DIR"
-
-if command -v pwsh >/dev/null 2>&1; then
-  exec pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/local/pre-pr-verify.ps1 "$@"
-fi
-
-if command -v powershell >/dev/null 2>&1; then
-  exec powershell -NoProfile -ExecutionPolicy Bypass -File scripts/local/pre-pr-verify.ps1 "$@"
-fi
 
 echo "Running pre-merge contract gate..."
 composer pre-merge
