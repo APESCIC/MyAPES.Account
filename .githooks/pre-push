@@ -1,0 +1,8 @@
+#!/bin/sh
+# Opt-in: git config core.hooksPath .githooks
+# Blocks a push when the branch name uses a milestone number or the wrong milestone version.
+# See .cursor/rules/milestone-versioning.mdc. Skip once with: git push --no-verify
+
+branch=$(git symbolic-ref --quiet --short HEAD) || exit 0
+
+exec php scripts/milestone-version check-branch "$branch"
