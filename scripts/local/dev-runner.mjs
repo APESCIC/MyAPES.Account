@@ -25,7 +25,7 @@ export function resolveAppPort(value = '8000') {
 export function buildDevCommands({
     platform = process.platform,
     appPort = process.env.APP_PORT,
-    laragon = process.env.LARAGON === '1',
+    wamp = process.env.WAMP === '1',
 } = {}) {
     const port = resolveAppPort(appPort);
     const logCommand =
@@ -35,7 +35,7 @@ export function buildDevCommands({
 
     const commands = [];
 
-    if (!laragon) {
+    if (!wamp) {
         commands.push({
             command: `php artisan serve --host=127.0.0.1 --port=${port}`,
             name: 'server',

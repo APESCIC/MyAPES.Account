@@ -1,5 +1,47 @@
 [
   {
+    "version": "0.58.2",
+    "date": "2026-11-09",
+    "channel": "stable",
+    "type": "patch",
+    "title": "WampServer local development",
+    "summary": "Local development and testing for MyAPES Account now run on WampServer instead of Laragon.",
+    "changes": [
+      "The local bootstrap, dev and pre-PR options for Windows are now -Wamp and composer run dev:wamp, with a .env.wamp.example profile. WampServer's Apache serves the app at http://myapes-account.test straight from the repository's public folder.",
+      "The README, agent instructions and the developer wiki page (now Local setup (WampServer)) explain the WampServer virtual host, the hosts entry and the daily loop."
+    ],
+    "affected_areas": [
+      "Developer tooling",
+      "Documentation"
+    ],
+    "categories": [
+      "changed"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch: developer tooling and documentation only. No change to what users see or to the live app.",
+    "validation": [
+      "Dev runner tests for the WampServer mode, the full PHPUnit suite and the pre-merge checks passed locally.",
+      "The local bootstrap ran in WampServer mode, and the app loaded at http://myapes-account.test through WampServer's Apache with Vite hot reload. Release history validated against main."
+    ],
+    "known_limitations": [
+      "WampServer does not include a mail catcher, so local mail goes to the log unless a separate Mailpit is running."
+    ],
+    "rollback": "Redeploy the previous release package. Nothing in the database changes in this release.",
+    "provenance": "Milestone v0.58.2 Dev: WampServer local development, epic #719 with sub-issue #720, pull request #721.",
+    "references": [
+      {
+        "label": "Issue #719",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/719"
+      },
+      {
+        "label": "Pull request #721",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/721"
+      }
+    ]
+  },
+  {
     "version": "0.58.1",
     "date": "2026-11-08",
     "channel": "stable",

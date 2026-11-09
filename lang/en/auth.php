@@ -207,7 +207,7 @@ return [
         'name_label' => 'Passkey name',
         'default_name' => 'This device',
         'add' => 'Add passkey',
-        'add_note' => 'You will confirm your password (or an existing passkey) first. Supported browsers require HTTPS, or a trusted local host with TLS (see Laragon notes in the README).',
+        'add_note' => 'You will confirm your password (or an existing passkey) first. Supported browsers require HTTPS, or a trusted local host with TLS (see the WampServer notes in the README).',
         'remove' => 'Remove',
         'added_on' => 'Added :date',
         'last_used' => 'Last used :date',

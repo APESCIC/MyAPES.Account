@@ -2,7 +2,7 @@
 param(
     [switch]$Seed,
     [switch]$Fresh,
-    [switch]$Laragon,
+    [switch]$Wamp,
     [string]$AppUrl = "http://myapes-account.test"
 )
 
@@ -31,7 +31,7 @@ foreach ($tool in @("php", "composer", "npm")) {
     }
 }
 
-$envExampleName = if ($Laragon) { ".env.laragon.example" } else { ".env.local.example" }
+$envExampleName = if ($Wamp) { ".env.wamp.example" } else { ".env.local.example" }
 
 foreach ($requiredFile in @(".\artisan", ".\composer.json", ".\$envExampleName")) {
     if (-not (Test-Path -LiteralPath $requiredFile)) {
@@ -81,11 +81,11 @@ if (-not (Test-Path -LiteralPath $sqlitePath)) {
 }
 
 $sqliteEnvPath = $sqlitePath.Replace("\", "/")
-$appUrl = if ($Laragon) { $AppUrl.TrimEnd("/") } else { "http://127.0.0.1:8000" }
+$appUrl = if ($Wamp) { $AppUrl.TrimEnd("/") } else { "http://127.0.0.1:8000" }
 Set-LocalEnvValue -Key "APP_ENV" -Value "local"
 Set-LocalEnvValue -Key "APP_DEBUG" -Value "true"
 Set-LocalEnvValue -Key "APP_URL" -Value $appUrl
-if ($Laragon) {
+if ($Wamp) {
     Set-LocalEnvValue -Key "OIDC_REDIRECT_URI" -Value "$appUrl/staff/auth/callback"
     Set-LocalEnvValue -Key "VITE_DEV_SERVER_URL" -Value "http://127.0.0.1:5173"
 }
@@ -127,8 +127,8 @@ if ($Fresh) {
 Assert-SelectiveMediaBoundary -RootDir $BootstrapRootDir -CreateAvatarLink
 Invoke-CheckedCommand npm run build
 
-if ($Laragon) {
-    Write-Host "Local Laragon bootstrap complete. Start Laragon Apache, then run 'composer run dev:laragon'."
+if ($Wamp) {
+    Write-Host "Local WampServer bootstrap complete. Start WampServer's Apache, then run 'composer run dev:wamp'."
 } else {
     Write-Host "Local bootstrap complete. Run 'composer run dev' to start MyAPES Account."
 }

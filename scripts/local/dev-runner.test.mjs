@@ -11,10 +11,10 @@ function commandNamed(commands, name) {
     return commands.find((command) => command.name === name);
 }
 
-test('Laragon mode omits artisan serve because Apache serves HTTP', () => {
+test('WampServer mode omits artisan serve because Apache serves HTTP', () => {
     const commands = buildDevCommands({
         platform: 'win32',
-        laragon: true,
+        wamp: true,
     });
 
     assert.deepEqual(

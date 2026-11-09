@@ -1,6 +1,6 @@
 param(
     [switch]$Fresh,
-    [switch]$Laragon,
+    [switch]$Wamp,
     [string]$AppUrl = "http://myapes-account.test"
 )
 
@@ -20,8 +20,8 @@ if ($Fresh) {
     $bootstrapArgs += '-Seed'
 }
 
-if ($Laragon) {
-    $bootstrapArgs += '-Laragon'
+if ($Wamp) {
+    $bootstrapArgs += '-Wamp'
     $bootstrapArgs += '-AppUrl'
     $bootstrapArgs += $AppUrl.TrimEnd('/')
 }
@@ -33,8 +33,8 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $version = (Get-Content VERSION -Raw).Trim()
-$baseUrl = if ($Laragon) { $AppUrl.TrimEnd('/') } else { 'http://127.0.0.1:8000' }
-$devCommand = if ($Laragon) { 'dev:laragon' } else { 'dev' }
+$baseUrl = if ($Wamp) { $AppUrl.TrimEnd('/') } else { 'http://127.0.0.1:8000' }
+$devCommand = if ($Wamp) { 'dev:wamp' } else { 'dev' }
 
 Write-Host ''
 Write-Host 'Pre-PR local verify checks passed.'

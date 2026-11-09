@@ -20,21 +20,23 @@ The owner is Bambie Murphy. Cursor does the coding. Write UK English (organisati
 
 ## Local development
 
-The owner's working copy is Laragon on Windows.
+The owner's working copy is WampServer on Windows. Laragon is retired and must stay stopped, because it also uses port 80.
 
 | Item | Value |
 | --- | --- |
-| Clone | `C:\laragon\www\myapes-account` |
+| Clone | `C:\Users\BambieMurphy\Documents\GitHub\MyAPES.Account` (served directly; no junction) |
 | App URL | `http://myapes-account.test` |
-| Daily loop | Start Laragon (Apache), then `composer run dev:laragon` |
-| First bootstrap | `powershell -ExecutionPolicy Bypass -File .\scripts\local\bootstrap.ps1 -Laragon -Fresh` |
-| Env file | `.env.laragon.example` (copied by `-Laragon`) |
+| Virtual host | `C:\wamp64\bin\apache\apache2.4.65\conf\extra\httpd-vhosts.conf`, document root `{repo}/public` |
+| Daily loop | WampServer services running (green tray icon), then `composer run dev:wamp` |
+| First bootstrap | `powershell -ExecutionPolicy Bypass -File .\scripts\local\bootstrap.ps1 -Wamp -Fresh` |
+| Env file | `.env.wamp.example` (copied by `-Wamp`) |
 
-- Cloud and Linux agents have no Laragon: use `bash scripts/local/dev.sh` and `http://127.0.0.1:8000/` for UI checks.
+- Restarting WampServer's Apache (`wampapache64`) and editing the hosts file need admin rights; the agent shell is not elevated, so ask the owner.
+- Cloud and Linux agents have no WampServer: use `bash scripts/local/dev.sh` and `http://127.0.0.1:8000/` for UI checks.
 - Local QA accounts come from `database/seeders/LocalQaSeeder.php` (local and testing only). Never copy their passwords anywhere.
 - Full local check: `composer pre-pr-verify` (PowerShell) or `bash scripts/local/pre-pr-verify.sh`.
 - In Windows PowerShell 5.1, pass `gh` bodies with `--body-file`, because inline double quotes get stripped.
-- Node/npm for Vite builds: use **npm 11.10 or newer** (Laragon's Node 22 ships npm 10 by default — upgrade with `npm install -g npm@11` before `npm ci`). Repo `.npmrc` sets `min-release-age=7`.
+- Node/npm for Vite builds: use **npm 11.10 or newer** (Node 22 ships npm 10 by default — upgrade with `npm install -g npm@11` before `npm ci`). Repo `.npmrc` sets `min-release-age=7`.
 - Every GitHub Actions `uses:` must be pinned to a full 40-character commit SHA with a version comment (`action@<sha> # vX.Y.Z`). Mutable tags such as `@v2` are not allowed.
 
 ## Before you start
