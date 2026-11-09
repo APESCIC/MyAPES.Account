@@ -136,11 +136,11 @@ $minimumNpm = [version]"11.10.0"
 $phpDir = Join-Path $LaragonRoot "bin\php\$expectedPhpFolder"
 if (-not (Test-Path -LiteralPath (Join-Path $phpDir "php.exe"))) {
     $phpDir = Get-ChildItem -LiteralPath (Join-Path $LaragonRoot "bin\php") -Directory -ErrorAction SilentlyContinue |
-        Where-Object { $_.Name -like "php-$expectedPhp.*" -and $_.Name -notlike "*nts*" } |
+        Where-Object { $_.Name -like "php-$expectedPhp.*" -and $_.Name -like "*nts*" } |
         Sort-Object Name -Descending |
         Select-Object -First 1 -ExpandProperty FullName
     if (-not $phpDir) {
-        throw "Laragon has no PHP $expectedPhp (thread-safe) build. Add one with Menu > Tools > Quick add, then run this script again."
+        throw "Laragon has no NTS PHP $expectedPhp build. Add one with Menu > PHP > Version > Get more (the NTS x64 build), then run this script again."
     }
     Write-Warn "Profile PHP folder $expectedPhpFolder is not installed; using $(Split-Path $phpDir -Leaf) instead."
 }
@@ -170,21 +170,35 @@ if ((Get-MajorMinor $phpVersion) -ne $expectedPhp) {
 }
 Write-Ok "PHP $phpVersion (thread-safe: $phpThreadSafe) from $phpDir"
 
-$modPhpConf = Join-Path $LaragonRoot "etc\apache2\mod_php.conf"
-if (Test-Path -LiteralPath $modPhpConf) {
-    $apachePhp = [regex]::Match([System.IO.File]::ReadAllText($modPhpConf), 'bin/php/(?<folder>[^/"]+)/').Groups['folder'].Value
-    if ((Get-MajorMinor $apachePhp) -ne $expectedPhp) {
-        Write-Host ""
-        Write-Host "    ********************************************************************" -ForegroundColor Red
-        Write-Host "    Laragon's Apache is set to $apachePhp, but MyAPES Account needs PHP $expectedPhp." -ForegroundColor Red
-        Write-Host "    Switch it with Menu > PHP > Version > $expectedPhpFolder, then Reload Apache." -ForegroundColor Red
-        Write-Host "    ********************************************************************" -ForegroundColor Red
-        $script:Warnings += "Laragon's Apache uses $apachePhp instead of PHP $expectedPhp."
-    } else {
-        Write-Ok "Laragon's Apache uses $apachePhp"
-    }
+# Laragon runs an NTS PHP through FastCGI (mod_fcgid, etc\apache2\fcgid.conf), with separate
+# PHP processes per site, so another project's .env cannot leak into this one.
+$httpdConf = Get-ChildItem -LiteralPath (Join-Path $LaragonRoot "bin\apache") -Directory -ErrorAction SilentlyContinue |
+    Sort-Object Name -Descending | Select-Object -First 1 | ForEach-Object { Join-Path $_.FullName "conf\httpd.conf" }
+$handler = if ($httpdConf -and (Test-Path -LiteralPath $httpdConf)) {
+    [regex]::Match([System.IO.File]::ReadAllText($httpdConf), '(?m)^\s*Include\s+"?[^"\r\n]*[\\/]etc[\\/]apache2[\\/](?<handler>mod_php|fcgid)\.conf').Groups['handler'].Value
+}
+$apachePhp = ''
+if ($handler -eq 'fcgid') {
+    $fcgidConf = Join-Path $LaragonRoot "etc\apache2\fcgid.conf"
+    $apachePhp = [regex]::Match([System.IO.File]::ReadAllText($fcgidConf), 'FcgidWrapper\s+"[^"]*bin/php/(?<folder>[^/"]+)/php-cgi\.exe"').Groups['folder'].Value
+}
+if ($handler -ne 'fcgid') {
+    Write-Host ""
+    Write-Host "    ********************************************************************" -ForegroundColor Red
+    Write-Host "    Laragon's Apache runs PHP through $(if ($handler) { $handler } else { 'an unknown handler' }), not FastCGI." -ForegroundColor Red
+    Write-Host "    Choose the NTS build with Menu > PHP > Version > $(Split-Path $phpDir -Leaf), then Reload Apache." -ForegroundColor Red
+    Write-Host "    ********************************************************************" -ForegroundColor Red
+    $script:Warnings += "Laragon's Apache does not run PHP through FastCGI."
+} elseif ($apachePhp -ne (Split-Path $phpDir -Leaf)) {
+    Write-Warn "Laragon's Apache runs $apachePhp through FastCGI, but the command line uses $(Split-Path $phpDir -Leaf). Choose Menu > PHP > Version > $(Split-Path $phpDir -Leaf)."
+    $script:Warnings += "Laragon's Apache uses $apachePhp instead of $(Split-Path $phpDir -Leaf)."
 } else {
-    Write-Warn "Could not find $modPhpConf to confirm the PHP version Apache uses."
+    Write-Ok "Laragon's Apache runs $apachePhp through FastCGI, the same build as the command line"
+}
+
+$opcache = (& php -r "echo extension_loaded('Zend OPcache') ? ini_get('opcache.enable').'/'.ini_get('opcache.validate_timestamps') : 'off';").Trim()
+if ($opcache -ne '1/1') {
+    Write-Warn "OPcache is not on with validate_timestamps=1 in $(Split-Path $phpDir -Leaf)\php.ini. For faster pages, turn it on in Menu > PHP > php.ini."
 }
 
 $missingExtensions = @()

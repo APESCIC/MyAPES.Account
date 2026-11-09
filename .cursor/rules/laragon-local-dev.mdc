@@ -1,0 +1,25 @@
+---
+description: Live preview gate before any development work, and local development on Laragon with PHP through FastCGI
+alwaysApply: true
+---
+
+# Laragon local development
+
+Laragon 8 on Windows is the only supported local set-up. This repository is its own Laragon project at <http://myapes-account.test>: Apache with PHP 8.4 (NTS build) through FastCGI (mod_fcgid), MySQL 8.4 (`myapes_account_local`), Node 22 and Vite on port 5175, with the values in `docs/laragon/profile.md`. Never suggest containers, virtual machines or any other local stack for local development.
+
+## Before any development work: the live preview gate
+
+Run this at the start of any development or coding work (code, tests, docs, config, installs or commits), after every branch switch, and before moving to another repository:
+
+1. **Load the latest version and updates.** `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1`. It stops if tracked files are uncommitted, fetches, fast-forwards the branch, merges `origin/main` into it (never a rebase), runs `composer install` or `npm ci` when a lock file changed, and reports pending migrations. Ask before running migrations.
+2. **Start Laragon.** The same script checks that Laragon, Apache and MySQL are running, that `/healthz` shows the checked-out revision on PHP 8.4 through FastCGI (`php_sapi` is `cgi-fcgi`), and starts Vite on port 5175 if nothing listens there. Laragon's settings (PHP version, SSL, restarts) belong to Bambie: ask with AskQuestion before changing them, and never touch other projects' folders, databases or vhosts.
+3. **Open it in Cursor's browser.** Open <http://myapes-account.test>, confirm it loaded, report the URL, the Vite port and a screenshot, then say "Preview ready, starting work". Call `SetActiveBranch` after a branch change.
+4. **If it won't load after two attempts, stop.** Report the blocker and ask how to proceed before doing any work.
+
+Exit code 3 from the script means a decision (uncommitted changes, a diverged branch, a merge conflict): ask with AskQuestion. Exit code 1 is a blocker: report its message.
+
+## FastCGI
+
+- Laragon runs the NTS PHP through FastCGI (`C:\laragon\etc\apache2\fcgid.conf`), with separate PHP processes per site, so another project's `.env` cannot leak into this one. Put `C:\laragon\bin\php\php-8.4.27-1-nts-Win32-vs17-x64` first on `PATH`, so the command line reads the same `php.ini` as the website.
+- PHP settings in `public/.htaccess` stay inside `<IfModule php_module>` (Cloudron runs PHP as an Apache module); their local equivalents are in `public/.user.ini`, which only FastCGI reads. Keep the `HTTP_AUTHORIZATION` rewrite rule.
+- Set up or repair with `composer setup` (`scripts/laragon-setup.ps1`). Demo data: `composer demo:seed` and `composer demo:reset`, which refuse unless `APP_ENV=local`.
