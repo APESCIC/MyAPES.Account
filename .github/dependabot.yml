@@ -1,10 +1,42 @@
+# Updates go to the long-lived `dependencies` branch, never straight to `main`.
+# Each milestone branch merges `origin/dependencies` when work on it starts, so
+# updates ship inside the milestone's single merge. See AGENTS.md.
 version: 2
 updates:
-  - package-ecosystem: github-actions
+  - package-ecosystem: composer
     directory: /
+    target-branch: dependencies
     schedule:
       interval: weekly
-    # Wait before proposing updates to newly published action versions (#560 / Semgrep cooldown rule).
+    # Wait before proposing updates to newly published versions (#560).
+    cooldown:
+      default-days: 7
+    groups:
+      composer:
+        patterns:
+          - '*'
+    commit-message:
+      prefix: chore
+      include: scope
+  - package-ecosystem: npm
+    directory: /
+    target-branch: dependencies
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      npm:
+        patterns:
+          - '*'
+    commit-message:
+      prefix: chore
+      include: scope
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: dependencies
+    schedule:
+      interval: weekly
     cooldown:
       default-days: 7
     groups:

@@ -18,8 +18,8 @@ Run these in your Laragon project (see [[Local setup (Laragon)|Dev-Local-setup-L
 |---|---|
 | [test-cloudron.yml](https://github.com/APESCIC/MyAPES.Account/blob/main/.github/workflows/test-cloudron.yml) | Release history, deploy scripts, frontend tests, translations, PowerShell scripts, build, PHPUnit, packaging; MySQL 8.4 authorisation contract |
 | [codeql.yml](https://github.com/APESCIC/MyAPES.Account/blob/main/.github/workflows/codeql.yml) | CodeQL for Actions and JavaScript |
-| [semgrep.yml](https://github.com/APESCIC/MyAPES.Account/blob/main/.github/workflows/semgrep.yml) | Semgrep OSS scan on each PR and on push to `main` |
-| Socket / Snyk (org apps, if enabled) | Dependency scanning outside this repository's workflows |
+| [dependency-review.yml](https://github.com/APESCIC/MyAPES.Account/blob/main/.github/workflows/dependency-review.yml) | Fails a pull request that adds a dependency with a known high or critical vulnerability |
+| [release.yml](https://github.com/APESCIC/MyAPES.Account/blob/main/.github/workflows/release.yml) | Publishes the GitHub Release when a `vX.Y.Z` tag is pushed |
 
 ## Rules
 - Every action is pinned to a full commit SHA with a version comment.
