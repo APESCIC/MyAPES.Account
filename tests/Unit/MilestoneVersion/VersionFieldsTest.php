@@ -25,11 +25,13 @@ class VersionFieldsTest extends TestCase
     protected function tearDown(): void
     {
         foreach (['VERSION', 'CloudronManifest.json', 'config/app.php', 'notes/_template.json', 'notes/v1.3.0.json'] as $file) {
-            @unlink($this->root.'/'.$file);
+            if (is_file($this->root.'/'.$file)) {
+                unlink($this->root.'/'.$file);
+            }
         }
-        @rmdir($this->root.'/config');
-        @rmdir($this->root.'/notes');
-        @rmdir($this->root);
+        rmdir($this->root.'/config');
+        rmdir($this->root.'/notes');
+        rmdir($this->root);
     }
 
     private function fields(): VersionFields
