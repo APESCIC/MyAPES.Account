@@ -83,18 +83,22 @@ class VersionFieldsTest extends TestCase
         file_put_contents($this->root.'/public/index.html', '<footer>Version v3.2.2b</footer>');
         file_put_contents($this->root.'/public/changelog/index.html', '<h2>v3.2.2b</h2>');
         $fields = new VersionFields($this->root, ['fields' => [
-            ['file' => 'VERSION', 'type' => 'plain', 'format' => 'tag'],
+            ['file' => 'VERSION', 'type' => 'plain'],
             ['type' => 'replace-all', 'dir' => 'public', 'pattern' => '*.html', 'format' => 'tag', 'exclude' => ['public/changelog/index.html']],
         ]]);
 
         try {
             $changes = $fields->bump(SemVer::parse('v3.2.3'));
 
-            $this->assertSame("v3.2.3\n", (string) file_get_contents($this->root.'/VERSION'));
+            $this->assertSame("3.2.3\n", (string) file_get_contents($this->root.'/VERSION'));
             $this->assertSame('<footer>Version v3.2.3</footer>', (string) file_get_contents($this->root.'/public/index.html'));
             $this->assertSame('<h2>v3.2.2b</h2>', (string) file_get_contents($this->root.'/public/changelog/index.html'));
             $this->assertContains('public/index.html', array_column($changes, 'file'));
             $this->assertSame([], $fields->mismatches(SemVer::parse('v3.2.3')));
+
+            $fields->bump(SemVer::parse('v3.2.4'));
+
+            $this->assertSame('<footer>Version v3.2.4</footer>', (string) file_get_contents($this->root.'/public/index.html'));
         } finally {
             unlink($this->root.'/public/index.html');
             unlink($this->root.'/public/changelog/index.html');

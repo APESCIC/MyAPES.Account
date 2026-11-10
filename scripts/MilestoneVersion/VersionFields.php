@@ -14,8 +14,9 @@ use RuntimeException;
  *   {"type": "replace-all", "dir": "public", "pattern": "*.html",        every copy of the old version, for
  *    "exclude": ["public/changelog/index.html"]}                         version text repeated in static pages
  *
- * replace-all swaps the version the first plain field held before the bump. Exclude pages that list past
- * versions, such as a change log, so their history is never rewritten.
+ * replace-all swaps the version the first plain field held before the bump, written in the field's format
+ * (so a "v3.2.2b" or "3.2.3" VERSION finds "v3.2.2b" or "v3.2.3" in a tag-format page). Exclude pages that
+ * list past versions, such as a change log, so their history is never rewritten.
  *
  * "format" is "plain" (1.3.0, the default) or "tag" (v1.3.0). An optional "releaseNote" copies a template
  * to a new file for the version when none exists yet.
@@ -159,7 +160,11 @@ final class VersionFields
      */
     private function replaceAll(array $field, ?string $previous, string $value, bool $dryRun): array
     {
-        if ($previous === null || $previous === '' || $previous === $value) {
+        if ($previous === null || ltrim($previous, 'v') === '') {
+            return [];
+        }
+        $needle = ($field['format'] ?? 'plain') === 'tag' ? 'v'.ltrim($previous, 'v') : ltrim($previous, 'v');
+        if ($needle === $value) {
             return [];
         }
 
@@ -173,13 +178,13 @@ final class VersionFields
             }
             $relative = ltrim(str_replace('\\', '/', substr($file->getPathname(), strlen($this->root))), '/');
             $contents = (string) file_get_contents($file->getPathname());
-            if (in_array($relative, $exclude, true) || ! str_contains($contents, $previous)) {
+            if (in_array($relative, $exclude, true) || ! str_contains($contents, $needle)) {
                 continue;
             }
             if (! $dryRun) {
-                file_put_contents($file->getPathname(), str_replace($previous, $value, $contents));
+                file_put_contents($file->getPathname(), str_replace($needle, $value, $contents));
             }
-            $changes[] = ['file' => $relative, 'from' => $previous, 'to' => $value];
+            $changes[] = ['file' => $relative, 'from' => $needle, 'to' => $value];
         }
         sort($changes);
 
