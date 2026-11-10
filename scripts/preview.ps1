@@ -38,6 +38,7 @@ $Config = @{
     Php        = '8.4'
     Laravel    = $true
     DevPort    = 5175
+    HealthPath = '/healthz'
     DevCommand = 'npm run dev'
 }
 
@@ -67,9 +68,9 @@ function Get-Page([string]$Url) {
 
 $repo = Split-Path $PSScriptRoot -Parent
 $phpDir = Get-ChildItem "$LaragonRoot\bin\php" -Directory -ErrorAction SilentlyContinue |
-    Where-Object { $_.Name -match "^php-$([regex]::Escape($Config.Php))\.\d+(-\d+)?-nts-Win32" } |
-    Sort-Object Name -Descending | Select-Object -First 1
-if (-not $phpDir) { Stop-Preview 1 "Laragon has no NTS PHP $($Config.Php). Run scripts\laragon-setup.ps1." }
+    Where-Object { $_.Name -match "^php-$([regex]::Escape($Config.Php))\.\d+(-\d+)?-(nts-)?Win32" } |
+    Sort-Object @{ Expression = { $_.Name -notmatch '-nts-' }; Ascending = $true }, @{ Expression = { $_.Name }; Descending = $true } | Select-Object -First 1
+if (-not $phpDir) { Stop-Preview 1 "Laragon has no PHP $($Config.Php). Run scripts\laragon-setup.ps1." }
 $nodeDir = Get-ChildItem "$LaragonRoot\bin\nodejs" -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '^node-v?22(\D|$)' } | Select-Object -First 1
 $env:Path = "$($phpDir.FullName);$LaragonRoot\bin\composer;$(if ($nodeDir) { $nodeDir.FullName });" + $env:Path
 if (-not $env:XDEBUG_MODE) { $env:XDEBUG_MODE = 'off' }
@@ -139,17 +140,17 @@ try {
     $missing = @($needed | Where-Object { -not (Get-Process $_ -ErrorAction SilentlyContinue) })
     if ($missing.Count -gt 0) { Stop-Preview 1 "Not running: $($missing -join ', '). Click Start All in Laragon." }
     if ($Config.Laravel) {
-        $health = Get-Page "$($Config.AppUrl)/healthz" | ConvertFrom-Json
-        if ($null -eq $health -or $null -eq $health.local) { Stop-Preview 1 "$($Config.AppUrl)/healthz did not answer with the local block. Is APP_ENV=local in .env, and has Laragon been reloaded?" }
+        $health = Get-Page "$($Config.AppUrl)$($Config.HealthPath)" | ConvertFrom-Json
+        if ($null -eq $health -or $null -eq $health.local) { Stop-Preview 1 "$($Config.AppUrl)$($Config.HealthPath) did not answer with the local block. Is APP_ENV=local in .env, and has Laragon been reloaded?" }
         if ($health.local.git_revision -ne $short) {
             Invoke-Native { php artisan optimize:clear } | Out-Null
-            $health = Get-Page "$($Config.AppUrl)/healthz" | ConvertFrom-Json
+            $health = Get-Page "$($Config.AppUrl)$($Config.HealthPath)" | ConvertFrom-Json
         }
         if ($health.local.git_revision -ne $short) { Stop-Preview 1 "The preview serves $($health.local.git_revision), not $short. Check the junction $($Config.Folder) points at this clone." }
-        if ($health.local.php_sapi -ne 'cgi-fcgi') { Stop-Preview 1 "The preview runs PHP as $($health.local.php_sapi), not FastCGI (cgi-fcgi). Switch Laragon to the NTS PHP $($Config.Php) build." }
-        if ($health.local.php -notlike "$($Config.Php).*") { Stop-Preview 1 "The preview runs PHP $($health.local.php), not $($Config.Php)." }
+        if ($health.local.php_sapi -ne 'cgi-fcgi') { Stop-Preview 1 "The preview runs PHP as $($health.local.php_sapi), not FastCGI (cgi-fcgi). Run scripts\laragon-setup.ps1 to check the PHP handler." }
+        if ($health.local.php -notlike "$($Config.Php).*") { Write-Warn "The preview runs PHP $($health.local.php), not the profile's $($Config.Php). scripts\laragon-setup.ps1 says how to fix it." }
         Write-Ok "Serves $short on PHP $($health.local.php) through FastCGI"
-        if ($health.status -ne 'ok') { Write-Warn "/healthz reports $($health.status). The preview still works; start the Laragon service it needs if the task needs it." }
+        if ($health.status -ne 'ok') { Write-Warn "$($Config.HealthPath) reports $($health.status). The preview still works; start the Laragon service it needs if the task needs it." }
     } else {
         $served = "$(Get-Page "$($Config.AppUrl)/VERSION")".Trim()
         $expected = (Get-Content (Join-Path $repo 'public\VERSION') -Raw).Trim()
