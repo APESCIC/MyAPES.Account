@@ -11,6 +11,11 @@ use RuntimeException;
  *   {"file": "VERSION", "type": "plain"}                                  the whole file is the version
  *   {"file": "CloudronManifest.json", "type": "json", "key": "version"}   the first "key": "..." value
  *   {"file": "config/app.php", "type": "regex", "pattern": "..."}         capture group 1 of the pattern
+ *   {"type": "replace-all", "dir": "public", "pattern": "*.html",        every copy of the old version, for
+ *    "exclude": ["public/changelog/index.html"]}                         version text repeated in static pages
+ *
+ * replace-all swaps the version the first plain field held before the bump. Exclude pages that list past
+ * versions, such as a change log, so their history is never rewritten.
  *
  * "format" is "plain" (1.3.0, the default) or "tag" (v1.3.0). An optional "releaseNote" copies a template
  * to a new file for the version when none exists yet.
@@ -43,7 +48,13 @@ final class VersionFields
     public function bump(SemVer $version, bool $dryRun = false): array
     {
         $changes = [];
+        $previous = $this->previousVersion();
         foreach ($this->config['fields'] ?? [] as $field) {
+            if (($field['type'] ?? 'plain') === 'replace-all') {
+                array_push($changes, ...$this->replaceAll($field, $previous, self::format($version, $field['format'] ?? 'plain'), $dryRun));
+
+                continue;
+            }
             $path = $this->path($field['file']);
             $value = self::format($version, $field['format'] ?? 'plain');
             $contents = (string) file_get_contents($path);
@@ -78,6 +89,9 @@ final class VersionFields
     {
         $problems = [];
         foreach ($this->config['fields'] ?? [] as $field) {
+            if (($field['type'] ?? 'plain') === 'replace-all') {
+                continue;
+            }
             $value = self::format($version, $field['format'] ?? 'plain');
             [$from] = $this->replace($field, (string) file_get_contents($this->path($field['file'])), $value);
             if ($from !== $value) {
@@ -120,6 +134,56 @@ final class VersionFields
         [$from, $offset] = $match[1];
 
         return [$from, substr_replace($contents, $value, $offset, strlen($from))];
+    }
+
+    /**
+     * The value the first plain field (normally VERSION) holds before the bump.
+     */
+    private function previousVersion(): ?string
+    {
+        foreach ($this->config['fields'] ?? [] as $field) {
+            if (($field['type'] ?? 'plain') === 'plain') {
+                return trim((string) file_get_contents($this->path($field['file'])));
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Replaces every copy of the previous version in the files under "dir" whose names match "pattern",
+     * for version text repeated in static pages (footers and the like).
+     *
+     * @param  array<string, string>  $field
+     * @return list<array{file: string, from: ?string, to: string}>
+     */
+    private function replaceAll(array $field, ?string $previous, string $value, bool $dryRun): array
+    {
+        if ($previous === null || $previous === '' || $previous === $value) {
+            return [];
+        }
+
+        $changes = [];
+        $exclude = (array) ($field['exclude'] ?? []);
+        $dir = $this->root.'/'.trim($field['dir'], '/');
+        $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS));
+        foreach ($files as $file) {
+            if (! $file->isFile() || ! fnmatch($field['pattern'], $file->getFilename())) {
+                continue;
+            }
+            $relative = ltrim(str_replace('\\', '/', substr($file->getPathname(), strlen($this->root))), '/');
+            $contents = (string) file_get_contents($file->getPathname());
+            if (in_array($relative, $exclude, true) || ! str_contains($contents, $previous)) {
+                continue;
+            }
+            if (! $dryRun) {
+                file_put_contents($file->getPathname(), str_replace($previous, $value, $contents));
+            }
+            $changes[] = ['file' => $relative, 'from' => $previous, 'to' => $value];
+        }
+        sort($changes);
+
+        return $changes;
     }
 
     private function path(string $file): string

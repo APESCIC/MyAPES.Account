@@ -76,6 +76,33 @@ class VersionFieldsTest extends TestCase
         $this->assertStringContainsString('CloudronManifest.json holds "0.0.0", not 1.3.0', implode("\n", $problems));
     }
 
+    public function test_replace_all_updates_repeated_footer_versions_but_not_excluded_history(): void
+    {
+        mkdir($this->root.'/public/changelog', recursive: true);
+        file_put_contents($this->root.'/VERSION', "v3.2.2b\n");
+        file_put_contents($this->root.'/public/index.html', '<footer>Version v3.2.2b</footer>');
+        file_put_contents($this->root.'/public/changelog/index.html', '<h2>v3.2.2b</h2>');
+        $fields = new VersionFields($this->root, ['fields' => [
+            ['file' => 'VERSION', 'type' => 'plain', 'format' => 'tag'],
+            ['type' => 'replace-all', 'dir' => 'public', 'pattern' => '*.html', 'format' => 'tag', 'exclude' => ['public/changelog/index.html']],
+        ]]);
+
+        try {
+            $changes = $fields->bump(SemVer::parse('v3.2.3'));
+
+            $this->assertSame("v3.2.3\n", (string) file_get_contents($this->root.'/VERSION'));
+            $this->assertSame('<footer>Version v3.2.3</footer>', (string) file_get_contents($this->root.'/public/index.html'));
+            $this->assertSame('<h2>v3.2.2b</h2>', (string) file_get_contents($this->root.'/public/changelog/index.html'));
+            $this->assertContains('public/index.html', array_column($changes, 'file'));
+            $this->assertSame([], $fields->mismatches(SemVer::parse('v3.2.3')));
+        } finally {
+            unlink($this->root.'/public/index.html');
+            unlink($this->root.'/public/changelog/index.html');
+            rmdir($this->root.'/public/changelog');
+            rmdir($this->root.'/public');
+        }
+    }
+
     public function test_a_missing_field_file_is_an_error(): void
     {
         $this->expectException(RuntimeException::class);
