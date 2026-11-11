@@ -657,6 +657,7 @@ return [
             ],
             'reasons' => [
                 'unmatched' => 'No ticket or case could be found for this email.',
+                'conflicting_reference' => 'The email\'s reply address, headers and subject point to different tickets or cases, so it was held for staff to check.',
                 'record_not_found' => 'The ticket or case no longer exists.',
                 'unauthenticated' => 'The receiving server did not record SPF, DKIM or DMARC results.',
                 'authentication_failed' => 'The sender failed SPF and DKIM, or DMARC failed.',

@@ -152,6 +152,66 @@ class ReplyMatchingAndSenderTest extends TestCase
         $this->assertFalse(SupportTicketMessage::query()->sole()->is_staff_note);
     }
 
+    public function test_a_stored_message_id_wins_over_the_subject_tag_so_the_thread_recipient_check_applies(): void
+    {
+        $this->storeThread('owner-thread@example.test', $this->owner);
+        $other = User::factory()->create(['email' => 'other@example.org']);
+        $headers = ['IN_REPLY_TO' => '<owner-thread@example.test>', 'SUBJECT' => 'Re: [MYAPES-T-'.$this->ticket->id.']'];
+
+        $this->assertPosted($this->receive($headers));
+        $fromOther = $this->receive(['FROM' => $other->email, ...$headers]);
+        $this->assertSame([InboundEmail::STATUS_QUARANTINED, 'wrong_sender'], [$fromOther->status, $fromOther->reason]);
+    }
+
+    public function test_references_pointing_to_different_records_are_held_as_conflicting(): void
+    {
+        $second = $this->ticketFor($this->owner, ['subject' => 'Second ticket']);
+        $this->storeThread('first-thread@example.test', $this->owner);
+
+        $this->assertQuarantined($this->receive([
+            'TO' => $this->replyAddressFor('T', $this->ticket->id, $this->owner),
+            'SUBJECT' => 'Re: [MYAPES-T-'.$second->id.']',
+        ]), 'conflicting_reference');
+        $this->assertQuarantined($this->receive([
+            'IN_REPLY_TO' => '<first-thread@example.test>',
+            'SUBJECT' => 'Re: [MYAPES-T-'.$second->id.']',
+        ]), 'conflicting_reference');
+        $this->assertNotSame('admin.emails.inbound.reasons.conflicting_reference', InboundEmail::query()->latest('id')->first()->reasonLabel());
+    }
+
+    public function test_references_to_the_same_record_are_not_a_conflict(): void
+    {
+        $this->storeThread('owner-thread@example.test', $this->owner);
+
+        $this->assertPosted($this->receive([
+            'TO' => $this->replyAddressFor('T', $this->ticket->id, $this->owner),
+            'IN_REPLY_TO' => '<owner-thread@example.test>',
+            'SUBJECT' => 'Re: [MYAPES-T-'.$this->ticket->id.']',
+        ]));
+    }
+
+    public function test_tokens_are_ignored_when_plus_addressing_is_off(): void
+    {
+        config(['inbound-mail.plus_addressing' => false]);
+
+        $this->assertQuarantined($this->receive(['TO' => $this->replyAddressFor('T', $this->ticket->id, $this->owner)]), 'unmatched');
+        $this->assertPosted($this->receive([
+            'TO' => 'communications@example.test',
+            'SUBJECT' => 'Re: [MYAPES-T-'.$this->ticket->id.']',
+        ]));
+    }
+
+    private function storeThread(string $messageId, User $user): void
+    {
+        MailReplyThread::query()->create([
+            'message_id' => $messageId,
+            'record_prefix' => 'T',
+            'record_id' => $this->ticket->id,
+            'user_id' => $user->id,
+            'created_at' => now(),
+        ]);
+    }
+
     /**
      * @param  array<string, string>  $values
      */

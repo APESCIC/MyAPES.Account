@@ -2,6 +2,7 @@
 
 namespace App\Core\Mail\Inbound;
 
+use App\Core\Mail\Inbound\Matching\ConflictingReferences;
 use App\Core\Mail\Inbound\Matching\ReplyMatcher;
 use App\Core\Mail\Inbound\Parsing\InboundEmailParser;
 use App\Core\Mail\Inbound\Parsing\ParsedInboundEmail;
@@ -65,7 +66,14 @@ final class InboundMailProcessor
         $auth = AuthenticationResults::from($parsed->headers, $this->settings->authservId());
         $email->forceFill(['spf' => $auth->spf, 'dkim' => $auth->dkim, 'dmarc' => $auth->dmarc]);
 
-        $match = $this->matcher->match($parsed);
+        try {
+            $match = $this->matcher->match($parsed);
+        } catch (ConflictingReferences) {
+            $this->finish($email, InboundEmail::STATUS_QUARANTINED, 'conflicting_reference');
+
+            return;
+        }
+
         $handler = $match === null ? null : $this->handlers->handler($match->prefix);
 
         if ($match === null || $handler === null) {
