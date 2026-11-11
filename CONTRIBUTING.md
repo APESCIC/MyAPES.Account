@@ -4,38 +4,14 @@ Thank you for helping. Please write in UK English, follow the [Code of Conduct](
 
 ## Before you start
 
-Always start from the latest `main`, so you never build on old code. Before you pick up an issue or create a branch:
-
-1. Run `git status`. If you have changes you haven't committed, stop and sort them out first. Don't stash, reset or throw them away to get past this step.
-2. Get the latest code: `git fetch origin --prune`, then `git checkout main` and `git pull --ff-only origin main`.
-3. Bring that code into the branch you'll work from. For the milestone branch, run `git checkout milestone/<slug>` then `git merge origin/main`. If it doesn't exist yet, create it from `main` and push it. If you're going back to an issue branch, check it out and run `git merge origin/main`.
-4. Only then create your issue branch from the milestone branch, or carry on with the one you resumed.
-
-If the pull or the merge fails, stop and ask for help. Don't force-push, `reset --hard` or rebase shared branches to get round it. Cursor agents follow the same steps from [`.cursor/rules/sync-before-work.mdc`](.cursor/rules/sync-before-work.mdc).
-
-## Milestone versioning tools
-
-Milestones are named and shipped by version, never by GitHub's milestone number: branch `milestone/v0-58-3-laragon-local-dev`, issue PR title `[v0.58.3] Fix login (#42)`, tag `v0.58.3`. The formats are in [`.cursor/rules/milestone-versioning.mdc`](.cursor/rules/milestone-versioning.mdc).
-
-- `composer milestone:next` shows the next milestone's version and branch name; `composer milestone:pr-title -- <issue>` gives the PR title.
-- `composer milestone:check-title -- "<title>"` and `composer milestone:check-branch -- "<branch>"` tell you what is wrong. The `milestone-version-check` CI job runs them on every pull request.
-- To check your branch name before each push, run `git config core.hooksPath .githooks` once.
-
-Cursor agents also use the skills in `.cursor/skills/` (`start-next-milestone`, `milestone-release-titles` and `/next-milestone`). See [AGENTS.md](AGENTS.md#milestone-versioning).
+Run `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1` before any work. It stops if you have uncommitted changes, pulls the latest code, merges `origin/main` into your branch (never a rebase), installs changed dependencies, and checks the Laragon preview at <http://myapes-account.test> serves that code through FastCGI. If the pull or the merge fails, stop and ask for help. Don't force-push, `reset --hard` or rebase shared branches to get round it.
 
 ## How work ships
 
-Work ships once per GitHub milestone, not once per change. There are four stages, in order:
+Each milestone is named by the version at the start of its GitHub milestone title (for example `v0.60.0 Beta: Repository standards and Cloudron mailbox`), never by GitHub's milestone number, and ships once: all its issues are committed on one `milestone/vX-Y-Z-<slug>` branch behind one draft pull request, which is merged once with a merge commit, tagged and released as `vX.Y.Z`, and deployed. A hotfix can ship earlier only with Bambie's written approval on its issue.
 
-1. **Complete the milestone.** Every issue in the milestone is finished and committed on the milestone branch (for example `milestone/v0-58-3-laragon-local-dev`, created from an up-to-date `main`).
-2. **One merge.** The milestone branch goes to `main` in one merge commit (no squash), after Bambie has approved it.
-3. **Release.** One release for the milestone.
-4. **Deploy.** One deploy for the milestone.
+The rule, with the names, the version fields, the flow and the hotfix route, is [`.cursor/rules/version-shipping.mdc`](.cursor/rules/version-shipping.mdc). The decisions behind it are in [AGENTS.md](AGENTS.md#shipping-and-versioning).
 
-Nothing reaches `main`, and nothing is tagged, released or deployed, before stage 2. A hotfix can skip these stages only with Bambie's written approval on its issue.
-
-The full rules, including the definition of done and release metadata, are in [AGENTS.md](AGENTS.md#milestone-shipping).
-
-## Versions and titles
-
-Each milestone's version is the `vMAJOR.MINOR.PATCH` at the start of its GitHub milestone title, for example `v0.58.3 Dev: Laragon local development`. The milestone branch, pull requests, tag and release are all named from that version, never from GitHub's milestone number. The formats, and how to tell which milestone is next, are in [`.cursor/rules/milestone-versioning.mdc`](.cursor/rules/milestone-versioning.mdc).
+- `composer milestone:next` shows the next version, its branch and its pull request and release titles.
+- `composer milestone:check-title -- "<title>"` and `composer milestone:check-branch -- "<branch>"` tell you what is wrong. The `milestone-version-check` CI job runs them on every pull request.
+- To check your branch name before each push, run `git config core.hooksPath .githooks` once.

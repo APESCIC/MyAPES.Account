@@ -5,6 +5,9 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
     const port = Number(env.VITE_PORT || 5175);
+    // Serve, reload and write public/hot under the APP_URL host name
+    // (myapes-account.test on Laragon), so no address is printed or used.
+    const host = new URL(env.APP_URL || 'http://localhost').hostname;
 
     return {
         plugins: [
@@ -25,14 +28,13 @@ export default defineConfig(({ mode }) => {
             tailwindcss(),
         ],
         server: {
-            host: '127.0.0.1',
+            host,
             port,
             strictPort: true,
             hmr: {
-                host: '127.0.0.1',
+                host,
                 port,
             },
-            cors: true,
             watch: {
                 ignored: ['**/storage/framework/views/**'],
             },

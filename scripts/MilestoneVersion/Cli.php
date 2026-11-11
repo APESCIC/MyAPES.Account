@@ -24,9 +24,12 @@ Usage: php scripts/milestone-version <command> [arguments]
   check-branch "<name>"          Fail if the branch uses a milestone number or the wrong version
   check-release <tag> "<title>"  Fail if the tag, release title (or --changelog "<heading>") disagree
       [--version vX.Y.Z] [--changelog "<heading>"]
+  bump <vX.Y.Z>                  Set every version field in scripts/MilestoneVersion/fields.json, once per
+      [--dry-run | --check]      milestone; the version must be the next milestone's (--offline skips that lookup)
+      [--offline]
 
-Composer: composer milestone:next, composer milestone:check-title -- "[v1.3.0] Fix login (#42)"
-Rule: .cursor/rules/milestone-versioning.mdc
+Composer: composer milestone:next, composer milestone:bump -- v1.3.0, composer milestone:check-title -- "[v1.3.0] Fix login (#42)"
+Rule: .cursor/rules/version-shipping.mdc
 TXT;
 
     /** @var resource */
@@ -42,7 +45,7 @@ TXT;
      * @param  resource|null  $out
      * @param  resource|null  $err
      */
-    public function __construct(private readonly Closure $github, $out = null, $err = null)
+    public function __construct(private readonly Closure $github, $out = null, $err = null, private readonly ?string $root = null)
     {
         $this->out = $out ?? STDOUT;
         $this->err = $err ?? STDERR;
@@ -64,6 +67,7 @@ TXT;
                 'check-title' => $this->checkTitle($positional, $options),
                 'check-branch' => $this->checkBranch($positional),
                 'check-release' => $this->checkRelease($positional, $options),
+                'bump' => $this->bump($positional, $options),
                 null, 'help', '--help', '-h' => $this->usage($command === null ? self::USAGE : self::OK),
                 default => $this->usage(self::USAGE, sprintf('Unknown command "%s".', $command)),
             };
@@ -94,6 +98,8 @@ TXT;
         $this->line(sprintf('Version:          %s', $next['version']));
         $this->line(sprintf('Latest tag:       %s', $next['latestTag'] ?? 'none'));
         $this->line(sprintf('Milestone branch: %s', Milestones::branch($next['version'], $next['title'])));
+        $this->line(sprintf('Milestone PR:     %s', Milestones::pullRequestTitle($next['version'], $next['title'])));
+        $this->line(sprintf('Release title:    %s', Milestones::releaseTitle($next['version'], $next['title'])));
         $this->line('Issue branch:     <type>/<issue>-<slug>, for example chore/42-fix-login');
         $this->line(sprintf('PR title:         [%s] <summary> (#<issue>)', $next['version']));
 
@@ -214,6 +220,7 @@ TXT;
         }
         [$tag, $title] = $positional;
 
+        $releaseTitle = null;
         if (isset($options['version'])) {
             $expected = $this->parseVersionOption((string) $options['version']);
             $source = '--version';
@@ -223,18 +230,20 @@ TXT;
                 return self::FAILED;
             }
             [$expected, $source] = [$next['version'], 'next milestone "'.$next['title'].'"'];
+            $releaseTitle = Milestones::releaseTitle($next['version'], $next['title']);
         }
 
         $problems = [];
+        if ($releaseTitle !== null && trim($title) !== $releaseTitle) {
+            $problems[] = sprintf('The release title should be "%s" (v<version> and the milestone name).', $releaseTitle);
+        }
         $tagVersion = str_starts_with($tag, 'v') ? SemVer::parse($tag) : null;
         if ($tagVersion === null) {
             $problems[] = sprintf('Tag "%s" is not a version tag. Use vX.Y.Z, for example %s.', $tag, $expected);
         } elseif (! $tagVersion->equals($expected)) {
             $problems[] = sprintf('Tag %s does not match the milestone version %s.', $tag, $expected);
         }
-        if (trim($title) !== $expected->tag()) {
-            array_push($problems, ...TitleRules::check($title, $expected));
-        }
+        array_push($problems, ...TitleRules::check($title, $expected));
         if (isset($options['changelog'])) {
             $heading = (string) $options['changelog'];
             $plain = sprintf('%d.%d.%d', $expected->major, $expected->minor, $expected->patch);
@@ -252,6 +261,53 @@ TXT;
         $this->fail('check-release', $tag.' "'.$title.'"', $problems);
 
         return self::FAILED;
+    }
+
+    /**
+     * @param  list<string>  $positional
+     * @param  array<string, string|true>  $options
+     */
+    private function bump(array $positional, array $options): int
+    {
+        if (! isset($positional[0])) {
+            return $this->usage(self::USAGE, 'bump needs a version, for example v1.3.0.');
+        }
+        $version = $this->parseVersionOption($positional[0]);
+        $fields = VersionFields::load($this->root ?? (string) getcwd());
+
+        if (isset($options['check'])) {
+            $problems = $fields->mismatches($version);
+            if ($problems === []) {
+                $this->line(sprintf('bump --check: OK every version field holds %s.', $version));
+
+                return self::OK;
+            }
+            $this->fail('bump --check', $version->tag(), $problems, sprintf('Run: php scripts/milestone-version bump %s', $version));
+
+            return self::FAILED;
+        }
+
+        if (! isset($options['offline'])) {
+            $next = $this->nextMilestone();
+            if ($next === null) {
+                return self::FAILED;
+            }
+            if (! $next['version']->equals($version)) {
+                $this->error(sprintf('%s is not the next milestone\'s version. The next milestone is "%s" (%s). Stop and check before bumping.', $version, $next['title'], $next['version']));
+
+                return self::FAILED;
+            }
+        }
+
+        $dryRun = isset($options['dry-run']);
+        foreach ($fields->bump($version, $dryRun) as $change) {
+            $this->line(sprintf('%s %s: %s -> %s', $dryRun ? 'Would set' : 'Set', $change['file'], $change['from'] ?? '(new)', $change['to']));
+        }
+        foreach ($fields->notes() as $note) {
+            $this->line('Next: '.$note);
+        }
+
+        return self::OK;
     }
 
     /**
@@ -411,7 +467,7 @@ TXT;
     {
         $positional = [];
         $options = [];
-        $flags = ['version-only'];
+        $flags = ['version-only', 'dry-run', 'check', 'offline'];
 
         for ($i = 0; $i < count($argv); $i++) {
             $arg = $argv[$i];

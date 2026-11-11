@@ -88,7 +88,7 @@ Transport is unchanged: Cloudron's SMTP add-on.
 
 - `config/mail.php` falls back to `CLOUDRON_MAIL_SMTP_SERVER`, `CLOUDRON_MAIL_SMTP_PORT`, `CLOUDRON_MAIL_SMTP_USERNAME` and `CLOUDRON_MAIL_SMTP_PASSWORD`, and to `CLOUDRON_MAIL_FROM` for the sender address. The sender name always comes from `terms.app_name`.
 - Mail is queued. `scripts/deploy/cloudron-run.sh` starts the Redis `queue:work` worker and `schedule:work`, which runs `mail:prune-log`, `audit:prune`, `inbound-mail:prune` and, every minute, `tickets:inbound-poll`.
-- Locally, `.env.example` (the Laragon profile) sends SMTP to Laragon's Mailpit on `127.0.0.1:1025`; read the messages at `http://127.0.0.1:8025`. Nothing is delivered. The agent-only profile (`.env.local.example`) uses the `log` mailer, which writes messages to `storage/logs`, and so does the default when no `MAIL_MAILER` is set.
+- Locally, `.env.example` (the Laragon profile) sends SMTP to Laragon's Mailpit on `127.0.0.1:1025`; read the messages at `http://localhost:8025`. Nothing is delivered. The agent-only profile (`.env.local.example`) uses the `log` mailer, which writes messages to `storage/logs`, and so does the default when no `MAIL_MAILER` is set.
 
 ## Replies by email
 
@@ -145,8 +145,8 @@ Plugins register handlers with `PluginServiceProvider::inboundReplyHandlers()`; 
 
 ### Cloudron setup
 
-1. Create the `communications@myapes.me.uk` mailbox on Cloudron and check that mail to `communications+test@myapes.me.uk` arrives (plus-addressing). Record the result on the ticket.
-2. Set the `INBOUND_MAIL_*` variables in the app's `/app/data/.env` (never in the repository or in chat), including a new `INBOUND_MAIL_TOKEN_KEY` (`openssl rand -hex 32`) and `INBOUND_MAIL_AUTHSERV_ID` set to the name the Cloudron mail server writes in `Authentication-Results`.
+1. Create the `communications@myapes.me.uk` mailbox in the Cloudron dashboard (Email → myapes.me.uk → Mailboxes; the `cloudron` CLI cannot create mailboxes), with a Mail app password for IMAP. Check that mail to `communications+test@myapes.me.uk` arrives (plus-addressing). Record the result on the ticket.
+2. Set the `INBOUND_MAIL_*` variables in the app's env file, `/app/data/shared/.env` (never in the repository or in chat), including a new `INBOUND_MAIL_TOKEN_KEY` (`openssl rand -hex 32`) and `INBOUND_MAIL_AUTHSERV_ID` set to the name the Cloudron mail server writes in `Authentication-Results`.
 3. Restart the app, send a real reply, and check it on Admin → Emails → Inbound.
 
 ### Local testing

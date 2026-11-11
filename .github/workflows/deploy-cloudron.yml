@@ -1,14 +1,12 @@
 name: Deploy MyAPES Account to Cloudron
 
+# Deploys a published release tag only: gh workflow run deploy-cloudron.yml --ref vX.Y.Z
+# release.yml publishes the GitHub Release when the tag is pushed; this workflow refuses a
+# tag without one, a tag whose commit is not on main, or a tag that does not match VERSION.
 on:
   workflow_dispatch:
-    inputs:
-      app_version:
-        description: App semantic version being deployed (from VERSION on main)
-        required: false
-        type: string
 
-run-name: ${{ github.event.inputs.app_version || 'from-ref' }} Beta
+run-name: Deploy ${{ github.ref_name }}
 
 concurrency:
   group: cloudron-3465c63f-0e1b-4e49-8f5f-799a471055a1
@@ -75,12 +73,27 @@ jobs:
           fetch-depth: 1
       - id: release
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           release_sha="$(git rev-parse HEAD)"
           app_version="$(tr -d '\r\n' < VERSION)"
           [[ "$release_sha" =~ ^[0-9a-f]{40}$ ]]
           [[ "$app_version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]
+          if [[ "$GITHUB_REF_TYPE" != "tag" || "$GITHUB_REF_NAME" != "v$app_version" ]]; then
+            echo "::error::Run this on the release tag v$app_version (gh workflow run deploy-cloudron.yml --ref v$app_version), not on $GITHUB_REF_TYPE $GITHUB_REF_NAME."
+            exit 1
+          fi
+          main_status="$(gh api "repos/$GITHUB_REPOSITORY/compare/$release_sha...main" --jq '.status')"
+          if [[ "$main_status" != "ahead" && "$main_status" != "identical" ]]; then
+            echo "::error::Tag $GITHUB_REF_NAME ($release_sha) is not on main ($main_status)."
+            exit 1
+          fi
+          if [[ "$(gh release view "$GITHUB_REF_NAME" --json isDraft --jq '.isDraft' 2>/dev/null)" != "false" ]]; then
+            echo "::error::$GITHUB_REF_NAME has no published GitHub Release. release.yml publishes it when the tag is pushed."
+            exit 1
+          fi
           echo "sha=$release_sha" >> "$GITHUB_OUTPUT"
           echo "app_version=$app_version" >> "$GITHUB_OUTPUT"
   deploy-cloudron:
@@ -104,7 +117,7 @@ jobs:
       CLOUDRON_TOKEN: ${{ secrets.CLOUDRON_TOKEN }}
       RELEASE_SHA: ${{ needs.resolve-release.outputs.release_sha }}
       APP_VERSION: ${{ needs.resolve-release.outputs.app_version }}
-      RELEASE_DISPLAY_TITLE: ${{ needs.resolve-release.outputs.app_version }} Beta
+      RELEASE_DISPLAY_TITLE: v${{ needs.resolve-release.outputs.app_version }}
       DEPLOYMENT_CONTROLS_SHA256: ${{ needs.deployment-control-authentication.outputs.deployment_controls_sha256 }}
     steps:
       - name: Checkout tested revision
@@ -142,6 +155,18 @@ jobs:
           npm install --global npm@11.21.1
           npm --version
           npm config get min-release-age
+
+      - name: Find the Composer cache folder
+        id: composer-cache
+        shell: bash
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer downloads
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ runner.os }}-php8.4-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-php8.4-
 
       - name: Build production release
         run: |
@@ -771,7 +796,7 @@ jobs:
         if: steps.verify.outcome == 'success'
         shell: bash
         env:
-          RELEASE_DISPLAY_TITLE: ${{ needs.resolve-release.outputs.app_version }} Beta
+          RELEASE_DISPLAY_TITLE: v${{ needs.resolve-release.outputs.app_version }}
           RELEASE_SHA: ${{ needs.resolve-release.outputs.release_sha }}
         run: |
           set -euo pipefail
@@ -1135,7 +1160,7 @@ jobs:
           RESTORED_ENVIRONMENT_OUTCOME: ${{ steps.restored_environment.outcome }}
           RESTORED_VERIFICATION_OUTCOME: ${{ steps.restored_verification.outcome }}
           APP_VERSION: ${{ needs.resolve-release.outputs.app_version }}
-          RELEASE_DISPLAY_TITLE: ${{ needs.resolve-release.outputs.app_version }} Beta
+          RELEASE_DISPLAY_TITLE: v${{ needs.resolve-release.outputs.app_version }}
           RELEASE_SHA: ${{ needs.resolve-release.outputs.release_sha }}
         run: |
           set -euo pipefail
@@ -1176,100 +1201,3 @@ jobs:
           esac
           echo "Database migrations were retained; use the pre-deployment Cloudron backup if database recovery is required."
           exit 1
-
-  publish-github-release:
-    name: Publish GitHub Release
-    needs: [resolve-release, deploy-cloudron]
-    if: needs.deploy-cloudron.result == 'success'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: write
-      issues: read
-    env:
-      APP_VERSION: ${{ needs.resolve-release.outputs.app_version }}
-      RELEASE_SHA: ${{ needs.resolve-release.outputs.release_sha }}
-    steps:
-      - name: Checkout deployed revision
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ needs.resolve-release.outputs.release_sha }}
-          fetch-depth: 1
-
-      - name: Build GitHub Release notes
-        shell: bash
-        run: |
-          set -euo pipefail
-          bash scripts/deploy/github-release-notes.sh resources/data/releases.json > release-notes.md
-          test -s release-notes.md
-
-      - name: Resolve GitHub Release title
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          milestone_title="$(gh api "repos/${GITHUB_REPOSITORY}/milestones?state=all&per_page=100" --paginate \
-            --jq '.[] | .title | select(startswith("v" + env.APP_VERSION + " ") or startswith("v" + env.APP_VERSION + ":"))' \
-            | head -n1 || true)"
-          suffix="${milestone_title#"v${APP_VERSION}"}"
-          suffix="${suffix%%:*}"
-          suffix="$(sed -E 's/^[[:space:]]+|[[:space:]]+$//g' <<<"$suffix")"
-          if [[ ! "$suffix" =~ ^[A-Za-z][A-Za-z0-9-]{0,19}$ ]]; then
-            suffix="Beta"
-          fi
-          echo "RELEASE_DISPLAY_TITLE=v${APP_VERSION} ${suffix}" >> "$GITHUB_ENV"
-          echo "GitHub Release title: v${APP_VERSION} ${suffix}"
-
-      - name: Resolve GitHub Release state
-        id: release_state
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          tag="v${APP_VERSION}"
-          if gh release view "$tag" --json targetCommitish --jq '.targetCommitish' >/tmp/existing-sha 2>/dev/null; then
-            existing_sha="$(tr -d '\r\n' < /tmp/existing-sha)"
-            if [[ "$existing_sha" == "$RELEASE_SHA" ]]; then
-              echo "GitHub Release ${tag} already targets ${RELEASE_SHA}; skipping creation."
-              echo "action=skip" >> "$GITHUB_OUTPUT"
-            else
-              echo "GitHub Release ${tag} already exists at ${existing_sha}, expected ${RELEASE_SHA}."
-              exit 1
-            fi
-          else
-            echo "action=create" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Create GitHub Release
-        if: steps.release_state.outputs.action == 'create'
-        uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.2.2
-        with:
-          tag_name: v${{ env.APP_VERSION }}
-          name: ${{ env.RELEASE_DISPLAY_TITLE }}
-          body_path: release-notes.md
-          target_commitish: ${{ env.RELEASE_SHA }}
-          make_latest: true
-
-      - name: Record GitHub Release summary
-        if: always()
-        shell: bash
-        env:
-          RELEASE_ACTION: ${{ steps.release_state.outputs.action }}
-        run: |
-          set -euo pipefail
-          RELEASE_DISPLAY_TITLE="${RELEASE_DISPLAY_TITLE:-unresolved}"
-          {
-            echo "## GitHub Release"
-            echo "- Display title: \`${RELEASE_DISPLAY_TITLE}\`"
-            echo "- Version tag: \`v${APP_VERSION}\`"
-            echo "- Target SHA: \`${RELEASE_SHA}\`"
-            if [[ "$RELEASE_ACTION" == "skip" ]]; then
-              echo "- Action: existing release reused (same SHA)"
-            elif [[ "$RELEASE_ACTION" == "create" ]]; then
-              echo "- Action: created release \`${RELEASE_DISPLAY_TITLE}\`"
-            else
-              echo "- Action: release step did not complete"
-            fi
-          } >> "$GITHUB_STEP_SUMMARY"

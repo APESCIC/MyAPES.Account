@@ -30,7 +30,7 @@ export const firstVisibleTarget = (targets, root = document, visible = isVisible
     return null;
 };
 
-// Character-code map avoids replaceAll-based sanitizers that Semgrep flags as brittle.
+// A character-code map, not chained replaceAll calls, so no character is escaped twice.
 const HTML_ESCAPES = Object.freeze({
     34: '&quot;',
     38: '&amp;',

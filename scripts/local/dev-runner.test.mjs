@@ -1,10 +1,14 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
+import net from 'node:net';
+
 import {
     buildDevCommands,
     buildDevRunnerOptions,
+    isListening,
     resolveAppPort,
+    resolveViteServer,
 } from './dev-runner.mjs';
 
 function commandNamed(commands, name) {
@@ -47,14 +51,45 @@ test('native Windows uses a PowerShell log tail and never starts Pail', () => {
         commandNamed(commands, 'logs').command,
         'powershell -NoProfile -ExecutionPolicy Bypass -File scripts/local/tail-log.ps1',
     );
-    assert.equal(
-        commandNamed(commands, 'vite').command,
-        'npm run dev -- --host 127.0.0.1',
-    );
+    assert.equal(commandNamed(commands, 'vite').command, 'npm run dev');
     assert.doesNotMatch(
         commands.map((command) => command.command).join('\n'),
         /artisan pail/i,
     );
+});
+
+test('a Vite already started by the preview gate is reused, not started twice', () => {
+    const commands = buildDevCommands({
+        platform: 'win32',
+        serve: false,
+        viteRunning: true,
+    });
+
+    assert.deepEqual(
+        commands.map((command) => command.name),
+        ['queue', 'logs'],
+    );
+});
+
+test('Vite runs on the APP_URL host name and VITE_PORT', () => {
+    assert.deepEqual(
+        resolveViteServer({
+            APP_URL: 'http://myapes-account.test',
+            VITE_PORT: '5175',
+        }),
+        { host: 'myapes-account.test', port: 5175 },
+    );
+    assert.deepEqual(resolveViteServer({}), { host: 'localhost', port: 5175 });
+});
+
+test('isListening reports whether something accepts connections', async () => {
+    const server = net.createServer();
+    await new Promise((resolve) => server.listen(0, 'localhost', resolve));
+    const { port } = server.address();
+
+    assert.equal(await isListening({ host: 'localhost', port }), true);
+    await new Promise((resolve) => server.close(resolve));
+    assert.equal(await isListening({ host: 'localhost', port }), false);
 });
 
 test('Unix-like platforms retain Laravel Pail for application logs', () => {

@@ -9,6 +9,7 @@
 /.cursor/*
 !/.cursor/rules/
 !/.cursor/skills/
+!/.cursor/commands/
 /.idea
 /.nova
 /.phpunit.cache

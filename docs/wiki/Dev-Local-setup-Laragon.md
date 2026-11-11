@@ -23,7 +23,7 @@ Start Laragon (**Start All**) first. `composer setup` runs `scripts/laragon-setu
 
 ## Daily loop
 1. Start Laragon
-2. Run `composer run dev` for hot reload (Vite on port 5175)
+2. Run `scripts\preview.ps1` for hot reload: Vite runs at `http://myapes-account.test:5175` with no window, its output in `storage/logs/vite-dev.log`; `scripts\preview.ps1 -StopDevServer` stops it
 3. Open `http://myapes-account.test` and sign in with a demo login ([demo data](https://github.com/APESCIC/MyAPES.Account/blob/main/docs/laragon/demo-data.md); never use real accounts or data)
 
 ## Demo data

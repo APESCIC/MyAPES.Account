@@ -1,0 +1,91 @@
+name: Release
+
+# One GitHub Release per milestone, published when the vX.Y.Z tag is pushed on the
+# milestone's merge commit. Deploying is a separate step: deploy-cloudron.yml on the tag.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Publish GitHub Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      issues: read
+    steps:
+      - name: Check out the tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Check the tag matches VERSION and is on main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          app_version="$(tr -d '\r\n' < VERSION)"
+          if [[ "$GITHUB_REF_NAME" != "v$app_version" ]]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match VERSION ($app_version)."
+            exit 1
+          fi
+          status="$(gh api "repos/$GITHUB_REPOSITORY/compare/$GITHUB_SHA...main" --jq '.status')"
+          if [[ "$status" != "ahead" && "$status" != "identical" ]]; then
+            echo "::error::Tag $GITHUB_REF_NAME ($GITHUB_SHA) is not on main ($status)."
+            exit 1
+          fi
+          echo "APP_VERSION=$app_version" >> "$GITHUB_ENV"
+
+      - name: Build the release notes from releases.json
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/deploy/github-release-notes.sh resources/data/releases.json > release-notes.md
+          test -s release-notes.md
+
+      - name: Resolve the release title from the milestone
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          milestone_title="$(gh api "repos/$GITHUB_REPOSITORY/milestones?state=all&per_page=100" --paginate \
+            --jq '.[] | .title | select(startswith("v" + env.APP_VERSION + " ") or startswith("v" + env.APP_VERSION + ":"))' \
+            | head -n1 || true)"
+          name="${milestone_title#"v${APP_VERSION}"}"
+          name="${name#:}"
+          if [[ "$name" == *:* ]]; then name="${name#*:}"; fi
+          name="$(sed -E 's/^[[:space:]]+|[[:space:]]+$//g' <<<"$name")"
+          title="v${APP_VERSION}${name:+ $name}"
+          echo "RELEASE_TITLE=$title" >> "$GITHUB_ENV"
+          echo "Release title: $title"
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "Release $GITHUB_REF_NAME already exists; not changed."
+            exit 0
+          fi
+          gh release create "$GITHUB_REF_NAME" --verify-tag --title "$RELEASE_TITLE" --notes-file release-notes.md --latest
+          {
+            echo "## GitHub Release"
+            echo "- Title: \`$RELEASE_TITLE\`"
+            echo "- Tag: \`$GITHUB_REF_NAME\` at \`$GITHUB_SHA\`"
+            echo "- Deploy next: \`gh workflow run deploy-cloudron.yml --ref $GITHUB_REF_NAME\`"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -63,10 +63,17 @@ Both commands give the same data every time. They refuse to run unless `APP_ENV=
 ## 6. Live preview
 
 ```powershell
-composer run dev
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1                 # start
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1 -StopDevServer  # stop
 ```
 
-This starts the Vite dev server on port **5175**, the queue listener and a log tail. Laragon's Apache serves the pages, so keep Laragon running. Open `http://myapes-account.test`: saving a Blade template, CSS or JavaScript file, or a route or app file, reloads the browser or swaps the change in without a rebuild. Stop with `Ctrl+C`.
+[`scripts/preview.ps1`](../scripts/preview.ps1) is the live preview gate. It loads the latest code, checks Laragon serves it, then starts the Vite dev server on `http://myapes-account.test:5175` in the background, with no window on the taskbar. Vite's output goes to `storage/logs/vite-dev.log` (git-ignored). Running it again reuses the Vite that is already running, so there is never a second copy. `-StopDevServer` stops this project's Vite only and removes `public/hot`, so the pages fall back to the built assets.
+
+Laragon's Apache serves the pages, so keep Laragon running. Open `http://myapes-account.test`: saving a Blade template, CSS or JavaScript file, or a route or app file, reloads the browser or swaps the change in without a rebuild.
+
+Vite, its live-reload connection and `public/hot` all use the host name from `APP_URL` (`myapes-account.test`), never an IP address. Laragon's hosts entry makes the name resolve; nothing else needs setting up.
+
+For the queue listener and a log tail as well, run `composer run dev` in a terminal. It reuses the Vite the gate started; stop it with `Ctrl+C`.
 
 `npm run build` writes the production assets to `public/build`; the site uses them whenever the dev server is not running.
 
@@ -88,7 +95,7 @@ php artisan inbound-mail:key --enable     # once: writes INBOUND_MAIL_TOKEN_KEY 
 php artisan config:clear
 ```
 
-1. Update a ticket or case in the app. The email lands in Mailpit (`http://127.0.0.1:8025`) with a `communications+t…` Reply-To, a `[MYAPES-T-12]` subject tag and the "Reply above this line" marker.
+1. Update a ticket or case in the app. The email lands in Mailpit (`http://localhost:8025`) with a `communications+t…` Reply-To, a `[MYAPES-T-12]` subject tag and the "Reply above this line" marker.
 2. Write a reply as that person, then feed it in:
 
    ```powershell
@@ -109,19 +116,20 @@ Every APESCIC repository is its own Laragon project:
 - its own database (this one is `myapes_account_local`)
 - its own Vite port (this one is 5175, set with `VITE_PORT` in `.env`)
 
-Apache (80 and 443) and MySQL (3306) are shared, and all projects run on the PHP version Laragon has selected. Start each project's `composer run dev` in its own terminal.
+Apache (80 and 443) and MySQL (3306) are shared, and all projects run on the PHP version Laragon has selected. Each project starts and stops its own Vite; this project's `-StopDevServer` never touches another project's dev server.
 
 ## Common fixes
 
 - **Wrong PHP version:** the setup script prints a red warning. Use **Menu > PHP > Version > php-8.4.x**, then **Menu > Apache > Reload**.
 - **Port 80 or 443 in use:** another web server is running (IIS, Skype or another local server). Stop it, or find it with `netstat -ano | findstr :80`, then click **Start All** again.
 - **Port 3306 in use:** another MySQL is running. Stop it, then start Laragon's MySQL.
-- **Port 5175 in use:** Vite stops with "Port 5175 is already in use" instead of picking another port. Close the other `composer run dev`, or set a different free `VITE_PORT` in `.env` (and tell the team, so the port stays unique).
+- **Port 5175 in use:** if it is this project's Vite, the preview gate reuses it. If another program holds the port, the gate says which one; close it, or set a different free `VITE_PORT` in `.env` (and tell the team, so the port stays unique).
+- **Vite did not start:** the gate shows the end of `storage/logs/vite-dev.log`; the whole file has Vite's output.
 - **`myapes-account.test` does not resolve:** use **Menu > Apache > Reload** so Laragon rewrites the hosts file. If it still fails, make sure Laragon can edit `C:\Windows\System32\drivers\etc\hosts` (run Laragon as administrator once).
-- **Unstyled pages:** run `composer run dev`, or `npm run build`.
-- **File permission errors** under `storage` or `bootstrap/cache`: close anything that locks the files (an editor search, antivirus or a running `composer run dev`), then run `php artisan optimize:clear`.
+- **Unstyled pages:** start Vite with `scripts\preview.ps1`, or run `npm run build`. A `public/hot` file left by a Vite that was closed some other way also unstyles the pages; `scripts\preview.ps1 -StopDevServer` removes it.
+- **File permission errors** under `storage` or `bootstrap/cache`: close anything that locks the files (an editor search, antivirus or a running dev server; `scripts\preview.ps1 -StopDevServer` stops Vite), then run `php artisan optimize:clear`.
 - **Passkeys:** browsers need a secure origin. Turn on Laragon SSL (**Menu > Apache > SSL > Enabled**), browse `https://myapes-account.test`, and set `APP_URL` to that origin and `SESSION_SECURE_COOKIE=true` in `.env`.
-- **Mail:** every email goes to Laragon's Mailpit at `http://127.0.0.1:8025`; nothing is delivered.
+- **Mail:** every email goes to Laragon's Mailpit at `http://localhost:8025`; nothing is delivered.
 
 ## Cursor cloud agents
 

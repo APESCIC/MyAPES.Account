@@ -1,0 +1,11 @@
+{
+    "fields": [
+        { "file": "VERSION", "type": "plain" },
+        { "file": "resources/data/module-runtime-contract.json", "type": "json", "key": "application_version" }
+    ],
+    "notes": [
+        "Prepend the release record: php artisan myapes:changelog-prepare --type=<patch|minor|major> --title=\"...\" --issue=<n> --pr=<n> (check with --dry-run first).",
+        "Update the version-pinned tests: ChangeLogPageTest, HealthAndThemeTest, ModuleRollbackCompatibilityTest, ReleaseHistoryCommandTest.",
+        "Check: php artisan myapes:changelog-validate --base-ref=origin/main"
+    ]
+}

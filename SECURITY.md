@@ -33,15 +33,15 @@ Security reports are accepted for the current released MyAPES Account version on
 
 Use [public issues](https://github.com/APESCIC/MyAPES-Account/issues) only for non-security bugs and feature requests. The Change Log Hub records released, public-safe changes. It is not a channel for vulnerability reports.
 
-## Triage (Semgrep and automated scans)
+## Triage (automated scans)
 
-Pull requests and pushes to `main` run the in-repo [Semgrep workflow](.github/workflows/semgrep.yml) with OSS rules. Org-level Semgrep (and any Socket/Snyk apps) may also report after merge.
+Pull requests run GitHub's free security checks: [CodeQL](.github/workflows/codeql.yml) (Actions and JavaScript; CodeQL has no PHP support), [dependency review](.github/workflows/dependency-review.yml), and Dependabot alerts and security updates. PHP is covered by PHPUnit, the architecture tests and Pint.
 
 When a finding lands:
 
 1. **Confirm** it is real in this codebase (not a committed test fixture, not a rule mismatch).
 2. **Fix** on the current milestone branch when it is actionable, or open a tracked issue in the next security/hotfix milestone.
-3. **False positives** (for example a test-only `APP_KEY` that matches a Telegram-key rule): mark false positive in the Semgrep UI with a short reason, and still harden the fixture in git when that is cheap.
+3. **False positives** (for example a test-only `APP_KEY` that matches a Telegram-key rule): dismiss it as a false positive in the code scanning alert with a short reason, and still harden the fixture in git when that is cheap.
 4. **Severity / response**: treat High/Critical production exposure as a hotfix candidate (Bambie's written approval on the hotfix issue). Medium/Low ride the next planned milestone unless they block a release.
 
-Do not paste secrets, production `APP_KEY` values, or personal data into issues, pull requests or Semgrep comments.
+Do not paste secrets, production `APP_KEY` values, or personal data into issues, pull requests or alert comments.

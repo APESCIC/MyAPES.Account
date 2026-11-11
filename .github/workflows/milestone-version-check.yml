@@ -1,7 +1,7 @@
 name: milestone-version-check
 
 # PR titles and branch names must carry their milestone's version, never GitHub's milestone number.
-# See .cursor/rules/milestone-versioning.mdc.
+# See .cursor/rules/version-shipping.mdc.
 
 on:
   pull_request:

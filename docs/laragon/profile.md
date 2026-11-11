@@ -8,14 +8,16 @@ Laragon 8 on Windows is the only supported local development setup for MyAPES Ac
 | Hostname | `http://myapes-account.test` (optional `https://myapes-account.test` with Laragon SSL) |
 | Document root | `public/` (Laragon Auto Virtual Hosts picks it up automatically) |
 | Web server | Apache 2.4 (`httpd-2.4.68-260617-Win64-VS18`) on ports 80 and 443 |
-| PHP | 8.4, thread-safe build (`php-8.4.27-Win32-vs17-x64`); production and CI also run 8.4 |
+| PHP | 8.4, NTS build (`php-8.4.27-1-nts-Win32-vs17-x64`), run by Apache through FastCGI (mod_fcgid) with separate PHP processes per site, and the same build on the command line; production and CI also run 8.4 |
+| PHP settings | Upload limits in `public/.user.ini` (read under FastCGI) and in the `<IfModule php_module>` block of `public/.htaccess` (read on Cloudron) |
 | PHP extensions | `bcmath`, `curl`, `fileinfo`, `gd`, `iconv`, `intl`, `mbstring`, `openssl`, `pdo_mysql`, `pdo_sqlite`, `sodium`, `zip` (all on by default in Laragon's PHP 8.4) |
-| Database engine | MySQL 8.4 (`mysql-8.4.3-winx64`) on `127.0.0.1:3306` |
+| Database engine | MySQL 8.4 (`mysql-8.4.3-winx64`) on port 3306 |
 | Database name | `myapes_account_local` (`utf8mb4`, `utf8mb4_unicode_ci`) |
 | Database user | `root` with an empty password (Laragon default, local only) |
 | Node | 22 (`node-v22`) with npm 11.10 or newer |
 | Vite dev server port | `5175` (unique to this project) |
-| Mail | Laragon Mailpit: SMTP `127.0.0.1:1025`, inbox `http://127.0.0.1:8025` |
+| Vite dev server | `http://myapes-account.test:5175`, started with no window by `scripts\preview.ps1` (stop with `-StopDevServer`), output in `storage/logs/vite-dev.log` |
+| Mail | Laragon Mailpit: SMTP on port 1025, inbox `http://localhost:8025` |
 | Tests | In-memory SQLite (`phpunit.xml`); they never touch `myapes_account_local` |
 
 ## Applying the profile
@@ -41,5 +43,5 @@ Other APESCIC repositories keep their own values in their own profile docs. Pick
 
 ## Notes
 
-- Laragon profiles are global: every project runs on the PHP version Laragon has selected. Laragon has no built-in per-project PHP. If another project needs a different PHP version at the same time, Laragon's community workaround is a hand-written vhost that runs an NTS PHP build through `mod_fcgid`; that is outside this project's supported setup.
+- Laragon profiles are global: every project runs on the PHP version Laragon has selected. With an NTS build selected, Laragon runs PHP through FastCGI (`C:\laragon\etc\apache2\fcgid.conf`), which starts separate `php-cgi.exe` processes per site, so another project's `.env` values cannot leak into this one (they could under the thread-safe build's mod_php). The setup script checks Apache uses FastCGI and the same build as the command line.
 - If Auto Virtual Hosts is turned off, copy [`myapes-account.test.conf`](myapes-account.test.conf) to `C:\laragon\etc\apache2\sites-enabled\` (without the `auto.` prefix, so Laragon leaves it as written) and reload Apache.

@@ -1,7 +1,9 @@
+import net from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import concurrently from 'concurrently';
+import { loadEnv } from 'vite';
 
 const runnerPath = fileURLToPath(import.meta.url);
 const repositoryRoot = path.resolve(path.dirname(runnerPath), '..', '..');
@@ -26,6 +28,7 @@ export function buildDevCommands({
     platform = process.platform,
     appPort = process.env.APP_PORT,
     serve = process.env.APP_SERVE === '1',
+    viteRunning = false,
 } = {}) {
     const port = resolveAppPort(appPort);
     const logCommand =
@@ -54,12 +57,15 @@ export function buildDevCommands({
             name: 'logs',
             prefixColor: '#fb7185',
         },
-        {
-            command: 'npm run dev -- --host 127.0.0.1',
+    );
+
+    if (!viteRunning) {
+        commands.push({
+            command: 'npm run dev',
             name: 'vite',
             prefixColor: '#fdba74',
-        },
-    );
+        });
+    }
 
     return commands;
 }
@@ -73,9 +79,39 @@ export function buildDevRunnerOptions({ cwd = repositoryRoot } = {}) {
     };
 }
 
+export function resolveViteServer(env) {
+    return {
+        host: new URL(env.APP_URL || 'http://localhost').hostname,
+        port: Number(env.VITE_PORT || 5175),
+    };
+}
+
+export function isListening({ host, port }, timeout = 1000) {
+    return new Promise((resolve) => {
+        const socket = net.connect({ host, port });
+        const finish = (listening) => {
+            socket.destroy();
+            resolve(listening);
+        };
+
+        socket.setTimeout(timeout, () => finish(false));
+        socket.once('connect', () => finish(true));
+        socket.once('error', () => finish(false));
+    });
+}
+
 export async function runDev() {
+    const vite = resolveViteServer(loadEnv('development', repositoryRoot, ''));
+    const viteRunning = await isListening(vite);
+
+    if (viteRunning) {
+        console.log(
+            `Vite already runs on http://${vite.host}:${vite.port} (scripts/preview.ps1 starts it); reusing it.`,
+        );
+    }
+
     const { result } = concurrently(
-        buildDevCommands(),
+        buildDevCommands({ viteRunning }),
         buildDevRunnerOptions(),
     );
 
