@@ -36,6 +36,7 @@ final class InboundMailProcessor
         private readonly LoopGuard $loopGuard,
         private readonly InboundRateLimits $limits,
         private readonly InboundAttachmentSorter $attachments,
+        private readonly ReplyMailboxStatus $status,
     ) {}
 
     public function process(InboundEmail $email): void
@@ -44,6 +45,12 @@ final class InboundMailProcessor
         $parsed = $this->parse($email);
 
         if ($parsed === null) {
+            return;
+        }
+
+        if ($this->status->acceptProbe($parsed->recipients)) {
+            $this->finish($email, InboundEmail::STATUS_IGNORED, 'probe');
+
             return;
         }
 

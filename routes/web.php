@@ -420,6 +420,12 @@ Route::middleware([
             Route::put('/settings/reply-mailbox', [AdminReplyMailboxController::class, 'update'])
                 ->middleware('can:admin.settings.manage')
                 ->name('settings.reply-mailbox.update');
+            Route::post('/settings/reply-mailbox/test', [AdminReplyMailboxController::class, 'test'])
+                ->middleware(['can:admin.settings.manage', 'throttle:10,1'])
+                ->name('settings.reply-mailbox.test');
+            Route::post('/settings/reply-mailbox/probe', [AdminReplyMailboxController::class, 'probe'])
+                ->middleware(['can:admin.settings.manage', 'throttle:5,1'])
+                ->name('settings.reply-mailbox.probe');
             Route::post('/emails/inbound/local/reply', [AdminLocalRepliesController::class, 'reply'])
                 ->middleware([EnsureLocalReplyLoop::class, 'can:admin.emails.manage'])
                 ->name('emails.inbound.local.reply');

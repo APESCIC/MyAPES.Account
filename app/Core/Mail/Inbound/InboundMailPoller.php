@@ -25,6 +25,7 @@ final class InboundMailPoller
         private readonly InboundMailSettings $settings,
         private readonly InboundMailbox $mailbox,
         private readonly InboundMailStore $store,
+        private readonly ReplyMailboxStatus $status,
     ) {}
 
     /**
@@ -38,6 +39,18 @@ final class InboundMailPoller
             return ['result' => self::RESULT_DISABLED] + $counts;
         }
 
+        $result = $this->fetch($counts);
+        $this->status->recordPoll($result);
+
+        return $result;
+    }
+
+    /**
+     * @param  array{result: string, fetched: int, stored: int, duplicates: int, failed: int}  $counts
+     * @return array{result: string, fetched: int, stored: int, duplicates: int, failed: int}
+     */
+    private function fetch(array $counts): array
+    {
         try {
             foreach ($this->mailbox->messages(max(1, (int) config('inbound-mail.poll_batch', 50))) as $message) {
                 $counts['fetched']++;

@@ -70,6 +70,9 @@
                 @if($fields['plus_addressing']['env']) {!! $envBadge !!} @endif
             </label>
             <p class="muted">{{ __('admin.settings.reply_mailbox.plus_addressing_help') }}</p>
+            @if($probe !== null)
+                <p class="muted" data-probe-state>{{ __('admin.settings.reply_mailbox.probe_label', ['at' => $probe['sent_at']->format('Y-m-d H:i')]) }} {{ $probe['state'] }}</p>
+            @endif
 
             @if($canManage)
                 <div class="actions">
@@ -78,4 +81,46 @@
             @endif
         </fieldset>
     </form>
+</section>
+
+<section class="panel" aria-labelledby="reply-mailbox-health-heading" data-reply-mailbox-health>
+    <h2 id="reply-mailbox-health-heading">{{ __('admin.settings.reply_mailbox.health_heading') }}</h2>
+    <dl class="detail-list">
+        <div>
+            <dt>{{ __('admin.settings.reply_mailbox.last_test') }}</dt>
+            <dd data-last-test>
+                @if($lastTest === null)
+                    {{ __('admin.settings.reply_mailbox.never') }}
+                @elseif($lastTest['ok'])
+                    {{ __('admin.settings.reply_mailbox.last_test_ok', ['at' => $lastTest['at']->format('Y-m-d H:i')]) }}
+                @else
+                    {{ __('admin.settings.reply_mailbox.last_test_failed', ['at' => $lastTest['at']->format('Y-m-d H:i'), 'reason' => $lastTest['error']]) }}
+                @endif
+            </dd>
+        </div>
+        <div>
+            <dt>{{ __('admin.settings.reply_mailbox.last_successful_poll') }}</dt>
+            <dd data-last-poll>{{ $lastSuccessfulPollAt?->format('Y-m-d H:i') ?? __('admin.settings.reply_mailbox.never') }}</dd>
+        </div>
+        @if($lastPoll !== null && $lastPoll['result'] !== 'polled')
+            <div>
+                <dt>{{ __('admin.settings.reply_mailbox.last_poll') }}</dt>
+                <dd>{{ __('admin.settings.reply_mailbox.last_poll_unavailable', ['at' => $lastPoll['at']->format('Y-m-d H:i')]) }}</dd>
+            </div>
+        @endif
+    </dl>
+
+    @can('admin.settings.manage')
+        <div class="actions">
+            <form method="post" action="{{ route('admin.settings.reply-mailbox.test') }}" data-test-connection-form>
+                @csrf
+                <button type="submit" class="button button-secondary">{{ __('admin.settings.reply_mailbox.test') }}</button>
+            </form>
+            <form method="post" action="{{ route('admin.settings.reply-mailbox.probe') }}" data-probe-form>
+                @csrf
+                <button type="submit" class="button button-secondary">{{ __('admin.settings.reply_mailbox.probe') }}</button>
+            </form>
+        </div>
+        <p class="muted">{{ __('admin.settings.reply_mailbox.probe_help') }}</p>
+    @endcan
 </section>

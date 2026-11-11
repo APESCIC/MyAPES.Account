@@ -55,6 +55,13 @@ final class FakeMailbox implements InboundMailbox
         }
     }
 
+    public function test(): void
+    {
+        if ($this->unavailable) {
+            throw new MailboxUnavailable('The inbound mailbox could not be reached (ConnectionFailedException).');
+        }
+    }
+
     public function expunge(): void
     {
         $this->expunged = true;

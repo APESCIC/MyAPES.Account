@@ -69,6 +69,11 @@ final class MailpitMailbox implements InboundMailbox
         $this->client->delete($ids);
     }
 
+    public function test(): void
+    {
+        $this->client->search('to:'.($this->settings->mailbox()['local'] ?? 'communications'), 1);
+    }
+
     public function markForDeletion(string $id): void
     {
         $this->pendingDeletes[] = $id;

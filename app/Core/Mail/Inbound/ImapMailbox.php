@@ -62,6 +62,17 @@ final class ImapMailbox implements InboundMailbox
         }
     }
 
+    public function test(): void
+    {
+        try {
+            $this->folder();
+        } finally {
+            $this->client?->disconnect();
+            $this->client = null;
+            $this->folder = null;
+        }
+    }
+
     private function folder(): Folder
     {
         if ($this->folder !== null) {
