@@ -88,7 +88,7 @@ Transport is unchanged: Cloudron's SMTP add-on.
 
 - `config/mail.php` falls back to `CLOUDRON_MAIL_SMTP_SERVER`, `CLOUDRON_MAIL_SMTP_PORT`, `CLOUDRON_MAIL_SMTP_USERNAME` and `CLOUDRON_MAIL_SMTP_PASSWORD`, and to `CLOUDRON_MAIL_FROM` for the sender address. The sender name always comes from `terms.app_name`.
 - Mail is queued. `scripts/deploy/cloudron-run.sh` starts the Redis `queue:work` worker and `schedule:work`, which runs `mail:prune-log`, `audit:prune`, `inbound-mail:prune` and, every minute, `tickets:inbound-poll`.
-- Locally, `.env.example` (the Laragon profile) sends SMTP to Laragon's Mailpit on `127.0.0.1:1025`; read the messages at `http://127.0.0.1:8025`. Nothing is delivered. The agent-only profile (`.env.local.example`) uses the `log` mailer, which writes messages to `storage/logs`, and so does the default when no `MAIL_MAILER` is set.
+- Locally, `.env.example` (the Laragon profile) sends SMTP to Laragon's Mailpit on `127.0.0.1:1025`; read the messages at `http://localhost:8025`. Nothing is delivered. The agent-only profile (`.env.local.example`) uses the `log` mailer, which writes messages to `storage/logs`, and so does the default when no `MAIL_MAILER` is set.
 
 ## Replies by email
 
