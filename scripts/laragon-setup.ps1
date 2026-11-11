@@ -382,4 +382,4 @@ if ($script:Warnings.Count -gt 0) {
 } else {
     Write-Host "Setup finished with no warnings." -ForegroundColor Green
 }
-Write-Host "Open $appUrl, then run 'composer run dev' for hot reload."
+Write-Host "Run scripts\preview.ps1 to start hot reload with no window, then open $appUrl."

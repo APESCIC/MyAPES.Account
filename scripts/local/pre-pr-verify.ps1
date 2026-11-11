@@ -35,5 +35,5 @@ Write-Host "VERSION: v$version"
 Write-Host "Smoke healthz: $baseUrl/healthz"
 Write-Host "Smoke change-log: $baseUrl/change-log"
 Write-Host ''
-Write-Host 'Start hot reload if needed: composer run dev'
+Write-Host 'Start hot reload if needed: scripts\preview.ps1 (no window; stop with -StopDevServer)'
 Write-Host 'Then spot-check changed routes in the browser before commit/PR.'

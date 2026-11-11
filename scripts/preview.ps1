@@ -13,21 +13,29 @@
     3. Checks Laragon is running and the site serves the checked-out code: for
        a Laravel app, /healthz shows the revision and PHP through FastCGI; for a
        static site, /VERSION matches the VERSION file.
-    4. Starts the dev server (Vite or Browsersync) in its own window if nothing
-       listens on its port.
+    4. Starts Vite in the background with no window, its output in
+       storage\logs\vite-dev.log, unless this repository's Vite already listens
+       on its port. It never starts a second copy.
 
     Opening the page in Cursor's browser is the agent's step 3.
+
+    -StopDevServer stops this repository's Vite (and removes public\hot) and
+    does nothing else.
 
     Exit codes: 0 ready, 1 blocked (the message says why), 3 needs a decision.
 
 .EXAMPLE
     powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1
+
+.EXAMPLE
+    powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1 -StopDevServer
 #>
 [CmdletBinding()]
 param(
     [switch]$NoSync,
     [switch]$NoMergeMain,
     [switch]$NoDevServer,
+    [switch]$StopDevServer,
     [string]$LaragonRoot = 'C:\laragon'
 )
 
@@ -39,7 +47,8 @@ $Config = @{
     Laravel    = $true
     DevPort    = 5175
     HealthPath = '/healthz'
-    DevCommand = 'npm run dev'
+    DevScript  = 'node_modules\vite\bin\vite.js'
+    DevLog     = 'storage\logs\vite-dev.log'
 }
 
 $ErrorActionPreference = 'Stop'
@@ -67,6 +76,39 @@ function Get-Page([string]$Url) {
 }
 
 $repo = Split-Path $PSScriptRoot -Parent
+
+# This repository's Vite processes, started from the clone or the Laragon junction, by this script or npm.
+function Get-DevServer {
+    $roots = @($repo, $Config.Folder) | ForEach-Object { [regex]::Escape($_.TrimEnd('\')) }
+    $pattern = "(?i)($($roots -join '|'))\\node_modules\\(\.bin\\+\.\.\\+)?vite\\bin\\vite\.js"
+    return @(Get-CimInstance Win32_Process -Filter "Name='node.exe'" | Where-Object { $_.CommandLine -match $pattern })
+}
+
+function Get-DevListener {
+    return Get-NetTCPConnection -State Listen -LocalPort $Config.DevPort -ErrorAction SilentlyContinue | Select-Object -First 1
+}
+
+function Get-HotUrl {
+    $hot = Join-Path $repo 'public\hot'
+    if (Test-Path $hot) { return "$(Get-Content $hot -Raw)".Trim() }
+    return $null
+}
+
+function Stop-DevServer {
+    $all = @(Get-CimInstance Win32_Process)
+    $ids = @()
+    foreach ($vite in Get-DevServer) {
+        $ids += $vite.ProcessId
+        # Walk up through the cmd and npm launchers, stopping at the shell that started them.
+        $parentId = $vite.ParentProcessId
+        while ($parent = $all | Where-Object { $_.ProcessId -eq $parentId -and $_.Name -in 'cmd.exe', 'node.exe' -and $_.CommandLine -match '(?i)vite|npm(-cli\.js"?)? run dev' }) {
+            $ids += $parent.ProcessId
+            $parentId = $parent.ParentProcessId
+        }
+    }
+    foreach ($id in $ids | Select-Object -Unique) { Invoke-Native { taskkill /PID $id /T /F } | Out-Null }
+    return @($ids | Select-Object -Unique).Count
+}
 $phpDir = Get-ChildItem "$LaragonRoot\bin\php" -Directory -ErrorAction SilentlyContinue |
     Where-Object { $_.Name -match "^php-$([regex]::Escape($Config.Php))\.\d+(-\d+)?-(nts-)?Win32" } |
     Sort-Object @{ Expression = { $_.Name -notmatch '-nts-' }; Ascending = $true }, @{ Expression = { $_.Name }; Descending = $true } | Select-Object -First 1
@@ -77,6 +119,16 @@ if (-not $env:XDEBUG_MODE) { $env:XDEBUG_MODE = 'off' }
 
 Push-Location $repo
 try {
+    if ($StopDevServer) {
+        Write-Step "Stop the dev server on port $($Config.DevPort)"
+        $stopped = Stop-DevServer
+        Start-Sleep -Milliseconds 500
+        if (Get-DevListener) { Write-Warn "Port $($Config.DevPort) is still in use by another program." }
+        elseif (Test-Path 'public\hot') { Remove-Item 'public\hot' -Force; Write-Ok 'Removed public\hot, so the pages use the built assets' }
+        Write-Ok $(if ($stopped -gt 0) { "Stopped $stopped processes" } else { 'It was not running' })
+        exit 0
+    }
+
     # 1. Latest code ------------------------------------------------------------
     Write-Step 'Latest code'
     $before = (git rev-parse HEAD).Trim()
@@ -163,17 +215,38 @@ try {
 
     # 4. Dev server ------------------------------------------------------------
     Write-Step "Dev server on port $($Config.DevPort)"
-    if (Get-NetTCPConnection -State Listen -LocalPort $Config.DevPort -ErrorAction SilentlyContinue) {
-        Write-Ok 'Already running'
+    $listener = Get-DevListener
+    if ($listener) {
+        if (Get-DevServer | Where-Object { $_.ProcessId -eq $listener.OwningProcess }) {
+            Write-Ok "Already running at $(Get-HotUrl)"
+        } else {
+            Write-Warn "Port $($Config.DevPort) is used by $((Get-Process -Id $listener.OwningProcess).ProcessName), not this repository's Vite. Stop it, or set a free VITE_PORT in .env."
+        }
     } elseif ($NoDevServer) {
-        Write-Warn "Not running (-NoDevServer). Start it with $($Config.DevCommand)."
+        Write-Warn 'Not running (-NoDevServer). Run this script without -NoDevServer to start it.'
     } else {
-        Start-Process -FilePath 'cmd.exe' -ArgumentList '/c', $Config.DevCommand -WorkingDirectory $repo -WindowStyle Minimized
-        Write-Ok "Started $($Config.DevCommand) in its own window"
+        $node = if ($nodeDir) { Join-Path $nodeDir.FullName 'node.exe' } else { (Get-Command node -ErrorAction SilentlyContinue).Source }
+        if (-not $node) { Stop-Preview 1 'Node 22 was not found. Run scripts\laragon-setup.ps1.' }
+        $log = Join-Path $repo $Config.DevLog
+        New-Item -ItemType Directory -Force (Split-Path $log) | Out-Null
+        # A hidden cmd only redirects Vite's output to the log; nothing opens on the taskbar.
+        $command = "`"`"$node`" `"$(Join-Path $repo $Config.DevScript)`" > `"$log`" 2>&1`""
+        Start-Process -FilePath $env:ComSpec -ArgumentList "/d /s /c $command" -WorkingDirectory $repo -WindowStyle Hidden
+        $deadline = (Get-Date).AddSeconds(30)
+        while (-not ((Get-DevListener) -and (Get-HotUrl)) -and (Get-Date) -lt $deadline) { Start-Sleep -Milliseconds 500 }
+        if (-not (Get-DevListener)) {
+            $tail = (Get-Content $log -Tail 10 -ErrorAction SilentlyContinue) -join "`n"
+            Stop-Preview 1 "Vite did not start on port $($Config.DevPort). The end of $($Config.DevLog):`n$tail"
+        }
+        Write-Ok "Started Vite at $(Get-HotUrl) with no window (log $($Config.DevLog))"
     }
+    $hotUrl = Get-HotUrl
+    $expected = "$($Config.AppUrl):$($Config.DevPort)"
+    if ($hotUrl -and $hotUrl -ne $expected) { Write-Warn "public\hot points at $hotUrl, not $expected. Check APP_URL and VITE_PORT in .env." }
 
     Write-Step 'Ready'
-    Write-Ok "Open $($Config.AppUrl) in Cursor's browser (live reload on port $($Config.DevPort))."
+    Write-Ok "Open $($Config.AppUrl) in Cursor's browser (live reload from $expected)."
+    Write-Ok 'Stop Vite with scripts\preview.ps1 -StopDevServer.'
     if ($before -ne $head) { Write-Ok "Code moved from $($before.Substring(0, 12)) to $short during the sync." }
 } finally {
     Pop-Location
