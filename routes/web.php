@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\AdminManagedListController;
 use App\Http\Controllers\Admin\AdminMaintenanceController;
 use App\Http\Controllers\Admin\AdminModuleController;
 use App\Http\Controllers\Admin\AdminOrganisationModuleController;
+use App\Http\Controllers\Admin\AdminReplyMailboxController;
 use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminVersionController;
@@ -416,6 +417,9 @@ Route::middleware([
                 ->middleware('can:admin.settings.view')
                 ->where('tab', '[a-z-]+')
                 ->name('settings.show');
+            Route::put('/settings/reply-mailbox', [AdminReplyMailboxController::class, 'update'])
+                ->middleware('can:admin.settings.manage')
+                ->name('settings.reply-mailbox.update');
             Route::post('/emails/inbound/local/reply', [AdminLocalRepliesController::class, 'reply'])
                 ->middleware([EnsureLocalReplyLoop::class, 'can:admin.emails.manage'])
                 ->name('emails.inbound.local.reply');
