@@ -376,7 +376,7 @@ Pull-request and `main` workflows perform the same append-only comparison. Manua
 
 ### GitHub Release tags
 
-Every documented app version in `releases.json` has a matching GitHub Release tag `v{VERSION}` (for example `v0.31.6` for `VERSION` `0.31.6`). The Change Log Hub and `/healthz` `version` field read from `VERSION` / `releases.json`; GitHub Releases are the external mirror on [the repository Releases page](https://github.com/APESCIC/MyAPES-Account/releases). `release.yml` publishes the GitHub Release when the `v{VERSION}` tag is pushed, titled `v{VERSION} <milestone name>`, for example `v0.60.0 Client account search and management`. Releases published before this change keep their old titles.
+Every documented app version in `releases.json` has a matching GitHub Release tag `v{VERSION}` (for example `v0.31.6` for `VERSION` `0.31.6`). The Change Log Hub and `/healthz` `version` field read from `VERSION` / `releases.json`; GitHub Releases are the external mirror on [the repository Releases page](https://github.com/APESCIC/MyAPES-Account/releases). `release.yml` publishes the GitHub Release when the `v{VERSION}` tag is pushed, titled `v{VERSION} <milestone name>`, for example `v0.60.0 Repository standards and Cloudron mailbox`. Releases published before this change keep their old titles.
 
 - Map versions to merge commits: `node scripts/local/map-release-commits.mjs --write`
 - Backfill or verify releases: `node scripts/local/backfill-github-releases.mjs --dry-run` then `node scripts/local/backfill-github-releases.mjs --resume`

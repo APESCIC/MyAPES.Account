@@ -8,7 +8,7 @@ Run `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1` be
 
 ## How work ships
 
-Each milestone is named by the version at the start of its GitHub milestone title (for example `v0.60.0 Beta: Client account search and management`), never by GitHub's milestone number, and ships once: all its issues are committed on one `milestone/vX-Y-Z-<slug>` branch behind one draft pull request, which is merged once with a merge commit, tagged and released as `vX.Y.Z`, and deployed. A hotfix can ship earlier only with Bambie's written approval on its issue.
+Each milestone is named by the version at the start of its GitHub milestone title (for example `v0.60.0 Beta: Repository standards and Cloudron mailbox`), never by GitHub's milestone number, and ships once: all its issues are committed on one `milestone/vX-Y-Z-<slug>` branch behind one draft pull request, which is merged once with a merge commit, tagged and released as `vX.Y.Z`, and deployed. A hotfix can ship earlier only with Bambie's written approval on its issue.
 
 The rule, with the names, the version fields, the flow and the hotfix route, is [`.cursor/rules/version-shipping.mdc`](.cursor/rules/version-shipping.mdc). The decisions behind it are in [AGENTS.md](AGENTS.md#shipping-and-versioning).
 

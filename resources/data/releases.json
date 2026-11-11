@@ -1,41 +1,55 @@
 [
   {
     "version": "0.60.0",
-    "date": "2026-11-09",
+    "date": "2026-11-11",
     "channel": "stable",
     "type": "minor",
-    "title": "Client account search and management",
-    "summary": "Staff can find and manage client accounts more easily, and the way MyAPES Account is built, released and deployed is simpler and safer.",
+    "title": "Repository standards and Cloudron mailbox",
+    "summary": "MyAPES Account now follows the APES repository standard for local development, versioning, releases and security checks, and the communications mailbox that replies by email will use is set up on Cloudron.",
     "changes": [
-      "Releases are now published when the version tag is pushed, and only a published release tag can be deployed to Cloudron.", "Automated security checks now use only GitHub's free tools: CodeQL, dependency review and Dependabot."
+      "Releases are now published when the version tag is pushed, and only a published release tag can be deployed to Cloudron.",
+      "Automated security checks now use only GitHub's free tools: CodeQL, dependency review and Dependabot.",
+      "Local development runs in Laragon with PHP through FastCGI, behind a live preview gate that loads the latest code before any work starts.",
+      "Each milestone is versioned, branched, released and deployed once, by its version number, with checks on pull request titles and branch names.",
+      "The communications mailbox for replies by email now exists on Cloudron, and the mail guide gives the app's env file as /app/data/shared/.env. Replies by email stay off until their settings are added."
     ],
     "affected_areas": [
-      "Release and deploy", "Security checks", "Local development"
+      "Release and deploy",
+      "Security checks",
+      "Local development",
+      "Email"
     ],
     "categories": [
-      "added"
+      "added",
+      "changed",
+      "removed"
     ],
     "audiences": [
-      "public-facing",
       "internal-only"
     ],
-    "version_rationale": "Minor: the milestone adds client account search and management features; the release and deploy changes keep every existing route and behaviour.",
+    "version_rationale": "Minor: new release, deploy, versioning and local development tooling, with no breaking change to any route or behaviour in the app.",
     "validation": [
-      "composer test and the deployment contract tests passed locally; the Laragon preview served the branch through FastCGI on PHP 8.4."
+      "composer test and the deployment contract tests passed locally; the Laragon preview served the branch through FastCGI on PHP 8.4.",
+      "Whole-word searches found no other local stacks or Semgrep outside past release records, and no ClamAV set-up in the wiki."
     ],
     "known_limitations": [
-      "The new release and deploy workflows run only on a release tag, so they are first exercised by this release."
+      "The new release and deploy workflows run only on a release tag, so they are first exercised by this release.",
+      "Replies by email stay off until the mailbox settings are added (v0.65.0)."
     ],
-    "rollback": "Deploy the previous release tag with deploy-cloudron.yml; this release adds no database migrations of its own for the release and deploy changes.",
-    "provenance": "Issue #744 and pull request #745, in milestone v0.60.0.",
+    "rollback": "Deploy the previous release tag with deploy-cloudron.yml; this release adds no database migrations.",
+    "provenance": "Milestone v0.60.0 Beta: Repository standards and Cloudron mailbox, epic #746 with issues #744 and #577, pull request #747 (which replaces #745, closed when its branch was renamed).",
     "references": [
       {
         "label": "Issue #744",
         "url": "https://github.com/APESCIC/MyAPES-Account/issues/744"
       },
       {
-        "label": "Pull request #745",
-        "url": "https://github.com/APESCIC/MyAPES-Account/pull/745"
+        "label": "Issue #577",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/577"
+      },
+      {
+        "label": "Pull request #747",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/747"
       }
     ]
   },
