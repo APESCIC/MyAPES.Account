@@ -50,6 +50,7 @@ Laragon 8 on Windows is the only supported local setup. Use this project's own L
 - Labels: only `area:admin`, `area:public`, `area:auth`, `area:tests`, `area:cloudron`.
 - Assignee: `apescic-director`.
 - Comment on each issue as work goes: the branch, the commits and progress. An issue is done when its acceptance criteria are committed on the milestone branch; it closes when the milestone pull request merges (`Closes #<n>`), and the epic closes after the deploy.
+- Before an issue is closed, Cursor ticks every acceptance-criteria box in its body and the issue's line in the epic checklist. An unticked box means the issue is not done: finish it, or record why it was dropped, before closing.
 
 ## Shipping and versioning
 
