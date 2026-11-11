@@ -145,8 +145,8 @@ Plugins register handlers with `PluginServiceProvider::inboundReplyHandlers()`; 
 
 ### Cloudron setup
 
-1. Create the `communications@myapes.me.uk` mailbox on Cloudron and check that mail to `communications+test@myapes.me.uk` arrives (plus-addressing). Record the result on the ticket.
-2. Set the `INBOUND_MAIL_*` variables in the app's `/app/data/.env` (never in the repository or in chat), including a new `INBOUND_MAIL_TOKEN_KEY` (`openssl rand -hex 32`) and `INBOUND_MAIL_AUTHSERV_ID` set to the name the Cloudron mail server writes in `Authentication-Results`.
+1. Create the `communications@myapes.me.uk` mailbox in the Cloudron dashboard (Email → myapes.me.uk → Mailboxes; the `cloudron` CLI cannot create mailboxes), with a Mail app password for IMAP. Check that mail to `communications+test@myapes.me.uk` arrives (plus-addressing). Record the result on the ticket.
+2. Set the `INBOUND_MAIL_*` variables in the app's env file, `/app/data/shared/.env` (never in the repository or in chat), including a new `INBOUND_MAIL_TOKEN_KEY` (`openssl rand -hex 32`) and `INBOUND_MAIL_AUTHSERV_ID` set to the name the Cloudron mail server writes in `Authentication-Results`.
 3. Restart the app, send a real reply, and check it on Admin → Emails → Inbound.
 
 ### Local testing
