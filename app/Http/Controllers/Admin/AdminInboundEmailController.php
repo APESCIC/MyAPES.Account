@@ -8,7 +8,11 @@ use App\Core\Mail\Inbound\InboundEmail;
 use App\Core\Mail\Inbound\InboundMailSettings;
 use App\Core\Mail\Inbound\InboundReplyRegistry;
 use App\Core\Mail\Inbound\InboundReplySetting;
+use App\Core\Mail\Inbound\Local\ClientReplyBuilder;
+use App\Core\Mail\Inbound\Local\LocalReplies;
+use App\Core\Mail\Inbound\MailboxUnavailable;
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\EnsureLocalReplyLoop;
 use App\Jobs\ProcessInboundEmail;
 use App\Services\AuditLogger;
 use App\Services\ModuleState;
@@ -45,7 +49,36 @@ class AdminInboundEmailController extends Controller
             'address' => $settings->address(),
             'retentionDays' => $settings->retentionDays(),
             'services' => $this->services(),
+            'localReplies' => $this->localReplies($request, $settings),
         ]);
+    }
+
+    /**
+     * The local test replies panel (#758), only on a local install reading Mailpit.
+     *
+     * @return array{emails: list<array{id: string, subject: string, to: string, created: string, url: string}>, error: ?string, variants: array<string, string>}|null
+     */
+    private function localReplies(Request $request, InboundMailSettings $settings): ?array
+    {
+        if (! EnsureLocalReplyLoop::available($settings) || ! $request->user()?->can('admin.emails.manage')) {
+            return null;
+        }
+
+        try {
+            $emails = app(LocalReplies::class)->recentRecordEmails();
+            $error = null;
+        } catch (MailboxUnavailable $exception) {
+            $emails = [];
+            $error = $exception->getMessage();
+        }
+
+        return ['emails' => $emails, 'error' => $error, 'variants' => [
+            ClientReplyBuilder::NO_TAG => __('admin.emails.inbound.local.variant.no-tag'),
+            ClientReplyBuilder::NO_REFERENCES => __('admin.emails.inbound.local.variant.no-references'),
+            ClientReplyBuilder::EDITED_SUBJECT => __('admin.emails.inbound.local.variant.edited-subject'),
+            ClientReplyBuilder::HTML_ONLY => __('admin.emails.inbound.local.variant.html-only'),
+            ClientReplyBuilder::ATTACHMENT => __('admin.emails.inbound.local.variant.attachment'),
+        ]];
     }
 
     public function show(string $inboundEmail, InboundMailSettings $settings, InboundReplyRegistry $registry): View

@@ -101,5 +101,9 @@
                 </dl>
             @endcan
         </section>
+
+        @if($localReplies !== null)
+            @include('admin.emails.inbound._local-replies', ['local' => $localReplies])
+        @endif
     </div>
 @endsection

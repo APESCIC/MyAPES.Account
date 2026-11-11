@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminAccessController;
 use App\Http\Controllers\Admin\AdminEmailController;
 use App\Http\Controllers\Admin\AdminGroupController;
 use App\Http\Controllers\Admin\AdminInboundEmailController;
+use App\Http\Controllers\Admin\AdminLocalRepliesController;
 use App\Http\Controllers\Admin\AdminManagedListController;
 use App\Http\Controllers\Admin\AdminMaintenanceController;
 use App\Http\Controllers\Admin\AdminModuleController;
@@ -35,6 +36,7 @@ use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Staff\CallerController;
 use App\Http\Controllers\SubCoreController;
 use App\Http\Controllers\SupportAttachmentController;
+use App\Http\Middleware\EnsureLocalReplyLoop;
 use App\Support\Tour\GuidedTour;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
@@ -406,6 +408,12 @@ Route::middleware([
             Route::put('/emails/inbound/services', [AdminInboundEmailController::class, 'updateServices'])
                 ->middleware('can:admin.emails.manage')
                 ->name('emails.inbound.services.update');
+            Route::post('/emails/inbound/local/reply', [AdminLocalRepliesController::class, 'reply'])
+                ->middleware([EnsureLocalReplyLoop::class, 'can:admin.emails.manage'])
+                ->name('emails.inbound.local.reply');
+            Route::post('/emails/inbound/local/fetch', [AdminLocalRepliesController::class, 'fetch'])
+                ->middleware([EnsureLocalReplyLoop::class, 'can:admin.emails.manage'])
+                ->name('emails.inbound.local.fetch');
             Route::get('/emails/inbound/{inboundEmail}', [AdminInboundEmailController::class, 'show'])
                 ->middleware('can:admin.emails.view')
                 ->whereNumber('inboundEmail')

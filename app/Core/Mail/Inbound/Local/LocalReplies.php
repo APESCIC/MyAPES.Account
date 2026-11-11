@@ -7,6 +7,7 @@ use App\Core\Mail\Inbound\MailboxUnavailable;
 use App\Core\Mail\Inbound\Mailpit\MailpitClient;
 use App\Core\Mail\Inbound\ReplyToken;
 use Illuminate\Mail\Mailer;
+use Illuminate\Support\Carbon;
 use RuntimeException;
 use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mime\Address;
@@ -43,7 +44,7 @@ final class LocalReplies
                 'id' => $id,
                 'subject' => (string) ($message['Subject'] ?? ''),
                 'to' => (string) ($message['To'][0]['Address'] ?? ''),
-                'created' => (string) ($message['Created'] ?? ''),
+                'created' => isset($message['Created']) ? Carbon::parse((string) $message['Created'])->timezone((string) config('app.timezone'))->format('Y-m-d H:i') : '',
                 'url' => $this->mailpit->webUrl($id),
             ];
 
