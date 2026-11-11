@@ -25,6 +25,7 @@ class HelpController extends Controller
         'admin.permissions.view',
         'admin.modules.view',
         'admin.emails.view',
+        'admin.settings.view',
         'admin.maintenance.manage',
     ];
 

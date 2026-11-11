@@ -91,6 +91,16 @@ final class PermissionDescriptions
             'description' => 'Send test emails, resend verification safely, and edit subject and intro wording.',
             'group' => 'Email',
         ],
+        'admin.settings.view' => [
+            'title' => 'View settings',
+            'description' => 'Open Admin → Settings and see the reply mailbox set-up, without its password.',
+            'group' => 'Platform',
+        ],
+        'admin.settings.manage' => [
+            'title' => 'Manage settings',
+            'description' => 'Change Admin → Settings, including the reply mailbox details and password, and test the connection.',
+            'group' => 'Platform',
+        ],
     ];
 
     public static function title(string $permission): string

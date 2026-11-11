@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\AdminManagedListController;
 use App\Http\Controllers\Admin\AdminMaintenanceController;
 use App\Http\Controllers\Admin\AdminModuleController;
 use App\Http\Controllers\Admin\AdminOrganisationModuleController;
+use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminVersionController;
 use App\Http\Controllers\Admin\StaffAdminController;
@@ -408,6 +409,13 @@ Route::middleware([
             Route::put('/emails/inbound/services', [AdminInboundEmailController::class, 'updateServices'])
                 ->middleware('can:admin.emails.manage')
                 ->name('emails.inbound.services.update');
+            Route::get('/settings', [AdminSettingsController::class, 'index'])
+                ->middleware('can:admin.settings.view')
+                ->name('settings.index');
+            Route::get('/settings/{tab}', [AdminSettingsController::class, 'show'])
+                ->middleware('can:admin.settings.view')
+                ->where('tab', '[a-z-]+')
+                ->name('settings.show');
             Route::post('/emails/inbound/local/reply', [AdminLocalRepliesController::class, 'reply'])
                 ->middleware([EnsureLocalReplyLoop::class, 'can:admin.emails.manage'])
                 ->name('emails.inbound.local.reply');

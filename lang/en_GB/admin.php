@@ -430,7 +430,25 @@ return [
         'plugins' => 'Plugins',
         'versions' => 'Versions',
         'emails' => 'Emails',
+        'settings' => 'Settings',
         'maintenance' => 'Maintenance',
+    ],
+    'settings' => [
+        'page_title' => 'Settings | MyAPES Account',
+        'eyebrow' => 'System',
+        'heading' => 'Settings',
+        'intro' => 'Set-up that administrators can change without a deploy. A value set in the server\'s .env file always wins and is shown as set by .env.',
+        'tabs' => [
+            'label' => 'Settings sections',
+            'reply_mailbox' => 'Reply mailbox',
+        ],
+        'reply_mailbox' => [
+            'heading' => 'Reply mailbox',
+            'intro' => 'The shared :address mailbox that receives client replies to ticket and case emails. MyAPES Account checks it every minute over IMAP.',
+            'status_off' => 'Replies by email are off.',
+            'status_no_mailbox' => 'Replies by email are on, but the mailbox is not set up, so nothing is fetched.',
+            'status_on' => 'Replies by email are on and the mailbox is set up.',
+        ],
     ],
     'emails' => [
         'page_title' => 'Admin emails | MyAPES Account',
@@ -631,6 +649,7 @@ return [
             'modules' => 'Organisation modules enablement',
             'plugins' => 'Plugins registry and settings',
             'emails' => 'Email templates and previews',
+            'settings' => 'Reply mailbox and other settings',
             'maintenance' => 'Maintenance mode windows',
         ],
         'keywords' => [
@@ -713,6 +732,7 @@ return [
                 'wording',
                 'test email',
             ],
+            'settings' => ['settings', 'reply mailbox', 'mailbox', 'imap', 'replies by email', 'communications', 'inbound', 'configuration'],
             'maintenance' => ['maintenance', 'downtime', 'outage', 'window', 'maintenance mode', 'scheduled maintenance'],
         ],
     ],
@@ -735,6 +755,8 @@ return [
             'admin_maintenance_manage' => 'Manage maintenance mode',
             'admin_emails_view' => 'View email templates',
             'admin_emails_manage' => 'Manage email templates',
+            'admin_settings_view' => 'View settings',
+            'admin_settings_manage' => 'Manage settings',
         ],
     ],
     'managed_lists' => [

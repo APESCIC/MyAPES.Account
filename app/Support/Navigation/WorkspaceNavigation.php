@@ -275,6 +275,7 @@ final class WorkspaceNavigation
             ],
             'system' => [
                 ['admin.emails', __('admin.nav.emails'), route('admin.emails.index'), 'mail', ['admin.emails.view'], ['admin.emails.*']],
+                ['admin.settings', __('admin.nav.settings'), route('admin.settings.index'), 'settings', ['admin.settings.view'], ['admin.settings.*']],
                 ['admin.maintenance', __('admin.nav.maintenance'), route('admin.maintenance.index'), 'circle-pause', ['admin.maintenance.manage'], ['admin.maintenance.*']],
             ],
             'support' => [

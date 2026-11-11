@@ -179,6 +179,14 @@ final class AdminSearchCatalogue
                 'abilities' => ['admin.emails.view'],
             ],
             [
+                'id' => 'admin.settings',
+                'label' => __('admin.nav.settings'),
+                'description' => __('admin.search.sections.settings'),
+                'url' => route('admin.settings.index'),
+                'keywords_key' => 'admin.search.keywords.settings',
+                'abilities' => ['admin.settings.view'],
+            ],
+            [
                 'id' => 'admin.maintenance',
                 'label' => __('admin.nav.maintenance'),
                 'description' => __('admin.search.sections.maintenance'),
