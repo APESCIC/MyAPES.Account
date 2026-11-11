@@ -116,6 +116,8 @@ try {
         if (-not (Test-Path $installed) -or (Get-Item 'composer.lock').LastWriteTime -gt (Get-Item $installed).LastWriteTime) {
             $run = Invoke-Native { php "$LaragonRoot\bin\composer\composer.phar" install --no-interaction --no-progress }
             if ($run.Code -ne 0) { Stop-Preview 1 "composer install failed: $($run.Output)" }
+            # Composer leaves installed.json alone when nothing changed; mark it current so the next run skips the install.
+            (Get-Item $installed).LastWriteTime = Get-Date
             Write-Ok 'Ran composer install'
         } else { Write-Ok 'Composer dependencies are current' }
     }
