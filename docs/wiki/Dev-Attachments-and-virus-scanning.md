@@ -3,7 +3,7 @@
 # Attachments and virus scanning
 
 **Audience:** developers and admins  
-**Purpose:** how ticket and case uploads work, and how to turn on ClamAV scanning on Cloudron. Introduced in v0.58.0.
+**Purpose:** how ticket and case uploads work, their limits, and what each scan status means. Introduced in v0.58.0.
 
 ## What people can upload
 
@@ -44,24 +44,20 @@ Each new upload is queued for a scan. The scan status is one of:
 | `infected` | Moved to `quarantine/` on the private disk; the uploader is emailed | No |
 | `not_scanned` | No scanner configured, or uploaded before v0.58.0 | Yes |
 
-The scanner is chosen with environment variables:
+No virus scanner is set up for MyAPES Account. `ATTACHMENT_SCANNER` stays at its default, `disabled`, so new files are marked `not_scanned` and can be downloaded. The test suite uses `fake`, which flags `FakeScanner::TEST_SIGNATURE`.
 
-| Variable | Default | Notes |
-| --- | --- | --- |
-| `ATTACHMENT_SCANNER` | `disabled` | `disabled`, `clamd` or `fake` (tests only; flags `FakeScanner::TEST_SIGNATURE`) |
-| `CLAMD_HOST` | empty | Host name or IP of the clamd daemon |
-| `CLAMD_PORT` | `3310` | clamd `TCPSocket` |
-| `CLAMD_TIMEOUT` | `30` | Seconds per scan |
+Files left `pending` (for example from a scan that could not finish) cannot be downloaded. Queue them again with:
 
-With `disabled`, files are marked `not_scanned` and can be downloaded.
+```bash
+php artisan attachments:scan-pending
+```
 
 ## Checking the set-up
 
-`attachments:diagnose` checks the scanner and the PHP upload limits, and exits with an error when something is short:
+`attachments:diagnose` checks the scanner setting and the PHP upload limits, and exits with an error when an upload limit is short. With no scanner, it reports scanning as off rather than as an error.
 
 ```bash
-php artisan attachments:diagnose                     # scanner off is reported, not an error
-php artisan attachments:diagnose --require-scanner   # scanner off is an error
+php artisan attachments:diagnose
 ```
 
 On Cloudron, run it as the web user from the current release:
@@ -71,94 +67,3 @@ cloudron exec --app myaccount.myapes.me.uk -- sudo -u www-data /usr/bin/php8.4 /
 ```
 
 Commands run under the PHP CLI, where `public/.htaccess` does not apply, so the command reports the `.htaccess` value (used by Apache's `mod_php` for web requests) next to the `php.ini` value. The LAMP app runs PHP as `mod_php`, so the `.htaccess` limits are the ones that count for uploads. A real upload of about 45 MB to a test ticket is the final check.
-
-## ClamAV on the Cloudron host
-
-Cloudron has no ClamAV add-on, so clamd runs in the official `clamav/clamav` container on the Cloudron host, on Cloudron's private Docker network. The app reaches it at a fixed address on that network. No port is published, so clamd is not reachable from outside the host.
-
-Cloudron does not manage this container. The `--restart unless-stopped` policy brings it back after a host restart; after Cloudron updates, check it is still running (step 6).
-
-These steps need root SSH on the Cloudron host. Run them in order.
-
-1. **Check memory and the network.** clamd needs about 1.5 GB, and briefly about twice that while it reloads signatures. Note the subnet of the `cloudron` network; it is normally `172.18.0.0/16`.
-   ```bash
-   free -m
-   docker network inspect cloudron --format '{{range .IPAM.Config}}{{.Subnet}}{{end}}'
-   docker ps --filter name=myapes-clamav
-   ```
-   If the subnet is not `172.18.0.0/16`, pick a free address near the top of that subnet and use it in place of `172.18.255.250` below.
-
-2. **Write the clamd configuration.** Start from the image's own `clamd.conf` and allow streams large enough for a 50 MB screencast:
-   ```bash
-   mkdir -p /root/myapes-clamav
-   docker run --rm clamav/clamav:stable cat /etc/clamav/clamd.conf > /root/myapes-clamav/clamd.conf
-   sed -i -E 's/^#?\s*StreamMaxLength.*/StreamMaxLength 55M/' /root/myapes-clamav/clamd.conf
-   grep -q '^StreamMaxLength 55M' /root/myapes-clamav/clamd.conf || echo 'StreamMaxLength 55M' >> /root/myapes-clamav/clamd.conf
-   grep -E '^(TCPSocket|TCPAddr|StreamMaxLength)' /root/myapes-clamav/clamd.conf
-   ```
-   The last command should show `TCPSocket 3310` and `StreamMaxLength 55M`.
-
-3. **Start the container.** No `-p` option, so nothing is published on the host's public interfaces:
-   ```bash
-   docker run -d --name myapes-clamav \
-     --restart unless-stopped \
-     --network cloudron --ip 172.18.255.250 \
-     --memory 3g \
-     -v /root/myapes-clamav/clamd.conf:/etc/clamav/clamd.conf:ro \
-     -v myapes-clamav-db:/var/lib/clamav \
-     clamav/clamav:stable
-   ```
-   The first start downloads the signature database, which takes a few minutes. The `myapes-clamav-db` volume keeps it across restarts and updates.
-
-4. **Wait until it is healthy, and confirm freshclam is updating:**
-   ```bash
-   docker inspect --format '{{.State.Health.Status}}' myapes-clamav   # repeat until "healthy"
-   docker logs --tail 40 myapes-clamav                                # look for freshclam "Database updated" or "up-to-date"
-   ```
-
-5. **Confirm it is private:**
-   ```bash
-   docker port myapes-clamav          # prints nothing: no published ports
-   ss -tlnp | grep ':3310' || true    # nothing listening on the host's own interfaces
-   ```
-
-6. **Fleet check.** After a host restart or a Cloudron update, `docker ps --filter name=myapes-clamav` should show the container `Up (healthy)`.
-
-**Update the image** (signatures update themselves; this is only for new ClamAV releases):
-
-```bash
-docker pull clamav/clamav:stable
-docker rm -f myapes-clamav
-# then run step 3 again
-```
-
-**Remove it** (turn scanning off in the app first, see below):
-
-```bash
-docker rm -f myapes-clamav
-docker volume rm myapes-clamav-db
-```
-
-## Turning scanning on in the app
-
-1. Back up the app: `cloudron backup create --app myaccount.myapes.me.uk`.
-2. Add these lines to `/app/data/shared/.env` (Cloudron File manager or `cloudron exec`), keeping the file's `root:www-data` owner, then restart the app so the configuration cache is rebuilt:
-   ```
-   ATTACHMENT_SCANNER=clamd
-   CLAMD_HOST=172.18.255.250
-   CLAMD_PORT=3310
-   ```
-3. Run `attachments:diagnose --require-scanner`. The virus scanner row should say `OK`.
-4. Upload a test file containing the [EICAR test string](https://www.eicar.org/download-anti-malware-testfile/) to a test ticket. It should show as blocked, and the audit log should have a `support_attachment.infected` entry. Delete the test ticket afterwards.
-5. Scan the files uploaded while scanning was off (run artisan as the web user, as in [Checking the set-up](#checking-the-set-up)):
-   ```bash
-   php artisan attachments:scan-pending --include-not-scanned
-   ```
-
-To turn scanning off again, set `ATTACHMENT_SCANNER=disabled` and restart. New files are then marked `not_scanned` and can be downloaded.
-
-If clamd is down, scans retry for about an hour, then the file stays `pending` and cannot be downloaded. Once clamd is back, queue the pending files again:
-
-```bash
-php artisan attachments:scan-pending
-```
