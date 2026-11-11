@@ -8,6 +8,7 @@ use App\Core\Mail\Inbound\Contracts\InboundMailbox;
 use App\Core\Mail\Inbound\ImapMailbox;
 use App\Core\Mail\Inbound\InboundMailSettings;
 use App\Core\Mail\Inbound\InboundReplyRegistry;
+use App\Core\Mail\Inbound\Mailpit\MailpitMailbox;
 use App\Core\Mail\Inbound\ReplyToken;
 use App\Core\Mail\MailCopyOverrides;
 use App\Core\Mail\MailTemplateRegistry;
@@ -28,7 +29,9 @@ class CoreMailServiceProvider extends ServiceProvider
         $this->app->singleton(InboundReplyRegistry::class);
         $this->app->singleton(InboundMailSettings::class);
         $this->app->singleton(ReplyToken::class);
-        $this->app->bind(InboundMailbox::class, ImapMailbox::class);
+        $this->app->bind(InboundMailbox::class, fn ($app): InboundMailbox => $app->make(InboundMailSettings::class)->usesMailpit()
+            ? $app->make(MailpitMailbox::class)
+            : $app->make(ImapMailbox::class));
         $this->app->bind(MailChannel::class, BrandedMailChannel::class);
     }
 

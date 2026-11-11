@@ -1148,6 +1148,7 @@ run_artisan optimize:clear
 run_artisan_with_retry_for_directory_readiness
 run_artisan myapes:modules:preflight --no-interaction --no-ansi
 run_artisan myapes:accounts:preflight --no-interaction --no-ansi
+run_artisan myapes:inbound-mail:preflight --no-interaction --no-ansi
 trap restore_current_authorization_after_failure EXIT
 if [[ -n "$CURRENT_TARGET_BEFORE" && "$CURRENT_TARGET_BEFORE" != "$RELEASE_DIR" ]]; then
   CURRENT_MAINTENANCE_STATE="$(maintenance_state_for_release "$CURRENT_TARGET_BEFORE")"

@@ -20,6 +20,7 @@ class DeploymentAuthenticationContractTest extends TestCase
             'run_artisan_with_retry_for_directory_readiness',
             'myapes:modules:preflight --no-interaction --no-ansi',
             'myapes:accounts:preflight --no-interaction --no-ansi',
+            'myapes:inbound-mail:preflight --no-interaction --no-ansi',
             'migrate --force',
             'myapes:modules:sync --no-interaction --no-ansi',
             'config:cache',
@@ -73,6 +74,7 @@ class DeploymentAuthenticationContractTest extends TestCase
         $this->assertGreaterThanOrEqual(1, substr_count($script, 'run_artisan_with_retry_for_directory_readiness'));
         $this->assertSame(1, substr_count($script, 'run_artisan myapes:modules:preflight'));
         $this->assertSame(1, substr_count($script, 'run_artisan myapes:accounts:preflight'));
+        $this->assertSame(1, substr_count($script, 'run_artisan myapes:inbound-mail:preflight'));
         $this->assertSame(1, substr_count($script, 'run_artisan myapes:modules:sync'));
         $this->assertSame(1, substr_count($script, 'run_artisan myapes:modules:check'));
         $this->assertSame(1, substr_count($script, 'run_artisan myapes:accounts:check'));
