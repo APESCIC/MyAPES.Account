@@ -3,8 +3,8 @@
 namespace App\Core\Mail\Inbound\Local;
 
 use App\Core\Accounts\User;
-use App\Core\Mail\Inbound\Mailpit\MailpitClient;
 use App\Core\Mail\Inbound\MailboxUnavailable;
+use App\Core\Mail\Inbound\Mailpit\MailpitClient;
 use App\Core\Mail\Inbound\ReplyToken;
 use Illuminate\Mail\Mailer;
 use RuntimeException;
