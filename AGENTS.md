@@ -29,7 +29,7 @@ Laragon 8 on Windows is the only supported local setup. Use this project's own L
 | Profile | [docs/laragon/profile.md](docs/laragon/profile.md): PHP 8.4 NTS through FastCGI (mod_fcgid), MySQL 8.4 (`myapes_account_local`, root, empty password), Node 22, npm 11.10+, Vite port 5175 |
 | Setup | `composer setup` (runs `scripts/laragon-setup.ps1`; safe to run twice) |
 | Live preview gate | Before any development work: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1`, then open <http://myapes-account.test> in Cursor's browser (see [`.cursor/rules/laragon-local-dev.mdc`](.cursor/rules/laragon-local-dev.mdc)) |
-| Daily loop | Laragon started (**Start All**), then `composer run dev` for Vite hot reload |
+| Daily loop | Laragon started (**Start All**), then `scripts\preview.ps1`: Vite hot reload at `http://myapes-account.test:5175` with no window, output in `storage/logs/vite-dev.log`, stopped with `-StopDevServer`. `composer run dev` adds the queue and a log tail and reuses that Vite |
 | Demo data | `composer demo:seed` to load, `composer demo:reset` to wipe and reload; logins in [docs/laragon/demo-data.md](docs/laragon/demo-data.md) |
 | Env file | `.env.example` (Laragon values) |
 

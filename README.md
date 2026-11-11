@@ -261,10 +261,13 @@ The demo data is deterministic, en_GB and clearly fake. It includes test logins 
 **Live preview**
 
 ```powershell
-composer run dev
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1                 # start
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1 -StopDevServer  # stop
 ```
 
-This starts Vite on port 5175, the queue listener and a log tail; Laragon's Apache serves the pages. Saving a Blade template, CSS or JavaScript file updates the browser without a rebuild. On native Windows the log tail follows `storage/logs/laravel.log` with PowerShell, because PHP's Unix-only `pcntl` extension is not available.
+The live preview gate starts Vite at `http://myapes-account.test:5175` in the background, with no window on the taskbar and its output in `storage/logs/vite-dev.log`. Running it again reuses that Vite. Laragon's Apache serves the pages at `http://myapes-account.test`. Saving a Blade template, CSS or JavaScript file updates the browser without a rebuild.
+
+`composer run dev` adds the queue listener and a log tail in a terminal, reusing the running Vite. On native Windows the log tail follows `storage/logs/laravel.log` with PowerShell, because PHP's Unix-only `pcntl` extension is not available.
 
 **Testing**
 
