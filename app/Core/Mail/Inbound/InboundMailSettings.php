@@ -2,11 +2,15 @@
 
 namespace App\Core\Mail\Inbound;
 
+use App\Core\Settings\AppSettings;
 use Illuminate\Support\Facades\Log;
 
 /**
  * Reads the inbound mail settings (#589). Replies by email are offered only
  * when the feature is on and a dedicated token key is set.
+ *
+ * The mailbox fields come from a non-empty .env value first, then Admin →
+ * Settings → Reply mailbox (#737), then the config default.
  */
 final class InboundMailSettings
 {
@@ -14,9 +18,24 @@ final class InboundMailSettings
 
     public const DRIVER_MAILPIT = 'mailpit';
 
+    private const CONFIG_KEYS = [
+        'enabled' => 'inbound-mail.enabled',
+        'address' => 'inbound-mail.address',
+        'plus_addressing' => 'inbound-mail.plus_addressing',
+        'host' => 'inbound-mail.imap.host',
+        'port' => 'inbound-mail.imap.port',
+        'encryption' => 'inbound-mail.imap.encryption',
+        'validate_cert' => 'inbound-mail.imap.validate_cert',
+        'username' => 'inbound-mail.imap.username',
+        'password' => 'inbound-mail.imap.password',
+        'folder' => 'inbound-mail.imap.folder',
+    ];
+
+    public function __construct(private readonly AppSettings $settings) {}
+
     public function repliesEnabled(): bool
     {
-        return (bool) config('inbound-mail.enabled')
+        return (bool) $this->setting('enabled')
             && $this->tokenKey() !== ''
             && $this->mailbox() !== null;
     }
@@ -76,7 +95,7 @@ final class InboundMailSettings
 
     public function address(): string
     {
-        return strtolower(trim((string) config('inbound-mail.address')));
+        return strtolower(trim((string) $this->setting('address')));
     }
 
     /**
@@ -96,7 +115,7 @@ final class InboundMailSettings
 
     public function plusAddressing(): bool
     {
-        return (bool) config('inbound-mail.plus_addressing');
+        return (bool) $this->setting('plus_addressing');
     }
 
     public function tokenKey(): string
@@ -122,7 +141,24 @@ final class InboundMailSettings
 
     public function imap(string $key): string
     {
-        return trim((string) config('inbound-mail.imap.'.$key));
+        return trim((string) (isset(self::CONFIG_KEYS[$key]) ? $this->setting($key) : config('inbound-mail.imap.'.$key)));
+    }
+
+    public function validateCert(): bool
+    {
+        return (bool) $this->setting('validate_cert');
+    }
+
+    /**
+     * A non-empty .env value (already in config), else the value saved in Admin → Settings, else the config default.
+     */
+    private function setting(string $key): mixed
+    {
+        if ($this->settings->source(InboundMailboxSettings::GROUP, $key) === AppSettings::SOURCE_DATABASE) {
+            return $this->settings->get(InboundMailboxSettings::GROUP, $key);
+        }
+
+        return config(self::CONFIG_KEYS[$key]);
     }
 
     public function authservId(): string

@@ -12,7 +12,7 @@ use Webklex\PHPIMAP\Message;
 
 /**
  * The communications mailbox over IMAPS (#579). Credentials come from the
- * environment only and never appear in errors or logs.
+ * environment or Admin → Settings (#737) and never appear in errors or logs.
  */
 final class ImapMailbox implements InboundMailbox
 {
@@ -73,7 +73,7 @@ final class ImapMailbox implements InboundMailbox
                 'host' => $this->settings->imap('host'),
                 'port' => (int) $this->settings->imap('port'),
                 'encryption' => $this->settings->imap('encryption') ?: 'ssl',
-                'validate_cert' => (bool) config('inbound-mail.imap.validate_cert'),
+                'validate_cert' => $this->settings->validateCert(),
                 'username' => $this->settings->imap('username'),
                 'password' => $this->settings->imap('password'),
                 'protocol' => 'imap',
