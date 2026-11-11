@@ -27,5 +27,6 @@ Merge with a merge commit (no squash), only after Bambie has approved the milest
 2. Tag the merge commit `vX.Y.Z` and push it; `release.yml` publishes the GitHub Release. Then deploy that tag by hand: `gh workflow run deploy-cloudron.yml --ref vX.Y.Z` ([deploy-cloudron.yml](https://github.com/APESCIC/MyAPES.Account/blob/main/.github/workflows/deploy-cloudron.yml)).
 3. The GitHub Release is titled `v{VERSION} <milestone name>` (for example `v0.60.0 Repository standards and Cloudron mailbox`), with tag `v{VERSION}`. The deploy refuses a tag without it.
 4. Check `/healthz` and the change log at https://myaccount.myapes.me.uk/change-log.
+5. The milestone closes by itself. After a successful deploy, [milestone-close.yml](https://github.com/APESCIC/MyAPES.Account/blob/main/.github/workflows/milestone-close.yml) closes any milestone whose issues are all closed (closing a finished epic first). A milestone where nothing shipped closes without a deploy. To check by hand, run `composer milestone:close-ready -- --dry-run`.
 
 Deploy secrets live in the `cloudron-deploy` GitHub environment. Never print or commit them. Rollback is forward-only; see the README's maintenance section.

@@ -27,6 +27,10 @@ Usage: php scripts/milestone-version <command> [arguments]
   bump <vX.Y.Z>                  Set every version field in scripts/MilestoneVersion/fields.json, once per
       [--dry-run | --check]      milestone; the version must be the next milestone's (--offline skips that lookup)
       [--offline]
+  close-ready                    Close every open milestone with no open issues whose tag was deployed (or where
+      [--tag vX.Y.Z |            nothing shipped), closing a finished Epic first; --tag or --milestone checks one
+       --milestone "<title>"]
+      [--dry-run]
 
 Composer: composer milestone:next, composer milestone:bump -- v1.3.0, composer milestone:check-title -- "[v1.3.0] Fix login (#42)"
 Rule: .cursor/rules/version-shipping.mdc
@@ -68,6 +72,7 @@ TXT;
                 'check-branch' => $this->checkBranch($positional),
                 'check-release' => $this->checkRelease($positional, $options),
                 'bump' => $this->bump($positional, $options),
+                'close-ready' => $this->closeReady($options),
                 null, 'help', '--help', '-h' => $this->usage($command === null ? self::USAGE : self::OK),
                 default => $this->usage(self::USAGE, sprintf('Unknown command "%s".', $command)),
             };
@@ -305,6 +310,66 @@ TXT;
         }
         foreach ($fields->notes() as $note) {
             $this->line('Next: '.$note);
+        }
+
+        return self::OK;
+    }
+
+    /**
+     * @param  array<string, string|true>  $options
+     */
+    private function closeReady(array $options): int
+    {
+        $github = $this->github();
+        if (! $github instanceof GitHubWrites) {
+            throw new RuntimeException('close-ready needs a GitHub client that can close milestones.');
+        }
+
+        $milestones = $github->openMilestones();
+        $wanted = null;
+        if (isset($options['tag'])) {
+            $version = $this->parseVersionOption((string) $options['tag']);
+            $milestones = array_filter($milestones, fn (array $m): bool => SemVer::fromMilestoneTitle($m['title'])?->equals($version) ?? false);
+            $wanted = $version->tag();
+        } elseif (isset($options['milestone'])) {
+            $wanted = trim((string) $options['milestone']);
+            $milestones = array_filter($milestones, fn (array $m): bool => $m['title'] === $wanted || (string) $m['number'] === $wanted);
+        }
+        if ($milestones === []) {
+            $this->line($wanted !== null ? sprintf('close-ready: no open milestone for "%s".', $wanted) : 'close-ready: no open milestones.');
+
+            return self::OK;
+        }
+
+        $dryRun = isset($options['dry-run']);
+        foreach ($milestones as $milestone) {
+            $decision = MilestoneCloser::decide(
+                $milestone,
+                $github->milestoneIssues($milestone['number']),
+                fn (SemVer $version): ?string => $github->successfulDeployRun($version->tag()),
+            );
+
+            if (! $decision['close']) {
+                $this->line(sprintf('Kept open "%s": %s.', $milestone['title'], $decision['reason']));
+
+                continue;
+            }
+
+            $epics = $decision['epics'] === [] ? '' : ' and Epic #'.implode(', #', $decision['epics']);
+            if ($dryRun) {
+                $this->line(sprintf('Would close "%s"%s: %s.', $milestone['title'], $epics, $decision['reason']));
+
+                continue;
+            }
+
+            foreach ($decision['epics'] as $epic) {
+                $github->commentIssue($epic, $decision['epicReason'] === 'completed'
+                    ? sprintf('Closed automatically: every sub-issue is closed and %s.', $decision['reason'])
+                    : sprintf('Closed automatically as not planned: %s.', $decision['reason']));
+                $github->closeIssue($epic, $decision['epicReason']);
+            }
+            $github->closeMilestone($milestone['number'], sprintf('Closed automatically on %s: %s.', gmdate('Y-m-d'), $decision['reason']));
+            $this->line(sprintf('Closed "%s"%s: %s.', $milestone['title'], $epics, $decision['reason']));
         }
 
         return self::OK;

@@ -36,7 +36,7 @@ This is the one rule for how work ships in this repository. `AGENTS.md`, `CONTRI
 3. **Merge.** Set the version fields and the release record (above) as the last commit, `chore: release vX.Y.Z`. `gh pr ready`, wait for the checks to go green, then ask the ship-gate question (`ship-gate` skill). On "merge": `gh pr merge --merge`, one merge commit, never a squash or rebase.
 4. **Release.** Tag the merge commit `vX.Y.Z` and push the tag. `release.yml` checks the tag matches `VERSION` and is on `main`, then publishes the GitHub Release titled `v<version> <milestone name>` with notes from `releases.json`.
 5. **Deploy.** One deploy of that tag: `gh workflow run deploy-cloudron.yml --ref vX.Y.Z`, then `gh run watch <id> --exit-status`. It refuses a tag without a published Release. Evidence is the run URL and `https://myaccount.myapes.me.uk/healthz` showing `version` = `VERSION` and `release` = the tag's commit.
-6. **Close out** the issues, the Epic and the milestone, then merge `origin/main` into `dependencies`.
+6. **Close out** the issues, the Epic and the milestone, then merge `origin/main` into `dependencies`. The milestone closes itself: `milestone-close.yml` runs after the successful deploy and closes it (and a finished Epic) once no issue is open. Check it with `composer milestone:close-ready -- --tag vX.Y.Z`, which closes it if the workflow has not, and confirm the milestone's `state` is `closed`. Never ask before closing a milestone that meets this rule; a milestone where nothing shipped (every issue closed as not planned or moved out) closes the same way without a deploy.
 
 ## Hotfixes
 

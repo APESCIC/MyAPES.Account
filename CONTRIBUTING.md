@@ -15,3 +15,4 @@ The rule, with the names, the version fields, the flow and the hotfix route, is 
 - `composer milestone:next` shows the next version, its branch and its pull request and release titles.
 - `composer milestone:check-title -- "<title>"` and `composer milestone:check-branch -- "<branch>"` tell you what is wrong. The `milestone-version-check` CI job runs them on every pull request.
 - To check your branch name before each push, run `git config core.hooksPath .githooks` once.
+- Milestones close by themselves after the deploy: the `milestone-close` workflow runs `composer milestone:close-ready` once all of a milestone's issues are closed. Add `-- --dry-run` to see what it would do.

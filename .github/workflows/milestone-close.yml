@@ -1,0 +1,49 @@
+name: milestone-close
+
+# Closes every open milestone with no open issues whose vX.Y.Z tag was deployed, or where nothing shipped,
+# closing a finished Epic first. See .cursor/rules/version-shipping.mdc.
+# Every run checks all open milestones: runs share one queue, so a newer run can replace a waiting one.
+
+on:
+  workflow_run:
+    workflows: [Deploy MyAPES Account to Cloudron]
+    types: [completed]
+  issues:
+    types: [closed, demilestoned]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Only report what would close
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+concurrency:
+  group: milestone-close
+  cancel-in-progress: false
+
+jobs:
+  close:
+    name: Close finished milestones
+    if: >-
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+      || (github.event_name == 'issues' && (github.event.milestone.title || github.event.issue.milestone.title))
+      || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out the script
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts
+
+      - name: Close milestones that are ready
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          DRY_RUN: ${{ inputs.dry_run && '--dry-run' || '' }}
+        run: php scripts/milestone-version close-ready ${DRY_RUN:+"$DRY_RUN"}
