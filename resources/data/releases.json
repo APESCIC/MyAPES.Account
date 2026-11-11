@@ -35,7 +35,7 @@
     ],
     "known_limitations": [
       "The new release and deploy workflows run only on a release tag, so they are first exercised by this release.",
-      "Replies by email stay off until the mailbox settings are added (v0.65.0)."
+      "Replies by email stay off until the mailbox settings are added (v0.61.0)."
     ],
     "rollback": "Deploy the previous release tag with deploy-cloudron.yml; this release adds no database migrations.",
     "provenance": "Milestone v0.60.0 Beta: Repository standards and Cloudron mailbox, epic #746 with issues #744 and #577, pull request #747 (which replaces #745, closed when its branch was renamed).",
