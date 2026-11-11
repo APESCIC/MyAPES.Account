@@ -5,9 +5,11 @@ namespace App\Console\Commands;
 use App\Core\Accounts\User;
 use App\Core\Mail\Inbound\InboundMailSettings;
 use App\Core\Mail\Inbound\InboundReplyRegistry;
+use App\Core\Mail\Inbound\Local\ClientReplyBuilder;
+use App\Core\Mail\Inbound\Local\OriginalEmail;
+use App\Core\Mail\Inbound\MailReplyThread;
 use App\Core\Mail\Inbound\ReplyToken;
 use Illuminate\Console\Command;
-use Illuminate\Support\Str;
 
 /**
  * Writes a realistic reply .eml for local testing (#587), so the whole
@@ -23,7 +25,7 @@ class MakeInboundSampleReply extends Command
 
     protected $description = 'Write a sample email reply to a ticket or case for local testing';
 
-    public function handle(InboundMailSettings $settings, InboundReplyRegistry $registry, ReplyToken $tokens): int
+    public function handle(InboundMailSettings $settings, InboundReplyRegistry $registry, ClientReplyBuilder $builder): int
     {
         if (! $this->laravel->environment(['local', 'testing'])) {
             $this->components->error('Sample replies are for local testing only.');
@@ -60,35 +62,22 @@ class MakeInboundSampleReply extends Command
             mkdir($dir, 0775, true);
         }
 
-        file_put_contents($path, $this->message($settings, $prefix, $recordId, $user, (string) $this->option('body')));
+        $original = new OriginalEmail(
+            messageId: (string) MailReplyThread::query()
+                ->where('record_prefix', $prefix)
+                ->where('record_id', $recordId)
+                ->where('user_id', $user->id)
+                ->latest('id')
+                ->value('message_id'),
+            subject: ReplyToken::subjectTag($prefix, $recordId),
+            replyTo: $settings->replyAddress($prefix, $recordId, (int) $user->id),
+            recipient: (string) $user->email,
+        );
+
+        file_put_contents($path, $builder->raw($builder->build($original, $user, (string) $this->option('body'))));
         $this->components->info('Wrote '.$path);
         $this->line('Feed it in with: php artisan tickets:inbound-ingest "'.$path.'"');
 
         return self::SUCCESS;
-    }
-
-    private function message(InboundMailSettings $settings, string $prefix, int $recordId, User $user, string $body): string
-    {
-        $server = $settings->authservId() !== '' ? $settings->authservId() : 'localhost';
-        $domain = substr((string) strrchr((string) $user->email, '@'), 1) ?: 'example.org';
-        $lines = [
-            'Return-Path: <'.$user->email.'>',
-            'Authentication-Results: '.$server.'; spf=pass smtp.mailfrom='.$domain.'; dkim=pass header.d='.$domain.'; dmarc=pass header.from='.$domain,
-            'From: '.$user->name.' <'.$user->email.'>',
-            'To: '.$settings->replyAddress($prefix, $recordId, (int) $user->id),
-            'Subject: Re: '.ReplyToken::subjectTag($prefix, $recordId),
-            'Date: '.now()->toRfc2822String(),
-            'Message-ID: <sample.'.Str::lower(Str::random(16)).'@'.$domain.'>',
-            'MIME-Version: 1.0',
-            'Content-Type: text/plain; charset=UTF-8',
-            '',
-            $body,
-            '',
-            '> '.__('mail.reply_by_email.marker'),
-            '> (quoted text from the original email)',
-            '',
-        ];
-
-        return implode("\r\n", $lines);
     }
 }
