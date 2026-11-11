@@ -77,7 +77,7 @@ return [
         'inbound' => [
             'reply_not_posted' => [
                 'name' => 'Email reply not added',
-                'description' => 'Sent, at most once an hour, when someone replies by email to a closed ticket or case.',
+                'description' => 'Sent, at most once an hour, when an account holder replies by email to a closed ticket or case, or with a reply that cannot be matched to one.',
             ],
         ],
     ],
@@ -135,6 +135,8 @@ return [
     'reply_not_posted' => [
         'subject' => 'Your email reply to :reference was not added',
         'line_closed' => ':reference is closed, so your email reply was not added.',
+        'line_unmatched' => 'We could not tell which ticket or case your email reply was for, so it was not added yet. Our staff will check it.',
+        'unmatched_reference' => 'a MyAPES Account email',
         'line_next' => 'If you still need help, log in to see the latest, or open a new request.',
         'action' => 'Log in to view',
     ],

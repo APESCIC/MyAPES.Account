@@ -10,8 +10,9 @@ use Illuminate\Notifications\Notification;
 use Symfony\Component\Mime\Email;
 
 /**
- * Tells someone their email reply was not added, for example because the
- * ticket or case is closed (#582). Sent at most once an hour per sender and
+ * Tells someone their email reply was not added, because the ticket or case
+ * is closed (#582) or because it could not be matched to one (#749). Sent at
+ * most once an hour per sender and
  * marked as an automatic reply so it never starts a mail loop (#583).
  */
 class EmailReplyNotPostedNotification extends Notification implements ShouldQueue
@@ -20,6 +21,8 @@ class EmailReplyNotPostedNotification extends Notification implements ShouldQueu
     use Queueable;
 
     public const REASON_CLOSED = 'closed';
+
+    public const REASON_UNMATCHED = 'unmatched';
 
     public function __construct(
         private readonly string $reference,

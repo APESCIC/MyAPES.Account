@@ -440,6 +440,10 @@ Route::middleware([
                 ->middleware('can:admin.emails.manage')
                 ->whereNumber('inboundEmail')
                 ->name('emails.inbound.retry');
+            Route::post('/emails/inbound/{inboundEmail}/attach', [AdminInboundEmailController::class, 'attach'])
+                ->middleware('can:admin.emails.manage')
+                ->whereNumber('inboundEmail')
+                ->name('emails.inbound.attach');
             Route::post('/emails/inbound/{inboundEmail}/discard', [AdminInboundEmailController::class, 'discard'])
                 ->middleware('can:admin.emails.manage')
                 ->whereNumber('inboundEmail')
