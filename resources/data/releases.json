@@ -10,6 +10,7 @@
       "Releases are now published when the version tag is pushed, and only a published release tag can be deployed to Cloudron.",
       "Automated security checks now use only GitHub's free tools: CodeQL, dependency review and Dependabot.",
       "Local development runs in Laragon with PHP through FastCGI, behind a live preview gate that loads the latest code before any work starts.",
+      "The preview gate starts the Vite dev server silently, by the site's host name rather than an IP address, with its own log and a switch to stop it, and skips composer install when nothing has changed.",
       "Each milestone is versioned, branched, released and deployed once, by its version number, with checks on pull request titles and branch names.",
       "The communications mailbox for replies by email now exists on Cloudron, and the mail guide gives the app's env file as /app/data/shared/.env. Replies by email stay off until their settings are added."
     ],
