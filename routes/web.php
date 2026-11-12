@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminAccessController;
+use App\Http\Controllers\Admin\AdminApiClientController;
 use App\Http\Controllers\Admin\AdminEmailController;
 use App\Http\Controllers\Admin\AdminGroupController;
 use App\Http\Controllers\Admin\AdminInboundEmailController;
@@ -432,6 +433,18 @@ Route::middleware([
             Route::post('/settings/integrations/{integration}/test', [AdminIntegrationController::class, 'test'])
                 ->middleware(['can:admin.settings.manage', 'throttle:10,1'])
                 ->name('settings.integrations.test');
+            Route::post('/settings/api-clients', [AdminApiClientController::class, 'store'])
+                ->middleware(['can:admin.settings.manage', 'throttle:20,1'])
+                ->name('settings.api-clients.store');
+            Route::put('/settings/api-clients/{apiClient}', [AdminApiClientController::class, 'update'])
+                ->middleware('can:admin.settings.manage')
+                ->name('settings.api-clients.update');
+            Route::post('/settings/api-clients/{apiClient}/rotate', [AdminApiClientController::class, 'rotate'])
+                ->middleware(['can:admin.settings.manage', 'throttle:20,1'])
+                ->name('settings.api-clients.rotate');
+            Route::post('/settings/api-clients/{apiClient}/revoke', [AdminApiClientController::class, 'revoke'])
+                ->middleware('can:admin.settings.manage')
+                ->name('settings.api-clients.revoke');
             Route::post('/emails/inbound/local/reply', [AdminLocalRepliesController::class, 'reply'])
                 ->middleware(['can:admin.emails.manage', EnsureLocalReplyLoop::class])
                 ->name('emails.inbound.local.reply');
