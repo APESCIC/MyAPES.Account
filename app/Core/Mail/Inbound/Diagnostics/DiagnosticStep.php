@@ -15,7 +15,7 @@ enum DiagnosticStep: string
 
     public function label(): string
     {
-        return __('admin.emails.import.steps.'.$this->value);
+        return __("admin.emails.import.steps.{$this->value}");
     }
 
     /**

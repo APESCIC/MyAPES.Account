@@ -10,6 +10,6 @@ enum StepStatus: string
 
     public function label(): string
     {
-        return __('admin.emails.import.step_status.'.$this->value);
+        return __("admin.emails.import.step_status.{$this->value}");
     }
 }

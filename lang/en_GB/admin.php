@@ -760,6 +760,17 @@ return [
             'test_failed' => 'Connection test failed at :step: :reason',
             'test_limited' => 'You have run :count connection tests in the last 10 minutes. Try again in :minutes minutes.',
             'test_help' => 'Tests the values in this form without saving them. Leave the password blank to use the saved one.',
+            'what_to_try' => 'What to try:',
+            'server_folders' => 'Folders on the server: :folders.',
+            'details' => [
+                'messages' => 'Folder',
+                'messages_value' => ':count messages, :unseen unread',
+                'capabilities' => 'Server features',
+                'yes' => 'yes',
+                'no' => 'no',
+                'certificate' => 'Certificate',
+                'certificate_value' => ':name, valid until :date',
+            ],
             'errors' => [
                 'dns_not_found' => [
                     'message' => 'The server name was not found.',

@@ -101,6 +101,8 @@ Facts the rule relies on:
 - 2026-11-12: email import uses the Cloudron `communications@myapes.me.uk` mailbox over IMAP on `mail.cloudron.apes.org.uk:993` SSL/TLS (Cloudron has no IMAP on 143), polled every minute with backoff, and imported mail moves to `Processed` or `Failed` folders emptied after 30 days. Decided by Bambie (epic #770).
 - The milestone branch is always the one `composer milestone:next` prints, even when an issue body names a slightly different slug.
 - `scripts\preview.ps1` can fail `npm ci` with `EPERM ... lightningcss.win32-x64-msvc.node` when this repo's Vite is still running from an older checkout. Run `scripts\preview.ps1 -StopDevServer`, then the gate again.
+- The "SQLite test and package" check on a milestone PR stays red until the `chore: release vX.Y.Z` commit prepends the release record: `myapes:changelog-validate --base-ref` runs before the tests. Run `composer test` locally while the PR is a draft.
+- CI runs `php artisan lang:check --fail-on-missing`, which only skips keys containing `$` or `{`. Build dynamic keys with interpolation (`__("admin.x.{$type}.message")`), not concatenation, or the check reports them missing.
 - `gh` with `--jq` in Windows PowerShell 5.1 loses the inner double quotes; pipe `--json` output to `ConvertFrom-Json` instead.
 
 ## Where to find things

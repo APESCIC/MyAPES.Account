@@ -22,12 +22,12 @@ enum FailureType: string
 
     public function message(): string
     {
-        return __('admin.emails.import.errors.'.$this->value.'.message');
+        return __("admin.emails.import.errors.{$this->value}.message");
     }
 
     public function hint(): string
     {
-        return __('admin.emails.import.errors.'.$this->value.'.hint');
+        return __("admin.emails.import.errors.{$this->value}.hint");
     }
 
     public function isWarning(): bool
