@@ -82,7 +82,7 @@ class MailboxFailureTypesTest extends TestCase
         $this->assertSame(['MOVE', 'UIDPLUS'], $report->details['missing_features']);
         $this->assertTrue(FailureType::FeatureMissing->isWarning());
 
-        $this->testFromThePage()
+        $this->submitTestForm()
             ->assertSee('data-warning="feature_missing"', false)
             ->assertSee(__('admin.emails.import.errors.feature_missing.hint', ['features' => 'MOVE, UIDPLUS']));
     }
@@ -113,7 +113,7 @@ class MailboxFailureTypesTest extends TestCase
     {
         $this->server->loginResponse = 'NO [AUTHENTICATIONFAILED] Authentication failed for '.self::USERNAME;
 
-        $this->testFromThePage()
+        $this->submitTestForm()
             ->assertSee('role="status"', false)
             ->assertSee(__('admin.emails.import.errors.login_failed.message'))
             ->assertSee(__('admin.emails.import.errors.login_failed.hint'))
@@ -126,20 +126,20 @@ class MailboxFailureTypesTest extends TestCase
     {
         $this->server->folders = ['Archive', 'Sent'];
 
-        $this->testFromThePage()
+        $this->submitTestForm()
             ->assertSee(__('admin.emails.import.errors.folder_not_found.message'))
             ->assertSee(__('admin.emails.import.server_folders', ['folders' => 'Archive, Sent']));
     }
 
     public function test_a_successful_test_shows_counts_capabilities_and_certificate_expiry(): void
     {
-        $this->testFromThePage()
+        $this->submitTestForm()
             ->assertSee(__('admin.emails.import.details.messages_value', ['count' => 3, 'unseen' => 1]))
             ->assertSee('IDLE: yes, MOVE: yes, UIDPLUS: yes')
             ->assertSee(__('admin.emails.import.details.certificate_value', ['name' => 'mail.example.test', 'date' => '2030-01-01']));
     }
 
-    private function test_from_the_page(): TestResponse
+    private function submitTestForm(): TestResponse
     {
         $admin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
 
