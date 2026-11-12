@@ -96,7 +96,7 @@ Ticket and case owners and staff can answer a ticket or case email by replying t
 
 ### Settings
 
-Everything comes from the environment (`config/inbound-mail.php`); nothing secret is committed. With `INBOUND_MAIL_ENABLED=false` or no token key, outgoing mail keeps the no-reply Reply-To and the poller does nothing.
+Administrators enter the mailbox in **Admin → Settings → Reply mailbox** (v0.61.0): on/off, address, IMAP server, port, encryption, certificate check, username, password (write-only, encrypted with the app key in `app_settings`), folder and whether plus-addressing is delivered. A non-empty value in the environment (`config/inbound-mail.php`, read through `config/app-settings.php`) always wins and the field shows **Set by .env**. The token key, authserv-id and limits are environment-only. Nothing secret is committed. With replies off or no token key, outgoing mail keeps the no-reply Reply-To and the poller does nothing.
 
 | Variable | Meaning |
 | --- | --- |
@@ -143,11 +143,17 @@ Plugins register handlers with `PluginServiceProvider::inboundReplyHandlers()`; 
 
 `inbound-mail:prune` runs daily. After `INBOUND_MAIL_RETENTION_DAYS` it deletes the raw message and clears the subject, address, name, notes and Message-ID, keeping status, reason, record, sender account id, hashed address and domain. Message-ID threads are deleted after 180 days. The privacy notice has a "Replies by email" section.
 
-### Cloudron setup
+### Cloudron mailbox runbook
 
-1. Create the `communications@myapes.me.uk` mailbox in the Cloudron dashboard (Email → myapes.me.uk → Mailboxes; the `cloudron` CLI cannot create mailboxes), with a Mail app password for IMAP. Check that mail to `communications+test@myapes.me.uk` arrives (plus-addressing). Record the result on the ticket.
-2. Set the `INBOUND_MAIL_*` variables in the app's env file, `/app/data/shared/.env` (never in the repository or in chat), including a new `INBOUND_MAIL_TOKEN_KEY` (`openssl rand -hex 32`) and `INBOUND_MAIL_AUTHSERV_ID` set to the name the Cloudron mail server writes in `Authentication-Results`.
-3. Restart the app, send a real reply, and check it on Admin → Emails → Inbound.
+Never put a password, token or key in an issue, a commit, chat or a log. Record results on [#754](https://github.com/APESCIC/MyAPES.Account/issues/754) (values only).
+
+1. **Mailbox and owner.** In the Cloudron dashboard (Email → myapes.me.uk → Mailboxes; the `cloudron` CLI cannot create mailboxes) the `communications@myapes.me.uk` mailbox is owned by a dedicated service user, not a person and not the `myapesaccount.staff` group. Give that user its own Mail app password for IMAP and store it only in APES Vault, collection 'API Keys & Tokens'.
+2. **Plus-addressing.** From a mailbox outside Cloudron, send one email to `communications+v060test@myapes.me.uk` (check the spelling). If it arrives, plus-addressing is delivered: tick **Plus-addressing delivered** in Admin → Settings → Reply mailbox (or set `INBOUND_MAIL_PLUS_ADDRESSING=true`). If it bounces, leave it off (`false`): Reply-To becomes the plain address and replies are matched by their stored Message-ID and the `[MYAPES-T-1234]` subject tag. Once the mailbox is set up, **Send a plus-address probe** on the same tab repeats this check from inside the app.
+3. **Spam folder.** The poller reads INBOX only. Look in the mailbox's Spam folder for the test emails; if they land there, fix the spam rule before switching replies on.
+4. **Authentication-Results.** Open a received test email's raw headers and note the server name at the start of its `Authentication-Results` header (name only). Set `INBOUND_MAIL_AUTHSERV_ID` to it, so only that server's results are trusted.
+5. **Token key.** Set `INBOUND_MAIL_TOKEN_KEY` (`openssl rand -hex 32`) and `INBOUND_MAIL_AUTHSERV_ID` in the app's env file, `/app/data/shared/.env`, then restart the app. The token key stays in the env file; it is not in Admin → Settings.
+6. **Mailbox details.** In Admin → Settings → Reply mailbox enter the IMAP server (the Cloudron mail server, `my.cloudron.apes.org.uk`, port 993, SSL), the username `communications@myapes.me.uk`, the Mail app password from APES Vault and the folder `INBOX`, tick **Turn on replies by email** and save. The password is encrypted in the database and never shown again. Then press **Test connection**. Values in `/app/data/shared/.env` still win and show as **Set by .env**; remove them there if you want to manage them in Admin.
+7. **Check.** Reply to a ticket email from a client account and check it on Admin → Emails → Inbound (and on the ticket).
 
 ### Local testing
 
