@@ -58,7 +58,10 @@ final class MailpitMailbox implements InboundMailbox
                     return $this->client->raw($this->id);
                 }
 
-                public function delete(): void
+                /**
+                 * Mailpit has no folders: a handled message is simply deleted.
+                 */
+                public function moveTo(string $folder): void
                 {
                     $this->mailbox->markForDeletion($this->id);
                 }
@@ -72,6 +75,13 @@ final class MailpitMailbox implements InboundMailbox
     public function uidValidity(): ?int
     {
         return null;
+    }
+
+    public function ensureFolders(array $folders): void {}
+
+    public function purge(string $folder, int $olderThanDays): int
+    {
+        return 0;
     }
 
     public function expunge(): void

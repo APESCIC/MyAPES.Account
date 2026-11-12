@@ -12,6 +12,9 @@ interface MailboxMessage
 
     public function raw(): string;
 
-    /** Mark the message for deletion once it is safely stored. */
-    public function delete(): void;
+    /**
+     * Moves the message out of the folder being read, for example to Processed (#776).
+     * Takes effect once the mailbox is expunged.
+     */
+    public function moveTo(string $folder): void;
 }

@@ -59,6 +59,9 @@ return [
 
     'retention_days' => (int) env('INBOUND_MAIL_RETENTION_DAYS', 30),
 
+    // Mail in the mailbox's Processed and Failed folders is deleted after this many days (#776).
+    'folder_retention_days' => (int) env('INBOUND_MAIL_FOLDER_RETENTION_DAYS', 30),
+
     'rate_limits' => [
         'per_sender_per_hour' => (int) env('INBOUND_MAIL_SENDER_LIMIT', 20),
         'per_record_per_hour' => (int) env('INBOUND_MAIL_RECORD_LIMIT', 30),

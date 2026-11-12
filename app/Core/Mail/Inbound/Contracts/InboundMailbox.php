@@ -26,7 +26,23 @@ interface InboundMailbox
     public function uidValidity(): ?int;
 
     /**
-     * Permanently remove messages marked for deletion.
+     * Creates any of these folders that are missing (#776).
+     *
+     * @param  list<string>  $folders
+     *
+     * @throws MailboxUnavailable
+     */
+    public function ensureFolders(array $folders): void;
+
+    /**
+     * Deletes messages older than the given number of days from a folder and returns how many (#776).
+     *
+     * @throws MailboxUnavailable
+     */
+    public function purge(string $folder, int $olderThanDays): int;
+
+    /**
+     * Completes moves and deletions, then disconnects.
      *
      * @throws MailboxUnavailable
      */

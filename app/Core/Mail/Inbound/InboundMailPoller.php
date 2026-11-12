@@ -3,17 +3,20 @@
 namespace App\Core\Mail\Inbound;
 
 use App\Core\Mail\Inbound\Contracts\InboundMailbox;
+use App\Core\Mail\Inbound\Contracts\MailboxMessage;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
  * Moves new mail from the communications mailbox into the app (#579).
  *
- * A message is deleted from the mailbox only after it is stored (or was
- * stored before). If storing fails, or the mailbox is unreachable, it stays
- * where it is and the next poll tries again. Each poll fetches only UIDs
- * above the last one handled (#777); when the server's UIDVALIDITY changes
- * the folder is read again and the Message-ID check skips duplicates.
+ * A message leaves the folder only after it is stored (or was stored
+ * before): it moves to Processed, so it stays visible in the mailbox (#776).
+ * If storing fails it stays where it is and the next poll tries again; after
+ * the third failure it moves to Failed. Each poll fetches only UIDs above
+ * the last one handled (#777); when the server's UIDVALIDITY changes the
+ * folder is read again and the Message-ID check skips duplicates.
  */
 final class InboundMailPoller
 {
@@ -22,6 +25,12 @@ final class InboundMailPoller
     public const RESULT_UNAVAILABLE = 'unavailable';
 
     public const RESULT_POLLED = 'polled';
+
+    public const FOLDER_PROCESSED = 'Processed';
+
+    public const FOLDER_FAILED = 'Failed';
+
+    public const MAX_STORE_ATTEMPTS = 3;
 
     public function __construct(
         private readonly InboundMailSettings $settings,
@@ -54,11 +63,13 @@ final class InboundMailPoller
     private function fetch(array $counts): array
     {
         try {
+            $this->mailbox->ensureFolders([self::FOLDER_PROCESSED, self::FOLDER_FAILED]);
             $uidValidity = $this->mailbox->uidValidity();
-            $state = InboundMailboxState::for($this->settings->imap('username') ?: $this->settings->address(), $this->settings->imap('folder') ?: 'INBOX');
+            $state = InboundMailboxState::for($this->mailboxKey(), $this->settings->imap('folder') ?: 'INBOX');
             $after = $state->resumeAfter($uidValidity);
             $handled = $after ?? 0;
             $pending = [];
+            $moved = 0;
 
             foreach ($this->mailbox->messages(max(1, (int) config('inbound-mail.poll_batch', 50)), $after) as $message) {
                 $counts['fetched']++;
@@ -68,22 +79,29 @@ final class InboundMailPoller
                     $stored = $this->store->store($message->raw());
                 } catch (Throwable $exception) {
                     $counts['failed']++;
-                    if ($uid !== null) {
-                        $pending[] = $uid;
-                    }
                     Log::warning('Inbound email could not be stored; it stays in the mailbox.', [
                         'exception' => class_basename($exception),
                     ]);
+
+                    if ($this->giveUp($message, $uidValidity)) {
+                        $message->moveTo(self::FOLDER_FAILED);
+                        $moved++;
+                        $handled = max($handled, (int) $uid);
+                    } elseif ($uid !== null) {
+                        $pending[] = $uid;
+                    }
 
                     continue;
                 }
 
                 $counts[$stored === null ? 'duplicates' : 'stored']++;
-                $message->delete();
+                $message->moveTo(self::FOLDER_PROCESSED);
+                $moved++;
+                $this->forgetAttempts($message, $uidValidity);
                 $handled = max($handled, (int) $uid);
             }
 
-            if ($counts['stored'] + $counts['duplicates'] > 0) {
+            if ($moved > 0) {
                 $this->mailbox->expunge();
             }
 
@@ -100,5 +118,47 @@ final class InboundMailPoller
         }
 
         return $counts;
+    }
+
+    /**
+     * Counts a failed store; true once the message has failed MAX_STORE_ATTEMPTS times.
+     */
+    private function giveUp(MailboxMessage $message, ?int $uidValidity): bool
+    {
+        $key = $this->attemptsKey($message, $uidValidity);
+        if ($key === null) {
+            return false;
+        }
+
+        $attempts = (int) Cache::get($key, 0) + 1;
+        if ($attempts >= self::MAX_STORE_ATTEMPTS) {
+            Cache::forget($key);
+
+            return true;
+        }
+
+        Cache::put($key, $attempts, now()->addDays($this->settings->retentionDays()));
+
+        return false;
+    }
+
+    private function forgetAttempts(MailboxMessage $message, ?int $uidValidity): void
+    {
+        $key = $this->attemptsKey($message, $uidValidity);
+        if ($key !== null) {
+            Cache::forget($key);
+        }
+    }
+
+    private function attemptsKey(MailboxMessage $message, ?int $uidValidity): ?string
+    {
+        $uid = $message->uid();
+
+        return $uid === null ? null : 'inbound-mail:store-attempts:'.sha1($this->mailboxKey()).':'.($uidValidity ?? 0).':'.$uid;
+    }
+
+    private function mailboxKey(): string
+    {
+        return strtolower($this->settings->imap('username') ?: $this->settings->address());
     }
 }

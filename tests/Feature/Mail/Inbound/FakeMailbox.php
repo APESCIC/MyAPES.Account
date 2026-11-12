@@ -5,19 +5,29 @@ namespace Tests\Feature\Mail\Inbound;
 use App\Core\Mail\Inbound\Contracts\InboundMailbox;
 use App\Core\Mail\Inbound\Contracts\MailboxMessage;
 use App\Core\Mail\Inbound\MailboxUnavailable;
+use Illuminate\Support\Carbon;
 use RuntimeException;
 
 /**
  * In-memory mailbox for poller tests (#579). A message's UID is its index
- * plus one (#777).
+ * plus one (#777). Moves use MOVE, or COPY then delete-on-expunge when
+ * $supportsMove is off (#776).
  */
 final class FakeMailbox implements InboundMailbox
 {
     /** @var array<int, string|null> raw messages by index; null makes raw() fail */
     public array $messages = [];
 
-    /** @var array<int, bool> */
+    /** @var array<int, bool> copied away and waiting for expunge */
     public array $deleted = [];
+
+    /** @var array<string, list<array{raw: ?string, at: Carbon}>> */
+    public array $folders = [];
+
+    /** @var list<string> */
+    public array $createdFolders = [];
+
+    public bool $supportsMove = true;
 
     public bool $expunged = false;
 
@@ -71,11 +81,26 @@ final class FakeMailbox implements InboundMailbox
                     return $this->raw ?? throw new RuntimeException('Fetch failed.');
                 }
 
-                public function delete(): void
+                public function moveTo(string $folder): void
                 {
-                    $this->mailbox->deleted[$this->index] = true;
+                    $this->mailbox->move($this->index, $folder);
                 }
             };
+        }
+    }
+
+    public function move(int $index, string $folder): void
+    {
+        if (! isset($this->folders[$folder])) {
+            throw new MailboxUnavailable('Folder missing.');
+        }
+
+        $this->folders[$folder][] = ['raw' => $this->messages[$index], 'at' => now()];
+
+        if ($this->supportsMove) {
+            unset($this->messages[$index]);
+        } else {
+            $this->deleted[$index] = true;
         }
     }
 
@@ -86,6 +111,29 @@ final class FakeMailbox implements InboundMailbox
         }
 
         return $this->uidValidity;
+    }
+
+    public function ensureFolders(array $folders): void
+    {
+        if ($this->unavailable) {
+            throw new MailboxUnavailable('Connection refused.');
+        }
+
+        foreach ($folders as $folder) {
+            if (! isset($this->folders[$folder])) {
+                $this->folders[$folder] = [];
+                $this->createdFolders[] = $folder;
+            }
+        }
+    }
+
+    public function purge(string $folder, int $olderThanDays): int
+    {
+        $cutoff = now()->subDays($olderThanDays);
+        $before = count($this->folders[$folder] ?? []);
+        $this->folders[$folder] = array_values(array_filter($this->folders[$folder] ?? [], static fn (array $message): bool => $message['at']->gte($cutoff)));
+
+        return $before - count($this->folders[$folder]);
     }
 
     public function test(): void
