@@ -1,16 +1,59 @@
 [
   {
+    "version": "0.61.1",
+    "date": "2026-11-12",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Dependency security updates",
+    "summary": "Security updates to the libraries MyAPES Account is built on, with no change to how the app works.",
+    "changes": [
+      "The Laravel framework, the Symfony components and the Markdown library MyAPES Account uses are updated to versions with the latest security fixes.",
+      "The tools used to build the app's styles and scripts are updated to versions with the latest security fixes."
+    ],
+    "affected_areas": [
+      "Security",
+      "Dependencies"
+    ],
+    "categories": [
+      "fixed",
+      "security"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch: dependency security updates within their current major versions, with no new feature and no change to routes or behaviour.",
+    "validation": [
+      "composer audit and npm audit report no advisories; the full test suite, the frontend tests and the frontend build passed locally; the Laragon preview served the app on the updated libraries."
+    ],
+    "known_limitations": [
+      "None."
+    ],
+    "rollback": "Deploy v0.61.0 with deploy-cloudron.yml; this release adds no database migrations.",
+    "provenance": "Milestone v0.61.1 Beta: Dependency security updates, epic #763 with issue #764, pull request #765.",
+    "references": [
+      {
+        "label": "Issue #764",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/764"
+      },
+      {
+        "label": "Pull request #765",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/765"
+      }
+    ]
+  },
+  {
     "version": "0.61.0",
     "date": "2026-11-12",
     "channel": "stable",
     "type": "minor",
     "title": "Admin reply mailbox settings",
-    "summary": "Administrators can now set up the mailbox that receives replies to ticket and case emails from Admin → Settings, test it, and attach replies that could not be matched, and replies are matched to the right ticket or case more reliably.",
+    "summary": "Administrators can now set up the mailbox that receives replies to ticket and case emails from Admin \u2192 Settings, test it, and attach replies that could not be matched, and replies are matched to the right ticket or case more reliably.",
     "changes": [
-      "Admin → Settings is new, for administrators only, with a Reply mailbox tab for the shared communications mailbox: whether replies by email are on, the mail server details, the folder and whether plus-addressed mail is delivered. The mailbox password can be replaced but is never shown again, and values set on the server still win and are marked as such.",
+      "Admin \u2192 Settings is new, for administrators only, with a Reply mailbox tab for the shared communications mailbox: whether replies by email are on, the mail server details, the folder and whether plus-addressed mail is delivered. The mailbox password can be replaced but is never shown again, and values set on the server still win and are marked as such.",
       "The Reply mailbox tab can test the connection, shows when the mailbox was last checked, and can send a test email to a plus-address to show whether it arrives. Every save, test and probe is recorded in the audit log without the password.",
       "Replies are now matched by their reply address first, then by the email they answer, then by the reference in the subject. A reply whose references point to different tickets or cases is held for staff instead of being guessed.",
-      "On Admin → Emails → Inbound, staff can attach a held reply to the right ticket or case. Account holders whose reply could not be matched get one email an hour saying so; unknown senders get nothing.",
+      "On Admin \u2192 Emails \u2192 Inbound, staff can attach a held reply to the right ticket or case. Account holders whose reply could not be matched get one email an hour saying so; unknown senders get nothing.",
       "Settings changed in Admin take effect without a deploy and are stored encrypted where they are secret.",
       "Developers can try the whole reply loop locally: ticket emails and client replies go through the local mail catcher, with a Local test replies panel and a reply-as-client command that exist only on a local install.",
       "Milestones now close by themselves once all their issues are closed and their release is deployed."
@@ -36,7 +79,7 @@
       "In the Laragon preview, a staff reply on a demo ticket emailed the client, a reply as that client was fetched and posted on the ticket marked by email, and a plus-address probe was received and ignored."
     ],
     "known_limitations": [
-      "Replies by email stay off in production until an administrator enters the mailbox in Admin → Settings → Reply mailbox; the Cloudron mailbox owner and server checks continue in v0.62.0.",
+      "Replies by email stay off in production until an administrator enters the mailbox in Admin \u2192 Settings \u2192 Reply mailbox; the Cloudron mailbox owner and server checks continue in v0.62.0.",
       "The mailbox token key, the trusted mail server name and the hourly limits are still set only on the server."
     ],
     "rollback": "Deploy the previous release tag with deploy-cloudron.yml. The new app_settings table and Settings permissions are additive and are ignored by v0.60.0; settings saved in Admin are not used after a rollback.",
