@@ -102,6 +102,8 @@ Facts the rule relies on:
 - The milestone branch is always the one `composer milestone:next` prints, even when an issue body names a slightly different slug.
 - `scripts\preview.ps1` can fail `npm ci` with `EPERM ... lightningcss.win32-x64-msvc.node` when this repo's Vite is still running from an older checkout. Run `scripts\preview.ps1 -StopDevServer`, then the gate again.
 - The "SQLite test and package" check on a milestone PR stays red until the `chore: release vX.Y.Z` commit prepends the release record: `myapes:changelog-validate --base-ref` runs before the tests. Run `composer test` locally while the PR is a draft.
+- `composer pre-pr-verify` runs the same release-record gate first, so it only passes once the release commit is in.
+- The full suite needs more than the CLI's default 128 MB: `php artisan test` starts PHPUnit in a child process that ignores `-d`, so run `php -d memory_limit=-1 vendor/bin/phpunit` for a local full run (CI's `setup-php` has no limit).
 - CI runs `php artisan lang:check --fail-on-missing`, which only skips keys containing `$` or `{`. Build dynamic keys with interpolation (`__("admin.x.{$type}.message")`), not concatenation, or the check reports them missing.
 - `gh` with `--jq` in Windows PowerShell 5.1 loses the inner double quotes; pipe `--json` output to `ConvertFrom-Json` instead.
 
