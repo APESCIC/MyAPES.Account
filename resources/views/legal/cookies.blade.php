@@ -26,6 +26,11 @@
             <p>{{ __('public.legal.cookies.blade.staff_sign_in_through_apes_cloudron_may_also_use_cookie') }}</p>
         </section>
 
+        <section data-cookies-recaptcha>
+            <h2>{{ __('public.legal.cookies.blade.recaptcha') }}</h2>
+            <p>{{ __('public.legal.cookies.blade.recaptcha_body') }}</p>
+        </section>
+
         <section>
             <h2>{{ __('public.legal.cookies.blade.storage_that_is_not_a_cookie') }}</h2>
             <p>The theme control (light or dark) is stored in your browser’s local storage so the next visit can keep your choice. That setting stays on your device and is not sent as a cookie.</p>

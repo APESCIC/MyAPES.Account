@@ -51,6 +51,7 @@ import {
     Video,
     X,
 } from 'lucide';
+import { initBotProtection } from './bot-protection.js';
 import { initChangeLog } from './change-log.js';
 import { initPasskeys } from './passkeys.js';
 import { initOwnerPicker } from './tickets/owner-picker.js';
@@ -147,6 +148,7 @@ createIcons({ icons });
 
 applyTheme(document.documentElement.dataset.theme);
 initChangeLog();
+initBotProtection();
 initPasskeys();
 initToasts();
 initOwnerPicker();

@@ -8,3 +8,5 @@
 > **To be written.** This page will be filled in with milestone v0.52 People split and v0.53 staff email.
 
 Related now: [mail.md](https://github.com/APESCIC/MyAPES.Account/blob/main/docs/mail.md)
+
+Admin → Settings (v0.62.0): [[Integrations]] (TinyMCE and Google reCAPTCHA keys), [[API clients|API-clients]] (tokens for APES apps) and [[Webhooks]] (signed change events for APES apps).

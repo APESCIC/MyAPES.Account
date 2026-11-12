@@ -9,6 +9,7 @@ use App\Core\Accounts\Role;
 use App\Core\Accounts\StaffProfile;
 use App\Core\Accounts\User;
 use App\Core\Accounts\UserProfile;
+use App\Core\Api\ApiClient;
 use App\Core\Attachments\SupportAttachment;
 use App\Core\Extensions\Models\ModuleInstallation;
 use App\Core\Mail\Inbound\InboundEmail;
@@ -49,6 +50,7 @@ final class MorphMap
             'directory_group_role_mapping' => DirectoryGroupRoleMapping::class,
             'module_installation' => ModuleInstallation::class,
             'inbound_email' => InboundEmail::class,
+            'api_client' => ApiClient::class,
         ];
     }
 

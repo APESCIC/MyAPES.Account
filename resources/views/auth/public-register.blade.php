@@ -11,6 +11,7 @@
         <x-mascot-tip />
         <form method="post" action="{{ route('public.register.submit') }}">
             @csrf
+            <x-bot-protection form="register" />
             <label for="name">{{ __('auth.register.full_name') }}</label>
             <input id="name" type="text" name="name" value="{{ old('name') }}" autocomplete="name" required>
 

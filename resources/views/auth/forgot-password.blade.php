@@ -9,6 +9,7 @@
         <x-mascot-tip />
         <form method="post" action="{{ route('password.email') }}">
             @csrf
+            <x-bot-protection form="forgot_password" />
             <label for="email">{{ __('auth.common.email') }}</label>
             <input id="email" type="email" name="email" value="{{ old('email') }}" autocomplete="username" required>
 

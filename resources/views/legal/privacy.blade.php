@@ -50,6 +50,11 @@
             <p>{{ __('public.legal.privacy.blade.email_replies_body', ['days' => (int) config('inbound-mail.retention_days', 30)]) }}</p>
         </section>
 
+        <section data-privacy-recaptcha>
+            <h2>{{ __('public.legal.privacy.blade.spam_protection') }}</h2>
+            <p>{{ __('public.legal.privacy.blade.spam_protection_body') }}</p>
+        </section>
+
         <section>
             <h2>{{ __('public.legal.privacy.blade.your_rights') }}</h2>
             <p>You can ask APES CIC for a copy of the personal information we hold, and you can ask us to correct it or, where the law allows, delete it or limit how we use it. You can also complain to the Information Commissioner's Office if you are unhappy with how we handle your information.</p>

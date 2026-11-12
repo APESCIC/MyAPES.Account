@@ -12,6 +12,7 @@
         "jumbojett/openid-connect-php": "^1.0",
         "laravel/framework": "^13.8",
         "laravel/passkeys": "^0.2.1",
+        "laravel/sanctum": "^4.4",
         "laravel/tinker": "^3.0",
         "mews/purifier": "^3.4",
         "pragmarx/google2fa": "^9.1",

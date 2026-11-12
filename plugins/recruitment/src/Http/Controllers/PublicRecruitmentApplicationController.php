@@ -2,6 +2,7 @@
 
 namespace Plugins\Recruitment\Http\Controllers;
 
+use App\Core\BotProtection\BotProtection;
 use App\Http\Controllers\Controller;
 use App\Services\AuditLogger;
 use App\Services\ModuleSettingsService;
@@ -51,10 +52,12 @@ class PublicRecruitmentApplicationController extends Controller
         RecruitmentRole $recruitmentRole,
         AuditLogger $auditLogger,
         ModuleSettingsService $moduleSettings,
+        BotProtection $botProtection,
     ): RedirectResponse {
         abort_unless($moduleSettings->recruitmentPublicApplyEnabled(), 404);
         abort_unless($recruitmentRole->isOpen(), 404);
         Gate::authorize('create', [RecruitmentApplication::class, $recruitmentRole]);
+        $botProtection->check($request, BotProtection::RECRUITMENT);
 
         $existing = RecruitmentApplication::query()
             ->where('recruitment_role_id', $recruitmentRole->id)

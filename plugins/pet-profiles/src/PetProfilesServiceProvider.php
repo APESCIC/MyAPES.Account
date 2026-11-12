@@ -8,6 +8,8 @@ use App\Core\Extensions\Plugins\PluginManifest;
 use App\Core\Extensions\Plugins\PluginNavigationItem;
 use App\Core\Extensions\Plugins\PluginServiceProvider;
 use App\Core\Extensions\Plugins\PluginSettingsSchema;
+use App\Core\Webhooks\WebhookEvents;
+use App\Core\Webhooks\WebhookSources;
 use Illuminate\Support\Facades\Gate;
 use Plugins\PetProfiles\Contracts\PetProfilesContract;
 use Plugins\PetProfiles\Dashboard\PetProfileActiveRecordDetector;
@@ -34,6 +36,11 @@ class PetProfilesServiceProvider extends PluginServiceProvider
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'pet-profiles');
 
         Gate::policy(PetProfile::class, PetProfilePolicy::class);
+        WebhookSources::changes(PetProfile::class, WebhookEvents::PET_CREATED, WebhookEvents::PET_UPDATED, 'pet_id', static fn (PetProfile $pet): ?string => match ($pet->service_domain) {
+            PetProfile::DOMAIN_SHELTER => 'shelter-rescue',
+            PetProfile::DOMAIN_PETCARE => 'pet-care-clinic',
+            default => null,
+        });
     }
 
     protected function clientRecords(): array

@@ -34,11 +34,4 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-
-    // TinyMCE Cloud (#483). The key is public by design but approved per
-    // domain at tiny.cloud; without it, rich text fields stay plain textareas.
-    'tinymce' => [
-        'api_key' => env('TINYMCE_API_KEY'),
-    ],
-
 ];

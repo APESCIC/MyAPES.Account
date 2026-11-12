@@ -1,5 +1,56 @@
 [
   {
+    "version": "0.62.0",
+    "date": "2026-11-12",
+    "channel": "stable",
+    "type": "minor",
+    "title": "API, webhooks and integrations",
+    "summary": "Other APES apps, starting with APES Newsroom and EASM, can now read from MyAPES Account through a secure API and be told when things change. Administrators manage outside service keys from Admin \u2192 Settings, and public forms get invisible spam protection.",
+    "changes": [
+      "Admin \u2192 Settings has a new Integrations tab for the keys of outside services, starting with the TinyMCE editor and Google reCAPTCHA. Saved secret keys are never shown again, values set on the server still win, and every change and connection test is recorded in the audit log.",
+      "The public register, forgot password, open a ticket and job application forms, and Public Login after repeated failed attempts, are now protected by Google reCAPTCHA v3 with hidden checks that people never see. If Google cannot be reached, the forms still work under stricter limits. The privacy and cookie notices explain the change.",
+      "A new read-only API at /api/v1 lets approved APES apps look up staff, groups, people, contact consent, pets, tickets and cases for their own organisation only, using service tokens that administrators issue, rotate and revoke in Admin \u2192 Settings \u2192 API clients.",
+      "Admin \u2192 Settings \u2192 Webhooks sends signed messages to approved apps when people, consent, staff, pets, tickets or cases change, with automatic retries, a delivery log and a replay button.",
+      "Admin \u2192 Settings \u2192 API docs explains the API and how apps check webhook signatures, and the health check now reports whether queued webhook deliveries are on time."
+    ],
+    "affected_areas": [
+      "Admin settings",
+      "Public forms",
+      "Privacy",
+      "API",
+      "Integrations"
+    ],
+    "categories": [
+      "added",
+      "security"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Minor: new API, webhook, integrations and form protection features with additive migrations and no breaking change to any existing route or behaviour.",
+    "validation": [
+      "The full test suite, the frontend tests, Pint on changed files, the translation key check and the hard-coded string inventory passed locally; new feature tests cover the integrations registry and screen, reCAPTCHA and honeypot rules, token abilities, organisation limits, rate limits, IP allowlists, webhook signing, retries and replay, and that no secret reaches any page or response.",
+      "In the Laragon preview, the Integrations, API clients, Webhooks and API docs tabs loaded for an administrator and the public register form carried the hidden checks."
+    ],
+    "known_limitations": [
+      "The API is read-only and webhooks are outgoing only; writing from other apps and incoming webhooks come later.",
+      "Google reCAPTCHA stays off until an administrator saves its keys in Admin \u2192 Settings \u2192 Integrations; until then only the hidden checks run."
+    ],
+    "rollback": "Deploy v0.61.1 with deploy-cloudron.yml. The new API client, token and webhook tables are additive and are ignored by v0.61.1; keys saved in Integrations stay stored but unused.",
+    "provenance": "Milestone v0.62.0 Beta: API, webhooks and integrations, epic #647 with issues #634, #635, #636, #637, #638, #639, #640, #641, #642, #643, #644, #645, #646 and the Cloudron hand-off #754; pull request #768.",
+    "references": [
+      {
+        "label": "Issue #647",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/647"
+      },
+      {
+        "label": "Pull request #768",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/768"
+      }
+    ]
+  },
+  {
     "version": "0.61.1",
     "date": "2026-11-12",
     "channel": "stable",

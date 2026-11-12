@@ -16,13 +16,14 @@ class HealthAndThemeTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'status' => 'ok',
-                'version' => '0.61.1',
+                'version' => '0.62.0',
                 'release' => 'development',
                 'maintenance' => false,
                 'checks' => [
                     'database' => 'ok',
                     'cache' => 'ok',
                     'environment' => 'ok',
+                    'queue' => 'ok',
                 ],
             ]);
     }
@@ -50,13 +51,14 @@ class HealthAndThemeTest extends TestCase
             ->assertServiceUnavailable()
             ->assertExactJson([
                 'status' => 'unavailable',
-                'version' => '0.61.1',
+                'version' => '0.62.0',
                 'release' => 'development',
                 'maintenance' => false,
                 'checks' => [
                     'database' => 'failed',
                     'cache' => 'failed',
                     'environment' => 'ok',
+                    'queue' => 'unknown',
                 ],
             ]);
     }

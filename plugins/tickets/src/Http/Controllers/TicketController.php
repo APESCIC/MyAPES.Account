@@ -3,6 +3,11 @@
 namespace Plugins\Tickets\Http\Controllers;
 
 use App\Core\Accounts\User;
+use App\Core\Attachments\AttachmentFeedback;
+use App\Core\Attachments\AttachmentLimits;
+use App\Core\Attachments\SupportAttachment;
+use App\Core\Attachments\UploadSettings;
+use App\Core\BotProtection\BotProtection;
 use App\Core\Extensions\Modules\ModuleContext;
 use App\Http\Controllers\Controller;
 use App\Modules\ModuleInstanceDefinition;
@@ -10,10 +15,6 @@ use App\Rules\EligibleRecordOwner;
 use App\Rules\EligibleStaffAssignee;
 use App\Services\AssignmentAuthorization;
 use App\Services\AuditLogger;
-use App\Core\Attachments\AttachmentFeedback;
-use App\Core\Attachments\AttachmentLimits;
-use App\Core\Attachments\SupportAttachment;
-use App\Core\Attachments\UploadSettings;
 use App\Services\SupportAttachmentService;
 use Closure;
 use Illuminate\Contracts\View\View;
@@ -103,11 +104,13 @@ class TicketController extends Controller
     public function store(
         Request $request,
         AuditLogger $auditLogger,
+        BotProtection $botProtection,
     ): RedirectResponse {
         $instance = $this->instance($request);
         $prefix = $this->area()->permissionPrefix();
         $ticketService = $this->ticketServices->for($instance->subCore->key);
         Gate::authorize($prefix.'create');
+        $botProtection->check($request, BotProtection::TICKET);
 
         $isApesCic = $this->area()->usesHierarchicalCategories;
         $rules = [

@@ -1,5 +1,5 @@
 @props(['name', 'id' => null, 'value' => null, 'required' => false, 'maxlength' => null])
-@php($apiKey = config('services.tinymce.api_key'))
+@php($apiKey = app(\App\Core\Integrations\IntegrationRegistry::class)->value(\App\Core\Integrations\CoreIntegrations::TINYMCE, 'api_key'))
 @php($editorEnabled = is_string($apiKey) && $apiKey !== '')
 @if($editorEnabled)
     @once

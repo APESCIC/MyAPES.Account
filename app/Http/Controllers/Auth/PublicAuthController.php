@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Core\Accounts\User;
+use App\Core\BotProtection\BotProtection;
 use App\Http\Controllers\Controller;
 use App\Rules\AvailablePublicEmail;
 use App\Rules\NotStaffEmail;
@@ -73,8 +74,9 @@ class PublicAuthController extends Controller
         return view('auth.public-login');
     }
 
-    public function login(Request $request, AuditLogger $auditLogger): RedirectResponse
+    public function login(Request $request, AuditLogger $auditLogger, BotProtection $botProtection): RedirectResponse
     {
+        $botProtection->check($request, BotProtection::LOGIN);
         $credentialField = $request->filled('login') ? 'login' : 'email';
         if ($credentialField === 'email') {
             $request->merge(['login' => $request->input('email')]);
@@ -95,6 +97,7 @@ class PublicAuthController extends Controller
             $auditLogger->record('auth.public_login_failed', null, null, [
                 'reason' => 'invalid_credentials',
             ]);
+            $botProtection->recordLoginFailure($request);
 
             return back()
                 ->withErrors([$credentialField => __('auth.failed')])
@@ -141,6 +144,7 @@ class PublicAuthController extends Controller
         Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
         $this->authorizationContext->recordPassword($request, $user);
+        $botProtection->clearLoginFailures($request);
         $auditLogger->record('auth.public_login_success', $user, $user);
 
         return redirect()->intended(route('dashboard'));
@@ -151,8 +155,9 @@ class PublicAuthController extends Controller
         return view('auth.public-register');
     }
 
-    public function register(Request $request, AuditLogger $auditLogger): RedirectResponse
+    public function register(Request $request, AuditLogger $auditLogger, BotProtection $botProtection): RedirectResponse
     {
+        $botProtection->check($request, BotProtection::REGISTER);
         $request->merge([
             'username' => Str::lower(trim((string) $request->input('username'))),
             'email' => Str::lower(trim((string) $request->input('email'))),

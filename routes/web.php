@@ -1,18 +1,21 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminAccessController;
+use App\Http\Controllers\Admin\AdminApiClientController;
 use App\Http\Controllers\Admin\AdminEmailController;
 use App\Http\Controllers\Admin\AdminGroupController;
 use App\Http\Controllers\Admin\AdminInboundEmailController;
+use App\Http\Controllers\Admin\AdminIntegrationController;
 use App\Http\Controllers\Admin\AdminLocalRepliesController;
-use App\Http\Controllers\Admin\AdminManagedListController;
 use App\Http\Controllers\Admin\AdminMaintenanceController;
+use App\Http\Controllers\Admin\AdminManagedListController;
 use App\Http\Controllers\Admin\AdminModuleController;
 use App\Http\Controllers\Admin\AdminOrganisationModuleController;
 use App\Http\Controllers\Admin\AdminReplyMailboxController;
 use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminVersionController;
+use App\Http\Controllers\Admin\AdminWebhookController;
 use App\Http\Controllers\Admin\StaffAdminController;
 use App\Http\Controllers\Auth\ConfirmPasswordController;
 use App\Http\Controllers\Auth\EmailChangeController;
@@ -23,9 +26,9 @@ use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\BookingsController;
 use App\Http\Controllers\ChangeLogController;
+use App\Http\Controllers\ClientRecordsNoticeController;
 use App\Http\Controllers\CspReportController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ClientRecordsNoticeController;
 use App\Http\Controllers\GuidedTourController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\LocaleController;
@@ -425,6 +428,39 @@ Route::middleware([
             Route::post('/settings/reply-mailbox/probe', [AdminReplyMailboxController::class, 'probe'])
                 ->middleware(['can:admin.settings.manage', 'throttle:5,1'])
                 ->name('settings.reply-mailbox.probe');
+            Route::put('/settings/integrations/{integration}', [AdminIntegrationController::class, 'update'])
+                ->middleware('can:admin.settings.manage')
+                ->name('settings.integrations.update');
+            Route::post('/settings/integrations/{integration}/test', [AdminIntegrationController::class, 'test'])
+                ->middleware(['can:admin.settings.manage', 'throttle:10,1'])
+                ->name('settings.integrations.test');
+            Route::post('/settings/api-clients', [AdminApiClientController::class, 'store'])
+                ->middleware(['can:admin.settings.manage', 'throttle:20,1'])
+                ->name('settings.api-clients.store');
+            Route::put('/settings/api-clients/{apiClient}', [AdminApiClientController::class, 'update'])
+                ->middleware('can:admin.settings.manage')
+                ->name('settings.api-clients.update');
+            Route::post('/settings/api-clients/{apiClient}/rotate', [AdminApiClientController::class, 'rotate'])
+                ->middleware(['can:admin.settings.manage', 'throttle:20,1'])
+                ->name('settings.api-clients.rotate');
+            Route::post('/settings/api-clients/{apiClient}/revoke', [AdminApiClientController::class, 'revoke'])
+                ->middleware('can:admin.settings.manage')
+                ->name('settings.api-clients.revoke');
+            Route::post('/settings/webhooks', [AdminWebhookController::class, 'store'])
+                ->middleware(['can:admin.settings.manage', 'throttle:20,1'])
+                ->name('settings.webhooks.store');
+            Route::post('/settings/webhooks/{webhookEndpoint}/secret', [AdminWebhookController::class, 'rotateSecret'])
+                ->middleware(['can:admin.settings.manage', 'throttle:20,1'])
+                ->name('settings.webhooks.secret');
+            Route::post('/settings/webhooks/{webhookEndpoint}/toggle', [AdminWebhookController::class, 'toggle'])
+                ->middleware('can:admin.settings.manage')
+                ->name('settings.webhooks.toggle');
+            Route::delete('/settings/webhooks/{webhookEndpoint}', [AdminWebhookController::class, 'destroy'])
+                ->middleware('can:admin.settings.manage')
+                ->name('settings.webhooks.destroy');
+            Route::post('/settings/webhooks/deliveries/{webhookDelivery}/replay', [AdminWebhookController::class, 'replay'])
+                ->middleware(['can:admin.settings.manage', 'throttle:30,1'])
+                ->name('settings.webhooks.replay');
             Route::post('/emails/inbound/local/reply', [AdminLocalRepliesController::class, 'reply'])
                 ->middleware(['can:admin.emails.manage', EnsureLocalReplyLoop::class])
                 ->name('emails.inbound.local.reply');
