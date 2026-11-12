@@ -2,6 +2,9 @@
 
 namespace App\Core\Mail\Inbound;
 
+use App\Core\Accounts\User;
+use App\Core\Mail\Inbound\Contracts\InboundReplyHandler;
+use App\Core\Mail\Inbound\Matching\ConflictingReferences;
 use App\Core\Mail\Inbound\Matching\ReplyMatcher;
 use App\Core\Mail\Inbound\Parsing\InboundEmailParser;
 use App\Core\Mail\Inbound\Parsing\ParsedInboundEmail;
@@ -12,6 +15,7 @@ use App\Core\Mail\Inbound\Protection\LoopGuard;
 use App\Core\Mail\Inbound\Verification\AuthenticationResults;
 use App\Core\Mail\Inbound\Verification\SenderVerifier;
 use App\Notifications\EmailReplyNotPostedNotification;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -36,6 +40,7 @@ final class InboundMailProcessor
         private readonly LoopGuard $loopGuard,
         private readonly InboundRateLimits $limits,
         private readonly InboundAttachmentSorter $attachments,
+        private readonly ReplyMailboxStatus $status,
     ) {}
 
     public function process(InboundEmail $email): void
@@ -44,6 +49,12 @@ final class InboundMailProcessor
         $parsed = $this->parse($email);
 
         if ($parsed === null) {
+            return;
+        }
+
+        if ($this->status->acceptProbe($parsed->recipients)) {
+            $this->finish($email, InboundEmail::STATUS_IGNORED, 'probe');
+
             return;
         }
 
@@ -58,11 +69,18 @@ final class InboundMailProcessor
         $auth = AuthenticationResults::from($parsed->headers, $this->settings->authservId());
         $email->forceFill(['spf' => $auth->spf, 'dkim' => $auth->dkim, 'dmarc' => $auth->dmarc]);
 
-        $match = $this->matcher->match($parsed);
+        try {
+            $match = $this->matcher->match($parsed);
+        } catch (ConflictingReferences) {
+            $this->holdUnmatched($email, $parsed, $auth, 'conflicting_reference');
+
+            return;
+        }
+
         $handler = $match === null ? null : $this->handlers->handler($match->prefix);
 
         if ($match === null || $handler === null) {
-            $this->finish($email, InboundEmail::STATUS_QUARANTINED, 'unmatched');
+            $this->holdUnmatched($email, $parsed, $auth, 'unmatched');
 
             return;
         }
@@ -135,6 +153,67 @@ final class InboundMailProcessor
         } finally {
             $this->attachments->cleanUp();
         }
+    }
+
+    /**
+     * Posts a held email to the record staff chose, as the account they chose (#749).
+     * The caller has checked the email is quarantined, the record is open and the account may reply.
+     */
+    public function attach(InboundEmail $email, InboundReplyHandler $handler, Model $record, User $account): Model
+    {
+        $parsed = $this->parse($email);
+        if ($parsed === null) {
+            throw new UnparseableEmail('The stored message is missing or unreadable.');
+        }
+
+        try {
+            $body = $this->extractor->extract($parsed);
+            $attachments = $this->attachments->sort($parsed->attachments, $handler->attachmentsAllowed($record));
+            $posted = $handler->post($record, $account, $body !== '' ? $body : __('mail.reply_by_email.attachments_only'), $attachments);
+
+            $this->finish($email, InboundEmail::STATUS_POSTED, null, [
+                ...$this->attachmentAttributes($attachments),
+                'user_id' => $account->id,
+                'record_prefix' => $handler->prefix(),
+                'record_id' => $record->getKey(),
+                'plugin' => $handler->plugin(),
+                'module_slug' => $handler->moduleSlug($record),
+                'posted_type' => $posted->getMorphClass(),
+                'posted_id' => $posted->getKey(),
+            ]);
+
+            return $posted;
+        } finally {
+            $this->attachments->cleanUp();
+        }
+    }
+
+    /**
+     * Holds an email no record could be matched to. A known, active, authenticated account holder gets one
+     * polite notice an hour (#749); unknown senders get nothing, so spoofed mail never causes backscatter.
+     */
+    private function holdUnmatched(InboundEmail $email, ParsedInboundEmail $parsed, AuthenticationResults $auth, string $reason): void
+    {
+        $user = $parsed->fromAddress === null ? null : User::query()
+            ->whereRaw('LOWER(email) = ?', [strtolower($parsed->fromAddress)])
+            ->first();
+        $notify = $user instanceof User
+            && $user->suspended_at === null
+            && (! $this->settings->requiresAuthentication() || $auth->passes())
+            && $this->limits->mayNotify($user);
+
+        if ($notify) {
+            $user->notify(new EmailReplyNotPostedNotification(
+                __('mail.reply_not_posted.unmatched_reference'),
+                route('dashboard'),
+                EmailReplyNotPostedNotification::REASON_UNMATCHED,
+            ));
+        }
+
+        $this->finish($email, InboundEmail::STATUS_QUARANTINED, $reason, [
+            'user_id' => $user?->id,
+            'notice_sent' => $notify,
+        ]);
     }
 
     /**

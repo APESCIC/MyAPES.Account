@@ -5,6 +5,7 @@ namespace Tests\Unit\MilestoneVersion;
 use PHPUnit\Framework\TestCase;
 use Scripts\MilestoneVersion\Cli;
 use Scripts\MilestoneVersion\GitHub;
+use Scripts\MilestoneVersion\GitHubWrites;
 use Scripts\MilestoneVersion\Milestones;
 
 class MilestoneVersionCliTest extends TestCase
@@ -194,6 +195,125 @@ class MilestoneVersionCliTest extends TestCase
     {
         $this->assertSame(Cli::USAGE, $this->cli('publish')[0]);
         $this->assertSame(Cli::USAGE, $this->cli('check-title')[0]);
+    }
+
+    /**
+     * @return array{int, string, list<string>}
+     */
+    private function closeReady(string ...$argv): array
+    {
+        $github = new class implements GitHubWrites
+        {
+            /** @var list<string> */
+            public array $writes = [];
+
+            public function openMilestones(): array
+            {
+                return [
+                    ['number' => 5, 'title' => 'v1.9.0 Beta: Reporting and exports'],
+                    ['number' => 6, 'title' => 'v1.9.1 Beta: Dropped'],
+                    ['number' => 7, 'title' => 'v1.10.0 Beta: Search'],
+                ];
+            }
+
+            public function tags(): array
+            {
+                return ['v1.9.0'];
+            }
+
+            public function issue(int $number): ?array
+            {
+                return null;
+            }
+
+            public function pullRequest(int $number): ?array
+            {
+                return null;
+            }
+
+            public function milestoneIssues(int $milestone): array
+            {
+                return match ($milestone) {
+                    5 => [
+                        ['number' => 10, 'title' => '[v1.9.x] 00 [Epic] Reporting', 'open' => true, 'stateReason' => null, 'openSubIssues' => 0],
+                        ['number' => 11, 'title' => '[v1.9.x] 01 Export', 'open' => false, 'stateReason' => 'completed', 'openSubIssues' => 0],
+                    ],
+                    6 => [['number' => 20, 'title' => '[v1.9.x] 01 Idea', 'open' => false, 'stateReason' => 'not_planned', 'openSubIssues' => 0]],
+                    default => [['number' => 30, 'title' => '[v1.10.x] 01 Search', 'open' => true, 'stateReason' => null, 'openSubIssues' => 0]],
+                };
+            }
+
+            public function successfulDeployRun(string $tag): ?string
+            {
+                return $tag === 'v1.9.0' ? 'https://github.com/o/r/actions/runs/1' : null;
+            }
+
+            public function commentIssue(int $number, string $body): void
+            {
+                $this->writes[] = "comment #{$number}: {$body}";
+            }
+
+            public function closeIssue(int $number, string $reason): void
+            {
+                $this->writes[] = "close #{$number} {$reason}";
+            }
+
+            public function closeMilestone(int $number, string $note): void
+            {
+                $this->writes[] = "close milestone {$number}: {$note}";
+            }
+        };
+
+        $out = fopen('php://memory', 'w+');
+        $exitCode = (new Cli(fn (): GitHub => $github, $out, fopen('php://memory', 'w+')))->run(['close-ready', ...$argv]);
+        rewind($out);
+
+        return [$exitCode, stream_get_contents($out), $github->writes];
+    }
+
+    public function test_close_ready_closes_deployed_and_dropped_milestones_only(): void
+    {
+        [$exitCode, $out, $writes] = $this->closeReady();
+
+        $this->assertSame(Cli::OK, $exitCode);
+        $this->assertStringContainsString('Closed "v1.9.0 Beta: Reporting and exports" and Epic #10: v1.9.0 deployed: https://github.com/o/r/actions/runs/1.', $out);
+        $this->assertStringContainsString('Closed "v1.9.1 Beta: Dropped": nothing in it shipped', $out);
+        $this->assertStringContainsString('Kept open "v1.10.0 Beta: Search": issues still open: #30.', $out);
+        $this->assertSame('close #10 completed', $writes[1]);
+        $this->assertStringStartsWith('comment #10: Closed automatically: every sub-issue is closed and v1.9.0 deployed', $writes[0]);
+        $this->assertStringStartsWith('close milestone 5: Closed automatically on ', $writes[2]);
+        $this->assertStringStartsWith('close milestone 6: ', $writes[3]);
+        $this->assertCount(4, $writes);
+    }
+
+    public function test_close_ready_dry_run_changes_nothing(): void
+    {
+        [$exitCode, $out, $writes] = $this->closeReady('--dry-run');
+
+        $this->assertSame(Cli::OK, $exitCode);
+        $this->assertStringContainsString('Would close "v1.9.0 Beta: Reporting and exports" and Epic #10', $out);
+        $this->assertSame([], $writes);
+    }
+
+    public function test_close_ready_checks_one_milestone_by_tag_or_title(): void
+    {
+        [, $out, $writes] = $this->closeReady('--tag', 'v1.10.0');
+        $this->assertStringContainsString('Kept open "v1.10.0 Beta: Search"', $out);
+        $this->assertStringNotContainsString('v1.9.0', $out);
+        $this->assertSame([], $writes);
+
+        [, $out, $writes] = $this->closeReady('--milestone', 'v1.9.1 Beta: Dropped');
+        $this->assertStringContainsString('Closed "v1.9.1 Beta: Dropped"', $out);
+        $this->assertCount(1, $writes);
+
+        [$exitCode, $out] = $this->closeReady('--tag', 'v2.0.0');
+        $this->assertSame(Cli::OK, $exitCode);
+        $this->assertStringContainsString('no open milestone for "v2.0.0"', $out);
+    }
+
+    public function test_close_ready_needs_a_client_that_can_write(): void
+    {
+        $this->assertSame(Cli::USAGE, $this->cli('close-ready')[0]);
     }
 
     public function test_milestone_names_drop_the_version_and_label(): void

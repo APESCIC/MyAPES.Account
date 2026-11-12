@@ -19,6 +19,7 @@ Good to know:
 - Only your new text is added. The quoted email underneath, and signatures such as "Sent from my iPhone", are left out.
 - You can attach files. The usual upload rules apply (screenshots, screencasts and documents up to the usual sizes). Files that are not allowed are left out; your text is still added.
 - If the ticket or case is **closed**, your reply is not added and you get one email telling you so. Log in to see it, or open a new request.
+- If MyAPES Account cannot tell which ticket or case your reply is for (for example you started a new email or changed the reference), it is held for staff and you get one email telling you so. Staff will add it to the right ticket or case.
 - You can always use **Log in to reply** in the email instead.
 
 ## For staff
@@ -46,21 +47,45 @@ These are recorded on Admin → Emails → Inbound but never posted or answered:
 | Posted | Added to the ticket or case |
 | Ignored | Automatic, bulk or bounced mail, or over the hourly limit |
 | Rejected | Closed record, empty reply, suspended account or a message too large to keep |
-| Quarantined | Needs a person: unknown sender, failed sender checks, the reply address belonged to someone else, no matching record, or the service is switched off |
+| Quarantined | Needs a person: unknown sender, failed sender checks, the reply address belonged to someone else, no matching record, references to different tickets or cases, or the service is switched off |
 | Failed | Could not be read or processed |
 | Discarded | An admin discarded it |
 
 With `admin.emails.manage` you can open a quarantined or failed email and:
 
+- **Attach to ticket or case** (quarantined only): type the reference, such as `T12` or `C4`, and post the reply there as a public message. It is posted as the account that sent it; if no account matches the sender you must choose the account, or discard it. Closed tickets and cases cannot be attached to.
 - **Retry** it, for example after fixing the sender's account or switching the service back on, or
 - **Discard** it, which deletes the stored message.
 
-Both are written to the audit log.
+All three are written to the audit log, without the message text.
+
+### Reply mailbox settings
+
+**Admin → Settings → Reply mailbox** (`admin.settings.view` to see it, `admin.settings.manage` to change it; administrators only) holds the shared `communications@myapes.me.uk` mailbox:
+
+- **Turn on replies by email**, the mailbox address, IMAP server, port, encryption, certificate check, username and folder.
+- **Mail app password**: write-only. It is encrypted and never shown again; leave the box blank to keep it. The real password lives in APES Vault, 'API Keys & Tokens'.
+- **Plus-addressing delivered**: tick it only if mail to `communications+something@` reaches the mailbox (see the runbook). When it is off, replies go to the plain address and are matched by their email headers and subject tag.
+- A field marked **Set by .env** comes from the server's env file and wins over this page.
+- **Test connection** logs in and opens the folder. **Send a plus-address probe** emails a `communications+probe` address; the tab shows whether it arrived after the next check. The probe is never added to a ticket or case.
+- The tab also shows the last connection test and the last successful check of the mailbox.
+
+Every save, test and probe is written to the audit log with field names only, never the password. Operators: the set-up steps are the [Cloudron mailbox runbook](https://github.com/APESCIC/MyAPES.Account/blob/main/docs/mail.md#cloudron-mailbox-runbook).
 
 **Replies by email for each service** (same page, `admin.emails.manage`) switches replies by email off for one plugin in one service, for example Tickets in Pet Care Clinic. While it is off, replies there are quarantined and that service's emails go back to the no-reply address.
 
 ## Privacy
 
 The full email is kept for 30 days so problems can be checked, then deleted. After that only a record of when it arrived, what happened and why is kept. The mailbox itself never keeps processed mail. The [privacy notice](https://myaccount.myapes.me.uk/privacy) explains this too.
+
+## Local testing
+
+Developers can try the whole loop on Laragon with no real mailbox. Turn replies on with `php artisan inbound-mail:key --enable` and set `INBOUND_MAIL_DRIVER=mailpit` in `.env`. Then:
+
+1. As staff, add a public message to a demo ticket; its email arrives in Mailpit (<http://localhost:8025>).
+2. On **Admin → Emails → Inbound**, the **Local test replies** panel lists that email. Use **Reply as client** to send a reply, with optional variants such as no subject tag.
+3. Press **Fetch replies now** and open the ticket: the reply is there, marked **by email**.
+
+The panel exists only on a local install. Step by step: [`docs/laragon.md`](https://github.com/APESCIC/MyAPES.Account/blob/main/docs/laragon.md#replies-by-email).
 
 Developers and operators: see [`docs/mail.md`](https://github.com/APESCIC/MyAPES.Account/blob/main/docs/mail.md#replies-by-email).

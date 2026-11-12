@@ -3,12 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Contracts\ModuleRegistry;
+use App\Core\Accounts\User;
 use App\Core\Extensions\Plugins\PluginRegistry;
 use App\Core\Mail\Inbound\InboundEmail;
+use App\Core\Mail\Inbound\InboundMailProcessor;
 use App\Core\Mail\Inbound\InboundMailSettings;
 use App\Core\Mail\Inbound\InboundReplyRegistry;
 use App\Core\Mail\Inbound\InboundReplySetting;
+use App\Core\Mail\Inbound\Local\ClientReplyBuilder;
+use App\Core\Mail\Inbound\Local\LocalReplies;
+use App\Core\Mail\Inbound\MailboxUnavailable;
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\EnsureLocalReplyLoop;
 use App\Jobs\ProcessInboundEmail;
 use App\Services\AuditLogger;
 use App\Services\ModuleState;
@@ -45,7 +51,36 @@ class AdminInboundEmailController extends Controller
             'address' => $settings->address(),
             'retentionDays' => $settings->retentionDays(),
             'services' => $this->services(),
+            'localReplies' => $this->localReplies($request, $settings),
         ]);
+    }
+
+    /**
+     * The local test replies panel (#758), only on a local install reading Mailpit.
+     *
+     * @return array{emails: list<array{id: string, subject: string, to: string, created: string, url: string}>, error: ?string, variants: array<string, string>}|null
+     */
+    private function localReplies(Request $request, InboundMailSettings $settings): ?array
+    {
+        if (! EnsureLocalReplyLoop::available($settings) || ! $request->user()?->can('admin.emails.manage')) {
+            return null;
+        }
+
+        try {
+            $emails = app(LocalReplies::class)->recentRecordEmails();
+            $error = null;
+        } catch (MailboxUnavailable $exception) {
+            $emails = [];
+            $error = $exception->getMessage();
+        }
+
+        return ['emails' => $emails, 'error' => $error, 'variants' => [
+            ClientReplyBuilder::NO_TAG => __('admin.emails.inbound.local.variant.no-tag'),
+            ClientReplyBuilder::NO_REFERENCES => __('admin.emails.inbound.local.variant.no-references'),
+            ClientReplyBuilder::EDITED_SUBJECT => __('admin.emails.inbound.local.variant.edited-subject'),
+            ClientReplyBuilder::HTML_ONLY => __('admin.emails.inbound.local.variant.html-only'),
+            ClientReplyBuilder::ATTACHMENT => __('admin.emails.inbound.local.variant.attachment'),
+        ]];
     }
 
     public function show(string $inboundEmail, InboundMailSettings $settings, InboundReplyRegistry $registry): View
@@ -56,7 +91,53 @@ class AdminInboundEmailController extends Controller
             'email' => $inboundEmail->load('user'),
             'recordUrl' => $this->recordUrl($inboundEmail, $registry),
             'retentionDays' => $settings->retentionDays(),
+            'canAttach' => $inboundEmail->status === InboundEmail::STATUS_QUARANTINED && $inboundEmail->hasRaw(),
         ]);
+    }
+
+    /**
+     * Posts a held reply to the ticket or case staff choose, as the chosen account (#749).
+     */
+    public function attach(Request $request, AuditLogger $audit, InboundReplyRegistry $registry, InboundMailProcessor $processor, string $inboundEmail): RedirectResponse
+    {
+        $inboundEmail = $this->findOrFail($inboundEmail);
+        $validated = $request->validate([
+            'record' => ['required', 'string', 'regex:/^[A-Za-z]\d{1,18}$/'],
+            'account' => ['nullable', 'email', 'max:255'],
+        ]);
+
+        if ($inboundEmail->status !== InboundEmail::STATUS_QUARANTINED || ! $inboundEmail->hasRaw()) {
+            return back()->withErrors(['record' => __('admin.emails.inbound.attach_not_quarantined')]);
+        }
+
+        $handler = $registry->handler(strtoupper($validated['record'][0]));
+        $record = $handler?->find((int) substr($validated['record'], 1));
+        if ($handler === null || $record === null) {
+            return back()->withErrors(['record' => __('admin.emails.inbound.attach_record_missing')])->withInput();
+        }
+        if ($handler->isClosed($record)) {
+            return back()->withErrors(['record' => __('admin.emails.inbound.attach_closed')])->withInput();
+        }
+
+        $account = ($validated['account'] ?? '') !== ''
+            ? User::query()->whereRaw('LOWER(email) = ?', [strtolower($validated['account'])])->first()
+            : $inboundEmail->user;
+        if (! $account instanceof User) {
+            return back()->withErrors(['account' => __('admin.emails.inbound.attach_account_required')])->withInput();
+        }
+        if ($account->suspended_at !== null || ! $handler->canReply($record, $account)) {
+            return back()->withErrors(['account' => __('admin.emails.inbound.attach_account_not_permitted')])->withInput();
+        }
+
+        $processor->attach($inboundEmail, $handler, $record, $account);
+        $audit->record('admin.emails.inbound_attached', $request->user(), $inboundEmail, [
+            'record' => $handler->prefix().$record->getKey(),
+            'account_id' => $account->id,
+        ]);
+
+        return redirect()
+            ->route('admin.emails.inbound.show', $inboundEmail)
+            ->with('status', __('admin.emails.inbound.attached', ['reference' => $handler->reference($record)]));
     }
 
     public function retry(Request $request, AuditLogger $audit, string $inboundEmail): RedirectResponse

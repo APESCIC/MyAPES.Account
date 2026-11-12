@@ -53,6 +53,8 @@ class AuthorizationProfile
             'admin.maintenance.manage',
             'admin.emails.view',
             'admin.emails.manage',
+            'admin.settings.view',
+            'admin.settings.manage',
         ],
     ];
 
@@ -74,6 +76,8 @@ class AuthorizationProfile
         'admin.modules.manage',
         'admin.maintenance.manage',
         'admin.emails.manage',
+        'admin.settings.view',
+        'admin.settings.manage',
     ];
 
     private const LEGACY_TO_PROTECTED = [

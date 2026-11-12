@@ -11,6 +11,7 @@ use App\Core\Extensions\Navigation\PublicNavigationRegistry;
 use App\Core\Extensions\Navigation\StaffPluginNavigationItem;
 use App\Core\Extensions\Navigation\StaffPluginNavigationRegistry;
 use App\Core\Extensions\Plugins\PluginRegistry;
+use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\HelpController;
 use App\Modules\ModuleNavigationItem;
 use App\Modules\SubCoreNavigation;
@@ -275,6 +276,7 @@ final class WorkspaceNavigation
             ],
             'system' => [
                 ['admin.emails', __('admin.nav.emails'), route('admin.emails.index'), 'mail', ['admin.emails.view'], ['admin.emails.*']],
+                ['admin.settings', __('admin.nav.settings'), route('admin.settings.show', AdminSettingsController::TAB_REPLY_MAILBOX), 'settings', ['admin.settings.view'], ['admin.settings.*']],
                 ['admin.maintenance', __('admin.nav.maintenance'), route('admin.maintenance.index'), 'circle-pause', ['admin.maintenance.manage'], ['admin.maintenance.*']],
             ],
             'support' => [

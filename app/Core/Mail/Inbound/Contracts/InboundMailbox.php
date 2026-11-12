@@ -24,4 +24,11 @@ interface InboundMailbox
      * @throws MailboxUnavailable
      */
     public function expunge(): void;
+
+    /**
+     * Connects and opens the folder without reading or changing any mail (#736).
+     *
+     * @throws MailboxUnavailable
+     */
+    public function test(): void;
 }

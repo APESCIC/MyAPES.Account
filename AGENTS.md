@@ -50,6 +50,7 @@ Laragon 8 on Windows is the only supported local setup. Use this project's own L
 - Labels: only `area:admin`, `area:public`, `area:auth`, `area:tests`, `area:cloudron`.
 - Assignee: `apescic-director`.
 - Comment on each issue as work goes: the branch, the commits and progress. An issue is done when its acceptance criteria are committed on the milestone branch; it closes when the milestone pull request merges (`Closes #<n>`), and the epic closes after the deploy.
+- Milestones close automatically, without asking: `.github/workflows/milestone-close.yml` runs `composer milestone:close-ready` after each successful Cloudron deploy and whenever an issue is closed or taken out of a milestone. A milestone closes once none of its issues is open (a finished epic is closed first) and either its `vX.Y.Z` tag was deployed or nothing in it shipped. Agents who find a milestone still open with all its issues closed run `composer milestone:close-ready` themselves, with no question; empty and unversioned milestones stay open.
 - Before an issue is closed, Cursor ticks every acceptance-criteria box in its body and the issue's line in the epic checklist. An unticked box means the issue is not done: finish it, or record why it was dropped, before closing.
 
 ## Shipping and versioning
@@ -58,7 +59,7 @@ Work ships once per milestone, by the milestone's version, never by GitHub's mil
 
 Facts the rule relies on:
 
-- `composer milestone:next`, `milestone:bump`, `milestone:check-title`, `milestone:check-branch` and `milestone:check-release` (`scripts/milestone-version`). CI runs the title and branch checks on every PR (`.github/workflows/milestone-version-check.yml`). Optional local check before each push: `git config core.hooksPath .githooks`.
+- `composer milestone:next`, `milestone:bump`, `milestone:check-title`, `milestone:check-branch`, `milestone:check-release` and `milestone:close-ready` (`scripts/milestone-version`). CI runs the title and branch checks on every PR (`.github/workflows/milestone-version-check.yml`). Optional local check before each push: `git config core.hooksPath .githooks`.
 - Release links in `releases.json` must start with `https://github.com/APESCIC/MyAPES-Account/` (hyphen); `myapes:changelog-validate` rejects other forms. No credentials, personal data or exploitable detail in release notes.
 - `release.yml` publishes the GitHub Release when the tag is pushed. `deploy-cloudron.yml` runs only on a published release tag (`gh workflow run deploy-cloudron.yml --ref vX.Y.Z`); it backs up, uploads, activates, verifies `/healthz` and the OIDC redirect, and rolls back on failure. Its secrets (`CLOUDRON_FQDN`, `CLOUDRON_TOKEN`) live in the `cloudron-deploy` environment. If a run needs a secret, a permission or an approval, stop and tell the owner.
 - Dependabot opens grouped weekly pull requests into the long-lived `dependencies` branch, never `main`. Merge them there once green; merge `origin/dependencies` into the milestone branch when work starts, and `origin/main` into `dependencies` after each milestone ships.

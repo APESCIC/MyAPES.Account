@@ -8,9 +8,11 @@ use RuntimeException;
  * GitHub REST client. With GITHUB_TOKEN or GH_TOKEN in the environment (as in CI) it calls the API directly;
  * otherwise it goes through the signed-in gh CLI. The token is never printed or stored.
  */
-final class GitHubClient implements GitHub
+final class GitHubClient implements GitHubWrites
 {
     private const PER_PAGE = 100;
+
+    private const DEPLOY_WORKFLOW = 'deploy-cloudron.yml';
 
     public function __construct(
         private readonly string $repository,
@@ -62,6 +64,55 @@ final class GitHubClient implements GitHub
         ];
     }
 
+    public function milestoneIssues(int $milestone): array
+    {
+        $issues = array_filter(
+            $this->paginate("repos/{$this->repository}/issues?milestone={$milestone}&state=all"),
+            fn (array $i): bool => ! isset($i['pull_request']),
+        );
+
+        return array_values(array_map(fn (array $i): array => [
+            'number' => (int) $i['number'],
+            'title' => (string) $i['title'],
+            'open' => $i['state'] === 'open',
+            'stateReason' => isset($i['state_reason']) ? (string) $i['state_reason'] : null,
+            'openSubIssues' => max(0, (int) ($i['sub_issues_summary']['total'] ?? 0) - (int) ($i['sub_issues_summary']['completed'] ?? 0)),
+        ], $issues));
+    }
+
+    public function successfulDeployRun(string $tag): ?string
+    {
+        $runs = $this->get(sprintf(
+            'repos/%s/actions/workflows/%s/runs?branch=%s&status=success&per_page=1',
+            $this->repository,
+            self::DEPLOY_WORKFLOW,
+            rawurlencode($tag),
+        ));
+
+        return $runs['workflow_runs'][0]['html_url'] ?? null;
+    }
+
+    public function commentIssue(int $number, string $body): void
+    {
+        $this->request('POST', "repos/{$this->repository}/issues/{$number}/comments", ['body' => $body]);
+    }
+
+    public function closeIssue(int $number, string $reason): void
+    {
+        $this->request('PATCH', "repos/{$this->repository}/issues/{$number}", ['state' => 'closed', 'state_reason' => $reason]);
+    }
+
+    public function closeMilestone(int $number, string $note): void
+    {
+        $path = "repos/{$this->repository}/milestones/{$number}";
+        $description = rtrim((string) ($this->get($path)['description'] ?? ''));
+
+        $this->request('PATCH', $path, [
+            'state' => 'closed',
+            'description' => $description === '' ? $note : $description."\n\n".$note,
+        ]);
+    }
+
     /**
      * @return list<array<string, mixed>>
      */
@@ -84,16 +135,26 @@ final class GitHubClient implements GitHub
      */
     private function get(string $path): ?array
     {
-        [$status, $body] = $this->token === null ? $this->viaGh($path) : $this->viaHttp($path);
+        return $this->request('GET', $path);
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $body
+     * @return ?array<mixed> Decoded JSON, or null when GitHub answers 404.
+     */
+    private function request(string $method, string $path, ?array $body = null): ?array
+    {
+        $json = $body === null ? null : (string) json_encode($body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        [$status, $response] = $this->token === null ? $this->viaGh($method, $path, $json) : $this->viaHttp($method, $path, $json);
 
         if ($status === 404) {
             return null;
         }
-        if ($status !== 200) {
-            throw new RuntimeException(sprintf('GitHub API request for %s failed (HTTP %d).', strtok($path, '?'), $status));
+        if ($status < 200 || $status > 299) {
+            throw new RuntimeException(sprintf('GitHub API %s %s failed (HTTP %d).', $method, strtok($path, '?'), $status));
         }
 
-        $decoded = json_decode($body, true);
+        $decoded = json_decode($response, true);
         if (! is_array($decoded)) {
             throw new RuntimeException(sprintf('GitHub API returned invalid JSON for %s.', strtok($path, '?')));
         }
@@ -104,35 +165,45 @@ final class GitHubClient implements GitHub
     /**
      * @return array{int, string}
      */
-    private function viaHttp(string $path): array
+    private function viaHttp(string $method, string $path, ?string $json): array
     {
-        $context = stream_context_create(['http' => [
-            'method' => 'GET',
+        $headers = [
+            'Accept: application/vnd.github+json',
+            'Authorization: Bearer '.$this->token,
+            'User-Agent: apescic-milestone-version',
+            'X-GitHub-Api-Version: 2022-11-28',
+        ];
+        if ($json !== null) {
+            $headers[] = 'Content-Type: application/json';
+        }
+
+        $context = stream_context_create(['http' => array_filter([
+            'method' => $method,
             'ignore_errors' => true,
             'timeout' => 30,
-            'header' => implode("\r\n", [
-                'Accept: application/vnd.github+json',
-                'Authorization: Bearer '.$this->token,
-                'User-Agent: apescic-milestone-version',
-                'X-GitHub-Api-Version: 2022-11-28',
-            ]),
-        ]]);
+            'header' => implode("\r\n", $headers),
+            'content' => $json,
+        ], fn ($value): bool => $value !== null)]);
 
-        $body = @file_get_contents($this->apiUrl.'/'.$path, false, $context);
-        $headers = $http_response_header ?? [];
-        if ($body === false || $headers === [] || preg_match('#^HTTP/\S+\s+(\d{3})#', $headers[0], $m) !== 1) {
+        $response = @file_get_contents($this->apiUrl.'/'.$path, false, $context);
+        $responseHeaders = $http_response_header ?? [];
+        if ($response === false || $responseHeaders === [] || preg_match('#^HTTP/\S+\s+(\d{3})#', $responseHeaders[0], $m) !== 1) {
             throw new RuntimeException('Could not reach the GitHub API.');
         }
 
-        return [(int) $m[1], $body];
+        return [(int) $m[1], $response];
     }
 
     /**
      * @return array{int, string}
      */
-    private function viaGh(string $path): array
+    private function viaGh(string $method, string $path, ?string $json): array
     {
-        [$exitCode, $stdout, $stderr] = self::run(['gh', 'api', '-H', 'Accept: application/vnd.github+json', $path]);
+        $command = ['gh', 'api', '-X', $method, '-H', 'Accept: application/vnd.github+json', $path];
+        if ($json !== null) {
+            array_push($command, '--input', '-');
+        }
+        [$exitCode, $stdout, $stderr] = self::run($command, $json);
 
         if ($exitCode === 0) {
             return [200, $stdout];
@@ -162,13 +233,17 @@ final class GitHubClient implements GitHub
      * @param  list<string>  $command
      * @return array{int, string, string}
      */
-    private static function run(array $command): array
+    private static function run(array $command, ?string $stdin = null): array
     {
-        $process = @proc_open($command, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes); // A fixed gh or git argument list, run without a shell.
+        $process = @proc_open($command, [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes); // A fixed gh or git argument list, run without a shell.
         if (! is_resource($process)) {
             throw new RuntimeException(sprintf('Could not run %s. Is it installed and on PATH?', $command[0]));
         }
 
+        if ($stdin !== null) {
+            fwrite($pipes[0], $stdin);
+        }
+        fclose($pipes[0]);
         $stdout = stream_get_contents($pipes[1]) ?: '';
         $stderr = stream_get_contents($pipes[2]) ?: '';
         fclose($pipes[1]);

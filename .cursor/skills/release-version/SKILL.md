@@ -24,7 +24,7 @@ Follows `.cursor/rules/version-shipping.mdc` and the `ship-gate` skill.
    ```
 
 9. **Deploy.** Check no deploy is queued or running (`gh run list -w deploy-cloudron.yml -L 3`), then `gh workflow run deploy-cloudron.yml --ref vX.Y.Z` and `gh run watch <id> --exit-status`. Evidence: the run URL and `/healthz` showing `version` = `VERSION` and `release` = the tag's commit.
-10. **Close out** the issues, the Epic and the milestone, then merge `origin/main` into `dependencies`. Post the completion message with the PR, merge commit, issues, release and deploy evidence.
+10. **Close out** the issues, the Epic and the milestone, then merge `origin/main` into `dependencies`. `milestone-close.yml` closes the milestone after the deploy; run `composer milestone:close-ready -- --tag vX.Y.Z` (no question needed) and confirm with `gh api repos/APESCIC/MyAPES.Account/milestones/<n> --jq .state` that it is `closed`. Post the completion message with the PR, merge commit, issues, release and deploy evidence.
 
 ## Never
 

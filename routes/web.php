@@ -4,10 +4,13 @@ use App\Http\Controllers\Admin\AdminAccessController;
 use App\Http\Controllers\Admin\AdminEmailController;
 use App\Http\Controllers\Admin\AdminGroupController;
 use App\Http\Controllers\Admin\AdminInboundEmailController;
+use App\Http\Controllers\Admin\AdminLocalRepliesController;
 use App\Http\Controllers\Admin\AdminManagedListController;
 use App\Http\Controllers\Admin\AdminMaintenanceController;
 use App\Http\Controllers\Admin\AdminModuleController;
 use App\Http\Controllers\Admin\AdminOrganisationModuleController;
+use App\Http\Controllers\Admin\AdminReplyMailboxController;
+use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminVersionController;
 use App\Http\Controllers\Admin\StaffAdminController;
@@ -35,6 +38,7 @@ use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Staff\CallerController;
 use App\Http\Controllers\SubCoreController;
 use App\Http\Controllers\SupportAttachmentController;
+use App\Http\Middleware\EnsureLocalReplyLoop;
 use App\Support\Tour\GuidedTour;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
@@ -406,6 +410,27 @@ Route::middleware([
             Route::put('/emails/inbound/services', [AdminInboundEmailController::class, 'updateServices'])
                 ->middleware('can:admin.emails.manage')
                 ->name('emails.inbound.services.update');
+            Route::get('/settings', [AdminSettingsController::class, 'index'])
+                ->middleware('can:admin.settings.view')
+                ->name('settings.index');
+            Route::get('/settings/{tab}', [AdminSettingsController::class, 'show'])
+                ->middleware('can:admin.settings.view')
+                ->name('settings.show');
+            Route::put('/settings/reply-mailbox', [AdminReplyMailboxController::class, 'update'])
+                ->middleware('can:admin.settings.manage')
+                ->name('settings.reply-mailbox.update');
+            Route::post('/settings/reply-mailbox/test', [AdminReplyMailboxController::class, 'test'])
+                ->middleware(['can:admin.settings.manage', 'throttle:10,1'])
+                ->name('settings.reply-mailbox.test');
+            Route::post('/settings/reply-mailbox/probe', [AdminReplyMailboxController::class, 'probe'])
+                ->middleware(['can:admin.settings.manage', 'throttle:5,1'])
+                ->name('settings.reply-mailbox.probe');
+            Route::post('/emails/inbound/local/reply', [AdminLocalRepliesController::class, 'reply'])
+                ->middleware(['can:admin.emails.manage', EnsureLocalReplyLoop::class])
+                ->name('emails.inbound.local.reply');
+            Route::post('/emails/inbound/local/fetch', [AdminLocalRepliesController::class, 'fetch'])
+                ->middleware(['can:admin.emails.manage', EnsureLocalReplyLoop::class])
+                ->name('emails.inbound.local.fetch');
             Route::get('/emails/inbound/{inboundEmail}', [AdminInboundEmailController::class, 'show'])
                 ->middleware('can:admin.emails.view')
                 ->whereNumber('inboundEmail')
@@ -414,6 +439,10 @@ Route::middleware([
                 ->middleware('can:admin.emails.manage')
                 ->whereNumber('inboundEmail')
                 ->name('emails.inbound.retry');
+            Route::post('/emails/inbound/{inboundEmail}/attach', [AdminInboundEmailController::class, 'attach'])
+                ->middleware('can:admin.emails.manage')
+                ->whereNumber('inboundEmail')
+                ->name('emails.inbound.attach');
             Route::post('/emails/inbound/{inboundEmail}/discard', [AdminInboundEmailController::class, 'discard'])
                 ->middleware('can:admin.emails.manage')
                 ->whereNumber('inboundEmail')
