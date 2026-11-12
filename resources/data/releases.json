@@ -1,5 +1,58 @@
 [
   {
+    "version": "0.61.0",
+    "date": "2026-11-12",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Admin reply mailbox settings",
+    "summary": "Administrators can now set up the mailbox that receives replies to ticket and case emails from Admin → Settings, test it, and attach replies that could not be matched, and replies are matched to the right ticket or case more reliably.",
+    "changes": [
+      "Admin → Settings is new, for administrators only, with a Reply mailbox tab for the shared communications mailbox: whether replies by email are on, the mail server details, the folder and whether plus-addressed mail is delivered. The mailbox password can be replaced but is never shown again, and values set on the server still win and are marked as such.",
+      "The Reply mailbox tab can test the connection, shows when the mailbox was last checked, and can send a test email to a plus-address to show whether it arrives. Every save, test and probe is recorded in the audit log without the password.",
+      "Replies are now matched by their reply address first, then by the email they answer, then by the reference in the subject. A reply whose references point to different tickets or cases is held for staff instead of being guessed.",
+      "On Admin → Emails → Inbound, staff can attach a held reply to the right ticket or case. Account holders whose reply could not be matched get one email an hour saying so; unknown senders get nothing.",
+      "Settings changed in Admin take effect without a deploy and are stored encrypted where they are secret.",
+      "Developers can try the whole reply loop locally: ticket emails and client replies go through the local mail catcher, with a Local test replies panel and a reply-as-client command that exist only on a local install.",
+      "Milestones now close by themselves once all their issues are closed and their release is deployed."
+    ],
+    "affected_areas": [
+      "Admin settings",
+      "Email",
+      "Tickets",
+      "Cases",
+      "Local development"
+    ],
+    "categories": [
+      "added",
+      "changed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Minor: new Admin settings, reply mailbox, triage and local test features with additive migrations and no breaking change to any existing route or behaviour.",
+    "validation": [
+      "The full test suite, Pint on changed files and the translation key check passed locally; new feature tests cover the settings store, the Settings screens, permissions, auditing, matching order, triage and end-to-end reply routing with plus-addressing on and off.",
+      "In the Laragon preview, a staff reply on a demo ticket emailed the client, a reply as that client was fetched and posted on the ticket marked by email, and a plus-address probe was received and ignored."
+    ],
+    "known_limitations": [
+      "Replies by email stay off in production until an administrator enters the mailbox in Admin → Settings → Reply mailbox; the Cloudron mailbox owner and server checks continue in v0.62.0.",
+      "The mailbox token key, the trusted mail server name and the hourly limits are still set only on the server."
+    ],
+    "rollback": "Deploy the previous release tag with deploy-cloudron.yml. The new app_settings table and Settings permissions are additive and are ignored by v0.60.0; settings saved in Admin are not used after a rollback.",
+    "provenance": "Milestone v0.61.0 Beta: Admin reply mailbox (IMAP) settings, epic #731 with issues #732, #733, #735, #736, #737, #738, #740, #741, #742, #743, #748, #749, #750, #756, #757, #758 and #760; #754 moved to v0.62.0; pull request #761.",
+    "references": [
+      {
+        "label": "Issue #731",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/731"
+      },
+      {
+        "label": "Pull request #761",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/761"
+      }
+    ]
+  },
+  {
     "version": "0.60.0",
     "date": "2026-11-11",
     "channel": "stable",
