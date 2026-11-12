@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Core\Accounts\User;
+use App\Core\Integrations\CoreIntegrations;
+use App\Core\Integrations\IntegrationRegistry;
 use App\Services\AuthorizationProfile;
 use App\Services\ModuleInstallationSynchronizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -12,7 +14,7 @@ use Plugins\Tickets\Models\SupportTicket;
 use Tests\TestCase;
 
 /**
- * TinyMCE 8 on description fields (#483).
+ * TinyMCE 8 on description fields (#483), with its key in Admin → Settings → Integrations (#636).
  */
 class RichTextEditorFieldsTest extends TestCase
 {
@@ -21,12 +23,12 @@ class RichTextEditorFieldsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        config(['app-settings.env.TINYMCE_API_KEY' => null]);
         app(ModuleInstallationSynchronizer::class)->synchronize();
     }
 
     public function test_without_a_key_fields_stay_plain_textareas(): void
     {
-        config(['services.tinymce.api_key' => null]);
         $user = User::factory()->protectedRole(AuthorizationProfile::ROLE_SERVICE_USER)->create();
 
         $this->actingAs($user)
@@ -39,14 +41,32 @@ class RichTextEditorFieldsTest extends TestCase
 
     public function test_with_a_key_the_editor_loads_from_the_cdn_using_the_configured_key(): void
     {
-        config(['services.tinymce.api_key' => 'test-key-from-env']);
+        config(['app-settings.env.TINYMCE_API_KEY' => 'testkeyfromenv']);
         $user = User::factory()->protectedRole(AuthorizationProfile::ROLE_SERVICE_USER)->create();
 
         $page = $this->actingAs($user)->get(route('apes-cic.tickets.index'))->assertOk();
         $page->assertSee('data-rich-text', false)
-            ->assertSee('https://cdn.tiny.cloud/1/test-key-from-env/tinymce/8/tinymce.min.js', false);
+            ->assertSee('https://cdn.tiny.cloud/1/testkeyfromenv/tinymce/8/tinymce.min.js', false);
         $this->assertSame(1, substr_count((string) $page->getContent(), 'tinymce.min.js'));
         $this->assertMatchesRegularExpression('/<script src="https:\/\/cdn\.tiny\.cloud[^"]+" referrerpolicy="origin" nonce="[^"]+"><\/script>/', (string) $page->getContent());
+    }
+
+    public function test_the_editor_loads_with_the_key_saved_in_integrations(): void
+    {
+        $admin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
+        $this->actingAs($admin)
+            ->put(route('admin.settings.integrations.update', CoreIntegrations::TINYMCE), ['api_key' => 'testkeyfromdatabase'])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(IntegrationRegistry::STATUS_SET, app(IntegrationRegistry::class)->status(CoreIntegrations::TINYMCE));
+        $user = User::factory()->protectedRole(AuthorizationProfile::ROLE_SERVICE_USER)->create();
+        $this->actingAs($user)->get(route('apes-cic.tickets.index'))
+            ->assertOk()
+            ->assertSee('https://cdn.tiny.cloud/1/testkeyfromdatabase/tinymce/8/tinymce.min.js', false);
+
+        config(['app-settings.env.TINYMCE_API_KEY' => 'testkeyfromenv']);
+        $this->actingAs($user)->get(route('apes-cic.tickets.index'))
+            ->assertSee('https://cdn.tiny.cloud/1/testkeyfromenv/tinymce/8/tinymce.min.js', false);
     }
 
     public function test_the_key_is_never_hard_coded(): void

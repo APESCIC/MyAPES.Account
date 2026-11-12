@@ -468,6 +468,16 @@ return [
             'test' => 'Test connection',
             'test_ok' => ':name answered the connection test.',
             'test_failed' => ':name failed the connection test: :reason',
+            'tinymce' => [
+                'name' => 'TinyMCE rich text editor',
+                'description' => 'The editor on ticket, case and other description fields. Without a key, these fields stay plain text boxes.',
+                'fields' => [
+                    'api_key' => 'TinyMCE Cloud API key',
+                ],
+                'help' => [
+                    'api_key' => 'From tiny.cloud. This key is public by design: it is part of the editor\'s address in every page that has an editor, and works only on the domains approved at tiny.cloud.',
+                ],
+            ],
         ],
         'reply_mailbox' => [
             'heading' => 'Reply mailbox',
