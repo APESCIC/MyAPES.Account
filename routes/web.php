@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\AdminReplyMailboxController;
 use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminVersionController;
+use App\Http\Controllers\Admin\AdminWebhookController;
 use App\Http\Controllers\Admin\StaffAdminController;
 use App\Http\Controllers\Auth\ConfirmPasswordController;
 use App\Http\Controllers\Auth\EmailChangeController;
@@ -445,6 +446,21 @@ Route::middleware([
             Route::post('/settings/api-clients/{apiClient}/revoke', [AdminApiClientController::class, 'revoke'])
                 ->middleware('can:admin.settings.manage')
                 ->name('settings.api-clients.revoke');
+            Route::post('/settings/webhooks', [AdminWebhookController::class, 'store'])
+                ->middleware(['can:admin.settings.manage', 'throttle:20,1'])
+                ->name('settings.webhooks.store');
+            Route::post('/settings/webhooks/{webhookEndpoint}/secret', [AdminWebhookController::class, 'rotateSecret'])
+                ->middleware(['can:admin.settings.manage', 'throttle:20,1'])
+                ->name('settings.webhooks.secret');
+            Route::post('/settings/webhooks/{webhookEndpoint}/toggle', [AdminWebhookController::class, 'toggle'])
+                ->middleware('can:admin.settings.manage')
+                ->name('settings.webhooks.toggle');
+            Route::delete('/settings/webhooks/{webhookEndpoint}', [AdminWebhookController::class, 'destroy'])
+                ->middleware('can:admin.settings.manage')
+                ->name('settings.webhooks.destroy');
+            Route::post('/settings/webhooks/deliveries/{webhookDelivery}/replay', [AdminWebhookController::class, 'replay'])
+                ->middleware(['can:admin.settings.manage', 'throttle:30,1'])
+                ->name('settings.webhooks.replay');
             Route::post('/emails/inbound/local/reply', [AdminLocalRepliesController::class, 'reply'])
                 ->middleware(['can:admin.emails.manage', EnsureLocalReplyLoop::class])
                 ->name('emails.inbound.local.reply');

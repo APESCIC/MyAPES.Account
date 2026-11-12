@@ -15,6 +15,8 @@ use App\Core\Extensions\Settings\ManagedListDefinition;
 use App\Core\Extensions\Settings\ManagedListRegistry;
 use App\Core\Mail\MailCategory;
 use App\Core\Mail\MailTemplate;
+use App\Core\Webhooks\WebhookEvents;
+use App\Core\Webhooks\WebhookSources;
 use Illuminate\Support\Facades\Gate;
 use Plugins\Tickets\Dashboard\SupportTicketActiveRecordDetector;
 use Plugins\Tickets\Dashboard\SupportTicketAnalyticsProvider;
@@ -35,6 +37,7 @@ class TicketsServiceProvider extends PluginServiceProvider
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'tickets');
 
         Gate::policy(SupportTicket::class, SupportTicketPolicy::class);
+        WebhookSources::changes(SupportTicket::class, WebhookEvents::TICKET_CREATED, WebhookEvents::TICKET_UPDATED, 'ticket_id', static fn (SupportTicket $ticket): string => $ticket->sub_core_key);
 
         foreach (['apes-cic', 'shelter-rescue', 'pet-care-clinic'] as $module) {
             app(ManagedListRegistry::class)->register($module, 'tickets', 'service_areas', static fn (): ManagedListDefinition => new ManagedListDefinition(

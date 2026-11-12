@@ -14,6 +14,8 @@ use App\Core\Extensions\Settings\ManagedListDefinition;
 use App\Core\Extensions\Settings\ManagedListRegistry;
 use App\Core\Mail\MailCategory;
 use App\Core\Mail\MailTemplate;
+use App\Core\Webhooks\WebhookEvents;
+use App\Core\Webhooks\WebhookSources;
 use Illuminate\Support\Facades\Gate;
 use Plugins\Cases\Dashboard\CaseAnalyticsProvider;
 use Plugins\Cases\Dashboard\CaseAttentionProvider;
@@ -35,6 +37,7 @@ class CasesServiceProvider extends PluginServiceProvider
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'cases');
 
         Gate::policy(ShelterCase::class, ShelterCasePolicy::class);
+        WebhookSources::changes(ShelterCase::class, WebhookEvents::CASE_CREATED, WebhookEvents::CASE_UPDATED, 'case_id', static fn (ShelterCase $case): string => $case->sub_core_key);
 
         app(ManagedListRegistry::class)->register('apes-cic', 'cases', 'categories', static fn (): ManagedListDefinition => new ManagedListDefinition(
             subCoreKey: 'apes-cic',
