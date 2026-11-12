@@ -8,6 +8,7 @@ use App\Core\Attachments\Scanning\DisabledScanner;
 use App\Core\Attachments\Scanning\FakeScanner;
 use App\Core\Attachments\Scanning\VirusScanner;
 use App\Core\Eloquent\MorphMap;
+use App\Core\Integrations\IntegrationRegistry;
 use App\Core\Settings\AppSettings;
 use Illuminate\Support\ServiceProvider;
 
@@ -17,6 +18,7 @@ class CoreServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ClientRecordRegistry::class);
         $this->app->singleton(AppSettings::class);
+        $this->app->singleton(IntegrationRegistry::class);
         $this->app->singleton(VirusScanner::class, static fn (): VirusScanner => match (config('myapes.attachments.scanner')) {
             'clamd' => new ClamdScanner(
                 (string) config('myapes.attachments.clamd.host', ''),
