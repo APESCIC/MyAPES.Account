@@ -7,6 +7,9 @@
 - [[Admins|Guide-Admins]]
 - [[Roles and access|Roles-and-access]]
 - [[Replies by email|Replies-by-email]]
+- [[Integrations]]
+- [[API clients|API-clients]]
+- [[Webhooks]]
 
 **Modules**
 - [[APES CIC|Module-APES-CIC]]
