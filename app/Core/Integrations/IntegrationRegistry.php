@@ -3,6 +3,8 @@
 namespace App\Core\Integrations;
 
 use App\Core\Settings\AppSettings;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use InvalidArgumentException;
 
 /**
@@ -21,6 +23,10 @@ final class IntegrationRegistry
     private const HINT_LENGTH = 4;
 
     private const HINT_MIN_SECRET_LENGTH = 12;
+
+    private const TEST_CACHE_PREFIX = 'integrations:last-test:';
+
+    private const TEST_KEEP_DAYS = 30;
 
     /** @var array<string, Integration> */
     private array $integrations = [];
@@ -145,13 +151,31 @@ final class IntegrationRegistry
     }
 
     /**
-     * Runs the integration's connection test: null when it passed, otherwise a short reason.
+     * Runs the integration's connection test and remembers the result:
+     * null when it passed, otherwise a short reason.
      */
     public function test(string $integration): ?string
     {
         $tester = $this->get($integration)->tester
             ?? throw new InvalidArgumentException(sprintf('Integration %s has no connection test.', $integration));
 
-        return $tester($this);
+        $error = $tester($this);
+        Cache::put(self::TEST_CACHE_PREFIX.$integration, ['ok' => $error === null, 'error' => $error, 'at' => now()->toIso8601String()], now()->addDays(self::TEST_KEEP_DAYS));
+
+        return $error;
+    }
+
+    /**
+     * @return array{ok: bool, error: ?string, at: Carbon}|null
+     */
+    public function lastTest(string $integration): ?array
+    {
+        $this->get($integration);
+        $test = Cache::get(self::TEST_CACHE_PREFIX.$integration);
+        if (! is_array($test)) {
+            return null;
+        }
+
+        return ['ok' => (bool) $test['ok'], 'error' => $test['error'], 'at' => Carbon::parse($test['at'])];
     }
 }

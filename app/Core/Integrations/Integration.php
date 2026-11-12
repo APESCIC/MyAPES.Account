@@ -10,7 +10,8 @@ use InvalidArgumentException;
  * An outside service MyAPES Account uses (#634), such as the TinyMCE editor
  * or Google reCAPTCHA. Its fields live in the shared settings store (#732)
  * under their own group. The tester returns null when the service answers,
- * or a short reason that never contains a secret.
+ * or a short reason that never contains a secret. The warning, when there
+ * is one, is shown to admins beside the integration.
  */
 final class Integration
 {
@@ -20,11 +21,13 @@ final class Integration
     /**
      * @param  list<IntegrationField>  $fields
      * @param  (Closure(IntegrationRegistry): ?string)|null  $tester
+     * @param  (Closure(): ?string)|null  $warning
      */
     public function __construct(
         public readonly string $key,
         array $fields,
         public readonly ?Closure $tester = null,
+        public readonly ?Closure $warning = null,
     ) {
         $keyed = [];
         foreach ($fields as $field) {

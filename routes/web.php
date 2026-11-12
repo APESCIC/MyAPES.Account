@@ -4,9 +4,10 @@ use App\Http\Controllers\Admin\AdminAccessController;
 use App\Http\Controllers\Admin\AdminEmailController;
 use App\Http\Controllers\Admin\AdminGroupController;
 use App\Http\Controllers\Admin\AdminInboundEmailController;
+use App\Http\Controllers\Admin\AdminIntegrationController;
 use App\Http\Controllers\Admin\AdminLocalRepliesController;
-use App\Http\Controllers\Admin\AdminManagedListController;
 use App\Http\Controllers\Admin\AdminMaintenanceController;
+use App\Http\Controllers\Admin\AdminManagedListController;
 use App\Http\Controllers\Admin\AdminModuleController;
 use App\Http\Controllers\Admin\AdminOrganisationModuleController;
 use App\Http\Controllers\Admin\AdminReplyMailboxController;
@@ -23,9 +24,9 @@ use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\BookingsController;
 use App\Http\Controllers\ChangeLogController;
+use App\Http\Controllers\ClientRecordsNoticeController;
 use App\Http\Controllers\CspReportController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ClientRecordsNoticeController;
 use App\Http\Controllers\GuidedTourController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\LocaleController;
@@ -425,6 +426,12 @@ Route::middleware([
             Route::post('/settings/reply-mailbox/probe', [AdminReplyMailboxController::class, 'probe'])
                 ->middleware(['can:admin.settings.manage', 'throttle:5,1'])
                 ->name('settings.reply-mailbox.probe');
+            Route::put('/settings/integrations/{integration}', [AdminIntegrationController::class, 'update'])
+                ->middleware('can:admin.settings.manage')
+                ->name('settings.integrations.update');
+            Route::post('/settings/integrations/{integration}/test', [AdminIntegrationController::class, 'test'])
+                ->middleware(['can:admin.settings.manage', 'throttle:10,1'])
+                ->name('settings.integrations.test');
             Route::post('/emails/inbound/local/reply', [AdminLocalRepliesController::class, 'reply'])
                 ->middleware(['can:admin.emails.manage', EnsureLocalReplyLoop::class])
                 ->name('emails.inbound.local.reply');
