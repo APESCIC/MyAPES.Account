@@ -5,8 +5,10 @@ namespace Tests\Feature\Admin;
 use App\Core\Accounts\AuditLog;
 use App\Core\Accounts\User;
 use App\Core\Mail\Inbound\Contracts\InboundMailbox;
+use App\Core\Mail\Inbound\Diagnostics\MailboxTransport;
 use App\Services\AuthorizationProfile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Fakes\FakeImapServer;
 use Tests\Feature\Mail\Inbound\FakeMailbox;
 use Tests\TestCase;
 
@@ -31,6 +33,7 @@ class ReplyMailboxAuditTest extends TestCase
             'inbound-mail.token_key' => self::TOKEN_KEY,
         ]);
         $this->app->instance(InboundMailbox::class, new FakeMailbox);
+        $this->app->instance(MailboxTransport::class, new FakeImapServer);
         $this->admin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
     }
 
@@ -71,7 +74,7 @@ class ReplyMailboxAuditTest extends TestCase
         $this->actingAs($this->admin)->post(route('admin.settings.reply-mailbox.test'));
         $this->actingAs($this->admin)->post(route('admin.settings.reply-mailbox.probe'));
 
-        foreach (['admin.settings.mailbox_tested', 'admin.settings.mailbox_probe_sent'] as $event) {
+        foreach (['admin.emails.import_tested', 'admin.settings.mailbox_probe_sent'] as $event) {
             $this->assertNoSecrets(AuditLog::query()->where('event', $event)->sole());
         }
     }

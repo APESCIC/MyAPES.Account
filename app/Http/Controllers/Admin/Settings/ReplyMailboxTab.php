@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin\Settings;
 
+use App\Core\Mail\Inbound\Diagnostics\DiagnosticReport;
 use App\Core\Mail\Inbound\InboundMailboxSettings;
 use App\Core\Mail\Inbound\InboundMailSettings;
 use App\Core\Mail\Inbound\ReplyMailboxStatus;
@@ -42,6 +43,7 @@ final class ReplyMailboxTab
             'fields' => $fields,
             'passwordSaved' => $this->settings->stored(InboundMailboxSettings::GROUP, 'password'),
             'lastTest' => $this->status->lastTest(),
+            'report' => is_array(session('mailbox_report')) ? DiagnosticReport::fromArray(session('mailbox_report')) : null,
             'lastPoll' => $this->status->lastPoll(),
             'lastSuccessfulPollAt' => $this->status->lastSuccessfulPollAt(),
             'probe' => $this->probe(),

@@ -2,6 +2,7 @@
 
 namespace App\Core\Mail\Inbound;
 
+use App\Core\Mail\Inbound\Diagnostics\DiagnosticReport;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -25,19 +26,24 @@ final class ReplyMailboxStatus
 
     public function __construct(private readonly InboundMailSettings $settings) {}
 
-    public function recordTest(bool $ok, ?string $error = null): void
+    public function recordTest(DiagnosticReport $report): void
     {
-        Cache::forever(self::TEST_KEY, ['at' => now()->toIso8601String(), 'ok' => $ok, 'error' => $error]);
+        Cache::forever(self::TEST_KEY, ['at' => now()->toIso8601String(), 'report' => $report->toArray()]);
     }
 
     /**
-     * @return array{at: Carbon, ok: bool, error: ?string}|null
+     * @return array{at: Carbon, ok: bool, report: DiagnosticReport}|null
      */
     public function lastTest(): ?array
     {
         $test = Cache::get(self::TEST_KEY);
+        if (! is_array($test) || ! is_array($test['report'] ?? null)) {
+            return null;
+        }
 
-        return is_array($test) ? ['at' => Carbon::parse($test['at']), 'ok' => (bool) $test['ok'], 'error' => $test['error'] ?? null] : null;
+        $report = DiagnosticReport::fromArray($test['report']);
+
+        return ['at' => Carbon::parse($test['at']), 'ok' => $report->ok(), 'report' => $report];
     }
 
     /**

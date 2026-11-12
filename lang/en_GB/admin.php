@@ -740,6 +740,73 @@ return [
             'log' => 'Outbound log',
             'inbound' => 'Inbound',
         ],
+        'import' => [
+            'result_heading' => 'Connection test result',
+            'result_total' => 'Finished in :ms ms.',
+            'step_time' => ':ms ms',
+            'steps' => [
+                'dns' => 'Server name (DNS)',
+                'tcp' => 'Connection',
+                'tls' => 'Encryption',
+                'login' => 'Login',
+                'folder' => 'Folder',
+            ],
+            'step_status' => [
+                'passed' => 'Passed',
+                'failed' => 'Failed',
+                'skipped' => 'Skipped',
+            ],
+            'test_ok' => 'Connection test passed: MyAPES Account reached the server, logged in and opened the folder.',
+            'test_failed' => 'Connection test failed at :step: :reason',
+            'test_limited' => 'You have run :count connection tests in the last 10 minutes. Try again in :minutes minutes.',
+            'test_help' => 'Tests the values in this form without saving them. Leave the password blank to use the saved one.',
+            'errors' => [
+                'dns_not_found' => [
+                    'message' => 'The server name was not found.',
+                    'hint' => 'Check the spelling of the IMAP server. On the APES Cloudron it is mail.cloudron.apes.org.uk.',
+                ],
+                'connection_refused' => [
+                    'message' => 'The server refused the connection.',
+                    'hint' => 'Check the port. On the APES Cloudron IMAP is on port 993; ask IT if a firewall blocks it.',
+                ],
+                'timeout' => [
+                    'message' => 'The server did not answer in time.',
+                    'hint' => 'Check the server name and port, then try again. If it keeps happening, ask IT whether the mail server is up.',
+                ],
+                'wrong_encryption' => [
+                    'message' => 'Wrong encryption for this port.',
+                    'hint' => 'Use SSL/TLS with port 993, or STARTTLS with port 143. The APES Cloudron offers IMAP on 993 with SSL/TLS only.',
+                ],
+                'certificate_name_mismatch' => [
+                    'message' => 'The server\'s certificate name does not match.',
+                    'hint' => 'Use the name on the certificate as the IMAP server, for example mail.cloudron.apes.org.uk rather than an alias.',
+                ],
+                'certificate_untrusted' => [
+                    'message' => 'The server\'s certificate has expired or is not trusted.',
+                    'hint' => 'Ask IT to renew the mail certificate on Cloudron. Only turn off the certificate check for local testing.',
+                ],
+                'handshake_failed' => [
+                    'message' => 'The encryption handshake failed.',
+                    'hint' => 'Check the encryption and port, then try again. If it keeps happening, ask IT to check the mail server.',
+                ],
+                'login_failed' => [
+                    'message' => 'The server refused the username or password.',
+                    'hint' => 'Use the full mailbox address as the username and the mailbox owner\'s Cloudron Mail Client app password (from APES Vault). Alias logins do not work.',
+                ],
+                'too_many_attempts' => [
+                    'message' => 'The server has had too many attempts.',
+                    'hint' => 'Wait 15 minutes before trying again, then check the password.',
+                ],
+                'folder_not_found' => [
+                    'message' => 'The folder was not found.',
+                    'hint' => 'Choose one of the folders the server has. Most mailboxes use INBOX.',
+                ],
+                'feature_missing' => [
+                    'message' => 'The server is missing a feature the import uses.',
+                    'hint' => 'Imports still work, a little more slowly. Ask IT whether the mail server can offer :features.',
+                ],
+            ],
+        ],
         'inbound' => [
             'page_title' => 'Inbound email | MyAPES Account',
             'heading' => 'Inbound email',

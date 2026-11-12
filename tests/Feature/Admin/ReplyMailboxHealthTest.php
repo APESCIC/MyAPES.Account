@@ -5,18 +5,24 @@ namespace Tests\Feature\Admin;
 use App\Core\Accounts\AuditLog;
 use App\Core\Accounts\User;
 use App\Core\Mail\Inbound\Contracts\InboundMailbox;
+use App\Core\Mail\Inbound\Diagnostics\MailboxTransport;
 use App\Core\Mail\Inbound\InboundEmail;
 use App\Core\Mail\Inbound\InboundMailPoller;
 use App\Core\Mail\Inbound\ReplyMailboxStatus;
 use App\Services\AuthorizationProfile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Log\Events\MessageLogged;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
+use Tests\Fakes\FakeImapServer;
 use Tests\Feature\Mail\Inbound\FakeMailbox;
 use Tests\Feature\Mail\Inbound\InboundMailTestHelpers;
 use Tests\TestCase;
 
 /**
- * Test connection, poll status and the plus-address probe (#736).
+ * Test connection (#736, #771), poll status and the plus-address probe (#736).
  */
 class ReplyMailboxHealthTest extends TestCase
 {
@@ -25,9 +31,13 @@ class ReplyMailboxHealthTest extends TestCase
 
     private const PASSWORD = 'not-a-real-mail-app-password';
 
+    private const TYPED_PASSWORD = 'typed-only-for-this-test-7f3k';
+
     private User $admin;
 
     private FakeMailbox $mailbox;
+
+    private FakeImapServer $server;
 
     protected function setUp(): void
     {
@@ -40,6 +50,8 @@ class ReplyMailboxHealthTest extends TestCase
         ]);
         $this->mailbox = new FakeMailbox;
         $this->app->instance(InboundMailbox::class, $this->mailbox);
+        $this->server = new FakeImapServer;
+        $this->app->instance(MailboxTransport::class, $this->server);
         $this->admin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
     }
 
@@ -48,41 +60,99 @@ class ReplyMailboxHealthTest extends TestCase
         $this->actingAs($this->admin)
             ->post(route('admin.settings.reply-mailbox.test'))
             ->assertRedirect(route('admin.settings.show', 'reply-mailbox'))
-            ->assertSessionHas('status', __('admin.settings.reply_mailbox.test_ok'));
+            ->assertSessionHas('status', __('admin.emails.import.test_ok'));
 
         $this->assertTrue(app(ReplyMailboxStatus::class)->lastTest()['ok']);
-        $audit = AuditLog::query()->where('event', 'admin.settings.mailbox_tested')->sole();
-        $this->assertSame('ok', $audit->context['result']);
+        $audit = AuditLog::query()->where('event', 'admin.emails.import_tested')->sole();
+        $this->assertSame(['result' => 'ok', 'step' => null], $audit->context);
 
         $this->actingAs($this->admin)->get(route('admin.settings.show', 'reply-mailbox'))
             ->assertSee(__('admin.settings.reply_mailbox.last_test_ok', ['at' => now()->format('Y-m-d H:i')]));
     }
 
-    public function test_a_failed_connection_test_shows_the_failure_without_secrets(): void
+    public function test_each_step_is_shown_with_its_status_and_time(): void
     {
-        $this->mailbox->unavailable = true;
+        $this->server->loginResponse = 'NO [AUTHENTICATIONFAILED] Authentication failed.';
+
+        $this->actingAs($this->admin)
+            ->followingRedirects()
+            ->post(route('admin.settings.reply-mailbox.test'))
+            ->assertSee('data-step="dns" data-step-status="passed"', false)
+            ->assertSee('data-step="tcp" data-step-status="passed"', false)
+            ->assertSee('data-step="tls" data-step-status="passed"', false)
+            ->assertSee('data-step="login" data-step-status="failed"', false)
+            ->assertSee('data-step="folder" data-step-status="skipped"', false)
+            ->assertSee(__('admin.emails.import.steps.login'))
+            ->assertSee(' ms)');
+    }
+
+    public function test_a_failed_connection_test_names_the_step_and_type_without_secrets(): void
+    {
+        $this->server->loginResponse = 'NO [AUTHENTICATIONFAILED] Authentication failed.';
 
         $this->actingAs($this->admin)
             ->post(route('admin.settings.reply-mailbox.test'))
-            ->assertSessionHasErrors('mailbox');
+            ->assertSessionHasErrors(['mailbox' => __('admin.emails.import.test_failed', [
+                'step' => __('admin.emails.import.steps.login'),
+                'reason' => __('admin.emails.import.errors.login_failed.message'),
+            ])]);
 
         $this->assertFalse(app(ReplyMailboxStatus::class)->lastTest()['ok']);
-        $audit = AuditLog::query()->where('event', 'admin.settings.mailbox_tested')->sole();
-        $this->assertSame('failed', $audit->context['result']);
-        $this->assertStringNotContainsString(self::PASSWORD, json_encode($audit->context));
+        $audit = AuditLog::query()->where('event', 'admin.emails.import_tested')->sole();
+        $this->assertSame(['result' => 'login_failed', 'step' => 'login'], $audit->context);
 
         $this->actingAs($this->admin)->get(route('admin.settings.show', 'reply-mailbox'))
-            ->assertSee('ConnectionFailedException')
+            ->assertSee(__('admin.emails.import.errors.login_failed.message'))
             ->assertDontSee(self::PASSWORD);
     }
 
-    public function test_testing_needs_the_mailbox_to_be_set_up(): void
+    public function test_unsaved_values_are_tested_before_replies_are_on_and_nothing_is_saved(): void
     {
-        config(['inbound-mail.imap.host' => null]);
+        config(['inbound-mail.enabled' => false, 'inbound-mail.token_key' => null, 'inbound-mail.imap.host' => null, 'inbound-mail.imap.password' => null]);
+        $before = DB::table('app_settings')->get()->toArray();
+
+        $this->actingAs($this->admin)
+            ->followingRedirects()
+            ->post(route('admin.settings.reply-mailbox.test'), $this->form())
+            ->assertSee(__('admin.emails.import.test_ok'))
+            ->assertDontSee('Turn on replies by email and save the mailbox details first.');
+
+        $this->assertEquals($before, DB::table('app_settings')->get()->toArray());
+        $this->assertContains('LOGIN', $this->server->commands);
+    }
+
+    public function test_a_typed_password_is_never_stored_logged_cached_audited_or_shown(): void
+    {
+        $logged = [];
+        Event::listen(MessageLogged::class, function (MessageLogged $event) use (&$logged): void {
+            $logged[] = $event->message.json_encode($event->context);
+        });
+        $this->server->loginResponse = 'NO [AUTHENTICATIONFAILED] Authentication failed.';
+
+        $response = $this->actingAs($this->admin)
+            ->post(route('admin.settings.reply-mailbox.test'), $this->form(['password' => self::TYPED_PASSWORD]));
+
+        $this->assertStringNotContainsString(self::TYPED_PASSWORD, json_encode(session()->all()));
+        $page = $this->actingAs($this->admin)->get($response->headers->get('Location'))->assertOk();
+        $page->assertDontSee(self::TYPED_PASSWORD);
+
+        $this->assertStringNotContainsString(self::TYPED_PASSWORD, implode("\n", $logged));
+        $this->assertStringNotContainsString(self::TYPED_PASSWORD, json_encode(Cache::get('inbound-mail:last-test')));
+        $this->assertStringNotContainsString(self::TYPED_PASSWORD, json_encode(AuditLog::query()->get()->toArray()));
+        $this->assertStringNotContainsString(self::TYPED_PASSWORD, json_encode(DB::table('app_settings')->get()->toArray()));
+    }
+
+    public function test_the_sixth_test_inside_ten_minutes_is_refused(): void
+    {
+        for ($i = 0; $i < 5; $i++) {
+            $this->actingAs($this->admin)->post(route('admin.settings.reply-mailbox.test'))->assertSessionHasNoErrors();
+        }
 
         $this->actingAs($this->admin)
             ->post(route('admin.settings.reply-mailbox.test'))
-            ->assertSessionHasErrors(['mailbox' => __('admin.settings.reply_mailbox.test_not_configured')]);
+            ->assertSessionHasErrors(['mailbox' => __('admin.emails.import.test_limited', ['count' => 5, 'minutes' => 10])]);
+
+        $this->assertSame(5, AuditLog::query()->where('event', 'admin.emails.import_tested')->count());
     }
 
     public function test_people_without_admin_settings_manage_are_forbidden(): void
@@ -123,5 +193,27 @@ class ReplyMailboxHealthTest extends TestCase
         $this->assertNull($email->posted_id);
         $this->assertNotNull(app(ReplyMailboxStatus::class)->probe()['arrived_at']);
         $this->actingAs($this->admin)->get(route('admin.settings.show', 'reply-mailbox'))->assertSee('so plus-addressing is delivered');
+    }
+
+    /**
+     * @param  array<string, string>  $overrides
+     * @return array<string, string>
+     */
+    private function form(array $overrides = []): array
+    {
+        return [
+            '_method' => 'PUT',
+            'enabled' => '0',
+            'address' => 'communications@example.test',
+            'host' => 'mail.example.test',
+            'port' => '993',
+            'encryption' => 'ssl',
+            'validate_cert' => '1',
+            'username' => 'communications@example.test',
+            'password' => self::PASSWORD,
+            'folder' => 'INBOX',
+            'plus_addressing' => '1',
+            ...$overrides,
+        ];
     }
 }

@@ -77,11 +77,15 @@
             @if($canManage)
                 <div class="actions">
                     <button type="submit">{{ __('admin.settings.reply_mailbox.save') }}</button>
+                    <button type="submit" class="button button-secondary" formaction="{{ route('admin.settings.reply-mailbox.test') }}" data-test-connection>{{ __('admin.settings.reply_mailbox.test') }}</button>
                 </div>
+                <p class="muted">{{ __('admin.emails.import.test_help') }}</p>
             @endif
         </fieldset>
     </form>
 </section>
+
+@include('admin.emails.import._result', ['report' => $report])
 
 <section class="panel" aria-labelledby="reply-mailbox-health-heading" data-reply-mailbox-health>
     <h2 id="reply-mailbox-health-heading">{{ __('admin.settings.reply_mailbox.health_heading') }}</h2>
@@ -94,7 +98,7 @@
                 @elseif($lastTest['ok'])
                     {{ __('admin.settings.reply_mailbox.last_test_ok', ['at' => $lastTest['at']->format('Y-m-d H:i')]) }}
                 @else
-                    {{ __('admin.settings.reply_mailbox.last_test_failed', ['at' => $lastTest['at']->format('Y-m-d H:i'), 'reason' => $lastTest['error']]) }}
+                    {{ __('admin.settings.reply_mailbox.last_test_failed', ['at' => $lastTest['at']->format('Y-m-d H:i'), 'reason' => $lastTest['report']->failure?->message()]) }}
                 @endif
             </dd>
         </div>
@@ -112,10 +116,6 @@
 
     @can('admin.settings.manage')
         <div class="actions">
-            <form method="post" action="{{ route('admin.settings.reply-mailbox.test') }}" data-test-connection-form>
-                @csrf
-                <button type="submit" class="button button-secondary">{{ __('admin.settings.reply_mailbox.test') }}</button>
-            </form>
             <form method="post" action="{{ route('admin.settings.reply-mailbox.probe') }}" data-probe-form>
                 @csrf
                 <button type="submit" class="button button-secondary">{{ __('admin.settings.reply_mailbox.probe') }}</button>

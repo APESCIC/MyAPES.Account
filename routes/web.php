@@ -422,8 +422,9 @@ Route::middleware([
             Route::put('/settings/reply-mailbox', [AdminReplyMailboxController::class, 'update'])
                 ->middleware('can:admin.settings.manage')
                 ->name('settings.reply-mailbox.update');
-            Route::post('/settings/reply-mailbox/test', [AdminReplyMailboxController::class, 'test'])
-                ->middleware(['can:admin.settings.manage', 'throttle:10,1'])
+            // PUT too: the Test button submits the mailbox form, which carries _method=PUT (#771).
+            Route::match(['post', 'put'], '/settings/reply-mailbox/test', [AdminReplyMailboxController::class, 'test'])
+                ->middleware('can:admin.settings.manage')
                 ->name('settings.reply-mailbox.test');
             Route::post('/settings/reply-mailbox/probe', [AdminReplyMailboxController::class, 'probe'])
                 ->middleware(['can:admin.settings.manage', 'throttle:5,1'])
