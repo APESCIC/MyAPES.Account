@@ -2,6 +2,7 @@
 
 use App\Core\Providers\CoreAccessServiceProvider;
 use App\Core\Providers\CoreAdminServiceProvider;
+use App\Core\Providers\CoreApiServiceProvider;
 use App\Core\Providers\CoreAuthServiceProvider;
 use App\Core\Providers\CoreMailServiceProvider;
 use App\Core\Providers\CoreServiceProvider;
@@ -22,6 +23,7 @@ return [
     CoreAccessServiceProvider::class,
     CoreAdminServiceProvider::class,
     CoreMailServiceProvider::class,
+    CoreApiServiceProvider::class,
     ExtensionRegistryServiceProvider::class,
     AppServiceProvider::class,
     ApesCicServiceProvider::class,

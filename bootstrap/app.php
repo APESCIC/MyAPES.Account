@@ -2,13 +2,14 @@
 
 use App\Http\Controllers\HealthController;
 use App\Http\Middleware\AuditAdminAuthorizationDenial;
+use App\Http\Middleware\AuthenticateApiClient;
 use App\Http\Middleware\EnsureAccountReady;
 use App\Http\Middleware\EnsureAuthorizationContext;
 use App\Http\Middleware\EnsureLocalPasskeyIdentity;
-use App\Http\Middleware\EnsurePublicAccount;
 use App\Http\Middleware\EnsureMaintenanceRecoveryAccess;
 use App\Http\Middleware\EnsureModuleAvailable;
 use App\Http\Middleware\EnsurePluginEnabled;
+use App\Http\Middleware\EnsurePublicAccount;
 use App\Http\Middleware\EnsureRecentStepUp;
 use App\Http\Middleware\EnsureServiceSelected;
 use App\Http\Middleware\RedirectTargetForUploadProgress;
@@ -21,6 +22,8 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Laravel\Sanctum\Http\Middleware\CheckAbilities;
+use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -30,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
         then: function (): void {
             Route::get('/healthz', HealthController::class)->name('health');
+            require __DIR__.'/../routes/api.php';
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
@@ -71,6 +75,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'passkeys.local' => EnsureLocalPasskeyIdentity::class,
             'account.public' => EnsurePublicAccount::class,
             'service.selected' => EnsureServiceSelected::class,
+            'api.client' => AuthenticateApiClient::class,
+            'abilities' => CheckAbilities::class,
+            'ability' => CheckForAnyAbility::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
