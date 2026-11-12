@@ -415,7 +415,6 @@ Route::middleware([
                 ->name('settings.index');
             Route::get('/settings/{tab}', [AdminSettingsController::class, 'show'])
                 ->middleware('can:admin.settings.view')
-                ->where('tab', '[a-z-]+')
                 ->name('settings.show');
             Route::put('/settings/reply-mailbox', [AdminReplyMailboxController::class, 'update'])
                 ->middleware('can:admin.settings.manage')
@@ -427,10 +426,10 @@ Route::middleware([
                 ->middleware(['can:admin.settings.manage', 'throttle:5,1'])
                 ->name('settings.reply-mailbox.probe');
             Route::post('/emails/inbound/local/reply', [AdminLocalRepliesController::class, 'reply'])
-                ->middleware([EnsureLocalReplyLoop::class, 'can:admin.emails.manage'])
+                ->middleware(['can:admin.emails.manage', EnsureLocalReplyLoop::class])
                 ->name('emails.inbound.local.reply');
             Route::post('/emails/inbound/local/fetch', [AdminLocalRepliesController::class, 'fetch'])
-                ->middleware([EnsureLocalReplyLoop::class, 'can:admin.emails.manage'])
+                ->middleware(['can:admin.emails.manage', EnsureLocalReplyLoop::class])
                 ->name('emails.inbound.local.fetch');
             Route::get('/emails/inbound/{inboundEmail}', [AdminInboundEmailController::class, 'show'])
                 ->middleware('can:admin.emails.view')

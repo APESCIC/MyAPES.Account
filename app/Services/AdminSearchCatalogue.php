@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Core\Extensions\Plugins\PluginRegistry;
+use App\Http\Controllers\Admin\AdminSettingsController;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Auth\Authenticatable;
 
@@ -182,7 +183,7 @@ final class AdminSearchCatalogue
                 'id' => 'admin.settings',
                 'label' => __('admin.nav.settings'),
                 'description' => __('admin.search.sections.settings'),
-                'url' => route('admin.settings.index'),
+                'url' => route('admin.settings.show', AdminSettingsController::TAB_REPLY_MAILBOX),
                 'keywords_key' => 'admin.search.keywords.settings',
                 'abilities' => ['admin.settings.view'],
             ],

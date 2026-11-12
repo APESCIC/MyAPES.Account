@@ -61,7 +61,7 @@
                             <h3>{{ __('admin.emails.inbound.attach') }}</h3>
                             <p class="muted">{{ __('admin.emails.inbound.attach_help') }}</p>
                             <label for="attach-record">{{ __('admin.emails.inbound.attach_record') }}</label>
-                            <input id="attach-record" name="record" type="text" required maxlength="20" pattern="[A-Za-z][0-9]+" value="{{ old('record', $email->record_prefix !== null ? $email->record_prefix.$email->record_id : '') }}" placeholder="T12">
+                            <input id="attach-record" name="record" type="text" required maxlength="20" pattern="[A-Za-z][0-9]+" value="{{ old('record', $email->record_prefix !== null ? $email->record_prefix.$email->record_id : '') }}" placeholder="{{ __('admin.emails.inbound.attach_record_placeholder') }}">
                             <label for="attach-account">{{ __('admin.emails.inbound.attach_account') }}</label>
                             <input id="attach-account" name="account" type="email" maxlength="255" value="{{ old('account', $email->user?->email) }}" @if($email->user === null) required @endif>
                             <p class="muted">{{ $email->user !== null ? __('admin.emails.inbound.attach_account_help') : __('admin.emails.inbound.attach_account_required') }}</p>

@@ -610,6 +610,7 @@ return [
             'attach' => 'Attach to ticket or case',
             'attach_help' => 'Post this reply as a public message on the ticket or case you choose, as if the account had replied by email. Use it when the reply could not be matched or its sender could not be checked.',
             'attach_record' => 'Ticket or case, for example T12 or C4',
+            'attach_record_placeholder' => 'T12',
             'attach_account' => 'Post as',
             'attach_account_help' => 'Defaults to the account that sent the email. Change it only if you are sure who wrote it.',
             'attach_account_required' => 'No account matches the sender, so choose the account to post as, or discard the email.',
