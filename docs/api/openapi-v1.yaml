@@ -1,0 +1,528 @@
+openapi: 3.1.0
+info:
+  title: MyAPES Account API
+  version: '1'
+  summary: Read-only API and outgoing webhooks for internal APES apps.
+  description: |
+    For internal APES apps only (first APES Newsroom and EASM). Every request needs a
+    service token issued in Admin > Settings > API clients, sent as
+    `Authorization: Bearer <token>`. Each client is limited to one organisation, the
+    abilities on its token, its rate limit (requests per minute, per token) and,
+    when set, an IP allowlist. Errors are JSON with a `message`:
+    401 no or bad token, 403 missing ability, blocked IP or another organisation,
+    404 not found or outside the client's organisation, 422 invalid query, 429 over the limit.
+
+    Lists are paginated with `page` and `per_page` (default 25, at most 100) and return
+    `data` plus `meta` (`current_page`, `last_page`, `per_page`, `total`).
+
+    The CI test `tests/Feature/Api/OpenApiSpecTest.php` fails when this file and
+    `routes/api.php` disagree. Keep real tokens and secrets in APES Vault only.
+servers:
+  - url: https://myaccount.myapes.me.uk/api/v1
+security:
+  - serviceToken: []
+tags:
+  - name: Client
+  - name: Staff
+  - name: People
+  - name: Pets
+  - name: Tickets
+  - name: Cases
+paths:
+  /me:
+    get:
+      tags: [Client]
+      operationId: getMe
+      summary: The client and token making the request
+      description: Needs no ability. Use it to check a token is set up correctly.
+      responses:
+        '200':
+          description: The client
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      client: { type: string, example: APES Newsroom }
+                      organisation: { $ref: '#/components/schemas/Organisation' }
+                      abilities: { type: array, items: { type: string } }
+                      token_expires_at: { type: [string, 'null'], format: date-time }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+  /staff:
+    get:
+      tags: [Staff]
+      operationId: listStaff
+      summary: Staff members
+      description: APES CIC clients see all staff; other organisations see staff in their team. Suspended accounts are left out.
+      x-myapes-ability: staff:read
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: A page of staff
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Staff' } }
+                  meta: { $ref: '#/components/schemas/PageMeta' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /staff/{id}:
+    get:
+      tags: [Staff]
+      operationId: getStaff
+      summary: One staff member
+      x-myapes-ability: staff:read
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: The staff member
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Staff' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /groups:
+    get:
+      tags: [Staff]
+      operationId: listGroups
+      summary: The myapesaccount.* directory groups (divisions)
+      x-myapes-ability: groups:read
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: A page of groups
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer }
+                        name: { type: string, example: myapesaccount.newsroom }
+                        member_count: { type: [integer, 'null'] }
+                        app_enabled: { type: boolean }
+                  meta: { $ref: '#/components/schemas/PageMeta' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /users/lookup:
+    get:
+      tags: [People]
+      operationId: lookupUser
+      summary: Find a public account by email
+      description: Only public accounts that chose the client's organisation are found.
+      x-myapes-ability: users:read
+      parameters:
+        - name: email
+          in: query
+          required: true
+          schema: { type: string, format: email }
+      responses:
+        '200':
+          description: The person
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Person' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/Invalid' }
+  /users/{id}:
+    get:
+      tags: [People]
+      operationId: getUser
+      summary: One public account
+      x-myapes-ability: users:read
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: The person
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Person' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /users/{id}/consents:
+    get:
+      tags: [People]
+      operationId: getUserConsents
+      summary: Contact consent by channel
+      description: The `email` channel is the mailing-list consent APES Newsroom uses.
+      x-myapes-ability: consent:read
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Current consent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      user_id: { type: integer }
+                      channels:
+                        type: object
+                        properties:
+                          calls: { type: boolean }
+                          sms: { type: boolean }
+                          whatsapp: { type: boolean }
+                          telegram: { type: boolean }
+                          email: { type: boolean }
+                      changed_at:
+                        type: object
+                        additionalProperties: { type: [string, 'null'] }
+                      policy_version: { type: [string, 'null'] }
+                      confirmed_at: { type: [string, 'null'], format: date-time }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /users/{id}/pets:
+    get:
+      tags: [Pets]
+      operationId: listUserPets
+      summary: A person's pets in the client's organisation
+      x-myapes-ability: pets:read
+      parameters:
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: A page of pets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Pet' } }
+                  meta: { $ref: '#/components/schemas/PageMeta' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /pets/{id}:
+    get:
+      tags: [Pets]
+      operationId: getPet
+      summary: One pet
+      x-myapes-ability: pets:read
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: The pet
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Pet' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /tickets:
+    get:
+      tags: [Tickets]
+      operationId: listTickets
+      summary: Tickets in the client's organisation
+      x-myapes-ability: tickets:read
+      parameters:
+        - name: organisation
+          in: query
+          description: Optional; must be the client's own organisation, otherwise 403.
+          schema: { $ref: '#/components/schemas/Organisation' }
+        - name: category
+          in: query
+          description: The ticket's service area key.
+          schema: { type: string }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: A page of tickets, newest first
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Ticket' } }
+                  meta: { $ref: '#/components/schemas/PageMeta' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/Invalid' }
+  /tickets/{ref}:
+    get:
+      tags: [Tickets]
+      operationId: getTicket
+      summary: One ticket with its public messages
+      description: Staff notes are never returned.
+      x-myapes-ability: tickets:read
+      parameters:
+        - $ref: '#/components/parameters/Ref'
+      responses:
+        '200':
+          description: The ticket
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    allOf:
+                      - $ref: '#/components/schemas/Ticket'
+                      - type: object
+                        properties:
+                          messages: { type: array, items: { $ref: '#/components/schemas/Message' } }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /cases/{ref}:
+    get:
+      tags: [Cases]
+      operationId: getCase
+      summary: One case with its public updates
+      description: Internal updates are never returned.
+      x-myapes-ability: cases:read
+      parameters:
+        - $ref: '#/components/parameters/Ref'
+      responses:
+        '200':
+          description: The case
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id: { type: integer }
+                      reference: { type: string, example: 'Case #42' }
+                      organisation: { $ref: '#/components/schemas/Organisation' }
+                      case_type: { type: [string, 'null'], example: adoption }
+                      category: { type: [string, 'null'] }
+                      sub_category: { type: [string, 'null'] }
+                      title: { type: string }
+                      details: { type: string, description: Sanitised HTML }
+                      priority: { type: [string, 'null'] }
+                      status: { type: string }
+                      requester: { $ref: '#/components/schemas/PersonRef' }
+                      pet:
+                        type: [object, 'null']
+                        properties:
+                          id: { type: integer }
+                          name: { type: string }
+                          species: { type: [string, 'null'] }
+                      opened_at: { type: [string, 'null'], format: date-time }
+                      resolved_at: { type: [string, 'null'], format: date-time }
+                      closed_at: { type: [string, 'null'], format: date-time }
+                      updates: { type: array, items: { $ref: '#/components/schemas/Message' } }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+webhooks:
+  user.created: { $ref: '#/components/pathItems/WebhookEvent' }
+  user.updated: { $ref: '#/components/pathItems/WebhookEvent' }
+  user.deleted: { $ref: '#/components/pathItems/WebhookEvent' }
+  consent.changed: { $ref: '#/components/pathItems/WebhookEvent' }
+  staff.updated: { $ref: '#/components/pathItems/WebhookEvent' }
+  pet.created: { $ref: '#/components/pathItems/WebhookEvent' }
+  pet.updated: { $ref: '#/components/pathItems/WebhookEvent' }
+  ticket.created: { $ref: '#/components/pathItems/WebhookEvent' }
+  ticket.updated: { $ref: '#/components/pathItems/WebhookEvent' }
+  case.created: { $ref: '#/components/pathItems/WebhookEvent' }
+  case.updated: { $ref: '#/components/pathItems/WebhookEvent' }
+components:
+  securitySchemes:
+    serviceToken:
+      type: http
+      scheme: bearer
+      description: A Sanctum service token from Admin > Settings > API clients (starts with a number, a bar and myapes_).
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer, minimum: 1 }
+    Ref:
+      name: ref
+      in: path
+      required: true
+      description: The number shown in emails, for example 123 for "Ticket #123".
+      schema: { type: integer, minimum: 1 }
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    PerPage:
+      name: per_page
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 100, default: 25 }
+  responses:
+    Unauthenticated:
+      description: No token, a bad or expired token, or a revoked client
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: The token lacks the ability, the IP address is not allowed, or another organisation was asked for
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Not found, or outside the client's organisation
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Invalid:
+      description: An invalid query parameter
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+  schemas:
+    Organisation:
+      type: string
+      enum: [apes-cic, shelter-rescue, pet-care-clinic]
+    Error:
+      type: object
+      properties:
+        message: { type: string }
+    PageMeta:
+      type: object
+      properties:
+        current_page: { type: integer }
+        last_page: { type: integer }
+        per_page: { type: integer }
+        total: { type: integer }
+    PersonRef:
+      type: [object, 'null']
+      properties:
+        id: { type: integer }
+        name: { type: string }
+    Staff:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        email: { type: string, format: email }
+        job_title: { type: [string, 'null'] }
+        team: { type: [string, 'null'], description: 'Department: apes-cic, shelter-rescue, pet-care-clinic or operations' }
+        groups: { type: array, items: { type: string }, description: 'Divisions: the myapesaccount.* groups' }
+    Person:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        email: { type: string, format: email }
+        email_verified: { type: boolean }
+        services: { type: array, items: { $ref: '#/components/schemas/Organisation' } }
+        created_at: { type: [string, 'null'], format: date-time }
+    Pet:
+      type: object
+      properties:
+        id: { type: integer }
+        owner_id: { type: integer }
+        name: { type: string }
+        species: { type: [string, 'null'] }
+        age_years: { type: [integer, 'null'] }
+        sex: { type: [string, 'null'], enum: [male, female, unknown, null] }
+        neutering_status: { type: [string, 'null'], enum: [neutered, not_neutered, unknown, null] }
+        health_issues: { type: [string, 'null'] }
+        created_at: { type: [string, 'null'], format: date-time }
+        updated_at: { type: [string, 'null'], format: date-time }
+    Ticket:
+      type: object
+      properties:
+        id: { type: integer }
+        reference: { type: string, example: 'Ticket #123' }
+        organisation: { $ref: '#/components/schemas/Organisation' }
+        category: { type: string, description: The service area key }
+        sub_category: { type: [string, 'null'] }
+        subject: { type: string }
+        description: { type: string, description: Sanitised HTML }
+        priority: { type: string, enum: [low, medium, high, urgent] }
+        status: { type: string }
+        requester: { $ref: '#/components/schemas/PersonRef' }
+        created_at: { type: [string, 'null'], format: date-time }
+        updated_at: { type: [string, 'null'], format: date-time }
+        closed_at: { type: [string, 'null'], format: date-time }
+    Message:
+      type: object
+      properties:
+        id: { type: integer }
+        from: { type: string, enum: [requester, staff] }
+        body: { type: string, description: Sanitised HTML }
+        via_email: { type: boolean }
+        created_at: { type: [string, 'null'], format: date-time }
+    WebhookPayload:
+      type: object
+      description: Thin on purpose; read details through the API with your own token.
+      properties:
+        id: { type: string, format: uuid, description: 'The event id; the same on a retry or replay, so use it to ignore duplicates' }
+        type: { type: string, example: ticket.created }
+        created_at: { type: string, format: date-time }
+        organisation: { $ref: '#/components/schemas/Organisation' }
+        data:
+          type: object
+          description: 'The record id (user_id, pet_id, ticket_id or case_id), and for *.updated the names of the fields that changed. consent.changed also has channel and granted.'
+          additionalProperties: true
+  pathItems:
+    WebhookEvent:
+      post:
+        summary: An event sent to your endpoint
+        description: |
+          Sent as a JSON POST to your HTTPS endpoint with these headers:
+          `X-MyAPES-Event` (the event type), `X-MyAPES-Event-Id` (the event id) and
+          `X-MyAPES-Signature: t=<unix time>,v1=<hex HMAC-SHA256>`. The HMAC is over
+          `<unix time>.<raw body>` with your endpoint's signing secret. Reject the request if
+          the signature does not match or the time is more than 300 seconds away.
+          Answer with any 2xx status within 10 seconds. Anything else is retried up to
+          8 times over about a day; after 5 failed deliveries in a row the endpoint is turned off.
+        parameters:
+          - name: X-MyAPES-Signature
+            in: header
+            required: true
+            schema: { type: string }
+          - name: X-MyAPES-Event
+            in: header
+            required: true
+            schema: { type: string }
+          - name: X-MyAPES-Event-Id
+            in: header
+            required: true
+            schema: { type: string, format: uuid }
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WebhookPayload' }
+        responses:
+          '2XX':
+            description: Received

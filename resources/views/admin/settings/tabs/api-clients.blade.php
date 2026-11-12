@@ -12,6 +12,7 @@
 <section class="panel" aria-labelledby="api-clients-heading" data-settings-tab="api-clients">
     <h2 id="api-clients-heading">{{ __('admin.settings.api_clients.heading') }}</h2>
     <p>{{ __('admin.settings.api_clients.intro') }}</p>
+    <p class="muted"><a href="{{ route('admin.settings.show', 'api-docs') }}">{{ __('admin.settings.api_clients.docs_link') }}</a></p>
 
     @if($clients->isEmpty())
         <p class="muted" data-api-clients-empty>{{ __('admin.settings.api_clients.empty') }}</p>

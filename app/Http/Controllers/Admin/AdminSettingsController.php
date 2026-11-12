@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\Settings\ApiClientsTab;
+use App\Http\Controllers\Admin\Settings\ApiDocsTab;
 use App\Http\Controllers\Admin\Settings\IntegrationsTab;
 use App\Http\Controllers\Admin\Settings\ReplyMailboxTab;
 use App\Http\Controllers\Admin\Settings\WebhooksTab;
@@ -24,12 +25,14 @@ class AdminSettingsController extends Controller
 
     public const TAB_WEBHOOKS = 'webhooks';
 
+    public const TAB_API_DOCS = 'api-docs';
+
     public function index(): RedirectResponse
     {
         return redirect()->route('admin.settings.show', self::TAB_REPLY_MAILBOX);
     }
 
-    public function show(string $tab, ReplyMailboxTab $replyMailbox, IntegrationsTab $integrations, ApiClientsTab $apiClients, WebhooksTab $webhooks): Response
+    public function show(string $tab, ReplyMailboxTab $replyMailbox, IntegrationsTab $integrations, ApiClientsTab $apiClients, WebhooksTab $webhooks, ApiDocsTab $apiDocs): Response
     {
         $tabs = $this->tabs();
         abort_unless(isset($tabs[$tab]), 404);
@@ -43,6 +46,7 @@ class AdminSettingsController extends Controller
                 self::TAB_INTEGRATIONS => $integrations->viewData(),
                 self::TAB_API_CLIENTS => $apiClients->viewData(),
                 self::TAB_WEBHOOKS => $webhooks->viewData(),
+                self::TAB_API_DOCS => $apiDocs->viewData(),
             },
         ])->header('Cache-Control', 'no-store, private');
     }
@@ -57,6 +61,7 @@ class AdminSettingsController extends Controller
             self::TAB_INTEGRATIONS => __('admin.settings.tabs.integrations'),
             self::TAB_API_CLIENTS => __('admin.settings.tabs.api_clients'),
             self::TAB_WEBHOOKS => __('admin.settings.tabs.webhooks'),
+            self::TAB_API_DOCS => __('admin.settings.tabs.api_docs'),
         ];
     }
 }
