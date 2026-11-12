@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Core\Mail\Inbound\InboundMailboxLogEntry;
 use App\Core\Mail\Inbound\InboundMailPruner;
 use Illuminate\Console\Command;
 
@@ -20,6 +21,7 @@ class PruneInboundMail extends Command
         $result = $pruner->prune(is_numeric($days) ? max(1, (int) $days) : null);
 
         $this->components->info("Pruned {$result['emails']} inbound email(s) and {$result['threads']} old reply thread(s).");
+        $this->components->info('Pruned '.InboundMailboxLogEntry::prune().' connection log entr(ies) older than '.InboundMailboxLogEntry::RETENTION_DAYS.' days.');
 
         return self::SUCCESS;
     }

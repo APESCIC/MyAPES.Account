@@ -72,6 +72,7 @@ final class InboundMailPoller
             return ['result' => self::RESULT_LOCKED] + $counts;
         }
 
+        $started = hrtime(true);
         try {
             $result = $this->fetch($counts);
         } finally {
@@ -79,6 +80,7 @@ final class InboundMailPoller
         }
 
         $this->status->recordPoll($result);
+        InboundMailboxLogEntry::recordPoll($result, (int) round((hrtime(true) - $started) / 1_000_000));
         $this->alerts->afterPoll($result);
 
         return $result;

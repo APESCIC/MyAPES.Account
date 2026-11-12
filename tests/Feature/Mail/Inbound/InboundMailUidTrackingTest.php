@@ -41,7 +41,7 @@ class InboundMailUidTrackingTest extends TestCase
         foreach (range(1, 7) as $n) {
             $this->mailbox->add($this->reply($n));
         }
-        InboundMailboxState::query()->create(['mailbox' => 'communications@example.test', 'folder' => 'INBOX', 'uid_validity' => 1, 'last_uid' => 5]);
+        InboundMailboxState::query()->create(['mailbox' => InboundMailboxState::mailboxKey('communications@example.test'), 'folder' => 'INBOX', 'uid_validity' => 1, 'last_uid' => 5]);
 
         $result = app(InboundMailPoller::class)->poll();
 
@@ -60,7 +60,7 @@ class InboundMailUidTrackingTest extends TestCase
 
         $this->assertSame([null], $this->mailbox->requestedAfter);
         $state = InboundMailboxState::query()->sole();
-        $this->assertSame('communications@example.test', $state->mailbox);
+        $this->assertSame(InboundMailboxState::mailboxKey('communications@example.test'), $state->mailbox);
         $this->assertSame('INBOX', $state->folder);
         $this->assertSame(1, $state->uid_validity);
         $this->assertSame(2, $state->last_uid);
@@ -111,7 +111,7 @@ class InboundMailUidTrackingTest extends TestCase
         app(InboundMailPoller::class)->poll();
 
         $this->assertSame([null, 1], $this->mailbox->requestedAfter);
-        $this->assertDatabaseHas('inbound_mailbox_states', ['mailbox' => 'communications@example.test', 'last_uid' => 2]);
+        $this->assertDatabaseHas('inbound_mailbox_states', ['mailbox' => InboundMailboxState::mailboxKey('communications@example.test'), 'last_uid' => 2]);
     }
 
     private function reply(int $n): string

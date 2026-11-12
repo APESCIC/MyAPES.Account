@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Core\Mail\Inbound\Contracts\InboundMailbox;
 use App\Core\Mail\Inbound\Diagnostics\MailboxConnection;
 use App\Core\Mail\Inbound\Diagnostics\MailboxDiagnostics;
+use App\Core\Mail\Inbound\InboundMailboxLogEntry;
 use App\Core\Mail\Inbound\InboundMailboxSettings;
 use App\Core\Mail\Inbound\InboundMailSettings;
 use App\Core\Mail\Inbound\ReplyMailboxStatus;
@@ -91,6 +92,7 @@ class AdminEmailImportController extends Controller
         RateLimiter::hit($limiter, self::TEST_WINDOW_SECONDS);
 
         $status->recordTest($report);
+        InboundMailboxLogEntry::recordTest($report);
         $audit->record('admin.emails.import_tested', $request->user(), context: [
             'result' => $report->failure?->value ?? 'ok',
             'step' => $report->failedStep?->value,

@@ -737,6 +737,28 @@ return [
             'probe_not_arrived' => 'not arrived after :minutes minutes. Check the mailbox\'s Spam folder; if it is not there, plus-addressing is not delivered.',
             'probe_subject' => 'MyAPES Account plus-address probe',
             'probe_body' => 'This is an automatic test from Admin → Emails → Import. It checks that plus-addressed mail reaches the mailbox and is never added to a ticket or case.',
+            'log' => [
+                'heading' => 'Recent connection log',
+                'intro' => 'The newest :count connection tests and checks of the mailbox. Entries older than :days days are deleted. No password, username or email content is ever kept.',
+                'empty' => 'Nothing has been logged yet.',
+                'caption' => 'Recent connection tests and checks, newest first',
+                'when' => 'When',
+                'kind' => 'What',
+                'result' => 'Result',
+                'step' => 'Step',
+                'duration' => 'Time',
+                'counts' => 'Mail',
+                'counts_value' => ':fetched fetched, :stored imported, :duplicates already imported, :failed failed',
+                'kinds' => [
+                    'test' => 'Connection test',
+                    'poll' => 'Check of the mailbox',
+                ],
+                'results' => [
+                    'ok' => 'Passed',
+                    'polled' => 'Worked',
+                    'unavailable' => 'Could not reach the mailbox',
+                ],
+            ],
             'alert' => [
                 'title' => 'Email import has stopped',
                 'body' => 'Since :at MyAPES Account cannot check the reply mailbox: :reason No email is lost; it is imported when the connection works again.',
