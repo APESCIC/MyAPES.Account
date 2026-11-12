@@ -44,8 +44,9 @@ class AdminApiClientController extends Controller
             ->with(self::TOKEN_FLASH_KEY, ['client' => $client->name, 'token' => $plain]);
     }
 
-    public function update(Request $request, ApiClient $apiClient, ApiClientManager $manager): RedirectResponse
+    public function update(Request $request, int $apiClient, ApiClientManager $manager): RedirectResponse
     {
+        $apiClient = ApiClient::query()->findOrFail($apiClient);
         abort_if($apiClient->isRevoked(), 404);
         $validated = $request->validate($this->accessRules());
 
@@ -57,8 +58,9 @@ class AdminApiClientController extends Controller
         return $this->back()->with('status', __('admin.settings.api_clients.updated', ['name' => $apiClient->name]));
     }
 
-    public function rotate(Request $request, ApiClient $apiClient, ApiClientManager $manager): RedirectResponse
+    public function rotate(Request $request, int $apiClient, ApiClientManager $manager): RedirectResponse
     {
+        $apiClient = ApiClient::query()->findOrFail($apiClient);
         abort_if($apiClient->isRevoked(), 404);
         $validated = $request->validate([
             'expires_in_days' => ['required', 'integer', 'min:1', 'max:'.ApiClientManager::MAX_EXPIRY_DAYS],
@@ -71,8 +73,9 @@ class AdminApiClientController extends Controller
             ->with(self::TOKEN_FLASH_KEY, ['client' => $apiClient->name, 'token' => $plain]);
     }
 
-    public function revoke(Request $request, ApiClient $apiClient, ApiClientManager $manager): RedirectResponse
+    public function revoke(Request $request, int $apiClient, ApiClientManager $manager): RedirectResponse
     {
+        $apiClient = ApiClient::query()->findOrFail($apiClient);
         abort_if($apiClient->isRevoked(), 404);
         $manager->revoke($apiClient, $request->user());
 

@@ -55,8 +55,9 @@ class AdminWebhookController extends Controller
             ->with(self::SECRET_FLASH_KEY, ['endpoint' => $endpoint->name, 'secret' => $secret]);
     }
 
-    public function rotateSecret(Request $request, WebhookEndpoint $webhookEndpoint, AuditLogger $audit): RedirectResponse
+    public function rotateSecret(Request $request, int $webhookEndpoint, AuditLogger $audit): RedirectResponse
     {
+        $webhookEndpoint = WebhookEndpoint::query()->findOrFail($webhookEndpoint);
         $secret = self::newSecret();
         $webhookEndpoint->forceFill(['secret' => $secret])->save();
         $audit->record('admin.webhooks.secret_rotated', $request->user(), context: ['webhook_endpoint_id' => $webhookEndpoint->id]);
@@ -66,8 +67,9 @@ class AdminWebhookController extends Controller
             ->with(self::SECRET_FLASH_KEY, ['endpoint' => $webhookEndpoint->name, 'secret' => $secret]);
     }
 
-    public function toggle(Request $request, WebhookEndpoint $webhookEndpoint, AuditLogger $audit): RedirectResponse
+    public function toggle(Request $request, int $webhookEndpoint, AuditLogger $audit): RedirectResponse
     {
+        $webhookEndpoint = WebhookEndpoint::query()->findOrFail($webhookEndpoint);
         $active = ! $webhookEndpoint->active;
         $webhookEndpoint->forceFill($active
             ? ['active' => true, 'consecutive_failures' => 0, 'disabled_at' => null, 'disabled_reason' => null]
@@ -77,16 +79,18 @@ class AdminWebhookController extends Controller
         return $this->back()->with('status', __($active ? 'admin.settings.webhooks.enabled' : 'admin.settings.webhooks.disabled', ['name' => $webhookEndpoint->name]));
     }
 
-    public function destroy(Request $request, WebhookEndpoint $webhookEndpoint, AuditLogger $audit): RedirectResponse
+    public function destroy(Request $request, int $webhookEndpoint, AuditLogger $audit): RedirectResponse
     {
+        $webhookEndpoint = WebhookEndpoint::query()->findOrFail($webhookEndpoint);
         $audit->record('admin.webhooks.deleted', $request->user(), context: ['webhook_endpoint_id' => $webhookEndpoint->id, 'name' => $webhookEndpoint->name]);
         $webhookEndpoint->delete();
 
         return $this->back()->with('status', __('admin.settings.webhooks.deleted', ['name' => $webhookEndpoint->name]));
     }
 
-    public function replay(Request $request, WebhookDelivery $webhookDelivery, WebhookDispatcher $dispatcher, AuditLogger $audit): RedirectResponse
+    public function replay(Request $request, int $webhookDelivery, WebhookDispatcher $dispatcher, AuditLogger $audit): RedirectResponse
     {
+        $webhookDelivery = WebhookDelivery::query()->with('endpoint')->findOrFail($webhookDelivery);
         abort_unless($webhookDelivery->endpoint->active, 409, __('admin.settings.webhooks.replay_inactive'));
 
         $replay = $dispatcher->replay($webhookDelivery);

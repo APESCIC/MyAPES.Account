@@ -7,13 +7,12 @@
     </div>
     <input type="hidden" name="{{ \App\Core\BotProtection\BotProtection::STARTED_FIELD }}" value="{{ $guard->startedToken() }}">
     @if($guard->recaptchaActive($form, request()))
-        @php($siteKey = (string) $guard->siteKey())
         @once
             @push('head')
-                <script src="https://www.google.com/recaptcha/api.js?render={{ rawurlencode($siteKey) }}" async defer nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}"></script>
+                <script src="https://www.google.com/recaptcha/api.js?render={{ rawurlencode((string) $guard->siteKey()) }}" async defer nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}"></script>
             @endpush
         @endonce
-        <input type="hidden" name="{{ \App\Core\BotProtection\BotProtection::TOKEN_FIELD }}" value="" data-recaptcha-token data-recaptcha-action="{{ $form }}" data-recaptcha-site-key="{{ $siteKey }}" data-recaptcha-unavailable="{{ \App\Core\BotProtection\RecaptchaVerifier::UNAVAILABLE_TOKEN }}">
+        <input type="hidden" name="{{ \App\Core\BotProtection\BotProtection::TOKEN_FIELD }}" value="" data-recaptcha-token data-recaptcha-action="{{ $form }}" data-recaptcha-site-key="{{ $guard->siteKey() }}" data-recaptcha-unavailable="{{ \App\Core\BotProtection\RecaptchaVerifier::UNAVAILABLE_TOKEN }}">
         <p class="muted" data-recaptcha-notice>
             {{ __('public.bot_protection.notice_before') }}
             <a href="https://policies.google.com/privacy" rel="noopener noreferrer" target="_blank">{{ __('public.bot_protection.google_privacy') }}</a>
