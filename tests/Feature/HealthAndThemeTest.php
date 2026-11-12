@@ -23,6 +23,7 @@ class HealthAndThemeTest extends TestCase
                     'database' => 'ok',
                     'cache' => 'ok',
                     'environment' => 'ok',
+                    'queue' => 'ok',
                 ],
             ]);
     }
@@ -57,6 +58,7 @@ class HealthAndThemeTest extends TestCase
                     'database' => 'failed',
                     'cache' => 'failed',
                     'environment' => 'ok',
+                    'queue' => 'unknown',
                 ],
             ]);
     }

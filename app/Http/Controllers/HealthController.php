@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Core\Webhooks\WebhookDelivery;
 use App\Support\LocalRevision;
 use App\Support\ReleaseHistoryRepository;
 use Illuminate\Contracts\Foundation\MaintenanceMode;
@@ -13,6 +14,8 @@ use Throwable;
 
 class HealthController extends Controller
 {
+    private const QUEUE_GRACE_MINUTES = 15;
+
     public function __invoke(
         ReleaseHistoryRepository $releases,
         MaintenanceMode $maintenanceMode,
@@ -23,6 +26,8 @@ class HealthController extends Controller
             'environment' => $this->environmentIsHealthy() ? 'ok' : 'failed',
         ];
         $isHealthy = ! in_array('failed', $checks, true);
+        // Reported, not fatal (#644): a webhook backlog must not fail a deploy or take the site down.
+        $checks['queue'] = $this->queueState();
 
         $body = [
             'status' => $isHealthy ? 'ok' : 'unavailable',
@@ -66,6 +71,27 @@ class HealthController extends Controller
         } catch (Throwable) {
             return false;
         }
+    }
+
+    /**
+     * "ok" while queued webhook deliveries are picked up on time, "delayed" when
+     * one has waited more than 15 minutes past its due time (the queue worker
+     * is likely stopped), "unknown" when the database cannot be asked.
+     */
+    private function queueState(): string
+    {
+        try {
+            $overdue = WebhookDelivery::query()
+                ->whereIn('status', [WebhookDelivery::PENDING, WebhookDelivery::RETRYING])
+                ->where(static fn ($query) => $query
+                    ->where('next_attempt_at', '<', now()->subMinutes(self::QUEUE_GRACE_MINUTES))
+                    ->orWhere(static fn ($pending) => $pending->whereNull('next_attempt_at')->where('created_at', '<', now()->subMinutes(self::QUEUE_GRACE_MINUTES))))
+                ->exists();
+        } catch (Throwable) {
+            return 'unknown';
+        }
+
+        return $overdue ? 'delayed' : 'ok';
     }
 
     private function environmentIsHealthy(): bool

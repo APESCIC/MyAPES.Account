@@ -16,6 +16,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request as HttpRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
 use Plugins\Tickets\Models\SupportTicket;
 use Tests\TestCase;
 
@@ -197,6 +198,19 @@ class WebhooksTest extends TestCase
         $sent = Http::recorded()->map(fn (array $pair) => $pair[0]->header(WebhookSignature::DELIVERY_HEADER)[0])->all();
         $this->assertSame([$original->event_id, $original->event_id], $sent);
         $this->assertDatabaseHas('audit_logs', ['event' => 'admin.webhooks.replayed']);
+    }
+
+    public function test_healthz_reports_a_stalled_webhook_queue_without_failing(): void
+    {
+        Queue::fake();
+        $this->endpoint('shelter-rescue', [WebhookEvents::TICKET_CREATED]);
+        $this->ticket('shelter-rescue');
+        Queue::assertPushed(DeliverWebhook::class);
+
+        $this->getJson(route('health'))->assertOk()->assertJsonPath('checks.queue', 'ok');
+
+        $this->travel(20)->minutes();
+        $this->getJson(route('health'))->assertOk()->assertJsonPath('status', 'ok')->assertJsonPath('checks.queue', 'delayed');
     }
 
     /**

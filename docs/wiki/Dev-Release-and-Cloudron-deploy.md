@@ -30,3 +30,10 @@ Merge with a merge commit (no squash), only after Bambie has approved the milest
 5. The milestone closes by itself. After a successful deploy, [milestone-close.yml](https://github.com/APESCIC/MyAPES.Account/blob/main/.github/workflows/milestone-close.yml) closes any milestone whose issues are all closed (closing a finished epic first). A milestone where nothing shipped closes without a deploy. To check by hand, run `composer milestone:close-ready -- --dry-run`.
 
 Deploy secrets live in the `cloudron-deploy` GitHub environment. Never print or commit them. Rollback is forward-only; see the README's maintenance section.
+
+## Queue worker, migrations and health (from v0.62.0)
+- **Migrations** run on every deploy (`activate-release.sh` runs `php artisan migrate --force` before the switch). v0.62.0 adds `api_clients`, `personal_access_tokens` and the webhook tables; nothing is dropped or renamed.
+- **Queue worker:** `cloudron-run.sh` keeps one `artisan queue:work` and one `artisan schedule:work` running. Webhook deliveries are queued jobs (`App\Jobs\DeliverWebhook`) on that worker; the deploy restarts the app, so the worker picks up the new code.
+- **Health:** `/healthz` reports `checks.queue`: `ok`, or `delayed` when a webhook delivery has waited more than 15 minutes past its due time (the worker has probably stopped). It is reported only and never fails the deploy check, which still needs `status: ok`, the new `version` and the merge commit as `release`.
+- **After a deploy that touches webhooks,** check one delivery goes through: in Admin → Settings → Webhooks, add (or use) an endpoint and replay a recent delivery, or change a test record, then look for `Delivered` in the delivery log.
+- **Keys:** the reCAPTCHA keys, TinyMCE key, API tokens and webhook signing secrets are set in Admin → Settings, never in this repository. Keep the real values in APES Vault ('API Keys & Tokens').
