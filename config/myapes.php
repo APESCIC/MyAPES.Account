@@ -84,16 +84,32 @@ return [
         'report' => (bool) env('CSP_REPORT', true),
         'directives' => [
             'default-src' => ["'self'"],
-            'script-src' => ["'self'", 'https://*.tiny.cloud', 'https://*.tinymce.com'],
+            // Google reCAPTCHA v3 (#637) loads only on the protected public forms.
+            'script-src' => ["'self'", 'https://*.tiny.cloud', 'https://*.tinymce.com', 'https://www.google.com/recaptcha/', 'https://www.gstatic.com/recaptcha/'],
             'style-src' => ["'self'", "'unsafe-inline'", 'https://*.tiny.cloud', 'https://*.tinymce.com'],
             'img-src' => ["'self'", 'data:', 'blob:', 'https:'],
             'font-src' => ["'self'", 'data:', 'https://*.tiny.cloud', 'https://*.tinymce.com'],
-            'connect-src' => ["'self'", 'blob:', 'https://*.tiny.cloud', 'https://*.tinymce.com'],
-            'frame-src' => ["'self'", 'https://bookings.cloud.microsoft', 'https://outlook.office365.com'],
+            'connect-src' => ["'self'", 'blob:', 'https://*.tiny.cloud', 'https://*.tinymce.com', 'https://www.google.com/recaptcha/'],
+            'frame-src' => ["'self'", 'https://bookings.cloud.microsoft', 'https://outlook.office365.com', 'https://www.google.com/recaptcha/', 'https://recaptcha.google.com/recaptcha/'],
             'object-src' => ["'none'"],
             'base-uri' => ["'self'"],
             'frame-ancestors' => ["'self'"],
         ],
+    ],
+
+    'bot_protection' => [
+        // Honeypot, minimum fill time and Google reCAPTCHA v3 on the public
+        // register, forgot password, ticket, recruitment apply and login forms
+        // (#637). The reCAPTCHA keys and score thresholds are in Admin →
+        // Settings → Integrations; without keys only the honeypot and timing apply.
+        'enabled' => (bool) env('BOT_PROTECTION_ENABLED', true),
+        'min_fill_seconds' => (int) env('BOT_PROTECTION_MIN_FILL_SECONDS', 2),
+        'google_timeout_seconds' => 3,
+        'login_failures_before_recaptcha' => 3,
+        'login_failure_window_seconds' => 3600,
+        // When Google cannot be reached, unverified submissions per form and IP address.
+        'unverified_attempts' => 5,
+        'unverified_window_seconds' => 600,
     ],
 
     'bookings' => [

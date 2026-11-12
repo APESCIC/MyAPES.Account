@@ -478,6 +478,27 @@ return [
                     'api_key' => 'From tiny.cloud. This key is public by design: it is part of the editor\'s address in every page that has an editor, and works only on the domains approved at tiny.cloud.',
                 ],
             ],
+            'recaptcha' => [
+                'name' => 'Google reCAPTCHA v3',
+                'description' => 'Invisible spam checks on the public register, forgot password, open a ticket and job application forms, and on Public Login after 3 failed attempts. Without keys, only the hidden honeypot and timing checks run.',
+                'fields' => [
+                    'site_key' => 'Site key',
+                    'secret_key' => 'Secret key',
+                    'threshold_register' => 'Lowest score allowed: register',
+                    'threshold_forgot_password' => 'Lowest score allowed: forgot password',
+                    'threshold_ticket' => 'Lowest score allowed: open a ticket',
+                    'threshold_recruitment' => 'Lowest score allowed: job application',
+                    'threshold_login' => 'Lowest score allowed: Public Login',
+                ],
+                'help' => [
+                    'site_key' => 'From the Google reCAPTCHA admin console (a v3 key for this domain). The site key is public: it appears in the page.',
+                    'threshold_login' => 'Scores run from 0.0 (likely a bot) to 1.0 (likely a person). 0.5 is Google\'s suggested starting point; raise a form\'s score if spam gets through, lower it if real people are blocked.',
+                ],
+                'test_not_configured' => 'Save the site key and secret key first.',
+                'test_unreachable' => 'Google could not be reached.',
+                'test_bad_secret' => 'Google rejected the secret key.',
+                'unverified_warning' => 'Google reCAPTCHA could not be checked at :at, so some public forms were accepted without it (the hidden checks and stricter limits still applied). Check the secret key and test the connection.',
+            ],
         ],
         'reply_mailbox' => [
             'heading' => 'Reply mailbox',

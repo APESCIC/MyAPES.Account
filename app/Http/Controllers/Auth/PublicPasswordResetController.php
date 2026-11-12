@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Core\Accounts\User;
+use App\Core\BotProtection\BotProtection;
 use App\Http\Controllers\Controller;
 use App\Services\AuditLogger;
 use App\Services\LocalPublicPasswordResetService;
@@ -31,8 +32,9 @@ class PublicPasswordResetController extends Controller
         return view('auth.forgot-password');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, BotProtection $botProtection): RedirectResponse
     {
+        $botProtection->check($request, BotProtection::FORGOT_PASSWORD);
         $validated = $request->validate([
             'email' => ['required', 'email'],
         ]);

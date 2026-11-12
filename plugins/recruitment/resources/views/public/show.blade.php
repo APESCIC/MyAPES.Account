@@ -52,8 +52,9 @@
                 </div>
             @elseif($canApply)
                 <p class="muted">{{ __('recruitment::public.show.blade.each_person_may_apply_once_per_role_tell_us_briefly_why') }}</p>
-                <form method="post" action="{{ route('recruitment.apply', $role) }}">
-                    @csrf
+            <form method="post" action="{{ route('recruitment.apply', $role) }}">
+            @csrf
+            <x-bot-protection form="recruitment" />
                     <label for="application_statement">{{ __('recruitment::public.show.blade.why_are_you_interested') }}</label>
                     <textarea id="application_statement" name="statement" required maxlength="5000">{{ old('statement') }}</textarea>
                     @foreach($role->questions as $question)

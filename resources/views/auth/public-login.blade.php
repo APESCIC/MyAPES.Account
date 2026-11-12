@@ -11,6 +11,7 @@
         <x-mascot-tip />
         <form method="post" action="{{ route('public.login.submit') }}">
             @csrf
+            <x-bot-protection form="login" />
             <label for="login">{{ __('auth.public_login.login_label') }}</label>
             <input id="login" type="text" name="login" value="{{ old('login') }}" autocomplete="username webauthn" required>
 

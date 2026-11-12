@@ -75,6 +75,7 @@
                     data-ticket-create-form
                 >
                 @csrf
+                <x-bot-protection form="ticket" />
                 <div class="row">
                     <div>
                         <label for="service_area">{{ __('tickets::ui.index.blade.service_area') }}</label>
