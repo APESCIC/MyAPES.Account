@@ -24,6 +24,13 @@ final class ReplyMailboxStatus
 
     private const HEARTBEAT_KEY = 'inbound-mail:heartbeat';
 
+    private const FAILURES_KEY = 'inbound-mail:consecutive-failures';
+
+    private const NEXT_POLL_KEY = 'inbound-mail:next-poll-at';
+
+    /** Minutes to wait after the 1st, 2nd, 3rd, 4th and later failures in a row (#778). */
+    public const BACKOFF_MINUTES = [1, 2, 5, 10, 15];
+
     public const PROBE_PREFIX = 'probe-';
 
     public function __construct(private readonly InboundMailSettings $settings) {}
@@ -58,7 +65,33 @@ final class ReplyMailboxStatus
 
         if ($result['result'] === InboundMailPoller::RESULT_POLLED) {
             Cache::forever(self::SUCCESSFUL_POLL_KEY, $entry['at']);
+            Cache::forget(self::FAILURES_KEY);
+            Cache::forget(self::NEXT_POLL_KEY);
+        } elseif ($result['result'] === InboundMailPoller::RESULT_UNAVAILABLE) {
+            $failures = $this->consecutiveFailures() + 1;
+            Cache::forever(self::FAILURES_KEY, $failures);
+            Cache::forever(self::NEXT_POLL_KEY, now()->addMinutes(self::BACKOFF_MINUTES[min($failures, count(self::BACKOFF_MINUTES)) - 1])->toIso8601String());
         }
+    }
+
+    public function consecutiveFailures(): int
+    {
+        return (int) Cache::get(self::FAILURES_KEY, 0);
+    }
+
+    /**
+     * When the next scheduled poll may connect again after failures (#778), or null when healthy.
+     */
+    public function nextPollAt(): ?Carbon
+    {
+        $at = Cache::get(self::NEXT_POLL_KEY);
+
+        return is_string($at) ? Carbon::parse($at) : null;
+    }
+
+    public function backingOff(): bool
+    {
+        return $this->nextPollAt()?->isFuture() ?? false;
     }
 
     /**

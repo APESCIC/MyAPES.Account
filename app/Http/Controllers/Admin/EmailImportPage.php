@@ -49,6 +49,8 @@ final class EmailImportPage
             'report' => is_array(session('mailbox_report')) ? DiagnosticReport::fromArray(session('mailbox_report')) : null,
             'lastPoll' => $this->status->lastPoll(),
             'lastSuccessfulPollAt' => $this->status->lastSuccessfulPollAt(),
+            'nextPollAt' => $this->status->backingOff() ? $this->status->nextPollAt() : null,
+            'consecutiveFailures' => $this->status->consecutiveFailures(),
             'probe' => $this->probe(),
             'encryptions' => collect(InboundMailboxSettings::encryptions())
                 ->mapWithKeys(fn (string $encryption): array => [$encryption => __("admin.emails.import.encryption.{$encryption}")])

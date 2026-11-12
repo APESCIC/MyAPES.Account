@@ -717,6 +717,8 @@ return [
             'saved' => 'Reply mailbox settings saved.',
             'no_changes' => 'Nothing changed.',
             'status_heading' => 'Import status',
+            'next_poll' => 'Next check',
+            'backing_off' => 'The mailbox failed :count times in a row, so checks are slowed down. The next check is at :at.',
             'last_test' => 'Last connection test',
             'last_test_ok' => 'Connected at :at.',
             'last_test_failed' => 'Failed at :at: :reason',
@@ -951,6 +953,7 @@ return [
                 'fetched' => 'Fetched :fetched, stored :stored, already stored :duplicates, failed :failed.',
                 'fetch_disabled' => 'Replies by email are not configured, so nothing was fetched.',
                 'fetch_unavailable' => 'Mailpit could not be reached. Nothing was lost; try again.',
+                'fetch_busy' => 'Another check of the mailbox is running. Try again in a minute.',
             ],
             'statuses' => [
                 'received' => 'Waiting',

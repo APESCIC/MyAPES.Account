@@ -11,6 +11,8 @@ final class SocketTransport implements MailboxTransport
     /** @var resource|null */
     private $stream = null;
 
+    private int $timeout = 15;
+
     public function resolves(string $host): bool
     {
         if ($host === '') {
@@ -41,6 +43,7 @@ final class SocketTransport implements MailboxTransport
 
         stream_set_timeout($stream, $timeout);
         $this->stream = $stream;
+        $this->timeout = $timeout;
     }
 
     public function startTls(string $peerName, bool $verify): array
@@ -59,6 +62,7 @@ final class SocketTransport implements MailboxTransport
             return true;
         });
 
+        $started = microtime(true);
         try {
             $enabled = stream_socket_enable_crypto($stream, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
         } finally {
@@ -66,7 +70,9 @@ final class SocketTransport implements MailboxTransport
         }
 
         if ($enabled !== true) {
-            throw new TransportFailure($this->timedOut() ? FailureType::Timeout : self::tlsFailure($warning));
+            // PHP does not always flag a stalled handshake as timed out, so a failure after the full timeout counts as one.
+            $stalled = $this->timedOut() || microtime(true) - $started >= $this->timeout - 0.1;
+            throw new TransportFailure($stalled ? FailureType::Timeout : self::tlsFailure($warning));
         }
 
         return self::certificate(stream_context_get_params($stream)['options']['ssl']['peer_certificate'] ?? null);
@@ -136,6 +142,7 @@ final class SocketTransport implements MailboxTransport
         return match (true) {
             str_contains($warning, 'did not match expected'), str_contains($warning, 'hostname mismatch') => FailureType::CertificateNameMismatch,
             str_contains($warning, 'certificate verify failed'), str_contains($warning, 'certificate has expired'), str_contains($warning, 'self signed'), str_contains($warning, 'self-signed') => FailureType::CertificateUntrusted,
+            str_contains($warning, 'timed out') => FailureType::Timeout,
             str_contains($warning, 'wrong version number'), str_contains($warning, 'unknown protocol'), str_contains($warning, 'packet length too long'), str_contains($warning, 'record layer failure') => FailureType::WrongEncryption,
             default => FailureType::HandshakeFailed,
         };

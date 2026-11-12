@@ -27,6 +27,18 @@ class PollInboundMail extends Command
             return self::SUCCESS;
         }
 
+        if ($result['result'] === InboundMailPoller::RESULT_BACKING_OFF) {
+            $this->components->info('Waiting after failed polls; the next poll connects at '.$status->nextPollAt()?->format('H:i').'.');
+
+            return self::SUCCESS;
+        }
+
+        if ($result['result'] === InboundMailPoller::RESULT_LOCKED) {
+            $this->components->info('Another poll is running; nothing to do.');
+
+            return self::SUCCESS;
+        }
+
         if ($result['result'] === InboundMailPoller::RESULT_UNAVAILABLE) {
             $this->components->warn('The mailbox could not be reached. Mail stays there until the next poll.');
 

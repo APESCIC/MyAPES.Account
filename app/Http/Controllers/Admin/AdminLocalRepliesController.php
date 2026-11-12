@@ -43,12 +43,14 @@ class AdminLocalRepliesController extends Controller
     public function fetch(InboundMailPoller $poller, InboundReplyRegistry $registry): RedirectResponse
     {
         $before = (int) InboundEmail::query()->max('id');
-        $result = $poller->poll();
+        $result = $poller->poll(force: true);
 
         if ($result['result'] !== InboundMailPoller::RESULT_POLLED) {
-            return $this->back()->withErrors(['local_reply' => $result['result'] === InboundMailPoller::RESULT_DISABLED
-                ? __('admin.emails.inbound.local.fetch_disabled')
-                : __('admin.emails.inbound.local.fetch_unavailable')]);
+            return $this->back()->withErrors(['local_reply' => match ($result['result']) {
+                InboundMailPoller::RESULT_DISABLED => __('admin.emails.inbound.local.fetch_disabled'),
+                InboundMailPoller::RESULT_LOCKED => __('admin.emails.inbound.local.fetch_busy'),
+                default => __('admin.emails.inbound.local.fetch_unavailable'),
+            }]);
         }
 
         $fetched = InboundEmail::query()->where('id', '>', $before)->orderBy('id')->get()->map(function (InboundEmail $email) use ($registry): array {

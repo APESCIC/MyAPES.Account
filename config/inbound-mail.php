@@ -48,7 +48,8 @@ return [
         'username' => env('INBOUND_MAIL_IMAP_USERNAME'),
         'password' => env('INBOUND_MAIL_IMAP_PASSWORD'),
         'folder' => env('INBOUND_MAIL_IMAP_FOLDER', 'INBOX'),
-        'timeout' => (int) env('INBOUND_MAIL_IMAP_TIMEOUT', 30),
+        // Seconds to connect and to wait for each answer, so a hanging server cannot stall a poll (#778).
+        'timeout' => (int) env('INBOUND_MAIL_IMAP_TIMEOUT', 15),
     ],
 
     'poll_batch' => (int) env('INBOUND_MAIL_POLL_BATCH', 50),

@@ -17,6 +17,12 @@
             <dt>{{ __('admin.emails.import.last_successful_poll') }}</dt>
             <dd data-last-poll>{{ $lastSuccessfulPollAt?->format('Y-m-d H:i') ?? __('admin.emails.import.never') }}</dd>
         </div>
+        @if($nextPollAt !== null)
+            <div>
+                <dt>{{ __('admin.emails.import.next_poll') }}</dt>
+                <dd data-next-poll>{{ __('admin.emails.import.backing_off', ['count' => $consecutiveFailures, 'at' => $nextPollAt->format('Y-m-d H:i')]) }}</dd>
+            </div>
+        @endif
         @if($lastPoll !== null && $lastPoll['result'] !== 'polled')
             <div>
                 <dt>{{ __('admin.emails.import.last_poll') }}</dt>

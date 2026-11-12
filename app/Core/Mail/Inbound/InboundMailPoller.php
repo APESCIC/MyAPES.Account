@@ -26,6 +26,14 @@ final class InboundMailPoller
 
     public const RESULT_POLLED = 'polled';
 
+    public const RESULT_BACKING_OFF = 'backing_off';
+
+    public const RESULT_LOCKED = 'locked';
+
+    private const LOCK = 'inbound-mail:poll-lock';
+
+    private const LOCK_SECONDS = 300;
+
     public const FOLDER_PROCESSED = 'Processed';
 
     public const FOLDER_FAILED = 'Failed';
@@ -40,9 +48,12 @@ final class InboundMailPoller
     ) {}
 
     /**
+     * Polls once. Scheduled polls wait while backing off after failures; an
+     * admin's "Fetch replies now" ($force) does not. Two polls never overlap (#778).
+     *
      * @return array{result: string, fetched: int, stored: int, duplicates: int, failed: int}
      */
-    public function poll(): array
+    public function poll(bool $force = false): array
     {
         $counts = ['result' => self::RESULT_POLLED, 'fetched' => 0, 'stored' => 0, 'duplicates' => 0, 'failed' => 0];
 
@@ -50,7 +61,21 @@ final class InboundMailPoller
             return ['result' => self::RESULT_DISABLED] + $counts;
         }
 
-        $result = $this->fetch($counts);
+        if (! $force && $this->status->backingOff()) {
+            return ['result' => self::RESULT_BACKING_OFF] + $counts;
+        }
+
+        $lock = Cache::lock(self::LOCK, self::LOCK_SECONDS);
+        if (! $lock->get()) {
+            return ['result' => self::RESULT_LOCKED] + $counts;
+        }
+
+        try {
+            $result = $this->fetch($counts);
+        } finally {
+            $lock->release();
+        }
+
         $this->status->recordPoll($result);
 
         return $result;
