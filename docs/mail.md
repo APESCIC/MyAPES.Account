@@ -124,7 +124,7 @@ Administrators enter the mailbox in **Admin → Settings → Reply mailbox** (v0
 1. `tickets:inbound-poll` (every minute, no overlap) fetches up to 50 messages, stores each raw message on the private disk with an `inbound_emails` row keyed by a hash of its Message-ID, queues `ProcessInboundEmail`, and only then deletes it from the mailbox. A duplicate Message-ID is never stored twice; an IMAP outage or a failed store leaves mail in the mailbox for the next poll.
 2. `App\Core\Mail\Inbound\InboundMailProcessor`:
    1. **Ignore** machine mail (`Protection\LoopGuard`): `Auto-Submitted` other than `no`, `X-Autoreply` and similar, `Precedence: bulk/list/junk`, `List-Id`, bounces (`Return-Path: <>`, `MAILER-DAEMON`, `multipart/report`), out-of-office subjects, and our own addresses. Ignored mail is never answered.
-   2. **Match** the record (`Matching\ReplyMatcher`): token in To/Cc/Delivered-To, then subject tag, then In-Reply-To/References.
+   2. **Match** the record (`Matching\ReplyMatcher`, v0.61.0): the token in To/Cc/Delivered-To (only when plus-addressing is on), then a stored Message-ID in In-Reply-To/References, then the subject tag. When they point to different records the email is quarantined as `conflicting_reference`. Unmatched or conflicting mail from a known, active, authenticated account holder gets one `EmailReplyNotPostedNotification` an hour; unknown senders get nothing.
    3. **Service switch**: off means quarantined (`service_off`).
    4. **Check the sender** (`Verification\SenderVerifier`): SPF or DKIM pass and DMARC not `fail`; an account with the From address; not suspended; the token's or thread's recipient; and owner or eligible staff (`Verification\InboundReplyEligibility`, which checks roles and service choices directly because the queue worker has no sign-in session).
    5. **Closed** record: rejected, with one `EmailReplyNotPostedNotification` (marked `Auto-Submitted: auto-replied`) at most once an hour per sender.
@@ -137,7 +137,7 @@ Plugins register handlers with `PluginServiceProvider::inboundReplyHandlers()`; 
 
 ### Statuses
 
-`received`, `posted`, `ignored`, `quarantined`, `rejected`, `failed`, `discarded`. The reason codes and their wording are in `lang/en_GB/admin.php` under `emails.inbound.reasons`. Quarantined and failed mail can be retried or discarded on Admin → Emails → Inbound (audited as `admin.emails.inbound_retried` and `admin.emails.inbound_discarded`); switching a service is audited as `admin.emails.inbound_service_changed`.
+`received`, `posted`, `ignored`, `quarantined`, `rejected`, `failed`, `discarded`. The reason codes and their wording are in `lang/en_GB/admin.php` under `emails.inbound.reasons`. Quarantined and failed mail can be retried or discarded on Admin → Emails → Inbound (audited as `admin.emails.inbound_retried` and `admin.emails.inbound_discarded`); switching a service is audited as `admin.emails.inbound_service_changed`. A quarantined reply can be posted with **Attach to ticket or case**, as the sender's account or one staff choose (never as an unknown person), on an open record; it is audited as `admin.emails.inbound_attached` without the message body. Reply mailbox saves, connection tests and probes in Admin → Settings are audited as `admin.settings.mailbox_saved`, `admin.settings.mailbox_tested` and `admin.settings.mailbox_probe_sent`, with field names only.
 
 ### Retention
 
@@ -157,7 +157,7 @@ Never put a password, token or key in an issue, a commit, chat or a log. Record 
 
 ### Local testing
 
-See [Laragon: Replies by email](laragon.md#replies-by-email): `inbound-mail:key --enable`, `tickets:inbound-sample` and `tickets:inbound-ingest` run the whole flow without a mailbox.
+See [Laragon: Replies by email](laragon.md#replies-by-email). With `INBOUND_MAIL_DRIVER=mailpit` the poller reads Laragon's Mailpit through `Mailpit\MailpitMailbox` (local or testing, loopback URL only), `tickets:inbound-reply-as` and the **Local test replies** panel on Admin → Emails → Inbound reply as a client through `Local\ClientReplyBuilder`, and `tickets:inbound-sample` with `tickets:inbound-ingest` still work from files.
 
 ## Tests
 
@@ -174,4 +174,5 @@ See [Laragon: Replies by email](laragon.md#replies-by-email): `inbound-mail:key 
 | Outbound log and retention | `tests/Feature/Mail/OutboundMailLogTest.php` |
 | Email preference | `tests/Feature/Mail/OptionalMailPreferenceTest.php` |
 | Wording overrides | `tests/Feature/Mail/MailCopyOverridesTest.php` |
-| Replies by email: outgoing headers, poller, matching and sender checks, text extraction, loop and rate limits, posting, attachments, Admin Inbound, retention, local harness | `tests/Feature/Mail/Inbound/*Test.php` with fixtures in `tests/Fixtures/InboundMail/` |
+| Replies by email: outgoing headers, poller, matching and sender checks, text extraction, loop and rate limits, posting, attachments, Admin Inbound, retention, local harness, Mailpit driver, reply builder, local panel, triage, end-to-end routing with plus-addressing on and off | `tests/Feature/Mail/Inbound/*Test.php` with fixtures in `tests/Fixtures/InboundMail/` and from `ClientReplyBuilder` |
+| Admin → Settings → Reply mailbox: store, form, resolve, test connection, probe, audit | `tests/Feature/Settings/AppSettingsTest.php`, `tests/Feature/Admin/*Settings*Test.php`, `tests/Feature/Admin/ReplyMailbox*Test.php`, `tests/Feature/Mail/Inbound/InboundMailSettingsResolveTest.php` |

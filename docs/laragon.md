@@ -88,25 +88,50 @@ composer pre-pr-verify # pre-merge, then the Laragon setup; -Fresh also runs dem
 
 ## Replies by email
 
-Ticket and case replies by email ([`mail.md`](mail.md#replies-by-email)) work locally without a real mailbox:
+Ticket and case replies by email ([`mail.md`](mail.md#replies-by-email)) work locally with Laragon's Mailpit standing in for the `communications@` mailbox: the app sends ticket emails to Mailpit, you reply as the client into Mailpit, and the normal poller fetches the reply from Mailpit and posts it.
+
+### Set up once
 
 ```powershell
-php artisan inbound-mail:key --enable     # once: writes INBOUND_MAIL_TOKEN_KEY and turns replies on in .env
+php artisan inbound-mail:key --enable     # writes INBOUND_MAIL_TOKEN_KEY and turns replies on in .env
+```
+
+Then add these two lines to `.env` and clear the config:
+
+```dotenv
+INBOUND_MAIL_DRIVER=mailpit
+INBOUND_MAIL_MAILPIT_URL=http://127.0.0.1:8025
+```
+
+```powershell
 php artisan config:clear
 ```
 
-1. Update a ticket or case in the app. The email lands in Mailpit (`http://localhost:8025`) with a `communications+t…` Reply-To, a `[MYAPES-T-12]` subject tag and the "Reply above this line" marker.
-2. Write a reply as that person, then feed it in:
+`mailpit` only works with `APP_ENV=local` (or `testing`) and a `127.0.0.1` or `localhost` URL. The Cloudron deploy refuses any driver but `imap` (`myapes:inbound-mail:preflight`), so never set it anywhere else. Leave the `INBOUND_MAIL_IMAP_*` settings empty locally.
 
-   ```powershell
-   php artisan tickets:inbound-sample T12 owner@example.org --body="It works now."
-   php artisan tickets:inbound-ingest storage\app\inbound-samples\reply-T12-<time>.eml
-   ```
+### The reply loop in the browser
 
-   You can also save a real reply from Gmail or Outlook as `.eml` and ingest that. Set `INBOUND_MAIL_REQUIRE_AUTH=false` in `.env` if the saved file has no `Authentication-Results` header.
-3. The reply appears on the ticket marked **by email**; anything that was not posted is on **Admin → Emails → Inbound** with the reason.
+1. Sign in with the QA Admin account and, as staff, add a public message to a demo ticket or case. Its emails land in Mailpit (<http://localhost:8025>) with a `communications+t…` Reply-To, a `[MYAPES-T-12]` subject tag and the "Reply above this line" marker.
+2. Open **Admin → Emails → Inbound**. The **Local test replies** panel (only on this local install) lists the latest 20 ticket and case emails in Mailpit, each with **Open in Mailpit**.
+3. Under **Reply as client**, choose the email, type the reply, and optionally another account to reply from or a variant (no subject tag, no reply headers, changed subject, HTML only, one attachment). Press **Send reply**: the reply goes to Mailpit through the normal mail settings.
+4. Press **Fetch replies now**. It runs the poller once and shows how many replies were fetched and stored, with links to each one and to its ticket or case. The reply appears on the ticket marked **by email**; anything not posted stays on the Inbound list with the reason, where **Attach to ticket or case** can post it.
 
-Leave the `INBOUND_MAIL_IMAP_*` settings empty locally; the every-minute poll then does nothing.
+### The same from the command line
+
+```powershell
+php artisan tickets:inbound-reply-as --latest=T12 --body="It works now."   # reply to the latest T12 email in Mailpit
+php artisan tickets:inbound-reply-as <mailpit-id> --as=other@example.test --variant=no-tag
+php artisan tickets:inbound-poll                                           # fetch from Mailpit and post
+```
+
+Without the Mailpit driver you can still write a reply to a file and feed it in:
+
+```powershell
+php artisan tickets:inbound-sample T12 owner@example.org --body="It works now."
+php artisan tickets:inbound-ingest storage\app\inbound-samples\reply-T12-<time>.eml
+```
+
+You can also save a real reply from Gmail or Outlook as `.eml` and ingest that. Set `INBOUND_MAIL_REQUIRE_AUTH=false` in `.env` if the saved file has no `Authentication-Results` header.
 
 ## Several APESCIC projects side by side
 
