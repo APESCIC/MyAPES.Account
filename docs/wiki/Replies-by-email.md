@@ -59,16 +59,42 @@ With `admin.emails.manage` you can open a quarantined or failed email and:
 
 All three are written to the audit log, without the message text.
 
-### Reply mailbox settings
+### Email import (the reply mailbox)
 
-**Admin → Settings → Reply mailbox** (`admin.settings.view` to see it, `admin.settings.manage` to change it; administrators only) holds the shared `communications@myapes.me.uk` mailbox:
+**Admin → Emails → Import** (v0.63.0; menu item **Email import**, and an **Import** tab next to Inbound) holds the shared `communications@myapes.me.uk` mailbox. `admin.settings.view` shows it and `admin.settings.manage` changes and tests it; both are for administrators only. It used to be the Reply mailbox tab of Admin → Settings, and that old address now takes you here.
 
-- **Turn on replies by email**, the mailbox address, IMAP server, port, encryption, certificate check, username and folder.
-- **Mail app password**: write-only. It is encrypted and never shown again; leave the box blank to keep it. The real password lives in APES Vault, 'API Keys & Tokens'.
+**Connection**
+
+- **Turn on replies by email**, the mailbox address, IMAP server, port, encryption, certificate check, username and folder. A new install starts with the APES Cloudron values: `mail.cloudron.apes.org.uk`, port 993 and **SSL/TLS (port 993)**. The Cloudron mail server has IMAP on 993 with SSL/TLS only.
+- Port 993 with STARTTLS, or port 143 with SSL/TLS, can never work, so the page refuses them and says which to choose.
+- **Username**: the full mailbox address. Alias logins do not work.
+- **Mail app password**: the mailbox owner's Cloudron **Mail Client** app password, from APES Vault ('API Keys & Tokens'). It is write-only, encrypted and never shown again; leave the box blank to keep it. A mailbox owned by a group only accepts a member's own password, so the mailbox is owned by a service user.
 - **Plus-addressing delivered**: tick it only if mail to `communications+something@` reaches the mailbox (see the runbook). When it is off, replies go to the plain address and are matched by their email headers and subject tag.
 - A field marked **Set by .env** comes from the server's env file and wins over this page.
-- **Test connection** logs in and opens the folder. **Send a plus-address probe** emails a `communications+probe` address; the tab shows whether it arrived after the next check. The probe is never added to a ticket or case.
-- The tab also shows the last connection test and the last successful check of the mailbox.
+
+**Test connection** tests the values in the form, even before you save or switch replies on. It checks, in order, the server name, the connection, the encryption, the login and the folder, and stops at the first problem. Each step shows Passed, Failed or Skipped with its time. A password you type is used for that test only and never kept. You can run 5 tests every 10 minutes. A passing test shows how many messages (and unread) are in the folder, which features the server has (IDLE, MOVE, UIDPLUS) and when its certificate expires. A failed test names the problem and what to try:
+
+| Problem | What to try |
+| --- | --- |
+| The server name was not found | Check the spelling of the IMAP server. On the APES Cloudron it is `mail.cloudron.apes.org.uk`. |
+| The server refused the connection | Check the port. On the APES Cloudron IMAP is on port 993; ask IT if a firewall blocks it. |
+| The server did not answer in time | Check the server name and port, then try again. If it keeps happening, ask IT whether the mail server is up. |
+| Wrong encryption for this port | Use SSL/TLS with port 993, or STARTTLS with port 143. The APES Cloudron offers IMAP on 993 with SSL/TLS only. |
+| The server's certificate name does not match | Use the name on the certificate as the IMAP server, for example `mail.cloudron.apes.org.uk` rather than an alias. |
+| The server's certificate has expired or is not trusted | Ask IT to renew the mail certificate on Cloudron. Only turn off the certificate check for local testing. |
+| The encryption handshake failed | Check the encryption and port, then try again. If it keeps happening, ask IT to check the mail server. |
+| The server refused the username or password | Use the full mailbox address and the mailbox owner's Cloudron Mail Client app password. Alias logins do not work. |
+| The server has had too many attempts | Wait 15 minutes before trying again, then check the password. |
+| The folder was not found | Choose one of the folders the server has (the result lists them). Most mailboxes use INBOX. |
+| The server is missing a feature the import uses (a warning) | Imports still work, a little more slowly. Ask IT whether the mail server can offer MOVE and UIDPLUS. |
+
+**Send a plus-address probe** emails a `communications+probe` address; the page shows whether it arrived after the next check. The probe is never added to a ticket or case.
+
+**Import status and readiness.** The page shows the last connection test, the last successful check of the mailbox and, after failures, when the next check will run. **Ready to import?** lists, with a tick or a cross: the reply token key on the server, replies switched on, a valid mailbox address, a saved password, a passing connection test, a scheduler check in the last 5 minutes and an arrived probe. Each cross says who fixes it: an administrator on this page, or IT on Cloudron. Secrets only ever show as set or not set.
+
+**How importing runs.** MyAPES Account checks the mailbox every minute and fetches only new mail. Imported mail moves to the mailbox's **Processed** folder; mail that cannot be stored after 3 tries moves to **Failed**. Both folders are created if missing and emptied of mail older than 30 days. If the mailbox cannot be reached, checks slow down (1, 2, 5, 10, then every 15 minutes) until it works again. After 3 failed checks in a row, or 15 minutes of failures, administrators see a banner and get one email; when importing works again the banner clears and one more email says so.
+
+**Recent connection log** lists the newest 50 tests and checks: when, what, the result, the step, the time and how much mail was fetched and imported. It never keeps a password, username or email content, and entries go after 30 days.
 
 Every save, test and probe is written to the audit log with field names only, never the password. Operators: the set-up steps are the [Cloudron mailbox runbook](https://github.com/APESCIC/MyAPES.Account/blob/main/docs/mail.md#cloudron-mailbox-runbook).
 
@@ -76,7 +102,7 @@ Every save, test and probe is written to the audit log with field names only, ne
 
 ## Privacy
 
-The full email is kept for 30 days so problems can be checked, then deleted. After that only a record of when it arrived, what happened and why is kept. The mailbox itself never keeps processed mail. The [privacy notice](https://myaccount.myapes.me.uk/privacy) explains this too.
+The full email is kept for 30 days so problems can be checked, then deleted. After that only a record of when it arrived, what happened and why is kept. In the mailbox itself, imported mail moves to a Processed (or Failed) folder and is deleted from there after 30 days. The [privacy notice](https://myaccount.myapes.me.uk/privacy) explains this too.
 
 ## Local testing
 

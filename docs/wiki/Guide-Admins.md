@@ -10,3 +10,5 @@
 Related now: [mail.md](https://github.com/APESCIC/MyAPES.Account/blob/main/docs/mail.md)
 
 Admin → Settings (v0.62.0): [[Integrations]] (TinyMCE and Google reCAPTCHA keys), [[API clients|API-clients]] (tokens for APES apps) and [[Webhooks]] (signed change events for APES apps).
+
+Admin → Emails → Import (v0.63.0): the reply mailbox connection, its step-by-step test, import status, readiness checklist and connection log. See [[Replies by email|Replies-by-email]].

@@ -1008,7 +1008,7 @@ return [
                 'mailing_list' => 'Mailing list mail.',
                 'bounce' => 'Bounce or delivery report.',
                 'loop' => 'Sent by MyAPES Account itself.',
-                'probe' => 'Plus-address probe from Admin → Settings → Reply mailbox. Never posted.',
+                'probe' => 'Plus-address probe from Admin → Emails → Import. Never posted.',
                 'rate_limited' => 'Too many replies in the last hour.',
                 'service_off' => 'Replies by email are turned off for this service.',
                 'too_large' => 'The message was too large to keep.',
