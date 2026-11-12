@@ -143,7 +143,7 @@ class MailboxFailureTypesTest extends TestCase
     {
         $admin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
 
-        return $this->actingAs($admin)->followingRedirects()->post(route('admin.settings.reply-mailbox.test'), [
+        return $this->actingAs($admin)->followingRedirects()->post(route('admin.emails.import.test'), [
             '_method' => 'PUT',
             'host' => 'mail.example.test',
             'port' => '993',

@@ -39,7 +39,7 @@ class ReplyMailboxAuditTest extends TestCase
 
     public function test_saving_records_the_changed_fields_and_never_the_password(): void
     {
-        $this->actingAs($this->admin)->put(route('admin.settings.reply-mailbox.update'), $this->form());
+        $this->actingAs($this->admin)->put(route('admin.emails.import.update'), $this->form());
 
         $audit = AuditLog::query()->where('event', 'admin.settings.mailbox_saved')->sole();
         $this->assertSame($this->admin->id, $audit->user_id);
@@ -51,16 +51,16 @@ class ReplyMailboxAuditTest extends TestCase
 
     public function test_saving_without_changes_records_nothing(): void
     {
-        $this->actingAs($this->admin)->put(route('admin.settings.reply-mailbox.update'), $this->form());
-        $this->actingAs($this->admin)->put(route('admin.settings.reply-mailbox.update'), $this->form(['password' => '']));
+        $this->actingAs($this->admin)->put(route('admin.emails.import.update'), $this->form());
+        $this->actingAs($this->admin)->put(route('admin.emails.import.update'), $this->form(['password' => '']));
 
         $this->assertSame(1, AuditLog::query()->where('event', 'admin.settings.mailbox_saved')->count());
     }
 
     public function test_keeping_the_password_records_that_it_did_not_change(): void
     {
-        $this->actingAs($this->admin)->put(route('admin.settings.reply-mailbox.update'), $this->form());
-        $this->actingAs($this->admin)->put(route('admin.settings.reply-mailbox.update'), $this->form(['password' => '', 'folder' => 'Replies']));
+        $this->actingAs($this->admin)->put(route('admin.emails.import.update'), $this->form());
+        $this->actingAs($this->admin)->put(route('admin.emails.import.update'), $this->form(['password' => '', 'folder' => 'Replies']));
 
         $audit = AuditLog::query()->where('event', 'admin.settings.mailbox_saved')->latest('id')->first();
         $this->assertSame(['folder'], $audit->context['changed']);
@@ -69,10 +69,10 @@ class ReplyMailboxAuditTest extends TestCase
 
     public function test_connection_tests_and_probes_are_audited_without_secrets(): void
     {
-        $this->actingAs($this->admin)->put(route('admin.settings.reply-mailbox.update'), $this->form());
+        $this->actingAs($this->admin)->put(route('admin.emails.import.update'), $this->form());
 
-        $this->actingAs($this->admin)->post(route('admin.settings.reply-mailbox.test'));
-        $this->actingAs($this->admin)->post(route('admin.settings.reply-mailbox.probe'));
+        $this->actingAs($this->admin)->post(route('admin.emails.import.test'));
+        $this->actingAs($this->admin)->post(route('admin.emails.import.probe'));
 
         foreach (['admin.emails.import_tested', 'admin.settings.mailbox_probe_sent'] as $event) {
             $this->assertNoSecrets(AuditLog::query()->where('event', $event)->sole());

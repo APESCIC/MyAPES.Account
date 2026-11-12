@@ -14,20 +14,29 @@ use App\Http\Controllers\Controller;
 use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 
 /**
- * Saves Admin → Settings → Reply mailbox (#735). Fields set in .env are not
- * saved, a blank password keeps the saved one, and the password is never
- * echoed back, logged or audited.
+ * Admin → Emails → Import (#774): the reply mailbox connection (#735), its
+ * test (#771) and the import status. Fields set in .env are not saved, a
+ * blank password keeps the saved one, and the password is never echoed
+ * back, logged or audited.
  */
-class AdminReplyMailboxController extends Controller
+class AdminEmailImportController extends Controller
 {
     private const TESTS_PER_WINDOW = 5;
 
     private const TEST_WINDOW_SECONDS = 600;
+
+    public function index(EmailImportPage $page): Response
+    {
+        return response()
+            ->view('admin.emails.import.index', $page->viewData())
+            ->header('Cache-Control', 'no-store, private');
+    }
 
     public function update(Request $request, AppSettings $settings, AuditLogger $audit): RedirectResponse
     {
@@ -58,7 +67,7 @@ class AdminReplyMailboxController extends Controller
             ]);
         }
 
-        return $this->back()->with('status', $changed === [] ? __('admin.settings.reply_mailbox.no_changes') : __('admin.settings.reply_mailbox.saved'));
+        return $this->back()->with('status', $changed === [] ? __('admin.emails.import.no_changes') : __('admin.emails.import.saved'));
     }
 
     /**
@@ -103,16 +112,16 @@ class AdminReplyMailboxController extends Controller
     public function probe(Request $request, InboundMailSettings $settings, ReplyMailboxStatus $status, AuditLogger $audit): RedirectResponse
     {
         if (! $settings->pollingConfigured()) {
-            return $this->back()->withErrors(['mailbox' => __('admin.settings.reply_mailbox.test_not_configured')]);
+            return $this->back()->withErrors(['mailbox' => __('admin.emails.import.test_not_configured')]);
         }
 
         $address = $status->startProbe();
-        Mail::raw(__('admin.settings.reply_mailbox.probe_body'), static function (Message $message) use ($address): void {
-            $message->to($address)->subject(__('admin.settings.reply_mailbox.probe_subject'));
+        Mail::raw(__('admin.emails.import.probe_body'), static function (Message $message) use ($address): void {
+            $message->to($address)->subject(__('admin.emails.import.probe_subject'));
         });
         $audit->record('admin.settings.mailbox_probe_sent', $request->user());
 
-        return $this->back()->with('status', __('admin.settings.reply_mailbox.probe_sent'));
+        return $this->back()->with('status', __('admin.emails.import.probe_sent'));
     }
 
     /**
@@ -150,6 +159,6 @@ class AdminReplyMailboxController extends Controller
 
     private function back(): RedirectResponse
     {
-        return redirect()->route('admin.settings.show', AdminSettingsController::TAB_REPLY_MAILBOX);
+        return redirect()->route('admin.emails.import.index');
     }
 }

@@ -30,10 +30,12 @@
                             <dd data-detail="messages">{{ __('admin.emails.import.details.messages_value', ['count' => $details['messages'], 'unseen' => $details['unseen'] ?? 0]) }}</dd>
                         </div>
                     @endisset
-                    <div>
-                        <dt>{{ __('admin.emails.import.details.capabilities') }}</dt>
-                        <dd data-detail="capabilities">{{ collect(['IDLE', 'MOVE', 'UIDPLUS'])->map(fn (string $feature): string => $feature.': '.(in_array($feature, $details['capabilities'] ?? [], true) ? __('admin.emails.import.details.yes') : __('admin.emails.import.details.no')))->implode(', ') }}</dd>
-                    </div>
+                    @if(($details['capabilities'] ?? []) !== [])
+                        <div>
+                            <dt>{{ __('admin.emails.import.details.capabilities') }}</dt>
+                            <dd data-detail="capabilities">{{ collect(['IDLE', 'MOVE', 'UIDPLUS'])->map(fn (string $feature): string => $feature.': '.(in_array($feature, $details['capabilities'], true) ? __('admin.emails.import.details.yes') : __('admin.emails.import.details.no')))->implode(', ') }}</dd>
+                        </div>
+                    @endif
                     @if(! empty($details['certificate_name']))
                         <div>
                             <dt>{{ __('admin.emails.import.details.certificate') }}</dt>

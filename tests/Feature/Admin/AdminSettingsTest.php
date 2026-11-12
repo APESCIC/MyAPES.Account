@@ -43,22 +43,30 @@ class AdminSettingsTest extends TestCase
         $this->actingAs($user)->get('/admin/settings/reply-mailbox')->assertForbidden();
     }
 
-    public function test_an_administrator_sees_settings_in_admin_navigation_and_the_reply_mailbox_tab(): void
+    public function test_settings_opens_on_integrations_and_no_longer_has_a_reply_mailbox_tab(): void
     {
         $admin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
 
         $this->actingAs($admin)->get('/admin/emails')
             ->assertOk()
-            ->assertSee(route('admin.settings.index'), false)
+            ->assertSee(route('admin.settings.show', 'integrations'), false)
             ->assertSee(__('admin.nav.settings'));
 
-        $this->actingAs($admin)->get('/admin/settings')->assertRedirect(route('admin.settings.show', 'reply-mailbox'));
+        $this->actingAs($admin)->get('/admin/settings')->assertRedirect(route('admin.settings.show', 'integrations'));
 
-        $this->actingAs($admin)->get('/admin/settings/reply-mailbox')
+        $this->actingAs($admin)->get(route('admin.settings.show', 'integrations'))
             ->assertOk()
             ->assertSee('data-settings-tabs', false)
-            ->assertSee('data-settings-tab="reply-mailbox"', false)
-            ->assertSee(__('admin.settings.reply_mailbox.heading'));
+            ->assertDontSee('data-reply-mailbox-form', false);
+    }
+
+    public function test_the_old_reply_mailbox_address_moves_permanently_to_email_import(): void
+    {
+        $admin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
+
+        $this->actingAs($admin)->get('/admin/settings/reply-mailbox')
+            ->assertStatus(301)
+            ->assertRedirect(route('admin.emails.import.index'));
     }
 
     public function test_an_unknown_tab_is_not_found(): void

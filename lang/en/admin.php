@@ -501,8 +501,11 @@ return [
             'templates' => 'Templates',
             'log' => 'Outbound log',
             'inbound' => 'Inbound',
+            'import' => 'Import',
         ],
         'import' => [
+            'page_title' => 'Email import | MyAPES Account',
+            'heading' => 'Email import',
             'result_heading' => 'Connection test result',
             'result_total' => 'Finished in :ms ms.',
             'step_time' => ':ms ms',

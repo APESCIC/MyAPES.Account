@@ -58,16 +58,16 @@ class ReplyMailboxHealthTest extends TestCase
     public function test_a_successful_connection_test_is_shown_and_audited(): void
     {
         $this->actingAs($this->admin)
-            ->post(route('admin.settings.reply-mailbox.test'))
-            ->assertRedirect(route('admin.settings.show', 'reply-mailbox'))
+            ->post(route('admin.emails.import.test'))
+            ->assertRedirect(route('admin.emails.import.index'))
             ->assertSessionHas('status', __('admin.emails.import.test_ok'));
 
         $this->assertTrue(app(ReplyMailboxStatus::class)->lastTest()['ok']);
         $audit = AuditLog::query()->where('event', 'admin.emails.import_tested')->sole();
         $this->assertSame(['result' => 'ok', 'step' => null], $audit->context);
 
-        $this->actingAs($this->admin)->get(route('admin.settings.show', 'reply-mailbox'))
-            ->assertSee(__('admin.settings.reply_mailbox.last_test_ok', ['at' => now()->format('Y-m-d H:i')]));
+        $this->actingAs($this->admin)->get(route('admin.emails.import.index'))
+            ->assertSee(__('admin.emails.import.last_test_ok', ['at' => now()->format('Y-m-d H:i')]));
     }
 
     public function test_each_step_is_shown_with_its_status_and_time(): void
@@ -76,7 +76,7 @@ class ReplyMailboxHealthTest extends TestCase
 
         $this->actingAs($this->admin)
             ->followingRedirects()
-            ->post(route('admin.settings.reply-mailbox.test'))
+            ->post(route('admin.emails.import.test'))
             ->assertSee('data-step="dns" data-step-status="passed"', false)
             ->assertSee('data-step="tcp" data-step-status="passed"', false)
             ->assertSee('data-step="tls" data-step-status="passed"', false)
@@ -91,7 +91,7 @@ class ReplyMailboxHealthTest extends TestCase
         $this->server->loginResponse = 'NO [AUTHENTICATIONFAILED] Authentication failed.';
 
         $this->actingAs($this->admin)
-            ->post(route('admin.settings.reply-mailbox.test'))
+            ->post(route('admin.emails.import.test'))
             ->assertSessionHasErrors(['mailbox' => __('admin.emails.import.test_failed', [
                 'step' => __('admin.emails.import.steps.login'),
                 'reason' => __('admin.emails.import.errors.login_failed.message'),
@@ -101,7 +101,7 @@ class ReplyMailboxHealthTest extends TestCase
         $audit = AuditLog::query()->where('event', 'admin.emails.import_tested')->sole();
         $this->assertSame(['result' => 'login_failed', 'step' => 'login'], $audit->context);
 
-        $this->actingAs($this->admin)->get(route('admin.settings.show', 'reply-mailbox'))
+        $this->actingAs($this->admin)->get(route('admin.emails.import.index'))
             ->assertSee(__('admin.emails.import.errors.login_failed.message'))
             ->assertDontSee(self::PASSWORD);
     }
@@ -113,7 +113,7 @@ class ReplyMailboxHealthTest extends TestCase
 
         $this->actingAs($this->admin)
             ->followingRedirects()
-            ->post(route('admin.settings.reply-mailbox.test'), $this->form())
+            ->post(route('admin.emails.import.test'), $this->form())
             ->assertSee(__('admin.emails.import.test_ok'))
             ->assertDontSee('Turn on replies by email and save the mailbox details first.');
 
@@ -130,7 +130,7 @@ class ReplyMailboxHealthTest extends TestCase
         $this->server->loginResponse = 'NO [AUTHENTICATIONFAILED] Authentication failed.';
 
         $response = $this->actingAs($this->admin)
-            ->post(route('admin.settings.reply-mailbox.test'), $this->form(['password' => self::TYPED_PASSWORD]));
+            ->post(route('admin.emails.import.test'), $this->form(['password' => self::TYPED_PASSWORD]));
 
         $this->assertStringNotContainsString(self::TYPED_PASSWORD, json_encode(session()->all()));
         $page = $this->actingAs($this->admin)->get($response->headers->get('Location'))->assertOk();
@@ -145,11 +145,11 @@ class ReplyMailboxHealthTest extends TestCase
     public function test_the_sixth_test_inside_ten_minutes_is_refused(): void
     {
         for ($i = 0; $i < 5; $i++) {
-            $this->actingAs($this->admin)->post(route('admin.settings.reply-mailbox.test'))->assertSessionHasNoErrors();
+            $this->actingAs($this->admin)->post(route('admin.emails.import.test'))->assertSessionHasNoErrors();
         }
 
         $this->actingAs($this->admin)
-            ->post(route('admin.settings.reply-mailbox.test'))
+            ->post(route('admin.emails.import.test'))
             ->assertSessionHasErrors(['mailbox' => __('admin.emails.import.test_limited', ['count' => 5, 'minutes' => 10])]);
 
         $this->assertSame(5, AuditLog::query()->where('event', 'admin.emails.import_tested')->count());
@@ -159,8 +159,8 @@ class ReplyMailboxHealthTest extends TestCase
     {
         $staff = User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create();
 
-        $this->actingAs($staff)->post(route('admin.settings.reply-mailbox.test'))->assertForbidden();
-        $this->actingAs($staff)->post(route('admin.settings.reply-mailbox.probe'))->assertForbidden();
+        $this->actingAs($staff)->post(route('admin.emails.import.test'))->assertForbidden();
+        $this->actingAs($staff)->post(route('admin.emails.import.probe'))->assertForbidden();
     }
 
     public function test_the_last_successful_poll_is_shown(): void
@@ -168,21 +168,21 @@ class ReplyMailboxHealthTest extends TestCase
         app(InboundMailPoller::class)->poll();
 
         $this->assertNotNull(app(ReplyMailboxStatus::class)->lastSuccessfulPollAt());
-        $this->actingAs($this->admin)->get(route('admin.settings.show', 'reply-mailbox'))
-            ->assertSeeInOrder([__('admin.settings.reply_mailbox.last_successful_poll'), now()->format('Y-m-d H:i')]);
+        $this->actingAs($this->admin)->get(route('admin.emails.import.index'))
+            ->assertSeeInOrder([__('admin.emails.import.last_successful_poll'), now()->format('Y-m-d H:i')]);
     }
 
     public function test_the_probe_reports_arrival_and_is_never_posted(): void
     {
         $this->actingAs($this->admin)
-            ->post(route('admin.settings.reply-mailbox.probe'))
-            ->assertSessionHas('status', __('admin.settings.reply_mailbox.probe_sent'));
+            ->post(route('admin.emails.import.probe'))
+            ->assertSessionHas('status', __('admin.emails.import.probe_sent'));
 
         $sent = $this->sentEmails();
         $this->assertCount(1, $sent);
         $probeAddress = $sent[0]->getTo()[0]->getAddress();
         $this->assertMatchesRegularExpression('/^communications\+probe-[a-z0-9]{12}@example\.test$/', $probeAddress);
-        $this->actingAs($this->admin)->get(route('admin.settings.show', 'reply-mailbox'))->assertSee(__('admin.settings.reply_mailbox.probe_waiting'));
+        $this->actingAs($this->admin)->get(route('admin.emails.import.index'))->assertSee(__('admin.emails.import.probe_waiting'));
 
         $this->mailbox->add($this->fixture('plain-reply', ['TO' => $probeAddress, 'FROM' => 'no-reply@example.test']));
         app(InboundMailPoller::class)->poll();
@@ -192,7 +192,7 @@ class ReplyMailboxHealthTest extends TestCase
         $this->assertSame('probe', $email->reason);
         $this->assertNull($email->posted_id);
         $this->assertNotNull(app(ReplyMailboxStatus::class)->probe()['arrived_at']);
-        $this->actingAs($this->admin)->get(route('admin.settings.show', 'reply-mailbox'))->assertSee('so plus-addressing is delivered');
+        $this->actingAs($this->admin)->get(route('admin.emails.import.index'))->assertSee('so plus-addressing is delivered');
     }
 
     /**

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminAccessController;
 use App\Http\Controllers\Admin\AdminApiClientController;
 use App\Http\Controllers\Admin\AdminEmailController;
+use App\Http\Controllers\Admin\AdminEmailImportController;
 use App\Http\Controllers\Admin\AdminGroupController;
 use App\Http\Controllers\Admin\AdminInboundEmailController;
 use App\Http\Controllers\Admin\AdminIntegrationController;
@@ -11,7 +12,6 @@ use App\Http\Controllers\Admin\AdminMaintenanceController;
 use App\Http\Controllers\Admin\AdminManagedListController;
 use App\Http\Controllers\Admin\AdminModuleController;
 use App\Http\Controllers\Admin\AdminOrganisationModuleController;
-use App\Http\Controllers\Admin\AdminReplyMailboxController;
 use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminVersionController;
@@ -413,22 +413,29 @@ Route::middleware([
             Route::put('/emails/inbound/services', [AdminInboundEmailController::class, 'updateServices'])
                 ->middleware('can:admin.emails.manage')
                 ->name('emails.inbound.services.update');
+            Route::get('/emails/import', [AdminEmailImportController::class, 'index'])
+                ->middleware('can:admin.settings.view')
+                ->name('emails.import.index');
+            Route::put('/emails/import', [AdminEmailImportController::class, 'update'])
+                ->middleware('can:admin.settings.manage')
+                ->name('emails.import.update');
+            // PUT too: the Test button submits the mailbox form, which carries _method=PUT (#771).
+            Route::match(['post', 'put'], '/emails/import/test', [AdminEmailImportController::class, 'test'])
+                ->middleware('can:admin.settings.manage')
+                ->name('emails.import.test');
+            Route::post('/emails/import/probe', [AdminEmailImportController::class, 'probe'])
+                ->middleware(['can:admin.settings.manage', 'throttle:5,1'])
+                ->name('emails.import.probe');
             Route::get('/settings', [AdminSettingsController::class, 'index'])
                 ->middleware('can:admin.settings.view')
                 ->name('settings.index');
+            // The Reply mailbox tab moved to Admin → Emails → Import (#774).
+            Route::get('/settings/reply-mailbox', fn () => redirect()->route('admin.emails.import.index', [], 301))
+                ->middleware('can:admin.settings.view')
+                ->name('settings.reply-mailbox');
             Route::get('/settings/{tab}', [AdminSettingsController::class, 'show'])
                 ->middleware('can:admin.settings.view')
                 ->name('settings.show');
-            Route::put('/settings/reply-mailbox', [AdminReplyMailboxController::class, 'update'])
-                ->middleware('can:admin.settings.manage')
-                ->name('settings.reply-mailbox.update');
-            // PUT too: the Test button submits the mailbox form, which carries _method=PUT (#771).
-            Route::match(['post', 'put'], '/settings/reply-mailbox/test', [AdminReplyMailboxController::class, 'test'])
-                ->middleware('can:admin.settings.manage')
-                ->name('settings.reply-mailbox.test');
-            Route::post('/settings/reply-mailbox/probe', [AdminReplyMailboxController::class, 'probe'])
-                ->middleware(['can:admin.settings.manage', 'throttle:5,1'])
-                ->name('settings.reply-mailbox.probe');
             Route::put('/settings/integrations/{integration}', [AdminIntegrationController::class, 'update'])
                 ->middleware('can:admin.settings.manage')
                 ->name('settings.integrations.update');
