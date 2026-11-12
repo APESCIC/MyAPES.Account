@@ -506,6 +506,46 @@ return [
         'import' => [
             'page_title' => 'Email import | MyAPES Account',
             'heading' => 'Email import',
+            'readiness' => [
+                'heading' => 'Ready to import?',
+                'ok' => 'Done',
+                'missing' => 'Still to do',
+                'fixed_by' => [
+                    'admin' => 'An administrator fixes this on this page.',
+                    'it' => 'IT fixes this on Cloudron.',
+                ],
+                'items' => [
+                    'token_key' => [
+                        'ok' => 'The reply token key is set on the server.',
+                        'missing' => 'The reply token key is missing on the server (INBOUND_MAIL_TOKEN_KEY in /app/data/shared/.env).',
+                    ],
+                    'enabled' => [
+                        'ok' => 'Replies by email are switched on.',
+                        'missing' => 'Replies by email are switched off.',
+                    ],
+                    'address' => [
+                        'ok' => 'The mailbox address is valid.',
+                        'missing' => 'The mailbox address is not a valid email address.',
+                    ],
+                    'password' => [
+                        'ok' => 'A mailbox password is set.',
+                        'missing' => 'No mailbox password is set.',
+                    ],
+                    'test' => [
+                        'ok' => 'The last connection test passed.',
+                        'missing' => 'No connection test has passed yet. Press Test connection.',
+                    ],
+                    'heartbeat' => [
+                        'ok' => 'The scheduler checked the mailbox in the last :minutes minutes.',
+                        'missing' => 'The scheduler has not checked the mailbox in the last :minutes minutes.',
+                        'not_recorded' => 'No scheduler check has been recorded yet.',
+                    ],
+                    'probe' => [
+                        'ok' => 'The plus-address probe arrived.',
+                        'missing' => 'No plus-address probe has arrived yet. Send one below.',
+                    ],
+                ],
+            ],
             'result_heading' => 'Connection test result',
             'result_total' => 'Finished in :ms ms.',
             'step_time' => ':ms ms',

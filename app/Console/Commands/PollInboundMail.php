@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Core\Mail\Inbound\InboundMailPoller;
+use App\Core\Mail\Inbound\ReplyMailboxStatus;
 use Illuminate\Console\Command;
 
 /**
@@ -15,8 +16,9 @@ class PollInboundMail extends Command
 
     protected $description = 'Fetch ticket and case email replies from the communications mailbox';
 
-    public function handle(InboundMailPoller $poller): int
+    public function handle(InboundMailPoller $poller, ReplyMailboxStatus $status): int
     {
+        $status->recordHeartbeat();
         $result = $poller->poll();
 
         if ($result['result'] === InboundMailPoller::RESULT_DISABLED) {

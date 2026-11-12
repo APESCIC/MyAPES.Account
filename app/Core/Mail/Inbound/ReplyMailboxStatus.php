@@ -22,6 +22,8 @@ final class ReplyMailboxStatus
 
     private const PROBE_KEY = 'inbound-mail:probe';
 
+    private const HEARTBEAT_KEY = 'inbound-mail:heartbeat';
+
     public const PROBE_PREFIX = 'probe-';
 
     public function __construct(private readonly InboundMailSettings $settings) {}
@@ -67,6 +69,21 @@ final class ReplyMailboxStatus
         $poll = Cache::get(self::POLL_KEY);
 
         return is_array($poll) ? ['at' => Carbon::parse($poll['at']), 'result' => (string) $poll['result']] : null;
+    }
+
+    /**
+     * The scheduler ran the poll command, whatever its result (#775, #779).
+     */
+    public function recordHeartbeat(): void
+    {
+        Cache::forever(self::HEARTBEAT_KEY, now()->toIso8601String());
+    }
+
+    public function heartbeatAt(): ?Carbon
+    {
+        $at = Cache::get(self::HEARTBEAT_KEY);
+
+        return is_string($at) ? Carbon::parse($at) : null;
     }
 
     public function lastSuccessfulPollAt(): ?Carbon

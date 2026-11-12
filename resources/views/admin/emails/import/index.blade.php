@@ -26,5 +26,6 @@
         @include('admin.emails.import._connection')
         @include('admin.emails.import._result', ['report' => $report])
         @include('admin.emails.import._status')
+        @include('admin.emails.import._readiness')
     </div>
 @endsection
