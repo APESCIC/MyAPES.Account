@@ -42,6 +42,13 @@ class AdminReplyMailboxController extends Controller
                 : $request->input($key);
         }
 
+        if (array_key_exists('port', $values) || array_key_exists('encryption', $values)) {
+            InboundMailboxSettings::guardPortAndEncryption(
+                (int) ($values['port'] ?? $settings->get(InboundMailboxSettings::GROUP, 'port')),
+                (string) ($values['encryption'] ?? $settings->get(InboundMailboxSettings::GROUP, 'encryption')),
+            );
+        }
+
         $changed = $settings->set(InboundMailboxSettings::GROUP, $values, (int) $request->user()->id);
 
         if ($changed !== []) {
@@ -127,6 +134,7 @@ class AdminReplyMailboxController extends Controller
 
         $value = fn (string $key): string => $editable($key) ? trim((string) $request->input($key)) : $inbound->imap($key);
         $typedPassword = (string) $request->input('password', '');
+        InboundMailboxSettings::guardPortAndEncryption((int) $value('port'), $value('encryption') ?: 'ssl');
 
         return new MailboxConnection(
             host: $value('host'),

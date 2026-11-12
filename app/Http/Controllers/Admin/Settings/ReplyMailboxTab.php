@@ -47,11 +47,9 @@ final class ReplyMailboxTab
             'lastPoll' => $this->status->lastPoll(),
             'lastSuccessfulPollAt' => $this->status->lastSuccessfulPollAt(),
             'probe' => $this->probe(),
-            'encryptions' => [
-                'ssl' => __('admin.settings.reply_mailbox.encryption.ssl'),
-                'tls' => __('admin.settings.reply_mailbox.encryption.tls'),
-                'none' => __('admin.settings.reply_mailbox.encryption.none'),
-            ],
+            'encryptions' => collect(InboundMailboxSettings::encryptions())
+                ->mapWithKeys(fn (string $encryption): array => [$encryption => __("admin.emails.import.encryption.{$encryption}")])
+                ->all(),
         ];
     }
 

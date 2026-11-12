@@ -3,11 +3,13 @@
 namespace Tests\Feature\Admin;
 
 use App\Core\Accounts\User;
+use App\Core\Mail\Inbound\Diagnostics\MailboxTransport;
 use App\Core\Mail\Inbound\InboundMailboxSettings;
 use App\Core\Settings\AppSettings;
 use App\Services\AuthorizationProfile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Tests\Fakes\FakeImapServer;
 use Tests\TestCase;
 
 /**
@@ -97,6 +99,59 @@ class ReplyMailboxSettingsTest extends TestCase
             ->assertSessionHasErrors(['port', 'encryption', 'address']);
 
         $this->assertFalse(app(AppSettings::class)->stored(self::GROUP, 'host'));
+    }
+
+    public function test_a_fresh_install_starts_with_the_cloudron_values(): void
+    {
+        $this->actingAs($this->admin)
+            ->get(route('admin.settings.show', 'reply-mailbox'))
+            ->assertOk()
+            ->assertSee('value="mail.cloudron.apes.org.uk"', false)
+            ->assertSee('value="993"', false)
+            ->assertSee('<option value="ssl" selected>'.__('admin.emails.import.encryption.ssl').'</option>', false)
+            ->assertSee(__('admin.emails.import.encryption.tls'))
+            ->assertSee(__('admin.emails.import.username_help'))
+            ->assertDontSee('my.cloudron.apes.org.uk');
+    }
+
+    public function test_port_993_with_starttls_is_refused(): void
+    {
+        $this->actingAs($this->admin)
+            ->put(route('admin.settings.reply-mailbox.update'), $this->form(['port' => '993', 'encryption' => 'tls']))
+            ->assertSessionHasErrors(['encryption' => __('admin.emails.import.encryption_mismatch', ['port' => 993, 'encryption' => __('admin.emails.import.encryption.ssl')])]);
+
+        $this->assertSame(0, DB::table('app_settings')->count());
+    }
+
+    public function test_port_143_with_ssl_is_refused(): void
+    {
+        $this->actingAs($this->admin)
+            ->put(route('admin.settings.reply-mailbox.update'), $this->form(['port' => '143', 'encryption' => 'ssl']))
+            ->assertSessionHasErrors(['encryption' => __('admin.emails.import.encryption_mismatch', ['port' => 143, 'encryption' => __('admin.emails.import.encryption.tls')])]);
+
+        $this->assertSame(0, DB::table('app_settings')->count());
+    }
+
+    public function test_testing_a_port_and_encryption_that_cannot_work_is_refused(): void
+    {
+        $server = new FakeImapServer;
+        $this->app->instance(MailboxTransport::class, $server);
+
+        $this->actingAs($this->admin)
+            ->put(route('admin.settings.reply-mailbox.test'), $this->form(['port' => '993', 'encryption' => 'tls']))
+            ->assertSessionHasErrors('encryption');
+
+        $this->assertFalse($server->connected);
+        $this->assertSame([], $server->commands);
+    }
+
+    public function test_no_encryption_is_offered_only_on_a_developer_machine(): void
+    {
+        $this->assertContains('none', InboundMailboxSettings::encryptions());
+
+        $this->app['env'] = 'production';
+
+        $this->assertSame(['ssl', 'tls'], InboundMailboxSettings::encryptions());
     }
 
     public function test_saving_needs_admin_settings_manage(): void

@@ -522,6 +522,14 @@ return [
             'test_failed' => 'Connection test failed at :step: :reason',
             'test_limited' => 'You have run :count connection tests in the last 10 minutes. Try again in :minutes minutes.',
             'test_help' => 'Tests the values in this form without saving them. Leave the password blank to use the saved one.',
+            'username_help' => 'The full mailbox address, for example communications@myapes.me.uk. Alias logins do not work.',
+            'encryption' => [
+                'ssl' => 'SSL/TLS (port 993)',
+                'tls' => 'STARTTLS (port 143)',
+                'none' => 'None (local testing only)',
+            ],
+            'encryption_help' => 'The APES Cloudron offers IMAP on port 993 with SSL/TLS only.',
+            'encryption_mismatch' => 'Port :port does not work with this encryption. Choose :encryption for port :port.',
             'what_to_try' => 'What to try:',
             'server_folders' => 'Folders on the server: :folders.',
             'details' => [

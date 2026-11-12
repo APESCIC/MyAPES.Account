@@ -37,11 +37,12 @@
             <input id="reply-mailbox-port" name="port" type="number" min="1" max="65535" value="{{ old('port', $fields['port']['value']) }}" @disabled($fields['port']['env'])>
 
             <label for="reply-mailbox-encryption">{{ __('admin.settings.reply_mailbox.fields.encryption') }} @if($fields['encryption']['env']) {!! $envBadge !!} @endif</label>
-            <select id="reply-mailbox-encryption" name="encryption" @disabled($fields['encryption']['env'])>
+            <select id="reply-mailbox-encryption" name="encryption" aria-describedby="reply-mailbox-encryption-help" @disabled($fields['encryption']['env'])>
                 @foreach($encryptions as $encryption => $label)
                     <option value="{{ $encryption }}" @selected(old('encryption', $fields['encryption']['value']) === $encryption)>{{ $label }}</option>
                 @endforeach
             </select>
+            <p class="muted" id="reply-mailbox-encryption-help">{{ __('admin.emails.import.encryption_help') }}</p>
 
             <label class="inline-check">
                 @unless($fields['validate_cert']['env'])<input type="hidden" name="validate_cert" value="0">@endunless
@@ -51,7 +52,8 @@
             </label>
 
             <label for="reply-mailbox-username">{{ __('admin.settings.reply_mailbox.fields.username') }} @if($fields['username']['env']) {!! $envBadge !!} @endif</label>
-            <input id="reply-mailbox-username" name="username" type="text" maxlength="255" autocomplete="off" value="{{ old('username', $fields['username']['value']) }}" @disabled($fields['username']['env'])>
+            <input id="reply-mailbox-username" name="username" type="text" maxlength="255" autocomplete="off" value="{{ old('username', $fields['username']['value']) }}" aria-describedby="reply-mailbox-username-help" @disabled($fields['username']['env'])>
+            <p class="muted" id="reply-mailbox-username-help">{{ __('admin.emails.import.username_help') }}</p>
 
             <label for="reply-mailbox-password">{{ __('admin.settings.reply_mailbox.fields.password') }} @if($fields['password']['env']) {!! $envBadge !!} @endif</label>
             <input id="reply-mailbox-password" name="password" type="password" maxlength="500" autocomplete="new-password" @disabled($fields['password']['env'])>

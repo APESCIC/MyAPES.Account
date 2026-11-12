@@ -39,8 +39,9 @@ return [
         'timeout' => 10,
     ],
 
+    // Cloudron offers IMAP on 993 with SSL/TLS only (#773); the form starts with these values.
     'imap' => [
-        'host' => env('INBOUND_MAIL_IMAP_HOST'),
+        'host' => env('INBOUND_MAIL_IMAP_HOST') ?: 'mail.cloudron.apes.org.uk',
         'port' => (int) env('INBOUND_MAIL_IMAP_PORT', 993),
         'encryption' => env('INBOUND_MAIL_IMAP_ENCRYPTION', 'ssl'),
         'validate_cert' => (bool) env('INBOUND_MAIL_IMAP_VALIDATE_CERT', true),
