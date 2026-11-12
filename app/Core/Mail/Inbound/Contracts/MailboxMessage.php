@@ -7,6 +7,9 @@ namespace App\Core\Mail\Inbound\Contracts;
  */
 interface MailboxMessage
 {
+    /** The IMAP UID (#777), or null for a mailbox without UIDs such as Mailpit. */
+    public function uid(): ?int;
+
     public function raw(): string;
 
     /** Mark the message for deletion once it is safely stored. */

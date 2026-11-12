@@ -22,10 +22,11 @@ final class ImapMailbox implements InboundMailbox
 
     public function __construct(private readonly InboundMailSettings $settings) {}
 
-    public function messages(int $limit): iterable
+    public function messages(int $limit, ?int $afterUid = null): iterable
     {
         try {
-            $messages = $this->folder()->query()->whereAll()->setFetchOrder('asc')->limit($limit)->get();
+            $query = $this->folder()->query()->setFetchOrder('asc')->limit($limit);
+            $messages = $afterUid !== null ? $query->getByUidGreater($afterUid) : $query->whereAll()->get();
         } catch (Throwable $exception) {
             throw new MailboxUnavailable('The inbound mailbox could not be read ('.class_basename($exception).').');
         }
@@ -34,6 +35,13 @@ final class ImapMailbox implements InboundMailbox
             yield new class($message) implements MailboxMessage
             {
                 public function __construct(private readonly Message $message) {}
+
+                public function uid(): ?int
+                {
+                    $uid = $this->message->getUid();
+
+                    return is_numeric($uid) ? (int) $uid : null;
+                }
 
                 public function raw(): string
                 {
@@ -46,6 +54,17 @@ final class ImapMailbox implements InboundMailbox
                 }
             };
         }
+    }
+
+    public function uidValidity(): ?int
+    {
+        try {
+            $validity = $this->folder()->status()['uidvalidity'] ?? null;
+        } catch (Throwable $exception) {
+            throw new MailboxUnavailable('The inbound mailbox status could not be read ('.class_basename($exception).').');
+        }
+
+        return is_numeric($validity) ? (int) $validity : null;
     }
 
     public function expunge(): void

@@ -11,7 +11,9 @@ use Throwable;
  *
  * A message is deleted from the mailbox only after it is stored (or was
  * stored before). If storing fails, or the mailbox is unreachable, it stays
- * where it is and the next poll tries again.
+ * where it is and the next poll tries again. Each poll fetches only UIDs
+ * above the last one handled (#777); when the server's UIDVALIDITY changes
+ * the folder is read again and the Message-ID check skips duplicates.
  */
 final class InboundMailPoller
 {
@@ -52,13 +54,23 @@ final class InboundMailPoller
     private function fetch(array $counts): array
     {
         try {
-            foreach ($this->mailbox->messages(max(1, (int) config('inbound-mail.poll_batch', 50))) as $message) {
+            $uidValidity = $this->mailbox->uidValidity();
+            $state = InboundMailboxState::for($this->settings->imap('username') ?: $this->settings->address(), $this->settings->imap('folder') ?: 'INBOX');
+            $after = $state->resumeAfter($uidValidity);
+            $handled = $after ?? 0;
+            $pending = [];
+
+            foreach ($this->mailbox->messages(max(1, (int) config('inbound-mail.poll_batch', 50)), $after) as $message) {
                 $counts['fetched']++;
+                $uid = $message->uid();
 
                 try {
                     $stored = $this->store->store($message->raw());
                 } catch (Throwable $exception) {
                     $counts['failed']++;
+                    if ($uid !== null) {
+                        $pending[] = $uid;
+                    }
                     Log::warning('Inbound email could not be stored; it stays in the mailbox.', [
                         'exception' => class_basename($exception),
                     ]);
@@ -68,10 +80,16 @@ final class InboundMailPoller
 
                 $counts[$stored === null ? 'duplicates' : 'stored']++;
                 $message->delete();
+                $handled = max($handled, (int) $uid);
             }
 
             if ($counts['stored'] + $counts['duplicates'] > 0) {
                 $this->mailbox->expunge();
+            }
+
+            if ($uidValidity !== null) {
+                // Mail that failed to store stays in the folder, so the next poll starts just below it.
+                $state->fill(['uid_validity' => $uidValidity, 'last_uid' => $pending !== [] ? min($pending) - 1 : $handled])->save();
             }
         } catch (MailboxUnavailable $exception) {
             Log::warning('Inbound mailbox unavailable; mail stays in the mailbox until the next poll.', [
