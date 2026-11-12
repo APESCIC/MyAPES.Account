@@ -506,6 +506,11 @@ return [
         'import' => [
             'page_title' => 'Email import | MyAPES Account',
             'heading' => 'Email import',
+            'alert' => [
+                'title' => 'Email import has stopped',
+                'body' => 'Since :at MyAPES Account cannot check the reply mailbox: :reason No email is lost; it is imported when the connection works again.',
+                'action' => 'Open Email import',
+            ],
             'readiness' => [
                 'heading' => 'Ready to import?',
                 'ok' => 'Done',

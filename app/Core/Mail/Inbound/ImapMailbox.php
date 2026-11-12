@@ -4,6 +4,7 @@ namespace App\Core\Mail\Inbound;
 
 use App\Core\Mail\Inbound\Contracts\InboundMailbox;
 use App\Core\Mail\Inbound\Contracts\MailboxMessage;
+use App\Core\Mail\Inbound\Diagnostics\FailureType;
 use Throwable;
 use Webklex\PHPIMAP\Client;
 use Webklex\PHPIMAP\ClientManager;
@@ -31,7 +32,7 @@ final class ImapMailbox implements InboundMailbox
             $query = $this->folder()->query()->setFetchOrder('asc')->limit($limit);
             $messages = $afterUid !== null ? $query->getByUidGreater($afterUid) : $query->whereAll()->get();
         } catch (Throwable $exception) {
-            throw new MailboxUnavailable('The inbound mailbox could not be read ('.class_basename($exception).').');
+            throw self::unavailable('The inbound mailbox could not be read', $exception);
         }
 
         foreach ($messages as $message) {
@@ -78,7 +79,7 @@ final class ImapMailbox implements InboundMailbox
                 $message->delete(expunge: false);
             }
         } catch (Throwable $exception) {
-            throw new MailboxUnavailable('An inbound email could not be moved ('.class_basename($exception).').');
+            throw self::unavailable('An inbound email could not be moved', $exception);
         }
     }
 
@@ -87,7 +88,7 @@ final class ImapMailbox implements InboundMailbox
         try {
             $validity = $this->folder()->status()['uidvalidity'] ?? null;
         } catch (Throwable $exception) {
-            throw new MailboxUnavailable('The inbound mailbox status could not be read ('.class_basename($exception).').');
+            throw self::unavailable('The inbound mailbox status could not be read', $exception);
         }
 
         return is_numeric($validity) ? (int) $validity : null;
@@ -103,7 +104,7 @@ final class ImapMailbox implements InboundMailbox
                 }
             }
         } catch (Throwable $exception) {
-            throw new MailboxUnavailable('The inbound mailbox folders could not be created ('.class_basename($exception).').');
+            throw self::unavailable('The inbound mailbox folders could not be created', $exception);
         }
     }
 
@@ -124,7 +125,7 @@ final class ImapMailbox implements InboundMailbox
 
             return $messages->count();
         } catch (Throwable $exception) {
-            throw new MailboxUnavailable('The inbound mailbox folder could not be emptied ('.class_basename($exception).').');
+            throw self::unavailable('The inbound mailbox folder could not be emptied', $exception);
         } finally {
             $this->disconnect();
         }
@@ -137,7 +138,7 @@ final class ImapMailbox implements InboundMailbox
             $this->client?->openFolder($this->settings->imap('folder') ?: 'INBOX');
             $this->client?->expunge();
         } catch (Throwable $exception) {
-            throw new MailboxUnavailable('The inbound mailbox could not be expunged ('.class_basename($exception).').');
+            throw self::unavailable('The inbound mailbox could not be expunged', $exception);
         } finally {
             $this->disconnect();
         }
@@ -150,6 +151,31 @@ final class ImapMailbox implements InboundMailbox
         } finally {
             $this->disconnect();
         }
+    }
+
+    /**
+     * The failure named by its type and the exception class only, never the server's words (#779).
+     */
+    public static function unavailable(string $what, Throwable $exception): MailboxUnavailable
+    {
+        return new MailboxUnavailable($what.' ('.class_basename($exception).').', self::failureFor($exception));
+    }
+
+    public static function failureFor(Throwable $exception): FailureType
+    {
+        $text = '';
+        for ($current = $exception; $current !== null; $current = $current->getPrevious()) {
+            $text .= ' '.class_basename($current).' '.strtolower($current->getMessage());
+        }
+
+        return match (true) {
+            str_contains($text, 'AuthFailedException'), str_contains($text, 'authenticationfailed') => FailureType::LoginFailed,
+            str_contains($text, 'timed out'), str_contains($text, 'timeout') => FailureType::Timeout,
+            str_contains($text, 'certificate') => FailureType::CertificateUntrusted,
+            str_contains($text, 'getaddrinfo'), str_contains($text, 'name or service not known') => FailureType::DnsNotFound,
+            str_contains($text, 'FolderFetchingException') => FailureType::FolderNotFound,
+            default => FailureType::ConnectionRefused,
+        };
     }
 
     private function supportsMove(): bool
@@ -194,11 +220,11 @@ final class ImapMailbox implements InboundMailbox
             $this->client->connect();
             $folder = $this->client->getFolderByPath($this->settings->imap('folder') ?: 'INBOX');
         } catch (Throwable $exception) {
-            throw new MailboxUnavailable('The inbound mailbox could not be reached ('.class_basename($exception).').');
+            throw self::unavailable('The inbound mailbox could not be reached', $exception);
         }
 
         if (! $folder instanceof Folder) {
-            throw new MailboxUnavailable('The inbound mailbox folder was not found.');
+            throw new MailboxUnavailable('The inbound mailbox folder was not found.', FailureType::FolderNotFound);
         }
 
         return $this->folder = $folder;

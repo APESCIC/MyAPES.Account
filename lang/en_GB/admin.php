@@ -737,6 +737,11 @@ return [
             'probe_not_arrived' => 'not arrived after :minutes minutes. Check the mailbox\'s Spam folder; if it is not there, plus-addressing is not delivered.',
             'probe_subject' => 'MyAPES Account plus-address probe',
             'probe_body' => 'This is an automatic test from Admin → Emails → Import. It checks that plus-addressed mail reaches the mailbox and is never added to a ticket or case.',
+            'alert' => [
+                'title' => 'Email import has stopped',
+                'body' => 'Since :at MyAPES Account cannot check the reply mailbox: :reason No email is lost; it is imported when the connection works again.',
+                'action' => 'Open Email import',
+            ],
             'readiness' => [
                 'heading' => 'Ready to import?',
                 'ok' => 'Done',

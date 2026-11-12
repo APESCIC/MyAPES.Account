@@ -28,6 +28,8 @@ final class ReplyMailboxStatus
 
     private const NEXT_POLL_KEY = 'inbound-mail:next-poll-at';
 
+    private const FAILING_SINCE_KEY = 'inbound-mail:failing-since';
+
     /** Minutes to wait after the 1st, 2nd, 3rd, 4th and later failures in a row (#778). */
     public const BACKOFF_MINUTES = [1, 2, 5, 10, 15];
 
@@ -56,7 +58,7 @@ final class ReplyMailboxStatus
     }
 
     /**
-     * @param  array{result: string, fetched: int, stored: int, duplicates: int, failed: int}  $result
+     * @param  array{result: string, failure?: string, fetched: int, stored: int, duplicates: int, failed: int}  $result
      */
     public function recordPoll(array $result): void
     {
@@ -67,11 +69,25 @@ final class ReplyMailboxStatus
             Cache::forever(self::SUCCESSFUL_POLL_KEY, $entry['at']);
             Cache::forget(self::FAILURES_KEY);
             Cache::forget(self::NEXT_POLL_KEY);
+            Cache::forget(self::FAILING_SINCE_KEY);
         } elseif ($result['result'] === InboundMailPoller::RESULT_UNAVAILABLE) {
             $failures = $this->consecutiveFailures() + 1;
             Cache::forever(self::FAILURES_KEY, $failures);
+            if ($failures === 1) {
+                Cache::forever(self::FAILING_SINCE_KEY, $entry['at']);
+            }
             Cache::forever(self::NEXT_POLL_KEY, now()->addMinutes(self::BACKOFF_MINUTES[min($failures, count(self::BACKOFF_MINUTES)) - 1])->toIso8601String());
         }
+    }
+
+    /**
+     * When the current run of failed polls began (#779), or null when the last poll worked.
+     */
+    public function failingSince(): ?Carbon
+    {
+        $at = Cache::get(self::FAILING_SINCE_KEY);
+
+        return is_string($at) ? Carbon::parse($at) : null;
     }
 
     public function consecutiveFailures(): int

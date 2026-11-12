@@ -24,6 +24,7 @@ class HealthAndThemeTest extends TestCase
                     'cache' => 'ok',
                     'environment' => 'ok',
                     'queue' => 'ok',
+                    'inbound_mail' => 'off',
                 ],
             ]);
     }
@@ -59,6 +60,7 @@ class HealthAndThemeTest extends TestCase
                     'cache' => 'failed',
                     'environment' => 'ok',
                     'queue' => 'unknown',
+                    'inbound_mail' => 'off',
                 ],
             ]);
     }

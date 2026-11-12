@@ -41,6 +41,8 @@ class MailTemplateRegistryTest extends TestCase
             'cases.apes_cic_case_updated',
             'cases.shelter_case_updated',
             'consultations.consultation_updated',
+            'inbound.import_failing',
+            'inbound.import_recovered',
             'inbound.reply_not_posted',
             'recruitment.application_received',
             'recruitment.application_status',

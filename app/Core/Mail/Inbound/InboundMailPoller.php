@@ -4,6 +4,7 @@ namespace App\Core\Mail\Inbound;
 
 use App\Core\Mail\Inbound\Contracts\InboundMailbox;
 use App\Core\Mail\Inbound\Contracts\MailboxMessage;
+use App\Core\Mail\Inbound\Diagnostics\FailureType;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -45,13 +46,14 @@ final class InboundMailPoller
         private readonly InboundMailbox $mailbox,
         private readonly InboundMailStore $store,
         private readonly ReplyMailboxStatus $status,
+        private readonly ImportAlerts $alerts,
     ) {}
 
     /**
      * Polls once. Scheduled polls wait while backing off after failures; an
      * admin's "Fetch replies now" ($force) does not. Two polls never overlap (#778).
      *
-     * @return array{result: string, fetched: int, stored: int, duplicates: int, failed: int}
+     * @return array{result: string, failure?: string, fetched: int, stored: int, duplicates: int, failed: int}
      */
     public function poll(bool $force = false): array
     {
@@ -77,13 +79,14 @@ final class InboundMailPoller
         }
 
         $this->status->recordPoll($result);
+        $this->alerts->afterPoll($result);
 
         return $result;
     }
 
     /**
-     * @param  array{result: string, fetched: int, stored: int, duplicates: int, failed: int}  $counts
-     * @return array{result: string, fetched: int, stored: int, duplicates: int, failed: int}
+     * @param  array{result: string, failure?: string, fetched: int, stored: int, duplicates: int, failed: int}  $counts
+     * @return array{result: string, failure?: string, fetched: int, stored: int, duplicates: int, failed: int}
      */
     private function fetch(array $counts): array
     {
@@ -139,7 +142,7 @@ final class InboundMailPoller
                 'reason' => $exception->getMessage(),
             ]);
 
-            return ['result' => self::RESULT_UNAVAILABLE] + $counts;
+            return ['result' => self::RESULT_UNAVAILABLE, 'failure' => ($exception->type ?? FailureType::ConnectionRefused)->value] + $counts;
         }
 
         return $counts;

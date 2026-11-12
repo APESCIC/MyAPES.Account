@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Core\Mail\Inbound\ImportAlerts;
 use App\Core\Webhooks\WebhookDelivery;
 use App\Support\LocalRevision;
 use App\Support\ReleaseHistoryRepository;
@@ -19,6 +20,7 @@ class HealthController extends Controller
     public function __invoke(
         ReleaseHistoryRepository $releases,
         MaintenanceMode $maintenanceMode,
+        ImportAlerts $alerts,
     ): JsonResponse {
         $checks = [
             'database' => $this->databaseIsHealthy() ? 'ok' : 'failed',
@@ -28,6 +30,8 @@ class HealthController extends Controller
         $isHealthy = ! in_array('failed', $checks, true);
         // Reported, not fatal (#644): a webhook backlog must not fail a deploy or take the site down.
         $checks['queue'] = $this->queueState();
+        // Also reported, not fatal (#779): only ok, failing or off, never a host, user or error.
+        $checks['inbound_mail'] = $this->inboundMailState($alerts);
 
         $body = [
             'status' => $isHealthy ? 'ok' : 'unavailable',
@@ -92,6 +96,15 @@ class HealthController extends Controller
         }
 
         return $overdue ? 'delayed' : 'ok';
+    }
+
+    private function inboundMailState(ImportAlerts $alerts): string
+    {
+        try {
+            return $alerts->health();
+        } catch (Throwable) {
+            return ImportAlerts::HEALTH_OFF;
+        }
     }
 
     private function environmentIsHealthy(): bool
