@@ -64,7 +64,7 @@ class ReplyMailboxHealthTest extends TestCase
 
         $this->assertTrue(app(ReplyMailboxStatus::class)->lastTest()['ok']);
         $audit = AuditLog::query()->where('event', 'admin.emails.import_tested')->sole();
-        $this->assertSame(['result' => 'ok', 'step' => null], $audit->context);
+        $this->assertSame(['result' => 'ok', 'step' => null, 'host' => 'imap.example.test'], $audit->context);
 
         $this->actingAs($this->admin)->get(route('admin.emails.import.index'))
             ->assertSee(__('admin.emails.import.last_test_ok', ['at' => now()->format('Y-m-d H:i')]));
@@ -99,7 +99,7 @@ class ReplyMailboxHealthTest extends TestCase
 
         $this->assertFalse(app(ReplyMailboxStatus::class)->lastTest()['ok']);
         $audit = AuditLog::query()->where('event', 'admin.emails.import_tested')->sole();
-        $this->assertSame(['result' => 'login_failed', 'step' => 'login'], $audit->context);
+        $this->assertSame(['result' => 'login_failed', 'step' => 'login', 'host' => 'imap.example.test'], $audit->context);
 
         $this->actingAs($this->admin)->get(route('admin.emails.import.index'))
             ->assertSee(__('admin.emails.import.errors.login_failed.message'))
@@ -140,6 +140,33 @@ class ReplyMailboxHealthTest extends TestCase
         $this->assertStringNotContainsString(self::TYPED_PASSWORD, json_encode(Cache::get('inbound-mail:last-test')));
         $this->assertStringNotContainsString(self::TYPED_PASSWORD, json_encode(AuditLog::query()->get()->toArray()));
         $this->assertStringNotContainsString(self::TYPED_PASSWORD, json_encode(DB::table('app_settings')->get()->toArray()));
+    }
+
+    public function test_the_saved_password_is_only_sent_to_the_saved_server(): void
+    {
+        $saved = ['_method' => 'PUT', 'host' => 'imap.example.test', 'port' => '993', 'encryption' => 'ssl', 'validate_cert' => '1', 'username' => 'communications@example.test', 'password' => '', 'folder' => 'INBOX'];
+
+        foreach ([
+            'another server' => ['host' => 'attacker.example.test'],
+            'another port' => ['port' => '1993'],
+            'another username' => ['username' => 'someone@example.test'],
+            'no certificate check' => ['validate_cert' => '0'],
+        ] as $case => $change) {
+            $this->actingAs($this->admin)
+                ->post(route('admin.emails.import.test'), [...$saved, ...$change])
+                ->assertSessionHasErrors(['password' => __('admin.emails.import.password_needed')]);
+            $this->assertFalse($this->server->connected, $case);
+            $this->assertSame([], $this->server->commands, $case);
+        }
+
+        $this->actingAs($this->admin)->post(route('admin.emails.import.test'), $saved)->assertSessionHasNoErrors();
+        $this->assertContains('LOGIN', $this->server->commands);
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.emails.import.test'), [...$saved, 'host' => 'other.example.test', 'password' => self::TYPED_PASSWORD])
+            ->assertSessionHasNoErrors();
+        $audit = AuditLog::query()->where('event', 'admin.emails.import_tested')->latest('id')->first();
+        $this->assertSame('other.example.test', $audit->context['host']);
     }
 
     public function test_the_sixth_test_inside_ten_minutes_is_refused(): void

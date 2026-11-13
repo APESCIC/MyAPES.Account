@@ -19,6 +19,7 @@ use Illuminate\Http\Response;
 use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Admin → Emails → Import (#774): the reply mailbox connection (#735), its
@@ -73,8 +74,9 @@ class AdminEmailImportController extends Controller
 
     /**
      * Tests the values in the form step by step (#771), before saving and
-     * before replies are switched on. A blank password uses the saved one; a
-     * typed one is used for this test only and never stored, logged or shown.
+     * before replies are switched on. A blank password uses the saved one,
+     * but only against the saved server; a typed one is used for this test
+     * only and never stored, logged or shown.
      */
     public function test(Request $request, AppSettings $settings, InboundMailSettings $inbound, MailboxDiagnostics $diagnostics, InboundMailbox $mailbox, ReplyMailboxStatus $status, AuditLogger $audit): RedirectResponse
     {
@@ -86,9 +88,8 @@ class AdminEmailImportController extends Controller
             ])]);
         }
 
-        $report = $inbound->usesMailpit()
-            ? $diagnostics->runMailpit($mailbox)
-            : $diagnostics->run($this->connectionFromForm($request, $settings, $inbound));
+        $connection = $inbound->usesMailpit() ? null : $this->connectionFromForm($request, $settings, $inbound);
+        $report = $connection === null ? $diagnostics->runMailpit($mailbox) : $diagnostics->run($connection);
         RateLimiter::hit($limiter, self::TEST_WINDOW_SECONDS);
 
         $status->recordTest($report);
@@ -96,6 +97,7 @@ class AdminEmailImportController extends Controller
         $audit->record('admin.emails.import_tested', $request->user(), context: [
             'result' => $report->failure?->value ?? 'ok',
             'step' => $report->failedStep?->value,
+            'host' => $connection?->host,
         ]);
 
         $response = $this->back()->withInput($request->except('password'))->with('mailbox_report', $report->toArray());
@@ -144,19 +146,42 @@ class AdminEmailImportController extends Controller
         $request->validate($rules);
 
         $value = fn (string $key): string => $editable($key) ? trim((string) $request->input($key)) : $inbound->imap($key);
-        $typedPassword = (string) $request->input('password', '');
+        $typedPassword = $settings->overriddenByEnv(InboundMailboxSettings::GROUP, 'password') ? '' : (string) $request->input('password', '');
+        $validateCert = $editable('validate_cert') ? $request->boolean('validate_cert') : $inbound->validateCert();
         InboundMailboxSettings::guardPortAndEncryption((int) $value('port'), $value('encryption') ?: 'ssl');
+
+        if ($typedPassword === '' && $this->leavesSavedServer($value, $validateCert, $inbound)) {
+            throw ValidationException::withMessages(['password' => __('admin.emails.import.password_needed')]);
+        }
 
         return new MailboxConnection(
             host: $value('host'),
             port: (int) $value('port'),
             encryption: $value('encryption') ?: 'ssl',
-            validateCert: $editable('validate_cert') ? $request->boolean('validate_cert') : $inbound->validateCert(),
+            validateCert: $validateCert,
             username: $value('username'),
-            password: $typedPassword !== '' && ! $settings->overriddenByEnv(InboundMailboxSettings::GROUP, 'password') ? $typedPassword : $inbound->imap('password'),
+            password: $typedPassword !== '' ? $typedPassword : $inbound->imap('password'),
             folder: $value('folder') ?: 'INBOX',
             timeout: max(1, (int) $inbound->imap('timeout')),
         );
+    }
+
+    /**
+     * The saved password is only ever sent to the saved server, with the saved
+     * login and without weakening the certificate check, so a test cannot be
+     * used to send it to a server of someone else's choosing.
+     *
+     * @param  callable(string): string  $value
+     */
+    private function leavesSavedServer(callable $value, bool $validateCert, InboundMailSettings $inbound): bool
+    {
+        foreach (['host', 'port', 'encryption', 'username'] as $key) {
+            if (strcasecmp($value($key), $inbound->imap($key)) !== 0) {
+                return true;
+            }
+        }
+
+        return $inbound->validateCert() && ! $validateCert;
     }
 
     private function back(): RedirectResponse

@@ -822,7 +822,8 @@ return [
             'test_ok' => 'Connection test passed: MyAPES Account reached the server, logged in and opened the folder.',
             'test_failed' => 'Connection test failed at :step: :reason',
             'test_limited' => 'You have run :count connection tests in the last 10 minutes. Try again in :minutes minutes.',
-            'test_help' => 'Tests the values in this form without saving them. Leave the password blank to use the saved one.',
+            'test_help' => 'Tests the values in this form without saving them. Leave the password blank to test the saved server with the saved password; type the password to test a different server, username or port.',
+            'password_needed' => 'Type the mailbox password to test a different server, port, encryption or username, or with the certificate check turned off. The saved password is only ever sent to the saved server.',
             'username_help' => 'The full mailbox address, for example communications@myapes.me.uk. Alias logins do not work.',
             'encryption' => [
                 'ssl' => 'SSL/TLS (port 993)',
