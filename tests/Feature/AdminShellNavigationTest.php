@@ -82,6 +82,7 @@ class AdminShellNavigationTest extends TestCase
             ->assertSee('>Staff users</span>', false)
             ->assertSee('>Access</span>', false)
             ->assertSee('>Plugins</span>', false)
+            ->assertSee('>'.__('admin.nav.email_import').'</span>', false)
             ->assertSee('>Maintenance</span>', false);
     }
 
@@ -89,7 +90,7 @@ class AdminShellNavigationTest extends TestCase
     {
         $staff = User::factory()->accessLevel(User::ROLE_STAFF)->create();
 
-        foreach (['/admin/access', '/admin/modules', '/admin/maintenance', '/superadmin'] as $path) {
+        foreach (['/admin/access', '/admin/modules', '/admin/maintenance', '/admin/emails/import', '/superadmin'] as $path) {
             $this->actingAs($staff)->get($path)->assertForbidden();
         }
 

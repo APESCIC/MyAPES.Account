@@ -69,6 +69,7 @@ Schedule::command('call-logs:prune')->daily();
 Schedule::command('mail:prune-log')->daily();
 Schedule::command('tickets:inbound-poll')->everyMinute()->withoutOverlapping(10);
 Schedule::command('inbound-mail:prune')->daily();
+Schedule::command('inbound-mail:empty-folders')->daily();
 Schedule::job(new RunDirectorySync(DirectorySyncRun::SOURCE_SCHEDULED))
     ->hourly()
     ->withoutOverlapping();

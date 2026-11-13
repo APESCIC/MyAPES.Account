@@ -89,7 +89,7 @@ class WorkspaceNavigationTest extends TestCase
 
         $adminKeys = $this->itemKeys($this->menuFor($admin, 'admin.index')->panels[NavPanel::ADMIN]);
 
-        foreach (['admin.overview', 'admin.users', 'admin.staff', 'admin.access', 'admin.modules', 'admin.plugins', 'admin.emails', 'admin.maintenance'] as $key) {
+        foreach (['admin.overview', 'admin.users', 'admin.staff', 'admin.access', 'admin.modules', 'admin.plugins', 'admin.emails', 'admin.emails.import', 'admin.settings', 'admin.maintenance'] as $key) {
             $this->assertContains($key, $adminKeys);
         }
     }
@@ -119,6 +119,8 @@ class WorkspaceNavigationTest extends TestCase
             'staff users' => ['admin.users.index', ['account_type' => 'staff'], NavPanel::ADMIN, 'admin.staff'],
             'access child page' => ['admin.roles.index', [], NavPanel::ADMIN, 'admin.access'],
             'plugin settings' => ['admin.modules.index', [], NavPanel::ADMIN, 'admin.plugins'],
+            'email import beats emails' => ['admin.emails.import.index', [], NavPanel::ADMIN, 'admin.emails.import'],
+            'emails' => ['admin.emails.inbound.index', [], NavPanel::ADMIN, 'admin.emails'],
             'help' => ['help', [], NavPanel::STAFF, 'help'],
         ];
     }

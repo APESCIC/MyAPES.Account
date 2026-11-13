@@ -75,6 +75,14 @@ return [
             ],
         ],
         'inbound' => [
+            'import_failing' => [
+                'name' => 'Email import stopped',
+                'description' => 'Sent once to administrators when MyAPES Account cannot import replies from the reply mailbox after 3 tries in a row or 15 minutes.',
+            ],
+            'import_recovered' => [
+                'name' => 'Email import working again',
+                'description' => 'Sent once to administrators when email import works again after it stopped.',
+            ],
             'reply_not_posted' => [
                 'name' => 'Email reply not added',
                 'description' => 'Sent, at most once an hour, when someone replies by email to a closed ticket or case.',
@@ -130,6 +138,24 @@ return [
         'footer' => 'Reply to this email, or:',
         'badge' => 'by email',
         'attachments_only' => 'Sent attachments by email.',
+    ],
+
+    'inbound_import_failing' => [
+        'subject' => 'MyAPES Account cannot import email replies',
+        'greeting' => 'Hello :name,',
+        'line_failing' => 'MyAPES Account has not been able to check the reply mailbox :count times in a row, so client replies by email are not being added to tickets and cases.',
+        'line_reason' => 'Reason: :reason',
+        'line_try' => 'What to try: :hint',
+        'line_safe' => 'No email is lost: it stays in the mailbox and is imported as soon as the connection works again. You will get one more email when it does.',
+        'action' => 'Open Email import',
+    ],
+
+    'inbound_import_recovered' => [
+        'subject' => 'MyAPES Account is importing email replies again',
+        'greeting' => 'Hello :name,',
+        'line_working' => 'MyAPES Account can check the reply mailbox again, so client replies by email are being added to tickets and cases.',
+        'line_caught_up' => 'Any replies that waited in the mailbox are being imported now.',
+        'action' => 'Open Email import',
     ],
 
     'reply_not_posted' => [

@@ -10,16 +10,39 @@ use App\Core\Mail\Inbound\MailboxUnavailable;
 interface InboundMailbox
 {
     /**
-     * Oldest messages first.
+     * Oldest messages first; with $afterUid, only messages whose UID is higher (#777).
      *
      * @return iterable<int, MailboxMessage>
      *
      * @throws MailboxUnavailable
      */
-    public function messages(int $limit): iterable;
+    public function messages(int $limit, ?int $afterUid = null): iterable;
 
     /**
-     * Permanently remove messages marked for deletion.
+     * The folder's UIDVALIDITY (#777), or null when the mailbox has no UIDs.
+     *
+     * @throws MailboxUnavailable
+     */
+    public function uidValidity(): ?int;
+
+    /**
+     * Creates any of these folders that are missing (#776).
+     *
+     * @param  list<string>  $folders
+     *
+     * @throws MailboxUnavailable
+     */
+    public function ensureFolders(array $folders): void;
+
+    /**
+     * Deletes messages older than the given number of days from a folder and returns how many (#776).
+     *
+     * @throws MailboxUnavailable
+     */
+    public function purge(string $folder, int $olderThanDays): int;
+
+    /**
+     * Completes moves and deletions, then disconnects.
      *
      * @throws MailboxUnavailable
      */

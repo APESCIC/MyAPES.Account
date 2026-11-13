@@ -88,10 +88,12 @@ class InboundMailPollerTest extends TestCase
         $this->mailbox->unavailable = true;
 
         $this->assertSame(InboundMailPoller::RESULT_UNAVAILABLE, app(InboundMailPoller::class)->poll()['result']);
+        $this->travel(61)->seconds();
         $this->artisan('tickets:inbound-poll')->expectsOutputToContain('could not be reached')->assertSuccessful();
         $this->assertCount(1, $this->mailbox->messages);
 
         $this->mailbox->unavailable = false;
+        $this->travel(3)->minutes();
         app(InboundMailPoller::class)->poll();
 
         $this->assertSame(1, InboundEmail::query()->count());

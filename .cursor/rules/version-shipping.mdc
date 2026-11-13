@@ -27,7 +27,7 @@ This is the one rule for how work ships in this repository. `AGENTS.md`, `CONTRI
 
 - Never write "Milestone 7", "#7", "[#7]", "M7" or "/milestone/7" in a branch, title, commit subject, tag or release.
 - Check names with `composer milestone:check-title -- "<title>"`, `composer milestone:check-branch -- "<branch>"` and `composer milestone:check-release -- vX.Y.Z "<release title>"`. CI runs the title and branch checks on every pull request.
-- Version fields: `VERSION` and `resources/data/module-runtime-contract.json` (`application_version`), set once by `composer milestone:bump -- vX.Y.Z`. Then prepend exactly one `releases.json` record with `php artisan myapes:changelog-prepare` (check its `--type` with `--dry-run`), update the version-pinned tests it lists, and run `php artisan myapes:changelog-validate --base-ref=origin/main`. Never edit or reorder published records.
+- Version fields: `VERSION` and `resources/data/module-runtime-contract.json` (`application_version`). Prepend exactly one `releases.json` record with `php artisan myapes:changelog-prepare --type=<patch|minor|major>` (check with `--dry-run` that it names vX.Y.Z); it bumps from the current `VERSION` and sets both version fields, so do not run `milestone:bump` first. Fill every TODO, update the version-pinned tests it lists (and the `array_slice` offset in `ReleaseHistoryCommandTest`), then run `php artisan myapes:changelog-validate --base-ref=origin/main` and `composer milestone:bump -- vX.Y.Z --check`. Never edit or reorder published records.
 
 ## The flow: one version ships once
 

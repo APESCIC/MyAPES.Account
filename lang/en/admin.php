@@ -501,6 +501,163 @@ return [
             'templates' => 'Templates',
             'log' => 'Outbound log',
             'inbound' => 'Inbound',
+            'import' => 'Import',
+        ],
+        'import' => [
+            'page_title' => 'Email import | MyAPES Account',
+            'heading' => 'Email import',
+            'log' => [
+                'heading' => 'Recent connection log',
+                'intro' => 'The newest :count connection tests and checks of the mailbox. Entries older than :days days are deleted. No password, username or email content is ever kept.',
+                'empty' => 'Nothing has been logged yet.',
+                'caption' => 'Recent connection tests and checks, newest first',
+                'when' => 'When',
+                'kind' => 'What',
+                'result' => 'Result',
+                'step' => 'Step',
+                'duration' => 'Time',
+                'counts' => 'Mail',
+                'counts_value' => ':fetched fetched, :stored imported, :duplicates already imported, :failed failed',
+                'kinds' => [
+                    'test' => 'Connection test',
+                    'poll' => 'Check of the mailbox',
+                ],
+                'results' => [
+                    'ok' => 'Passed',
+                    'polled' => 'Worked',
+                    'unavailable' => 'Could not reach the mailbox',
+                ],
+            ],
+            'alert' => [
+                'title' => 'Email import has stopped',
+                'body' => 'Since :at MyAPES Account cannot check the reply mailbox: :reason No email is lost; it is imported when the connection works again.',
+                'action' => 'Open Email import',
+            ],
+            'readiness' => [
+                'heading' => 'Ready to import?',
+                'ok' => 'Done',
+                'missing' => 'Still to do',
+                'fixed_by' => [
+                    'admin' => 'An administrator fixes this on this page.',
+                    'it' => 'IT fixes this on Cloudron.',
+                ],
+                'items' => [
+                    'token_key' => [
+                        'ok' => 'The reply token key is set on the server.',
+                        'missing' => 'The reply token key is missing on the server (INBOUND_MAIL_TOKEN_KEY in /app/data/shared/.env).',
+                    ],
+                    'enabled' => [
+                        'ok' => 'Replies by email are switched on.',
+                        'missing' => 'Replies by email are switched off.',
+                    ],
+                    'address' => [
+                        'ok' => 'The mailbox address is valid.',
+                        'missing' => 'The mailbox address is not a valid email address.',
+                    ],
+                    'password' => [
+                        'ok' => 'A mailbox password is set.',
+                        'missing' => 'No mailbox password is set.',
+                    ],
+                    'test' => [
+                        'ok' => 'The last connection test passed.',
+                        'missing' => 'No connection test has passed yet. Press Test connection.',
+                    ],
+                    'heartbeat' => [
+                        'ok' => 'The scheduler checked the mailbox in the last :minutes minutes.',
+                        'missing' => 'The scheduler has not checked the mailbox in the last :minutes minutes.',
+                        'not_recorded' => 'No scheduler check has been recorded yet.',
+                    ],
+                    'probe' => [
+                        'ok' => 'The plus-address probe arrived.',
+                        'missing' => 'No plus-address probe has arrived yet. Send one below.',
+                    ],
+                ],
+            ],
+            'result_heading' => 'Connection test result',
+            'result_total' => 'Finished in :ms ms.',
+            'step_time' => ':ms ms',
+            'steps' => [
+                'dns' => 'Server name (DNS)',
+                'tcp' => 'Connection',
+                'tls' => 'Encryption',
+                'login' => 'Login',
+                'folder' => 'Folder',
+            ],
+            'step_status' => [
+                'passed' => 'Passed',
+                'failed' => 'Failed',
+                'skipped' => 'Skipped',
+            ],
+            'test_ok' => 'Connection test passed: MyAPES Account reached the server, logged in and opened the folder.',
+            'test_failed' => 'Connection test failed at :step: :reason',
+            'test_limited' => 'You have run :count connection tests in the last 10 minutes. Try again in :minutes minutes.',
+            'test_help' => 'Tests the values in this form without saving them. Leave the password blank to test the saved server with the saved password; type the password to test a different server, username or port.',
+            'password_needed' => 'Type the mailbox password to test a different server, port, encryption or username, or with the certificate check turned off. The saved password is only ever sent to the saved server.',
+            'username_help' => 'The full mailbox address, for example communications@myapes.me.uk. Alias logins do not work.',
+            'encryption' => [
+                'ssl' => 'SSL/TLS (port 993)',
+                'tls' => 'STARTTLS (port 143)',
+                'none' => 'None (local testing only)',
+            ],
+            'encryption_help' => 'The APES Cloudron offers IMAP on port 993 with SSL/TLS only.',
+            'encryption_mismatch' => 'Port :port does not work with this encryption. Choose :encryption for port :port.',
+            'what_to_try' => 'What to try:',
+            'server_folders' => 'Folders on the server: :folders.',
+            'details' => [
+                'messages' => 'Folder',
+                'messages_value' => ':count messages, :unseen unread',
+                'capabilities' => 'Server features',
+                'yes' => 'yes',
+                'no' => 'no',
+                'certificate' => 'Certificate',
+                'certificate_value' => ':name, valid until :date',
+            ],
+            'errors' => [
+                'dns_not_found' => [
+                    'message' => 'The server name was not found.',
+                    'hint' => 'Check the spelling of the IMAP server. On the APES Cloudron it is mail.cloudron.apes.org.uk.',
+                ],
+                'connection_refused' => [
+                    'message' => 'The server refused the connection.',
+                    'hint' => 'Check the port. On the APES Cloudron IMAP is on port 993; ask IT if a firewall blocks it.',
+                ],
+                'timeout' => [
+                    'message' => 'The server did not answer in time.',
+                    'hint' => 'Check the server name and port, then try again. If it keeps happening, ask IT whether the mail server is up.',
+                ],
+                'wrong_encryption' => [
+                    'message' => 'Wrong encryption for this port.',
+                    'hint' => 'Use SSL/TLS with port 993, or STARTTLS with port 143. The APES Cloudron offers IMAP on 993 with SSL/TLS only.',
+                ],
+                'certificate_name_mismatch' => [
+                    'message' => 'The server\'s certificate name does not match.',
+                    'hint' => 'Use the name on the certificate as the IMAP server, for example mail.cloudron.apes.org.uk rather than an alias.',
+                ],
+                'certificate_untrusted' => [
+                    'message' => 'The server\'s certificate has expired or is not trusted.',
+                    'hint' => 'Ask IT to renew the mail certificate on Cloudron. Only turn off the certificate check for local testing.',
+                ],
+                'handshake_failed' => [
+                    'message' => 'The encryption handshake failed.',
+                    'hint' => 'Check the encryption and port, then try again. If it keeps happening, ask IT to check the mail server.',
+                ],
+                'login_failed' => [
+                    'message' => 'The server refused the username or password.',
+                    'hint' => 'Use the full mailbox address as the username and the mailbox owner\'s Cloudron Mail Client app password (from APES Vault). Alias logins do not work.',
+                ],
+                'too_many_attempts' => [
+                    'message' => 'The server has had too many attempts.',
+                    'hint' => 'Wait 15 minutes before trying again, then check the password.',
+                ],
+                'folder_not_found' => [
+                    'message' => 'The folder was not found.',
+                    'hint' => 'Choose one of the folders the server has. Most mailboxes use INBOX.',
+                ],
+                'feature_missing' => [
+                    'message' => 'The server is missing a feature the import uses.',
+                    'hint' => 'Imports still work, a little more slowly. Ask IT whether the mail server can offer :features.',
+                ],
+            ],
         ],
         'inbound' => [
             'page_title' => 'Inbound email | MyAPES Account',

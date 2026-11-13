@@ -2,6 +2,7 @@
 
 namespace App\Core\Mail\Inbound;
 
+use App\Core\Mail\Inbound\Diagnostics\DiagnosticReport;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -21,27 +22,43 @@ final class ReplyMailboxStatus
 
     private const PROBE_KEY = 'inbound-mail:probe';
 
+    private const HEARTBEAT_KEY = 'inbound-mail:heartbeat';
+
+    private const FAILURES_KEY = 'inbound-mail:consecutive-failures';
+
+    private const NEXT_POLL_KEY = 'inbound-mail:next-poll-at';
+
+    private const FAILING_SINCE_KEY = 'inbound-mail:failing-since';
+
+    /** Minutes to wait after the 1st, 2nd, 3rd, 4th and later failures in a row (#778). */
+    public const BACKOFF_MINUTES = [1, 2, 5, 10, 15];
+
     public const PROBE_PREFIX = 'probe-';
 
     public function __construct(private readonly InboundMailSettings $settings) {}
 
-    public function recordTest(bool $ok, ?string $error = null): void
+    public function recordTest(DiagnosticReport $report): void
     {
-        Cache::forever(self::TEST_KEY, ['at' => now()->toIso8601String(), 'ok' => $ok, 'error' => $error]);
+        Cache::forever(self::TEST_KEY, ['at' => now()->toIso8601String(), 'report' => $report->toArray()]);
     }
 
     /**
-     * @return array{at: Carbon, ok: bool, error: ?string}|null
+     * @return array{at: Carbon, ok: bool, report: DiagnosticReport}|null
      */
     public function lastTest(): ?array
     {
         $test = Cache::get(self::TEST_KEY);
+        if (! is_array($test) || ! is_array($test['report'] ?? null)) {
+            return null;
+        }
 
-        return is_array($test) ? ['at' => Carbon::parse($test['at']), 'ok' => (bool) $test['ok'], 'error' => $test['error'] ?? null] : null;
+        $report = DiagnosticReport::fromArray($test['report']);
+
+        return ['at' => Carbon::parse($test['at']), 'ok' => $report->ok(), 'report' => $report];
     }
 
     /**
-     * @param  array{result: string, fetched: int, stored: int, duplicates: int, failed: int}  $result
+     * @param  array{result: string, failure?: string, fetched: int, stored: int, duplicates: int, failed: int}  $result
      */
     public function recordPoll(array $result): void
     {
@@ -50,7 +67,47 @@ final class ReplyMailboxStatus
 
         if ($result['result'] === InboundMailPoller::RESULT_POLLED) {
             Cache::forever(self::SUCCESSFUL_POLL_KEY, $entry['at']);
+            Cache::forget(self::FAILURES_KEY);
+            Cache::forget(self::NEXT_POLL_KEY);
+            Cache::forget(self::FAILING_SINCE_KEY);
+        } elseif ($result['result'] === InboundMailPoller::RESULT_UNAVAILABLE) {
+            $failures = $this->consecutiveFailures() + 1;
+            Cache::forever(self::FAILURES_KEY, $failures);
+            if ($failures === 1) {
+                Cache::forever(self::FAILING_SINCE_KEY, $entry['at']);
+            }
+            Cache::forever(self::NEXT_POLL_KEY, now()->addMinutes(self::BACKOFF_MINUTES[min($failures, count(self::BACKOFF_MINUTES)) - 1])->toIso8601String());
         }
+    }
+
+    /**
+     * When the current run of failed polls began (#779), or null when the last poll worked.
+     */
+    public function failingSince(): ?Carbon
+    {
+        $at = Cache::get(self::FAILING_SINCE_KEY);
+
+        return is_string($at) ? Carbon::parse($at) : null;
+    }
+
+    public function consecutiveFailures(): int
+    {
+        return (int) Cache::get(self::FAILURES_KEY, 0);
+    }
+
+    /**
+     * When the next scheduled poll may connect again after failures (#778), or null when healthy.
+     */
+    public function nextPollAt(): ?Carbon
+    {
+        $at = Cache::get(self::NEXT_POLL_KEY);
+
+        return is_string($at) ? Carbon::parse($at) : null;
+    }
+
+    public function backingOff(): bool
+    {
+        return $this->nextPollAt()?->isFuture() ?? false;
     }
 
     /**
@@ -61,6 +118,21 @@ final class ReplyMailboxStatus
         $poll = Cache::get(self::POLL_KEY);
 
         return is_array($poll) ? ['at' => Carbon::parse($poll['at']), 'result' => (string) $poll['result']] : null;
+    }
+
+    /**
+     * The scheduler ran the poll command, whatever its result (#775, #779).
+     */
+    public function recordHeartbeat(): void
+    {
+        Cache::forever(self::HEARTBEAT_KEY, now()->toIso8601String());
+    }
+
+    public function heartbeatAt(): ?Carbon
+    {
+        $at = Cache::get(self::HEARTBEAT_KEY);
+
+        return is_string($at) ? Carbon::parse($at) : null;
     }
 
     public function lastSuccessfulPollAt(): ?Carbon

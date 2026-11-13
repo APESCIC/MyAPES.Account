@@ -21,7 +21,7 @@ final class MailpitMailbox implements InboundMailbox
         private readonly InboundMailSettings $settings,
     ) {}
 
-    public function messages(int $limit): iterable
+    public function messages(int $limit, ?int $afterUid = null): iterable
     {
         $mailbox = $this->settings->mailbox();
         if ($mailbox === null) {
@@ -48,17 +48,40 @@ final class MailpitMailbox implements InboundMailbox
                     private readonly string $id,
                 ) {}
 
+                public function uid(): ?int
+                {
+                    return null;
+                }
+
                 public function raw(): string
                 {
                     return $this->client->raw($this->id);
                 }
 
-                public function delete(): void
+                /**
+                 * Mailpit has no folders: a handled message is simply deleted.
+                 */
+                public function moveTo(string $folder): void
                 {
                     $this->mailbox->markForDeletion($this->id);
                 }
             };
         }
+    }
+
+    /**
+     * Mailpit has no UIDs; duplicates are skipped by Message-ID.
+     */
+    public function uidValidity(): ?int
+    {
+        return null;
+    }
+
+    public function ensureFolders(array $folders): void {}
+
+    public function purge(string $folder, int $olderThanDays): int
+    {
+        return 0;
     }
 
     public function expunge(): void

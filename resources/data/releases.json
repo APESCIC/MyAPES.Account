@@ -1,5 +1,58 @@
 [
   {
+    "version": "0.63.0",
+    "date": "2026-11-13",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Email import and stable IMAP connection",
+    "summary": "Administrators can now set up and test the reply mailbox from its own page, Admin \u2192 Emails \u2192 Import, and see in plain words which step of the connection failed and what to try. Importing client replies by email keeps running steadily, with visible mailbox folders, no duplicates, polite retries and alerts when it stops.",
+    "changes": [
+      "Admin \u2192 Emails \u2192 Import is a new page and menu item for administrators. It holds the reply mailbox connection, the import status, a readiness checklist and a recent connection log. The Reply mailbox tab has left Admin \u2192 Settings, which now opens on Integrations, and the old address takes you to the new page.",
+      "Test connection now checks the values typed in the form, before saving and before replies are switched on, step by step: server name, connection, encryption, login and folder. Each step shows passed, failed or skipped with its time, and a failure is explained in plain words with what to try. A typed password is used for that one test and never kept.",
+      "The form starts with the APES Cloudron mail server values and refuses port and encryption pairs that can never work, such as port 993 with STARTTLS.",
+      "The readiness checklist shows what is still missing before replies by email can work, and who fixes each item: an administrator on the page or IT on Cloudron.",
+      "Imported replies now move to a Processed folder in the mailbox instead of being deleted, mail that cannot be imported after three tries moves to a Failed folder, and both folders are emptied after 30 days. Each check fetches only new mail, so nothing is imported twice.",
+      "Checks of the mailbox never overlap, give up on a server that does not answer within 15 seconds and slow down after failures. After repeated failures administrators see a banner and get one email, and one more when importing works again. The health check reports whether email import is ok, failing or off.",
+      "The privacy notice now explains that imported replies stay in the mailbox's Processed folder for 30 days."
+    ],
+    "affected_areas": [
+      "Admin emails",
+      "Admin settings",
+      "Replies by email",
+      "Privacy",
+      "Health check"
+    ],
+    "categories": [
+      "added",
+      "changed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Minor: a new admin page, connection diagnostics and import reliability features with additive migrations; the old settings address redirects and no existing route stops working.",
+    "validation": [
+      "The full PHPUnit suite, Pint on changed files and the translation key check passed locally; new feature tests use a fake IMAP server for every failure type and cover the Import page and its permissions, readiness, folders, UID tracking, the poll lock and backoff (including a server that never answers), alerts, the health field and a redaction test that finds no password or username in logs, cache, database or audit.",
+      "In the Laragon preview, Admin \u2192 Emails \u2192 Import loaded for an administrator with its connection form, test result, import status, readiness checklist and connection log, and the old Reply mailbox address redirected to it."
+    ],
+    "known_limitations": [
+      "Replies by email on the live app need the Cloudron mailbox owner, its Mail Client app password and the reply token key set up after the deploy (issue #754).",
+      "The mailbox is checked every minute; push delivery (IMAP IDLE) and configurable intervals are not included."
+    ],
+    "rollback": "Deploy v0.62.0 with deploy-cloudron.yml. The new mailbox state and connection log tables are additive and are ignored by v0.62.0; mail already moved to the Processed and Failed folders stays there and can be moved back to the inbox by hand if needed.",
+    "provenance": "Milestone v0.63.0 Beta: Email import and stable IMAP connection, epic #770 with issues #771, #772, #773, #774, #775, #776, #777, #778, #779, #780, #781, #782 and the Cloudron hand-off #754; pull request #783.",
+    "references": [
+      {
+        "label": "Issue #770",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/770"
+      },
+      {
+        "label": "Pull request #783",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/783"
+      }
+    ]
+  },
+  {
     "version": "0.62.0",
     "date": "2026-11-12",
     "channel": "stable",

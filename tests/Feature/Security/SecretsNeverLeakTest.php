@@ -45,9 +45,10 @@ class SecretsNeverLeakTest extends TestCase
         $secrets = [self::RECAPTCHA_SECRET, self::WEBHOOK_SECRET, explode('|', $token, 2)[1]];
 
         $bodies = [];
-        foreach (['reply-mailbox', 'integrations', 'api-clients', 'webhooks', 'api-docs'] as $tab) {
+        foreach (['integrations', 'api-clients', 'webhooks', 'api-docs'] as $tab) {
             $bodies[$tab] = (string) $this->actingAs($admin)->get(route('admin.settings.show', $tab))->assertOk()->getContent();
         }
+        $bodies['email-import'] = (string) $this->actingAs($admin)->get(route('admin.emails.import.index'))->assertOk()->getContent();
         auth()->logout();
         foreach (['public.register', 'password.request', 'privacy', 'cookies', 'health'] as $route) {
             $bodies[$route] = (string) $this->get(route($route))->getContent();
