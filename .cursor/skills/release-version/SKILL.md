@@ -1,6 +1,6 @@
 ---
 name: release-version
-description: Ship a completed version - set the version fields once with composer milestone:bump and myapes:changelog-prepare, mark the milestone PR ready, get CI green, ask the ship-gate question, then merge once (merge commit), push the vX.Y.Z tag (release.yml publishes the Release), deploy that tag with deploy-cloudron.yml and close out. Use when every issue in the milestone is committed, or when the user asks to merge, release, tag or deploy the milestone.
+description: Ship a completed version - set the version fields once with myapes:changelog-prepare and check them with composer milestone:bump --check, mark the milestone PR ready, get CI green, ask the ship-gate question, then merge once (merge commit), push the vX.Y.Z tag (release.yml publishes the Release), deploy that tag with deploy-cloudron.yml and close out. Use when every issue in the milestone is committed, or when the user asks to merge, release, tag or deploy the milestone.
 ---
 
 # Release a version
@@ -10,7 +10,7 @@ Follows `.cursor/rules/version-shipping.mdc` and the `ship-gate` skill.
 ## Steps
 
 1. **Sync.** Run `scripts\preview.ps1` (it merges `origin/main` into the milestone branch).
-2. **Set the version once.** `composer milestone:bump -- vX.Y.Z` (it refuses a version that is not the next milestone's). Then `php artisan myapes:changelog-prepare --type=<patch|minor|major> --title="..." --issue=<n> --pr=<n>`, after checking the type with `--dry-run`. Update the version-pinned tests it names, then `php artisan myapes:changelog-validate --base-ref=origin/main` and `composer milestone:bump -- vX.Y.Z --check`.
+2. **Set the version once.** `php artisan myapes:changelog-prepare --type=<patch|minor|major> --title="..." --issue=<n> --pr=<n>`, after checking with `--dry-run` that it names vX.Y.Z. It bumps from the current `VERSION` and sets `VERSION` and the runtime contract itself, so do not run `composer milestone:bump` first. Fill every TODO in the new record, update the version-pinned tests it names and the `array_slice` offset in `ReleaseHistoryCommandTest`, then `php artisan myapes:changelog-validate --base-ref=origin/main` and `composer milestone:bump -- vX.Y.Z --check`.
 3. **Last commit.** `chore: release vX.Y.Z`. Push.
 4. **Ready.** `gh pr ready <pr>`, then `gh pr checks <pr> --watch`. Fix failures on the same branch.
 5. **Check the names.** `composer milestone:check-release -- vX.Y.Z "<release title>"`, using the "Release title" from `composer milestone:next`.
