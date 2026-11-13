@@ -40,7 +40,7 @@ class ReplyMailboxEndToEndTest extends TestCase
         $this->assertInstanceOf(ImapMailbox::class, app(InboundMailbox::class));
 
         $admin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
-        $this->actingAs($admin)->put(route('admin.settings.reply-mailbox.update'), [
+        $this->actingAs($admin)->put(route('admin.emails.import.update'), [
             'enabled' => '1',
             'address' => 'communications@example.test',
             'host' => 'imap.example.test',

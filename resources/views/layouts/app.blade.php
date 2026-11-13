@@ -69,6 +69,7 @@
             <main id="main-content" class="app-main" tabindex="-1">
                 <x-flash-toasts />
                 @include('partials.client-records-notice')
+                @include('partials.import-alert')
 
                 @yield('content')
             </main>

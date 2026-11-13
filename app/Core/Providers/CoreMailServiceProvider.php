@@ -5,6 +5,8 @@ namespace App\Core\Providers;
 use App\Core\Mail\BrandedMailChannel;
 use App\Core\Mail\CoreMailTemplates;
 use App\Core\Mail\Inbound\Contracts\InboundMailbox;
+use App\Core\Mail\Inbound\Diagnostics\MailboxTransport;
+use App\Core\Mail\Inbound\Diagnostics\SocketTransport;
 use App\Core\Mail\Inbound\ImapMailbox;
 use App\Core\Mail\Inbound\InboundMailboxSettings;
 use App\Core\Mail\Inbound\InboundMailSettings;
@@ -35,6 +37,7 @@ class CoreMailServiceProvider extends ServiceProvider
         $this->app->bind(InboundMailbox::class, fn ($app): InboundMailbox => $app->make(InboundMailSettings::class)->usesMailpit()
             ? $app->make(MailpitMailbox::class)
             : $app->make(ImapMailbox::class));
+        $this->app->bind(MailboxTransport::class, SocketTransport::class);
         $this->app->bind(MailChannel::class, BrandedMailChannel::class);
     }
 

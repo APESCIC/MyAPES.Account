@@ -37,7 +37,7 @@ class AppSettingsTest extends TestCase
     public function test_a_setting_falls_back_to_its_default(): void
     {
         $this->assertSame(993, $this->settings->get(self::GROUP, 'port'));
-        $this->assertNull($this->settings->get(self::GROUP, 'host'));
+        $this->assertSame('mail.cloudron.apes.org.uk', $this->settings->get(self::GROUP, 'host'));
         $this->assertSame(AppSettings::SOURCE_DEFAULT, $this->settings->source(self::GROUP, 'port'));
     }
 
@@ -90,7 +90,8 @@ class AppSettingsTest extends TestCase
 
         $this->assertSame(['host'], $changed);
         $this->assertSame(self::SECRET, $this->settings->get(self::GROUP, 'password'));
-        $this->assertNull($this->settings->get(self::GROUP, 'host'));
+        $this->assertFalse($this->settings->stored(self::GROUP, 'host'));
+        $this->assertSame('mail.cloudron.apes.org.uk', $this->settings->get(self::GROUP, 'host'));
         $this->assertTrue($this->settings->stored(self::GROUP, 'password'));
     }
 

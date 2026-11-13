@@ -3,6 +3,7 @@
 namespace App\Core\Mail;
 
 use App\Core\Accounts\User;
+use App\Core\Mail\Inbound\Diagnostics\FailureType;
 use App\Notifications\Auth\EmailChangeCompletedNotification;
 use App\Notifications\Auth\EmailChangeConfirmNotification;
 use App\Notifications\Auth\EmailChangeStartedNotification;
@@ -14,6 +15,8 @@ use App\Notifications\Auth\TwoFactorDisabledNotification;
 use App\Notifications\Auth\TwoFactorEnabledNotification;
 use App\Notifications\Auth\VerifyEmailNotification;
 use App\Notifications\EmailReplyNotPostedNotification;
+use App\Notifications\InboundImportFailingNotification;
+use App\Notifications\InboundImportRecoveredNotification;
 use App\Notifications\PendingFirstLoginChaseNotification;
 use App\Notifications\StaffClientRecordsArchivedNotification;
 use Closure;
@@ -70,6 +73,26 @@ final class CoreMailTemplates
                 sample: static fn (): StaffClientRecordsArchivedNotification => new StaffClientRecordsArchivedNotification(['Tickets' => 2, 'Pet profiles' => 1]),
                 subjectKey: 'mail.staff_client_records_archived.subject',
                 introKey: 'mail.staff_client_records_archived.line_archived',
+            ),
+            new MailTemplate(
+                key: 'inbound.import_failing',
+                notification: InboundImportFailingNotification::class,
+                category: MailCategory::Service,
+                labelKey: 'mail.templates.inbound.import_failing.name',
+                descriptionKey: 'mail.templates.inbound.import_failing.description',
+                sample: static fn (): InboundImportFailingNotification => new InboundImportFailingNotification(FailureType::LoginFailed, 3),
+                subjectKey: 'mail.inbound_import_failing.subject',
+                introKey: 'mail.inbound_import_failing.line_failing',
+            ),
+            new MailTemplate(
+                key: 'inbound.import_recovered',
+                notification: InboundImportRecoveredNotification::class,
+                category: MailCategory::Service,
+                labelKey: 'mail.templates.inbound.import_recovered.name',
+                descriptionKey: 'mail.templates.inbound.import_recovered.description',
+                sample: static fn (): InboundImportRecoveredNotification => new InboundImportRecoveredNotification,
+                subjectKey: 'mail.inbound_import_recovered.subject',
+                introKey: 'mail.inbound_import_recovered.line_working',
             ),
             new MailTemplate(
                 key: 'inbound.reply_not_posted',

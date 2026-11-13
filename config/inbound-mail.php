@@ -39,15 +39,17 @@ return [
         'timeout' => 10,
     ],
 
+    // Cloudron offers IMAP on 993 with SSL/TLS only (#773); the form starts with these values.
     'imap' => [
-        'host' => env('INBOUND_MAIL_IMAP_HOST'),
+        'host' => env('INBOUND_MAIL_IMAP_HOST') ?: 'mail.cloudron.apes.org.uk',
         'port' => (int) env('INBOUND_MAIL_IMAP_PORT', 993),
         'encryption' => env('INBOUND_MAIL_IMAP_ENCRYPTION', 'ssl'),
         'validate_cert' => (bool) env('INBOUND_MAIL_IMAP_VALIDATE_CERT', true),
         'username' => env('INBOUND_MAIL_IMAP_USERNAME'),
         'password' => env('INBOUND_MAIL_IMAP_PASSWORD'),
         'folder' => env('INBOUND_MAIL_IMAP_FOLDER', 'INBOX'),
-        'timeout' => (int) env('INBOUND_MAIL_IMAP_TIMEOUT', 30),
+        // Seconds to connect and to wait for each answer, so a hanging server cannot stall a poll (#778).
+        'timeout' => (int) env('INBOUND_MAIL_IMAP_TIMEOUT', 15),
     ],
 
     'poll_batch' => (int) env('INBOUND_MAIL_POLL_BATCH', 50),
@@ -57,6 +59,9 @@ return [
     'max_reply_characters' => 20000,
 
     'retention_days' => (int) env('INBOUND_MAIL_RETENTION_DAYS', 30),
+
+    // Mail in the mailbox's Processed and Failed folders is deleted after this many days (#776).
+    'folder_retention_days' => (int) env('INBOUND_MAIL_FOLDER_RETENTION_DAYS', 30),
 
     'rate_limits' => [
         'per_sender_per_hour' => (int) env('INBOUND_MAIL_SENDER_LIMIT', 20),
