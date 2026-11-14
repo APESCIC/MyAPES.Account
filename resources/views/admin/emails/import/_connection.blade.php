@@ -5,11 +5,11 @@
     <dl class="detail-list" data-connection-panel>
         @foreach($connectionRows as $row)
             <div data-connection-row="{{ $row['key'] }}" data-source="{{ $row['source'] }}">
-                <dt>{{ __('admin.emails.import.fields.'.$row['key']) }}</dt>
+                <dt>{{ __("admin.emails.import.fields.{$row['key']}") }}</dt>
                 <dd>
                     @if($row['secret'])
                         <span data-secret-status="{{ $row['source'] }}">
-                            {{ __('admin.emails.import.sources.'.$row['source']) }}
+                            {{ __("admin.emails.import.sources.{$row['source']}") }}
                         </span>
                         @if($row['key'] === 'password')
                             <a href="{{ route('admin.settings.show', 'keys-and-secrets') }}">{{ __('admin.emails.import.keys_and_secrets_link') }}</a>
@@ -18,7 +18,7 @@
                         @endif
                     @else
                         <span data-connection-value>{{ $row['value'] }}</span>
-                        <span class="muted" data-connection-source>{{ __('admin.emails.import.sources.'.$row['source']) }}</span>
+                        <span class="muted" data-connection-source>{{ __("admin.emails.import.sources.{$row['source']}") }}</span>
                     @endif
                 </dd>
             </div>

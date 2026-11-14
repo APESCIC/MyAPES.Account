@@ -48,7 +48,7 @@
                 <dl class="detail-list import-counts" data-count-window="{{ $window }}">
                     @foreach (\App\Core\Mail\Inbound\ImportMonitor::COUNT_KEYS as $key)
                         <div>
-                            <dt>{{ __('admin.emails.import.monitor.count.'.$key) }}</dt>
+                            <dt>{{ __("admin.emails.import.monitor.count.{$key}") }}</dt>
                             <dd data-count="{{ $key }}">{{ $block['data'][$key] }}</dd>
                         </div>
                     @endforeach

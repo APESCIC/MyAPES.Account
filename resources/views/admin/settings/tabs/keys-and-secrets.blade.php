@@ -23,7 +23,7 @@
         @endif
     </p>
     <p class="muted" data-secret-active-source="{{ $mailbox['active_source'] }}">
-        {{ __('admin.settings.keys_and_secrets.active_source.'.$mailbox['active_source']) }}
+        {{ __("admin.settings.keys_and_secrets.active_source.{$mailbox['active_source']}") }}
     </p>
 
     @if($canManage)
@@ -76,7 +76,7 @@
             <div>
                 <dt>{{ $name }}</dt>
                 <dd data-server-secret="{{ $name }}" data-state="{{ $state }}">
-                    {{ __('admin.settings.keys_and_secrets.server_only.'.$state) }}
+                    {{ __("admin.settings.keys_and_secrets.server_only.{$state}") }}
                     <span class="muted">{{ __('admin.settings.keys_and_secrets.server_only.why') }}</span>
                 </dd>
             </div>

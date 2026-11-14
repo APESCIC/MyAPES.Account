@@ -86,7 +86,7 @@ final class ImportMonitor
 
         return [
             'state' => $state,
-            'label' => __('admin.emails.import.monitor.health.'.$state),
+            'label' => __("admin.emails.import.monitor.health.{$state}"),
             'last_check' => $this->status->lastPoll()['at'] ?? null,
             'last_success' => $this->status->lastSuccessfulPollAt(),
             'next_check' => $this->status->backingOff() ? $this->status->nextPollAt() : null,
