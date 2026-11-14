@@ -80,6 +80,6 @@ class EmailImportPageTest extends TestCase
             $this->assertContains($keyword, $entries['admin.emails.import']['keywords']);
             $this->assertNotContains($keyword, $entries['admin.settings']['keywords']);
         }
-        $this->assertSame(route('admin.settings.show', 'integrations'), $entries['admin.settings']['url']);
+        $this->assertSame(route('admin.settings.show', 'general'), $entries['admin.settings']['url']);
     }
 }
