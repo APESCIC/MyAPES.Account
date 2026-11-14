@@ -93,12 +93,12 @@ final class PermissionDescriptions
         ],
         'admin.settings.view' => [
             'title' => 'View settings',
-            'description' => 'Open Admin → Settings and see the reply mailbox set-up, without its password.',
+            'description' => 'Open Admin → Settings (General, Integrations, API clients, webhooks and API docs) and Admin → Emails → Import, without seeing any saved secret.',
             'group' => 'Platform',
         ],
         'admin.settings.manage' => [
             'title' => 'Manage settings',
-            'description' => 'Change Admin → Settings, including the reply mailbox details and password, and test the connection.',
+            'description' => 'Change Admin → Settings, including general options such as public registration and the site banner, and the reply mailbox details and password in Admin → Emails → Import.',
             'group' => 'Platform',
         ],
     ];

@@ -8,9 +8,11 @@ use Plugins\Recruitment\Models\RecruitmentRole;
 
 class SitemapController extends Controller
 {
+    public const CACHE_KEY = 'seo.sitemap.xml';
+
     public function __invoke(): Response
     {
-        $xml = Cache::remember('seo.sitemap.xml', now()->addMinutes(15), function (): string {
+        $xml = Cache::remember(self::CACHE_KEY, now()->addMinutes(15), function (): string {
             $urls = [];
 
             foreach ([

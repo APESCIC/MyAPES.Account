@@ -191,7 +191,7 @@ final class AdminSearchCatalogue
                 'id' => 'admin.settings',
                 'label' => __('admin.nav.settings'),
                 'description' => __('admin.search.sections.settings'),
-                'url' => route('admin.settings.show', AdminSettingsController::TAB_INTEGRATIONS),
+                'url' => route('admin.settings.show', AdminSettingsController::TAB_GENERAL),
                 'keywords_key' => 'admin.search.keywords.settings',
                 'abilities' => ['admin.settings.view'],
             ],
