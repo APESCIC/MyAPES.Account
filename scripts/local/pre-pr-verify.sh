@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Agent-only path for Cursor cloud and Linux agents without Laragon.
-# Developers on Windows use Laragon: composer pre-pr-verify (scripts/local/pre-pr-verify.ps1).
+# Agent-only path for Cursor cloud and Linux agents without Herd.
+# Developers on Windows use Herd: composer pre-pr-verify (scripts/local/pre-pr-verify.ps1).
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Agent-only path for Cursor cloud and Linux agents without Laragon (SQLite, artisan serve).
-# It is not a supported developer setup; developers use scripts/laragon-setup.ps1.
+# Agent-only path for Cursor cloud and Linux agents without Herd (SQLite, artisan serve).
+# It is not a supported developer setup; developers use scripts/herd-setup.ps1.
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"

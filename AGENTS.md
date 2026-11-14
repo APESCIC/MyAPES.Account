@@ -26,28 +26,29 @@ MyAPES Account is the APES CIC account and service portal: service users, studen
 - Recruitment vacancies use `RecruitmentRole`, never Spatie's `Role` (and not an Access job role).
 - Follow the conventions of sibling files, reuse existing components, and do not change dependencies without approval.
 
-## Local development (Laragon)
+## Local development and preview (Herd)
 
-Laragon 8 on Windows is the only supported local setup. Use this project's own Laragon project, profile, demo data and commands, and test against the demo data. Never suggest another local stack, container or virtual machine for local development. Guide: [docs/laragon.md](docs/laragon.md).
+Laravel Herd (Pro) on Windows is the only supported local setup. Use this project's own Herd site, profile, demo data and commands, and test against the demo data. Never suggest another local stack, container or virtual machine for local development. Guide: [docs/herd.md](docs/herd.md).
 
 | Item | Value |
 | --- | --- |
-| Project folder | `C:\laragon\www\myapes-account` (on the owner's PC, a junction to `C:\Users\BambieMurphy\Documents\GitHub\MyAPES.Account`) |
-| App URL | `http://myapes-account.test`, document root `public/` (Laragon Auto Virtual Hosts) |
-| Profile | [docs/laragon/profile.md](docs/laragon/profile.md): PHP 8.4 NTS through FastCGI (mod_fcgid), MySQL 8.4 (`myapes_account_local`, root, empty password), Node 22, npm 11.10+, Vite port 5175 |
-| Setup | `composer setup` (runs `scripts/laragon-setup.ps1`; safe to run twice) |
-| Live preview gate | Before any development work: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1`, then open <http://myapes-account.test> in Cursor's browser (see [`.cursor/rules/laragon-local-dev.mdc`](.cursor/rules/laragon-local-dev.mdc)) |
-| Daily loop | Laragon started (**Start All**), then `scripts\preview.ps1`: Vite hot reload at `http://myapes-account.test:5175` with no window, output in `storage/logs/vite-dev.log`, stopped with `-StopDevServer`. `composer run dev` adds the queue and a log tail and reuses that Vite |
-| Demo data | `composer demo:seed` to load, `composer demo:reset` to wipe and reload; logins in [docs/laragon/demo-data.md](docs/laragon/demo-data.md) |
-| Env file | `.env.example` (Laragon values) |
+| Herd site | `myapes-account`, linked from the clone (`C:\Users\BambieMurphy\Documents\GitHub\MyAPES.Account` on the owner's PC); no junction or copy elsewhere |
+| App URL | `http://myapes-account.test`, document root `public/` |
+| Profile | [docs/herd/profile.md](docs/herd/profile.md) ([`profile.json`](docs/herd/profile.json) for the scripts): PHP 8.4 pinned with `herd isolate` (FastCGI, `php_sapi` `cgi-fcgi`), Herd MySQL 8.4 (`myapes_account_local`, root, empty password), Node 22 from Herd's nvm, npm 11.10+, Vite port 5175 |
+| Mail | Herd's mail catcher, SMTP `127.0.0.1:2525` (Herd > Mail, or the Herd MCP `mail` tool). An optional standalone Mailpit (SMTP 1025, API 8025) is only for the reply loop (`INBOUND_MAIL_DRIVER=mailpit`) |
+| Setup | `composer setup` (runs `scripts/herd-setup.ps1`; safe to run twice) |
+| Live preview gate | Before any development work: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1`, then open <http://myapes-account.test> in Cursor's browser (see [`.cursor/rules/herd-local-dev.mdc`](.cursor/rules/herd-local-dev.mdc)) |
+| Daily loop | Herd open, then `scripts\preview.ps1`: Vite hot reload at `http://myapes-account.test:5175` with no window, output in `storage/logs/vite-dev.log`, stopped with `-StopDevServer`. `composer run dev` adds the queue and a log tail and reuses that Vite |
+| Demo data | `composer demo:seed` to load, `composer demo:reset` to wipe and reload; logins in [docs/herd/demo-data.md](docs/herd/demo-data.md) |
+| Env file | `.env.example` (Herd values) |
 
-- The agent shell's `php` and `node` may not be Laragon's. Run `scripts/laragon-setup.ps1`, or put the NTS build `C:\laragon\bin\php\php-8.4.*-nts-*` (the one Apache runs through FastCGI), `C:\laragon\bin\mysql\mysql-8.4.*\bin` and `C:\laragon\bin\nodejs\node-v22` first on `PATH`.
-- Laragon's settings (PHP version, SSL, restarts) and the hosts file belong to the owner: ask before changing them, and never touch other projects' folders, databases or vhosts.
+- The agent shell's `php` and `node` may not be the project's: Herd's global defaults are PHP 8.5 and Node 26 on the owner's PC. Dot-source `scripts\herd-env.ps1` (Herd's PHP 8.4, Composer, MySQL client and Node 22 first on `PATH`), or use `herd php` and `herd composer`.
+- Herd's settings (PHP versions, services, SSL, restarts) and the hosts file belong to the owner: ask before changing them, and never touch other sites, their databases or links.
 - Demo data refuses to run unless `APP_ENV=local`. Never point it at production or Cloudron, and never copy real data into it.
 - Local QA accounts come from `database/seeders/LocalQaSeeder.php` (local and testing only) and drive the in-app QA role switcher. Never copy their passwords anywhere.
-- Cursor cloud and Linux agents have no Laragon. Their agent-only path is `bash scripts/local/bootstrap.sh --fresh` and `bash scripts/local/dev.sh`, with `http://127.0.0.1:8000/` for UI checks. It is not a developer setup.
+- Cursor cloud and Linux agents have no Herd. Their agent-only path is `bash scripts/local/bootstrap.sh --fresh` and `bash scripts/local/dev.sh`, with `http://127.0.0.1:8000/` for UI checks. It is not a developer setup.
 - In Windows PowerShell 5.1, pass `gh` bodies with `--body-file`, because inline double quotes get stripped.
-- Node/npm for Vite builds: use **npm 11.10 or newer** (Node 22 ships npm 10 by default — upgrade with `npm install -g npm@11` before `npm ci`). Repo `.npmrc` sets `min-release-age=7`.
+- Node/npm for Vite builds: use **npm 11.10 or newer** (Node 22 ships npm 10 by default — upgrade Herd's Node 22 with `npm install -g npm@11` after `. .\scripts\herd-env.ps1`, before `npm ci`). Repo `.npmrc` sets `min-release-age=7`.
 - Every GitHub Actions `uses:` must be pinned to a full 40-character commit SHA with a version comment (`action@<sha> # vX.Y.Z`). Mutable tags such as `@v2` are not allowed.
 
 ## Tests and checks
@@ -72,7 +73,7 @@ Laragon 8 on Windows is the only supported local setup. Use this project's own L
 
 ## Shipping and versioning
 
-Work ships once per milestone, by the milestone's version, never by GitHub's milestone number: every issue committed on one `milestone/vX-Y-Z-<slug>` branch behind one draft pull request, **one merge commit** into `main`, one `vX.Y.Z` tag and GitHub Release, and one Cloudron deploy of that tag. The single rule is [`.cursor/rules/version-shipping.mdc`](.cursor/rules/version-shipping.mdc): the next version, the names, the version fields and release record, the flow and hotfixes. Agents run it with the [`complete-next-version`](.cursor/skills/complete-next-version/SKILL.md) and [`release-version`](.cursor/skills/release-version/SKILL.md) skills, or `/complete-next-version`. Before any work, run the live preview gate in [`.cursor/rules/laragon-local-dev.mdc`](.cursor/rules/laragon-local-dev.mdc).
+Work ships once per milestone, by the milestone's version, never by GitHub's milestone number: every issue committed on one `milestone/vX-Y-Z-<slug>` branch behind one draft pull request, **one merge commit** into `main`, one `vX.Y.Z` tag and GitHub Release, and one Cloudron deploy of that tag. The single rule is [`.cursor/rules/version-shipping.mdc`](.cursor/rules/version-shipping.mdc): the next version, the names, the version fields and release record, the flow and hotfixes. Agents run it with the [`complete-next-version`](.cursor/skills/complete-next-version/SKILL.md) and [`release-version`](.cursor/skills/release-version/SKILL.md) skills, or `/complete-next-version`. Before any work, run the live preview gate in [`.cursor/rules/herd-local-dev.mdc`](.cursor/rules/herd-local-dev.mdc).
 
 Facts the rule relies on:
 
@@ -99,7 +100,12 @@ Facts the rule relies on:
 ## Decisions and gotchas
 
 - 2026-11-12: email import uses the Cloudron `communications@myapes.me.uk` mailbox over IMAP on `mail.cloudron.apes.org.uk:993` SSL/TLS (Cloudron has no IMAP on 143), polled every minute with backoff, and imported mail moves to `Processed` or `Failed` folders emptied after 30 days. Decided by Bambie (epic #770).
+- 2026-11-14: Laravel Herd Pro replaces Laragon for local development and testing. Local mail goes to Herd's mail catcher; the Mailpit inbound driver stays for an optional standalone Mailpit when testing the reply loop. Decided by Bambie (epic #789).
 - The milestone branch is always the one `composer milestone:next` prints, even when an issue body names a slightly different slug.
+- With Herd's PHP, `composer install` regenerating the optimised autoloader can take several minutes (66 s for `dump-autoload -o`, 30 s for `package:discover`, far longer on a cold first run); it is slow, not stuck. Right after it, the first `/healthz` can exceed `scripts\preview.ps1`'s 60 s timeout; run the gate again.
+- Herd's own Vite process (`herd processes:start vite --site=myapes-account`) stopped with no output on 14 November 2026, so `scripts\preview.ps1` starts Vite itself with Herd's Node 22.
+- `herd services:list` can show the MySQL service as `stopped` while it answers on 3306; the scripts check the port instead.
+- In Windows PowerShell 5.1, `gh api ... | ConvertFrom-Json | Format-Table` can print an empty table for a JSON array; loop over the items (`% { ... }`) to list them.
 - `scripts\preview.ps1` can fail `npm ci` with `EPERM ... lightningcss.win32-x64-msvc.node` when this repo's Vite is still running from an older checkout. Run `scripts\preview.ps1 -StopDevServer`, then the gate again.
 - The "SQLite test and package" check on a milestone PR stays red until the `chore: release vX.Y.Z` commit prepends the release record: `myapes:changelog-validate --base-ref` runs before the tests. Run `composer test` locally while the PR is a draft.
 - Release order: run `php artisan myapes:changelog-prepare --type=<patch|minor|major>` first (it bumps from the current `VERSION` and sets `VERSION` and the runtime contract itself), then `composer milestone:bump -- vX.Y.Z --check`. Running `milestone:bump` first makes `changelog-prepare` prepare the version after next. Then raise the `array_slice($releases, N)` offset in `ReleaseHistoryCommandTest` by one; the tool does not update it.
