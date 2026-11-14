@@ -104,6 +104,8 @@ Facts the rule relies on:
 - The milestone branch is always the one `composer milestone:next` prints, even when an issue body names a slightly different slug.
 - With Herd's PHP, `composer install` regenerating the optimised autoloader can take several minutes (66 s for `dump-autoload -o`, 30 s for `package:discover`, far longer on a cold first run); it is slow, not stuck. Right after it, the first `/healthz` can exceed `scripts\preview.ps1`'s 60 s timeout; run the gate again.
 - Herd's own Vite process (`herd processes:start vite --site=myapes-account`) stopped with no output on 14 November 2026, so `scripts\preview.ps1` starts Vite itself with Herd's Node 22.
+- With `core.autocrlf=true` on Windows, `vendor/bin/pint --test` reports `line_ending` (and knock-on brace and operator fixers) for every file in the CRLF working tree. Check changed files from their committed LF content (`git cat-file -p HEAD:<path>` into a temp folder, then Pint there) or rely on CI; never commit Pint's CRLF "fixes".
+- Something outside the repo (likely Herd's dev-process badge) can delete `public/hot` while Vite keeps running, which makes pages load the built assets; `scripts\preview.ps1` rewrites it when it finds this repo's Vite running.
 - `herd services:list` can show the MySQL service as `stopped` while it answers on 3306; the scripts check the port instead.
 - In Windows PowerShell 5.1, `gh api ... | ConvertFrom-Json | Format-Table` can print an empty table for a JSON array; loop over the items (`% { ... }`) to list them.
 - `scripts\preview.ps1` can fail `npm ci` with `EPERM ... lightningcss.win32-x64-msvc.node` when this repo's Vite is still running from an older checkout. Run `scripts\preview.ps1 -StopDevServer`, then the gate again.
