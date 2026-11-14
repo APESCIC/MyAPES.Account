@@ -10,6 +10,7 @@ use App\Exceptions\DirectoryUnavailable;
 use App\Exceptions\OidcProviderException;
 use App\Http\Controllers\Controller;
 use App\Http\Cookies\OidcReauthenticationCookie;
+use App\Http\Middleware\EnsureRecentStepUp;
 use App\Services\AuditLogger;
 use App\Services\DirectoryRoleSynchronizer;
 use App\Services\DirectoryUserSynchronizer;
@@ -57,6 +58,54 @@ class OidcAuthController extends Controller
                 OidcFlow::StaffLogin,
                 $forceReauthentication,
             );
+        } catch (OidcProviderException) {
+            $auditLogger->record('auth.oidc_provider_unavailable', context: [
+                'reason' => 'provider_unavailable',
+            ]);
+            abort(503, __('auth.oidc.unavailable'));
+        }
+    }
+
+    /**
+     * Step-up re-authentication for directory identities (#823).
+     *
+     * Already signed-in Cloudron users cannot use staff.auth.login (it redirects
+     * to the dashboard), so this route forces Staff OIDC with prompt=login.
+     */
+    public function stepUp(
+        Request $request,
+        OidcIdentityProvider $identityProvider,
+        OidcReauthenticationCookie $reauthenticationCookie,
+        AuditLogger $auditLogger,
+    ): RedirectResponse {
+        /** @var User|null $user */
+        $user = $request->user();
+
+        if ($user === null || ! $user->hasDirectoryIdentity()) {
+            abort(403, __('auth.confirm_password.local_only'));
+        }
+
+        $pending = $request->session()->get(EnsureRecentStepUp::OIDC_STEP_UP_SESSION_KEY);
+
+        if (! is_array($pending)
+            || (int) ($pending['user_id'] ?? 0) !== (int) $user->getKey()
+            || ! hash_equals((string) ($pending['oidc_sub'] ?? ''), (string) $user->oidc_sub)
+        ) {
+            $request->session()->put(EnsureRecentStepUp::OIDC_STEP_UP_SESSION_KEY, [
+                'user_id' => $user->getKey(),
+                'oidc_sub' => $user->oidc_sub,
+            ]);
+        }
+
+        $auditLogger->record('auth.oidc_reauthentication_required', $user, $user, [
+            'reason' => 'step_up',
+        ]);
+
+        try {
+            return $identityProvider->authorizationRedirect(
+                OidcFlow::StaffLogin,
+                true,
+            )->withCookie($reauthenticationCookie->mark());
         } catch (OidcProviderException) {
             $auditLogger->record('auth.oidc_provider_unavailable', context: [
                 'reason' => 'provider_unavailable',
@@ -228,9 +277,29 @@ class OidcAuthController extends Controller
 
         $user->refresh();
 
+        $stepUp = $request->session()->pull(EnsureRecentStepUp::OIDC_STEP_UP_SESSION_KEY);
+        $stepUpMatches = is_array($stepUp)
+            && (int) ($stepUp['user_id'] ?? 0) === (int) $user->getKey()
+            && hash_equals((string) ($stepUp['oidc_sub'] ?? ''), (string) $user->oidc_sub);
+
+        if (is_array($stepUp) && ! $stepUpMatches) {
+            $auditLogger->record('auth.oidc_step_up_denied', $user, $user, [
+                'reason' => 'subject_mismatch',
+            ]);
+            abort(403, __('auth.oidc.step_up_mismatch'));
+        }
+
         Auth::login($user, false);
         $request->session()->regenerate();
         $authorizationContext->recordCloudronOidc($request, $user);
+
+        if ($stepUpMatches) {
+            $request->session()->passwordConfirmed();
+            $auditLogger->record('auth.oidc_step_up_success', $user, $user, [
+                'role' => $result->protectedRole,
+            ]);
+        }
+
         $auditLogger->record('auth.login_success', $user, $user, [
             'role' => $result->protectedRole,
             'group_count' => count($groups),
@@ -244,7 +313,7 @@ class OidcAuthController extends Controller
             $response = redirect()->intended(route('dashboard'));
         }
 
-        return $reauthenticationCookie->isRequired($request)
+        return $reauthenticationCookie->isRequired($request) || $stepUpMatches
             ? $response->withCookie($reauthenticationCookie->clear())
             : $response;
     }

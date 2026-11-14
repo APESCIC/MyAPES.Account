@@ -62,6 +62,21 @@ class KeysAndSecretsTest extends TestCase
             ->assertSessionHasNoErrors();
     }
 
+    public function test_directory_admin_without_step_up_is_sent_to_oidc_not_password_confirm(): void
+    {
+        $directoryAdmin = User::factory()
+            ->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)
+            ->directoryIdentity('keys-secrets-directory-admin')
+            ->create([
+                'email' => 'keys.directory@example.com',
+                'ldap_groups' => ['myapesaccount.admin'],
+            ]);
+
+        $this->actingAs($directoryAdmin)
+            ->put(route('admin.settings.keys-and-secrets.store'), ['password' => self::PASSWORD])
+            ->assertRedirect(route('staff.auth.step-up'));
+    }
+
     public function test_saved_value_is_encrypted_and_never_appears_in_html_json_logs_or_audit(): void
     {
         $this->actingAs($this->admin)

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Core\Accounts\User;
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\EnsureRecentStepUp;
 use App\Services\SessionAuthorizationContext;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -17,8 +18,14 @@ class ConfirmPasswordController extends Controller
         private readonly SessionAuthorizationContext $authorizationContext,
     ) {}
 
-    public function show(Request $request): View
+    public function show(Request $request): View|RedirectResponse
     {
+        $user = $request->user();
+
+        if ($user instanceof User && $user->hasDirectoryIdentity()) {
+            return $this->redirectDirectoryUserToOidcStepUp($request, $user);
+        }
+
         $this->ensureLocalPasswordIdentity($request);
 
         return view('auth.confirm-password');
@@ -26,6 +33,12 @@ class ConfirmPasswordController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $user = $request->user();
+
+        if ($user instanceof User && $user->hasDirectoryIdentity()) {
+            return $this->redirectDirectoryUserToOidcStepUp($request, $user);
+        }
+
         $user = $this->ensureLocalPasswordIdentity($request);
 
         if (! is_string($user->password) || $user->password === '' || ! Hash::check((string) $request->input('password'), $user->password)) {
@@ -39,6 +52,20 @@ class ConfirmPasswordController extends Controller
         $request->session()->passwordConfirmed();
 
         return redirect()->to($this->intendedUrl($request));
+    }
+
+    private function redirectDirectoryUserToOidcStepUp(Request $request, User $user): RedirectResponse
+    {
+        $request->session()->put(EnsureRecentStepUp::OIDC_STEP_UP_SESSION_KEY, [
+            'user_id' => $user->getKey(),
+            'oidc_sub' => $user->oidc_sub,
+        ]);
+
+        if (! $request->session()->has('url.intended')) {
+            $request->session()->put('url.intended', $this->intendedUrl($request));
+        }
+
+        return redirect()->route('staff.auth.step-up');
     }
 
     private function ensureLocalPasswordIdentity(Request $request): User

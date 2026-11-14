@@ -127,7 +127,7 @@ class StepUpAuthTest extends TestCase
         $this->assertTrue(Hash::check('password', $user->password));
     }
 
-    public function test_confirm_password_forbidden_for_directory_identity(): void
+    public function test_confirm_password_redirects_directory_identity_to_oidc_step_up(): void
     {
         $directory = User::factory()
             ->directoryIdentity('stepup-directory-subject')
@@ -138,12 +138,20 @@ class StepUpAuthTest extends TestCase
 
         $this->actingAs($directory)
             ->get(route('password.confirm'))
-            ->assertForbidden();
+            ->assertRedirect(route('staff.auth.step-up'));
+
+        $this->assertSame(
+            [
+                'user_id' => $directory->id,
+                'oidc_sub' => 'stepup-directory-subject',
+            ],
+            session('myapes.oidc_step_up'),
+        );
 
         $this->actingAs($directory)
             ->post(route('password.confirm.store'), [
                 'password' => 'password',
             ])
-            ->assertForbidden();
+            ->assertRedirect(route('staff.auth.step-up'));
     }
 }
