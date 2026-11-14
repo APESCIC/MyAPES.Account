@@ -10,7 +10,7 @@ use InvalidArgumentException;
 use RuntimeException;
 
 /**
- * Replies to a ticket or case email in Laragon's Mailpit as the client would
+ * Replies to a ticket or case email in a local Mailpit as the client would
  * (#757), so the reply loop can be tried locally end to end.
  */
 class ReplyAsClient extends Command

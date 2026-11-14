@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Http;
 use Throwable;
 
 /**
- * Laragon's Mailpit REST API (#756), for the local reply loop only. Every call
+ * A local Mailpit's REST API (#756), for the local reply loop only. Every call
  * refuses unless the settings allow Mailpit (local or testing, loopback URL).
  */
 final class MailpitClient

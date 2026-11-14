@@ -7,7 +7,7 @@ use Illuminate\Console\Command;
 
 /**
  * Deploy preflight for replies by email (#756): a release must poll the real
- * mailbox over IMAP, never Laragon's local Mailpit.
+ * mailbox over IMAP, never a local Mailpit.
  */
 class InboundMailPreflight extends Command
 {

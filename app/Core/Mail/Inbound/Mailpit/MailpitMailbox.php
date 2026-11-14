@@ -8,7 +8,7 @@ use App\Core\Mail\Inbound\InboundMailSettings;
 
 /**
  * The local reply mailbox (#756): reads replies sent to INBOUND_MAIL_ADDRESS
- * (and its +token forms) from Laragon's Mailpit, oldest first. Messages are
+ * (and its +token forms) from a local Mailpit, oldest first. Messages are
  * deleted from Mailpit only after the poller has stored them.
  */
 final class MailpitMailbox implements InboundMailbox

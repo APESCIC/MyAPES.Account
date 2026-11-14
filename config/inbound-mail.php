@@ -30,7 +30,7 @@ return [
 
     'require_authentication' => (bool) env('INBOUND_MAIL_REQUIRE_AUTH', true),
 
-    // imap (default) or mailpit. mailpit reads Laragon's Mailpit over its REST API and works only on local
+    // imap (default) or mailpit. mailpit reads a standalone local Mailpit over its REST API and works only on local
     // or testing with a loopback URL (#756); the Cloudron deploy preflight refuses it.
     'driver' => env('INBOUND_MAIL_DRIVER', 'imap'),
 

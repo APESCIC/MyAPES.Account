@@ -6,7 +6,7 @@ export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
     const port = Number(env.VITE_PORT || 5175);
     // Serve, reload and write public/hot under the APP_URL host name
-    // (myapes-account.test on Laragon), so no address is printed or used.
+    // (myapes-account.test on Herd), so no address is printed or used.
     const host = new URL(env.APP_URL || 'http://localhost').hostname;
 
     return {
