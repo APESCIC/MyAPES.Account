@@ -3057,6 +3057,26 @@ caption {
     margin: 0.75rem 0 1rem;
 }
 
+.sg-nav-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    margin-left: 0.35rem;
+    padding: 0.05rem 0.4rem;
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--clay) 85%, var(--ink));
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 660;
+    line-height: 1.2;
+}
+
+.inline-form {
+    display: inline-block;
+    margin-left: 0.35rem;
+}
+
 /* Chart.js with maintainAspectRatio:false must size against a fixed-height
    parent. Constraining only the canvas lets Chart.js expand the page forever. */
 .analytics-chart-frame {

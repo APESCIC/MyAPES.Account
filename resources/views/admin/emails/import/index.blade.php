@@ -24,6 +24,7 @@
 
     <div class="panel-stack" data-email-import>
         @include('admin.emails.import._monitor')
+        @include('admin.emails.import._queue')
         @include('admin.emails.import._connection')
         @include('admin.emails.import._result', ['report' => $report])
         @include('admin.emails.import._status')

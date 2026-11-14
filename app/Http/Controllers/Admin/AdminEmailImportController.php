@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Core\Mail\Inbound\Contracts\InboundMailbox;
 use App\Core\Mail\Inbound\Diagnostics\MailboxConnection;
 use App\Core\Mail\Inbound\Diagnostics\MailboxDiagnostics;
+use App\Core\Mail\Inbound\ImportQueue;
 use App\Core\Mail\Inbound\InboundMailboxLogEntry;
 use App\Core\Mail\Inbound\InboundMailPoller;
 use App\Core\Mail\Inbound\InboundMailSettings;
@@ -94,6 +95,23 @@ class AdminEmailImportController extends Controller
         $audit->record('admin.settings.mailbox_probe_sent', $request->user());
 
         return $this->back()->with('status', __('admin.emails.import.probe_sent'));
+    }
+
+    /**
+     * Retries every failed import that still has its raw message (#814).
+     */
+    public function retryFailed(Request $request, ImportQueue $queue, AuditLogger $audit): RedirectResponse
+    {
+        $request->validate(['confirm_retry_failed' => ['accepted']]);
+
+        $count = $queue->retryAllFailed();
+        $audit->record('admin.emails.import_retry_failed', $request->user(), context: [
+            'count' => $count,
+        ]);
+
+        return $this->back()->with('status', $count === 0
+            ? __('admin.emails.import.queue.retry_failed_none')
+            : __('admin.emails.import.queue.retry_failed_done', ['count' => $count]));
     }
 
     /**

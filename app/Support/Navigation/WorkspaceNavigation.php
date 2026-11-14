@@ -11,6 +11,7 @@ use App\Core\Extensions\Navigation\PublicNavigationRegistry;
 use App\Core\Extensions\Navigation\StaffPluginNavigationItem;
 use App\Core\Extensions\Navigation\StaffPluginNavigationRegistry;
 use App\Core\Extensions\Plugins\PluginRegistry;
+use App\Core\Mail\Inbound\ImportQueue;
 use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\HelpController;
 use App\Modules\ModuleNavigationItem;
@@ -39,6 +40,7 @@ final class WorkspaceNavigation
         private readonly AuthorizationProfile $profile,
         private readonly Gate $gate,
         private readonly AccountClassifier $accounts,
+        private readonly ImportQueue $importQueue,
     ) {}
 
     public function forRequest(?User $user, Request $request): WorkspaceMenu
@@ -303,7 +305,11 @@ final class WorkspaceNavigation
                     continue;
                 }
 
-                $visible[] = new NavItem($key, $label, $url, $icon, $patterns, $keywords[$key] ?? [], $definition[6] ?? []);
+                $item = new NavItem($key, $label, $url, $icon, $patterns, $keywords[$key] ?? [], $definition[6] ?? []);
+                if ($key === 'admin.emails.import') {
+                    $item = $item->withBadge($this->importQueue->badgeCount());
+                }
+                $visible[] = $item;
             }
 
             $groups[] = new NavGroup($groupKey, $headings[$groupKey], $visible);

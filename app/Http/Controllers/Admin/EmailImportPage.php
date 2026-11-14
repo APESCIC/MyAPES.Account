@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Core\Mail\Inbound\ConnectionPanel;
 use App\Core\Mail\Inbound\Diagnostics\DiagnosticReport;
 use App\Core\Mail\Inbound\ImportMonitor;
+use App\Core\Mail\Inbound\ImportQueue;
 use App\Core\Mail\Inbound\ImportReadiness;
 use App\Core\Mail\Inbound\InboundEmail;
 use App\Core\Mail\Inbound\InboundMailboxLogEntry;
@@ -14,8 +15,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
 /**
- * What Admin → Emails → Import shows (#735, #774, #811, #813). Secrets are
- * never sent to the page: only status and source.
+ * What Admin → Emails → Import shows (#735, #774, #811, #813, #814). Secrets
+ * are never sent to the page: only status and source.
  */
 final class EmailImportPage
 {
@@ -27,6 +28,7 @@ final class EmailImportPage
         private readonly ImportReadiness $readiness,
         private readonly ConnectionPanel $connection,
         private readonly ImportMonitor $monitor,
+        private readonly ImportQueue $queue,
     ) {}
 
     /**
@@ -57,6 +59,8 @@ final class EmailImportPage
                 InboundEmail::STATUSES,
                 array_map(InboundEmail::labelForStatus(...), InboundEmail::STATUSES),
             ),
+            'queue' => $this->queue->items(),
+            'queueBadge' => $this->queue->badgeCount(),
         ];
     }
 
