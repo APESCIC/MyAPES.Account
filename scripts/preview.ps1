@@ -202,6 +202,11 @@ try {
     $listener = Get-DevListener
     if ($listener) {
         if (Get-DevServer | Where-Object { $_.ProcessId -eq $listener.OwningProcess }) {
+            if (-not (Get-HotUrl)) {
+                # Something removed public\hot while Vite kept running; without it the pages load the built assets.
+                [System.IO.File]::WriteAllText((Join-Path $repo 'public\hot'), "$($p.appUrl):$($p.viteDevServerPort)")
+                Write-Ok 'Restored public\hot for the running Vite'
+            }
             Write-Ok "Already running at $(Get-HotUrl)"
         } else {
             Write-Warn "Port $($p.viteDevServerPort) is used by $((Get-Process -Id $listener.OwningProcess).ProcessName), not this repository's Vite. Stop it, or set a free VITE_PORT in .env."
