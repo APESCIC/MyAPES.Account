@@ -62,6 +62,10 @@ composer demo:reset   # wipe myapes_account_local, migrate and reload the demo d
 
 Both commands give the same data every time. They refuse to run unless `APP_ENV=local`. See [`herd/demo-data.md`](herd/demo-data.md) for what is included and the test logins.
 
+### Developer sign-in (local only)
+
+`.env.example` sets `QA_LOGIN_ENABLED=true` for Herd. With `APP_ENV=local`, `/login` and `/staff/login` show an amber **Developer sign-in** panel (tagged Local only). Choose an account type or common stack to sign in as a fake QA profile in one click. The amber **QA pill** in the user dock switches profile in place and offers **Sign out of QA**. `/qa` is the same panel as a fallback. QA accounts have random unknown passwords — use the panel, not the password form. Leave the flag unset on Cloudron; the feature is off in testing, staging and production.
+
 ## 4. Live preview
 
 ```powershell

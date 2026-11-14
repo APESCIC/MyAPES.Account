@@ -154,7 +154,7 @@ class FreshInstallAuthorizationSeederTest extends TestCase
             ->orderBy('email')
             ->get();
 
-        $this->assertCount(6, $users);
+        $this->assertCount(9, $users);
         $this->assertSame(
             [User::IDENTITY_LOCAL],
             $users->pluck('identity_type')->unique()->values()->all(),
@@ -183,6 +183,20 @@ class FreshInstallAuthorizationSeederTest extends TestCase
             'myapesaccount.staff',
             'position.staff',
         ], $users->firstWhere('email', LocalQaSeeder::HR_EMAIL)?->ldap_groups);
+        $this->assertSame([
+            'myapesaccount.staff',
+            'myapesaccount.vet',
+            'position.staff',
+        ], $users->firstWhere('email', LocalQaSeeder::VET_EMAIL)?->ldap_groups);
+        $this->assertSame([
+            'myapesaccount.staff',
+            'myapesaccount.vetnurse',
+            'position.staff',
+        ], $users->firstWhere('email', LocalQaSeeder::VET_NURSE_EMAIL)?->ldap_groups);
+        $this->assertSame([
+            'myapesaccount.staff',
+            'position.staff',
+        ], $users->firstWhere('email', LocalQaSeeder::RECEPTIONIST_EMAIL)?->ldap_groups);
         $this->assertSame([
             'department.directors',
             'intranet.managers',

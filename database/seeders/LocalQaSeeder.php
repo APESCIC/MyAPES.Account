@@ -18,6 +18,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use LogicException;
 use Plugins\Cases\Models\CaseUpdate;
 use Plugins\Cases\Models\ShelterCase;
@@ -42,11 +43,13 @@ class LocalQaSeeder extends Seeder
 
     public const VET_EMAIL = 'qa.vet@myapes.local';
 
+    public const VET_NURSE_EMAIL = 'qa.vet.nurse@myapes.local';
+
+    public const RECEPTIONIST_EMAIL = 'qa.receptionist@myapes.local';
+
     public const ADMIN_EMAIL = 'qa.admin@myapes.local';
 
     public const CUSTOM_ROLE_NAME = 'local-qa-reviewer';
-
-    public const DEFAULT_PASSWORD = 'MyAPES-Local-QA-2026!';
 
     /**
      * @return list<string>
@@ -59,6 +62,9 @@ class LocalQaSeeder extends Seeder
             self::VOLUNTEER_EMAIL,
             self::STAFF_EMAIL,
             self::HR_EMAIL,
+            self::VET_EMAIL,
+            self::VET_NURSE_EMAIL,
+            self::RECEPTIONIST_EMAIL,
             self::ADMIN_EMAIL,
         ];
     }
@@ -110,6 +116,18 @@ class LocalQaSeeder extends Seeder
             User::ROLE_STAFF,
             $seededAt
         );
+        $vetNurseUser = $this->upsertUser(
+            self::VET_NURSE_EMAIL,
+            'QA Vet Nurse User',
+            User::ROLE_STAFF,
+            $seededAt
+        );
+        $receptionistUser = $this->upsertUser(
+            self::RECEPTIONIST_EMAIL,
+            'QA Receptionist User',
+            User::ROLE_STAFF,
+            $seededAt
+        );
         $adminUser = $this->upsertUser(
             self::ADMIN_EMAIL,
             'QA Admin User',
@@ -122,11 +140,15 @@ class LocalQaSeeder extends Seeder
             $staffUser,
             $hrUser,
             $vetUser,
+            $vetNurseUser,
+            $receptionistUser,
             $adminUser,
         );
         $this->upsertCustomRole($adminUser, $staffUser);
         $this->grantJobRole($adminUser, $hrUser, DefaultJobRoles::HUMAN_RESOURCES);
         $this->grantJobRole($adminUser, $vetUser, DefaultJobRoles::VET);
+        $this->grantJobRole($adminUser, $vetNurseUser, DefaultJobRoles::VET_NURSE);
+        $this->grantJobRole($adminUser, $receptionistUser, DefaultJobRoles::RECEPTIONIST);
 
         $this->upsertProfile($serviceUser, 'Service User', '+44 7700 900101', 'APES CIC Service User');
         $this->upsertStaffProfile($studentUser, 'Placement student', StaffProfile::TEAM_SHELTER_RESCUE, '+447700900105');
@@ -134,6 +156,8 @@ class LocalQaSeeder extends Seeder
         $this->upsertStaffProfile($staffUser, 'Rescue coordinator', StaffProfile::TEAM_SHELTER_RESCUE, '+447700900102');
         $this->upsertStaffProfile($hrUser, 'People and recruitment lead', StaffProfile::TEAM_OPERATIONS, '+447700900107');
         $this->upsertStaffProfile($vetUser, 'Clinic vet', StaffProfile::TEAM_OPERATIONS, '+447700900108');
+        $this->upsertStaffProfile($vetNurseUser, 'Clinic vet nurse', StaffProfile::TEAM_OPERATIONS, '+447700900109');
+        $this->upsertStaffProfile($receptionistUser, 'Reception', StaffProfile::TEAM_OPERATIONS, '+447700900110');
         $this->upsertStaffProfile($adminUser, 'Operations manager', StaffProfile::TEAM_OPERATIONS, '+447700900103');
 
         $openTicket = SupportTicket::query()->updateOrCreate(
@@ -901,6 +925,8 @@ class LocalQaSeeder extends Seeder
         User $staffUser,
         User $hrUser,
         User $vetUser,
+        User $vetNurseUser,
+        User $receptionistUser,
         User $adminUser,
     ): void {
         $studentUser->forceFill([
@@ -945,6 +971,21 @@ class LocalQaSeeder extends Seeder
             ],
         ])->save();
 
+        $vetNurseUser->forceFill([
+            'ldap_groups' => [
+                'myapesaccount.staff',
+                'myapesaccount.vetnurse',
+                'position.staff',
+            ],
+        ])->save();
+
+        $receptionistUser->forceFill([
+            'ldap_groups' => [
+                'myapesaccount.staff',
+                'position.staff',
+            ],
+        ])->save();
+
         $adminUser->forceFill([
             'ldap_groups' => [
                 'department.directors',
@@ -963,10 +1004,9 @@ class LocalQaSeeder extends Seeder
     ): User {
         /** @var User $user */
         $user = User::query()->firstOrNew(['email' => $email]);
-        $user->forceFill([
+        $attributes = [
             'name' => $name,
             'username' => str_replace('@myapes.local', '', $email),
-            'password' => self::DEFAULT_PASSWORD,
             'oidc_sub' => null,
             'identity_type' => User::IDENTITY_LOCAL,
             'ldap_groups' => [],
@@ -975,7 +1015,11 @@ class LocalQaSeeder extends Seeder
             'suspended_at' => null,
             'suspended_by' => null,
             'suspension_reason' => null,
-        ]);
+        ];
+        if (! $user->exists) {
+            $attributes['password'] = Str::password(40);
+        }
+        $user->forceFill($attributes);
         $user->setAccessLevel($role)->save();
 
         $profile = app(AuthorizationProfile::class);

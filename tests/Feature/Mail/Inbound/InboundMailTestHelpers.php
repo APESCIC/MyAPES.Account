@@ -17,6 +17,17 @@ use Symfony\Component\Mime\Email;
  */
 trait InboundMailTestHelpers
 {
+    /**
+     * Flip the app to local for features that only run there. TestCase::actingAs
+     * records METHOD_QA, which is only valid in testing or when QA login is on,
+     * so enable the gate while the env is local.
+     */
+    protected function useLocalEnvironment(): void
+    {
+        $this->app['env'] = 'local';
+        config(['myapes.qa_login_enabled' => true]);
+    }
+
     protected function enableEmailReplies(array $overrides = []): void
     {
         $password = array_key_exists('inbound-mail.imap.password', $overrides)

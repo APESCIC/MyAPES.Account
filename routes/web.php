@@ -1,5 +1,7 @@
 <?php
 
+use App\Core\Qa\Http\Controllers\QaLoginController;
+use App\Core\Qa\Http\Middleware\EnsureQaLoginEnabled;
 use App\Http\Controllers\Admin\AdminAccessController;
 use App\Http\Controllers\Admin\AdminApiClientController;
 use App\Http\Controllers\Admin\AdminEmailController;
@@ -117,7 +119,15 @@ Route::middleware('guest')->group(function (): void {
     }
 });
 
-Route::post('/qa/switch-role', [PublicAuthController::class, 'qaSwitchRole'])->name('qa.switch-role');
+if (app()->environment(['local', 'testing'])) {
+    Route::middleware(EnsureQaLoginEnabled::class)
+        ->controller(QaLoginController::class)
+        ->group(function (): void {
+            Route::get('/qa', 'index')->name('qa.index');
+            Route::post('/qa/login', 'store')->name('qa.login');
+            Route::post('/qa/logout', 'destroy')->name('qa.logout');
+        });
+}
 
 Route::prefix('staff/auth')->controller(OidcAuthController::class)->group(function (): void {
     Route::get('/login', 'login')->name('staff.auth.login');

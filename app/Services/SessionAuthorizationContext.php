@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Core\Accounts\AuthorizationState;
 use App\Core\Accounts\DirectorySyncRun;
 use App\Core\Accounts\User;
+use App\Core\Qa\QaLogin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 
@@ -85,7 +86,8 @@ class SessionAuthorizationContext
         }
 
         if ($method === self::METHOD_QA
-            && ! app()->environment(['local', 'testing'])) {
+            && ! QaLogin::enabled()
+            && ! app()->environment('testing')) {
             return false;
         }
 
@@ -111,7 +113,7 @@ class SessionAuthorizationContext
         $method = $this->authenticationMethod($request);
 
         if ($method === self::METHOD_QA) {
-            return app()->environment(['local', 'testing']);
+            return QaLogin::enabled() || app()->environment('testing');
         }
 
         if ($method !== self::METHOD_CLOUDRON_OIDC

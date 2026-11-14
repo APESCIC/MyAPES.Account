@@ -34,5 +34,8 @@
             <p class="error" role="alert" hidden data-passkey-error></p>
             <p class="muted">{{ __('auth.passkeys.login_fallback') }}</p>
         </form>
+        @if (\App\Core\Qa\QaLogin::enabled())
+            <x-qa.signin-panel :profiles="\App\Core\Qa\QaLogin::picker()" class="mt-2" />
+        @endif
     </div>
 @endsection

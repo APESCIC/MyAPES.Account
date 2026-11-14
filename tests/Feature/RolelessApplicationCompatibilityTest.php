@@ -88,8 +88,12 @@ class RolelessApplicationCompatibilityTest extends TestCase
         $this->dropRoleColumn();
         $this->seed(LocalQaSeeder::class);
 
-        $response = $this->post(route('qa.switch-role'), [
-            'role' => User::ROLE_ADMIN,
+        config(['myapes.qa_login_enabled' => true]);
+        app()->detectEnvironment(static fn (): string => 'local');
+        $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class);
+
+        $response = $this->post(route('qa.login'), [
+            'profile' => 'admin',
         ]);
 
         $response->assertRedirect(route('dashboard'));

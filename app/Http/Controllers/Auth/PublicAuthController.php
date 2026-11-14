@@ -13,7 +13,6 @@ use App\Services\AuthorizationAccountSynchronizer;
 use App\Services\AuthorizationProfile;
 use App\Services\SessionAuthorizationContext;
 use App\Services\TotpTwoFactorService;
-use Database\Seeders\LocalQaSeeder;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,7 +22,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
-use RuntimeException;
 
 class PublicAuthController extends Controller
 {
@@ -35,42 +33,6 @@ class PublicAuthController extends Controller
 
     public function showLogin(Request $request, AuditLogger $auditLogger): View|RedirectResponse
     {
-        if (app()->environment(['local', 'testing'])) {
-            $user = $this->findQaUserByRole('service_user');
-
-            if ($user === null) {
-                $auditLogger->record('auth.qa_public_auto_login_skipped', null, null, [
-                    'entry' => 'public.login',
-                    'reason' => 'seeded_qa_user_missing',
-                ]);
-
-                return view('auth.public-login');
-            }
-
-            if ($user->suspended_at !== null) {
-                $auditLogger->record(
-                    'auth.suspended_login_denied',
-                    $user,
-                    $user,
-                    [
-                        'entry' => 'qa_public_auto_login',
-                        'method' => SessionAuthorizationContext::METHOD_QA,
-                    ],
-                );
-
-                return view('auth.public-login');
-            }
-
-            Auth::login($user, false);
-            $request->session()->regenerate();
-            $this->authorizationContext->recordQa($request, $user);
-            $auditLogger->record('auth.qa_public_auto_login', $user, $user, [
-                'entry' => 'public.login',
-            ]);
-
-            return redirect()->intended(route('dashboard'));
-        }
-
         return view('auth.public-login');
     }
 
@@ -265,97 +227,6 @@ class PublicAuthController extends Controller
         ]);
 
         return redirect()->intended(route('dashboard'));
-    }
-
-    public function qaSwitchRole(Request $request, AuditLogger $auditLogger): RedirectResponse
-    {
-        if (! app()->environment(['local', 'testing'])) {
-            abort(404);
-        }
-
-        $validated = $request->validate([
-            'role' => [
-                'required',
-                Rule::in($this->authorizationProfile->qaSwitchSelectors()),
-            ],
-        ]);
-
-        /** @var User|null $currentUser */
-        $currentUser = $request->user();
-        $targetUser = $this->requireQaUserByRole($validated['role']);
-
-        if ($targetUser->suspended_at !== null) {
-            $auditLogger->record(
-                'auth.suspended_login_denied',
-                $targetUser,
-                $targetUser,
-                [
-                    'entry' => 'qa_role_switch',
-                    'method' => SessionAuthorizationContext::METHOD_QA,
-                ],
-            );
-
-            return back()->withErrors([
-                'role' => 'The selected QA account is suspended.',
-            ]);
-        }
-
-        if ($currentUser !== null) {
-            Auth::logout();
-        }
-
-        Auth::login($targetUser, false);
-        $request->session()->regenerate();
-        $this->authorizationContext->recordQa($request, $targetUser);
-
-        $auditLogger->record('auth.qa_role_switch', $currentUser, $targetUser, [
-            'from_role' => $currentUser === null
-                ? null
-                : $this->authorizationProfile->displayKey($currentUser),
-            'to_role' => $this->authorizationProfile->displayKey($targetUser),
-            'target_user_id' => $targetUser->id,
-        ]);
-
-        $roleLabel = strtolower($this->authorizationProfile->displayLabel($targetUser)).' user';
-
-        return redirect()
-            ->route('dashboard')
-            ->with('status', __('flash.qa_switched', ['role' => $roleLabel, 'email' => $targetUser->email]));
-    }
-
-    private function requireQaUserByRole(string $role): User
-    {
-        $email = match ($role) {
-            'service_user' => LocalQaSeeder::SERVICE_USER_EMAIL,
-            'student' => LocalQaSeeder::STUDENT_EMAIL,
-            'volunteer' => LocalQaSeeder::VOLUNTEER_EMAIL,
-            'staff' => LocalQaSeeder::STAFF_EMAIL,
-            'admin' => LocalQaSeeder::ADMIN_EMAIL,
-            default => throw new RuntimeException("Unsupported QA role [{$role}]."),
-        };
-
-        /** @var User|null $user */
-        $user = User::query()
-            ->where('email', $email)
-            ->first();
-
-        if ($user === null
-            || ! $this->authorizationProfile->matchesQaSelector($user, $role)) {
-            throw new RuntimeException(
-                "Seeded QA {$role} account is missing. Run php artisan db:seed in local/testing."
-            );
-        }
-
-        return $user;
-    }
-
-    private function findQaUserByRole(string $role): ?User
-    {
-        try {
-            return $this->requireQaUserByRole($role);
-        } catch (RuntimeException) {
-            return null;
-        }
     }
 
     private function denyAuthenticatedLogin(

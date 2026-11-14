@@ -119,6 +119,7 @@ return [
         'heading' => 'Staff Login',
         'intro' => 'APES staff and administrators sign in via APES Cloudron.',
         'local_qa_note' => 'Local QA mode: use seeded staff/admin credentials to sign in directly.',
+        'local_demo_note' => 'Local demo accounts: use the demo email and password from the Herd demo data guide.',
         'local_submit' => 'Local Staff Login',
     ],
 

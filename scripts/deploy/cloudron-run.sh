@@ -6,6 +6,12 @@ PHP_BIN="/usr/bin/php8.4"
 LOG_DIR="/app/data/shared/storage/logs"
 export APP_ENV=production
 
+# Developer sign-in must never be on in production (QA_LOGIN_ENABLED stays unset on Cloudron).
+if [[ "${QA_LOGIN_ENABLED:-}" == "true" || "${QA_LOGIN_ENABLED:-}" == "1" ]]; then
+  echo "Refusing to run with QA_LOGIN_ENABLED set while APP_ENV=production."
+  exit 1
+fi
+
 run_artisan() {
   sudo -E -u www-data env APP_ENV=production \
     "$PHP_BIN" "${CURRENT_DIR}/artisan" "$@"
