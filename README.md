@@ -232,22 +232,21 @@ The interface uses a light-first desert theme with a sun-baked earth sidebar, sa
 | `public/site.webmanifest` | Web app manifest |
 | `public/browserconfig.xml` | Microsoft tile metadata |
 
-## Local development with Laragon
+## Local development with Laravel Herd
 
-Laragon 8 on Windows is the **only supported local development setup**. MyAPES Account runs as its own Laragon project at `http://myapes-account.test` (document root `public/`), on PHP 8.4, MySQL 8.4 (database `myapes_account_local`), Node 22 and a Vite dev server on port 5175. The full guide is [docs/laragon.md](docs/laragon.md). It covers prerequisites, applying the profile, running several APESCIC projects side by side and common fixes. The project's values are in [docs/laragon/profile.md](docs/laragon/profile.md).
+Laravel Herd (Pro) on Windows is the **only supported local development setup**. MyAPES Account runs as its own Herd site at `http://myapes-account.test` (document root `public/`), on PHP 8.4, Herd's MySQL 8.4 (database `myapes_account_local`), Node 22 and a Vite dev server on port 5175. Mail goes to Herd's mail catcher. The full guide is [docs/herd.md](docs/herd.md). It covers prerequisites, linking the site, running several APESCIC projects side by side and common fixes. The project's values are in [docs/herd/profile.md](docs/herd/profile.md).
 
-**Prerequisites:** Laragon 8 (Full) at `C:\laragon` with Auto Virtual Hosts on, the [project profile](docs/laragon/profile.md#applying-the-profile) applied (PHP 8.4, MySQL 8.4, Node 22), and npm 11.10 or newer (`npm install -g npm@11` in a Laragon terminal).
+**Prerequisites:** Laravel Herd for Windows with a Pro licence, PHP 8.4, a MySQL 8.4 service on port 3306 and Node 22 in Herd, and npm 11.10 or newer in Herd's Node 22 (`. .\scripts\herd-env.ps1`, then `npm install -g npm@11`).
 
 **First run**
 
 ```powershell
-cd C:\laragon\www
-git clone https://github.com/APESCIC/MyAPES.Account.git myapes-account
-cd myapes-account
-composer setup   # runs scripts/laragon-setup.ps1
+git clone https://github.com/APESCIC/MyAPES.Account.git
+cd MyAPES.Account
+composer setup   # runs scripts/herd-setup.ps1
 ```
 
-Start Laragon (**Start All**) first. The setup script checks Laragon's PHP, Composer, Node, npm and MySQL against the profile, and warns if Laragon is set to the wrong PHP version. It copies `.env.example` to `.env` if missing and installs dependencies. It also creates the `myapes_account_local` database, runs the migrations and offers to load the demo data. It is safe to run again and only touches this project.
+Open Herd first. The setup script checks Herd's PHP, Composer, Node, npm and MySQL against the profile, links the site as `myapes-account.test` and pins it to PHP 8.4. It copies `.env.example` to `.env` if missing and installs dependencies. It also creates the `myapes_account_local` database, runs the migrations and offers to load the demo data. It is safe to run again and only touches this project.
 
 **Demo data and test logins**
 
@@ -256,7 +255,7 @@ composer demo:seed    # load or refresh the demo data
 composer demo:reset   # wipe myapes_account_local, migrate and reload it
 ```
 
-The demo data is deterministic, en_GB and clearly fake. It includes test logins for every role (`admin@example.test`, `staff@example.test`, `member@example.test` and more) with one shared local-only password. [docs/laragon/demo-data.md](docs/laragon/demo-data.md) lists everything, including the logins. Both commands refuse to run unless `APP_ENV=local`.
+The demo data is deterministic, en_GB and clearly fake. It includes test logins for every role (`admin@example.test`, `staff@example.test`, `member@example.test` and more) with one shared local-only password. [docs/herd/demo-data.md](docs/herd/demo-data.md) lists everything, including the logins. Both commands refuse to run unless `APP_ENV=local`.
 
 **Live preview**
 
@@ -265,7 +264,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1         
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1 -StopDevServer  # stop
 ```
 
-The live preview gate starts Vite at `http://myapes-account.test:5175` in the background, with no window on the taskbar and its output in `storage/logs/vite-dev.log`. Running it again reuses that Vite. Laragon's Apache serves the pages at `http://myapes-account.test`. Saving a Blade template, CSS or JavaScript file updates the browser without a rebuild.
+The live preview gate starts Vite at `http://myapes-account.test:5175` in the background, with no window on the taskbar and its output in `storage/logs/vite-dev.log`. Running it again reuses that Vite. Herd's nginx serves the pages at `http://myapes-account.test`. Saving a Blade template, CSS or JavaScript file updates the browser without a rebuild.
 
 `composer run dev` adds the queue listener and a log tail in a terminal, reusing the running Vite. On native Windows the log tail follows `storage/logs/laravel.log` with PowerShell, because PHP's Unix-only `pcntl` extension is not available.
 
@@ -275,9 +274,9 @@ The live preview gate starts Vite at `http://myapes-account.test:5175` in the ba
 - Pre-merge validation: `composer pre-merge`
 - Pre-PR check: `composer pre-pr-verify` (add `-Fresh` through `scripts/local/pre-pr-verify.ps1` to reset the demo data too)
 
-**Troubleshooting:** see [Common fixes](docs/laragon.md#common-fixes). It covers the wrong PHP version, ports 80, 443, 3306 or 5175 in use, `.test` not resolving, unstyled pages, file permissions, passkeys over HTTPS and Mailpit.
+**Troubleshooting:** see [Common fixes](docs/herd.md#common-fixes). It covers the wrong PHP version, ports 80, 443, 3306 or 5175 in use, `.test` not resolving, unstyled pages, file permissions and passkeys over HTTPS (`herd secure myapes-account`).
 
-The Laragon setup script enforces the tracked selective-media boundary at
+The Herd setup script enforces the tracked selective-media boundary at
 `public/storage/.myapes-selective-media`. It refuses marker changes or
 unexpected entries and creates only `public/storage/avatars`, targeting
 `storage/app/public/avatars`. Pet Profile photos remain in
@@ -285,7 +284,7 @@ unexpected entries and creates only `public/storage/avatars`, targeting
 authorization-checked Shelter or APES Pet Care Clinic routes; they are never exposed by a
 public-storage link.
 
-**Cursor cloud agents only:** agents without Laragon use `bash scripts/local/bootstrap.sh --fresh` and `bash scripts/local/dev.sh` (SQLite and `php artisan serve` on `http://127.0.0.1:8000`, from `.env.local.example`). This agent-only path is not a supported developer setup.
+**Cursor cloud agents only:** agents without Herd use `bash scripts/local/bootstrap.sh --fresh` and `bash scripts/local/dev.sh` (SQLite and `php artisan serve` on `http://127.0.0.1:8000`, from `.env.local.example`). This agent-only path is not a supported developer setup.
 
 ### Seeded local QA accounts
 
@@ -785,7 +784,7 @@ Rotating MySQL, Redis, SMTP, and LDAP credentials are read from Cloudron-provide
   - The scheduler is configured to run pruning daily
 - **Session hardening defaults** in `.env.example`:
   - `SESSION_ENCRYPT=true`
-  - `SESSION_SECURE_COOKIE=true` in `scripts/deploy/production.env.example` for HTTPS deployments; the Laragon `.env.example` uses `false` for `http://myapes-account.test`
+  - `SESSION_SECURE_COOKIE=true` in `scripts/deploy/production.env.example` for HTTPS deployments; the Herd `.env.example` uses `false` for `http://myapes-account.test`
   - `SESSION_HTTP_ONLY=true`
 - **Upload safeguards**:
   - Avatar and pet photo uploads are restricted to JPEG/PNG/WebP

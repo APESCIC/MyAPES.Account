@@ -15,7 +15,7 @@ function commandNamed(commands, name) {
     return commands.find((command) => command.name === name);
 }
 
-test('Laragon default omits artisan serve because Apache serves HTTP', () => {
+test('Herd default omits artisan serve because nginx serves HTTP', () => {
     const commands = buildDevCommands({
         platform: 'win32',
         serve: false,

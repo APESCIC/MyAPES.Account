@@ -954,7 +954,7 @@ return [
             'toggle_service' => ':plugin for :module',
             'local' => [
                 'heading' => 'Local test replies',
-                'help' => 'Only on this Laragon install. Reply to a ticket or case email in Mailpit as the client, then fetch replies now to see it reach the ticket or case.',
+                'help' => 'Only on this local install. Reply to a ticket or case email in Mailpit as the client, then fetch replies now to see it reach the ticket or case.',
                 'caption' => 'Latest ticket and case emails in Mailpit',
                 'empty' => 'No ticket or case emails are in Mailpit yet. Reply to a ticket or case as staff first, so its email arrives in Mailpit.',
                 'unavailable' => 'Mailpit could not be read: :reason',

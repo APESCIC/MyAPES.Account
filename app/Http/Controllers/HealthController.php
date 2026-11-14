@@ -41,7 +41,7 @@ class HealthController extends Controller
             'checks' => $checks,
         ];
 
-        // The live preview gate checks the Laragon preview serves this checkout through FastCGI.
+        // The live preview gate checks the Herd preview serves this checkout through FastCGI.
         if (app()->environment('local')) {
             $body['local'] = [
                 'php' => PHP_VERSION,

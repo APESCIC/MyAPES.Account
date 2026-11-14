@@ -16,7 +16,7 @@ use RuntimeException;
 
 /**
  * Local test replies on Admin → Emails → Inbound (#758): reply to a ticket or
- * case email in Laragon's Mailpit as the client, then fetch replies now.
+ * case email in a local Mailpit as the client, then fetch replies now.
  * Routes are behind EnsureLocalReplyLoop, so they are not found elsewhere.
  */
 class AdminLocalRepliesController extends Controller

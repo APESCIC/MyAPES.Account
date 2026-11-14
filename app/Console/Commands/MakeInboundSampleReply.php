@@ -13,7 +13,7 @@ use Illuminate\Console\Command;
 
 /**
  * Writes a realistic reply .eml for local testing (#587), so the whole
- * replies-by-email flow can be tried in Laragon without a mailbox.
+ * replies-by-email flow can be tried locally without a mailbox.
  */
 class MakeInboundSampleReply extends Command
 {

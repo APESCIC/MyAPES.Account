@@ -1,6 +1,6 @@
 # Demo data
 
-The demo data fills every main area of MyAPES Account with clearly fake records, so you can click through, test and file bug reports against the same data. It only runs on a local Laragon install (`APP_ENV=local`).
+The demo data fills every main area of MyAPES Account with clearly fake records, so you can click through, test and file bug reports against the same data. It only runs on a local Herd install (`APP_ENV=local`).
 
 ```powershell
 composer demo:seed    # add or refresh the demo data
@@ -14,7 +14,7 @@ Both run `php artisan myapes:demo-data` (with `--reset` for the reset). The data
 Every demo account uses the same fake, local-only password:
 
 ```text
-Laragon-Demo-Only-2026!
+Local-Demo-Only-2026!
 ```
 
 It is not a real password, works only against your local database, and must never be used anywhere else.

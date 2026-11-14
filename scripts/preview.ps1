@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     Live preview gate, steps 1 and 2: load the latest code, then check the
-    Laragon preview serves it. Run before any development work.
+    Herd preview serves it. Run before any development work.
 
 .DESCRIPTION
     1. Stops if tracked files have uncommitted changes. Fetches origin, fast-
@@ -10,9 +10,8 @@
     2. Runs composer install or npm ci when a lock file is newer than the
        installed dependencies, and reports migrations that have not run (it
        never runs them).
-    3. Checks Laragon is running and the site serves the checked-out code: for
-       a Laravel app, /healthz shows the revision and PHP through FastCGI; for a
-       static site, /VERSION matches the VERSION file.
+    3. Checks Herd and its MySQL service are running, and that /healthz shows
+       the checked-out revision on the profile's PHP version through FastCGI.
     4. Starts Vite in the background with no window, its output in
        storage\logs\vite-dev.log, unless this repository's Vite already listens
        on its port. It never starts a second copy.
@@ -36,20 +35,8 @@ param(
     [switch]$NoMergeMain,
     [switch]$NoDevServer,
     [switch]$StopDevServer,
-    [string]$LaragonRoot = 'C:\laragon'
+    [string]$HerdRoot = (Join-Path $env:USERPROFILE '.config\herd')
 )
-
-# This repository's Laragon values (docs/laragon/profile.md).
-$Config = @{
-    AppUrl     = 'http://myapes-account.test'
-    Folder     = 'C:\laragon\www\myapes-account'
-    Php        = '8.4'
-    Laravel    = $true
-    DevPort    = 5175
-    HealthPath = '/healthz'
-    DevScript  = 'node_modules\vite\bin\vite.js'
-    DevLog     = 'storage\logs\vite-dev.log'
-}
 
 $ErrorActionPreference = 'Stop'
 
@@ -69,23 +56,27 @@ function Get-Page([string]$Url) {
     try {
         return (Invoke-WebRequest $Url -UseBasicParsing -TimeoutSec 60).Content
     } catch {
-        $stream = $_.Exception.Response.GetResponseStream()
-        if ($null -eq $stream) { return $null }
-        return (New-Object IO.StreamReader $stream).ReadToEnd()
+        # A timeout or refused connection has no response to read.
+        $response = $_.Exception.Response
+        if ($null -eq $response) { return $null }
+        return (New-Object IO.StreamReader $response.GetResponseStream()).ReadToEnd()
     }
 }
 
 $repo = Split-Path $PSScriptRoot -Parent
+# This repository's Herd values (docs/herd/profile.md).
+$p = Get-Content (Join-Path $repo 'docs\herd\profile.json') -Raw | ConvertFrom-Json
+$devScript = 'node_modules\vite\bin\vite.js'
+$devLog = 'storage\logs\vite-dev.log'
 
-# This repository's Vite processes, started from the clone or the Laragon junction, by this script or npm.
+# This repository's Vite processes, started by this script or npm.
 function Get-DevServer {
-    $roots = @($repo, $Config.Folder) | ForEach-Object { [regex]::Escape($_.TrimEnd('\')) }
-    $pattern = "(?i)($($roots -join '|'))\\node_modules\\(\.bin\\+\.\.\\+)?vite\\bin\\vite\.js"
+    $pattern = "(?i)$([regex]::Escape($repo.TrimEnd('\')))\\node_modules\\(\.bin\\+\.\.\\+)?vite\\bin\\vite\.js"
     return @(Get-CimInstance Win32_Process -Filter "Name='node.exe'" | Where-Object { $_.CommandLine -match $pattern })
 }
 
 function Get-DevListener {
-    return Get-NetTCPConnection -State Listen -LocalPort $Config.DevPort -ErrorAction SilentlyContinue | Select-Object -First 1
+    return Get-NetTCPConnection -State Listen -LocalPort $p.viteDevServerPort -ErrorAction SilentlyContinue | Select-Object -First 1
 }
 
 function Get-HotUrl {
@@ -109,21 +100,28 @@ function Stop-DevServer {
     foreach ($id in $ids | Select-Object -Unique) { Invoke-Native { taskkill /PID $id /T /F } | Out-Null }
     return @($ids | Select-Object -Unique).Count
 }
-$phpDir = Get-ChildItem "$LaragonRoot\bin\php" -Directory -ErrorAction SilentlyContinue |
-    Where-Object { $_.Name -match "^php-$([regex]::Escape($Config.Php))\.\d+(-\d+)?-(nts-)?Win32" } |
-    Sort-Object @{ Expression = { $_.Name -notmatch '-nts-' }; Ascending = $true }, @{ Expression = { $_.Name }; Descending = $true } | Select-Object -First 1
-if (-not $phpDir) { Stop-Preview 1 "Laragon has no PHP $($Config.Php). Run scripts\laragon-setup.ps1." }
-$nodeDir = Get-ChildItem "$LaragonRoot\bin\nodejs" -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '^node-v?22(\D|$)' } | Select-Object -First 1
-$env:Path = "$($phpDir.FullName);$LaragonRoot\bin\composer;$(if ($nodeDir) { $nodeDir.FullName });" + $env:Path
+
+# Herd's PHP for the profile's version and Node of the profile's major version; Herd's global
+# Node default may be another major version.
+$herdBin = Join-Path $HerdRoot 'bin'
+$phpDir = Join-Path $herdBin "php$($p.php -replace '\.', '')"
+if (-not (Test-Path (Join-Path $phpDir 'php.exe'))) { Stop-Preview 1 "Herd has no PHP $($p.php) in $phpDir. Run scripts\herd-setup.ps1." }
+$composerPhar = Join-Path $herdBin 'composer.phar'
+$nodeDir = Get-ChildItem (Join-Path $herdBin 'nvm') -Directory -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -match "^v$($p.node)\.\d+\.\d+$" } |
+    Sort-Object { [version]($_.Name.TrimStart('v')) } -Descending |
+    Select-Object -First 1
+if (-not $nodeDir) { Stop-Preview 1 "Herd's nvm has no Node $($p.node). Turn on Node.js in Herd > Settings, then run: herd node:install $($p.node)" }
+$env:Path = "$phpDir;$herdBin;$($nodeDir.FullName);" + $env:Path
 if (-not $env:XDEBUG_MODE) { $env:XDEBUG_MODE = 'off' }
 
 Push-Location $repo
 try {
     if ($StopDevServer) {
-        Write-Step "Stop the dev server on port $($Config.DevPort)"
+        Write-Step "Stop the dev server on port $($p.viteDevServerPort)"
         $stopped = Stop-DevServer
         Start-Sleep -Milliseconds 500
-        if (Get-DevListener) { Write-Warn "Port $($Config.DevPort) is still in use by another program." }
+        if (Get-DevListener) { Write-Warn "Port $($p.viteDevServerPort) is still in use by another program." }
         elseif (Test-Path 'public\hot') { Remove-Item 'public\hot' -Force; Write-Ok 'Removed public\hot, so the pages use the built assets' }
         Write-Ok $(if ($stopped -gt 0) { "Stopped $stopped processes" } else { 'It was not running' })
         exit 0
@@ -163,89 +161,80 @@ try {
 
     # 2. Dependencies and migrations --------------------------------------------
     Write-Step 'Dependencies'
-    if (Test-Path 'composer.lock') {
-        $installed = Join-Path $repo 'vendor\composer\installed.json'
-        if (-not (Test-Path $installed) -or (Get-Item 'composer.lock').LastWriteTime -gt (Get-Item $installed).LastWriteTime) {
-            $run = Invoke-Native { php "$LaragonRoot\bin\composer\composer.phar" install --no-interaction --no-progress }
-            if ($run.Code -ne 0) { Stop-Preview 1 "composer install failed: $($run.Output)" }
-            # Composer leaves installed.json alone when nothing changed; mark it current so the next run skips the install.
-            (Get-Item $installed).LastWriteTime = Get-Date
-            Write-Ok 'Ran composer install'
-        } else { Write-Ok 'Composer dependencies are current' }
-    }
-    if (Test-Path 'package-lock.json') {
-        $npmMarker = Join-Path $repo 'node_modules\.package-lock.json'
-        if (-not (Test-Path $npmMarker) -or (Get-Item 'package-lock.json').LastWriteTime -gt (Get-Item $npmMarker).LastWriteTime) {
-            $run = Invoke-Native { npm ci --no-audit --no-fund }
-            if ($run.Code -ne 0) { Stop-Preview 1 "npm ci failed: $($run.Output)" }
-            Write-Ok 'Ran npm ci (restart the dev server if it was running)'
-        } else { Write-Ok 'npm dependencies are current' }
-    }
-    if ($Config.Laravel) {
-        $pending = Invoke-Native { php artisan migrate:status --pending --no-ansi }
-        if ($pending.Code -eq 0 -and $pending.Output -match '\bPending\b' -and $pending.Output -notmatch 'No pending migrations') {
-            Write-Warn 'There are migrations that have not run. Ask before running php artisan migrate.'
-        } else { Write-Ok 'No pending migrations' }
-    }
+    $installed = Join-Path $repo 'vendor\composer\installed.json'
+    if (-not (Test-Path $installed) -or (Get-Item 'composer.lock').LastWriteTime -gt (Get-Item $installed).LastWriteTime) {
+        $run = Invoke-Native { php $composerPhar install --no-interaction --no-progress }
+        if ($run.Code -ne 0) { Stop-Preview 1 "composer install failed: $($run.Output)" }
+        # Composer leaves installed.json alone when nothing changed; mark it current so the next run skips the install.
+        (Get-Item $installed).LastWriteTime = Get-Date
+        Write-Ok 'Ran composer install'
+    } else { Write-Ok 'Composer dependencies are current' }
+    $npmMarker = Join-Path $repo 'node_modules\.package-lock.json'
+    if (-not (Test-Path $npmMarker) -or (Get-Item 'package-lock.json').LastWriteTime -gt (Get-Item $npmMarker).LastWriteTime) {
+        $run = Invoke-Native { npm ci --no-audit --no-fund }
+        if ($run.Code -ne 0) { Stop-Preview 1 "npm ci failed: $($run.Output)" }
+        Write-Ok 'Ran npm ci (restart the dev server if it was running)'
+    } else { Write-Ok 'npm dependencies are current' }
+    $pending = Invoke-Native { php artisan migrate:status --pending --no-ansi }
+    if ($pending.Code -eq 0 -and $pending.Output -match '\bPending\b' -and $pending.Output -notmatch 'No pending migrations') {
+        Write-Warn 'There are migrations that have not run. Ask before running php artisan migrate.'
+    } else { Write-Ok 'No pending migrations' }
 
-    # 3. Laragon and the preview -------------------------------------------------
-    Write-Step "Laragon preview $($Config.AppUrl)"
-    $needed = if ($Config.Laravel) { @('laragon', 'httpd', 'mysqld') } else { @('laragon', 'httpd') }
-    $missing = @($needed | Where-Object { -not (Get-Process $_ -ErrorAction SilentlyContinue) })
-    if ($missing.Count -gt 0) { Stop-Preview 1 "Not running: $($missing -join ', '). Click Start All in Laragon." }
-    if ($Config.Laravel) {
-        $health = Get-Page "$($Config.AppUrl)$($Config.HealthPath)" | ConvertFrom-Json
-        if ($null -eq $health -or $null -eq $health.local) { Stop-Preview 1 "$($Config.AppUrl)$($Config.HealthPath) did not answer with the local block. Is APP_ENV=local in .env, and has Laragon been reloaded?" }
-        if ($health.local.git_revision -ne $short) {
-            Invoke-Native { php artisan optimize:clear } | Out-Null
-            $health = Get-Page "$($Config.AppUrl)$($Config.HealthPath)" | ConvertFrom-Json
-        }
-        if ($health.local.git_revision -ne $short) { Stop-Preview 1 "The preview serves $($health.local.git_revision), not $short. Check the junction $($Config.Folder) points at this clone." }
-        if ($health.local.php_sapi -ne 'cgi-fcgi') { Stop-Preview 1 "The preview runs PHP as $($health.local.php_sapi), not FastCGI (cgi-fcgi). Run scripts\laragon-setup.ps1 to check the PHP handler." }
-        if ($health.local.php -notlike "$($Config.Php).*") { Write-Warn "The preview runs PHP $($health.local.php), not the profile's $($Config.Php). scripts\laragon-setup.ps1 says how to fix it." }
-        Write-Ok "Serves $short on PHP $($health.local.php) through FastCGI"
-        if ($health.status -ne 'ok') { Write-Warn "$($Config.HealthPath) reports $($health.status). The preview still works; start the Laragon service it needs if the task needs it." }
-    } else {
-        $served = "$(Get-Page "$($Config.AppUrl)/VERSION")".Trim()
-        $expected = (Get-Content (Join-Path $repo 'public\VERSION') -Raw).Trim()
-        if (-not $served) { Stop-Preview 1 "$($Config.AppUrl)/VERSION did not answer. Check the junction $($Config.Folder) points at this clone and Laragon has been reloaded." }
-        if ($served -ne $expected) { Stop-Preview 1 "The preview serves VERSION $served, not $expected from this checkout. Check the junction $($Config.Folder) points at this clone." }
-        Write-Ok "Serves this checkout (VERSION $served)"
+    # 3. Herd and the preview ----------------------------------------------------
+    Write-Step "Herd preview $($p.appUrl)"
+    $missing = @('Herd', 'nginx' | Where-Object { -not (Get-Process $_ -ErrorAction SilentlyContinue) })
+    if ($missing.Count -gt 0) { Stop-Preview 1 "Not running: $($missing -join ', '). Open Herd." }
+    if (-not (Get-NetTCPConnection -State Listen -LocalPort $p.database.port -ErrorAction SilentlyContinue)) { Stop-Preview 1 "Nothing listens on MySQL's port $($p.database.port). Start Herd's MySQL service (Herd > Services)." }
+    $health = Get-Page "$($p.appUrl)/healthz" | ConvertFrom-Json
+    if ($null -eq $health -or $null -eq $health.local) { Stop-Preview 1 "$($p.appUrl)/healthz did not answer with the local block. Is APP_ENV=local in .env, and does 'herd links' list $($p.herdSite)?" }
+    if ($health.local.git_revision -ne $short) {
+        Invoke-Native { php artisan optimize:clear } | Out-Null
+        $health = Get-Page "$($p.appUrl)/healthz" | ConvertFrom-Json
     }
+    if ($health.local.git_revision -ne $short) { Stop-Preview 1 "The preview serves $($health.local.git_revision), not $short. Check 'herd links' shows $($p.herdSite) pointing at this clone." }
+    if ($health.local.php_sapi -ne 'cgi-fcgi') { Stop-Preview 1 "The preview runs PHP as $($health.local.php_sapi), not FastCGI (cgi-fcgi). Run scripts\herd-setup.ps1." }
+    if ($health.local.php -notlike "$($p.php).*") { Stop-Preview 1 "The preview runs PHP $($health.local.php), not $($p.php). Pin the site with: herd isolate $($p.php) --site=$($p.herdSite)" }
+    Write-Ok "Serves $short on PHP $($health.local.php) through FastCGI"
+    if ($health.status -ne 'ok') { Write-Warn "/healthz reports $($health.status). The preview still works; start the Herd service it needs if the task needs it." }
 
     # 4. Dev server ------------------------------------------------------------
-    Write-Step "Dev server on port $($Config.DevPort)"
+    Write-Step "Dev server on port $($p.viteDevServerPort)"
     $listener = Get-DevListener
     if ($listener) {
         if (Get-DevServer | Where-Object { $_.ProcessId -eq $listener.OwningProcess }) {
+            if (-not (Get-HotUrl)) {
+                # Something removed public\hot while Vite kept running; without it the pages load the built assets.
+                [System.IO.File]::WriteAllText((Join-Path $repo 'public\hot'), "$($p.appUrl):$($p.viteDevServerPort)")
+                Write-Ok 'Restored public\hot for the running Vite'
+            }
             Write-Ok "Already running at $(Get-HotUrl)"
         } else {
-            Write-Warn "Port $($Config.DevPort) is used by $((Get-Process -Id $listener.OwningProcess).ProcessName), not this repository's Vite. Stop it, or set a free VITE_PORT in .env."
+            Write-Warn "Port $($p.viteDevServerPort) is used by $((Get-Process -Id $listener.OwningProcess).ProcessName), not this repository's Vite. Stop it, or set a free VITE_PORT in .env."
         }
     } elseif ($NoDevServer) {
         Write-Warn 'Not running (-NoDevServer). Run this script without -NoDevServer to start it.'
     } else {
-        $node = if ($nodeDir) { Join-Path $nodeDir.FullName 'node.exe' } else { (Get-Command node -ErrorAction SilentlyContinue).Source }
-        if (-not $node) { Stop-Preview 1 'Node 22 was not found. Run scripts\laragon-setup.ps1.' }
-        $log = Join-Path $repo $Config.DevLog
+        $node = Join-Path $nodeDir.FullName 'node.exe'
+        $log = Join-Path $repo $devLog
         New-Item -ItemType Directory -Force (Split-Path $log) | Out-Null
+        if (Test-Path 'public\hot') { Remove-Item 'public\hot' -Force }
         # A hidden cmd only redirects Vite's output to the log; nothing opens on the taskbar.
-        $command = "`"`"$node`" `"$(Join-Path $repo $Config.DevScript)`" > `"$log`" 2>&1`""
+        $command = "`"`"$node`" `"$(Join-Path $repo $devScript)`" > `"$log`" 2>&1`""
         Start-Process -FilePath $env:ComSpec -ArgumentList "/d /s /c $command" -WorkingDirectory $repo -WindowStyle Hidden
         $deadline = (Get-Date).AddSeconds(30)
         while (-not ((Get-DevListener) -and (Get-HotUrl)) -and (Get-Date) -lt $deadline) { Start-Sleep -Milliseconds 500 }
         if (-not (Get-DevListener)) {
             $tail = (Get-Content $log -Tail 10 -ErrorAction SilentlyContinue) -join "`n"
-            Stop-Preview 1 "Vite did not start on port $($Config.DevPort). The end of $($Config.DevLog):`n$tail"
+            Stop-Preview 1 "Vite did not start on port $($p.viteDevServerPort). The end of ${devLog}:`n$tail"
         }
-        Write-Ok "Started Vite at $(Get-HotUrl) with no window (log $($Config.DevLog))"
+        Write-Ok "Started Vite at $(Get-HotUrl) on Node $($nodeDir.Name) with no window (log $devLog)"
     }
     $hotUrl = Get-HotUrl
-    $expected = "$($Config.AppUrl):$($Config.DevPort)"
+    $expected = "$($p.appUrl):$($p.viteDevServerPort)"
     if ($hotUrl -and $hotUrl -ne $expected) { Write-Warn "public\hot points at $hotUrl, not $expected. Check APP_URL and VITE_PORT in .env." }
 
     Write-Step 'Ready'
-    Write-Ok "Open $($Config.AppUrl) in Cursor's browser (live reload from $expected)."
+    Write-Ok "Open $($p.appUrl) in Cursor's browser (live reload from $expected)."
     Write-Ok 'Stop Vite with scripts\preview.ps1 -StopDevServer.'
     if ($before -ne $head) { Write-Ok "Code moved from $($before.Substring(0, 12)) to $short during the sync." }
 } finally {

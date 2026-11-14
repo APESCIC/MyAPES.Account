@@ -13,7 +13,7 @@ use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mime\Address;
 
 /**
- * The local reply loop (#757, #758): find ticket and case emails in Laragon's
+ * The local reply loop (#757, #758): find ticket and case emails in a local
  * Mailpit and send a client's reply to them through the local mail settings.
  */
 final class LocalReplies

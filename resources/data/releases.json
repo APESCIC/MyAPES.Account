@@ -1,5 +1,49 @@
 [
   {
+    "version": "0.63.1",
+    "date": "2026-11-14",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Laravel Herd local development",
+    "summary": "Local development and testing for MyAPES Account now run on Laravel Herd, with the same address, demo data and live preview as before.",
+    "changes": [
+      "Laravel Herd Pro on Windows is the supported local setup, replacing Laragon. The app is a Herd site at http://myapes-account.test on PHP 8.4, with Herd's MySQL 8.4 database, Vite hot reload on port 5175 and a recorded profile in docs/herd.",
+      "composer setup now runs a Herd setup script that checks Herd's PHP, Node, npm and MySQL, links the site and pins it to PHP 8.4, and the live preview script checks the Herd site and starts Vite with Herd's Node 22. A small helper puts Herd's PHP 8.4 and Node 22 first on the command line.",
+      "Mail sent by a local install now goes to Herd's mail catcher. Testing the whole replies-by-email loop in the browser uses an optional standalone Mailpit, and the guide explains how.",
+      "The developer guide, wiki page, README, agent instructions and agent rule describe Herd, and the Laragon guide, profile, setup script and rule are removed."
+    ],
+    "affected_areas": [
+      "Developer tooling",
+      "Documentation"
+    ],
+    "categories": [
+      "changed"
+    ],
+    "audiences": [
+      "internal-only"
+    ],
+    "version_rationale": "Patch: developer tooling and documentation only. No change to what users see or to the live app.",
+    "validation": [
+      "The Herd setup script ran with no warnings, the live preview script passed and restarted Vite on Herd's Node 22, and the app loaded at http://myapes-account.test on Herd with the local data copied across.",
+      "The full PHPUnit suite passed locally on Herd's PHP 8.4 (one shell-script contract test timed out under load and passed when run again on its own), the frontend and script tests passed, Pint passed on the changed files, and the translation key check passed."
+    ],
+    "known_limitations": [
+      "The browser reply loop needs a standalone Mailpit installed by the developer, because Herd's mail catcher has no API for reading replies."
+    ],
+    "rollback": "Redeploy the previous release package. Nothing in the database or the live app changes in this release.",
+    "provenance": "Milestone v0.63.1 Dev: Laravel Herd local development, epic #789 with sub-issues #784, #785, #786, #787 and #788, pull request #790.",
+    "references": [
+      {
+        "label": "Issue #789",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/789"
+      },
+      {
+        "label": "Pull request #790",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/790"
+      }
+    ]
+  },
+  {
     "version": "0.63.0",
     "date": "2026-11-13",
     "channel": "stable",

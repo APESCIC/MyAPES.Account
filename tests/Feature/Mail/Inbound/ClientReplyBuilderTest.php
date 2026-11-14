@@ -132,7 +132,7 @@ class ClientReplyBuilderTest extends TestCase
             ]);
         });
 
-        $this->artisan('tickets:inbound-reply-as', ['--latest' => 'T12', '--body' => 'Replying from Laragon.', '--variant' => ['no-tag']])
+        $this->artisan('tickets:inbound-reply-as', ['--latest' => 'T12', '--body' => 'Replying from Herd.', '--variant' => ['no-tag']])
             ->expectsOutputToContain('from owner@example.org to communications+t12.abc@example.test')
             ->assertSuccessful();
 

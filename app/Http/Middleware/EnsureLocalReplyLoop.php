@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * The local test replies panel (#758) exists only on a local install reading
- * Laragon's Mailpit; anywhere else its routes are not found.
+ * a local Mailpit; anywhere else its routes are not found.
  */
 class EnsureLocalReplyLoop
 {

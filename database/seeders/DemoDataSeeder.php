@@ -33,11 +33,11 @@ use Plugins\Recruitment\Models\RecruitmentRole;
 use Plugins\Tickets\Models\SupportTicket;
 
 /**
- * Deterministic, clearly fake demo data for local Laragon development (#722).
+ * Deterministic, clearly fake demo data for local Herd development (#722).
  *
  * Every run with the same seed writes the same records: Faker uses en_GB and a fixed
  * seed, timestamps come from a fixed base time, and records are upserted on stable keys.
- * It refuses to run outside APP_ENV=local; see docs/laragon/demo-data.md.
+ * It refuses to run outside APP_ENV=local; see docs/herd/demo-data.md.
  */
 class DemoDataSeeder extends Seeder
 {
@@ -45,7 +45,7 @@ class DemoDataSeeder extends Seeder
 
     public const SEED = 20261109;
 
-    public const PASSWORD = 'Laragon-Demo-Only-2026!';
+    public const PASSWORD = 'Local-Demo-Only-2026!';
 
     public const BASE_TIME = '2026-10-01 09:00:00';
 

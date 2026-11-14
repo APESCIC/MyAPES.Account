@@ -522,7 +522,7 @@ class DeploymentAuthenticationContractTest extends TestCase
 
     public function test_local_bootstraps_verify_marker_and_create_only_the_avatar_link(): void
     {
-        $powershell = $this->read('scripts/laragon-setup.ps1');
+        $powershell = $this->read('scripts/herd-setup.ps1');
         $bash = $this->read('scripts/local/bootstrap.sh');
         $powershellBoundary = $this->read('scripts/local/selective-media-boundary.ps1');
         $bashBoundary = $this->read('scripts/local/selective-media-boundary.sh');

@@ -67,7 +67,7 @@ class InboundHarnessTest extends TestCase
         $ticket = $this->ticketFor($owner);
         $file = $this->workDir.'/reply.eml';
 
-        $this->artisan('tickets:inbound-sample', ['record' => 'T'.$ticket->id, 'email' => 'owner@example.org', '--body' => 'Replying from Laragon.', '--output' => $file])
+        $this->artisan('tickets:inbound-sample', ['record' => 'T'.$ticket->id, 'email' => 'owner@example.org', '--body' => 'Replying from Herd.', '--output' => $file])
             ->assertSuccessful();
         $this->assertFileExists($file);
 
@@ -77,7 +77,7 @@ class InboundHarnessTest extends TestCase
 
         $message = SupportTicketMessage::query()->sole();
         $this->assertTrue($message->via_email);
-        $this->assertStringContainsString('Replying from Laragon.', (string) $message->message);
+        $this->assertStringContainsString('Replying from Herd.', (string) $message->message);
         $this->assertSame('file', InboundEmail::query()->sole()->source);
 
         $this->artisan('tickets:inbound-ingest', ['file' => $file])

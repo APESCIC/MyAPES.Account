@@ -54,7 +54,7 @@
     "scripts": {
         "setup": [
             "Composer\\Config::disableProcessTimeout",
-            "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/laragon-setup.ps1"
+            "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/herd-setup.ps1"
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
