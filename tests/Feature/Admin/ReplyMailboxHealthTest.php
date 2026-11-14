@@ -188,4 +188,28 @@ class ReplyMailboxHealthTest extends TestCase
         $this->assertNotNull(app(ReplyMailboxStatus::class)->probe()['arrived_at']);
         $this->actingAs($this->admin)->get(route('admin.emails.import.index'))->assertSee('so plus-addressing is delivered');
     }
+
+    public function test_the_probe_reports_not_arrived_after_ten_minutes(): void
+    {
+        $this->actingAs($this->admin)->post(route('admin.emails.import.probe'));
+        $this->travel(11)->minutes();
+
+        $this->actingAs($this->admin)->get(route('admin.emails.import.index'))
+            ->assertSee(__('admin.emails.import.probe_not_arrived', ['minutes' => 10]));
+    }
+
+    public function test_fetch_now_cannot_overlap_a_scheduled_poll(): void
+    {
+        Cache::lock('inbound-mail:poll-lock', 60)->get();
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.emails.import.fetch'))
+            ->assertSessionHasErrors(['mailbox' => __('admin.emails.import.fetch_busy')]);
+    }
+
+    public function test_fetch_now_needs_emails_manage(): void
+    {
+        $staff = User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create();
+        $this->actingAs($staff)->post(route('admin.emails.import.fetch'))->assertForbidden();
+    }
 }

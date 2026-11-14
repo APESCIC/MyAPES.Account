@@ -6,6 +6,7 @@ use App\Core\Mail\Inbound\Contracts\InboundMailbox;
 use App\Core\Mail\Inbound\Diagnostics\MailboxConnection;
 use App\Core\Mail\Inbound\Diagnostics\MailboxDiagnostics;
 use App\Core\Mail\Inbound\InboundMailboxLogEntry;
+use App\Core\Mail\Inbound\InboundMailPoller;
 use App\Core\Mail\Inbound\InboundMailSettings;
 use App\Core\Mail\Inbound\ReplyMailboxStatus;
 use App\Http\Controllers\Controller;
@@ -78,7 +79,7 @@ class AdminEmailImportController extends Controller
     }
 
     /**
-     * Sends one email to communications+probe-…@ (#736); the next poll records whether it arrived and never posts it.
+     * Sends one email to communications+probe-…@ (#736, #812); the next poll records whether it arrived and never posts it.
      */
     public function probe(Request $request, InboundMailSettings $settings, ReplyMailboxStatus $status, AuditLogger $audit): RedirectResponse
     {
@@ -93,6 +94,34 @@ class AdminEmailImportController extends Controller
         $audit->record('admin.settings.mailbox_probe_sent', $request->user());
 
         return $this->back()->with('status', __('admin.emails.import.probe_sent'));
+    }
+
+    /**
+     * Runs one poll now, sharing the poll lock with the scheduler (#812).
+     */
+    public function fetch(Request $request, InboundMailPoller $poller, AuditLogger $audit): RedirectResponse
+    {
+        $result = $poller->poll(force: true);
+        $audit->record('admin.emails.import_fetched', $request->user(), context: [
+            'result' => $result['result'],
+            'fetched' => $result['fetched'] ?? 0,
+            'stored' => $result['stored'] ?? 0,
+        ]);
+
+        if ($result['result'] !== InboundMailPoller::RESULT_POLLED) {
+            return $this->back()->withErrors(['mailbox' => match ($result['result']) {
+                InboundMailPoller::RESULT_DISABLED => __('admin.emails.import.fetch_disabled'),
+                InboundMailPoller::RESULT_LOCKED => __('admin.emails.import.fetch_busy'),
+                default => __('admin.emails.import.fetch_unavailable'),
+            }]);
+        }
+
+        return $this->back()->with('status', __('admin.emails.import.fetched', [
+            'fetched' => $result['fetched'],
+            'stored' => $result['stored'],
+            'duplicates' => $result['duplicates'],
+            'failed' => $result['failed'],
+        ]));
     }
 
     private function back(): RedirectResponse

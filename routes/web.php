@@ -424,6 +424,9 @@ Route::middleware([
             Route::post('/emails/import/probe', [AdminEmailImportController::class, 'probe'])
                 ->middleware(['can:admin.settings.manage', 'throttle:5,1'])
                 ->name('emails.import.probe');
+            Route::post('/emails/import/fetch', [AdminEmailImportController::class, 'fetch'])
+                ->middleware(['can:admin.emails.manage', 'throttle:10,1'])
+                ->name('emails.import.fetch');
             Route::get('/settings', [AdminSettingsController::class, 'index'])
                 ->middleware('can:admin.settings.view')
                 ->name('settings.index');
