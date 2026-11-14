@@ -18,7 +18,7 @@ use Tests\TestCase;
 
 /**
  * Settings saved in Admin → Settings → Reply mailbox switch polling on (#742),
- * with no real IMAP server: a fake mailbox stands in, as on Laragon.
+ * with no real IMAP server: a fake mailbox stands in, as on a local Herd install.
  */
 class ReplyMailboxEndToEndTest extends TestCase
 {

@@ -100,7 +100,7 @@ Facts the rule relies on:
 ## Decisions and gotchas
 
 - 2026-11-12: email import uses the Cloudron `communications@myapes.me.uk` mailbox over IMAP on `mail.cloudron.apes.org.uk:993` SSL/TLS (Cloudron has no IMAP on 143), polled every minute with backoff, and imported mail moves to `Processed` or `Failed` folders emptied after 30 days. Decided by Bambie (epic #770).
-- 2026-11-14: Laravel Herd Pro replaces Laragon for local development and testing. Local mail goes to Herd's mail catcher; the Mailpit inbound driver stays for an optional standalone Mailpit when testing the reply loop. Decided by Bambie (epic #789).
+- 2026-11-14: Laravel Herd Pro becomes the only local development and testing stack (v0.63.1). Local mail goes to Herd's mail catcher; the Mailpit inbound driver stays for an optional standalone Mailpit when testing the reply loop. Decided by Bambie (epic #789).
 - The milestone branch is always the one `composer milestone:next` prints, even when an issue body names a slightly different slug.
 - With Herd's PHP, `composer install` regenerating the optimised autoloader can take several minutes (66 s for `dump-autoload -o`, 30 s for `package:discover`, far longer on a cold first run); it is slow, not stuck. Right after it, the first `/healthz` can exceed `scripts\preview.ps1`'s 60 s timeout; run the gate again.
 - Herd's own Vite process (`herd processes:start vite --site=myapes-account`) stopped with no output on 14 November 2026, so `scripts\preview.ps1` starts Vite itself with Herd's Node 22.

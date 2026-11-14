@@ -65,7 +65,7 @@ class SemVerTest extends TestCase
 
     public function test_reads_the_version_from_the_start_of_a_milestone_title(): void
     {
-        $this->assertSame('v0.58.3', SemVer::fromMilestoneTitle('v0.58.3 Dev: Laragon local development')?->tag());
+        $this->assertSame('v0.63.1', SemVer::fromMilestoneTitle('v0.63.1 Dev: Laravel Herd local development')?->tag());
         $this->assertSame('v1.31.0', SemVer::fromMilestoneTitle('v1.31.0: SEO')?->tag());
         $this->assertSame('v1.0.0-beta.1', SemVer::fromMilestoneTitle('v1.0.0-beta.1 Launch')?->tag());
         $this->assertNull(SemVer::fromMilestoneTitle('Ship once per milestone'));

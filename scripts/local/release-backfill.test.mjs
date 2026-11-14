@@ -65,16 +65,16 @@ test('internal-only release notes omit version rationale when not public-facing'
         date: '2026-08-29',
         channel: 'stable',
         type: 'patch',
-        title: 'Laragon local dev testing setup',
-        summary: 'Windows developers can run MyAPES Account on Laragon.',
-        changes: ['Add .env.laragon.example.'],
+        title: 'Herd local dev testing setup',
+        summary: 'Windows developers can run MyAPES Account on Laravel Herd.',
+        changes: ['Add scripts/herd-setup.ps1.'],
         affected_areas: ['Local development documentation'],
         audiences: ['internal-only'],
         version_rationale: 'Patch release: local development tooling only.',
         references: [],
     });
 
-    assert.match(notes, /Laragon/);
+    assert.match(notes, /Herd/);
     assert.doesNotMatch(notes, /Version rationale/);
 });
 
