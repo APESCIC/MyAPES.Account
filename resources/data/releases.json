@@ -1,54 +1,5 @@
 [
   {
-    "version": "0.64.0",
-    "date": "2026-11-14",
-    "channel": "stable",
-    "type": "minor",
-    "title": "Admin general settings",
-    "summary": "Administrators can now change everyday options for the whole app on a new General tab in Admin \u2192 Settings: the support contact, whether people can register for a public account, and a short banner on public pages.",
-    "changes": [
-      "Admin \u2192 Settings has a new General tab, which is now the first tab and the one Settings opens on. It holds the support email address and phone number, the public registration switch and the site banner, and shows for reference how long records are kept and the upload limits, with links to Maintenance, Integrations, Modules and Emails.",
-      "When an administrator switches public registration off, the Register links disappear from the public pages, the menu, the sign-in page and the help pages, and anyone who opens the Register page is taken to Public Login with a notice that registration is closed. People with an account can still sign in, and staff sign-in through APES Cloudron is not affected.",
-      "An administrator can show a short plain-text banner at the top of public pages, for example to warn about planned maintenance. It is not shown on Admin pages.",
-      "Every change on the General tab is recorded in the audit log, naming the settings that changed but never their values."
-    ],
-    "affected_areas": [
-      "Admin settings",
-      "Public registration",
-      "Public pages",
-      "Help and privacy pages"
-    ],
-    "categories": [
-      "added",
-      "changed"
-    ],
-    "audiences": [
-      "public-facing",
-      "internal-only"
-    ],
-    "version_rationale": "Minor: a new admin settings tab and new public-site behaviour behind settings that default to the current behaviour (registration open, banner off); no migrations, and no existing route stops working.",
-    "validation": [
-      "The PHPUnit suites for Admin settings, the General tab, the registration gate and banner, public sign-in and registration, navigation, the sitemap, Open a ticket and recruitment passed locally, with Pint on changed files and the translation key check.",
-      "In the Herd preview, an administrator saved the General tab and the change was stored and audited with the changed setting names only; as a guest, the banner showed on the home page and every Register link was gone."
-    ],
-    "known_limitations": [
-      "The support email address and phone number are stored but not yet shown on public pages.",
-      "Retention periods and upload limits are shown read-only; they are still changed on the server."
-    ],
-    "rollback": "Deploy v0.63.1 with deploy-cloudron.yml. The General settings rows in app_settings are ignored by v0.63.1, so registration is open and no banner shows after a rollback.",
-    "provenance": "Milestone v0.64.0 Beta: Admin general settings, epic #755 with issues #734 and #739; pull request #821.",
-    "references": [
-      {
-        "label": "Issue #755",
-        "url": "https://github.com/APESCIC/MyAPES-Account/issues/755"
-      },
-      {
-        "label": "Pull request #821",
-        "url": "https://github.com/APESCIC/MyAPES-Account/pull/821"
-      }
-    ]
-  },
-  {
     "version": "0.63.1",
     "date": "2026-11-14",
     "channel": "stable",
