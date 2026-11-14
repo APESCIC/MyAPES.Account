@@ -267,31 +267,31 @@ class ReleaseHistoryCommandTest extends TestCase
         $this->assertSame('2026-07-24', $releases[241]['date']);
         $this->assertSame('2026-07-24', $releases[242]['date']);
 
-        foreach (array_slice($releases, 234) as $release) {
+        foreach (array_slice($releases, 235) as $release) {
             $this->assertStringContainsString('reconstructed from merged pull request', $release['provenance']);
         }
 
         $current = $repository->current();
         $this->assertSame('stable', $current['channel']);
-        $this->assertSame('minor', $current['type']);
+        $this->assertSame('patch', $current['type']);
         $this->assertSame(
             [
                 [
-                    'label' => 'Issue #755',
-                    'url' => 'https://github.com/APESCIC/MyAPES-Account/issues/755',
+                    'label' => 'Issue #823',
+                    'url' => 'https://github.com/APESCIC/MyAPES-Account/issues/823',
                 ],
                 [
-                    'label' => 'Pull request #821',
-                    'url' => 'https://github.com/APESCIC/MyAPES-Account/pull/821',
+                    'label' => 'Pull request #825',
+                    'url' => 'https://github.com/APESCIC/MyAPES-Account/pull/825',
                 ],
             ],
             $current['references'],
         );
         $currentText = strtolower(json_encode($current, JSON_THROW_ON_ERROR));
         foreach ([
-            'admin general settings',
-            'public registration',
-            'pull request #821',
+            'oidc step-up for keys and secrets',
+            'cloudron',
+            'pull request #825',
         ] as $requiredReleaseText) {
             $this->assertStringContainsString($requiredReleaseText, $currentText);
         }
