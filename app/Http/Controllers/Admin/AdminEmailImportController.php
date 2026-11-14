@@ -53,7 +53,7 @@ class AdminEmailImportController extends Controller
             return $this->back()->withErrors(['mailbox' => $mismatch]);
         }
 
-        $connection = $inbound->usesMailpit() ? null : MailboxConnection::fromSettings($inbound);
+        $connection = $inbound->usesLocalCatcher() ? null : MailboxConnection::fromSettings($inbound);
         if ($connection !== null && $connection->password() === '') {
             return $this->back()->withErrors(['mailbox' => __('admin.emails.import.password_needed')]);
         }

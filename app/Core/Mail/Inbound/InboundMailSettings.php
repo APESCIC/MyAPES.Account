@@ -76,8 +76,11 @@ final class InboundMailSettings
         }
 
         if ($this->driver() === self::DRIVER_HERD) {
-            // Implemented in #816; until then treat as not configured for polling.
-            Log::warning('INBOUND_MAIL_DRIVER=herd is not active yet; polling is off.');
+            if ($this->herdAllowed()) {
+                return true;
+            }
+
+            Log::warning('INBOUND_MAIL_DRIVER=herd works only on local or testing; polling is off.');
 
             return false;
         }
@@ -103,6 +106,19 @@ final class InboundMailSettings
         return $this->driver() === self::DRIVER_MAILPIT && $this->mailpitAllowed();
     }
 
+    public function usesHerd(): bool
+    {
+        return $this->driver() === self::DRIVER_HERD && $this->herdAllowed();
+    }
+
+    /**
+     * Local-only catchers (Mailpit or Herd) that skip the IMAP connection test.
+     */
+    public function usesLocalCatcher(): bool
+    {
+        return $this->usesMailpit() || $this->usesHerd();
+    }
+
     public function mailpitUrl(): string
     {
         return rtrim(trim((string) config('inbound-mail.mailpit.url')), '/');
@@ -117,6 +133,14 @@ final class InboundMailSettings
 
         return app()->environment(['local', 'testing'])
             && in_array(trim($host, '[]'), ['127.0.0.1', 'localhost', '::1'], true);
+    }
+
+    /**
+     * Herd's mail catcher is only available on a developer machine (#816).
+     */
+    public function herdAllowed(): bool
+    {
+        return app()->environment(['local', 'testing']);
     }
 
     public function address(): string
