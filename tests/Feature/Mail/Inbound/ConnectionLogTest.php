@@ -151,7 +151,11 @@ class ConnectionLogTest extends TestCase
 
     public function test_tests_and_polls_are_logged_with_their_step_type_and_counts(): void
     {
-        config(['inbound-mail.imap.username' => self::USERNAME, 'inbound-mail.imap.password' => self::PASSWORD]);
+        $this->enableEmailReplies([
+            'inbound-mail.imap.host' => 'imap.example.test',
+            'inbound-mail.imap.username' => self::USERNAME,
+            'inbound-mail.imap.password' => self::PASSWORD,
+        ]);
         $this->server->folders = ['Archive'];
         $this->actingAs($this->admin)->put(route('admin.emails.import.test'), ['host' => 'imap.example.test', 'port' => '993', 'encryption' => 'ssl', 'username' => self::USERNAME, 'password' => '', 'folder' => 'INBOX']);
         $this->mailbox->add($this->fixture('plain-reply'));

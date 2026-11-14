@@ -31,9 +31,13 @@ class ReplyMailboxEndToEndTest extends TestCase
         Queue::fake();
         config([
             'app-settings.env' => array_fill_keys(array_keys((array) config('app-settings.env')), null),
-            'inbound-mail.enabled' => false,
+            'inbound-mail.enabled' => null,
             'inbound-mail.token_key' => 'inbound-test-key',
-            'inbound-mail.imap.host' => null,
+            'inbound-mail.address' => 'communications@myapes.me.uk',
+            'inbound-mail.imap.host' => 'mail.cloudron.apes.org.uk',
+            'inbound-mail.imap.port' => 993,
+            'inbound-mail.imap.encryption' => 'ssl',
+            'inbound-mail.imap.password' => null,
         ]);
         $settings = app(InboundMailSettings::class);
         $this->assertFalse($settings->pollingConfigured());
@@ -54,6 +58,7 @@ class ReplyMailboxEndToEndTest extends TestCase
         ])->assertSessionHasNoErrors();
 
         $this->assertTrue($settings->pollingConfigured());
+        $this->assertSame(InboundMailSettings::PASSWORD_SOURCE_LEGACY, $settings->passwordSource());
         $this->assertSame('communications@example.test', $settings->address());
 
         $mailbox = new FakeMailbox;

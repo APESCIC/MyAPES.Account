@@ -16,6 +16,8 @@ use App\Core\Mail\Inbound\ReplyToken;
 use App\Core\Mail\MailCopyOverrides;
 use App\Core\Mail\MailTemplateRegistry;
 use App\Core\Mail\RecordOutboundMail;
+use App\Core\Secrets\SecretDefinition;
+use App\Core\Secrets\SecretRegistry;
 use App\Core\Settings\AppSettings;
 use Illuminate\Notifications\Channels\MailChannel;
 use Illuminate\Notifications\Events\NotificationFailed;
@@ -31,6 +33,17 @@ class CoreMailServiceProvider extends ServiceProvider
         $this->app->singleton(MailTemplateRegistry::class);
         $this->app->singleton(MailCopyOverrides::class);
         $this->app->singleton(InboundReplyRegistry::class);
+        $this->app->singleton(SecretRegistry::class, static function ($app): SecretRegistry {
+            $registry = new SecretRegistry($app->make(AppSettings::class));
+            $registry->register(new SecretDefinition(
+                SecretRegistry::INBOUND_MAIL_IMAP_PASSWORD,
+                'communications@ Mail Client app password',
+                'INBOUND_MAIL_IMAP_PASSWORD',
+                'IMAP password for the built-in communications@ mailbox.',
+            ));
+
+            return $registry;
+        });
         $this->app->singleton(InboundMailSettings::class);
         $this->app->singleton(ReplyToken::class);
         $this->app->afterResolving(AppSettings::class, static fn (AppSettings $settings) => $settings->define(...InboundMailboxSettings::definitions()));

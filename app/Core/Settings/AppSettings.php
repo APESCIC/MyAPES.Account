@@ -85,6 +85,18 @@ final class AppSettings
     }
 
     /**
+     * The value stored in the database only, ignoring any .env override.
+     * Used when an admin-entered secret must win over .env (#808, #810).
+     */
+    public function getStored(string $group, string $key): mixed
+    {
+        $definition = $this->definition($group, $key);
+        $stored = $this->storedValue($definition);
+
+        return $stored !== null ? $definition->cast($stored) : null;
+    }
+
+    /**
      * Saves submitted values for one group. A blank secret keeps the stored one;
      * a blank non-secret value clears it. Returns the keys that changed.
      *
