@@ -3,7 +3,9 @@
         <p>{{ __('public.client_records_notice.body') }}</p>
         <div class="actions">
             <a href="{{ route('help') }}#staff-and-personal-accounts">{{ __('public.account_separation.learn_more') }}</a>
-            <a href="{{ route('public.register') }}">{{ __('public.account_separation.register') }}</a>
+            @registrationOpen
+                <a href="{{ route('public.register') }}">{{ __('public.account_separation.register') }}</a>
+            @endregistrationOpen
             <form method="post" action="{{ route('client-records-notice.dismiss') }}">
                 @csrf
                 <button type="submit" class="button-secondary">{{ __('public.client_records_notice.dismiss') }}</button>

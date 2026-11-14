@@ -11,6 +11,7 @@ use App\Core\Extensions\Navigation\PublicNavigationRegistry;
 use App\Core\Extensions\Navigation\StaffPluginNavigationItem;
 use App\Core\Extensions\Navigation\StaffPluginNavigationRegistry;
 use App\Core\Extensions\Plugins\PluginRegistry;
+use App\Core\Settings\GeneralSettings;
 use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\HelpController;
 use App\Modules\ModuleNavigationItem;
@@ -39,6 +40,7 @@ final class WorkspaceNavigation
         private readonly AuthorizationProfile $profile,
         private readonly Gate $gate,
         private readonly AccountClassifier $accounts,
+        private readonly GeneralSettings $general,
     ) {}
 
     public function forRequest(?User $user, Request $request): WorkspaceMenu
@@ -319,11 +321,13 @@ final class WorkspaceNavigation
 
         return new NavPanel(NavPanel::PUBLIC, __('workspace.panels.public'), $this->withoutEmptyGroups([
             new NavGroup('explore', __('workspace.groups.explore'), $explore),
-            new NavGroup('account', __('workspace.groups.account'), [
+            new NavGroup('account', __('workspace.groups.account'), array_values(array_filter([
                 new NavItem('public.login', __('public.chrome.app.blade.public_login'), route('public.login'), 'log-in', ['public.login', 'password.*', 'two-factor.login'], $this->words('workspace.keywords.login')),
-                new NavItem('public.register', __('public.chrome.app.blade.register'), route('public.register'), 'user-plus', ['public.register'], $this->words('workspace.keywords.register')),
+                $this->general->registrationOpen()
+                    ? new NavItem('public.register', __('public.chrome.app.blade.register'), route('public.register'), 'user-plus', ['public.register'], $this->words('workspace.keywords.register'))
+                    : null,
                 new NavItem('staff.login', __('public.chrome.app.blade.staff_login'), route('staff.login'), 'badge-check', ['staff.*'], $this->words('workspace.keywords.staff_login')),
-            ]),
+            ]))),
             new NavGroup('support', __('workspace.groups.support'), [
                 new NavItem('help', __('public.chrome.app.blade.help'), route('help'), 'circle-help', ['help'], $this->words('workspace.keywords.help')),
                 new NavItem('change-log', __('workspace.nav.change_log'), route('change-log.index'), 'scroll-text', ['change-log.*'], $this->words('workspace.keywords.change_log')),

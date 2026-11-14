@@ -26,7 +26,11 @@
 
         <section>
             <h2>{{ __('public.legal.help.blade.create_or_recover_a_public_account') }}</h2>
-            <p>Use <a href="{{ route('public.register') }}">{{ __('public.chrome.app.blade.register') }}</a> to create a public account, then open the verification link we send to your email before you finish profile setup.</p>
+            @registrationOpen
+                <p>Use <a href="{{ route('public.register') }}">{{ __('public.chrome.app.blade.register') }}</a> to create a public account, then open the verification link we send to your email before you finish profile setup.</p>
+            @else
+                <p>{{ __('auth.common.registration_closed_help') }}</p>
+            @endregistrationOpen
             <p>{{ __('public.legal.help.blade.if_you_cannot_sign_in_public_login_has_a_forgot_passwor') }}</p>
         </section>
 
@@ -50,7 +54,11 @@
         <section>
             <h2>{{ __('public.legal.help.blade.privacy_and_data_requests') }}</h2>
             <p>{{ __('public.legal.help.blade.if_you_already_have_a_public_account_sign_in_and_open_a') }}</p>
-            <p>If you cannot sign in, <a href="{{ route('public.register') }}">{{ __('public.legal.help.blade.create_a_public_account') }}</a> first, or contact APES CIC through the <a href="https://www.apes.org.uk" rel="noopener noreferrer">{{ __('public.legal.help.blade.apes_website') }}</a>.</p>
+            @registrationOpen
+                <p>If you cannot sign in, <a href="{{ route('public.register') }}">{{ __('public.legal.help.blade.create_a_public_account') }}</a> first, or contact APES CIC through the <a href="https://www.apes.org.uk" rel="noopener noreferrer">{{ __('public.legal.help.blade.apes_website') }}</a>.</p>
+            @else
+                <p>If you cannot sign in, contact APES CIC through the <a href="https://www.apes.org.uk" rel="noopener noreferrer">{{ __('public.legal.help.blade.apes_website') }}</a>.</p>
+            @endregistrationOpen
         </section>
 
         <section id="staff-and-personal-accounts" data-help-staff-accounts>
@@ -59,7 +67,9 @@
             <p>{{ __('public.legal.help.staff_accounts.conflict') }}</p>
             <p>{{ __('public.legal.help.staff_accounts.how') }}</p>
             <p>{{ __('public.legal.help.staff_accounts.archived') }}</p>
-            <p><a href="{{ route('public.register') }}">{{ __('public.account_separation.register') }}</a></p>
+            @registrationOpen
+                <p><a href="{{ route('public.register') }}">{{ __('public.account_separation.register') }}</a></p>
+            @endregistrationOpen
         </section>
 
         <section>

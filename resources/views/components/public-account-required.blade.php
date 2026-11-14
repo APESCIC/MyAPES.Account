@@ -5,7 +5,9 @@
         <p>{{ __('public.account_separation.body') }}</p>
         <p>{{ __('public.account_separation.steps') }}</p>
         <div class="actions">
-            <a href="{{ route('public.register') }}">{{ __('public.account_separation.register') }}</a>
+            @registrationOpen
+                <a href="{{ route('public.register') }}">{{ __('public.account_separation.register') }}</a>
+            @endregistrationOpen
             <a href="{{ route('public.login') }}">{{ __('public.account_separation.sign_in') }}</a>
             <a href="{{ route('help') }}#staff-and-personal-accounts">{{ __('public.account_separation.learn_more') }}</a>
             @auth

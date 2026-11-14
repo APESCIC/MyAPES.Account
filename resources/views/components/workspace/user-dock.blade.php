@@ -27,10 +27,12 @@
                 <i data-lucide="log-in" aria-hidden="true"></i>
                 {{ __('workspace.dock.log_in') }}
             </a>
-            <a href="{{ route('public.register') }}" class="sg-btn sg-btn-primary sg-btn-sm">
-                <i data-lucide="user-plus" aria-hidden="true"></i>
-                {{ __('workspace.dock.register') }}
-            </a>
+            @registrationOpen
+                <a href="{{ route('public.register') }}" class="sg-btn sg-btn-primary sg-btn-sm">
+                    <i data-lucide="user-plus" aria-hidden="true"></i>
+                    {{ __('workspace.dock.register') }}
+                </a>
+            @endregistrationOpen
         </div>
     @endif
 

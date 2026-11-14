@@ -87,8 +87,8 @@ Route::get('/storage/pet-profiles/{path?}', static fn () => abort(404))
 Route::middleware('guest')->controller(PublicAuthController::class)->group(function (): void {
     Route::get('/login', 'showLogin')->name('public.login');
     Route::post('/login', 'login')->middleware('throttle:public-login')->name('public.login.submit');
-    Route::get('/register', 'showRegister')->name('public.register');
-    Route::post('/register', 'register')->name('public.register.submit');
+    Route::get('/register', 'showRegister')->middleware('registration.open')->name('public.register');
+    Route::post('/register', 'register')->middleware('registration.open')->name('public.register.submit');
 });
 
 Route::middleware('guest')->controller(TwoFactorChallengeController::class)->group(function (): void {
