@@ -82,8 +82,11 @@ class AdminShellNavigationTest extends TestCase
             ->assertSee('>Staff users</span>', false)
             ->assertSee('>Access</span>', false)
             ->assertSee('>Plugins</span>', false)
+            ->assertSee('>'.__('admin.nav.emails').'</span>', false)
             ->assertSee('>'.__('admin.nav.email_import').'</span>', false)
             ->assertSee('>Maintenance</span>', false);
+
+        $this->assertSame('Email Templates', __('admin.nav.emails'));
     }
 
     public function test_admin_child_urls_fail_closed_without_matching_permission(): void

@@ -162,6 +162,25 @@ class AdminEmailsTest extends TestCase
             ->assertSee(__('admin.search.sections.emails'), false);
     }
 
+    public function test_templates_home_uses_email_templates_label_and_marks_subnav_current_page(): void
+    {
+        $admin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
+
+        $this->assertSame('Email Templates', __('admin.nav.emails'));
+        $this->assertSame('Email Templates', __('admin.emails.heading'));
+
+        $html = (string) $this->actingAs($admin)->get('/admin/emails')
+            ->assertOk()
+            ->assertSeeText(__('admin.nav.emails'))
+            ->assertSeeText(__('admin.emails.heading'))
+            ->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/<nav class="admin-subnav"[^>]*>.*href="'.preg_quote(route('admin.emails.index'), '/').'"[^>]*aria-current="page"/s',
+            $html
+        );
+    }
+
     public function test_email_permissions_follow_the_protected_role_matrix(): void
     {
         $profile = app(AuthorizationProfile::class);

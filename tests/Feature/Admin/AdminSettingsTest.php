@@ -73,6 +73,20 @@ class AdminSettingsTest extends TestCase
         $this->assertSame(route('admin.settings.show', 'integrations'), $links[1][1] ?? null);
     }
 
+    public function test_settings_subnav_marks_the_current_tab(): void
+    {
+        $admin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
+
+        $html = (string) $this->actingAs($admin)->get(route('admin.settings.show', 'keys-and-secrets'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/<nav class="admin-subnav"[^>]*data-settings-tabs>.*href="'.preg_quote(route('admin.settings.show', 'keys-and-secrets'), '/').'"[^>]*aria-current="page"/s',
+            $html
+        );
+    }
+
     public function test_the_old_reply_mailbox_address_moves_permanently_to_email_import(): void
     {
         $admin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
