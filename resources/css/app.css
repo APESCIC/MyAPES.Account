@@ -672,8 +672,9 @@ form.inline {
     box-shadow: none;
 }
 
-/* Sub-section tabs inside a page (Access, Recruitment); styled as .sg-tabs. */
-.admin-nav {
+/* Sub-section tabs inside a page (Access, Recruitment, Settings, Emails); styled as .sg-tabs. */
+.admin-nav,
+.admin-subnav {
     margin-bottom: 1rem;
     padding: 0.25rem;
     display: inline-flex;
@@ -684,7 +685,8 @@ form.inline {
     background: var(--sg-surface);
 }
 
-.admin-nav a {
+.admin-nav a,
+.admin-subnav a {
     min-height: 2.5rem;
     padding: 0.5rem 1rem;
     display: inline-flex;
@@ -697,17 +699,20 @@ form.inline {
     white-space: nowrap;
 }
 
-.admin-nav a svg {
+.admin-nav a svg,
+.admin-subnav a svg {
     width: 1rem;
     height: 1rem;
     flex-shrink: 0;
 }
 
-.admin-nav a:hover {
+.admin-nav a:hover,
+.admin-subnav a:hover {
     color: var(--color-sg-ink);
 }
 
-.admin-nav a[aria-current='page'] {
+.admin-nav a[aria-current='page'],
+.admin-subnav a[aria-current='page'] {
     background: var(--sg-active-surface);
     color: var(--color-sg-teal);
     box-shadow: var(--shadow-sg-active);
