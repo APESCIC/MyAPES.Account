@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\Settings\ApiClientsTab;
 use App\Http\Controllers\Admin\Settings\ApiDocsTab;
 use App\Http\Controllers\Admin\Settings\IntegrationsTab;
+use App\Http\Controllers\Admin\Settings\KeysAndSecretsTab;
 use App\Http\Controllers\Admin\Settings\WebhooksTab;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -24,13 +25,21 @@ class AdminSettingsController extends Controller
 
     public const TAB_API_DOCS = 'api-docs';
 
+    public const TAB_KEYS_AND_SECRETS = 'keys-and-secrets';
+
     public function index(): RedirectResponse
     {
         return redirect()->route('admin.settings.show', self::TAB_INTEGRATIONS);
     }
 
-    public function show(string $tab, IntegrationsTab $integrations, ApiClientsTab $apiClients, WebhooksTab $webhooks, ApiDocsTab $apiDocs): Response
-    {
+    public function show(
+        string $tab,
+        IntegrationsTab $integrations,
+        ApiClientsTab $apiClients,
+        WebhooksTab $webhooks,
+        ApiDocsTab $apiDocs,
+        KeysAndSecretsTab $keysAndSecrets,
+    ): Response {
         $tabs = $this->tabs();
         abort_unless(isset($tabs[$tab]), 404);
 
@@ -43,6 +52,7 @@ class AdminSettingsController extends Controller
                 self::TAB_API_CLIENTS => $apiClients->viewData(),
                 self::TAB_WEBHOOKS => $webhooks->viewData(),
                 self::TAB_API_DOCS => $apiDocs->viewData(),
+                self::TAB_KEYS_AND_SECRETS => $keysAndSecrets->viewData(),
             },
         ])->header('Cache-Control', 'no-store, private');
     }
@@ -57,6 +67,7 @@ class AdminSettingsController extends Controller
             self::TAB_API_CLIENTS => __('admin.settings.tabs.api_clients'),
             self::TAB_WEBHOOKS => __('admin.settings.tabs.webhooks'),
             self::TAB_API_DOCS => __('admin.settings.tabs.api_docs'),
+            self::TAB_KEYS_AND_SECRETS => __('admin.settings.tabs.keys_and_secrets'),
         ];
     }
 }

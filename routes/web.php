@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\AdminEmailImportController;
 use App\Http\Controllers\Admin\AdminGroupController;
 use App\Http\Controllers\Admin\AdminInboundEmailController;
 use App\Http\Controllers\Admin\AdminIntegrationController;
+use App\Http\Controllers\Admin\AdminKeysAndSecretsController;
 use App\Http\Controllers\Admin\AdminLocalRepliesController;
 use App\Http\Controllers\Admin\AdminMaintenanceController;
 use App\Http\Controllers\Admin\AdminManagedListController;
@@ -436,6 +437,15 @@ Route::middleware([
             Route::get('/settings/{tab}', [AdminSettingsController::class, 'show'])
                 ->middleware('can:admin.settings.view')
                 ->name('settings.show');
+            Route::put('/settings/keys-and-secrets/mailbox-password', [AdminKeysAndSecretsController::class, 'store'])
+                ->middleware(['can:admin.settings.manage', 'account.step-up'])
+                ->name('settings.keys-and-secrets.store');
+            Route::delete('/settings/keys-and-secrets/mailbox-password', [AdminKeysAndSecretsController::class, 'destroy'])
+                ->middleware(['can:admin.settings.manage', 'account.step-up'])
+                ->name('settings.keys-and-secrets.destroy');
+            Route::post('/settings/keys-and-secrets/mailbox-password/test', [AdminKeysAndSecretsController::class, 'test'])
+                ->middleware(['can:admin.settings.manage', 'account.step-up', 'throttle:5,1'])
+                ->name('settings.keys-and-secrets.test');
             Route::put('/settings/integrations/{integration}', [AdminIntegrationController::class, 'update'])
                 ->middleware('can:admin.settings.manage')
                 ->name('settings.integrations.update');

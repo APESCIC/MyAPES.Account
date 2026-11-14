@@ -2,8 +2,10 @@
 
 namespace App\Core\Secrets;
 
+use App\Core\Settings\AppSetting;
 use App\Core\Settings\AppSettings;
 use App\Core\Settings\SettingDefinition;
+use Illuminate\Support\Carbon;
 use InvalidArgumentException;
 use SensitiveParameter;
 
@@ -110,6 +112,23 @@ final class SecretRegistry
     {
         $this->definition($key);
         $this->settings->forget(self::GROUP, $key);
+    }
+
+    /**
+     * @return array{source: string, set_at: ?Carbon, set_by: ?int}
+     */
+    public function status(string $key): array
+    {
+        $source = $this->source($key);
+        $row = $source === self::SOURCE_KEYS
+            ? AppSetting::query()->where('group', self::GROUP)->where('key', $key)->first()
+            : null;
+
+        return [
+            'source' => $source,
+            'set_at' => $row?->updated_at,
+            'set_by' => $row?->updated_by,
+        ];
     }
 
     private function envValue(string $key): ?string
