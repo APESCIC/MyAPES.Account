@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.64.1",
+    "date": "2026-11-14",
+    "channel": "stable",
+    "type": "patch",
+    "title": "OIDC step-up for Keys and secrets",
+    "summary": "Staff who sign in with APES Cloudron can confirm sensitive actions again through Cloudron sign-in, including saving secrets in Admin settings. Local password and passkey confirmation for public accounts is unchanged.",
+    "changes": [
+      "When a Cloudron directory staff member needs to re-confirm before a sensitive change, MyAPES Account sends them through Staff Login again (Cloudron asks them to sign in) and then returns them to what they were doing.",
+      "Admin → Settings → Keys and secrets and other step-up gated actions work for Cloudron staff after that re-confirmation.",
+      "People with a local password or passkey still confirm the same way as before."
+    ],
+    "affected_areas": [
+      "Staff sign-in (Cloudron)",
+      "Admin settings",
+      "Account security step-up"
+    ],
+    "categories": [
+      "fixed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch: restores step-up confirmation for Cloudron directory identities without changing local confirm behaviour or adding migrations.",
+    "validation": [
+      "PHPUnit suites for OIDC step-up, local step-up, Keys and secrets, force re-authentication and Cloudron OIDC redirects passed locally, with Pint on changed files.",
+      "composer pre-pr-verify and CI checks on the milestone pull request."
+    ],
+    "known_limitations": [
+      "None for this patch."
+    ],
+    "rollback": "Deploy v0.64.0 with deploy-cloudron.yml. Cloudron staff lose step-up again for Keys and secrets until a later fix is deployed; local password confirm is unchanged.",
+    "provenance": "Milestone v0.64.1 Beta: OIDC step-up for Keys and secrets, epic #824 with issue #823; pull request #825.",
+    "references": [
+      {
+        "label": "Issue #823",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/823"
+      },
+      {
+        "label": "Pull request #825",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/825"
+      }
+    ]
+  },
+  {
     "version": "0.64.0",
     "date": "2026-11-14",
     "channel": "stable",
@@ -49,17 +94,17 @@
       }
     ]
   },
-{
+  {
     "version": "0.63.2",
     "date": "2026-11-14",
     "channel": "stable",
     "type": "patch",
     "title": "Built-in email import and Herd reply testing",
-    "summary": "Administrators manage the reply mailbox password from Keys and secrets, see a built-in read-only connection on Admin → Emails → Import, and can fetch mail, watch import health and retry held or failed messages. Local developers can test the full replies-by-email loop through Laravel Herd's mail catcher.",
+    "summary": "Administrators manage the reply mailbox password from Keys and secrets, see a built-in read-only connection on Admin \u2192 Emails \u2192 Import, and can fetch mail, watch import health and retry held or failed messages. Local developers can test the full replies-by-email loop through Laravel Herd's mail catcher.",
     "changes": [
       "The reply mailbox connection is built in: host, port, encryption, username and folders come from the app and the server environment. Administrators no longer type those values on the Import page.",
-      "Admin → Settings → Keys and secrets is the only place to set or clear the mailbox password. Saving or clearing it asks for a fresh sign-in check, never shows the value again, and records the change in the audit log. Environment and Vault values still win over a saved secret.",
-      "Admin → Emails → Import shows a read-only connection panel with where each value comes from, a Fetch now control with a safe round-trip probe, an import monitor (health, counts, chart and recent imports), and a held and failed queue with retry and a menu badge.",
+      "Admin \u2192 Settings \u2192 Keys and secrets is the only place to set or clear the mailbox password. Saving or clearing it asks for a fresh sign-in check, never shows the value again, and records the change in the audit log. Environment and Vault values still win over a saved secret.",
+      "Admin \u2192 Emails \u2192 Import shows a read-only connection panel with where each value comes from, a Fetch now control with a safe round-trip probe, an import monitor (health, counts, chart and recent imports), and a held and failed queue with retry and a menu badge.",
       "On Laravel Herd locally, inbound mail can be polled from Herd's mail catcher, a \"Reply as client\" action posts a test reply into that catcher, and tickets:inbound-loop-check confirms the loop is ready. Continuous integration can run an optional GreenMail IMAPS job when the image is available.",
       "The mail and Herd guides, wiki pages and agent instructions describe the built-in connection, Keys and secrets, Import monitor and local Herd reply testing."
     ],
