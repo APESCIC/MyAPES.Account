@@ -429,7 +429,7 @@ return [
         'modules' => 'Modules',
         'plugins' => 'Plugins',
         'versions' => 'Versions',
-        'emails' => 'Emails',
+        'emails' => 'Email Templates',
         'email_import' => 'Email import',
         'settings' => 'Settings',
         'maintenance' => 'Maintenance',
@@ -728,9 +728,9 @@ return [
         ],
     ],
     'emails' => [
-        'page_title' => 'Admin emails | MyAPES Account',
+        'page_title' => 'Email Templates | MyAPES Account',
         'eyebrow' => 'Outbound mail',
-        'heading' => 'Emails',
+        'heading' => 'Email Templates',
         'intro' => 'Every email MyAPES Account sends, with a preview built from sample data. Previews never send mail.',
         'templates' => 'Email templates',
         'templates_caption' => ':count registered email templates',
@@ -1299,6 +1299,7 @@ return [
             'emails' => [
                 'emails',
                 'email',
+                'email templates',
                 'mail',
                 'templates',
                 'notifications',
