@@ -528,7 +528,7 @@ final class WorkspaceNavigation
             $commands[] = [
                 'id' => 'search:'.$entry['id'],
                 'label' => $entry['label'],
-                'section' => __('workspace.panels.admin').' · '.__('workspace.palette.settings_section'),
+                'section' => __('workspace.panels.admin').' Â· '.__('workspace.palette.settings_section'),
                 'url' => $entry['url'],
                 'icon' => $entry['group'] === 'plugin' ? 'puzzle' : 'settings',
                 'keywords' => implode(' ', [$entry['description'], ...$entry['keywords']]),
