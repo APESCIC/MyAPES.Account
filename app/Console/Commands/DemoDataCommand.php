@@ -18,7 +18,7 @@ class DemoDataCommand extends Command
         {--reset : Drop every table in the local database, migrate, then load the demo data}
         {--without-qa : Leave out the LocalQaSeeder fixtures, so /login shows the sign-in form}';
 
-    protected $description = 'Load fake demo data into the local Laragon database (local only)';
+    protected $description = 'Load fake demo data into the local Herd database (local only)';
 
     public function handle(): int
     {
@@ -50,7 +50,7 @@ class DemoDataCommand extends Command
                 $login['access'] === User::ROLE_SERVICE_USER ? '/login' : '/staff/login',
             ])->values()->all(),
         );
-        $this->components->info('Demo data loaded. The shared demo password is in docs/laragon/demo-data.md.');
+        $this->components->info('Demo data loaded. The shared demo password is in docs/herd/demo-data.md.');
 
         return self::SUCCESS;
     }

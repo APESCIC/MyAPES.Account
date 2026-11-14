@@ -1,10 +1,10 @@
 # Contributing to MyAPES Account
 
-Thank you for helping. Please write in UK English, follow the [Code of Conduct](CODE_OF_CONDUCT.md), and report security issues as described in [SECURITY.md](SECURITY.md). Local development uses Laragon only; see [Local development with Laragon](docs/laragon.md). The [developer guide](docs/developer-guide.md) covers modules, plugins and testing.
+Thank you for helping. Please write in UK English, follow the [Code of Conduct](CODE_OF_CONDUCT.md), and report security issues as described in [SECURITY.md](SECURITY.md). Local development uses Laravel Herd only; see [Local development with Laravel Herd](docs/herd.md). The [developer guide](docs/developer-guide.md) covers modules, plugins and testing.
 
 ## Before you start
 
-Run `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1` before any work. It stops if you have uncommitted changes, pulls the latest code, merges `origin/main` into your branch (never a rebase), installs changed dependencies, and checks the Laragon preview at <http://myapes-account.test> serves that code through FastCGI. If the pull or the merge fails, stop and ask for help. Don't force-push, `reset --hard` or rebase shared branches to get round it.
+Run `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1` before any work. It stops if you have uncommitted changes, pulls the latest code, merges `origin/main` into your branch (never a rebase), installs changed dependencies, and checks the Herd preview at <http://myapes-account.test> serves that code on PHP 8.4 through FastCGI. If the pull or the merge fails, stop and ask for help. Don't force-push, `reset --hard` or rebase shared branches to get round it.
 
 ## How work ships
 

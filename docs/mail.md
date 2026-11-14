@@ -88,7 +88,7 @@ Transport is unchanged: Cloudron's SMTP add-on.
 
 - `config/mail.php` falls back to `CLOUDRON_MAIL_SMTP_SERVER`, `CLOUDRON_MAIL_SMTP_PORT`, `CLOUDRON_MAIL_SMTP_USERNAME` and `CLOUDRON_MAIL_SMTP_PASSWORD`, and to `CLOUDRON_MAIL_FROM` for the sender address. The sender name always comes from `terms.app_name`.
 - Mail is queued. `scripts/deploy/cloudron-run.sh` starts the Redis `queue:work` worker and `schedule:work`, which runs `mail:prune-log`, `audit:prune`, `inbound-mail:prune`, `inbound-mail:empty-folders` and, every minute, `tickets:inbound-poll`.
-- Locally, `.env.example` (the Laragon profile) sends SMTP to Laragon's Mailpit on `127.0.0.1:1025`; read the messages at `http://localhost:8025`. Nothing is delivered. The agent-only profile (`.env.local.example`) uses the `log` mailer, which writes messages to `storage/logs`, and so does the default when no `MAIL_MAILER` is set.
+- Locally, `.env.example` (the Herd profile) sends SMTP to Herd's mail catcher on `127.0.0.1:2525`; read the messages in Herd > Mail. Nothing is delivered. The agent-only profile (`.env.local.example`) uses the `log` mailer, which writes messages to `storage/logs`, and so does the default when no `MAIL_MAILER` is set.
 
 ## Replies by email
 
@@ -205,7 +205,7 @@ Never put a password, token or key in an issue, a commit, chat or a log. Record 
 
 ### Local testing
 
-See [Laragon: Replies by email](laragon.md#replies-by-email). With `INBOUND_MAIL_DRIVER=mailpit` the poller reads Laragon's Mailpit through `Mailpit\MailpitMailbox` (local or testing, loopback URL only), `tickets:inbound-reply-as` and the **Local test replies** panel on Admin → Emails → Inbound reply as a client through `Local\ClientReplyBuilder`, and `tickets:inbound-sample` with `tickets:inbound-ingest` still work from files.
+See [Herd: Replies by email](herd.md#replies-by-email). With `INBOUND_MAIL_DRIVER=mailpit` the poller reads an optional standalone Mailpit through `Mailpit\MailpitMailbox` (local or testing, loopback URL only), `tickets:inbound-reply-as` and the **Local test replies** panel on Admin → Emails → Inbound reply as a client through `Local\ClientReplyBuilder`, and `tickets:inbound-sample` with `tickets:inbound-ingest` still work from files.
 
 ## Tests
 

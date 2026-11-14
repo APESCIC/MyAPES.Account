@@ -6,7 +6,7 @@
 **Purpose:** what runs on every pull request and how to run it locally.
 
 ## Locally
-Run these in your Laragon project (see [[Local setup (Laragon)|Dev-Local-setup-Laragon]]); demo data for manual checks comes from `composer demo:reset`.
+Run these in your Herd site (see [[Local setup (Herd)|Dev-Local-setup-Herd]]); demo data for manual checks comes from `composer demo:reset`.
 - `composer test` – full PHPUnit suite (SQLite)
 - `php artisan test --compact tests/Architecture` – layer rules
 - `php artisan lang:check --fail-on-missing` – missing translation keys

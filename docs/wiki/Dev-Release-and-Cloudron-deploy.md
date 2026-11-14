@@ -7,7 +7,7 @@
 
 Work ships once per milestone: all the milestone's issues are completed on the milestone branch, then the branch goes to `main` in one merge commit, followed by one release and one deploy. See [Milestone shipping in AGENTS.md](https://github.com/APESCIC/MyAPES.Account/blob/main/AGENTS.md#shipping-and-versioning).
 
-The milestone's version is the `vMAJOR.MINOR.PATCH` at the start of its GitHub milestone title, for example `v0.58.3 Dev: Laragon local development`. Branch, pull request, tag and release names all come from it, never from GitHub's milestone number. See [version-shipping.mdc](https://github.com/APESCIC/MyAPES.Account/blob/main/.cursor/rules/version-shipping.mdc).
+The milestone's version is the `vMAJOR.MINOR.PATCH` at the start of its GitHub milestone title, for example `v0.63.1 Dev: Laravel Herd local development`. Branch, pull request, tag and release names all come from it, never from GitHub's milestone number. See [version-shipping.mdc](https://github.com/APESCIC/MyAPES.Account/blob/main/.cursor/rules/version-shipping.mdc).
 
 ## The milestone pull request
 1. Prepend exactly one new record, at the milestone's version, to `resources/data/releases.json`:

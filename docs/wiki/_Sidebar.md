@@ -24,7 +24,7 @@
 - [[Consultations|Plugin-Consultations]]
 
 **Developers**
-- [[Local setup (Laragon)|Dev-Local-setup-Laragon]]
+- [[Local setup (Herd)|Dev-Local-setup-Herd]]
 - [[Architecture|Dev-Architecture]]
 - [[Building a plugin|Dev-Building-a-plugin]]
 - [[Testing and CI|Dev-Testing-and-CI]]
