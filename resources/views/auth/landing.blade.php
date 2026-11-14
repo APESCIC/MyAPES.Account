@@ -33,7 +33,9 @@
             <p class="muted">{{ __('auth.landing.public_access_blurb') }}</p>
             <div class="actions">
                 <a href="{{ route('public.login') }}">{{ __('auth.common.public_login') }}</a>
-                <a href="{{ route('public.register') }}">{{ __('auth.common.register') }}</a>
+                @registrationOpen
+                    <a href="{{ route('public.register') }}">{{ __('auth.common.register') }}</a>
+                @endregistrationOpen
             </div>
         </div>
         <div class="panel">
@@ -53,7 +55,7 @@
                     </div>
                 @elseif($publicPluginNav->routeName === 'tickets.public.index')
                     <h2>{{ $publicPluginNav->label }}</h2>
-                    <p class="muted">{{ __('auth.landing.open_ticket_blurb') }}</p>
+                    <p class="muted">@registrationOpen{{ __('auth.landing.open_ticket_blurb') }}@else{{ __('auth.landing.open_ticket_blurb_closed') }}@endregistrationOpen</p>
                     <div class="actions">
                         <a href="{{ route($publicPluginNav->routeName) }}">{{ __('auth.landing.view_ticket_services') }}</a>
                     </div>

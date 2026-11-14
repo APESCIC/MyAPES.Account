@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminAccessController;
 use App\Http\Controllers\Admin\AdminApiClientController;
 use App\Http\Controllers\Admin\AdminEmailController;
 use App\Http\Controllers\Admin\AdminEmailImportController;
+use App\Http\Controllers\Admin\AdminGeneralSettingsController;
 use App\Http\Controllers\Admin\AdminGroupController;
 use App\Http\Controllers\Admin\AdminInboundEmailController;
 use App\Http\Controllers\Admin\AdminIntegrationController;
@@ -87,8 +88,8 @@ Route::get('/storage/pet-profiles/{path?}', static fn () => abort(404))
 Route::middleware('guest')->controller(PublicAuthController::class)->group(function (): void {
     Route::get('/login', 'showLogin')->name('public.login');
     Route::post('/login', 'login')->middleware('throttle:public-login')->name('public.login.submit');
-    Route::get('/register', 'showRegister')->name('public.register');
-    Route::post('/register', 'register')->name('public.register.submit');
+    Route::get('/register', 'showRegister')->middleware('registration.open')->name('public.register');
+    Route::post('/register', 'register')->middleware('registration.open')->name('public.register.submit');
 });
 
 Route::middleware('guest')->controller(TwoFactorChallengeController::class)->group(function (): void {
@@ -305,7 +306,7 @@ Route::middleware([
         ->name('superadmin.')
         ->middleware('admin.denial-audit')
         ->group(function (): void {
-            // Legacy Super Admin shell URLs collapse into the unified Admin area (#252 / #293 / #459 → 301).
+            // Legacy Super Admin shell URLs collapse into the unified Admin area (#252 / #293 / #459 ? 301).
             Route::get('/', fn () => redirect()->route('admin.index', request()->query(), 301))
                 ->middleware('can:admin.analytics.view')
                 ->name('index');
@@ -433,13 +434,16 @@ Route::middleware([
             Route::get('/settings', [AdminSettingsController::class, 'index'])
                 ->middleware('can:admin.settings.view')
                 ->name('settings.index');
-            // The Reply mailbox tab moved to Admin → Emails → Import (#774).
+            // The Reply mailbox tab moved to Admin ? Emails ? Import (#774).
             Route::get('/settings/reply-mailbox', fn () => redirect()->route('admin.emails.import.index', [], 301))
                 ->middleware('can:admin.settings.view')
                 ->name('settings.reply-mailbox');
             Route::get('/settings/{tab}', [AdminSettingsController::class, 'show'])
                 ->middleware('can:admin.settings.view')
                 ->name('settings.show');
+            Route::put('/settings/general', [AdminGeneralSettingsController::class, 'update'])
+                ->middleware('can:admin.settings.manage')
+                ->name('settings.general.update');
             Route::put('/settings/keys-and-secrets/mailbox-password', [AdminKeysAndSecretsController::class, 'store'])
                 ->middleware(['can:admin.settings.manage', 'account.step-up'])
                 ->name('settings.keys-and-secrets.store');

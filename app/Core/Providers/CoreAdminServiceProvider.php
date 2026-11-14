@@ -4,10 +4,12 @@ namespace App\Core\Providers;
 
 use App\Contracts\MaintenanceModeGateway;
 use App\Core\Extensions\Navigation\PublicNavigationRegistry;
+use App\Core\Settings\GeneralSettings;
 use App\Services\LaravelMaintenanceModeGateway;
 use App\Support\MascotTips;
 use App\Support\Navigation\WorkspaceNavigation;
 use App\Support\ReleaseHistoryRepository;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\View as IlluminateView;
@@ -44,6 +46,9 @@ class CoreAdminServiceProvider extends ServiceProvider
                 'workspaceMenu',
                 app(WorkspaceNavigation::class)->forRequest($user, $request),
             );
+            $view->with('siteBanner', $request->routeIs('admin.*') ? null : app(GeneralSettings::class)->banner());
         });
+
+        Blade::if('registrationOpen', static fn (): bool => app(GeneralSettings::class)->registrationOpen());
     }
 }

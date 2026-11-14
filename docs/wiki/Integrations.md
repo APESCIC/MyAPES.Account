@@ -41,5 +41,5 @@ Privacy: reCAPTCHA sends technical data to Google, so its script loads only on t
 For local testing, Google's published test keys work: they always pass.
 
 ## Related
-- [[API clients|API-clients]] and [[Webhooks]] are the next tabs in Admin → Settings.
+- [[General settings|General-settings]] is the first tab in Admin → Settings; [[API clients|API-clients]] and [[Webhooks]] come after Integrations.
 - [[Security]]

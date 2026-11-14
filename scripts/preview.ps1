@@ -185,6 +185,7 @@ try {
     $missing = @('Herd', 'nginx' | Where-Object { -not (Get-Process $_ -ErrorAction SilentlyContinue) })
     if ($missing.Count -gt 0) { Stop-Preview 1 "Not running: $($missing -join ', '). Open Herd." }
     if (-not (Get-NetTCPConnection -State Listen -LocalPort $p.database.port -ErrorAction SilentlyContinue)) { Stop-Preview 1 "Nothing listens on MySQL's port $($p.database.port). Start Herd's MySQL service (Herd > Services)." }
+    if ($p.appUrl -like 'https://*' -and -not (Test-Path (Join-Path $HerdRoot "config\valet\Certificates\$($p.hostname).crt"))) { Stop-Preview 1 "$($p.herdSite) is not secured, so $($p.appUrl) does not answer. Run scripts\herd-setup.ps1 (it runs herd secure $($p.herdSite))." }
     $health = Get-Page "$($p.appUrl)/healthz" | ConvertFrom-Json
     if ($null -eq $health -or $null -eq $health.local) { Stop-Preview 1 "$($p.appUrl)/healthz did not answer with the local block. Is APP_ENV=local in .env, and does 'herd links' list $($p.herdSite)?" }
     if ($health.local.git_revision -ne $short) {

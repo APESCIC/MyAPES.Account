@@ -26,7 +26,9 @@
                 <button type="submit">{{ __('auth.common.login') }}</button>
                 <button type="button" data-passkey-verify>{{ __('auth.passkeys.login_button') }}</button>
                 <a href="{{ route('password.request') }}">{{ __('auth.common.forgot_password_link') }}</a>
-                <a href="{{ route('public.register') }}">{{ __('auth.common.create_account') }}</a>
+                @registrationOpen
+                    <a href="{{ route('public.register') }}">{{ __('auth.common.create_account') }}</a>
+                @endregistrationOpen
                 <a href="{{ route('staff.login') }}">{{ __('auth.common.staff_login') }}</a>
             </div>
             <p class="error" role="alert" hidden data-passkey-error></p>

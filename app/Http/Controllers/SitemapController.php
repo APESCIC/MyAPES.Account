@@ -2,18 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Core\Settings\GeneralSettings;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 use Plugins\Recruitment\Models\RecruitmentRole;
 
 class SitemapController extends Controller
 {
-    public function __invoke(): Response
+    public const CACHE_KEY = 'seo.sitemap.xml';
+
+    public function __invoke(GeneralSettings $general): Response
     {
-        $xml = Cache::remember('seo.sitemap.xml', now()->addMinutes(15), function (): string {
+        $xml = Cache::remember(self::CACHE_KEY, now()->addMinutes(15), function () use ($general): string {
             $urls = [];
 
-            foreach ([
+            foreach (array_filter([
                 route('home'),
                 route('privacy'),
                 route('cookies'),
@@ -21,9 +24,9 @@ class SitemapController extends Controller
                 route('terms'),
                 route('change-log.index'),
                 route('public.login'),
-                route('public.register'),
+                $general->registrationOpen() ? route('public.register') : null,
                 route('staff.login'),
-            ] as $loc) {
+            ]) as $loc) {
                 $urls[] = ['loc' => $loc, 'lastmod' => null];
             }
 

@@ -74,7 +74,7 @@ test('a Vite already started by the preview gate is reused, not started twice', 
 test('Vite runs on the APP_URL host name and VITE_PORT', () => {
     assert.deepEqual(
         resolveViteServer({
-            APP_URL: 'http://myapes-account.test',
+            APP_URL: 'https://myapes-account.test',
             VITE_PORT: '5175',
         }),
         { host: 'myapes-account.test', port: 5175 },

@@ -234,7 +234,7 @@ The interface uses a light-first desert theme with a sun-baked earth sidebar, sa
 
 ## Local development with Laravel Herd
 
-Laravel Herd (Pro) on Windows is the **only supported local development setup**. MyAPES Account runs as its own Herd site at `https://myapes-account.test` (document root `public/`), on PHP 8.4, Herd's MySQL 8.4 (database `myapes_account_local`), Node 22 and a Vite dev server on port 5175. Mail goes to Herd's mail catcher. The full guide is [docs/herd.md](docs/herd.md). It covers prerequisites, linking the site, running several APESCIC projects side by side and common fixes. The project's values are in [docs/herd/profile.md](docs/herd/profile.md).
+Laravel Herd (Pro) on Windows is the **only supported local development setup**. MyAPES Account runs as its own Herd site at `https://myapes-account.test` (document root `public/`, secured with Herd's certificate), on PHP 8.4, Herd's MySQL 8.4 (database `myapes_account_local`), Node 22 and a Vite dev server on port 5175. Mail goes to Herd's mail catcher. The full guide is [docs/herd.md](docs/herd.md). It covers prerequisites, linking the site, running several APESCIC projects side by side and common fixes. The project's values are in [docs/herd/profile.md](docs/herd/profile.md).
 
 **Prerequisites:** Laravel Herd for Windows with a Pro licence, PHP 8.4, a MySQL 8.4 service on port 3306 and Node 22 in Herd, and npm 11.10 or newer in Herd's Node 22 (`. .\scripts\herd-env.ps1`, then `npm install -g npm@11`).
 
@@ -274,7 +274,7 @@ The live preview gate starts Vite at `https://myapes-account.test:5175` in the b
 - Pre-merge validation: `composer pre-merge`
 - Pre-PR check: `composer pre-pr-verify` (add `-Fresh` through `scripts/local/pre-pr-verify.ps1` to reset the demo data too)
 
-**Troubleshooting:** see [Common fixes](docs/herd.md#common-fixes). It covers the wrong PHP version, ports 80, 443, 3306 or 5175 in use, `.test` not resolving, unstyled pages, file permissions and passkeys over HTTPS (`herd secure myapes-account`).
+**Troubleshooting:** see [Common fixes](docs/herd.md#common-fixes). It covers the wrong PHP version, ports 80, 443, 3306 or 5175 in use, `.test` not resolving, unstyled pages, file permissions and mixed-content (unstyled) pages over HTTPS.
 
 The Herd setup script enforces the tracked selective-media boundary at
 `public/storage/.myapes-selective-media`. It refuses marker changes or

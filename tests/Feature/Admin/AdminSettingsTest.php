@@ -43,21 +43,34 @@ class AdminSettingsTest extends TestCase
         $this->actingAs($user)->get('/admin/settings/reply-mailbox')->assertForbidden();
     }
 
-    public function test_settings_opens_on_integrations_and_no_longer_has_a_reply_mailbox_tab(): void
+    public function test_settings_opens_on_general_and_no_longer_has_a_reply_mailbox_tab(): void
     {
         $admin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
 
         $this->actingAs($admin)->get('/admin/emails')
             ->assertOk()
-            ->assertSee(route('admin.settings.show', 'integrations'), false)
+            ->assertSee(route('admin.settings.show', 'general'), false)
             ->assertSee(__('admin.nav.settings'));
 
-        $this->actingAs($admin)->get('/admin/settings')->assertRedirect(route('admin.settings.show', 'integrations'));
+        $this->actingAs($admin)->get('/admin/settings')->assertRedirect(route('admin.settings.show', 'general'));
 
-        $this->actingAs($admin)->get(route('admin.settings.show', 'integrations'))
+        $this->actingAs($admin)->get(route('admin.settings.show', 'general'))
             ->assertOk()
             ->assertSee('data-settings-tabs', false)
+            ->assertSee('data-settings-tab="general"', false)
             ->assertDontSee('data-reply-mailbox-form', false);
+    }
+
+    public function test_general_is_the_first_tab(): void
+    {
+        $admin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
+
+        $html = (string) $this->actingAs($admin)->get(route('admin.settings.show', 'integrations'))->getContent();
+        preg_match('/<nav class="admin-subnav"[^>]*data-settings-tabs>(.*?)<\/nav>/s', $html, $nav);
+        preg_match_all('/href="([^"]+)"/', $nav[1] ?? '', $links);
+
+        $this->assertSame(route('admin.settings.show', 'general'), $links[1][0] ?? null);
+        $this->assertSame(route('admin.settings.show', 'integrations'), $links[1][1] ?? null);
     }
 
     public function test_the_old_reply_mailbox_address_moves_permanently_to_email_import(): void
@@ -73,7 +86,7 @@ class AdminSettingsTest extends TestCase
     {
         $admin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
 
-        $this->actingAs($admin)->get('/admin/settings/general')->assertNotFound();
+        $this->actingAs($admin)->get('/admin/settings/not-a-tab')->assertNotFound();
     }
 
     public function test_settings_permissions_are_for_administrators_only(): void

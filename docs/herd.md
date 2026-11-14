@@ -28,7 +28,7 @@ herd link myapes-account
 herd isolate 8.4 --site=myapes-account
 ```
 
-Herd serves it at `https://myapes-account.test` from the `public/` folder, on PHP 8.4. The setup script below does the link and the PHP pin for you if they are missing.
+Herd serves it at `https://myapes-account.test` from the `public/` folder, on PHP 8.4, with Herd's own trusted certificate (`herd secure myapes-account`); `http://` redirects to it. The setup script below does the link, the PHP pin and the certificate for you if they are missing.
 
 ## 2. Run the setup script
 
@@ -42,7 +42,7 @@ composer setup
 [`scripts/herd-setup.ps1`](../scripts/herd-setup.ps1):
 
 1. checks Herd is running and that its PHP, extensions, Composer, Node, npm and MySQL match the profile
-2. links the site and pins it to PHP 8.4 if that is not done yet
+2. links the site, pins it to PHP 8.4 and secures it for HTTPS if that is not done yet
 3. copies `.env.example` to `.env` if `.env` is missing (it never overwrites an existing `.env`), warns about values that differ from the profile, and generates `APP_KEY`
 4. runs `composer install` and `npm ci`
 5. creates the `myapes_account_local` database if it does not exist, then runs the migrations

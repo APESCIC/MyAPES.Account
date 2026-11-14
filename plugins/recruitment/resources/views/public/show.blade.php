@@ -36,10 +36,12 @@
         @if(! ($publicApplyEnabled ?? true))
             <p class="muted">{{ __('recruitment::public.show.blade.applications_are_not_open_for_public_roles_right_now_yo') }}</p>
         @elseif(auth()->guest())
-            <p class="muted">{{ __('recruitment::public.show.blade.sign_in_or_create_a_public_account_to_apply_you_can_sti') }}</p>
+            <p class="muted">@registrationOpen{{ __('recruitment::public.show.blade.sign_in_or_create_a_public_account_to_apply_you_can_sti') }}@else{{ __('recruitment::public.show.blade.sign_in_to_apply_registration_closed') }}@endregistrationOpen</p>
             <div class="actions">
                 <a href="{{ route('recruitment.apply.start', ['recruitmentRole' => $role, 'via' => 'login']) }}">{{ __('recruitment::public.show.blade.public_login') }}</a>
-                <a href="{{ route('recruitment.apply.start', ['recruitmentRole' => $role, 'via' => 'register']) }}">{{ __('recruitment::public.show.blade.register') }}</a>
+                @registrationOpen
+                    <a href="{{ route('recruitment.apply.start', ['recruitmentRole' => $role, 'via' => 'register']) }}">{{ __('recruitment::public.show.blade.register') }}</a>
+                @endregistrationOpen
             </div>
         @else
             @if($existingApplication)

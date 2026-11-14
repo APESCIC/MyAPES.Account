@@ -34,6 +34,8 @@ return [
         'forgot_password' => 'Forgot password',
         'forgot_password_link' => 'Forgot password?',
         'create_account' => 'Create account',
+        'registration_closed' => 'Registration for new public accounts is closed at the moment. If you already have an account, sign in here.',
+        'registration_closed_help' => 'Registration for new public accounts is closed at the moment. If you already have an account, use Public Login.',
         'remember_me' => 'Remember me',
         'back_to_public_login' => 'Back to Public Login',
         'log_out' => 'Log out',
@@ -58,6 +60,7 @@ return [
         'open_roles_blurb' => 'Browse staff, volunteering, and student opportunities with APES CIC.',
         'view_open_roles' => 'View open roles',
         'open_ticket_blurb' => 'See which APES services you can raise a ticket with, then sign in or register to send it.',
+        'open_ticket_blurb_closed' => 'See which APES services you can raise a ticket with, then sign in to send it.',
         'view_ticket_services' => 'See services and areas',
     ],
 
