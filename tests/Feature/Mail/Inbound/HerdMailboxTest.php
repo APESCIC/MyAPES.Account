@@ -10,7 +10,6 @@ use App\Core\Mail\Inbound\ImapMailbox;
 use App\Core\Mail\Inbound\InboundEmail;
 use App\Core\Mail\Inbound\InboundMailPoller;
 use App\Core\Mail\Inbound\InboundMailSettings;
-use App\Core\Mail\Inbound\MailboxUnavailable;
 use App\Jobs\ProcessInboundEmail;
 use App\Services\ModuleInstallationSynchronizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -19,6 +18,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Plugins\Tickets\Models\SupportTicketMessage;
+use Tests\Support\FakeHerdMailRunner;
 use Tests\TestCase;
 
 /**
@@ -120,97 +120,5 @@ class HerdMailboxTest extends TestCase
         $this->enableEmailReplies([
             'inbound-mail.driver' => 'herd',
         ]);
-    }
-}
-
-/**
- * @internal
- */
-final class FakeHerdMailRunner implements HerdMailRunner
-{
-    /** @var array<string, array{to: string, date: string, raw: string}> */
-    public array $mail = [];
-
-    /** @var list<string> */
-    public array $deleted = [];
-
-    /** @var list<list<string>> */
-    public array $calls = [];
-
-    public function put(string $id, string $to, string $date, string $raw): void
-    {
-        $this->mail[$id] = ['to' => $to, 'date' => $date, 'raw' => $raw];
-    }
-
-    public function run(array $arguments): string
-    {
-        $this->calls[] = $arguments;
-        $command = $arguments[0] ?? '';
-
-        return match ($command) {
-            'mail:list' => $this->list($arguments),
-            'mail:show' => $this->show($arguments),
-            'mail:delete' => $this->delete($arguments),
-            default => throw new MailboxUnavailable('Unexpected herd command: '.$command),
-        };
-    }
-
-    /**
-     * @param  list<string>  $arguments
-     */
-    private function list(array $arguments): string
-    {
-        $toFilter = null;
-        foreach ($arguments as $argument) {
-            if (str_starts_with($argument, '--to=')) {
-                $toFilter = substr($argument, 5);
-            }
-        }
-
-        $rows = [];
-        foreach ($this->mail as $id => $message) {
-            if (in_array($id, $this->deleted, true)) {
-                continue;
-            }
-            if ($toFilter !== null && ! str_contains(strtolower($message['to']), strtolower($toFilter))) {
-                continue;
-            }
-            $rows[] = [
-                'id' => $id,
-                'date' => $message['date'],
-                'mailbox' => 'Default',
-                'subject' => 'Re: Ticket',
-                'from' => [['address' => 'owner@example.org', 'name' => '']],
-                'to' => [['address' => $message['to'], 'name' => '']],
-                'cc' => [],
-                'attachments' => 0,
-            ];
-        }
-
-        return json_encode($rows, JSON_THROW_ON_ERROR);
-    }
-
-    /**
-     * @param  list<string>  $arguments
-     */
-    private function show(array $arguments): string
-    {
-        $id = $arguments[1] ?? '';
-        if (! isset($this->mail[$id]) || ! in_array('--format=raw', $arguments, true)) {
-            throw new MailboxUnavailable('Herd mail:show missing raw mail '.$id);
-        }
-
-        return $this->mail[$id]['raw'];
-    }
-
-    /**
-     * @param  list<string>  $arguments
-     */
-    private function delete(array $arguments): string
-    {
-        $id = $arguments[1] ?? '';
-        $this->deleted[] = $id;
-
-        return "Deleted mail {$id}.\n";
     }
 }
