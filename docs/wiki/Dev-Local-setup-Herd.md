@@ -34,4 +34,4 @@ Open Herd first. `composer setup` runs `scripts/herd-setup.ps1`: it checks the v
 - `composer test` (or `php artisan test`)
 - `composer pre-merge`
 
-Never commit `.env` or any key, token or password.
+Never commit `.env` or any key, token or password. To exercise **Keys and secrets** and **Integrations** on this machine (dummy or Google test keys only; never Vault or production values in chat or the repo), follow [`docs/herd.md`](https://github.com/APESCIC/MyAPES.Account/blob/main/docs/herd.md#keys-and-secrets-and-integrations-locally).
