@@ -13,6 +13,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Group;
 use Plugins\Tickets\Models\SupportTicketMessage;
+use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
@@ -87,11 +88,15 @@ class GreenMailImapTest extends TestCase
     {
         $host = getenv('GREENMAIL_HOST') ?: '127.0.0.1';
         $port = (int) (getenv('GREENMAIL_SMTP_PORT') ?: 3025);
+        $mailbox = (string) config('inbound-mail.address');
         $transport = new EsmtpTransport($host, $port, false);
-        $transport->setUsername('communications@example.test');
-        $transport->setPassword('communications@example.test');
-        $email->from(new Address('owner@example.org', 'Olive Owner'));
-        $transport->send($email);
+        // GreenMail creates one mailbox per RCPT TO; a plus-address reply would
+        // land in a different inbox than the poller reads. Keep the plus address
+        // in the MIME To header for matching, and deliver into the plain mailbox
+        // over the SMTP envelope.
+        $sender = new Address('owner@example.org', 'Olive Owner');
+        $email->from($sender);
+        $transport->send($email, new Envelope($sender, [new Address($mailbox)]));
     }
 
     private function folderMessageCount(string $folder): int
