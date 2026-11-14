@@ -87,11 +87,19 @@ class WorkspaceNavigationTest extends TestCase
     {
         $admin = User::factory()->protectedRole('administrator')->create();
 
-        $adminKeys = $this->itemKeys($this->menuFor($admin, 'admin.index')->panels[NavPanel::ADMIN]);
+        $menu = $this->menuFor($admin, 'admin.index');
+        $adminKeys = $this->itemKeys($menu->panels[NavPanel::ADMIN]);
 
         foreach (['admin.overview', 'admin.users', 'admin.staff', 'admin.access', 'admin.modules', 'admin.plugins', 'admin.emails', 'admin.emails.import', 'admin.settings', 'admin.maintenance'] as $key) {
             $this->assertContains($key, $adminKeys);
         }
+
+        $emails = collect($menu->panels[NavPanel::ADMIN]->items())->first(
+            static fn (NavItem $item): bool => $item->key === 'admin.emails'
+        );
+        $this->assertNotNull($emails);
+        $this->assertSame(__('admin.nav.emails'), $emails->label);
+        $this->assertSame('Email Templates', $emails->label);
     }
 
     public function test_admin_panel_home_is_the_first_openable_child_and_empty_groups_drop(): void

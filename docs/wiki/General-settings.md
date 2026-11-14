@@ -26,11 +26,15 @@ The tab also shows, for reference only:
 - **How long records are kept**: the audit log, staff call logs, the email send log, imported emails and the mailbox's Processed and Failed folders. These are set in the server's `.env` file by the APES IT Administrator.
 - **Upload limits** for files attached to tickets and cases, and the server's PHP limits.
 
-Links at the bottom go to **Maintenance**, **Integrations**, **Modules**, **Emails → Inbound** and **Emails → Import** (the reply mailbox).
+Links at the bottom go to **Maintenance**, **Integrations**, **Modules**, **Email Templates → Inbound** and **Email Templates → Import** (the reply mailbox).
+
+## Keys and secrets
+The **Keys and secrets** tab is where live operators enter the communications@ Mail Client app password (Test, then save). That is the primary path on Cloudron; the server `.env` is fallback only for that password. See [[Replies by email|Replies-by-email]] and [`docs/secrets-inventory.md`](https://github.com/APESCIC/MyAPES.Account/blob/main/docs/secrets-inventory.md).
 
 ## Audit
 Every save that changes something writes an `admin.settings.general_saved` event to the audit log. It names the settings that changed, never their values.
 
 ## Related
-- [[Integrations]], [[API clients|API-clients]] and [[Webhooks]] are the other tabs in Admin → Settings.
-- [[Replies by email|Replies-by-email]] for Admin → Emails → Import.
+- [[Integrations]], [[API clients|API-clients]], [[Webhooks]] and **Keys and secrets** are the other tabs in Admin → Settings.
+- [[Replies by email|Replies-by-email]] for Admin → Email Templates → Import.
+- [[Security]] for the operational secrets inventory (names only).

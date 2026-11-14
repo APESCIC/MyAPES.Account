@@ -96,9 +96,21 @@ composer pre-pr-verify # pre-merge, then the Herd setup; -Fresh also runs demo:r
 
 Every email goes to Herd's mail catcher (SMTP `127.0.0.1:2525`); read it in **Herd > Mail**. Nothing is delivered.
 
+## Keys and secrets and Integrations (locally)
+
+Exercise Admin → Settings → **Keys and secrets** and **Integrations** on Herd without putting any secret in the repository, chat or issues.
+
+**Never commit** secrets. **Never paste** Vault or production values into chat, issues, pull requests or commits. Production Vault and live Keys and secrets stay on Cloudron only. Inventory of names: [secrets-inventory.md](secrets-inventory.md).
+
+1. Keep secrets in the **machine-local** `.env` (copied from `.env.example`; never overwrite a filled `.env` from the repo) **or** type them only into Admin on this machine.
+2. **Keys and secrets — mailbox password (UI only):** sign in as the local QA Admin, open Admin → Settings → Keys and secrets, type a **dummy** IMAP password if you only need to check the form, press **Test** if you have a reachable mailbox, then save. Leave the box blank to keep a saved value. Clearing falls back to `INBOUND_MAIL_IMAP_PASSWORD` in the local `.env` if set. For the Herd reply loop below you usually do **not** need a real IMAP password.
+3. **Integrations — TinyMCE:** leave empty locally (description fields fall back to plain text) or paste a non-production key into Admin / local `.env` only.
+4. **Integrations — reCAPTCHA:** use Google’s published **test** site and secret keys for local forms only, or leave unset so forms skip reCAPTCHA in local. Press **Test connection** on Integrations when you have typed keys.
+5. Automated coverage: PHPUnit suites under `tests/Feature/Admin` (Keys and secrets, Integrations) and the inbound/Herd tests listed in [mail.md](mail.md#tests) — point new work at those rather than committing fixtures with secrets.
+
 ## Replies by email
 
-Ticket and case replies by email ([`mail.md`](mail.md#replies-by-email)) can be tried locally in two ways.
+Ticket and case replies by email ([`mail.md`](mail.md#replies-by-email)) can be tried locally in two ways. Live Cloudron still uses Keys and secrets as the primary mailbox-password path ([mail.md](mail.md#cloudron-mailbox-runbook)); this section is local/Herd only.
 
 ### Without a mailbox
 
@@ -132,9 +144,9 @@ php artisan tickets:inbound-loop-check
 `herd` and `mailpit` only work with `APP_ENV=local` (or `testing`). The Cloudron deploy refuses any driver but `imap` (`myapes:inbound-mail:preflight`).
 
 1. Sign in with the QA Admin account and, as staff, add a public message to a demo ticket or case. Its emails land in Herd > Mail with a `communications+t…` Reply-To and a `[MYAPES-T-12]` subject tag.
-2. Open **Admin → Emails → Inbound**. The **Local test replies** panel lists the latest 20 ticket and case emails from Herd (or Mailpit).
+2. Open **Admin → Email Templates → Inbound**. The **Local test replies** panel lists the latest 20 ticket and case emails from Herd (or Mailpit).
 3. Under **Reply as client**, choose the email, type the reply, optionally pick a variant, and press **Send reply**.
-4. On **Admin → Emails → Import**, press **Fetch now** (or use the panel's Fetch replies now). The reply appears on the ticket marked **by email**; held mail stays on the Import monitor queue.
+4. On **Admin → Email Templates → Import**, press **Fetch now** (or use the panel's Fetch replies now). The reply appears on the ticket marked **by email**; held mail stays on the Import monitor queue.
 
 ```powershell
 php artisan tickets:inbound-reply-as --latest=T12 --body="It works now."

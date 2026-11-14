@@ -100,8 +100,8 @@ return [
             'body' => 'Each role in Recruitment has its own application questions. Add short or long answer questions on the role page and move them into the order applicants should see.',
         ],
         'emails' => [
-            'heading' => 'Emails',
-            'body' => 'Emails lists every message the app sends. You can change the subject and body, use the merge fields shown on the page, preview the result and reset to the standard text at any time.',
+            'heading' => 'Email Templates',
+            'body' => 'Email Templates lists every message the app sends. You can change the subject and body, use the merge fields shown on the page, preview the result and reset to the standard text at any time.',
             'replies' => 'System emails come from a no-reply address. Ticket and case emails include a Log in to reply link, so replies stay in the app.',
         ],
         'maintenance' => [
