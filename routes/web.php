@@ -415,7 +415,7 @@ Route::middleware([
                 ->middleware('can:admin.emails.manage')
                 ->name('emails.inbound.services.update');
             Route::get('/emails/import', [AdminEmailImportController::class, 'index'])
-                ->middleware('can:admin.settings.view')
+                ->middleware('can:admin.emails.view')
                 ->name('emails.import.index');
             // Connection form retired (#809); test and probe use the built-in connection (#812).
             Route::post('/emails/import/test', [AdminEmailImportController::class, 'test'])

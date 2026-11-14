@@ -4,15 +4,18 @@ namespace App\Http\Controllers\Admin;
 
 use App\Core\Mail\Inbound\ConnectionPanel;
 use App\Core\Mail\Inbound\Diagnostics\DiagnosticReport;
+use App\Core\Mail\Inbound\ImportMonitor;
 use App\Core\Mail\Inbound\ImportReadiness;
+use App\Core\Mail\Inbound\InboundEmail;
 use App\Core\Mail\Inbound\InboundMailboxLogEntry;
 use App\Core\Mail\Inbound\InboundMailSettings;
 use App\Core\Mail\Inbound\ReplyMailboxStatus;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
 /**
- * What Admin → Emails → Import shows (#735, #774, #811). Secrets are never
- * sent to the page: only status and source.
+ * What Admin → Emails → Import shows (#735, #774, #811, #813). Secrets are
+ * never sent to the page: only status and source.
  */
 final class EmailImportPage
 {
@@ -23,13 +26,18 @@ final class EmailImportPage
         private readonly ReplyMailboxStatus $status,
         private readonly ImportReadiness $readiness,
         private readonly ConnectionPanel $connection,
+        private readonly ImportMonitor $monitor,
     ) {}
 
     /**
      * @return array<string, mixed>
      */
-    public function viewData(): array
+    public function viewData(Request $request): array
     {
+        $statusFilter = $request->query('status');
+        $statusFilter = is_string($statusFilter) ? $statusFilter : null;
+        $monitor = $this->monitor->data($statusFilter);
+
         return [
             'repliesEnabled' => $this->inbound->repliesEnabled(),
             'pollingConfigured' => $this->inbound->pollingConfigured(),
@@ -44,6 +52,11 @@ final class EmailImportPage
             'nextPollAt' => $this->status->backingOff() ? $this->status->nextPollAt() : null,
             'consecutiveFailures' => $this->status->consecutiveFailures(),
             'probe' => $this->probe(),
+            'monitor' => $monitor,
+            'monitorStatuses' => array_combine(
+                InboundEmail::STATUSES,
+                array_map(InboundEmail::labelForStatus(...), InboundEmail::STATUSES),
+            ),
         ];
     }
 

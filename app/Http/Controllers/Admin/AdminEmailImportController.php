@@ -28,10 +28,10 @@ class AdminEmailImportController extends Controller
 
     private const TEST_WINDOW_SECONDS = 600;
 
-    public function index(EmailImportPage $page): Response
+    public function index(Request $request, EmailImportPage $page): Response
     {
         return response()
-            ->view('admin.emails.import.index', $page->viewData())
+            ->view('admin.emails.import.index', $page->viewData($request))
             ->header('Cache-Control', 'no-store, private');
     }
 
