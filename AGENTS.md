@@ -33,12 +33,12 @@ Laravel Herd (Pro) on Windows is the only supported local setup. Use this projec
 | Item | Value |
 | --- | --- |
 | Herd site | `myapes-account`, linked from the clone (`C:\Users\BambieMurphy\Documents\GitHub\MyAPES.Account` on the owner's PC); no junction or copy elsewhere |
-| App URL | `http://myapes-account.test`, document root `public/` |
+| App URL | `https://myapes-account.test`, document root `public/` |
 | Profile | [docs/herd/profile.md](docs/herd/profile.md) ([`profile.json`](docs/herd/profile.json) for the scripts): PHP 8.4 pinned with `herd isolate` (FastCGI, `php_sapi` `cgi-fcgi`), Herd MySQL 8.4 (`myapes_account_local`, root, empty password), Node 22 from Herd's nvm, npm 11.10+, Vite port 5175 |
 | Mail | Herd's mail catcher, SMTP `127.0.0.1:2525` (Herd > Mail, or the Herd MCP `mail` tool). An optional standalone Mailpit (SMTP 1025, API 8025) is only for the reply loop (`INBOUND_MAIL_DRIVER=mailpit`) |
 | Setup | `composer setup` (runs `scripts/herd-setup.ps1`; safe to run twice) |
-| Live preview gate | Before any development work: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1`, then open <http://myapes-account.test> in Cursor's browser (see [`.cursor/rules/herd-local-dev.mdc`](.cursor/rules/herd-local-dev.mdc)) |
-| Daily loop | Herd open, then `scripts\preview.ps1`: Vite hot reload at `http://myapes-account.test:5175` with no window, output in `storage/logs/vite-dev.log`, stopped with `-StopDevServer`. `composer run dev` adds the queue and a log tail and reuses that Vite |
+| Live preview gate | Before any development work: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1`, then open <https://myapes-account.test> in Cursor's browser (see [`.cursor/rules/herd-local-dev.mdc`](.cursor/rules/herd-local-dev.mdc)) |
+| Daily loop | Herd open, then `scripts\preview.ps1`: Vite hot reload at `https://myapes-account.test:5175` with no window, output in `storage/logs/vite-dev.log`, stopped with `-StopDevServer`. `composer run dev` adds the queue and a log tail and reuses that Vite |
 | Demo data | `composer demo:seed` to load, `composer demo:reset` to wipe and reload; logins in [docs/herd/demo-data.md](docs/herd/demo-data.md) |
 | Env file | `.env.example` (Herd values) |
 

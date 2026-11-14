@@ -234,7 +234,7 @@ The interface uses a light-first desert theme with a sun-baked earth sidebar, sa
 
 ## Local development with Laravel Herd
 
-Laravel Herd (Pro) on Windows is the **only supported local development setup**. MyAPES Account runs as its own Herd site at `http://myapes-account.test` (document root `public/`), on PHP 8.4, Herd's MySQL 8.4 (database `myapes_account_local`), Node 22 and a Vite dev server on port 5175. Mail goes to Herd's mail catcher. The full guide is [docs/herd.md](docs/herd.md). It covers prerequisites, linking the site, running several APESCIC projects side by side and common fixes. The project's values are in [docs/herd/profile.md](docs/herd/profile.md).
+Laravel Herd (Pro) on Windows is the **only supported local development setup**. MyAPES Account runs as its own Herd site at `https://myapes-account.test` (document root `public/`), on PHP 8.4, Herd's MySQL 8.4 (database `myapes_account_local`), Node 22 and a Vite dev server on port 5175. Mail goes to Herd's mail catcher. The full guide is [docs/herd.md](docs/herd.md). It covers prerequisites, linking the site, running several APESCIC projects side by side and common fixes. The project's values are in [docs/herd/profile.md](docs/herd/profile.md).
 
 **Prerequisites:** Laravel Herd for Windows with a Pro licence, PHP 8.4, a MySQL 8.4 service on port 3306 and Node 22 in Herd, and npm 11.10 or newer in Herd's Node 22 (`. .\scripts\herd-env.ps1`, then `npm install -g npm@11`).
 
@@ -264,7 +264,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1         
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1 -StopDevServer  # stop
 ```
 
-The live preview gate starts Vite at `http://myapes-account.test:5175` in the background, with no window on the taskbar and its output in `storage/logs/vite-dev.log`. Running it again reuses that Vite. Herd's nginx serves the pages at `http://myapes-account.test`. Saving a Blade template, CSS or JavaScript file updates the browser without a rebuild.
+The live preview gate starts Vite at `https://myapes-account.test:5175` in the background, with no window on the taskbar and its output in `storage/logs/vite-dev.log`. Running it again reuses that Vite. Herd's nginx serves the pages at `https://myapes-account.test`. Saving a Blade template, CSS or JavaScript file updates the browser without a rebuild.
 
 `composer run dev` adds the queue listener and a log tail in a terminal, reusing the running Vite. On native Windows the log tail follows `storage/logs/laravel.log` with PowerShell, because PHP's Unix-only `pcntl` extension is not available.
 
@@ -784,7 +784,7 @@ Rotating MySQL, Redis, SMTP, and LDAP credentials are read from Cloudron-provide
   - The scheduler is configured to run pruning daily
 - **Session hardening defaults** in `.env.example`:
   - `SESSION_ENCRYPT=true`
-  - `SESSION_SECURE_COOKIE=true` in `scripts/deploy/production.env.example` for HTTPS deployments; the Herd `.env.example` uses `false` for `http://myapes-account.test`
+  - `SESSION_SECURE_COOKIE=true` for HTTPS deployments; the Herd `.env.example` uses `true` for `https://myapes-account.test`
   - `SESSION_HTTP_ONLY=true`
 - **Upload safeguards**:
   - Avatar and pet photo uploads are restricted to JPEG/PNG/WebP

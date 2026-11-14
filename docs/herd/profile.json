@@ -2,7 +2,7 @@
     "project": "myapes-account",
     "herdSite": "myapes-account",
     "hostname": "myapes-account.test",
-    "appUrl": "http://myapes-account.test",
+    "appUrl": "https://myapes-account.test",
     "documentRoot": "public",
     "webServer": "nginx",
     "php": "8.4",

@@ -14,7 +14,7 @@ Follows `.cursor/rules/version-shipping.mdc`. Run it from one plan; when a new c
 3. **Branch.** Use the printed milestone branch. Create it from `origin/main` if it is missing (`git switch -c <branch> origin/main`, `git push -u origin HEAD`), otherwise switch to it and merge `origin/main`. Merge `origin/dependencies` with a merge commit. Stop on any conflict. Call `SetActiveBranch`.
 4. **Issues.** List the milestone's issues (`gh issue list --milestone "<title>" --state open`). Comment on each when work starts.
 5. **Draft PR.** After the first commit, open one draft PR into `main` titled with the printed "Milestone PR" title, with `Closes #<n>` for every issue including the Epic.
-6. **Work every issue in order** on the milestone branch. Small Conventional Commits with `Refs #<n>`, push when useful, run `composer test` and Pint, check the change in the preview at http://myapes-account.test. Comment on the issue with the commit SHA when it is done; leave it open until the PR merges. Don't ask between issues; stop only for a failure or blocker the plan does not settle.
+6. **Work every issue in order** on the milestone branch. Small Conventional Commits with `Refs #<n>`, push when useful, run `composer test` and Pint, check the change in the preview at https://myapes-account.test. Comment on the issue with the commit SHA when it is done; leave it open until the PR merges. Don't ask between issues; stop only for a failure or blocker the plan does not settle.
 7. **Hand over** to the `release-version` skill once every issue is committed.
 
 ## Never
