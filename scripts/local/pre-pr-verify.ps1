@@ -12,8 +12,8 @@ if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
 
-Write-Host 'Running Laragon setup...'
-& (Join-Path $PSScriptRoot '..\laragon-setup.ps1') -NoDemo
+Write-Host 'Running Herd setup...'
+& (Join-Path $PSScriptRoot '..\herd-setup.ps1') -NoDemo
 if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }

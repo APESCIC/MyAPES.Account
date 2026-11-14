@@ -1,0 +1,42 @@
+{
+    "project": "myapes-account",
+    "herdSite": "myapes-account",
+    "hostname": "myapes-account.test",
+    "appUrl": "http://myapes-account.test",
+    "documentRoot": "public",
+    "webServer": "nginx",
+    "php": "8.4",
+    "phpIsolated": true,
+    "phpExtensions": [
+        "bcmath",
+        "curl",
+        "fileinfo",
+        "gd",
+        "iconv",
+        "intl",
+        "mbstring",
+        "openssl",
+        "pdo_mysql",
+        "pdo_sqlite",
+        "sodium",
+        "zip"
+    ],
+    "database": {
+        "engine": "mysql",
+        "version": "8.4",
+        "host": "127.0.0.1",
+        "port": 3306,
+        "name": "myapes_account_local",
+        "username": "root",
+        "charset": "utf8mb4",
+        "collation": "utf8mb4_unicode_ci"
+    },
+    "mail": {
+        "mailer": "smtp",
+        "host": "127.0.0.1",
+        "port": 2525
+    },
+    "node": "22",
+    "npmMinimum": "11.10.0",
+    "viteDevServerPort": 5175
+}
