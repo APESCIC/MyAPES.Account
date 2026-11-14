@@ -36,8 +36,16 @@ final class KeysAndSecretsTab
                 'active_source' => $this->inbound->passwordSource(),
             ],
             'serverOnly' => [
-                'APP_KEY' => config('app.key') ? 'set' : 'missing',
-                'INBOUND_MAIL_TOKEN_KEY' => $this->inbound->tokenKey() !== '' ? 'set' : 'missing',
+                [
+                    'name' => 'APP_KEY',
+                    'state' => config('app.key') ? 'set' : 'missing',
+                    'label' => __(config('app.key') ? 'admin.settings.keys_and_secrets.server_only.set' : 'admin.settings.keys_and_secrets.server_only.missing'),
+                ],
+                [
+                    'name' => 'INBOUND_MAIL_TOKEN_KEY',
+                    'state' => $this->inbound->tokenKey() !== '' ? 'set' : 'missing',
+                    'label' => __($this->inbound->tokenKey() !== '' ? 'admin.settings.keys_and_secrets.server_only.set' : 'admin.settings.keys_and_secrets.server_only.missing'),
+                ],
             ],
         ];
     }

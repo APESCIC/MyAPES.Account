@@ -41,9 +41,12 @@ class GreenMailImapTest extends TestCase
         Storage::fake('private');
 
         $host = getenv('GREENMAIL_HOST') ?: '127.0.0.1';
+        // GreenMail keeps one mailbox per recipient address and has no
+        // plus-addressing, so match by subject tag against the plain inbox.
         $this->enableEmailReplies([
             'inbound-mail.driver' => 'imap',
             'inbound-mail.address' => 'communications@example.test',
+            'inbound-mail.plus_addressing' => false,
             'inbound-mail.imap.host' => $host,
             'inbound-mail.imap.port' => (int) (getenv('GREENMAIL_IMAPS_PORT') ?: 3993),
             'inbound-mail.imap.encryption' => 'ssl',
@@ -58,12 +61,11 @@ class GreenMailImapTest extends TestCase
     {
         $owner = User::factory()->create(['email' => 'owner@example.org']);
         $ticket = $this->ticketFor($owner);
-        $replyTo = $this->replyAddressFor('T', $ticket->id, $owner);
 
         $original = new OriginalEmail(
             messageId: 'greenmail-orig@example.test',
             subject: 'Boiler update [MYAPES-T-'.$ticket->id.']',
-            replyTo: $replyTo,
+            replyTo: 'communications@example.test',
             recipient: 'owner@example.org',
             text: 'Staff update for GreenMail.',
         );

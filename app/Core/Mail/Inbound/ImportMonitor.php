@@ -65,13 +65,25 @@ final class ImportMonitor
             ? $statusFilter
             : null;
 
+        $chart = $this->chart();
+        $chartMax = max(1, ...array_map(
+            static fn (array $day): int => $day['posted'] + $day['held'] + $day['failed'],
+            $chart,
+        ));
+        $chart = array_map(static function (array $day) use ($chartMax): array {
+            $total = $day['posted'] + $day['held'] + $day['failed'];
+            $day['height'] = (int) round(($total / $chartMax) * 100);
+
+            return $day;
+        }, $chart);
+
         return [
             'health' => $this->health(),
             'counts' => [
                 'hours_24' => $this->countsSince(now()->subDay()),
                 'days_7' => $this->countsSince(now()->subDays(7)),
             ],
-            'chart' => $this->chart(),
+            'chart' => $chart,
             'recent' => $this->recent($filter),
             'status_filter' => $filter,
         ];
