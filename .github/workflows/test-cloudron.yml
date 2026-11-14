@@ -322,3 +322,50 @@ jobs:
           echo "Timeout probe worker exit status: $worker_status"
           php tests/Support/directory-sync-timeout-probe.php assert
 
+  greenmail-imap:
+    name: GreenMail IMAPS inbound poll (#819)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      greenmail:
+        # Service image (not a GitHub Action uses:); tag is enough. Actions below stay SHA-pinned.
+        image: greenmail/standalone:2.1.3
+        ports:
+          - 3025:3025
+          - 3993:3993
+          - 8080:8080
+        options: >-
+          --health-cmd="curl -fsS http://127.0.0.1:8080/api/service/readiness || exit 1"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && 'main' || github.sha }}
+          fetch-depth: 1
+
+      - name: Set up PHP 8.4
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '8.4'
+          extensions: mbstring, imap, sqlite3
+          coverage: none
+          tools: composer:v2
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run GreenMail IMAPS inbound test
+        env:
+          RUN_GREENMAIL: '1'
+          GREENMAIL_HOST: 127.0.0.1
+          GREENMAIL_SMTP_PORT: 3025
+          GREENMAIL_IMAPS_PORT: 3993
+          APP_ENV: testing
+          CACHE_STORE: array
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+        run: php artisan test --group=greenmail
+

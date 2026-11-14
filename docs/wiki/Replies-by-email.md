@@ -106,12 +106,12 @@ The full email is kept for 30 days so problems can be checked, then deleted. Aft
 
 ## Local testing
 
-Developers can try the whole loop on Herd with no real mailbox, using an optional standalone Mailpit (Herd's own mail catcher has no API for reading replies). Turn replies on with `php artisan inbound-mail:key --enable`, start Mailpit, and set `MAIL_PORT=1025` and `INBOUND_MAIL_DRIVER=mailpit` in `.env`. Then:
+Developers can try the whole loop on Herd with no real mailbox. Turn replies on with `php artisan inbound-mail:key --enable`, set `INBOUND_MAIL_DRIVER=herd` and `MAIL_USERNAME=myapes-account` in `.env`, then:
 
-1. As staff, add a public message to a demo ticket; its email arrives in Mailpit (<http://localhost:8025>).
+1. As staff, add a public message to a demo ticket; its email arrives in Herd > Mail.
 2. On **Admin → Emails → Inbound**, the **Local test replies** panel lists that email. Use **Reply as client** to send a reply, with optional variants such as no subject tag.
-3. Press **Fetch replies now** and open the ticket: the reply is there, marked **by email**.
+3. On **Admin → Emails → Import**, press **Fetch now** (or run `php artisan tickets:inbound-loop-check`) and open the ticket: the reply is there, marked **by email**.
 
-The panel exists only on a local install. Step by step: [`docs/herd.md`](https://github.com/APESCIC/MyAPES.Account/blob/main/docs/herd.md#replies-by-email).
+Mailpit remains an optional fallback. The mailbox password is set in **Admin → Settings → Keys and secrets** or `INBOUND_MAIL_IMAP_PASSWORD` in the server `.env` — never in a connection form. The panel exists only on a local install. Step by step: [`docs/herd.md`](https://github.com/APESCIC/MyAPES.Account/blob/main/docs/herd.md#replies-by-email).
 
 Developers and operators: see [`docs/mail.md`](https://github.com/APESCIC/MyAPES.Account/blob/main/docs/mail.md#replies-by-email).
