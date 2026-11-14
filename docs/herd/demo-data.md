@@ -33,15 +33,17 @@ It is not a real password, works only against your local database, and must neve
 
 In local, `/staff/login` shows a direct email and password form for these accounts.
 
-### The QA fixtures and `/login`
+### Developer sign-in and QA fixtures
 
-By default the demo data also loads the existing local QA fixtures (`database/seeders/LocalQaSeeder.php`), because the in-app QA role switcher uses them. While they exist, opening `/login` signs straight in as the QA service user. To try the public sign-in form with `member@example.test`, load the demo data without them:
+With `QA_LOGIN_ENABLED=true` and `APP_ENV=local`, `/login` and `/staff/login` show an amber **Developer sign-in** panel (Local only). Pick an account type or common stack to sign in as a fake QA account in one click. Once signed in, the amber **QA pill** in the user dock switches profile in place or **Sign out of QA**. `/qa` is the same panel as a fallback. QA accounts have random unknown passwords; use the panel, not the email/password form.
+
+By default the demo data also loads `database/seeders/LocalQaSeeder.php` so those profiles and fixture records exist. To try the public sign-in form with `member@example.test` without the QA fixtures:
 
 ```powershell
 composer demo:reset -- --without-qa
 ```
 
-The QA role switcher needs the QA fixtures, so it does not work in that mode.
+Leave `QA_LOGIN_ENABLED` unset on Cloudron. The feature is off in testing, staging and production.
 
 ## What is included
 
