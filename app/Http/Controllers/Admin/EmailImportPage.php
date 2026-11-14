@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Core\Mail\Inbound\ConnectionPanel;
 use App\Core\Mail\Inbound\Diagnostics\DiagnosticReport;
 use App\Core\Mail\Inbound\ImportReadiness;
 use App\Core\Mail\Inbound\InboundMailboxLogEntry;
-use App\Core\Mail\Inbound\InboundMailboxSettings;
 use App\Core\Mail\Inbound\InboundMailSettings;
 use App\Core\Mail\Inbound\ReplyMailboxStatus;
-use App\Core\Settings\AppSettings;
 use Illuminate\Support\Carbon;
 
 /**
- * What Admin → Emails → Import shows (#735, #774). The password is never
- * sent to the page: only whether one is saved.
+ * What Admin → Emails → Import shows (#735, #774, #811). Secrets are never
+ * sent to the page: only status and source.
  */
 final class EmailImportPage
 {
@@ -21,9 +20,9 @@ final class EmailImportPage
 
     public function __construct(
         private readonly InboundMailSettings $inbound,
-        private readonly AppSettings $settings,
         private readonly ReplyMailboxStatus $status,
         private readonly ImportReadiness $readiness,
+        private readonly ConnectionPanel $connection,
     ) {}
 
     /**
@@ -31,20 +30,11 @@ final class EmailImportPage
      */
     public function viewData(): array
     {
-        $fields = [];
-        foreach ($this->settings->definitions(InboundMailboxSettings::GROUP) as $key => $definition) {
-            $fields[$key] = [
-                'value' => $definition->secret ? null : $this->settings->get(InboundMailboxSettings::GROUP, $key),
-                'env' => $this->settings->overriddenByEnv(InboundMailboxSettings::GROUP, $key),
-            ];
-        }
-
         return [
             'repliesEnabled' => $this->inbound->repliesEnabled(),
             'pollingConfigured' => $this->inbound->pollingConfigured(),
             'address' => $this->inbound->address(),
-            'fields' => $fields,
-            'passwordSaved' => $this->settings->stored(InboundMailboxSettings::GROUP, 'password'),
+            'connectionRows' => $this->connection->rows(),
             'lastTest' => $this->status->lastTest(),
             'readiness' => $this->readiness->items(),
             'log' => InboundMailboxLogEntry::recent(),
@@ -54,9 +44,6 @@ final class EmailImportPage
             'nextPollAt' => $this->status->backingOff() ? $this->status->nextPollAt() : null,
             'consecutiveFailures' => $this->status->consecutiveFailures(),
             'probe' => $this->probe(),
-            'encryptions' => collect(InboundMailboxSettings::encryptions())
-                ->mapWithKeys(fn (string $encryption): array => [$encryption => __("admin.emails.import.encryption.{$encryption}")])
-                ->all(),
         ];
     }
 

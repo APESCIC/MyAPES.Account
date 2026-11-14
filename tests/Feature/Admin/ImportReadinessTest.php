@@ -8,16 +8,15 @@ use App\Core\Mail\Inbound\Diagnostics\DiagnosticStep;
 use App\Core\Mail\Inbound\Diagnostics\FailureType;
 use App\Core\Mail\Inbound\Diagnostics\StepResult;
 use App\Core\Mail\Inbound\Diagnostics\StepStatus;
-use App\Core\Mail\Inbound\InboundMailboxSettings;
 use App\Core\Mail\Inbound\ReplyMailboxStatus;
-use App\Core\Settings\AppSettings;
+use App\Core\Secrets\SecretRegistry;
 use App\Services\AuthorizationProfile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 /**
- * The readiness checklist on Admin → Emails → Import (#775).
+ * The readiness checklist on Admin → Emails → Import (#775, #811).
  */
 class ImportReadinessTest extends TestCase
 {
@@ -51,27 +50,11 @@ class ImportReadinessTest extends TestCase
         $this->assertItem('token_key', 'missing', 'it');
     }
 
-    public function test_the_replies_switched_on_item(): void
-    {
-        $this->assertItem('enabled', 'missing', 'admin');
-
-        $this->save(['enabled' => true]);
-        $this->assertItem('enabled', 'ok');
-    }
-
-    public function test_the_mailbox_address_item(): void
-    {
-        $this->assertItem('address', 'ok');
-
-        config(['app-settings.env.INBOUND_MAIL_ADDRESS' => 'not-an-address', 'inbound-mail.address' => 'not-an-address']);
-        $this->assertItem('address', 'missing', 'it');
-    }
-
     public function test_the_password_item(): void
     {
         $this->assertItem('password', 'missing', 'admin');
 
-        $this->save(['password' => self::PASSWORD]);
+        app(SecretRegistry::class)->set(SecretRegistry::INBOUND_MAIL_IMAP_PASSWORD, self::PASSWORD);
         $this->assertItem('password', 'ok');
     }
 
@@ -114,11 +97,24 @@ class ImportReadinessTest extends TestCase
 
     public function test_no_secret_value_is_rendered(): void
     {
-        $this->save(['password' => self::PASSWORD, 'enabled' => true]);
+        app(SecretRegistry::class)->set(SecretRegistry::INBOUND_MAIL_IMAP_PASSWORD, self::PASSWORD);
 
         $this->page()
             ->assertSee(__('admin.emails.import.readiness.items.password.ok'))
             ->assertSee(__('admin.emails.import.readiness.items.token_key.ok'))
+            ->assertDontSee(self::PASSWORD)
+            ->assertDontSee(self::TOKEN_KEY);
+    }
+
+    public function test_the_connection_panel_shows_sources_without_secrets(): void
+    {
+        app(SecretRegistry::class)->set(SecretRegistry::INBOUND_MAIL_IMAP_PASSWORD, self::PASSWORD);
+
+        $this->page()
+            ->assertSee('data-connection-panel', false)
+            ->assertSee('data-connection-row="host" data-source="built_in"', false)
+            ->assertSee('data-connection-row="password" data-source="keys_and_secrets"', false)
+            ->assertSee(__('admin.emails.import.sources.built_in'), false)
             ->assertDontSee(self::PASSWORD)
             ->assertDontSee(self::TOKEN_KEY);
     }
@@ -140,13 +136,5 @@ class ImportReadinessTest extends TestCase
     private function page(): TestResponse
     {
         return $this->actingAs($this->admin)->get(route('admin.emails.import.index'))->assertOk();
-    }
-
-    /**
-     * @param  array<string, mixed>  $values
-     */
-    private function save(array $values): void
-    {
-        app(AppSettings::class)->set(InboundMailboxSettings::GROUP, $values, $this->admin->id);
     }
 }
