@@ -1,6 +1,6 @@
 param(
     [switch]$Fresh,
-    [string]$AppUrl = "http://myapes-account.test"
+    [string]$AppUrl = "https://myapes-account.test"
 )
 
 $ErrorActionPreference = 'Stop'

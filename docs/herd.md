@@ -28,7 +28,7 @@ herd link myapes-account
 herd isolate 8.4 --site=myapes-account
 ```
 
-Herd serves it at `http://myapes-account.test` from the `public/` folder, on PHP 8.4. The setup script below does the link and the PHP pin for you if they are missing.
+Herd serves it at `https://myapes-account.test` from the `public/` folder, on PHP 8.4, with Herd's own trusted certificate (`herd secure myapes-account`); `http://` redirects to it. The setup script below does the link, the PHP pin and the certificate for you if they are missing.
 
 ## 2. Run the setup script
 
@@ -42,12 +42,12 @@ composer setup
 [`scripts/herd-setup.ps1`](../scripts/herd-setup.ps1):
 
 1. checks Herd is running and that its PHP, extensions, Composer, Node, npm and MySQL match the profile
-2. links the site and pins it to PHP 8.4 if that is not done yet
+2. links the site, pins it to PHP 8.4 and secures it for HTTPS if that is not done yet
 3. copies `.env.example` to `.env` if `.env` is missing (it never overwrites an existing `.env`), warns about values that differ from the profile, and generates `APP_KEY`
 4. runs `composer install` and `npm ci`
 5. creates the `myapes_account_local` database if it does not exist, then runs the migrations
 6. asks whether to load the demo data (`-Demo` loads it without asking, `-NoDemo` skips it)
-7. builds the frontend (`-SkipBuild` skips it) and checks `http://myapes-account.test/healthz`
+7. builds the frontend (`-SkipBuild` skips it) and checks `https://myapes-account.test/healthz`
 
 It is safe to run again at any time. It only touches this site link, this folder and the `myapes_account_local` database, and refuses to continue if `APP_ENV` is not `local` or the database name does not end in `_local`.
 
@@ -69,9 +69,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1         
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1 -StopDevServer  # stop
 ```
 
-[`scripts/preview.ps1`](../scripts/preview.ps1) is the live preview gate. It loads the latest code, checks Herd serves it on PHP 8.4, then starts the Vite dev server on `http://myapes-account.test:5175` with Herd's Node 22, in the background with no window on the taskbar. Vite's output goes to `storage/logs/vite-dev.log` (git-ignored). Running it again reuses the Vite that is already running, so there is never a second copy. `-StopDevServer` stops this project's Vite only and removes `public/hot`, so the pages fall back to the built assets.
+[`scripts/preview.ps1`](../scripts/preview.ps1) is the live preview gate. It loads the latest code, checks Herd serves it on PHP 8.4, then starts the Vite dev server on `https://myapes-account.test:5175` (with the same Herd certificate) with Herd's Node 22, in the background with no window on the taskbar. Vite's output goes to `storage/logs/vite-dev.log` (git-ignored). Running it again reuses the Vite that is already running, so there is never a second copy. `-StopDevServer` stops this project's Vite only and removes `public/hot`, so the pages fall back to the built assets.
 
-Herd's nginx serves the pages, so keep Herd running. Open `http://myapes-account.test`: saving a Blade template, CSS or JavaScript file, or a route or app file, reloads the browser or swaps the change in without a rebuild.
+Herd's nginx serves the pages, so keep Herd running. Open `https://myapes-account.test`: saving a Blade template, CSS or JavaScript file, or a route or app file, reloads the browser or swaps the change in without a rebuild.
 
 Vite, its live-reload connection and `public/hot` all use the host name from `APP_URL` (`myapes-account.test`), never an IP address. Herd's hosts entry makes the name resolve; nothing else needs setting up.
 
@@ -166,9 +166,9 @@ nginx (80 and 443) and MySQL (3306) are shared. Each project starts and stops it
 - **Vite did not start:** the gate shows the end of `storage/logs/vite-dev.log`; the whole file has Vite's output.
 - **`myapes-account.test` does not resolve:** run `herd status`, and check `herd links` lists `myapes-account`. Herd's helper service writes the hosts entry; restart Herd if it is missing.
 - **`php` or `node` is the wrong version:** dot-source `scripts\herd-env.ps1`, or use `herd php` and `herd composer`.
-- **Unstyled pages:** start Vite with `scripts\preview.ps1`, or run `npm run build`. A `public/hot` file left by a Vite that was closed some other way also unstyles the pages; `scripts\preview.ps1 -StopDevServer` removes it.
+- **Unstyled pages:** start Vite with `scripts\preview.ps1`, or run `npm run build`. A `public/hot` file left by a Vite that was closed some other way also unstyles the pages; `scripts\preview.ps1 -StopDevServer` removes it. If `public/hot` starts with `http://` while the site is on HTTPS, the browser blocks the styles as mixed content: check `APP_URL` is `https://myapes-account.test` and the site is secured, then restart Vite (`-StopDevServer`, then `scripts\preview.ps1`).
 - **File permission errors** under `storage` or `bootstrap/cache`: close anything that locks the files (an editor search, antivirus or a running dev server; `scripts\preview.ps1 -StopDevServer` stops Vite), then run `php artisan optimize:clear`.
-- **Passkeys:** browsers need a secure origin. Run `herd secure myapes-account`, browse `https://myapes-account.test`, and set `APP_URL` to that origin and `SESSION_SECURE_COOKIE=true` in `.env`.
+- **Passkeys:** browsers need a secure origin, which the HTTPS site already is (`APP_URL=https://myapes-account.test`, `SESSION_SECURE_COOKIE=true`).
 
 ## Cursor cloud agents
 

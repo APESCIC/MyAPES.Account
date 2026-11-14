@@ -1,3 +1,6 @@
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { defineConfig, loadEnv } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
@@ -7,7 +10,12 @@ export default defineConfig(({ mode }) => {
     const port = Number(env.VITE_PORT || 5175);
     // Serve, reload and write public/hot under the APP_URL host name
     // (myapes-account.test on Herd), so no address is printed or used.
-    const host = new URL(env.APP_URL || 'http://localhost').hostname;
+    const appUrl = new URL(env.APP_URL || 'http://localhost');
+    const host = appUrl.hostname;
+    // On an https APP_URL, serve Vite with Herd's certificate for that host, when
+    // the site is secured; elsewhere (CI, builds, no Herd) Vite stays on http.
+    const herdCertificate = path.join(os.homedir(), '.config', 'herd', 'config', 'valet', 'Certificates', `${host}.crt`);
+    const detectTls = appUrl.protocol === 'https:' && fs.existsSync(herdCertificate) ? host : false;
 
     return {
         plugins: [
@@ -24,6 +32,7 @@ export default defineConfig(({ mode }) => {
                     'routes/**',
                     'app/**',
                 ],
+                detectTls,
             }),
             tailwindcss(),
         ],

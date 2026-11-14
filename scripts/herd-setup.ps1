@@ -8,8 +8,9 @@
          that match the profile, and puts them first on PATH for this session;
       2. checks the PHP extensions, OPcache and npm's version;
       3. checks Herd's MySQL service runs the profile's version on its port;
-      4. links the site (herd link) and pins it to the profile's PHP version
-         (herd isolate), unless that is already done;
+      4. links the site (herd link), pins it to the profile's PHP version
+         (herd isolate) and secures it for HTTPS (herd secure), unless that is
+         already done;
       5. creates .env from .env.example when it is missing and compares it with
          the profile;
       6. installs dependencies and generates APP_KEY when it is blank;
@@ -178,6 +179,14 @@ try {
         } else {
             Invoke-Checked 'herd isolate' { herd isolate $p.php --site=$($p.herdSite) }
             Write-Ok "Pinned $($p.hostname) to PHP $($p.php)"
+        }
+    }
+    if ($p.appUrl -like 'https://*') {
+        if (Test-Path (Join-Path $HerdRoot "config\valet\Certificates\$($p.hostname).crt")) {
+            Write-Ok "Served over HTTPS with Herd's certificate"
+        } else {
+            Invoke-Checked 'herd secure' { herd secure $p.herdSite }
+            Write-Ok "Secured $($p.hostname) with Herd's certificate (HTTPS)"
         }
     }
 
