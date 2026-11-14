@@ -121,6 +121,7 @@ Route::post('/qa/switch-role', [PublicAuthController::class, 'qaSwitchRole'])->n
 
 Route::prefix('staff/auth')->controller(OidcAuthController::class)->group(function (): void {
     Route::get('/login', 'login')->name('staff.auth.login');
+    Route::get('/step-up', 'stepUp')->middleware('auth')->name('staff.auth.step-up');
     Route::get('/callback', 'callback')->name('staff.auth.callback');
     Route::post('/logout', 'logout')->middleware('auth')->name('auth.logout');
 });

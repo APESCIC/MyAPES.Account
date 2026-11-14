@@ -21,6 +21,7 @@ return [
         'directory_unavailable' => 'Staff access verification is temporarily unavailable.',
         'email_conflict' => 'An account with this email already exists. Use a different Cloudron or work email for staff access.',
         'local_account' => 'This email belongs to a public account. Staff sign in with Cloudron using a separate account; keep your public account for personal use.',
+        'step_up_mismatch' => 'Staff re-authentication must complete with the same Cloudron account that started the confirmation.',
     ],
 
     'common' => [
