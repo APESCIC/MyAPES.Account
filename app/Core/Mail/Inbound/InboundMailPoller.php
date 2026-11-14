@@ -47,6 +47,7 @@ final class InboundMailPoller
         private readonly InboundMailStore $store,
         private readonly ReplyMailboxStatus $status,
         private readonly ImportAlerts $alerts,
+        private readonly RetireStoredMailboxSettings $retireStored,
     ) {}
 
     /**
@@ -82,6 +83,10 @@ final class InboundMailPoller
         $this->status->recordPoll($result);
         InboundMailboxLogEntry::recordPoll($result, (int) round((hrtime(true) - $started) / 1_000_000));
         $this->alerts->afterPoll($result);
+
+        if (($result['result'] ?? null) === self::RESULT_POLLED) {
+            $this->retireStored->retireAfterSuccessfulPoll();
+        }
 
         return $result;
     }

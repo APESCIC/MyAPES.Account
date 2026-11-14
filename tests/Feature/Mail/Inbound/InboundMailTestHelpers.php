@@ -4,6 +4,8 @@ namespace Tests\Feature\Mail\Inbound;
 
 use App\Core\Accounts\User;
 use App\Core\Mail\Inbound\ReplyToken;
+use App\Core\Secrets\SecretRegistry;
+use Illuminate\Support\Collection;
 use Plugins\Cases\Models\ShelterCase;
 use Plugins\PetProfiles\Models\PetProfile;
 use Plugins\Tickets\Models\SupportTicket;
@@ -17,6 +19,11 @@ trait InboundMailTestHelpers
 {
     protected function enableEmailReplies(array $overrides = []): void
     {
+        $password = array_key_exists('inbound-mail.imap.password', $overrides)
+            ? $overrides['inbound-mail.imap.password']
+            : 'test-inbound-password';
+        unset($overrides['inbound-mail.imap.password'], $overrides['app-settings.env.INBOUND_MAIL_IMAP_PASSWORD']);
+
         config([
             'inbound-mail.enabled' => true,
             'inbound-mail.address' => 'communications@example.test',
@@ -24,9 +31,21 @@ trait InboundMailTestHelpers
             'inbound-mail.token_key' => 'inbound-test-key',
             'inbound-mail.require_authentication' => true,
             'inbound-mail.authserv_id' => 'mx.example.test',
+            'inbound-mail.imap.host' => 'mail.cloudron.apes.org.uk',
+            'inbound-mail.imap.port' => 993,
+            'inbound-mail.imap.encryption' => 'ssl',
+            'inbound-mail.imap.password' => null,
+            'app-settings.env.INBOUND_MAIL_IMAP_PASSWORD' => null,
             'mail.default' => 'array',
             ...$overrides,
         ]);
+
+        $secrets = app(SecretRegistry::class);
+        if (is_string($password) && $password !== '') {
+            $secrets->set(SecretRegistry::INBOUND_MAIL_IMAP_PASSWORD, $password);
+        } else {
+            $secrets->clear(SecretRegistry::INBOUND_MAIL_IMAP_PASSWORD);
+        }
     }
 
     protected function ticketFor(User $owner, array $attributes = []): SupportTicket
@@ -91,7 +110,7 @@ trait InboundMailTestHelpers
      */
     protected function sentEmails(): array
     {
-        /** @var \Illuminate\Support\Collection<int, SentMessage> $messages */
+        /** @var Collection<int, SentMessage> $messages */
         $messages = app('mailer')->getSymfonyTransport()->messages();
 
         return $messages->map(static fn (SentMessage $message): Email => $message->getOriginalMessage())->values()->all();

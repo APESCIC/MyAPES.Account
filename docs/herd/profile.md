@@ -5,7 +5,7 @@ Laravel Herd (Pro) on Windows is the only supported local development setup for 
 | Setting | Value |
 | --- | --- |
 | Herd site | `myapes-account`, linked from the clone (`herd link myapes-account`); no copy or junction anywhere else |
-| Hostname | `http://myapes-account.test` (optional `https://myapes-account.test` after `herd secure myapes-account`) |
+| Hostname | `https://myapes-account.test` (secured with `herd secure myapes-account`; nginx redirects plain HTTP to it) |
 | Document root | `public/` (Herd serves it automatically) |
 | Web server | Herd's nginx on ports 80 and 443 |
 | PHP | 8.4, pinned to the site with `herd isolate 8.4 --site=myapes-account`. Herd runs it through FastCGI (`php-cgi`, so `/healthz` reports `php_sapi` `cgi-fcgi`), and the command line uses the same build (`%USERPROFILE%\.config\herd\bin\php84`); production and CI also run 8.4 |
@@ -16,7 +16,7 @@ Laravel Herd (Pro) on Windows is the only supported local development setup for 
 | Database user | `root` with an empty password (Herd default, local only) |
 | Node | 22 from Herd's nvm (`%USERPROFILE%\.config\herd\bin\nvm\v22.*`) with npm 11.10 or newer. Herd's global Node default can be another version; the scripts pick Node 22 themselves |
 | Vite dev server port | `5175` (unique to this project) |
-| Vite dev server | `http://myapes-account.test:5175`, started with no window by `scripts\preview.ps1` (stop with `-StopDevServer`), output in `storage/logs/vite-dev.log` |
+| Vite dev server | `https://myapes-account.test:5175` with Herd's site certificate (an HTTPS page cannot load plain-HTTP assets), started with no window by `scripts\preview.ps1` (stop with `-StopDevServer`), output in `storage/logs/vite-dev.log` |
 | Mail | Herd's mail catcher: SMTP on `127.0.0.1:2525`, read in Herd > Mail. Nothing is delivered |
 | Tests | In-memory SQLite (`phpunit.xml`); they never touch `myapes_account_local` |
 

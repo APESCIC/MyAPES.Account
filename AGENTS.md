@@ -33,12 +33,12 @@ Laravel Herd (Pro) on Windows is the only supported local setup. Use this projec
 | Item | Value |
 | --- | --- |
 | Herd site | `myapes-account`, linked from the clone (`C:\Users\BambieMurphy\Documents\GitHub\MyAPES.Account` on the owner's PC); no junction or copy elsewhere |
-| App URL | `http://myapes-account.test`, document root `public/` |
+| App URL | `https://myapes-account.test`, document root `public/` |
 | Profile | [docs/herd/profile.md](docs/herd/profile.md) ([`profile.json`](docs/herd/profile.json) for the scripts): PHP 8.4 pinned with `herd isolate` (FastCGI, `php_sapi` `cgi-fcgi`), Herd MySQL 8.4 (`myapes_account_local`, root, empty password), Node 22 from Herd's nvm, npm 11.10+, Vite port 5175 |
 | Mail | Herd's mail catcher, SMTP `127.0.0.1:2525` (Herd > Mail, or the Herd MCP `mail` tool). An optional standalone Mailpit (SMTP 1025, API 8025) is only for the reply loop (`INBOUND_MAIL_DRIVER=mailpit`) |
 | Setup | `composer setup` (runs `scripts/herd-setup.ps1`; safe to run twice) |
-| Live preview gate | Before any development work: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1`, then open <http://myapes-account.test> in Cursor's browser (see [`.cursor/rules/herd-local-dev.mdc`](.cursor/rules/herd-local-dev.mdc)) |
-| Daily loop | Herd open, then `scripts\preview.ps1`: Vite hot reload at `http://myapes-account.test:5175` with no window, output in `storage/logs/vite-dev.log`, stopped with `-StopDevServer`. `composer run dev` adds the queue and a log tail and reuses that Vite |
+| Live preview gate | Before any development work: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1`, then open <https://myapes-account.test> in Cursor's browser (see [`.cursor/rules/herd-local-dev.mdc`](.cursor/rules/herd-local-dev.mdc)) |
+| Daily loop | Herd open, then `scripts\preview.ps1`: Vite hot reload at `https://myapes-account.test:5175` with no window, output in `storage/logs/vite-dev.log`, stopped with `-StopDevServer`. `composer run dev` adds the queue and a log tail and reuses that Vite |
 | Demo data | `composer demo:seed` to load, `composer demo:reset` to wipe and reload; logins in [docs/herd/demo-data.md](docs/herd/demo-data.md) |
 | Env file | `.env.example` (Herd values) |
 
@@ -100,6 +100,7 @@ Facts the rule relies on:
 ## Decisions and gotchas
 
 - 2026-11-12: email import uses the Cloudron `communications@myapes.me.uk` mailbox over IMAP on `mail.cloudron.apes.org.uk:993` SSL/TLS (Cloudron has no IMAP on 143), polled every minute with backoff, and imported mail moves to `Processed` or `Failed` folders emptied after 30 days. Decided by Bambie (epic #770).
+- 2026-11-14: inbound connection is built in (no Import form); the mailbox password is set in Admin → Settings → Keys and secrets or `INBOUND_MAIL_IMAP_PASSWORD` in the server `.env` (Vault item name only for the communications@ Mail Client app password). Local reply testing uses `INBOUND_MAIL_DRIVER=herd` (Herd `mail:*` commands) with Mailpit as fallback; `tickets:inbound-loop-check` proves the loop. Decided by Bambie (epic #807).
 - 2026-11-14: Laravel Herd Pro becomes the only local development and testing stack (v0.63.1). Local mail goes to Herd's mail catcher; the Mailpit inbound driver stays for an optional standalone Mailpit when testing the reply loop. Decided by Bambie (epic #789).
 - The milestone branch is always the one `composer milestone:next` prints, even when an issue body names a slightly different slug.
 - With Herd's PHP, `composer install` regenerating the optimised autoloader can take several minutes (66 s for `dump-autoload -o`, 30 s for `package:discover`, far longer on a cold first run); it is slow, not stuck. Right after it, the first `/healthz` can exceed `scripts\preview.ps1`'s 60 s timeout; run the gate again.

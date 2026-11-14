@@ -31,13 +31,24 @@
         @endif
     </dl>
 
-    @can('admin.settings.manage')
-        <div class="actions">
+    <div class="actions">
+        @can('admin.emails.manage')
+            <form method="post" action="{{ route('admin.emails.import.fetch') }}" data-fetch-now-form>
+                @csrf
+                <button type="submit" class="button button-secondary">{{ __('admin.emails.import.fetch') }}</button>
+            </form>
+        @endcan
+        @can('admin.settings.manage')
             <form method="post" action="{{ route('admin.emails.import.probe') }}" data-probe-form>
                 @csrf
                 <button type="submit" class="button button-secondary">{{ __('admin.emails.import.probe') }}</button>
             </form>
-        </div>
+        @endcan
+    </div>
+    @can('admin.settings.manage')
         <p class="muted">{{ __('admin.emails.import.probe_help') }}</p>
+    @endcan
+    @can('admin.emails.manage')
+        <p class="muted">{{ __('admin.emails.import.fetch_help') }}</p>
     @endcan
 </section>

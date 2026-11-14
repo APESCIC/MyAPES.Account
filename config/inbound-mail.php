@@ -2,26 +2,29 @@
 
 /*
 |--------------------------------------------------------------------------
-| Ticket and case replies by email (#589)
+| Ticket and case replies by email (#589, #808)
 |--------------------------------------------------------------------------
 |
 | Replies to ticket and case emails go to one mailbox, which the app polls
-| over IMAP. Everything is read from the environment; secrets are never
-| committed. With INBOUND_MAIL_ENABLED off or no token key, outgoing mail
-| keeps the no-reply Reply-To and the poller does nothing.
+| over IMAP. Connection values are built in below; a non-empty INBOUND_MAIL_*
+| value in .env overrides. The mailbox password comes from Admin → Keys and
+| secrets first, then INBOUND_MAIL_IMAP_PASSWORD. Secrets are never committed.
+| With INBOUND_MAIL_ENABLED=false, or without a token key and password,
+| outgoing mail keeps the no-reply Reply-To and the poller does nothing.
 |
 */
 
 return [
 
-    'enabled' => (bool) env('INBOUND_MAIL_ENABLED', false),
+    // null/empty = auto (on when token key and password are present); false turns replies off (#808).
+    'enabled' => env('INBOUND_MAIL_ENABLED'),
 
     'address' => env('INBOUND_MAIL_ADDRESS', 'communications@myapes.me.uk'),
 
     // Whether the mail server delivers communications+token@ to the mailbox (#577).
     'plus_addressing' => (bool) env('INBOUND_MAIL_PLUS_ADDRESSING', true),
 
-    // Dedicated HMAC key for reply tokens. Never APP_KEY.
+    // Dedicated HMAC key for reply tokens. Never APP_KEY. Stays in the server .env only.
     'token_key' => env('INBOUND_MAIL_TOKEN_KEY'),
 
     // Only Authentication-Results headers from this server are trusted.
@@ -30,8 +33,8 @@ return [
 
     'require_authentication' => (bool) env('INBOUND_MAIL_REQUIRE_AUTH', true),
 
-    // imap (default) or mailpit. mailpit reads a standalone local Mailpit over its REST API and works only on local
-    // or testing with a loopback URL (#756); the Cloudron deploy preflight refuses it.
+    // imap (default), mailpit, or herd (#816). mailpit/herd work only on local or testing;
+    // the Cloudron deploy preflight refuses them.
     'driver' => env('INBOUND_MAIL_DRIVER', 'imap'),
 
     'mailpit' => [
@@ -39,7 +42,7 @@ return [
         'timeout' => 10,
     ],
 
-    // Cloudron offers IMAP on 993 with SSL/TLS only (#773); the form starts with these values.
+    // Built-in Cloudron mailbox (#808). Username defaults to the address when empty.
     'imap' => [
         'host' => env('INBOUND_MAIL_IMAP_HOST') ?: 'mail.cloudron.apes.org.uk',
         'port' => (int) env('INBOUND_MAIL_IMAP_PORT', 993),

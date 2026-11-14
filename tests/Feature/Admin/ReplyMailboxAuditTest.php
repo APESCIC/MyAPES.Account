@@ -6,6 +6,7 @@ use App\Core\Accounts\AuditLog;
 use App\Core\Accounts\User;
 use App\Core\Mail\Inbound\Contracts\InboundMailbox;
 use App\Core\Mail\Inbound\Diagnostics\MailboxTransport;
+use App\Core\Secrets\SecretRegistry;
 use App\Services\AuthorizationProfile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Fakes\FakeImapServer;
@@ -13,7 +14,7 @@ use Tests\Feature\Mail\Inbound\FakeMailbox;
 use Tests\TestCase;
 
 /**
- * Reply mailbox changes and tests are audited without secrets (#740).
+ * Import tests and probes are audited without secrets (#740, #809).
  */
 class ReplyMailboxAuditTest extends TestCase
 {
@@ -30,47 +31,21 @@ class ReplyMailboxAuditTest extends TestCase
         parent::setUp();
         config([
             'app-settings.env' => array_fill_keys(array_keys((array) config('app-settings.env')), null),
+            'inbound-mail.enabled' => null,
             'inbound-mail.token_key' => self::TOKEN_KEY,
+            'inbound-mail.address' => 'communications@example.test',
+            'inbound-mail.imap.host' => 'imap.example.test',
+            'inbound-mail.imap.port' => 993,
+            'inbound-mail.imap.encryption' => 'ssl',
         ]);
+        app(SecretRegistry::class)->set(SecretRegistry::INBOUND_MAIL_IMAP_PASSWORD, self::PASSWORD);
         $this->app->instance(InboundMailbox::class, new FakeMailbox);
         $this->app->instance(MailboxTransport::class, new FakeImapServer);
         $this->admin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
     }
 
-    public function test_saving_records_the_changed_fields_and_never_the_password(): void
-    {
-        $this->actingAs($this->admin)->put(route('admin.emails.import.update'), $this->form());
-
-        $audit = AuditLog::query()->where('event', 'admin.settings.mailbox_saved')->sole();
-        $this->assertSame($this->admin->id, $audit->user_id);
-        $this->assertContains('host', $audit->context['changed']);
-        $this->assertNotContains('password', $audit->context['changed']);
-        $this->assertTrue($audit->context['password_changed']);
-        $this->assertNoSecrets($audit);
-    }
-
-    public function test_saving_without_changes_records_nothing(): void
-    {
-        $this->actingAs($this->admin)->put(route('admin.emails.import.update'), $this->form());
-        $this->actingAs($this->admin)->put(route('admin.emails.import.update'), $this->form(['password' => '']));
-
-        $this->assertSame(1, AuditLog::query()->where('event', 'admin.settings.mailbox_saved')->count());
-    }
-
-    public function test_keeping_the_password_records_that_it_did_not_change(): void
-    {
-        $this->actingAs($this->admin)->put(route('admin.emails.import.update'), $this->form());
-        $this->actingAs($this->admin)->put(route('admin.emails.import.update'), $this->form(['password' => '', 'folder' => 'Replies']));
-
-        $audit = AuditLog::query()->where('event', 'admin.settings.mailbox_saved')->latest('id')->first();
-        $this->assertSame(['folder'], $audit->context['changed']);
-        $this->assertFalse($audit->context['password_changed']);
-    }
-
     public function test_connection_tests_and_probes_are_audited_without_secrets(): void
     {
-        $this->actingAs($this->admin)->put(route('admin.emails.import.update'), $this->form());
-
         $this->actingAs($this->admin)->post(route('admin.emails.import.test'));
         $this->actingAs($this->admin)->post(route('admin.emails.import.probe'));
 
@@ -85,26 +60,5 @@ class ReplyMailboxAuditTest extends TestCase
 
         $this->assertStringNotContainsString(self::PASSWORD, $recorded);
         $this->assertStringNotContainsString(self::TOKEN_KEY, $recorded);
-    }
-
-    /**
-     * @param  array<string, string>  $overrides
-     * @return array<string, string>
-     */
-    private function form(array $overrides = []): array
-    {
-        return [
-            'enabled' => '1',
-            'address' => 'communications@example.test',
-            'host' => 'imap.example.test',
-            'port' => '993',
-            'encryption' => 'ssl',
-            'validate_cert' => '1',
-            'username' => 'communications@example.test',
-            'password' => self::PASSWORD,
-            'folder' => 'INBOX',
-            'plus_addressing' => '1',
-            ...$overrides,
-        ];
     }
 }

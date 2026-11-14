@@ -8,8 +8,8 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * The local test replies panel (#758) exists only on a local install reading
- * a local Mailpit; anywhere else its routes are not found.
+ * The local test replies panel (#758, #817) exists only on a local install
+ * reading Herd or Mailpit; anywhere else its routes are not found.
  */
 class EnsureLocalReplyLoop
 {
@@ -27,6 +27,6 @@ class EnsureLocalReplyLoop
 
     public static function available(InboundMailSettings $settings): bool
     {
-        return app()->environment('local') && $settings->usesMailpit();
+        return app()->environment('local') && $settings->usesLocalCatcher();
     }
 }

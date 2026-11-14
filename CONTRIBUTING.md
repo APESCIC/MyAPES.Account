@@ -4,7 +4,7 @@ Thank you for helping. Please write in UK English, follow the [Code of Conduct](
 
 ## Before you start
 
-Run `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1` before any work. It stops if you have uncommitted changes, pulls the latest code, merges `origin/main` into your branch (never a rebase), installs changed dependencies, and checks the Herd preview at <http://myapes-account.test> serves that code on PHP 8.4 through FastCGI. If the pull or the merge fails, stop and ask for help. Don't force-push, `reset --hard` or rebase shared branches to get round it.
+Run `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1` before any work. It stops if you have uncommitted changes, pulls the latest code, merges `origin/main` into your branch (never a rebase), installs changed dependencies, and checks the Herd preview at <https://myapes-account.test> serves that code on PHP 8.4 through FastCGI. If the pull or the merge fails, stop and ask for help. Don't force-push, `reset --hard` or rebase shared branches to get round it.
 
 ## How work ships
 

@@ -3,7 +3,7 @@
 # Local setup (Herd)
 
 **Audience:** developers  
-**Purpose:** run MyAPES Account locally at `http://myapes-account.test`.
+**Purpose:** run MyAPES Account locally at `https://myapes-account.test`.
 
 Laravel Herd (Pro) on Windows is the only supported local setup. The full, maintained instructions are in [docs/herd.md](https://github.com/APESCIC/MyAPES.Account/blob/main/docs/herd.md); this page is the short version.
 
@@ -22,9 +22,9 @@ Open Herd first. `composer setup` runs `scripts/herd-setup.ps1`: it checks the v
 
 ## Daily loop
 1. Open Herd
-2. Run `scripts\preview.ps1` for hot reload: Vite runs at `http://myapes-account.test:5175` with no window, its output in `storage/logs/vite-dev.log`; `scripts\preview.ps1 -StopDevServer` stops it
-3. Open `http://myapes-account.test` and sign in with a demo login ([demo data](https://github.com/APESCIC/MyAPES.Account/blob/main/docs/herd/demo-data.md); never use real accounts or data)
-4. Mail the app sends lands in **Herd > Mail**; nothing is delivered
+2. Run `scripts\preview.ps1` for hot reload: Vite runs at `https://myapes-account.test:5175` with no window, its output in `storage/logs/vite-dev.log`; `scripts\preview.ps1 -StopDevServer` stops it
+3. Open `https://myapes-account.test` and sign in with a demo login ([demo data](https://github.com/APESCIC/MyAPES.Account/blob/main/docs/herd/demo-data.md); never use real accounts or data)
+4. Mail the app sends lands in **Herd > Mail**; nothing is delivered. For replies by email, set `INBOUND_MAIL_DRIVER=herd` and `MAIL_USERNAME=myapes-account`, then use **Admin → Emails → Inbound** local test replies and `php artisan tickets:inbound-loop-check` (see [docs/herd.md](https://github.com/APESCIC/MyAPES.Account/blob/main/docs/herd.md#replies-by-email))
 
 ## Demo data
 - `composer demo:seed` loads it; `composer demo:reset` wipes the local database and reloads it
