@@ -75,15 +75,16 @@ class ConnectionLogTest extends TestCase
 
     public function test_a_known_password_and_username_are_found_nowhere(): void
     {
-        $this->actingAs($this->admin)->put(route('admin.emails.import.update'), [
-            'enabled' => '1', 'address' => 'communications@example.test', 'host' => 'imap.example.test', 'port' => '993',
-            'encryption' => 'ssl', 'validate_cert' => '1', 'username' => self::USERNAME, 'password' => self::PASSWORD,
-            'folder' => 'INBOX', 'plus_addressing' => '1',
-        ])->assertSessionHasNoErrors();
+        $this->enableEmailReplies([
+            'inbound-mail.imap.host' => 'imap.example.test',
+            'inbound-mail.imap.username' => self::USERNAME,
+            'inbound-mail.imap.password' => self::PASSWORD,
+        ]);
 
         $this->server->loginResponse = 'NO [AUTHENTICATIONFAILED] Authentication failed for '.self::USERNAME;
-        $this->actingAs($this->admin)->put(route('admin.emails.import.test'), ['host' => 'imap.example.test', 'port' => '993', 'encryption' => 'ssl', 'username' => self::USERNAME, 'password' => self::TYPED_PASSWORD, 'folder' => 'INBOX']);
-        $this->actingAs($this->admin)->put(route('admin.emails.import.test'), ['host' => 'imap.example.test', 'port' => '993', 'encryption' => 'ssl', 'username' => self::USERNAME, 'password' => '', 'folder' => 'INBOX']);
+        $this->actingAs($this->admin)->post(route('admin.emails.import.test'));
+        $this->actingAs($this->admin)->withSession(['auth.password_confirmed_at' => now()->unix()])
+            ->post(route('admin.settings.keys-and-secrets.test'), ['password' => self::TYPED_PASSWORD]);
 
         $this->mailbox->unavailable = true;
         foreach (range(1, 3) as $attempt) {
@@ -112,12 +113,8 @@ class ConnectionLogTest extends TestCase
             $this->assertStringNotContainsString(self::PASSWORD, $contents, "password found in {$where}");
             $this->assertStringNotContainsString(self::TYPED_PASSWORD, $contents, "typed password found in {$where}");
             $this->assertDoesNotMatchRegularExpression('/\bLOGIN\s+"/', $contents, "an IMAP LOGIN line found in {$where}");
-            if ($where !== 'settings' && $where !== 'cache') {
-                $this->assertStringNotContainsString(self::USERNAME, $contents, "username found in {$where}");
-            }
+            $this->assertStringNotContainsString(self::USERNAME, $contents, "username found in {$where}");
         }
-        // The settings store holds the configured username by design; nothing else in the cache does.
-        $this->assertStringNotContainsString(self::USERNAME, str_replace($this->settingsCache(), '', $places['cache']));
         $this->assertStringNotContainsString(self::SUBJECT, $places['connection log']);
         $this->assertGreaterThan(0, DB::table('inbound_mailbox_log')->count());
     }
@@ -157,7 +154,7 @@ class ConnectionLogTest extends TestCase
             'inbound-mail.imap.password' => self::PASSWORD,
         ]);
         $this->server->folders = ['Archive'];
-        $this->actingAs($this->admin)->put(route('admin.emails.import.test'), ['host' => 'imap.example.test', 'port' => '993', 'encryption' => 'ssl', 'username' => self::USERNAME, 'password' => '', 'folder' => 'INBOX']);
+        $this->actingAs($this->admin)->post(route('admin.emails.import.test'));
         $this->mailbox->add($this->fixture('plain-reply'));
         app(InboundMailPoller::class)->poll();
 

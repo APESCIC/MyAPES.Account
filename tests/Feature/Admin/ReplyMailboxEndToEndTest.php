@@ -2,13 +2,12 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Core\Accounts\User;
 use App\Core\Mail\Inbound\Contracts\InboundMailbox;
 use App\Core\Mail\Inbound\ImapMailbox;
 use App\Core\Mail\Inbound\InboundEmail;
 use App\Core\Mail\Inbound\InboundMailPoller;
 use App\Core\Mail\Inbound\InboundMailSettings;
-use App\Services\AuthorizationProfile;
+use App\Core\Secrets\SecretRegistry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -17,15 +16,14 @@ use Tests\Feature\Mail\Inbound\InboundMailTestHelpers;
 use Tests\TestCase;
 
 /**
- * Settings saved in Admin → Settings → Reply mailbox switch polling on (#742),
- * with no real IMAP server: a fake mailbox stands in, as on a local Herd install.
+ * A Keys and secrets password turns polling on against the built-in connection (#808, #809).
  */
 class ReplyMailboxEndToEndTest extends TestCase
 {
     use InboundMailTestHelpers;
     use RefreshDatabase;
 
-    public function test_details_saved_by_an_admin_turn_polling_on_and_env_still_wins(): void
+    public function test_a_keys_and_secrets_password_turns_polling_on_and_enabled_false_turns_it_off(): void
     {
         Storage::fake('private');
         Queue::fake();
@@ -33,7 +31,7 @@ class ReplyMailboxEndToEndTest extends TestCase
             'app-settings.env' => array_fill_keys(array_keys((array) config('app-settings.env')), null),
             'inbound-mail.enabled' => null,
             'inbound-mail.token_key' => 'inbound-test-key',
-            'inbound-mail.address' => 'communications@myapes.me.uk',
+            'inbound-mail.address' => 'communications@example.test',
             'inbound-mail.imap.host' => 'mail.cloudron.apes.org.uk',
             'inbound-mail.imap.port' => 993,
             'inbound-mail.imap.encryption' => 'ssl',
@@ -43,22 +41,9 @@ class ReplyMailboxEndToEndTest extends TestCase
         $this->assertFalse($settings->pollingConfigured());
         $this->assertInstanceOf(ImapMailbox::class, app(InboundMailbox::class));
 
-        $admin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
-        $this->actingAs($admin)->put(route('admin.emails.import.update'), [
-            'enabled' => '1',
-            'address' => 'communications@example.test',
-            'host' => 'imap.example.test',
-            'port' => '993',
-            'encryption' => 'ssl',
-            'validate_cert' => '1',
-            'username' => 'communications@example.test',
-            'password' => 'not-a-real-password',
-            'folder' => 'INBOX',
-            'plus_addressing' => '1',
-        ])->assertSessionHasNoErrors();
-
+        app(SecretRegistry::class)->set(SecretRegistry::INBOUND_MAIL_IMAP_PASSWORD, 'not-a-real-password');
         $this->assertTrue($settings->pollingConfigured());
-        $this->assertSame(InboundMailSettings::PASSWORD_SOURCE_LEGACY, $settings->passwordSource());
+        $this->assertSame(InboundMailSettings::PASSWORD_SOURCE_KEYS, $settings->passwordSource());
         $this->assertSame('communications@example.test', $settings->address());
 
         $mailbox = new FakeMailbox;

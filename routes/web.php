@@ -417,11 +417,8 @@ Route::middleware([
             Route::get('/emails/import', [AdminEmailImportController::class, 'index'])
                 ->middleware('can:admin.settings.view')
                 ->name('emails.import.index');
-            Route::put('/emails/import', [AdminEmailImportController::class, 'update'])
-                ->middleware('can:admin.settings.manage')
-                ->name('emails.import.update');
-            // PUT too: the Test button submits the mailbox form, which carries _method=PUT (#771).
-            Route::match(['post', 'put'], '/emails/import/test', [AdminEmailImportController::class, 'test'])
+            // Connection form retired (#809); test and probe use the built-in connection (#812).
+            Route::post('/emails/import/test', [AdminEmailImportController::class, 'test'])
                 ->middleware('can:admin.settings.manage')
                 ->name('emails.import.test');
             Route::post('/emails/import/probe', [AdminEmailImportController::class, 'probe'])

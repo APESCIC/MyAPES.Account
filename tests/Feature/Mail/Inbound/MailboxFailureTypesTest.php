@@ -142,17 +142,13 @@ class MailboxFailureTypesTest extends TestCase
     private function submitTestForm(): TestResponse
     {
         $admin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
-
-        return $this->actingAs($admin)->followingRedirects()->post(route('admin.emails.import.test'), [
-            '_method' => 'PUT',
-            'host' => 'mail.example.test',
-            'port' => '993',
-            'encryption' => 'ssl',
-            'validate_cert' => '1',
-            'username' => self::USERNAME,
-            'password' => self::PASSWORD,
-            'folder' => 'INBOX',
+        $this->enableEmailReplies([
+            'inbound-mail.imap.host' => 'mail.example.test',
+            'inbound-mail.imap.username' => self::USERNAME,
+            'inbound-mail.imap.password' => self::PASSWORD,
         ]);
+
+        return $this->actingAs($admin)->followingRedirects()->post(route('admin.emails.import.test'));
     }
 
     private function connection(int $port = 993, string $encryption = 'ssl'): MailboxConnection

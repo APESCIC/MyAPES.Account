@@ -106,22 +106,20 @@ class ReplyMailboxHealthTest extends TestCase
             ->assertDontSee(self::PASSWORD);
     }
 
-    public function test_unsaved_values_are_tested_before_replies_are_on_and_nothing_is_saved(): void
+    public function test_the_built_in_connection_can_be_tested_without_saving_anything(): void
     {
-        config(['inbound-mail.enabled' => false, 'inbound-mail.token_key' => null, 'inbound-mail.imap.host' => null, 'inbound-mail.imap.password' => null]);
         $before = DB::table('app_settings')->get()->toArray();
 
         $this->actingAs($this->admin)
             ->followingRedirects()
-            ->post(route('admin.emails.import.test'), $this->form())
-            ->assertSee(__('admin.emails.import.test_ok'))
-            ->assertDontSee('Turn on replies by email and save the mailbox details first.');
+            ->post(route('admin.emails.import.test'))
+            ->assertSee(__('admin.emails.import.test_ok'));
 
         $this->assertEquals($before, DB::table('app_settings')->get()->toArray());
         $this->assertContains('LOGIN', $this->server->commands);
     }
 
-    public function test_a_typed_password_is_never_stored_logged_cached_audited_or_shown(): void
+    public function test_a_failed_test_never_echoes_the_saved_password(): void
     {
         $logged = [];
         Event::listen(MessageLogged::class, function (MessageLogged $event) use (&$logged): void {
@@ -129,44 +127,13 @@ class ReplyMailboxHealthTest extends TestCase
         });
         $this->server->loginResponse = 'NO [AUTHENTICATIONFAILED] Authentication failed.';
 
-        $response = $this->actingAs($this->admin)
-            ->post(route('admin.emails.import.test'), $this->form(['password' => self::TYPED_PASSWORD]));
+        $response = $this->actingAs($this->admin)->post(route('admin.emails.import.test'));
 
-        $this->assertStringNotContainsString(self::TYPED_PASSWORD, json_encode(session()->all()));
-        $page = $this->actingAs($this->admin)->get($response->headers->get('Location'))->assertOk();
-        $page->assertDontSee(self::TYPED_PASSWORD);
-
-        $this->assertStringNotContainsString(self::TYPED_PASSWORD, implode("\n", $logged));
-        $this->assertStringNotContainsString(self::TYPED_PASSWORD, json_encode(Cache::get('inbound-mail:last-test')));
-        $this->assertStringNotContainsString(self::TYPED_PASSWORD, json_encode(AuditLog::query()->get()->toArray()));
-        $this->assertStringNotContainsString(self::TYPED_PASSWORD, json_encode(DB::table('app_settings')->get()->toArray()));
-    }
-
-    public function test_the_saved_password_is_only_sent_to_the_saved_server(): void
-    {
-        $saved = ['_method' => 'PUT', 'host' => 'imap.example.test', 'port' => '993', 'encryption' => 'ssl', 'validate_cert' => '1', 'username' => 'communications@example.test', 'password' => '', 'folder' => 'INBOX'];
-
-        foreach ([
-            'another server' => ['host' => 'attacker.example.test'],
-            'another port' => ['port' => '1993'],
-            'another username' => ['username' => 'someone@example.test'],
-            'no certificate check' => ['validate_cert' => '0'],
-        ] as $case => $change) {
-            $this->actingAs($this->admin)
-                ->post(route('admin.emails.import.test'), [...$saved, ...$change])
-                ->assertSessionHasErrors(['password' => __('admin.emails.import.password_needed')]);
-            $this->assertFalse($this->server->connected, $case);
-            $this->assertSame([], $this->server->commands, $case);
-        }
-
-        $this->actingAs($this->admin)->post(route('admin.emails.import.test'), $saved)->assertSessionHasNoErrors();
-        $this->assertContains('LOGIN', $this->server->commands);
-
-        $this->actingAs($this->admin)
-            ->post(route('admin.emails.import.test'), [...$saved, 'host' => 'other.example.test', 'password' => self::TYPED_PASSWORD])
-            ->assertSessionHasNoErrors();
-        $audit = AuditLog::query()->where('event', 'admin.emails.import_tested')->latest('id')->first();
-        $this->assertSame('other.example.test', $audit->context['host']);
+        $this->assertStringNotContainsString(self::PASSWORD, json_encode(session()->all()));
+        $this->actingAs($this->admin)->get($response->headers->get('Location'))->assertOk()->assertDontSee(self::PASSWORD);
+        $this->assertStringNotContainsString(self::PASSWORD, implode("\n", $logged));
+        $this->assertStringNotContainsString(self::PASSWORD, json_encode(Cache::get('inbound-mail:last-test')));
+        $this->assertStringNotContainsString(self::PASSWORD, json_encode(AuditLog::query()->get()->toArray()));
     }
 
     public function test_the_sixth_test_inside_ten_minutes_is_refused(): void
@@ -220,27 +187,5 @@ class ReplyMailboxHealthTest extends TestCase
         $this->assertNull($email->posted_id);
         $this->assertNotNull(app(ReplyMailboxStatus::class)->probe()['arrived_at']);
         $this->actingAs($this->admin)->get(route('admin.emails.import.index'))->assertSee('so plus-addressing is delivered');
-    }
-
-    /**
-     * @param  array<string, string>  $overrides
-     * @return array<string, string>
-     */
-    private function form(array $overrides = []): array
-    {
-        return [
-            '_method' => 'PUT',
-            'enabled' => '0',
-            'address' => 'communications@example.test',
-            'host' => 'mail.example.test',
-            'port' => '993',
-            'encryption' => 'ssl',
-            'validate_cert' => '1',
-            'username' => 'communications@example.test',
-            'password' => self::PASSWORD,
-            'folder' => 'INBOX',
-            'plus_addressing' => '1',
-            ...$overrides,
-        ];
     }
 }
