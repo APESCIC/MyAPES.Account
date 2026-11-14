@@ -34,7 +34,7 @@ class InboundMailPollerTest extends TestCase
 
     public function test_poller_does_nothing_until_the_mailbox_is_configured(): void
     {
-        $this->enableEmailReplies();
+        $this->enableEmailReplies(['inbound-mail.imap.password' => null]);
         $this->mailbox->add($this->fixture('plain-reply'));
 
         $this->assertSame(InboundMailPoller::RESULT_DISABLED, app(InboundMailPoller::class)->poll()['result']);

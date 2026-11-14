@@ -1269,7 +1269,7 @@ class DeploymentAuthenticationContractTest extends TestCase
         $workflow = $this->combinedWorkflows();
 
         foreach ([
-            'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1' => 4,
+            'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1' => 5,
             'actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0' => 2,
         ] as $reference => $expectedOccurrences) {
             $this->assertSame(
@@ -1299,7 +1299,20 @@ class DeploymentAuthenticationContractTest extends TestCase
             $workflow,
             '  database-compatibility:',
         );
-        $databaseCompatibilityJob = substr($workflow, $databaseCompatibilityStart);
+        $nextJob = preg_match(
+            '/\n  [a-z0-9-]+:\s*\n/',
+            $workflow,
+            $nextJobMatch,
+            PREG_OFFSET_CAPTURE,
+            $databaseCompatibilityStart + 1,
+        ) === 1
+            ? (int) $nextJobMatch[0][1]
+            : strlen($workflow);
+        $databaseCompatibilityJob = substr(
+            $workflow,
+            $databaseCompatibilityStart,
+            $nextJob - $databaseCompatibilityStart,
+        );
 
         preg_match_all(
             '/^\s*timeout-minutes:\s*\d+\s*$/m',

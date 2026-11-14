@@ -185,7 +185,7 @@ final class AdminSearchCatalogue
                 'description' => __('admin.search.sections.email_import'),
                 'url' => route('admin.emails.import.index'),
                 'keywords_key' => 'admin.search.keywords.email_import',
-                'abilities' => ['admin.settings.view'],
+                'abilities' => ['admin.emails.view'],
             ],
             [
                 'id' => 'admin.settings',

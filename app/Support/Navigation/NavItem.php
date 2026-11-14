@@ -12,6 +12,7 @@ final readonly class NavItem
      * @param  list<string>  $activePatterns  route-name patterns that make this item current
      * @param  list<string>  $keywords  extra words the command palette matches on
      * @param  array<string, string>  $activeQuery  request values that must also match, e.g. account_type
+     * @param  int|null  $badge  optional count shown beside the label (hidden when null or 0)
      */
     public function __construct(
         public string $key,
@@ -21,6 +22,7 @@ final readonly class NavItem
         public array $activePatterns = [],
         public array $keywords = [],
         public array $activeQuery = [],
+        public ?int $badge = null,
     ) {}
 
     /**
@@ -36,6 +38,21 @@ final readonly class NavItem
             array_values(array_unique([...$this->activePatterns, ...$patterns])),
             $this->keywords,
             $this->activeQuery,
+            $this->badge,
+        );
+    }
+
+    public function withBadge(?int $badge): self
+    {
+        return new self(
+            $this->key,
+            $this->label,
+            $this->url,
+            $this->icon,
+            $this->activePatterns,
+            $this->keywords,
+            $this->activeQuery,
+            $badge !== null && $badge > 0 ? $badge : null,
         );
     }
 }

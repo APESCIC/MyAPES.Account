@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\AdminGeneralSettingsController;
 use App\Http\Controllers\Admin\AdminGroupController;
 use App\Http\Controllers\Admin\AdminInboundEmailController;
 use App\Http\Controllers\Admin\AdminIntegrationController;
+use App\Http\Controllers\Admin\AdminKeysAndSecretsController;
 use App\Http\Controllers\Admin\AdminLocalRepliesController;
 use App\Http\Controllers\Admin\AdminMaintenanceController;
 use App\Http\Controllers\Admin\AdminManagedListController;
@@ -305,7 +306,7 @@ Route::middleware([
         ->name('superadmin.')
         ->middleware('admin.denial-audit')
         ->group(function (): void {
-            // Legacy Super Admin shell URLs collapse into the unified Admin area (#252 / #293 / #459 → 301).
+            // Legacy Super Admin shell URLs collapse into the unified Admin area (#252 / #293 / #459 ? 301).
             Route::get('/', fn () => redirect()->route('admin.index', request()->query(), 301))
                 ->middleware('can:admin.analytics.view')
                 ->name('index');
@@ -415,22 +416,25 @@ Route::middleware([
                 ->middleware('can:admin.emails.manage')
                 ->name('emails.inbound.services.update');
             Route::get('/emails/import', [AdminEmailImportController::class, 'index'])
-                ->middleware('can:admin.settings.view')
+                ->middleware('can:admin.emails.view')
                 ->name('emails.import.index');
-            Route::put('/emails/import', [AdminEmailImportController::class, 'update'])
-                ->middleware('can:admin.settings.manage')
-                ->name('emails.import.update');
-            // PUT too: the Test button submits the mailbox form, which carries _method=PUT (#771).
-            Route::match(['post', 'put'], '/emails/import/test', [AdminEmailImportController::class, 'test'])
+            // Connection form retired (#809); test and probe use the built-in connection (#812).
+            Route::post('/emails/import/test', [AdminEmailImportController::class, 'test'])
                 ->middleware('can:admin.settings.manage')
                 ->name('emails.import.test');
             Route::post('/emails/import/probe', [AdminEmailImportController::class, 'probe'])
                 ->middleware(['can:admin.settings.manage', 'throttle:5,1'])
                 ->name('emails.import.probe');
+            Route::post('/emails/import/fetch', [AdminEmailImportController::class, 'fetch'])
+                ->middleware(['can:admin.emails.manage', 'throttle:10,1'])
+                ->name('emails.import.fetch');
+            Route::post('/emails/import/retry-failed', [AdminEmailImportController::class, 'retryFailed'])
+                ->middleware(['can:admin.emails.manage', 'throttle:10,1'])
+                ->name('emails.import.retry-failed');
             Route::get('/settings', [AdminSettingsController::class, 'index'])
                 ->middleware('can:admin.settings.view')
                 ->name('settings.index');
-            // The Reply mailbox tab moved to Admin → Emails → Import (#774).
+            // The Reply mailbox tab moved to Admin ? Emails ? Import (#774).
             Route::get('/settings/reply-mailbox', fn () => redirect()->route('admin.emails.import.index', [], 301))
                 ->middleware('can:admin.settings.view')
                 ->name('settings.reply-mailbox');
@@ -440,6 +444,15 @@ Route::middleware([
             Route::put('/settings/general', [AdminGeneralSettingsController::class, 'update'])
                 ->middleware('can:admin.settings.manage')
                 ->name('settings.general.update');
+            Route::put('/settings/keys-and-secrets/mailbox-password', [AdminKeysAndSecretsController::class, 'store'])
+                ->middleware(['can:admin.settings.manage', 'account.step-up'])
+                ->name('settings.keys-and-secrets.store');
+            Route::delete('/settings/keys-and-secrets/mailbox-password', [AdminKeysAndSecretsController::class, 'destroy'])
+                ->middleware(['can:admin.settings.manage', 'account.step-up'])
+                ->name('settings.keys-and-secrets.destroy');
+            Route::post('/settings/keys-and-secrets/mailbox-password/test', [AdminKeysAndSecretsController::class, 'test'])
+                ->middleware(['can:admin.settings.manage', 'account.step-up', 'throttle:5,1'])
+                ->name('settings.keys-and-secrets.test');
             Route::put('/settings/integrations/{integration}', [AdminIntegrationController::class, 'update'])
                 ->middleware('can:admin.settings.manage')
                 ->name('settings.integrations.update');

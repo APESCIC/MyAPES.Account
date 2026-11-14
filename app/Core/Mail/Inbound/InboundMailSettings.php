@@ -2,21 +2,32 @@
 
 namespace App\Core\Mail\Inbound;
 
+use App\Core\Mail\Inbound\Diagnostics\MailboxDiagnostics;
+use App\Core\Secrets\SecretRegistry;
 use App\Core\Settings\AppSettings;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Reads the inbound mail settings (#589). Replies by email are offered only
- * when the feature is on and a dedicated token key is set.
- *
- * The mailbox fields come from a non-empty .env value first, then Admin →
- * Settings → Reply mailbox (#737), then the config default.
+ * Reads the inbound mail settings (#589, #808). Connection values are built
+ * into config (overridable by a non-empty INBOUND_MAIL_* .env value). The
+ * mailbox password comes from Admin → Keys and secrets first, then .env.
+ * Legacy inbound_mailbox rows keep import running until #809 retires them.
  */
 final class InboundMailSettings
 {
     public const DRIVER_IMAP = 'imap';
 
     public const DRIVER_MAILPIT = 'mailpit';
+
+    public const DRIVER_HERD = 'herd';
+
+    public const PASSWORD_SOURCE_KEYS = SecretRegistry::SOURCE_KEYS;
+
+    public const PASSWORD_SOURCE_ENV = SecretRegistry::SOURCE_ENV;
+
+    public const PASSWORD_SOURCE_LEGACY = 'legacy';
+
+    public const PASSWORD_SOURCE_MISSING = SecretRegistry::SOURCE_MISSING;
 
     private const CONFIG_KEYS = [
         'enabled' => 'inbound-mail.enabled',
@@ -31,13 +42,21 @@ final class InboundMailSettings
         'folder' => 'inbound-mail.imap.folder',
     ];
 
-    public function __construct(private readonly AppSettings $settings) {}
+    public function __construct(
+        private readonly AppSettings $settings,
+        private readonly SecretRegistry $secrets,
+    ) {}
 
     public function repliesEnabled(): bool
     {
-        return (bool) $this->setting('enabled')
-            && $this->tokenKey() !== ''
-            && $this->mailbox() !== null;
+        if ($this->explicitlyDisabled()) {
+            return false;
+        }
+
+        return $this->tokenKey() !== ''
+            && $this->imapPassword() !== ''
+            && $this->mailbox() !== null
+            && $this->connectionMismatchMessage() === null;
     }
 
     public function pollingConfigured(): bool
@@ -56,15 +75,25 @@ final class InboundMailSettings
             return false;
         }
 
+        if ($this->driver() === self::DRIVER_HERD) {
+            if ($this->herdAllowed()) {
+                return true;
+            }
+
+            Log::warning('INBOUND_MAIL_DRIVER=herd works only on local or testing; polling is off.');
+
+            return false;
+        }
+
         if ($this->driver() !== self::DRIVER_IMAP) {
-            Log::warning('INBOUND_MAIL_DRIVER must be imap or mailpit; polling is off.');
+            Log::warning('INBOUND_MAIL_DRIVER must be imap, mailpit or herd; polling is off.');
 
             return false;
         }
 
         return $this->imap('host') !== ''
             && $this->imap('username') !== ''
-            && $this->imap('password') !== '';
+            && $this->imapPassword() !== '';
     }
 
     public function driver(): string
@@ -75,6 +104,19 @@ final class InboundMailSettings
     public function usesMailpit(): bool
     {
         return $this->driver() === self::DRIVER_MAILPIT && $this->mailpitAllowed();
+    }
+
+    public function usesHerd(): bool
+    {
+        return $this->driver() === self::DRIVER_HERD && $this->herdAllowed();
+    }
+
+    /**
+     * Local-only catchers (Mailpit or Herd) that skip the IMAP connection test.
+     */
+    public function usesLocalCatcher(): bool
+    {
+        return $this->usesMailpit() || $this->usesHerd();
     }
 
     public function mailpitUrl(): string
@@ -93,9 +135,17 @@ final class InboundMailSettings
             && in_array(trim($host, '[]'), ['127.0.0.1', 'localhost', '::1'], true);
     }
 
+    /**
+     * Herd's mail catcher is only available on a developer machine (#816).
+     */
+    public function herdAllowed(): bool
+    {
+        return app()->environment(['local', 'testing']);
+    }
+
     public function address(): string
     {
-        return strtolower(trim((string) $this->setting('address')));
+        return strtolower(trim((string) $this->connectionValue('address')));
     }
 
     /**
@@ -115,7 +165,7 @@ final class InboundMailSettings
 
     public function plusAddressing(): bool
     {
-        return (bool) $this->setting('plus_addressing');
+        return (bool) $this->connectionValue('plus_addressing');
     }
 
     public function tokenKey(): string
@@ -141,24 +191,71 @@ final class InboundMailSettings
 
     public function imap(string $key): string
     {
-        return trim((string) (isset(self::CONFIG_KEYS[$key]) ? $this->setting($key) : config('inbound-mail.imap.'.$key)));
+        if ($key === 'password') {
+            return $this->imapPassword();
+        }
+
+        if ($key === 'username') {
+            $username = trim((string) $this->connectionValue('username'));
+
+            return $username !== '' ? $username : $this->address();
+        }
+
+        if (isset(self::CONFIG_KEYS[$key])) {
+            return trim((string) $this->connectionValue($key));
+        }
+
+        return trim((string) config('inbound-mail.imap.'.$key));
     }
 
     public function validateCert(): bool
     {
-        return (bool) $this->setting('validate_cert');
+        return (bool) $this->connectionValue('validate_cert');
     }
 
     /**
-     * A non-empty .env value (already in config), else the value saved in Admin → Settings, else the config default.
+     * @return self::PASSWORD_SOURCE_*
      */
-    private function setting(string $key): mixed
+    public function passwordSource(): string
     {
-        if ($this->settings->source(InboundMailboxSettings::GROUP, $key) === AppSettings::SOURCE_DATABASE) {
-            return $this->settings->get(InboundMailboxSettings::GROUP, $key);
+        $source = $this->secrets->source(SecretRegistry::INBOUND_MAIL_IMAP_PASSWORD);
+
+        if ($source !== SecretRegistry::SOURCE_MISSING) {
+            return $source;
         }
 
-        return config(self::CONFIG_KEYS[$key]);
+        $legacy = $this->legacyPassword();
+
+        return $legacy !== '' ? self::PASSWORD_SOURCE_LEGACY : self::PASSWORD_SOURCE_MISSING;
+    }
+
+    public function imapPassword(): string
+    {
+        $fromSecrets = $this->secrets->get(SecretRegistry::INBOUND_MAIL_IMAP_PASSWORD);
+
+        if (is_string($fromSecrets) && $fromSecrets !== '') {
+            return $fromSecrets;
+        }
+
+        return $this->legacyPassword();
+    }
+
+    /**
+     * The existing port/encryption mismatch message, or null when the pair is valid (#808).
+     */
+    public function connectionMismatchMessage(): ?string
+    {
+        $port = (int) $this->imap('port');
+        $encryption = $this->imap('encryption') ?: 'ssl';
+
+        if (! MailboxDiagnostics::mismatched($port, $encryption)) {
+            return null;
+        }
+
+        return __('admin.emails.import.encryption_mismatch', [
+            'port' => $port,
+            'encryption' => __($port === 993 ? 'admin.emails.import.encryption.ssl' : 'admin.emails.import.encryption.tls'),
+        ]);
     }
 
     public function authservId(): string
@@ -179,5 +276,44 @@ final class InboundMailSettings
     public function rateLimit(string $key): int
     {
         return max(1, (int) config('inbound-mail.rate_limits.'.$key, 1));
+    }
+
+    /**
+     * INBOUND_MAIL_ENABLED=false turns replies off even when a password is set (#808).
+     */
+    private function explicitlyDisabled(): bool
+    {
+        $raw = config('inbound-mail.enabled');
+
+        if ($raw === null || $raw === '') {
+            return false;
+        }
+
+        return filter_var($raw, FILTER_VALIDATE_BOOLEAN) === false;
+    }
+
+    /**
+     * Built-in / .env values, or the legacy Admin form row while #809 still keeps it.
+     */
+    private function connectionValue(string $key): mixed
+    {
+        if ($this->passwordSource() === self::PASSWORD_SOURCE_LEGACY
+            && $this->settings->source(InboundMailboxSettings::GROUP, $key) === AppSettings::SOURCE_DATABASE) {
+            return $this->settings->get(InboundMailboxSettings::GROUP, $key);
+        }
+
+        return config(self::CONFIG_KEYS[$key]);
+    }
+
+    private function legacyPassword(): string
+    {
+        if (! $this->settings->stored(InboundMailboxSettings::GROUP, 'password')) {
+            return '';
+        }
+
+        // Prefer the stored legacy row even when .env is empty; Secrets already covered env.
+        $value = $this->settings->getStored(InboundMailboxSettings::GROUP, 'password');
+
+        return is_string($value) ? $value : '';
     }
 }

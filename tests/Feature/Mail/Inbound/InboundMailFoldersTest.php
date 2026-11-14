@@ -111,7 +111,7 @@ class InboundMailFoldersTest extends TestCase
             ->first(fn ($event): bool => str_contains((string) $event->command, 'inbound-mail:empty-folders'));
         $this->assertSame('0 0 * * *', $event?->expression);
 
-        config(['inbound-mail.imap.password' => null]);
+        $this->enableEmailReplies(['inbound-mail.imap.password' => null]);
         $this->artisan('inbound-mail:empty-folders')->expectsOutputToContain('nothing to empty')->assertSuccessful();
     }
 

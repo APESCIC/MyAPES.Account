@@ -1,5 +1,57 @@
 [
   {
+    "version": "0.63.2",
+    "date": "2026-11-14",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Built-in email import and Herd reply testing",
+    "summary": "Administrators manage the reply mailbox password from Keys and secrets, see a built-in read-only connection on Admin → Emails → Import, and can fetch mail, watch import health and retry held or failed messages. Local developers can test the full replies-by-email loop through Laravel Herd's mail catcher.",
+    "changes": [
+      "The reply mailbox connection is built in: host, port, encryption, username and folders come from the app and the server environment. Administrators no longer type those values on the Import page.",
+      "Admin → Settings → Keys and secrets is the only place to set or clear the mailbox password. Saving or clearing it asks for a fresh sign-in check, never shows the value again, and records the change in the audit log. Environment and Vault values still win over a saved secret.",
+      "Admin → Emails → Import shows a read-only connection panel with where each value comes from, a Fetch now control with a safe round-trip probe, an import monitor (health, counts, chart and recent imports), and a held and failed queue with retry and a menu badge.",
+      "On Laravel Herd locally, inbound mail can be polled from Herd's mail catcher, a \"Reply as client\" action posts a test reply into that catcher, and tickets:inbound-loop-check confirms the loop is ready. Continuous integration can run an optional GreenMail IMAPS job when the image is available.",
+      "The mail and Herd guides, wiki pages and agent instructions describe the built-in connection, Keys and secrets, Import monitor and local Herd reply testing."
+    ],
+    "affected_areas": [
+      "Admin emails",
+      "Admin settings",
+      "Replies by email",
+      "Developer tooling",
+      "Documentation",
+      "Health check"
+    ],
+    "categories": [
+      "added",
+      "changed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Patch: built-in connection and admin Import improvements on top of v0.63.0 email import, plus local Herd reply testing. No breaking route or database change for existing installs.",
+    "validation": [
+      "Feature tests cover SecretRegistry password resolution, Keys and secrets write-only save and clear with step-up, retirement of the Import connection form, the read-only connection panel, Fetch now and probe, the import monitor, the held and failed queue with retry, the Herd inbound driver and reply-as-client flow, inbound-loop-check, and the optional GreenMail IMAPS job (skipped when the extension or image is missing).",
+      "Pint on changed files, the translation key check and the release-history validate against origin/main passed; composer pre-pr-verify ran before the pull request was marked ready."
+    ],
+    "known_limitations": [
+      "Replies by email on the live app still need the Cloudron mailbox owner, its Mail Client app password and the reply token key set up after the deploy (issue #754).",
+      "Herd inbound polling and Reply as client are for local development only; production continues to use the built-in IMAP connection."
+    ],
+    "rollback": "Deploy v0.63.1 with deploy-cloudron.yml. Mailbox password values saved under Keys and secrets remain in the secrets store and are ignored by v0.63.1; clear them there if rolling back before a re-deploy of this release.",
+    "provenance": "Milestone v0.63.2 Beta: Built-in email import and Herd reply testing, epic #807 with issues #808, #809, #810, #811, #812, #813, #814, #815, #816, #817, #818, #819 and #820; pull request #822. Ops hand-off #754 stays open until after deploy.",
+    "references": [
+      {
+        "label": "Issue #807",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/807"
+      },
+      {
+        "label": "Pull request #822",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/822"
+      }
+    ]
+  },
+  {
     "version": "0.63.1",
     "date": "2026-11-14",
     "channel": "stable",

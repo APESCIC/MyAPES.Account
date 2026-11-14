@@ -784,7 +784,7 @@ Rotating MySQL, Redis, SMTP, and LDAP credentials are read from Cloudron-provide
   - The scheduler is configured to run pruning daily
 - **Session hardening defaults** in `.env.example`:
   - `SESSION_ENCRYPT=true`
-  - `SESSION_SECURE_COOKIE=true` in `scripts/deploy/production.env.example` for HTTPS deployments; the Herd `.env.example` also uses `true`, for `https://myapes-account.test`
+  - `SESSION_SECURE_COOKIE=true` for HTTPS deployments; the Herd `.env.example` uses `true` for `https://myapes-account.test`
   - `SESSION_HTTP_ONLY=true`
 - **Upload safeguards**:
   - Avatar and pet photo uploads are restricted to JPEG/PNG/WebP

@@ -69,7 +69,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1         
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1 -StopDevServer  # stop
 ```
 
-[`scripts/preview.ps1`](../scripts/preview.ps1) is the live preview gate. It loads the latest code, checks Herd serves it on PHP 8.4, then starts the Vite dev server on `https://myapes-account.test:5175` (with the same Herd certificate) with Herd's Node 22, in the background with no window on the taskbar. Vite's output goes to `storage/logs/vite-dev.log` (git-ignored). Running it again reuses the Vite that is already running, so there is never a second copy. `-StopDevServer` stops this project's Vite only and removes `public/hot`, so the pages fall back to the built assets.
+[`scripts/preview.ps1`](../scripts/preview.ps1) is the live preview gate. It loads the latest code, checks Herd serves it on PHP 8.4, then starts the Vite dev server on `https://myapes-account.test:5175` with Herd's Node 22 and Herd's site certificate, in the background with no window on the taskbar. Vite's output goes to `storage/logs/vite-dev.log` (git-ignored). Running it again reuses the Vite that is already running, so there is never a second copy. `-StopDevServer` stops this project's Vite only and removes `public/hot`, so the pages fall back to the built assets.
 
 Herd's nginx serves the pages, so keep Herd running. Open `https://myapes-account.test`: saving a Blade template, CSS or JavaScript file, or a route or app file, reloads the browser or swaps the change in without a rebuild.
 
@@ -112,38 +112,37 @@ php artisan tickets:inbound-ingest storage\app\inbound-samples\reply-T12-<time>.
 
 You can also save a real reply from Gmail or Outlook as `.eml` and ingest that. Set `INBOUND_MAIL_REQUIRE_AUTH=false` in `.env` if the saved file has no `Authentication-Results` header.
 
-### The whole loop with an optional standalone Mailpit
+### The whole loop with Herd (preferred) or Mailpit
 
-Herd's mail catcher has no API the app can read replies from, so the full browser loop uses a standalone [Mailpit](https://mailpit.axllent.org/) standing in for the `communications@` mailbox: the app sends ticket emails to Mailpit, you reply as the client into Mailpit, and the normal poller fetches the reply from Mailpit and posts it. Mailpit is optional and not part of the Herd setup; install it yourself (for example `winget install axllent.mailpit`) and run it with its default ports (SMTP 1025, web 8025).
-
-While you test, set these in `.env` and clear the config:
+From v0.63.2 the app reads Herd's mail catcher through `herd mail:list`, `mail:show` and `mail:delete` (`INBOUND_MAIL_DRIVER=herd`). Set `MAIL_USERNAME=myapes-account` in `.env` (see `.env.example`) so this project's SMTP mail lands in its own Herd mailbox. Mailpit remains the fallback if Herd mail commands are unavailable.
 
 ```dotenv
-MAIL_PORT=1025
-INBOUND_MAIL_DRIVER=mailpit
-INBOUND_MAIL_MAILPIT_URL=http://127.0.0.1:8025
+MAIL_PORT=2525
+MAIL_USERNAME=myapes-account
+INBOUND_MAIL_DRIVER=herd
 ```
 
 ```powershell
 php artisan config:clear
+php artisan inbound-mail:key --enable
+composer demo:reset
+php artisan tickets:inbound-loop-check
 ```
 
-Set `MAIL_PORT=2525` and `INBOUND_MAIL_DRIVER=imap` again afterwards, so mail goes back to Herd.
+`herd` and `mailpit` only work with `APP_ENV=local` (or `testing`). The Cloudron deploy refuses any driver but `imap` (`myapes:inbound-mail:preflight`).
 
-`mailpit` only works with `APP_ENV=local` (or `testing`) and a `127.0.0.1` or `localhost` URL. The Cloudron deploy refuses any driver but `imap` (`myapes:inbound-mail:preflight`), so never set it anywhere else. Leave the `INBOUND_MAIL_IMAP_*` settings empty locally.
-
-1. Sign in with the QA Admin account and, as staff, add a public message to a demo ticket or case. Its emails land in Mailpit (<http://localhost:8025>) with a `communications+t…` Reply-To, a `[MYAPES-T-12]` subject tag and the "Reply above this line" marker.
-2. Open **Admin → Emails → Inbound**. The **Local test replies** panel (only on this local install) lists the latest 20 ticket and case emails in Mailpit, each with **Open in Mailpit**.
-3. Under **Reply as client**, choose the email, type the reply, and optionally another account to reply from or a variant (no subject tag, no reply headers, changed subject, HTML only, one attachment). Press **Send reply**: the reply goes to Mailpit through the normal mail settings.
-4. Press **Fetch replies now**. It runs the poller once and shows how many replies were fetched and stored, with links to each one and to its ticket or case. The reply appears on the ticket marked **by email**; anything not posted stays on the Inbound list with the reason, where **Attach to ticket or case** can post it.
-
-The same from the command line:
+1. Sign in with the QA Admin account and, as staff, add a public message to a demo ticket or case. Its emails land in Herd > Mail with a `communications+t…` Reply-To and a `[MYAPES-T-12]` subject tag.
+2. Open **Admin → Emails → Inbound**. The **Local test replies** panel lists the latest 20 ticket and case emails from Herd (or Mailpit).
+3. Under **Reply as client**, choose the email, type the reply, optionally pick a variant, and press **Send reply**.
+4. On **Admin → Emails → Import**, press **Fetch now** (or use the panel's Fetch replies now). The reply appears on the ticket marked **by email**; held mail stays on the Import monitor queue.
 
 ```powershell
-php artisan tickets:inbound-reply-as --latest=T12 --body="It works now."   # reply to the latest T12 email in Mailpit
-php artisan tickets:inbound-reply-as <mailpit-id> --as=other@example.test --variant=no-tag
-php artisan tickets:inbound-poll                                           # fetch from Mailpit and post
+php artisan tickets:inbound-reply-as --latest=T12 --body="It works now."
+php artisan tickets:inbound-poll
+php artisan tickets:inbound-loop-check
 ```
+
+Optional Mailpit fallback: `MAIL_PORT=1025`, `INBOUND_MAIL_DRIVER=mailpit`, `INBOUND_MAIL_MAILPIT_URL=http://127.0.0.1:8025`.
 
 ## Several APESCIC projects side by side
 
@@ -166,9 +165,10 @@ nginx (80 and 443) and MySQL (3306) are shared. Each project starts and stops it
 - **Vite did not start:** the gate shows the end of `storage/logs/vite-dev.log`; the whole file has Vite's output.
 - **`myapes-account.test` does not resolve:** run `herd status`, and check `herd links` lists `myapes-account`. Herd's helper service writes the hosts entry; restart Herd if it is missing.
 - **`php` or `node` is the wrong version:** dot-source `scripts\herd-env.ps1`, or use `herd php` and `herd composer`.
-- **Unstyled pages:** start Vite with `scripts\preview.ps1`, or run `npm run build`. A `public/hot` file left by a Vite that was closed some other way also unstyles the pages; `scripts\preview.ps1 -StopDevServer` removes it. If `public/hot` starts with `http://` while the site is on HTTPS, the browser blocks the styles as mixed content: check `APP_URL` is `https://myapes-account.test` and the site is secured, then restart Vite (`-StopDevServer`, then `scripts\preview.ps1`).
+- **Unstyled pages:** start Vite with `scripts\preview.ps1`, or run `npm run build`. A `public/hot` file whose scheme does not match the page (plain HTTP while the page is HTTPS) also unstyles the pages, because browsers block the mixed content; `scripts\preview.ps1` rewrites `public/hot` from the profile, and `-StopDevServer` removes it.
+- **Invalid certificate in the browser:** Herd regenerates its local CA when it is updated or reinstalled, and every `.test` certificate becomes untrusted until the new CA is trusted again. Open Herd (it re-trusts the CA) and run `herd secure myapes-account` to re-issue the site certificate, then restart the browser — it keeps serving the old chain from its cache. The CA lives at `%USERPROFILE%\.config\herd\config\valet\CA\LaravelValetCASelfSigned.crt`.
 - **File permission errors** under `storage` or `bootstrap/cache`: close anything that locks the files (an editor search, antivirus or a running dev server; `scripts\preview.ps1 -StopDevServer` stops Vite), then run `php artisan optimize:clear`.
-- **Passkeys:** browsers need a secure origin, which the HTTPS site already is (`APP_URL=https://myapes-account.test`, `SESSION_SECURE_COOKIE=true`).
+- **Passkeys:** browsers need a secure origin. The profile already serves HTTPS (`herd secure myapes-account`, `APP_URL=https://myapes-account.test`, `SESSION_SECURE_COOKIE=true`); run `herd secure myapes-account` again and restore those two values if the site was ever unsecured.
 
 ## Cursor cloud agents
 

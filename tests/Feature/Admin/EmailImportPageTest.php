@@ -54,7 +54,6 @@ class EmailImportPageTest extends TestCase
         $user = User::factory()->protectedRole($role)->create();
 
         $this->actingAs($user)->get(route('admin.emails.import.index'))->assertForbidden();
-        $this->actingAs($user)->put(route('admin.emails.import.update'), ['host' => 'mail.example.test'])->assertForbidden();
         $this->actingAs($user)->post(route('admin.emails.import.test'))->assertForbidden();
         $this->actingAs($user)->post(route('admin.emails.import.probe'))->assertForbidden();
 

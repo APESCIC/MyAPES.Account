@@ -5,12 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Core\Mail\Inbound\Contracts\InboundMailbox;
 use App\Core\Mail\Inbound\Diagnostics\MailboxConnection;
 use App\Core\Mail\Inbound\Diagnostics\MailboxDiagnostics;
+use App\Core\Mail\Inbound\ImportQueue;
 use App\Core\Mail\Inbound\InboundMailboxLogEntry;
-use App\Core\Mail\Inbound\InboundMailboxSettings;
+use App\Core\Mail\Inbound\InboundMailPoller;
 use App\Core\Mail\Inbound\InboundMailSettings;
 use App\Core\Mail\Inbound\ReplyMailboxStatus;
-use App\Core\Settings\AppSettings;
-use App\Core\Settings\SettingDefinition;
 use App\Http\Controllers\Controller;
 use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
@@ -19,13 +18,10 @@ use Illuminate\Http\Response;
 use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Validation\ValidationException;
 
 /**
- * Admin → Emails → Import (#774): the reply mailbox connection (#735), its
- * test (#771) and the import status. Fields set in .env are not saved, a
- * blank password keeps the saved one, and the password is never echoed
- * back, logged or audited.
+ * Admin → Emails → Import (#774, #809): connection is built in; the form is
+ * gone. Test and probe still run here against the resolved connection (#812).
  */
 class AdminEmailImportController extends Controller
 {
@@ -33,62 +29,35 @@ class AdminEmailImportController extends Controller
 
     private const TEST_WINDOW_SECONDS = 600;
 
-    public function index(EmailImportPage $page): Response
+    public function index(Request $request, EmailImportPage $page): Response
     {
         return response()
-            ->view('admin.emails.import.index', $page->viewData())
+            ->view('admin.emails.import.index', $page->viewData($request))
             ->header('Cache-Control', 'no-store, private');
     }
 
-    public function update(Request $request, AppSettings $settings, AuditLogger $audit): RedirectResponse
-    {
-        $values = [];
-        foreach ($settings->definitions(InboundMailboxSettings::GROUP) as $key => $definition) {
-            if ($settings->overriddenByEnv(InboundMailboxSettings::GROUP, $key)) {
-                continue;
-            }
-
-            $values[$key] = $definition->type === SettingDefinition::BOOLEAN
-                ? $request->boolean($key)
-                : $request->input($key);
-        }
-
-        if (array_key_exists('port', $values) || array_key_exists('encryption', $values)) {
-            InboundMailboxSettings::guardPortAndEncryption(
-                (int) ($values['port'] ?? $settings->get(InboundMailboxSettings::GROUP, 'port')),
-                (string) ($values['encryption'] ?? $settings->get(InboundMailboxSettings::GROUP, 'encryption')),
-            );
-        }
-
-        $changed = $settings->set(InboundMailboxSettings::GROUP, $values, (int) $request->user()->id);
-
-        if ($changed !== []) {
-            $audit->record('admin.settings.mailbox_saved', $request->user(), context: [
-                'changed' => array_values(array_diff($changed, ['password'])),
-                'password_changed' => in_array('password', $changed, true),
-            ]);
-        }
-
-        return $this->back()->with('status', $changed === [] ? __('admin.emails.import.no_changes') : __('admin.emails.import.saved'));
-    }
-
     /**
-     * Tests the values in the form step by step (#771), before saving and
-     * before replies are switched on. A blank password uses the saved one,
-     * but only against the saved server; a typed one is used for this test
-     * only and never stored, logged or shown.
+     * Tests the built-in connection step by step (#771, #812).
      */
-    public function test(Request $request, AppSettings $settings, InboundMailSettings $inbound, MailboxDiagnostics $diagnostics, InboundMailbox $mailbox, ReplyMailboxStatus $status, AuditLogger $audit): RedirectResponse
+    public function test(Request $request, InboundMailSettings $inbound, MailboxDiagnostics $diagnostics, InboundMailbox $mailbox, ReplyMailboxStatus $status, AuditLogger $audit): RedirectResponse
     {
         $limiter = 'mailbox-test:'.$request->user()->id;
         if (RateLimiter::tooManyAttempts($limiter, self::TESTS_PER_WINDOW)) {
-            return $this->back()->withInput($request->except('password'))->withErrors(['mailbox' => __('admin.emails.import.test_limited', [
+            return $this->back()->withErrors(['mailbox' => __('admin.emails.import.test_limited', [
                 'count' => self::TESTS_PER_WINDOW,
                 'minutes' => max(1, (int) ceil(RateLimiter::availableIn($limiter) / 60)),
             ])]);
         }
 
-        $connection = $inbound->usesMailpit() ? null : $this->connectionFromForm($request, $settings, $inbound);
+        if ($mismatch = $inbound->connectionMismatchMessage()) {
+            return $this->back()->withErrors(['mailbox' => $mismatch]);
+        }
+
+        $connection = $inbound->usesLocalCatcher() ? null : MailboxConnection::fromSettings($inbound);
+        if ($connection !== null && $connection->password() === '') {
+            return $this->back()->withErrors(['mailbox' => __('admin.emails.import.password_needed')]);
+        }
+
         $report = $connection === null ? $diagnostics->runMailpit($mailbox) : $diagnostics->run($connection);
         RateLimiter::hit($limiter, self::TEST_WINDOW_SECONDS);
 
@@ -100,7 +69,7 @@ class AdminEmailImportController extends Controller
             'host' => $connection?->host,
         ]);
 
-        $response = $this->back()->withInput($request->except('password'))->with('mailbox_report', $report->toArray());
+        $response = $this->back()->with('mailbox_report', $report->toArray());
 
         return $report->ok()
             ? $response->with('status', __('admin.emails.import.test_ok'))
@@ -111,7 +80,7 @@ class AdminEmailImportController extends Controller
     }
 
     /**
-     * Sends one email to communications+probe-…@ (#736); the next poll records whether it arrived and never posts it.
+     * Sends one email to communications+probe-…@ (#736, #812); the next poll records whether it arrived and never posts it.
      */
     public function probe(Request $request, InboundMailSettings $settings, ReplyMailboxStatus $status, AuditLogger $audit): RedirectResponse
     {
@@ -129,59 +98,48 @@ class AdminEmailImportController extends Controller
     }
 
     /**
-     * The form's values for one test. Fields set in .env, or not sent, keep their current value.
+     * Retries every failed import that still has its raw message (#814).
      */
-    private function connectionFromForm(Request $request, AppSettings $settings, InboundMailSettings $inbound): MailboxConnection
+    public function retryFailed(Request $request, ImportQueue $queue, AuditLogger $audit): RedirectResponse
     {
-        $editable = fn (string $key): bool => $request->has($key) && ! $settings->overriddenByEnv(InboundMailboxSettings::GROUP, $key);
-        $definitions = $settings->definitions(InboundMailboxSettings::GROUP);
+        $request->validate(['confirm_retry_failed' => ['accepted']]);
 
-        $rules = [];
-        foreach (['host', 'port', 'encryption', 'username', 'folder'] as $key) {
-            if ($editable($key)) {
-                $rules[$key] = ['required', ...$definitions[$key]->rules];
-            }
-        }
-        $rules['password'] = ['nullable', 'string', 'max:500'];
-        $request->validate($rules);
+        $count = $queue->retryAllFailed();
+        $audit->record('admin.emails.import_retry_failed', $request->user(), context: [
+            'count' => $count,
+        ]);
 
-        $value = fn (string $key): string => $editable($key) ? trim((string) $request->input($key)) : $inbound->imap($key);
-        $typedPassword = $settings->overriddenByEnv(InboundMailboxSettings::GROUP, 'password') ? '' : (string) $request->input('password', '');
-        $validateCert = $editable('validate_cert') ? $request->boolean('validate_cert') : $inbound->validateCert();
-        InboundMailboxSettings::guardPortAndEncryption((int) $value('port'), $value('encryption') ?: 'ssl');
-
-        if ($typedPassword === '' && $this->leavesSavedServer($value, $validateCert, $inbound)) {
-            throw ValidationException::withMessages(['password' => __('admin.emails.import.password_needed')]);
-        }
-
-        return new MailboxConnection(
-            host: $value('host'),
-            port: (int) $value('port'),
-            encryption: $value('encryption') ?: 'ssl',
-            validateCert: $validateCert,
-            username: $value('username'),
-            password: $typedPassword !== '' ? $typedPassword : $inbound->imap('password'),
-            folder: $value('folder') ?: 'INBOX',
-            timeout: max(1, (int) $inbound->imap('timeout')),
-        );
+        return $this->back()->with('status', $count === 0
+            ? __('admin.emails.import.queue.retry_failed_none')
+            : __('admin.emails.import.queue.retry_failed_done', ['count' => $count]));
     }
 
     /**
-     * The saved password is only ever sent to the saved server, with the saved
-     * login and without weakening the certificate check, so a test cannot be
-     * used to send it to a server of someone else's choosing.
-     *
-     * @param  callable(string): string  $value
+     * Runs one poll now, sharing the poll lock with the scheduler (#812).
      */
-    private function leavesSavedServer(callable $value, bool $validateCert, InboundMailSettings $inbound): bool
+    public function fetch(Request $request, InboundMailPoller $poller, AuditLogger $audit): RedirectResponse
     {
-        foreach (['host', 'port', 'encryption', 'username'] as $key) {
-            if (strcasecmp($value($key), $inbound->imap($key)) !== 0) {
-                return true;
-            }
+        $result = $poller->poll(force: true);
+        $audit->record('admin.emails.import_fetched', $request->user(), context: [
+            'result' => $result['result'],
+            'fetched' => $result['fetched'] ?? 0,
+            'stored' => $result['stored'] ?? 0,
+        ]);
+
+        if ($result['result'] !== InboundMailPoller::RESULT_POLLED) {
+            return $this->back()->withErrors(['mailbox' => match ($result['result']) {
+                InboundMailPoller::RESULT_DISABLED => __('admin.emails.import.fetch_disabled'),
+                InboundMailPoller::RESULT_LOCKED => __('admin.emails.import.fetch_busy'),
+                default => __('admin.emails.import.fetch_unavailable'),
+            }]);
         }
 
-        return $inbound->validateCert() && ! $validateCert;
+        return $this->back()->with('status', __('admin.emails.import.fetched', [
+            'fetched' => $result['fetched'],
+            'stored' => $result['stored'],
+            'duplicates' => $result['duplicates'],
+            'failed' => $result['failed'],
+        ]));
     }
 
     private function back(): RedirectResponse

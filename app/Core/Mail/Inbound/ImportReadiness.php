@@ -2,12 +2,12 @@
 
 namespace App\Core\Mail\Inbound;
 
-use App\Core\Settings\AppSettings;
+use App\Core\Secrets\SecretRegistry;
 
 /**
- * Why replies by email are off and what is still missing (#775). Each item
- * says who fixes it: an administrator on the Import page, or IT on Cloudron.
- * Secrets are reported only as set or not set.
+ * Why replies by email are off and what is still missing (#775, #811).
+ * Form items are gone; the checklist keeps token key, password, last test,
+ * heartbeat and the plus-address probe.
  */
 final class ImportReadiness
 {
@@ -19,7 +19,7 @@ final class ImportReadiness
 
     public function __construct(
         private readonly InboundMailSettings $inbound,
-        private readonly AppSettings $settings,
+        private readonly SecretRegistry $secrets,
         private readonly ReplyMailboxStatus $status,
     ) {}
 
@@ -34,9 +34,7 @@ final class ImportReadiness
 
         return [
             $this->item('token_key', $this->inbound->tokenKey() !== '', self::FIXED_BY_IT),
-            $this->item('enabled', (bool) $this->settings->get(InboundMailboxSettings::GROUP, 'enabled'), $this->fixer('enabled')),
-            $this->item('address', $this->inbound->mailbox() !== null && filter_var($this->inbound->address(), FILTER_VALIDATE_EMAIL) !== false, $this->fixer('address')),
-            $this->item('password', $this->inbound->imap('password') !== '', $this->fixer('password')),
+            $this->item('password', $this->inbound->imapPassword() !== '', $this->passwordFixer()),
             $this->item('test', $lastTest !== null && $lastTest['ok'], self::FIXED_BY_ADMIN),
             $this->item(
                 'heartbeat',
@@ -68,11 +66,11 @@ final class ImportReadiness
         ];
     }
 
-    /**
-     * A field set in the server's .env file can only be changed by IT.
-     */
-    private function fixer(string $key): string
+    private function passwordFixer(): string
     {
-        return $this->settings->overriddenByEnv(InboundMailboxSettings::GROUP, $key) ? self::FIXED_BY_IT : self::FIXED_BY_ADMIN;
+        return match ($this->inbound->passwordSource()) {
+            InboundMailSettings::PASSWORD_SOURCE_ENV => self::FIXED_BY_IT,
+            default => self::FIXED_BY_ADMIN,
+        };
     }
 }
