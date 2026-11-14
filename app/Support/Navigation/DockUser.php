@@ -18,5 +18,6 @@ final readonly class DockUser
         public ?string $qaProfile = null,
         public ?array $qaPicker = null,
         public bool $qaConfirm = false,
+        public ?string $qaReturnTo = null,
     ) {}
 }

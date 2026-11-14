@@ -90,6 +90,7 @@ final class WorkspaceNavigation
             $qaProfile,
             $qaProfile === null ? null : QaLogin::picker(),
             $qaProfile !== null && session()->pull(QaLogin::CONFIRM) === true,
+            $qaProfile === null ? null : QaLogin::safeReturnPath(request()->getRequestUri()),
         );
     }
 

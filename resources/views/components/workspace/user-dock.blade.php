@@ -1,9 +1,5 @@
 @props(['menu'])
-@php
-    $qaProfile = $menu->user?->qaProfile;
-    $qaReturnTo = \App\Core\Qa\QaLogin::safeReturnPath(request()->getRequestUri());
-@endphp
-<div class="sg-dock" data-workspace-dock @if($qaProfile) data-qa-dock @endif>
+<div class="sg-dock" data-workspace-dock @if($menu->user?->qaProfile) data-qa-dock @endif>
     @if($menu->user !== null)
         <div class="sg-dock__card">
             <span class="sg-avatar" aria-hidden="true">{{ $menu->user->initials }}</span>
@@ -12,10 +8,10 @@
                 <span class="sg-dock__role">{{ $menu->user->roleLabel }}</span>
             </span>
         </div>
-        @if($qaProfile !== null)
+        @if($menu->user->qaProfile !== null)
             <button type="button" class="sg-qa-pill" popovertarget="qa-switcher" aria-expanded="false" data-qa-pill>
                 <i data-lucide="flask-conical" aria-hidden="true"></i>
-                <span class="sg-qa-pill__label">{{ __('qa.pill.label', ['profile' => \App\Core\Qa\QaLogin::label($qaProfile)]) }}</span>
+                <span class="sg-qa-pill__label">{{ __('qa.pill.label', ['profile' => \App\Core\Qa\QaLogin::label($menu->user->qaProfile)]) }}</span>
             </button>
             <div
                 id="qa-switcher"
@@ -32,8 +28,8 @@
                 </div>
                 <x-qa.profile-picker
                     :profiles="$menu->user->qaPicker"
-                    :current="$qaProfile"
-                    :return-to="$qaReturnTo"
+                    :current="$menu->user->qaProfile"
+                    :return-to="$menu->user->qaReturnTo"
                     id-prefix="qa-switcher"
                 />
                 <form method="post" action="{{ route('qa.logout') }}" class="sg-qa-flyout__signout">

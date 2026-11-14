@@ -49,7 +49,7 @@ class HerdLocalRepliesTest extends TestCase
 
     public function test_the_panel_lists_the_latest_ticket_and_case_emails_from_herd(): void
     {
-        $this->app['env'] = 'local';
+        $this->useLocalEnvironment();
 
         $this->actingAs($this->admin)
             ->get(route('admin.emails.inbound.index'))
@@ -63,7 +63,7 @@ class HerdLocalRepliesTest extends TestCase
 
     public function test_a_reply_from_the_panel_is_imported_by_fetch_now_and_posted(): void
     {
-        $this->app['env'] = 'local';
+        $this->useLocalEnvironment();
         $ticket = $this->ticketFor($this->owner);
         $to = $this->replyAddressFor('T', $ticket->id, $this->owner);
         $this->runner->mail = [];
@@ -130,7 +130,7 @@ class HerdLocalRepliesTest extends TestCase
     #[DataProvider('variants')]
     public function test_each_variant_is_matched_or_held_as_with_mailpit(array $variants, string $expectedStatus): void
     {
-        $this->app['env'] = 'local';
+        $this->useLocalEnvironment();
         $ticket = $this->ticketFor($this->owner);
         $to = $this->replyAddressFor('T', $ticket->id, $this->owner);
 

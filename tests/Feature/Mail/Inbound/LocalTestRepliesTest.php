@@ -51,7 +51,7 @@ class LocalTestRepliesTest extends TestCase
 
     public function test_the_panel_and_routes_are_not_found_with_the_imap_driver(): void
     {
-        $this->app['env'] = 'local';
+        $this->useLocalEnvironment();
         config(['inbound-mail.driver' => 'imap']);
         $this->actingAs($this->admin);
 
@@ -62,7 +62,7 @@ class LocalTestRepliesTest extends TestCase
 
     public function test_people_without_admin_emails_manage_are_forbidden(): void
     {
-        $this->app['env'] = 'local';
+        $this->useLocalEnvironment();
         $this->actingAs(User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create());
 
         $this->post(route('admin.emails.inbound.local.reply'), ['message' => 'orig-id', 'body' => 'Hi'])->assertForbidden();
@@ -71,7 +71,7 @@ class LocalTestRepliesTest extends TestCase
 
     public function test_the_panel_lists_the_latest_ticket_and_case_emails_in_mailpit(): void
     {
-        $this->app['env'] = 'local';
+        $this->useLocalEnvironment();
 
         $this->actingAs($this->admin)
             ->get(route('admin.emails.inbound.index'))
@@ -85,7 +85,7 @@ class LocalTestRepliesTest extends TestCase
 
     public function test_reply_as_client_sends_the_reply_through_the_mail_settings(): void
     {
-        $this->app['env'] = 'local';
+        $this->useLocalEnvironment();
 
         $this->actingAs($this->admin)
             ->post(route('admin.emails.inbound.local.reply'), [
@@ -105,7 +105,7 @@ class LocalTestRepliesTest extends TestCase
 
     public function test_reply_as_client_refuses_unknown_variants_and_senders(): void
     {
-        $this->app['env'] = 'local';
+        $this->useLocalEnvironment();
         $this->actingAs($this->admin);
 
         $this->post(route('admin.emails.inbound.local.reply'), ['message' => 'orig-id', 'body' => 'Hi', 'variants' => ['bogus']])
@@ -117,7 +117,7 @@ class LocalTestRepliesTest extends TestCase
 
     public function test_fetch_replies_now_runs_the_poller_once_and_shows_the_counts(): void
     {
-        $this->app['env'] = 'local';
+        $this->useLocalEnvironment();
         $this->replyRaw = $this->fixture('plain-reply', ['MESSAGE_ID' => 'panel@mail.example.org', 'SUBJECT' => 'Re: Boiler [MYAPES-T-12]']);
 
         $this->actingAs($this->admin)

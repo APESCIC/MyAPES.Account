@@ -8,6 +8,7 @@ use App\Core\Accounts\User;
 use App\Services\AuthorizationMetadataSynchronizer;
 use App\Services\AuthorizationProfile;
 use App\Services\AuthorizationRoleMaterializer;
+use App\Services\LegacyAccessCompatibilityAdapter;
 use App\Support\DefaultJobRoles;
 use Database\Seeders\LocalQaSeeder;
 use Illuminate\Http\RedirectResponse;
@@ -221,7 +222,9 @@ final class QaLogin
             ]);
         }
 
-        $user->setAccessLevel($definition['access_level'])->save();
+        app(LegacyAccessCompatibilityAdapter::class)
+            ->write($user, $definition['access_level'])
+            ->save();
 
         $authorization = app(AuthorizationProfile::class);
         $protectedRoleName = $authorization->protectedRoleForLegacy($definition['access_level']);
