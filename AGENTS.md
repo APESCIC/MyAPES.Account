@@ -33,12 +33,12 @@ Laravel Herd (Pro) on Windows is the only supported local setup. Use this projec
 | Item | Value |
 | --- | --- |
 | Herd site | `myapes-account`, linked from the clone (`C:\Users\BambieMurphy\Documents\GitHub\MyAPES.Account` on the owner's PC); no junction or copy elsewhere |
-| App URL | `http://myapes-account.test`, document root `public/` |
+| App URL | `https://myapes-account.test` (Herd secure, Herd's certificate; `http://` redirects), document root `public/` |
 | Profile | [docs/herd/profile.md](docs/herd/profile.md) ([`profile.json`](docs/herd/profile.json) for the scripts): PHP 8.4 pinned with `herd isolate` (FastCGI, `php_sapi` `cgi-fcgi`), Herd MySQL 8.4 (`myapes_account_local`, root, empty password), Node 22 from Herd's nvm, npm 11.10+, Vite port 5175 |
 | Mail | Herd's mail catcher, SMTP `127.0.0.1:2525` (Herd > Mail, or the Herd MCP `mail` tool). An optional standalone Mailpit (SMTP 1025, API 8025) is only for the reply loop (`INBOUND_MAIL_DRIVER=mailpit`) |
 | Setup | `composer setup` (runs `scripts/herd-setup.ps1`; safe to run twice) |
-| Live preview gate | Before any development work: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1`, then open <http://myapes-account.test> in Cursor's browser (see [`.cursor/rules/herd-local-dev.mdc`](.cursor/rules/herd-local-dev.mdc)) |
-| Daily loop | Herd open, then `scripts\preview.ps1`: Vite hot reload at `http://myapes-account.test:5175` with no window, output in `storage/logs/vite-dev.log`, stopped with `-StopDevServer`. `composer run dev` adds the queue and a log tail and reuses that Vite |
+| Live preview gate | Before any development work: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1`, then open <https://myapes-account.test> in Cursor's browser (see [`.cursor/rules/herd-local-dev.mdc`](.cursor/rules/herd-local-dev.mdc)) |
+| Daily loop | Herd open, then `scripts\preview.ps1`: Vite hot reload at `https://myapes-account.test:5175` (Herd's certificate) with no window, output in `storage/logs/vite-dev.log`, stopped with `-StopDevServer`. `composer run dev` adds the queue and a log tail and reuses that Vite |
 | Demo data | `composer demo:seed` to load, `composer demo:reset` to wipe and reload; logins in [docs/herd/demo-data.md](docs/herd/demo-data.md) |
 | Env file | `.env.example` (Herd values) |
 
@@ -107,6 +107,9 @@ Facts the rule relies on:
 - With `core.autocrlf=true` on Windows, `vendor/bin/pint --test` reports `line_ending` (and knock-on brace and operator fixers) for every file in the CRLF working tree. Check changed files from their committed LF content (`git cat-file -p HEAD:<path>` into a temp folder, then Pint there) or rely on CI; never commit Pint's CRLF "fixes".
 - Something outside the repo (likely Herd's dev-process badge) can delete `public/hot` while Vite keeps running, which makes pages load the built assets; `scripts\preview.ps1` rewrites it when it finds this repo's Vite running.
 - `herd services:list` can show the MySQL service as `stopped` while it answers on 3306; the scripts check the port instead.
+- 2026-11-14: the local Herd site is served over HTTPS (Herd secure, Vite on https 5175 with Herd's certificate). Decided by Bambie.
+- An https page with an http `public/hot` (Vite started before the site was secured, or `APP_URL` still http) is unstyled: the browser blocks the http Vite assets as mixed content, and form posts can fail. `vite.config.js` only serves https when `APP_URL` is https and `~\.config\herd\config\valet\Certificates\myapes-account.test.crt` exists; restart Vite after securing (`scripts\preview.ps1 -StopDevServer`, then `scripts\preview.ps1`).
+- Switching the site between http and https leaves Cursor's browser replaying cached 301 redirects (and any HSTS it saw) to the old scheme. Load URLs with a fresh query string, or send CDP `Network.setCacheDisabled` (`Network.clearBrowserCache` is not allowed). The app itself sends no HSTS header.
 - In Windows PowerShell 5.1, `gh api ... | ConvertFrom-Json | Format-Table` can print an empty table for a JSON array; loop over the items (`% { ... }`) to list them.
 - `scripts\preview.ps1` can fail `npm ci` with `EPERM ... lightningcss.win32-x64-msvc.node` when this repo's Vite is still running from an older checkout. Run `scripts\preview.ps1 -StopDevServer`, then the gate again.
 - The "SQLite test and package" check on a milestone PR stays red until the `chore: release vX.Y.Z` commit prepends the release record: `myapes:changelog-validate --base-ref` runs before the tests. Run `composer test` locally while the PR is a draft.

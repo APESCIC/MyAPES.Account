@@ -16,7 +16,7 @@ Always on. Core has no knowledge of a specific organisation area or feature.
 - Accounts and profiles
 - Access: directory groups, job roles, and permissions
 - Notifications (the delivery mechanism, not a feature's message copy). Mail templates, branding, the outbound log and Admin Emails: [mail.md](mail.md)
-- Settings
+- Settings: the shared store `App\Core\Settings\AppSettings` (table `app_settings`; a non-empty `.env` value wins). General options (support contact, public registration, site banner) are the `general` group, read through `App\Core\Settings\GeneralSettings` and edited on Admin → Settings → General ([wiki](wiki/General-settings.md))
 - Unified Admin shell, including maintenance
 - Audit, health, and the change log
 - Shared attachments

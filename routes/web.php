@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminAccessController;
 use App\Http\Controllers\Admin\AdminApiClientController;
 use App\Http\Controllers\Admin\AdminEmailController;
 use App\Http\Controllers\Admin\AdminEmailImportController;
+use App\Http\Controllers\Admin\AdminGeneralSettingsController;
 use App\Http\Controllers\Admin\AdminGroupController;
 use App\Http\Controllers\Admin\AdminInboundEmailController;
 use App\Http\Controllers\Admin\AdminIntegrationController;
@@ -86,8 +87,8 @@ Route::get('/storage/pet-profiles/{path?}', static fn () => abort(404))
 Route::middleware('guest')->controller(PublicAuthController::class)->group(function (): void {
     Route::get('/login', 'showLogin')->name('public.login');
     Route::post('/login', 'login')->middleware('throttle:public-login')->name('public.login.submit');
-    Route::get('/register', 'showRegister')->name('public.register');
-    Route::post('/register', 'register')->name('public.register.submit');
+    Route::get('/register', 'showRegister')->middleware('registration.open')->name('public.register');
+    Route::post('/register', 'register')->middleware('registration.open')->name('public.register.submit');
 });
 
 Route::middleware('guest')->controller(TwoFactorChallengeController::class)->group(function (): void {
@@ -436,6 +437,9 @@ Route::middleware([
             Route::get('/settings/{tab}', [AdminSettingsController::class, 'show'])
                 ->middleware('can:admin.settings.view')
                 ->name('settings.show');
+            Route::put('/settings/general', [AdminGeneralSettingsController::class, 'update'])
+                ->middleware('can:admin.settings.manage')
+                ->name('settings.general.update');
             Route::put('/settings/integrations/{integration}', [AdminIntegrationController::class, 'update'])
                 ->middleware('can:admin.settings.manage')
                 ->name('settings.integrations.update');

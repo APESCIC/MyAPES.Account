@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Herd local development
 
-Laravel Herd (Pro) on Windows is the only supported local set-up. This repository is its own Herd site at <http://myapes-account.test>: nginx with PHP 8.4 (pinned with `herd isolate`) through FastCGI, Herd's MySQL 8.4 service (`myapes_account_local`), Herd's mail catcher on SMTP 2525, Node 22 from Herd's nvm and Vite on port 5175, with the values in `docs/herd/profile.md` (`docs/herd/profile.json` for the scripts). Never suggest containers, virtual machines or any other local stack for local development.
+Laravel Herd (Pro) on Windows is the only supported local set-up. This repository is its own Herd site at <https://myapes-account.test> (secured with Herd's certificate): nginx with PHP 8.4 (pinned with `herd isolate`) through FastCGI, Herd's MySQL 8.4 service (`myapes_account_local`), Herd's mail catcher on SMTP 2525, Node 22 from Herd's nvm and Vite on port 5175, with the values in `docs/herd/profile.md` (`docs/herd/profile.json` for the scripts). Never suggest containers, virtual machines or any other local stack for local development.
 
 ## Before any development work: the live preview gate
 
@@ -14,8 +14,8 @@ Cursor's `live-preview-gate` and `herd-local-preview` skills own the gate. This 
 | Slot | Value |
 | --- | --- |
 | Preview command | `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1` (exit 3 = a decision to ask about, exit 1 = a blocker to report) |
-| Preview URL | <http://myapes-account.test> (Herd site `myapes-account`) |
-| HMR | Vite at `http://myapes-account.test:5175`, started by the script with no window, output in `storage/logs/vite-dev.log`; stop with `scripts\preview.ps1 -StopDevServer` |
+| Preview URL | <https://myapes-account.test> (Herd site `myapes-account`, secured) |
+| HMR | Vite at `https://myapes-account.test:5175` (Herd's certificate), started by the script with no window, output in `storage/logs/vite-dev.log`; stop with `scripts\preview.ps1 -StopDevServer` |
 | Health check | `/healthz` shows the checked-out revision, PHP 8.4 and `php_sapi` `cgi-fcgi` in its `local` block |
 
 The script stops on uncommitted tracked files, fetches, fast-forwards, merges `origin/main` (never a rebase), runs `composer install` or `npm ci` when a lock file changed, reports pending migrations (ask before running them), checks Herd and its MySQL are running and that `/healthz` matches, then starts or reuses this repository's Vite. Never start Vite or `npm run dev` in a window of its own, and use host names, not IP addresses, for the preview.

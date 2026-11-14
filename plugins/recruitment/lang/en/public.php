@@ -4,6 +4,7 @@ return [
     'show' => [
         'blade' => [
             'sign_in_or_create_a_public_account_to_apply_you_can_sti' => 'Sign in or create a public account to apply. You can still browse open roles without an account.',
+            'sign_in_to_apply_registration_closed' => 'Sign in to apply. You can still browse open roles without an account.',
             'applications_are_not_open_for_public_roles_right_now_yo' => 'Applications are not open for public roles right now. You can still browse open roles.',
             'each_person_may_apply_once_per_role_tell_us_briefly_why' => 'Each person may apply once per role. Tell us briefly why you are interested.',
             'you_cannot_apply_for_this_role_with_your_current_accoun' => 'You cannot apply for this role with your current account.',

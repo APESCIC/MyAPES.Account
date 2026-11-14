@@ -11,6 +11,7 @@ use App\Http\Middleware\EnsureModuleAvailable;
 use App\Http\Middleware\EnsurePluginEnabled;
 use App\Http\Middleware\EnsurePublicAccount;
 use App\Http\Middleware\EnsureRecentStepUp;
+use App\Http\Middleware\EnsureRegistrationOpen;
 use App\Http\Middleware\EnsureServiceSelected;
 use App\Http\Middleware\RedirectTargetForUploadProgress;
 use App\Http\Middleware\RevalidateDirectoryAccess;
@@ -74,6 +75,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'account.step-up' => EnsureRecentStepUp::class,
             'passkeys.local' => EnsureLocalPasskeyIdentity::class,
             'account.public' => EnsurePublicAccount::class,
+            'registration.open' => EnsureRegistrationOpen::class,
             'service.selected' => EnsureServiceSelected::class,
             'api.client' => AuthenticateApiClient::class,
             'abilities' => CheckAbilities::class,
