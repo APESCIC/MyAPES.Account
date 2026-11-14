@@ -10,7 +10,7 @@
         <p class="muted">{{ __('auth.staff_login.intro') }}</p>
         <x-mascot-tip />
         @if(app()->environment(['local', 'testing']))
-            <p class="muted">{{ __('auth.staff_login.local_qa_note') }}</p>
+            <p class="muted">{{ __('auth.staff_login.local_demo_note') }}</p>
             <form method="post" action="{{ route('staff.local-login.submit') }}">
                 @csrf
                 <label for="email">{{ __('auth.common.email') }}</label>
@@ -28,5 +28,8 @@
         <form method="get" action="{{ route('staff.auth.login') }}">
             <button type="submit">{{ __('auth.common.continue_cloudron') }}</button>
         </form>
+        @if (\App\Core\Qa\QaLogin::enabled())
+            <x-qa.signin-panel :profiles="\App\Core\Qa\QaLogin::picker()" class="mt-2" />
+        @endif
     </div>
 @endsection

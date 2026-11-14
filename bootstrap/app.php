@@ -1,5 +1,6 @@
 <?php
 
+use App\Core\Qa\QaLogin;
 use App\Http\Controllers\HealthController;
 use App\Http\Middleware\AuditAdminAuthorizationDenial;
 use App\Http\Middleware\AuthenticateApiClient;
@@ -90,6 +91,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 && app()->maintenanceMode()->active()
                 && $request->expectsJson()) {
                 return app(MaintenanceResponseFactory::class)->make($request);
+            }
+
+            $fallback = QaLogin::fallbackAfterSwitch($request, $exception->getStatusCode());
+            if ($fallback !== null) {
+                return $fallback;
             }
 
             return null;

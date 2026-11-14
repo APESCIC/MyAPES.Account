@@ -12,6 +12,7 @@ use App\Core\Extensions\Navigation\StaffPluginNavigationItem;
 use App\Core\Extensions\Navigation\StaffPluginNavigationRegistry;
 use App\Core\Extensions\Plugins\PluginRegistry;
 use App\Core\Mail\Inbound\ImportQueue;
+use App\Core\Qa\QaLogin;
 use App\Core\Settings\GeneralSettings;
 use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\HelpController;
@@ -79,11 +80,16 @@ final class WorkspaceNavigation
             ->map(static fn (string $part): string => mb_strtoupper(mb_substr($part, 0, 1)))
             ->implode('');
 
+        $qaProfile = QaLogin::enabled() ? QaLogin::profileFor($user) : null;
+
         return new DockUser(
             $user->name,
             $initials,
             $this->profile->displayLabel($user),
             $this->profile->qaSelectorFor($user),
+            $qaProfile,
+            $qaProfile === null ? null : QaLogin::picker(),
+            $qaProfile !== null && session()->pull(QaLogin::CONFIRM) === true,
         );
     }
 

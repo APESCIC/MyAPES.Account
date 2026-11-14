@@ -19,6 +19,7 @@ import {
     createIcons,
     ExternalLink,
     FileText,
+    FlaskConical,
     Github,
     Heart,
     HeartPulse,
@@ -60,6 +61,7 @@ import { initWorkspaceDrawer } from './workspace/drawer.js';
 import { initFileUploads } from './workspace/file-upload.js';
 import { initFormActions } from './workspace/form-actions.js';
 import { initGuidedTour } from './workspace/guided-tour.js';
+import { initQaSwitcher } from './workspace/qa-switcher.js';
 import { initRichTextEditors } from './workspace/rich-text-editor.js';
 import { initToasts } from './workspace/toasts.js';
 
@@ -82,6 +84,7 @@ const icons = {
     Compass,
     ExternalLink,
     FileText,
+    FlaskConical,
     Github,
     Heart,
     HeartPulse,
@@ -171,6 +174,7 @@ initCommandPalette({
     beforeOpen: () => drawer.close({ restoreFocus: false }),
 });
 initGuidedTour();
+initQaSwitcher();
 
 const mascotStorageKey = 'myapes-mascot-dismissed-v2';
 const mascotDock = document.querySelector('[data-mascot-dock]');

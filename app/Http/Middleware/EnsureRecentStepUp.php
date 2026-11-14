@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Core\Accounts\User;
+use App\Core\Qa\QaLogin;
 use Closure;
 use Illuminate\Auth\Middleware\RequirePassword;
 use Illuminate\Contracts\Routing\ResponseFactory;
@@ -16,7 +17,8 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * Local identities use Laravel password confirmation (and passkey confirm,
  * which also calls session passwordConfirmed()). Directory identities are
- * sent through Staff OIDC with prompt=login instead.
+ * sent through Staff OIDC with prompt=login instead. QA accounts (local only)
+ * confirm their profile instead of a password (#839).
  */
 class EnsureRecentStepUp
 {
@@ -35,6 +37,26 @@ class EnsureRecentStepUp
     {
         /** @var User|null $user */
         $user = $request->user();
+
+        if (
+            $user instanceof User
+            && QaLogin::enabled()
+            && QaLogin::profileFor($user) !== null
+            && $this->shouldConfirmPassword($request, $passwordTimeoutSeconds)
+        ) {
+            if ($request->expectsJson()) {
+                return $this->responseFactory->json([
+                    'message' => 'Password confirmation required.',
+                ], 423);
+            }
+
+            $request->session()->flash(QaLogin::CONFIRM, true);
+            $request->session()->put('url.intended', $request->fullUrl());
+
+            return $this->responseFactory->redirectGuest(
+                $this->urlGenerator->route($redirectToRoute ?? 'password.confirm'),
+            );
+        }
 
         if (
             $user instanceof User

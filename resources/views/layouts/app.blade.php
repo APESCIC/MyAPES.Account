@@ -27,7 +27,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
 </head>
-@php($isAuthPage = request()->routeIs('public.login', 'public.register', 'staff.login', 'password.request', 'password.reset', 'password.confirm', 'two-factor.login', 'verification.notice'))
+@php($isAuthPage = request()->routeIs('public.login', 'public.register', 'staff.login', 'password.request', 'password.reset', 'password.confirm', 'two-factor.login', 'verification.notice', 'qa.index'))
 <body @class(['workspace-shell', 'is-auth-page' => $isAuthPage, 'has-mascot-dock' => $mascotTip])>
 <a class="skip-link" href="#main-content">{{ __('public.chrome.app.blade.skip_to_main_content') }}</a>
 

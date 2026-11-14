@@ -1,4 +1,4 @@
-@php($status = session('status'))
+@php($status = session('status') ?: session('qa.notice'))
 @php($errorBag = $errors ?? session('errors'))
 <div class="visually-hidden" aria-live="polite" data-toast-announcer="polite"></div>
 <div class="visually-hidden" aria-live="assertive" data-toast-announcer="assertive"></div>
