@@ -67,8 +67,9 @@ class PublicRegistrationGateTest extends TestCase
             ->assertSee(__('auth.landing.open_ticket_blurb_closed'))
             ->assertDontSee(__('auth.landing.open_ticket_blurb'));
         $this->get(route('tickets.public.index'))
-            ->assertDontSee('via=register', false)
-            ->assertSee(__('tickets::public.intro_closed'));
+            ->assertDontSee('href="'.route('public.register').'"', false)
+            ->assertDontSee('data-open-ticket-register', false)
+            ->assertSee(__('tickets::public.intro_guest_closed'));
         $this->get('/sitemap.xml')->assertDontSee(route('public.register'), false);
     }
 
@@ -81,7 +82,10 @@ class PublicRegistrationGateTest extends TestCase
             ->assertOk()
             ->assertSee(__('auth.common.registration_closed'));
 
-        $this->assertSame(route('apes-cic.tickets.index', ['service_area' => 'it_systems']).'#create', session('url.intended'));
+        $this->assertSame(
+            route('tickets.public.index', ['service' => 'apes-cic', 'area' => 'it_systems']),
+            session('url.intended'),
+        );
     }
 
     public function test_staff_sign_in_and_public_sign_in_are_unaffected(): void

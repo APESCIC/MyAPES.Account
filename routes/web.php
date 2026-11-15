@@ -43,6 +43,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RobotsTxtController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Staff\CallerController;
+use App\Http\Controllers\Staff\ClientController;
 use App\Http\Controllers\SubCoreController;
 use App\Http\Controllers\SupportAttachmentController;
 use App\Http\Middleware\EnsureLocalReplyLoop;
@@ -69,9 +70,12 @@ Route::get('/change-log', ChangeLogController::class)->name('change-log.index');
 Route::view('/privacy', 'legal.privacy')->name('privacy');
 Route::view('/cookies', 'legal.cookies')->name('cookies');
 Route::get('/help', [HelpController::class, 'public'])->name('help');
-Route::get('/bookings', [BookingsController::class, 'index'])->name('bookings.index');
+Route::get('/bookings', [BookingsController::class, 'index'])
+    ->middleware('account.public')
+    ->name('bookings.index');
 Route::get('/bookings/{page}', [BookingsController::class, 'show'])
     ->where('page', '[a-z-]+')
+    ->middleware('account.public')
     ->name('bookings.show');
 Route::view('/terms', 'legal.terms')->name('terms');
 Route::get('/mail/reply', MailReplyLinkController::class)
@@ -106,6 +110,8 @@ Route::middleware('guest')->controller(PublicPasswordResetController::class)->gr
     Route::post('/forgot-password', 'store')->middleware('throttle:public-password-reset-request')->name('password.email');
     Route::get('/reset-password/{token}', 'edit')->name('password.reset');
     Route::post('/reset-password', 'update')->middleware('throttle:public-password-reset-submit')->name('password.update');
+    Route::get('/set-password/{token}', 'editSetPassword')->name('password.set');
+    Route::post('/set-password', 'updateSetPassword')->middleware('throttle:public-password-reset-submit')->name('password.set.update');
 });
 
 Route::middleware('guest')->group(function (): void {
@@ -205,6 +211,11 @@ Route::middleware([
         Route::post('/{caller}/end-call', [CallerController::class, 'endCall'])->whereNumber('caller')->name('end-call');
         Route::put('/{caller}/details', [CallerController::class, 'updateDetails'])->whereNumber('caller')->name('details.update');
         Route::post('/{caller}/call-logs', [CallerController::class, 'storeCallLog'])->whereNumber('caller')->name('call-logs.store');
+    });
+    Route::prefix('staff/clients')->name('clients.')->group(function (): void {
+        Route::get('/', [ClientController::class, 'index'])->name('index');
+        Route::post('/', [ClientController::class, 'store'])->middleware('throttle:20,1')->name('store');
+        Route::get('/{client}', [ClientController::class, 'show'])->whereNumber('client')->name('show');
     });
     Route::get('/support/attachments/{attachment}', [SupportAttachmentController::class, 'download'])
         ->name('support.attachments.download');

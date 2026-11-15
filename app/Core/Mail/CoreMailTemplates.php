@@ -11,6 +11,7 @@ use App\Notifications\Auth\PasskeyAddedNotification;
 use App\Notifications\Auth\PasskeyRemovedNotification;
 use App\Notifications\Auth\PasswordChangedNotification;
 use App\Notifications\Auth\ResetPasswordNotification;
+use App\Notifications\Auth\StaffAssistedSetPasswordNotification;
 use App\Notifications\Auth\TwoFactorDisabledNotification;
 use App\Notifications\Auth\TwoFactorEnabledNotification;
 use App\Notifications\Auth\VerifyEmailNotification;
@@ -34,6 +35,8 @@ final class CoreMailTemplates
                 static fn (): VerifyEmailNotification => new VerifyEmailNotification),
             self::auth('reset_password', 'reset', ResetPasswordNotification::class,
                 static fn (): ResetPasswordNotification => new ResetPasswordNotification('sample-preview-token')),
+            self::auth('set_password', 'set_password', StaffAssistedSetPasswordNotification::class,
+                static fn (): StaffAssistedSetPasswordNotification => new StaffAssistedSetPasswordNotification('sample-preview-token')),
             self::auth('password_changed', 'password_changed', PasswordChangedNotification::class,
                 static fn (): PasswordChangedNotification => new PasswordChangedNotification),
             self::auth('two_factor_enabled', 'two_factor_enabled', TwoFactorEnabledNotification::class,

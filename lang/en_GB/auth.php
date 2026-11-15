@@ -114,6 +114,13 @@ return [
         'submit' => 'Reset password',
     ],
 
+    'set_password' => [
+        'title' => 'Set password | MyAPES Account',
+        'heading' => 'Set password',
+        'intro' => 'Choose a password for the public account APES created for you.',
+        'submit' => 'Set password',
+    ],
+
     'staff_login' => [
         'title' => 'Staff Login | MyAPES Account',
         'heading' => 'Staff Login',

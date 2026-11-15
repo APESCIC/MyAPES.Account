@@ -72,10 +72,32 @@ class PublicPasswordResetController extends Controller
         return view('auth.reset-password', [
             'token' => $token,
             'email' => $request->string('email')->toString(),
+            'formAction' => route('password.update'),
+            'heading' => __('auth.reset_password.heading'),
+        ]);
+    }
+
+    public function editSetPassword(Request $request, string $token): View
+    {
+        return view('auth.reset-password', [
+            'token' => $token,
+            'email' => $request->string('email')->toString(),
+            'formAction' => route('password.set.update'),
+            'heading' => __('auth.set_password.heading'),
         ]);
     }
 
     public function update(Request $request): RedirectResponse
+    {
+        return $this->completeReset($request, 'users');
+    }
+
+    public function updateSetPassword(Request $request): RedirectResponse
+    {
+        return $this->completeReset($request, 'staff_assisted');
+    }
+
+    private function completeReset(Request $request, string $broker): RedirectResponse
     {
         $validated = $request->validate([
             'token' => ['required', 'string'],
@@ -92,7 +114,7 @@ class PublicPasswordResetController extends Controller
             ]);
         }
 
-        $status = Password::reset(
+        $status = Password::broker($broker)->reset(
             [
                 'email' => $email,
                 'password' => $validated['password'],

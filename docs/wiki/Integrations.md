@@ -25,7 +25,7 @@ The editor on ticket, case and other description fields.
 This key is public by design (it is part of the editor's address on every page with an editor), so it is a normal field, not a masked secret. Without a key, those fields stay plain text boxes. `TINYMCE_API_KEY` in `.env` still works and wins.
 
 ## Google reCAPTCHA v3
-Invisible spam checks on the public **register**, **forgot password**, **open a ticket** and **job application** forms, and on **Public Login after 3 failed attempts**. Staff signing in through APES Cloudron never see it.
+Invisible spam checks on the public **Public Register**, **forgot password**, **Open a ticket** and **job application** forms, and on **Public Login after 3 failed attempts**. Staff signing in through APES Cloudron never see it. Guests must sign in (or register) before the Open a ticket form accepts a submission.
 
 1. In the Google reCAPTCHA admin console, create a **v3** key for the site's domain.
 2. Paste the **Site key** and the **Secret key**, and save.

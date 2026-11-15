@@ -130,6 +130,7 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
             'client_records_archived_at' => 'datetime',
             'client_records_notice_dismissed_at' => 'datetime',
             'registration_consented_at' => 'datetime',
+            'registration_consent_staff_id' => 'integer',
             'password' => 'hashed',
             'two_factor_secret' => 'encrypted',
             'two_factor_recovery_codes' => 'encrypted:array',

@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', __('auth.reset_password.title'))
+@section('title', ($heading ?? __('auth.reset_password.heading')).' | MyAPES Account')
 
 @section('content')
     <div class="panel">
-        <h1>{{ __('auth.reset_password.heading') }}</h1>
+        <h1>{{ $heading ?? __('auth.reset_password.heading') }}</h1>
         <p class="muted">{{ __('auth.reset_password.intro') }}</p>
         <x-mascot-tip />
-        <form method="post" action="{{ route('password.update') }}">
+        <form method="post" action="{{ $formAction ?? route('password.update') }}">
             @csrf
             <input type="hidden" name="token" value="{{ $token }}">
 

@@ -99,6 +99,13 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+        // Staff-created public clients (#671): 72-hour one-time set-password link.
+        'staff_assisted' => [
+            'provider' => 'users',
+            'table' => 'staff_assisted_password_reset_tokens',
+            'expire' => 4320,
+            'throttle' => 60,
+        ],
     ],
 
     /*

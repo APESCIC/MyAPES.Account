@@ -44,6 +44,8 @@ final class PermissionNaming
         'admin.access',
         'volunteer.access',
         'student.access',
+        // Staff-workspace ability shared with volunteer and student (#672).
+        'staff.clients.create',
     ];
 
     /**

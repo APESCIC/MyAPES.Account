@@ -106,12 +106,21 @@ final class WorkspaceNavigation
 
         if ($this->accounts->hasStaffSideRole($user)) {
             $overview[] = new NavItem('callers', __('callers.nav'), route('callers.index'), 'search', ['callers.*'], ['caller', 'phone', 'call', 'verify', 'pin']);
+            if ($user->can(AuthorizationProfile::PERMISSION_CLIENT_CREATE)) {
+                $overview[] = new NavItem('clients', __('clients.nav'), route('clients.index'), 'user-plus', ['clients.*'], ['client', 'create', 'public', 'pin', 'register']);
+            }
         }
 
         $groups = [
             new NavGroup('overview', __('workspace.groups.overview'), $overview),
             ...$this->moduleGroups($user, $moduleNavigation),
         ];
+
+        if (! $this->accounts->isStaffSide($user)) {
+            $groups[] = new NavGroup('tools', __('workspace.groups.tools'), [
+                $this->bookingsItem(),
+            ]);
+        }
 
         $support = [
             new NavItem('help', __('public.chrome.app.blade.help'), route('help'), 'circle-help', ['help'], $this->words('workspace.keywords.help')),
@@ -121,7 +130,6 @@ final class WorkspaceNavigation
             $support[] = new NavItem('help.staff', __('help.nav.staff_guide'), route('help.staff'), 'book-open', ['help.staff'], $this->words('help.keywords.staff_guide'));
         }
 
-        $support[] = $this->bookingsItem();
         $support[] = new NavItem('change-log', __('workspace.nav.change_log'), route('change-log.index'), 'scroll-text', ['change-log.*'], $this->words('workspace.keywords.change_log'));
 
         foreach ($this->publicPlugins->visibleTo($user) as $item) {

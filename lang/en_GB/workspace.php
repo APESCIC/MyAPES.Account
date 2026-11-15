@@ -17,6 +17,7 @@ return [
 
     'groups' => [
         'overview' => 'Overview',
+        'tools' => 'Tools',
         'support' => 'Support',
         'services' => 'Services',
         'people' => 'People',
