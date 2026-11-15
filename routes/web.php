@@ -43,6 +43,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RobotsTxtController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Staff\CallerController;
+use App\Http\Controllers\Staff\ClientController;
 use App\Http\Controllers\SubCoreController;
 use App\Http\Controllers\SupportAttachmentController;
 use App\Http\Middleware\EnsureLocalReplyLoop;
@@ -109,6 +110,8 @@ Route::middleware('guest')->controller(PublicPasswordResetController::class)->gr
     Route::post('/forgot-password', 'store')->middleware('throttle:public-password-reset-request')->name('password.email');
     Route::get('/reset-password/{token}', 'edit')->name('password.reset');
     Route::post('/reset-password', 'update')->middleware('throttle:public-password-reset-submit')->name('password.update');
+    Route::get('/set-password/{token}', 'editSetPassword')->name('password.set');
+    Route::post('/set-password', 'updateSetPassword')->middleware('throttle:public-password-reset-submit')->name('password.set.update');
 });
 
 Route::middleware('guest')->group(function (): void {
@@ -208,6 +211,11 @@ Route::middleware([
         Route::post('/{caller}/end-call', [CallerController::class, 'endCall'])->whereNumber('caller')->name('end-call');
         Route::put('/{caller}/details', [CallerController::class, 'updateDetails'])->whereNumber('caller')->name('details.update');
         Route::post('/{caller}/call-logs', [CallerController::class, 'storeCallLog'])->whereNumber('caller')->name('call-logs.store');
+    });
+    Route::prefix('staff/clients')->name('clients.')->group(function (): void {
+        Route::get('/', [ClientController::class, 'index'])->name('index');
+        Route::post('/', [ClientController::class, 'store'])->middleware('throttle:20,1')->name('store');
+        Route::get('/{client}', [ClientController::class, 'show'])->whereNumber('client')->name('show');
     });
     Route::get('/support/attachments/{attachment}', [SupportAttachmentController::class, 'download'])
         ->name('support.attachments.download');

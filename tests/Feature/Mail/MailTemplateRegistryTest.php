@@ -35,6 +35,7 @@ class MailTemplateRegistryTest extends TestCase
             'auth.passkey_removed',
             'auth.password_changed',
             'auth.reset_password',
+            'auth.set_password',
             'auth.two_factor_disabled',
             'auth.two_factor_enabled',
             'auth.verify_email',

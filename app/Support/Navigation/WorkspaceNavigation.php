@@ -106,6 +106,9 @@ final class WorkspaceNavigation
 
         if ($this->accounts->hasStaffSideRole($user)) {
             $overview[] = new NavItem('callers', __('callers.nav'), route('callers.index'), 'search', ['callers.*'], ['caller', 'phone', 'call', 'verify', 'pin']);
+            if ($user->can(AuthorizationProfile::PERMISSION_CLIENT_CREATE)) {
+                $overview[] = new NavItem('clients', __('clients.nav'), route('clients.index'), 'user-plus', ['clients.*'], ['client', 'create', 'public', 'pin', 'register']);
+            }
         }
 
         $groups = [

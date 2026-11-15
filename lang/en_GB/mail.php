@@ -31,6 +31,10 @@ return [
                 'name' => 'Reset password',
                 'description' => 'Sent when someone asks to reset a Public Login password.',
             ],
+            'set_password' => [
+                'name' => 'Set password',
+                'description' => 'Optional 72-hour link when staff create a public client account with an email address.',
+            ],
             'password_changed' => [
                 'name' => 'Password changed',
                 'description' => 'Confirms a Public Login password change.',
@@ -201,6 +205,15 @@ return [
             'action' => 'Reset password',
             'expiry' => 'This link expires in :count minutes.',
             'outro' => 'If you did not ask to reset your password, you can ignore this message. Your password will stay the same.',
+            'subcopy' => 'If the button does not work, open this address in your browser: :url',
+        ],
+        'set_password' => [
+            'subject' => 'Set your MyAPES Account password',
+            'greeting' => 'Hello :name,',
+            'intro' => 'An APES staff member created a MyAPES Account for you. Tap the button below to choose a password so you can sign in. This message never includes a password or PIN.',
+            'action' => 'Set password',
+            'expiry' => 'This link expires in :count minutes and can only be used once.',
+            'outro' => 'If you were not expecting this, contact APES support. Your phone PIN still works for caller verification.',
             'subcopy' => 'If the button does not work, open this address in your browser: :url',
         ],
         'password_changed' => [
