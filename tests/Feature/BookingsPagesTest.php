@@ -62,15 +62,39 @@ class BookingsPagesTest extends TestCase
         $this->get('/bookings/not-a-service')->assertNotFound();
     }
 
-    public function test_bookings_are_in_the_public_and_signed_in_menus(): void
+    public function test_bookings_are_in_guest_explore_and_public_tools_menus(): void
     {
         $guestMenu = $this->menuFor(null);
         $this->assertContains('bookings', $this->itemKeys($guestMenu->panels[NavPanel::PUBLIC]));
 
         $user = User::factory()->protectedRole('service-user')->create();
-        $this->assertContains('bookings', $this->itemKeys($this->menuFor($user)->panels[NavPanel::STAFF]));
+        $staffPanel = $this->menuFor($user)->panels[NavPanel::STAFF];
+        $this->assertContains('bookings', $this->itemKeys($staffPanel));
+        $this->assertSame(
+            ['overview', 'tools', 'support'],
+            array_values(array_filter(
+                array_map(static fn ($group) => $group->key, $staffPanel->groups),
+                static fn (string $key): bool => in_array($key, ['overview', 'tools', 'support'], true),
+            )),
+        );
+        $tools = collect($staffPanel->groups)->first(static fn ($group) => $group->key === 'tools');
+        $this->assertNotNull($tools);
+        $this->assertContains('bookings', array_map(static fn (NavItem $item): string => $item->key, $tools->items));
+        $support = collect($staffPanel->groups)->first(static fn ($group) => $group->key === 'support');
+        $this->assertNotNull($support);
+        $this->assertNotContains('bookings', array_map(static fn (NavItem $item): string => $item->key, $support->items));
 
         $this->actingAs($user)->get(route('bookings.show', 'apes'))->assertOk();
+    }
+
+    public function test_staff_side_users_cannot_open_bookings(): void
+    {
+        foreach (['staff', 'volunteer', 'student', 'administrator'] as $role) {
+            $user = User::factory()->protectedRole($role)->create();
+            $this->assertNotContains('bookings', $this->itemKeys($this->menuFor($user)->panels[NavPanel::STAFF]));
+            $this->actingAs($user)->get(route('bookings.index'))->assertForbidden();
+            $this->actingAs($user)->get(route('bookings.show', 'apes'))->assertForbidden();
+        }
     }
 
     private function menuFor(?User $user): \App\Support\Navigation\WorkspaceMenu

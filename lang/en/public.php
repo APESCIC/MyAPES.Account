@@ -280,7 +280,7 @@ return [
                 'app_support' => 'App Support',
                 'light_mode' => 'Light mode',
                 'dashboard' => 'Dashboard',
-                'register' => 'Register',
+                'register' => 'Public Register',
                 'local_qa' => 'Local QA',
                 'dev_only' => 'Dev only',
                 'hide_tip' => 'Hide tip',

@@ -69,9 +69,12 @@ Route::get('/change-log', ChangeLogController::class)->name('change-log.index');
 Route::view('/privacy', 'legal.privacy')->name('privacy');
 Route::view('/cookies', 'legal.cookies')->name('cookies');
 Route::get('/help', [HelpController::class, 'public'])->name('help');
-Route::get('/bookings', [BookingsController::class, 'index'])->name('bookings.index');
+Route::get('/bookings', [BookingsController::class, 'index'])
+    ->middleware('account.public')
+    ->name('bookings.index');
 Route::get('/bookings/{page}', [BookingsController::class, 'show'])
     ->where('page', '[a-z-]+')
+    ->middleware('account.public')
     ->name('bookings.show');
 Route::view('/terms', 'legal.terms')->name('terms');
 Route::get('/mail/reply', MailReplyLinkController::class)
