@@ -1,5 +1,59 @@
 [
   {
+    "version": "0.65.0",
+    "date": "2026-11-15",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Open a ticket flow, Tools menu and staff-created client accounts",
+    "summary": "Public Open a ticket is login-first with one combined form that routes into the chosen service. Guests and public users get Bookings under Tools and a Public Register label. Staff, volunteers and students can create local public client accounts with a phone PIN shown once and an optional 72-hour set-password email.",
+    "changes": [
+      "Guests must sign in or use Public Register before opening a ticket; signed-in public users pick a service and area on one form that submits straight into that service's ticket system, with no triage queue.",
+      "Old /open-a-ticket/{service}/{area}/start URLs redirect into the combined form with the service and area pre-selected.",
+      "Public users see a Tools menu above Support with Bookings under Tools; staff-side roles lose Bookings from the menu and receive 403 on those routes.",
+      "Guest chrome renames Register to Public Register.",
+      "Staff, volunteers and students with client.create can create local public client accounts: duplicate email/phone and staff-domain emails are refused; a 4–8 digit PIN is required, shown once, stored hashed, and never emailed or logged; optional email can send a 72-hour set-password link without the PIN; staff-assisted consent and audit record creation without secrets."
+    ],
+    "affected_areas": [
+      "Open a ticket",
+      "Workspace navigation",
+      "Bookings",
+      "Public Register",
+      "Staff Clients",
+      "Authentication (set-password)",
+      "Authorisation (client.create)",
+      "Audit log",
+      "Help and wiki"
+    ],
+    "categories": [
+      "added",
+      "changed"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Minor: new public ticket flow behaviour, navigation changes, and staff client-account creation with a new permission.",
+    "validation": [
+      "PHPUnit feature coverage for PublicOpenTicketPageTest, BookingsPagesTest, StaffClientAccountTest, registration gate and staff help pages.",
+      "composer pre-pr-verify and CI checks on the milestone pull request."
+    ],
+    "known_limitations": [
+      "None for this release."
+    ],
+    "rollback": "Redeploy the previous release tag and restore the previous database backup if client-consent columns or set-password tokens need to be removed.",
+    "provenance": "Milestone epic #661 and pull request #844 on the milestone/v0-65-0-open-ticket-flow-tools branch.",
+    "references": [
+      {
+        "label": "Issue #661",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/661"
+      },
+      {
+        "label": "Pull request #844",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/844"
+      }
+    ]
+  },
+  {
     "version": "0.64.3",
     "date": "2026-11-14",
     "channel": "stable",
@@ -39,7 +93,7 @@
       "Developer sign-in works only on local Herd with QA_LOGIN_ENABLED=true. Live admin log-in-as-user is out of scope and never planned."
     ],
     "rollback": "Deploy v0.64.2 with deploy-cloudron.yml. Local installs lose the Developer sign-in panel and QA pill until a later release; production is unchanged when the flag was unset.",
-    "provenance": "Milestone v0.64.3 Dev: Developer sign-in and QA role switcher, epic #834 with issues #835–#842; pull request #843.",
+    "provenance": "Milestone v0.64.3 Dev: Developer sign-in and QA role switcher, epic #834 with issues #835\u2013#842; pull request #843.",
     "references": [
       {
         "label": "Issue #834",
