@@ -293,7 +293,7 @@ class ReleaseHistoryCommandTest extends TestCase
         $currentText = strtolower(json_encode($current, JSON_THROW_ON_ERROR));
         foreach ([
             'open a ticket flow, tools menu and staff-created client accounts',
-            'client.create',
+            'admin.clients.create',
             'public register',
             'pull request #844',
         ] as $requiredReleaseText) {

@@ -52,7 +52,7 @@ return [
         ],
         'clients' => [
             'heading' => 'Creating a public client account',
-            'body' => 'Staff, volunteers and students with the client.create permission can open Clients and create a local public account for someone who phones in. This never creates a Cloudron staff account.',
+            'body' => 'Staff, volunteers and students with the Create public client accounts permission can open Clients and create a local public account for someone who phones in. This never creates a Cloudron staff account.',
             'pin' => 'You must set a 4–8 digit phone verification PIN. It is shown once after you save — write it down for the caller, then it disappears. The PIN is stored hashed and is never emailed, logged or printed again.',
             'email' => 'Email is optional. If you enter an email and tick the set-password option, the person gets a one-time link that expires after 72 hours. That email never includes the PIN or a password.',
             'consent' => 'Tick staff-assisted consent to record that you created the account with the person\'s agreement. The audit log stores who created it and whether the email was sent, without the PIN or password.',

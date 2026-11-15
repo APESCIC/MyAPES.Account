@@ -11,7 +11,7 @@
       "Old /open-a-ticket/{service}/{area}/start URLs redirect into the combined form with the service and area pre-selected.",
       "Public users see a Tools menu above Support with Bookings under Tools; staff-side roles lose Bookings from the menu and receive 403 on those routes.",
       "Guest chrome renames Register to Public Register.",
-      "Staff, volunteers and students with client.create can create local public client accounts: duplicate email/phone and staff-domain emails are refused; a 4–8 digit PIN is required, shown once, stored hashed, and never emailed or logged; optional email can send a 72-hour set-password link without the PIN; staff-assisted consent and audit record creation without secrets."
+      "Staff, volunteers and students with admin.clients.create can create local public client accounts: duplicate email/phone and staff-domain emails are refused; a 4–8 digit PIN is required, shown once, stored hashed, and never emailed or logged; optional email can send a 72-hour set-password link without the PIN; staff-assisted consent and audit record creation without secrets."
     ],
     "affected_areas": [
       "Open a ticket",
@@ -20,7 +20,7 @@
       "Public Register",
       "Staff Clients",
       "Authentication (set-password)",
-      "Authorisation (client.create)",
+      "Authorisation (admin.clients.create)",
       "Audit log",
       "Help and wiki"
     ],
