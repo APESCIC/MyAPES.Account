@@ -26,7 +26,7 @@ class AuthorizationProfile
 
     public const PERMISSION_STUDENT_ACCESS = 'student.access';
 
-    public const PERMISSION_CLIENT_CREATE = 'admin.clients.create';
+    public const PERMISSION_CLIENT_CREATE = 'staff.clients.create';
 
     private const BASE_PERMISSION_MATRIX = [
         self::ROLE_SERVICE_USER => [],

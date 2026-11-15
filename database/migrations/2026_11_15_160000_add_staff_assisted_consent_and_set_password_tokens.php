@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Staff-assisted registration consent (#673), admin.clients.create (#672), and 72-hour set-password tokens (#671).
+ * Staff-assisted registration consent (#673), staff.clients.create (#672), and 72-hour set-password tokens (#671).
  */
 return new class extends Migration
 {
@@ -44,14 +44,14 @@ return new class extends Migration
 
         $now = now();
         DB::table('permissions')->insertOrIgnore([
-            'name' => 'admin.clients.create',
+            'name' => 'staff.clients.create',
             'guard_name' => 'web',
             'is_code_owned' => true,
             'created_at' => $now,
             'updated_at' => $now,
         ]);
 
-        $permissionId = DB::table('permissions')->where('name', 'admin.clients.create')->where('guard_name', 'web')->value('id');
+        $permissionId = DB::table('permissions')->where('name', 'staff.clients.create')->where('guard_name', 'web')->value('id');
         $roleIds = DB::table('roles')
             ->where('guard_name', 'web')
             ->whereIn('name', ['student', 'volunteer', 'staff', 'administrator'])

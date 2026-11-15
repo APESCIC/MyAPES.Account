@@ -7,7 +7,7 @@
 
 ## Creating a public client account (v0.65.0)
 
-Staff, volunteers and students with `admin.clients.create` can open **Clients** and create a local public account for a caller:
+Staff, volunteers and students with `staff.clients.create` can open **Clients** and create a local public account for a caller:
 
 - Rejects duplicate email or phone, and staff-domain emails (for example `@apes.org.uk`).
 - Requires a 4–8 digit phone PIN. It is shown **once** after save — write it down for the caller. It is stored hashed and is never emailed, logged or printed again.

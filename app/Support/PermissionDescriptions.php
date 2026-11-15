@@ -36,7 +36,7 @@ final class PermissionDescriptions
             'description' => 'Update profiles, assign custom roles, and suspend or reactivate accounts.',
             'group' => 'Accounts',
         ],
-        'admin.clients.create' => [
+        'staff.clients.create' => [
             'title' => 'Create public client accounts',
             'description' => 'Create a local public client account with a phone PIN and optional set-password email (staff, volunteers and students).',
             'group' => 'Accounts',
