@@ -5,7 +5,14 @@
 **Audience:** everyone  
 **Purpose:** what the Tickets plugin does and who can do what.
 
-> **To be written.** This page will be filled in with milestone v0.58 uploads.
+## Open a ticket (public)
+
+From v0.65.0, `/open-a-ticket` is login-first:
+
+1. Guests see **Public Login** and **Public Register** links, not a submit form.
+2. Signed-in public users pick a service and area on one combined form; the ticket goes straight into that service's ticket system (APES CIC, Shelter, or Pet Care). There is no triage queue.
+3. Staff Cloudron accounts cannot complete the public form.
+4. Old `/open-a-ticket/{service}/{area}/start` URLs redirect to the combined form with the service and area pre-selected (guests are sent through sign-in or Public Register first).
 
 ## Replying by email
 

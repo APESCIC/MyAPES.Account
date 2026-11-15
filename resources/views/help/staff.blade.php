@@ -52,6 +52,14 @@
             <p>{{ __('help.staff.callers.end') }}</p>
         </section>
 
+        <section id="clients">
+            <h2>{{ __('help.staff.clients.heading') }}</h2>
+            <p>{{ __('help.staff.clients.body') }}</p>
+            <p>{{ __('help.staff.clients.pin') }}</p>
+            <p>{{ __('help.staff.clients.email') }}</p>
+            <p>{{ __('help.staff.clients.consent') }}</p>
+        </section>
+
         <section id="call-logs">
             <h2>{{ __('help.staff.call_logs.heading') }}</h2>
             <p>{{ __('help.staff.call_logs.body') }}</p>

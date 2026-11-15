@@ -12,8 +12,8 @@ The **support email address** and **support phone number** people can use to rea
 
 ## Public registration
 **Allow people to register for a public account** is on by default. When you switch it off:
-- the **Register** links disappear from the public pages, the menu, the sign-in page and the help pages, and `/register` is left out of the sitemap;
-- anyone who opens the Register page, or sends its form, is taken to **Public Login** with a notice that registration is closed;
+- the **Public Register** links disappear from the public pages, the menu, the sign-in page and the help pages, and `/register` is left out of the sitemap;
+- anyone who opens the Public Register page, or sends its form, is taken to **Public Login** with a notice that registration is closed;
 - links that would normally send a guest to register (for example **Open a ticket** or applying for a role) send them to Public Login instead.
 
 People who already have an account can still sign in. Staff and administrators still sign in through **APES Cloudron** (Staff Login), which this switch never affects.

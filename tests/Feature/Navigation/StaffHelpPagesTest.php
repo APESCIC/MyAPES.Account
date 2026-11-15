@@ -24,12 +24,14 @@ class StaffHelpPagesTest extends TestCase
 
         $response = $this->actingAs($staff)->get(route('help.staff'))->assertOk();
 
-        foreach (['areas', 'dashboard', 'services', 'pets', 'callers', 'call-logs', 'editor', 'search', 'account', 'support'] as $section) {
+        foreach (['areas', 'dashboard', 'services', 'pets', 'callers', 'clients', 'call-logs', 'editor', 'search', 'account', 'support'] as $section) {
             $response->assertSee('id="'.$section.'"', false);
         }
 
         $response
             ->assertSeeText('Verifying a caller')
+            ->assertSeeText('Creating a public client account')
+            ->assertSeeText('shown once after you save')
             ->assertSeeText('deleted automatically after 24 months')
             ->assertDontSee('href="'.route('help.admin').'"', false);
     }

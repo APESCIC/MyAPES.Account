@@ -66,6 +66,9 @@ class BookingsPagesTest extends TestCase
     {
         $guestMenu = $this->menuFor(null);
         $this->assertContains('bookings', $this->itemKeys($guestMenu->panels[NavPanel::PUBLIC]));
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSeeText('Public Register');
 
         $user = User::factory()->protectedRole('service-user')->create();
         $staffPanel = $this->menuFor($user)->panels[NavPanel::STAFF];

@@ -45,6 +45,18 @@
             </ul>
         </section>
 
+        <section id="open-a-ticket">
+            <h2>{{ __('public.legal.help.blade.open_a_ticket') }}</h2>
+            <p>{{ __('public.legal.help.blade.open_a_ticket_intro') }}</p>
+            <p><a href="{{ route('tickets.public.index') }}">{{ __('public.legal.help.blade.open_a_ticket_link') }}</a> {{ __('public.legal.help.blade.open_a_ticket_steps') }}</p>
+            <p>{{ __('public.legal.help.blade.open_a_ticket_staff') }}</p>
+        </section>
+
+        <section id="bookings">
+            <h2>{{ __('public.legal.help.blade.bookings') }}</h2>
+            <p>{{ __('public.legal.help.blade.bookings_body') }}</p>
+        </section>
+
         <section>
             <h2>{{ __('public.legal.help.blade.ask_apes_cic_for_help') }}</h2>
             <p>Signed-in public users should open a ticket in the service they need. Use an APES CIC case when the matter is a privacy request, complaint, or other formal casework.</p>

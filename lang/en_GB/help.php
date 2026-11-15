@@ -50,6 +50,13 @@ return [
             'lock' => 'Three wrong answers lock verification for that account for 15 minutes. Every attempt is recorded.',
             'end' => 'Once the caller is verified you can update their details and add a call log. Press End call when you finish; the verification also ends on its own after 60 minutes.',
         ],
+        'clients' => [
+            'heading' => 'Creating a public client account',
+            'body' => 'Staff, volunteers and students with the client.create permission can open Clients and create a local public account for someone who phones in. This never creates a Cloudron staff account.',
+            'pin' => 'You must set a 4–8 digit phone verification PIN. It is shown once after you save — write it down for the caller, then it disappears. The PIN is stored hashed and is never emailed, logged or printed again.',
+            'email' => 'Email is optional. If you enter an email and tick the set-password option, the person gets a one-time link that expires after 72 hours. That email never includes the PIN or a password.',
+            'consent' => 'Tick staff-assisted consent to record that you created the account with the person\'s agreement. The audit log stores who created it and whether the email was sent, without the PIN or password.',
+        ],
         'call_logs' => [
             'heading' => 'Call logs',
             'body' => 'Call logs are for staff only and never show to the person they are about. Keep them factual. They are deleted automatically after 24 months.',
