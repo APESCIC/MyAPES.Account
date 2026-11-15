@@ -29,6 +29,7 @@ use InvalidArgumentException;
 use Plugins\Tickets\Models\SupportTicket;
 use Plugins\Tickets\Models\SupportTicketMessage;
 use Plugins\Tickets\TicketCategoryResolver;
+use Plugins\Tickets\TicketCreator;
 use Plugins\Tickets\TicketOwnerCandidates;
 use Plugins\Tickets\TicketsArea;
 use Plugins\Tickets\TicketServiceConfiguration;
@@ -105,101 +106,18 @@ class TicketController extends Controller
         Request $request,
         AuditLogger $auditLogger,
         BotProtection $botProtection,
+        TicketCreator $creator,
     ): RedirectResponse {
         $instance = $this->instance($request);
-        $prefix = $this->area()->permissionPrefix();
-        $ticketService = $this->ticketServices->for($instance->subCore->key);
-        Gate::authorize($prefix.'create');
+        Gate::authorize($this->area()->permissionPrefix().'create');
         $botProtection->check($request, BotProtection::TICKET);
 
-        $isApesCic = $this->area()->usesHierarchicalCategories;
-        $rules = [
-            'service_area' => ['required', Rule::in($ticketService->serviceAreas)],
-            'subject' => ['required', 'string', 'max:255'],
-            'priority' => ['required', Rule::in(self::createPrioritiesFor($request->user(), $prefix))],
-            'description' => ['required', 'string'],
-        ];
-
-        if ($isApesCic) {
-            $rules['sub_category'] = ['required', 'string', 'max:64'];
-            $rules['affected_website_key'] = ['nullable', 'string', 'max:64'];
-        }
-        $rules = [...$rules, ...AttachmentLimits::rules()];
-
-        $validated = $request->validate($rules, AttachmentLimits::validationMessages());
-        AttachmentLimits::assertSubmissionWithinLimits($request);
-
-        $categoryFields = [
-            'service_area' => $validated['service_area'],
-            'sub_category' => null,
-            'affected_website_key' => null,
-        ];
-
-        if ($isApesCic) {
-            $categoryFields = $this->categories->validateSelection(
-                $instance->subCore->key,
-                $validated['service_area'],
-                $validated['sub_category'],
-                $validated['affected_website_key'] ?? null,
-            );
-        }
-
-        $allowsAttachments = $this->attachmentsAllowed(
+        return $creator->createFromRequest(
+            $request,
+            $request->user(),
             $instance->subCore->key,
-            $categoryFields['service_area'],
-            $categoryFields['sub_category'],
+            $auditLogger,
         );
-        if (! $allowsAttachments && AttachmentLimits::requested($request)) {
-            throw ValidationException::withMessages([
-                'screenshots' => $this->uploads->enabledFor($this->area()->moduleSlug)
-                    ? __('tickets::ui.validation.attachments_are_not_available_for_this_subcategory')
-                    : __('attachments.validation.uploads_disabled'),
-            ]);
-        }
-
-        $ticket = SupportTicket::create([
-            'service_area' => $categoryFields['service_area'],
-            'sub_category' => $categoryFields['sub_category'],
-            'affected_website_key' => $categoryFields['affected_website_key'],
-            'subject' => $validated['subject'],
-            'priority' => $validated['priority'],
-            'description' => $validated['description'],
-            'sub_core_key' => $instance->subCore->key,
-            'user_id' => $request->user()->id,
-            'status' => 'open',
-        ]);
-
-        $ticket->messages()->create([
-            'user_id' => $request->user()->id,
-            'message' => 'Ticket created.',
-            'is_staff_note' => false,
-        ]);
-
-        $storedAttachments = collect();
-        if ($allowsAttachments) {
-            $storedAttachments = $this->attachments->storeFromRequest(
-                $ticket,
-                $instance->subCore->key,
-                $request->user(),
-                $request,
-            );
-        }
-
-        $this->notifier->notify($ticket, $request->user(), 'created', attachmentCount: $storedAttachments->count());
-        $auditLogger->record("{$ticketService->auditPrefix}.created", $request->user(), $ticket, [
-            'service_area' => $ticket->service_area,
-            'sub_category' => $ticket->sub_category,
-            'affected_website_key' => $ticket->affected_website_key,
-            'priority' => $ticket->priority,
-            'sub_core_key' => $ticket->sub_core_key,
-            'module_key' => $instance->module->key,
-        ]);
-
-        return redirect()->route($this->area()->showRouteName(), $ticket)
-            ->with('status', AttachmentFeedback::status(
-                __('tickets::ui.flash.your_ticket_has_been_saved'),
-                $storedAttachments->count(),
-            ));
     }
 
     public function show(
