@@ -30,7 +30,18 @@ final class QaLogin
 
     public static function enabled(): bool
     {
-        return config('myapes.qa_login_enabled') === true && app()->environment('local');
+        if (! app()->environment('local')) {
+            return false;
+        }
+
+        $flag = config('myapes.qa_login_enabled');
+
+        // Unset or empty: on for local Herd by default. Explicit false/0 still disables.
+        if ($flag === null || $flag === '') {
+            return true;
+        }
+
+        return filter_var($flag, FILTER_VALIDATE_BOOLEAN);
     }
 
     /**
