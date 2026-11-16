@@ -1,0 +1,31 @@
+# Secrets and credentials (never index for agents)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+credentials.txt
+secrets.json
+**/pending-secrets/
+**/.bw-session*
+**/*.local.json
+auth.json
+/storage/*.key
+
+# Large / generated trees
+vendor/
+node_modules/
+/public/build/
+/public/hot
+/public/fonts-manifest.dev.json
+dist/
+build/
+coverage/
+.git/
+.phpunit.cache
+.phpunit.result.cache
+/storage/pail
+/storage/logs/
