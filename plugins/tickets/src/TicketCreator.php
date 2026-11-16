@@ -7,6 +7,7 @@ use App\Core\Attachments\AttachmentFeedback;
 use App\Core\Attachments\AttachmentLimits;
 use App\Core\Attachments\UploadSettings;
 use App\Services\AuditLogger;
+use App\Services\ClientOwnedRecordResolver;
 use App\Services\SupportAttachmentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,6 +27,7 @@ final class TicketCreator
         private readonly SupportAttachmentService $attachments,
         private readonly UploadSettings $uploads,
         private readonly TicketStakeholderNotifier $notifier,
+        private readonly ClientOwnedRecordResolver $owners,
     ) {}
 
     public function createFromRequest(
@@ -44,6 +46,7 @@ final class TicketCreator
             'subject' => ['required', 'string', 'max:255'],
             'priority' => ['required', Rule::in(TicketController::createPrioritiesFor($user, $prefix))],
             'description' => ['required', 'string'],
+            'for_user' => ['nullable', 'integer', 'exists:users,id'],
         ];
 
         if ($isApesCic) {
@@ -83,6 +86,8 @@ final class TicketCreator
             ]);
         }
 
+        $owner = $this->owners->resolve($request, $user);
+
         $ticket = SupportTicket::create([
             'service_area' => $categoryFields['service_area'],
             'sub_category' => $categoryFields['sub_category'],
@@ -91,7 +96,7 @@ final class TicketCreator
             'priority' => $validated['priority'],
             'description' => $validated['description'],
             'sub_core_key' => $subCoreKey,
-            'user_id' => $user->id,
+            'user_id' => $owner->id,
             'status' => 'open',
         ]);
 
@@ -143,4 +148,5 @@ final class TicketCreator
         return is_string($subCategory)
             && $this->categories->allowsAttachments($subCoreKey, $serviceArea, $subCategory);
     }
+
 }

@@ -66,6 +66,10 @@
                 <h2>{{ __('cases::ui.index.blade.open_a_case') }}</h2>
                 <form method="post" action="{{ route('apes-cic.cases.store') }}" enctype="multipart/form-data" data-case-create-form>
                 @csrf
+                @if(request()->filled('for_user') || old('for_user'))
+                    <input type="hidden" name="for_user" value="{{ old('for_user', request('for_user')) }}">
+                    <p class="muted" data-for-user-notice>{{ __('admin.users.hub.actions.creating_for_client') }}</p>
+                @endif
                 <div class="row">
                     <div>
                         <label for="category">{{ __('cases::ui.index.blade.category') }}</label>
