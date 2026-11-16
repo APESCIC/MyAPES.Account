@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Core\Accounts;
+namespace App\Services;
+
+use App\Core\Accounts\User;
 
 use App\Core\Extensions\Plugins\PluginEnablement;
 use Illuminate\Support\Facades\Route;

@@ -30,7 +30,7 @@ class AdminPendingFirstLoginChaseTest extends TestCase
         ]);
 
         $detail = $this->actingAs($administrator)
-            ->get(route('admin.users.show', $pending));
+            ->get(route('admin.users.show', ['user' => $pending, 'tab' => 'details']));
         $detail->assertOk()
             ->assertSee('Pending first login')
             ->assertSee('Send Staff Login reminder')
@@ -90,7 +90,7 @@ class AdminPendingFirstLoginChaseTest extends TestCase
         ]);
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.show', $public))
+            ->get(route('admin.users.show', ['user' => $public, 'tab' => 'details']))
             ->assertOk()
             ->assertSee('Reset local password')
             ->assertDontSee('Send Staff Login reminder')
@@ -126,7 +126,7 @@ class AdminPendingFirstLoginChaseTest extends TestCase
             ]);
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.show', $directory))
+            ->get(route('admin.users.show', ['user' => $directory, 'tab' => 'details']))
             ->assertOk()
             ->assertDontSee('Send Staff Login reminder');
 

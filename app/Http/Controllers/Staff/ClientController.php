@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Staff;
 
 use App\Core\Accounts\PhoneVerificationPinService;
 use App\Core\Accounts\User;
-use App\Core\Accounts\UserActivityTimeline;
-use App\Core\Accounts\UserProfileHubActions;
-use App\Core\Accounts\UserRecordsSummary;
+use App\Services\UserActivityTimeline;
+use App\Services\UserProfileHubActions;
+use App\Services\UserRecordsSummary;
 use App\Http\Controllers\Concerns\BuildsUserProfileHub;
 use App\Http\Controllers\Controller;
 use App\Services\AuthorizationProfile;

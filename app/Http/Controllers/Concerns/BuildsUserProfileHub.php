@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Concerns;
 
 use App\Core\Accounts\User;
-use App\Core\Accounts\UserActivityTimeline;
-use App\Core\Accounts\UserProfileHubActions;
-use App\Core\Accounts\UserRecordsSummary;
 use App\Services\TotpTwoFactorService;
+use App\Services\UserActivityTimeline;
+use App\Services\UserProfileHubActions;
+use App\Services\UserRecordsSummary;
 use Illuminate\Http\Request;
 
 trait BuildsUserProfileHub

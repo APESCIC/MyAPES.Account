@@ -3,7 +3,7 @@
 @section('title', 'Admin user | MyAPES Account')
 
 @section('content')
-    <div class="panel-stack" data-profile-hub>
+    <div class="panel-stack">
         <section class="panel" aria-labelledby="managed-user-title">
             <p><a href="{{ route('admin.users.index') }}">{{ __('admin.users.back_to_users') }}</a></p>
             <h1 id="managed-user-title">{{ $managedUser->name }}</h1>

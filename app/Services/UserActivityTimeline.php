@@ -1,6 +1,9 @@
 <?php
 
-namespace App\Core\Accounts;
+namespace App\Services;
+
+use App\Core\Accounts\AuditLog;
+use App\Core\Accounts\User;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\LengthAwarePaginator as Paginator;
@@ -176,8 +179,10 @@ final class UserActivityTimeline
                 continue;
             }
 
-            foreach (self::SECRET_CONTEXT_KEYS as $secret) {
-                if (str_contains($lower, $secret)) {
+            // Substring match only for unambiguous secret fragments — bare
+            // "code"/"otp" would strip allow-listed keys such as reason_code.
+            foreach (['password', 'secret', 'token', 'pin', 'recovery'] as $secretFragment) {
+                if (str_contains($lower, $secretFragment)) {
                     continue 2;
                 }
             }

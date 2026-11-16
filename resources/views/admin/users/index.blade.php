@@ -115,7 +115,7 @@
                     <td>
                         <a href="{{ route('admin.users.show', $user) }}">{{ __('admin.users.view_user') }}</a>
                         @if(in_array($user->id, $resettableUserIds, true))
-                            · <a href="{{ route('admin.users.show', $user) }}#local-password">{{ __('admin.users.reset_password') }}</a>
+                            · <a href="{{ route('admin.users.show', ['user' => $user, 'tab' => 'details']) }}#local-password">{{ __('admin.users.reset_password') }}</a>
                         @endif
                     </td>
                 </tr>

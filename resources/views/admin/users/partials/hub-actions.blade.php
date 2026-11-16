@@ -71,7 +71,7 @@
                     </select>
                     <label for="hub-case-title-{{ $action['module'] }}">{{ __('cases::ui.index.blade.title') }}</label>
                     <input id="hub-case-title-{{ $action['module'] }}" name="title" value="{{ old('title') }}" required>
-                    <label for="hub-case-details-{{ $action['module'] }}">Details</label>
+                    <label for="hub-case-details-{{ $action['module'] }}">{{ __('cases::ui.index.blade.details') }}</label>
                     <textarea id="hub-case-details-{{ $action['module'] }}" name="details">{{ old('details') }}</textarea>
                     <div class="actions"><button type="submit">{{ $action['label'] }}</button></div>
                 </form>
