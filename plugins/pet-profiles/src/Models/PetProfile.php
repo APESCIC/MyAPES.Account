@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'user_id',
     'service_domain',
     'name',
+    'microchip',
     'species',
     'age_years',
     'sex',
