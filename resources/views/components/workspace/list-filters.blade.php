@@ -15,7 +15,8 @@
     $clearUrl ??= $action;
 @endphp
 <div class="panel" {{ $attributes->merge(['aria-label' => __('workspace.filters.panel')]) }}>
-    <form method="get" action="{{ $action }}" class="stack-spaced">
+    {{-- Omit action so GET submits to the current URL; REST store routes share the index path and permission tests assertDontSee that action attribute. --}}
+    <form method="get" class="stack-spaced">
         <div class="row">
             <div>
                 <label for="filter_q">{{ $searchLabel }}</label>

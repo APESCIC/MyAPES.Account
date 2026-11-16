@@ -11,11 +11,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // assigned_to already has a foreign-key index; do not add or drop it.
         SearchIndexMigration::addIndex('support_tickets', 'support_tickets_sub_core_status_index', function (Blueprint $table): void {
             $table->index(['sub_core_key', 'status'], 'support_tickets_sub_core_status_index');
-        });
-        SearchIndexMigration::addIndex('support_tickets', 'support_tickets_assigned_to_index', function (Blueprint $table): void {
-            $table->index('assigned_to', 'support_tickets_assigned_to_index');
         });
         SearchIndexMigration::addIndex('support_tickets', 'support_tickets_subject_index', function (Blueprint $table): void {
             $table->index('subject', 'support_tickets_subject_index');
@@ -28,9 +26,6 @@ return new class extends Migration
         SearchIndexMigration::dropFullText('support_tickets', 'support_tickets_subject_fulltext');
         SearchIndexMigration::dropIndex('support_tickets', 'support_tickets_sub_core_status_index', function (Blueprint $table): void {
             $table->dropIndex('support_tickets_sub_core_status_index');
-        });
-        SearchIndexMigration::dropIndex('support_tickets', 'support_tickets_assigned_to_index', function (Blueprint $table): void {
-            $table->dropIndex('support_tickets_assigned_to_index');
         });
         SearchIndexMigration::dropIndex('support_tickets', 'support_tickets_subject_index', function (Blueprint $table): void {
             $table->dropIndex('support_tickets_subject_index');

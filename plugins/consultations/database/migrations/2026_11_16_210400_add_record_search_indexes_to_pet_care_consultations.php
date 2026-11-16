@@ -11,11 +11,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // assigned_to already has a foreign-key index; do not add or drop it.
         SearchIndexMigration::addIndex('pet_care_consultations', 'pet_care_consultations_status_index', function (Blueprint $table): void {
             $table->index('status', 'pet_care_consultations_status_index');
-        });
-        SearchIndexMigration::addIndex('pet_care_consultations', 'pet_care_consultations_assigned_to_index', function (Blueprint $table): void {
-            $table->index('assigned_to', 'pet_care_consultations_assigned_to_index');
         });
         SearchIndexMigration::addIndex('pet_care_consultations', 'pet_care_consultations_subject_index', function (Blueprint $table): void {
             $table->index('subject', 'pet_care_consultations_subject_index');
@@ -28,9 +26,6 @@ return new class extends Migration
         SearchIndexMigration::dropFullText('pet_care_consultations', 'pet_care_consultations_subject_fulltext');
         SearchIndexMigration::dropIndex('pet_care_consultations', 'pet_care_consultations_status_index', function (Blueprint $table): void {
             $table->dropIndex('pet_care_consultations_status_index');
-        });
-        SearchIndexMigration::dropIndex('pet_care_consultations', 'pet_care_consultations_assigned_to_index', function (Blueprint $table): void {
-            $table->dropIndex('pet_care_consultations_assigned_to_index');
         });
         SearchIndexMigration::dropIndex('pet_care_consultations', 'pet_care_consultations_subject_index', function (Blueprint $table): void {
             $table->dropIndex('pet_care_consultations_subject_index');

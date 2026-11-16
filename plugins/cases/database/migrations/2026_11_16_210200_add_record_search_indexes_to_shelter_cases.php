@@ -11,11 +11,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // assigned_to already has a foreign-key index; do not add or drop it.
         SearchIndexMigration::addIndex('shelter_cases', 'shelter_cases_sub_core_status_index', function (Blueprint $table): void {
             $table->index(['sub_core_key', 'status'], 'shelter_cases_sub_core_status_index');
-        });
-        SearchIndexMigration::addIndex('shelter_cases', 'shelter_cases_assigned_to_index', function (Blueprint $table): void {
-            $table->index('assigned_to', 'shelter_cases_assigned_to_index');
         });
         SearchIndexMigration::addIndex('shelter_cases', 'shelter_cases_title_index', function (Blueprint $table): void {
             $table->index('title', 'shelter_cases_title_index');
@@ -28,9 +26,6 @@ return new class extends Migration
         SearchIndexMigration::dropFullText('shelter_cases', 'shelter_cases_title_fulltext');
         SearchIndexMigration::dropIndex('shelter_cases', 'shelter_cases_sub_core_status_index', function (Blueprint $table): void {
             $table->dropIndex('shelter_cases_sub_core_status_index');
-        });
-        SearchIndexMigration::dropIndex('shelter_cases', 'shelter_cases_assigned_to_index', function (Blueprint $table): void {
-            $table->dropIndex('shelter_cases_assigned_to_index');
         });
         SearchIndexMigration::dropIndex('shelter_cases', 'shelter_cases_title_index', function (Blueprint $table): void {
             $table->dropIndex('shelter_cases_title_index');
