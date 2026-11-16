@@ -38,6 +38,7 @@ return new class extends Migration
         'admin.access',
         'superadmin.access',
         'staff.clients.create',
+        'staff.clients.view',
         'admin.users.view',
         'admin.users.manage',
         'admin.groups.view',

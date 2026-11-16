@@ -174,6 +174,11 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
         return $this->hasOne(UserContactPreference::class);
     }
 
+    public function clientNotes(): HasMany
+    {
+        return $this->hasMany(ClientNote::class, 'user_id')->latest('id');
+    }
+
     public function pendingEmailChange(): HasOne
     {
         return $this->hasOne(PendingEmailChange::class);
