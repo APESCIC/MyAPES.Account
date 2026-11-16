@@ -16,7 +16,7 @@ class AdminUserDetailUxTest extends TestCase
         $staff = $this->userWithAccess(User::ROLE_STAFF);
 
         $response = $this->actingAs($administrator)
-            ->get(route('admin.users.show', $staff))
+            ->get(route('admin.users.show', ['user' => $staff, 'tab' => 'access']))
             ->assertOk()
             ->assertSee('Effective access')
             ->assertSee('Job roles')
@@ -44,7 +44,7 @@ class AdminUserDetailUxTest extends TestCase
         $staff = $this->userWithAccess(User::ROLE_STAFF);
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.show', $staff))
+            ->get(route('admin.users.show', ['user' => $staff, 'tab' => 'access']))
             ->assertOk()
             ->assertSee('id="suspend-user"', false)
             ->assertSee('I confirm I want to suspend this account')

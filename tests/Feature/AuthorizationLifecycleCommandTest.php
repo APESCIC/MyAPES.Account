@@ -921,7 +921,7 @@ class AuthorizationLifecycleCommandTest extends TestCase
 
         $this->assertSame(0, $exitCode);
         $this->assertStringContainsString('Authorization schema: ok', $output);
-        $this->assertStringContainsString('Permission matrix: ok (86 permissions)', $output);
+        $this->assertStringContainsString('Permission matrix: ok (87 permissions)', $output);
         $this->assertStringContainsString('Directory mappings: ok (4 immutable)', $output);
         $this->assertStringContainsString('Role provenance: ok (3 users)', $output);
         $this->assertStringContainsString('Session cutover: ok', $output);

@@ -14,6 +14,7 @@ use App\Core\Attachments\AttachmentFeedback;
 use App\Core\Attachments\AttachmentLimits;
 use App\Core\Attachments\SupportAttachment;
 use Closure;
+use App\Services\ClientOwnedRecordResolver;
 use App\Services\SupportAttachmentService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -38,6 +39,7 @@ class CaseController extends Controller
         private readonly SupportAttachmentService $attachments,
         private readonly PetProfilesContract $petProfiles,
         private readonly CaseAttachmentGate $attachmentGate,
+        private readonly ClientOwnedRecordResolver $owners,
     ) {}
 
     public function index(Request $request): View
@@ -127,6 +129,7 @@ class CaseController extends Controller
             'priority' => ['required', Rule::in($this->area()->priorities)],
             'title' => ['required', 'string', 'max:255'],
             'details' => ['nullable', 'string'],
+            'for_user' => ['nullable', 'integer', 'exists:users,id'],
             ...AttachmentLimits::rules(),
         ], AttachmentLimits::validationMessages());
         AttachmentLimits::assertSubmissionWithinLimits($request);
@@ -150,6 +153,8 @@ class CaseController extends Controller
             ]);
         }
 
+        $owner = $this->owners->resolve($request, $request->user());
+
         $case = ShelterCase::create([
             'category' => $categoryFields['category'],
             'sub_category' => $categoryFields['sub_category'],
@@ -158,7 +163,7 @@ class CaseController extends Controller
             'title' => $validated['title'],
             'details' => $validated['details'] ?? null,
             'sub_core_key' => $instance->subCore->key,
-            'user_id' => $request->user()->id,
+            'user_id' => $owner->id,
             'status' => 'open',
             'opened_at' => now(),
         ]);

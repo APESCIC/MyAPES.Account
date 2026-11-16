@@ -141,13 +141,21 @@ class AdminAccessAndViewsTest extends TestCase
             ->assertSee('myapes.case-reviewers')
             ->assertSee('case-reviewer')
             ->assertSee('local')
-            ->assertSee('staff.access')
+            ->assertSee('<h1', false)
+            ->assertSee('<section', false);
+
+        $this->actingAs($administrator)
+            ->get(route('admin.users.show', ['user' => $target, 'tab' => 'access']))
+            ->assertOk()
+            ->assertSee('staff.access');
+
+        $this->actingAs($administrator)
+            ->get(route('admin.users.show', ['user' => $target, 'tab' => 'activity']))
+            ->assertOk()
             ->assertSee('safe_history_code')
             ->assertDontSee('directory-subject-must-not-render')
             ->assertDontSee('unsafe-subject')
-            ->assertDontSee('unsafe-value')
-            ->assertSee('<h1', false)
-            ->assertSee('<section', false);
+            ->assertDontSee('unsafe-value');
 
         $this->actingAs($administrator)
             ->from('/admin/users')
@@ -203,7 +211,7 @@ class AdminAccessAndViewsTest extends TestCase
             ->assertDontSee('admin.users.*');
 
         $response = $this->actingAs($reviewingAdministrator)
-            ->get(route('admin.users.show', $target))
+            ->get(route('admin.users.show', ['user' => $target, 'tab' => 'access']))
             ->assertOk()
             ->assertSee('Effective access')
             ->assertSee('Advanced permissions')

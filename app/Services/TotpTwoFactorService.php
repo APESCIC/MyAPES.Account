@@ -103,26 +103,36 @@ class TotpTwoFactorService
 
     public function disable(User $user): void
     {
-        $this->assertLocalIdentity($user);
+        $this->disableForSubject($user, $user);
+    }
 
-        if (! $this->hasEnabledTwoFactor($user) && ! $this->hasPendingEnrolment($user)) {
+    /**
+     * Admin/staff-assisted 2FA reset (#522). Audits the actor separately from the subject.
+     */
+    public function disableForSubject(User $subject, User $actor): void
+    {
+        $this->assertLocalIdentity($subject);
+
+        if (! $this->hasEnabledTwoFactor($subject) && ! $this->hasPendingEnrolment($subject)) {
             throw new DomainException(__('auth.two_factor.not_enabled'));
         }
 
-        $wasEnabled = $this->hasEnabledTwoFactor($user);
+        $wasEnabled = $this->hasEnabledTwoFactor($subject);
 
-        $user->forceFill([
+        $subject->forceFill([
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
         ])->save();
 
         if ($wasEnabled) {
-            $user->notify(new TwoFactorDisabledNotification);
+            $subject->notify(new TwoFactorDisabledNotification);
         }
 
-        $this->auditLogger->record('auth.two_factor_disabled', $user, $user, [
+        $this->auditLogger->record('auth.two_factor_disabled', $actor, $subject, [
             'was_confirmed' => $wasEnabled,
+            'target_user_id' => $subject->id,
+            'actor_id' => $actor->id,
         ]);
     }
 

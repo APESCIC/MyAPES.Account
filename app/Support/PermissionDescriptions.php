@@ -41,6 +41,11 @@ final class PermissionDescriptions
             'description' => 'Create a local public client account with a phone PIN and optional set-password email (staff, volunteers and students).',
             'group' => 'Accounts',
         ],
+        'staff.clients.view' => [
+            'title' => 'View public client profiles',
+            'description' => 'Open a public client profile hub, see their records, add internal notes, and start a ticket or case for them.',
+            'group' => 'Accounts',
+        ],
         'admin.analytics.view' => [
             'title' => 'View admin overview',
             'description' => 'See operational KPIs on the Admin overview.',

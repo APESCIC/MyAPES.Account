@@ -28,24 +28,30 @@ class AuthorizationProfile
 
     public const PERMISSION_CLIENT_CREATE = 'staff.clients.create';
 
+    public const PERMISSION_CLIENT_VIEW = 'staff.clients.view';
+
     private const BASE_PERMISSION_MATRIX = [
         self::ROLE_SERVICE_USER => [],
         self::ROLE_STUDENT => [
             self::PERMISSION_STUDENT_ACCESS,
             self::PERMISSION_CLIENT_CREATE,
+            self::PERMISSION_CLIENT_VIEW,
         ],
         self::ROLE_VOLUNTEER => [
             self::PERMISSION_VOLUNTEER_ACCESS,
             self::PERMISSION_CLIENT_CREATE,
+            self::PERMISSION_CLIENT_VIEW,
         ],
         self::ROLE_STAFF => [
             self::PERMISSION_STAFF_ACCESS,
             self::PERMISSION_CLIENT_CREATE,
+            self::PERMISSION_CLIENT_VIEW,
         ],
         self::ROLE_ADMINISTRATOR => [
             self::PERMISSION_STAFF_ACCESS,
             self::PERMISSION_ADMIN_ACCESS,
             self::PERMISSION_CLIENT_CREATE,
+            self::PERMISSION_CLIENT_VIEW,
             'admin.users.view',
             'admin.users.manage',
             'admin.groups.view',

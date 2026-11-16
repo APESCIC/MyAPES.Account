@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Contracts\ModuleRegistry;
 use App\Core\Accounts\AccountClassifier;
-use App\Core\Accounts\AuditLog;
 use App\Core\Accounts\Role;
 use App\Core\Accounts\RoleSource;
 use App\Core\Accounts\StaffProfile;
 use App\Core\Accounts\User;
+use App\Services\UserActivityTimeline;
+use App\Services\UserProfileHubActions;
+use App\Services\UserRecordsSummary;
+use App\Http\Controllers\Concerns\BuildsUserProfileHub;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\OnboardingController;
 use App\Services\AuditLogger;
@@ -19,6 +22,7 @@ use App\Services\LocalPublicPasswordResetService;
 use App\Services\PendingFirstLoginChaseService;
 use App\Services\SecureUploadService;
 use App\Services\StaffProfilePhotoResponder;
+use App\Services\TotpTwoFactorService;
 use App\Services\UkPhoneNumber;
 use App\Services\VerificationResendService;
 use App\Support\DefaultJobRoles;
@@ -27,7 +31,6 @@ use DomainException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use InvalidArgumentException;
@@ -35,6 +38,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdminUserController extends Controller
 {
+    use BuildsUserProfileHub;
+
     public function index(
         Request $request,
         AuthorizationProfile $profile,
@@ -177,6 +182,10 @@ class AdminUserController extends Controller
         PendingFirstLoginChaseService $pendingFirstLoginChase,
         ModuleRegistry $modules,
         VerificationResendService $verificationResends,
+        UserRecordsSummary $records,
+        UserProfileHubActions $actions,
+        UserActivityTimeline $timeline,
+        TotpTwoFactorService $twoFactor,
     ): View {
         Gate::authorize('admin.users.view');
         $managedUser = User::query()->findOrFail($user);
@@ -215,42 +224,8 @@ class AdminUserController extends Controller
             );
         }
 
-        $auditContextKeys = [
-            'actor_id',
-            'target_user_id',
-            'role_id',
-            'role_ids',
-            'role_count',
-            'permission_count',
-            'affected_user_count',
-            'group_id',
-            'mapping_id',
-            'matched_user_count',
-            'changed_user_count',
-            'action',
-            'source_key',
-            'route_name',
-            'method',
-            'reason_code',
-            'reason_length',
-            'granted_count',
-            'revoked_count',
-        ];
-        $auditHistory = AuditLog::query()
-            ->where('auditable_type', $managedUser->getMorphClass())
-            ->where('auditable_id', $managedUser->id)
-            ->latest('id')
-            ->limit(50)
-            ->get()
-            ->map(static fn (AuditLog $audit): array => [
-                'event' => $audit->event,
-                'actor_id' => $audit->user_id,
-                'created_at' => $audit->created_at,
-                'context' => Arr::only(
-                    is_array($audit->context) ? $audit->context : [],
-                    $auditContextKeys,
-                ),
-            ]);
+        $actor = $request->user();
+        abort_unless($actor instanceof User, 403);
 
         return view('admin.users.show', [
             'managedUser' => $managedUser,
@@ -267,20 +242,16 @@ class AdminUserController extends Controller
                 ->pluck('role_id')
                 ->map(static fn (mixed $id): int => (int) $id)
                 ->all(),
-            'auditHistory' => $auditHistory,
             'canManageTarget' => $mutations->canManageTarget(
-                $request->user(),
+                $actor,
                 $managedUser,
             ),
-            'canResetLocalPassword' => $request->user() instanceof User
-                && $passwordResets->canReset($request->user(), $managedUser),
-            'canChasePendingFirstLogin' => $request->user() instanceof User
-                && $pendingFirstLoginChase->canChase(
-                    $request->user(),
-                    $managedUser,
-                ),
-            'canResendVerification' => $request->user() instanceof User
-                && $verificationResends->canResend($request->user(), $managedUser),
+            'canResetLocalPassword' => $passwordResets->canReset($actor, $managedUser),
+            'canChasePendingFirstLogin' => $pendingFirstLoginChase->canChase(
+                $actor,
+                $managedUser,
+            ),
+            'canResendVerification' => $verificationResends->canResend($actor, $managedUser),
             'identityLabel' => match ($managedUser->identity_type) {
                 User::IDENTITY_LOCAL => 'Local',
                 User::IDENTITY_CLOUDRON_OIDC => 'Cloudron OIDC',
@@ -301,7 +272,78 @@ class AdminUserController extends Controller
             'preference' => $managedUser->contactPreference,
             'profile' => $managedUser->profile,
             'staffProfile' => $managedUser->staffProfile,
+            'isAdminHub' => true,
+            'canEditHub' => true,
+            ...$this->profileHubData(
+                $request,
+                $managedUser,
+                $actor,
+                $records,
+                $actions,
+                $timeline,
+                $twoFactor,
+            ),
         ]);
+    }
+
+    public function updateContactPreferences(
+        Request $request,
+        string $user,
+        AuthorizationMutationService $mutations,
+        ContactPreferenceUpdater $preferences,
+        OnboardingController $onboarding,
+        AuditLogger $auditLogger,
+    ): RedirectResponse {
+        Gate::authorize('admin.users.manage');
+        $managedUser = User::query()->findOrFail($user);
+        abort_unless($mutations->canManageTarget($request->user(), $managedUser), 403);
+
+        $request->validate([
+            'contact_preferences_confirmed' => ['accepted'],
+        ]);
+
+        $preferences->update(
+            $managedUser,
+            $request->user(),
+            $onboarding->contactChoices($request),
+            'admin_hub',
+        );
+
+        $auditLogger->record('contact_preferences.updated', $request->user(), $managedUser, [
+            'target_user_id' => $managedUser->id,
+            'actor_id' => $request->user()->id,
+            'source_key' => 'admin_hub',
+        ]);
+
+        return redirect()
+            ->route('admin.users.show', ['user' => $managedUser, 'tab' => 'overview'])
+            ->with('status', __('admin.flash.contact_preferences_updated'));
+    }
+
+    public function resetTwoFactor(
+        Request $request,
+        string $user,
+        AuthorizationMutationService $mutations,
+        TotpTwoFactorService $twoFactor,
+    ): RedirectResponse {
+        Gate::authorize('admin.users.manage');
+        $managedUser = User::query()->findOrFail($user);
+        abort_unless($mutations->canManageTarget($request->user(), $managedUser), 403);
+        $request->validate([
+            'confirm_two_factor_reset' => ['accepted'],
+        ]);
+
+        try {
+            $twoFactor->disableForSubject($managedUser, $request->user());
+        } catch (DomainException $exception) {
+            return back()->withErrors([
+                'two_factor' => $exception->getMessage(),
+            ]);
+        }
+
+        return redirect()
+            ->route('admin.users.show', ['user' => $managedUser, 'tab' => 'overview'])
+            ->with('status', __('admin.flash.two_factor_reset'));
     }
 
     public function updateRoles(

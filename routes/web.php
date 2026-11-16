@@ -44,6 +44,8 @@ use App\Http\Controllers\RobotsTxtController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Staff\CallerController;
 use App\Http\Controllers\Staff\ClientController;
+use App\Http\Controllers\Staff\ClientNoteController;
+use App\Http\Controllers\Staff\StaffClientRecordController;
 use App\Http\Controllers\SubCoreController;
 use App\Http\Controllers\SupportAttachmentController;
 use App\Http\Middleware\EnsureLocalReplyLoop;
@@ -216,6 +218,26 @@ Route::middleware([
         Route::get('/', [ClientController::class, 'index'])->name('index');
         Route::post('/', [ClientController::class, 'store'])->middleware('throttle:20,1')->name('store');
         Route::get('/{client}', [ClientController::class, 'show'])->whereNumber('client')->name('show');
+        Route::post('/{client}/notes', [ClientNoteController::class, 'store'])
+            ->whereNumber('client')
+            ->middleware('throttle:30,1')
+            ->name('notes.store');
+        Route::put('/{client}/notes/{note}', [ClientNoteController::class, 'update'])
+            ->whereNumber('client')
+            ->whereNumber('note')
+            ->name('notes.update');
+        Route::delete('/{client}/notes/{note}', [ClientNoteController::class, 'destroy'])
+            ->whereNumber('client')
+            ->whereNumber('note')
+            ->name('notes.destroy');
+        Route::post('/{client}/tickets', [StaffClientRecordController::class, 'storeTicket'])
+            ->whereNumber('client')
+            ->middleware('throttle:30,1')
+            ->name('tickets.store');
+        Route::post('/{client}/cases', [StaffClientRecordController::class, 'storeCase'])
+            ->whereNumber('client')
+            ->middleware('throttle:30,1')
+            ->name('cases.store');
     });
     Route::get('/support/attachments/{attachment}', [SupportAttachmentController::class, 'download'])
         ->name('support.attachments.download');
@@ -381,6 +403,12 @@ Route::middleware([
             Route::post('/users/{user}/pending-first-login-chase', [AdminUserController::class, 'chasePendingFirstLogin'])
                 ->middleware('can:admin.users.manage')
                 ->name('users.pending-first-login-chase');
+            Route::put('/users/{user}/contact-preferences', [AdminUserController::class, 'updateContactPreferences'])
+                ->middleware('can:admin.users.manage')
+                ->name('users.contact-preferences.update');
+            Route::post('/users/{user}/two-factor-reset', [AdminUserController::class, 'resetTwoFactor'])
+                ->middleware('can:admin.users.manage')
+                ->name('users.two-factor.reset');
 
             Route::get('/access', [AdminAccessController::class, 'index'])
                 ->name('access.index');

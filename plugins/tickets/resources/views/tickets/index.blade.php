@@ -76,6 +76,10 @@
                 >
                 @csrf
                 <x-bot-protection form="ticket" />
+                @if(request()->filled('for_user') || old('for_user'))
+                    <input type="hidden" name="for_user" value="{{ old('for_user', request('for_user')) }}">
+                    <p class="muted" data-for-user-notice>{{ __('admin.users.hub.actions.creating_for_client') }}</p>
+                @endif
                 <div class="row">
                     <div>
                         <label for="service_area">{{ __('tickets::ui.index.blade.service_area') }}</label>

@@ -49,7 +49,7 @@ class AdminProfileManagementTest extends TestCase
         ]);
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.show', $public))
+            ->get(route('admin.users.show', ['user' => $public, 'tab' => 'details']))
             ->assertOk()
             ->assertSee('name="address_line_1"', false)
             ->assertDontSee('name="job_title"', false);
@@ -88,7 +88,7 @@ class AdminProfileManagementTest extends TestCase
             ]);
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.show', $staff))
+            ->get(route('admin.users.show', ['user' => $staff, 'tab' => 'details']))
             ->assertOk()
             ->assertSeeText('Directory Staff')
             ->assertSeeText('myapesaccount.staff')

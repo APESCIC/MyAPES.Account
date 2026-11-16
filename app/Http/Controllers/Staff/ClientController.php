@@ -4,9 +4,14 @@ namespace App\Http\Controllers\Staff;
 
 use App\Core\Accounts\PhoneVerificationPinService;
 use App\Core\Accounts\User;
+use App\Services\UserActivityTimeline;
+use App\Services\UserProfileHubActions;
+use App\Services\UserRecordsSummary;
+use App\Http\Controllers\Concerns\BuildsUserProfileHub;
 use App\Http\Controllers\Controller;
 use App\Services\AuthorizationProfile;
 use App\Services\StaffClientAccountCreator;
+use App\Services\TotpTwoFactorService;
 use App\Services\UkPhoneNumber;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -14,10 +19,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 /**
- * Staff › Clients: create public client accounts (#669–#673).
+ * Staff › Clients: create public client accounts (#669–#673) and profile hub (#521).
  */
 class ClientController extends Controller
 {
+    use BuildsUserProfileHub;
+
     public function __construct(
         private readonly AuthorizationProfile $profile,
     ) {}
@@ -100,16 +107,47 @@ class ClientController extends Controller
         return redirect()->route('clients.show', $result['user']);
     }
 
-    public function show(Request $request, User $client): View
-    {
-        Gate::authorize(AuthorizationProfile::PERMISSION_CLIENT_CREATE);
+    public function show(
+        Request $request,
+        User $client,
+        UserRecordsSummary $records,
+        UserProfileHubActions $actions,
+        UserActivityTimeline $timeline,
+        TotpTwoFactorService $twoFactor,
+    ): View {
+        Gate::authorize(AuthorizationProfile::PERMISSION_CLIENT_VIEW);
         abort_if($this->profile->hasDirectoryProtectedEligibility($client), 404);
 
+        $actor = $request->user();
+        abort_unless($actor instanceof User, 403);
+
+        $client->load('profile', 'contactPreference');
         $plainPin = $request->session()->pull('client_created_pin');
 
         return view('clients.show', [
-            'client' => $client->load('profile'),
+            'client' => $client,
+            'managedUser' => $client,
             'plainPin' => is_string($plainPin) ? $plainPin : null,
+            'preference' => $client->contactPreference,
+            'profile' => $client->profile,
+            'isAdminHub' => false,
+            'canEditHub' => false,
+            'canManageTarget' => false,
+            'canResendVerification' => false,
+            'isStaffAccount' => false,
+            'tabRoute' => 'clients.show',
+            'tabParam' => 'client',
+            'tabSubject' => $client,
+            'noteStoreRoute' => 'clients.notes.store',
+            ...$this->profileHubData(
+                $request,
+                $client,
+                $actor,
+                $records,
+                $actions,
+                $timeline,
+                $twoFactor,
+            ),
         ]);
     }
 }
