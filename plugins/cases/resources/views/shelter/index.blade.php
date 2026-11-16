@@ -9,6 +9,13 @@
             <h1>{{ __('cases::ui.index.blade.case_management') }}</h1>
             <p class="muted">{{ __('cases::ui.index.blade.track_adoption_surrender_rescue_and_fostering_workflows') }}</p>
         </div>
+        <x-workspace.list-filters
+            :action="route('shelter.cases.index')"
+            :filters="$filters"
+            :statuses="$filterStatuses"
+            :assignees="$filterAssignees"
+            :show-assignee="$revealAssigneeIdentity"
+        />
         <div class="panel" id="list">
             <h2>{{ __('cases::ui.index.blade.cases') }}</h2>
             <table>

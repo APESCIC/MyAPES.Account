@@ -10,6 +10,13 @@
             <p class="muted">{{ __('cases::ui.index.blade.formal_casework_including_data_access_privacy_requests_') }}</p>
             <x-mascot-tip />
         </div>
+        <x-workspace.list-filters
+            :action="route('apes-cic.cases.index')"
+            :filters="$filters"
+            :statuses="$filterStatuses"
+            :assignees="$filterAssignees"
+            :show-assignee="$revealAssigneeIdentity"
+        />
         <div class="panel" id="list">
             <h2>{{ __('cases::ui.index.blade.your_available_cases') }}</h2>
             @if($cases->isEmpty())

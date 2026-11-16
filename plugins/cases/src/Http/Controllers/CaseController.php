@@ -45,7 +45,7 @@ class CaseController extends Controller
     public function index(Request $request): View
     {
         return $this->area()->isShelter()
-            ? $this->shelterIndex()
+            ? $this->shelterIndex($request)
             : $this->cicIndex($request);
     }
 
@@ -97,19 +97,49 @@ class CaseController extends Controller
             403,
         );
 
+        $filters = \App\Core\Search\ListFilterQuery::fromRequest($request, $this->area()->statuses);
+        $query = ShelterCase::query()
+            ->forSubCore($instance->subCore->key)
+            ->visibleTo($user, $instance->subCore->key)
+            ->with(['user', 'assignedTo'])
+            ->latest();
+        $searchId = $filters['q'] !== null ? ltrim($filters['q'], '#') : null;
+        \App\Core\Search\ListFilterQuery::apply(
+            $query,
+            $filters,
+            ['title', 'status'],
+            searchExtra: static function ($inner, string $like) use ($searchId): void {
+                $inner->orWhereHas('user', static function ($userQuery) use ($like): void {
+                    $userQuery->where('name', 'like', $like)->orWhere('email', 'like', $like);
+                });
+                if (is_string($searchId) && ctype_digit($searchId)) {
+                    $inner->orWhere('id', (int) $searchId);
+                }
+            },
+        );
+        $revealAssigneeIdentity = $user->can($prefix.'view-all');
+
         return view($this->area()->view('index'), [
-            'cases' => ShelterCase::query()
-                ->forSubCore($instance->subCore->key)
-                ->visibleTo($user, $instance->subCore->key)
-                ->with(['user', 'assignedTo'])
-                ->latest()
-                ->paginate(20)
-                ->fragment('list'),
+            'cases' => $query->paginate(20)->withQueryString()->fragment('list'),
+            'filters' => $filters,
+            'filterStatuses' => $this->area()->statuses,
+            'filterAssignees' => $revealAssigneeIdentity
+                ? \App\Core\Accounts\User::query()
+                    ->whereHas('roles', static fn ($roles) => $roles->whereIn('name', [
+                        User::ROLE_STAFF,
+                        User::ROLE_ADMIN,
+                        User::ROLE_VOLUNTEER,
+                        User::ROLE_STUDENT,
+                    ]))
+                    ->orderBy('name')
+                    ->limit(100)
+                    ->get(['id', 'name'])
+                : collect(),
             'categoryGroups' => $this->categories->categories($instance->subCore->key),
             'websites' => $this->categories->websites($instance->subCore->key),
             'priorities' => $this->area()->priorities,
             'canCreateCase' => $user->can($prefix.'create'),
-            'revealAssigneeIdentity' => $user->can($prefix.'view-all'),
+            'revealAssigneeIdentity' => $revealAssigneeIdentity,
             'categoryResolver' => $this->categories,
             'uploadsEnabled' => $this->attachmentGate->uploadsEnabled($this->area()),
         ]);
@@ -496,23 +526,54 @@ class CaseController extends Controller
         return CasesArea::forModule($slug);
     }
 
-    private function shelterIndex(): View
+    private function shelterIndex(Request $request): View
     {
         $area = $this->area();
-        $user = request()->user();
+        $user = $request->user();
         Gate::authorize('viewAny', ShelterCase::class);
         $domain = $this->petProfiles->domainForModule($area->moduleSlug);
+        $filters = \App\Core\Search\ListFilterQuery::fromRequest($request, $area->statuses);
         $query = ShelterCase::query()
             ->forSubCore($area->moduleSlug)
             ->visibleTo($user, $area->moduleSlug)
             ->whereHas('petProfile')
             ->with(['petProfile', 'assignedTo'])
             ->latest();
+        $searchId = $filters['q'] !== null ? ltrim($filters['q'], '#') : null;
+        \App\Core\Search\ListFilterQuery::apply(
+            $query,
+            $filters,
+            ['title', 'status', 'case_type'],
+            searchExtra: static function ($inner, string $like) use ($searchId): void {
+                $inner->orWhereHas('petProfile', static function ($petQuery) use ($like): void {
+                    $petQuery->where('name', 'like', $like);
+                });
+                if (is_string($searchId) && ctype_digit($searchId)) {
+                    $inner->orWhere('id', (int) $searchId);
+                }
+            },
+        );
 
         $petProfiles = $this->petProfiles->visibleOrdered($user, $domain);
+        $revealAssigneeIdentity = $user->can($area->permission('view-all'));
 
         return view($area->view('index'), [
-            'cases' => $query->paginate(20)->fragment('list'),
+            'cases' => $query->paginate(20)->withQueryString()->fragment('list'),
+            'filters' => $filters,
+            'filterStatuses' => $area->statuses,
+            'filterAssignees' => $revealAssigneeIdentity
+                ? User::query()
+                    ->whereHas('roles', static fn ($roles) => $roles->whereIn('name', [
+                        User::ROLE_STAFF,
+                        User::ROLE_ADMIN,
+                        User::ROLE_VOLUNTEER,
+                        User::ROLE_STUDENT,
+                    ]))
+                    ->orderBy('name')
+                    ->limit(100)
+                    ->get(['id', 'name'])
+                : collect(),
+            'revealAssigneeIdentity' => $revealAssigneeIdentity,
             'canCreateCase' => Gate::allows('create', ShelterCase::class),
             'uploadsEnabled' => $this->attachmentGate->uploadsEnabled($area),
             'petProfiles' => $petProfiles,

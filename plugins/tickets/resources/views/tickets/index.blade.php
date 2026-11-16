@@ -10,6 +10,13 @@
             <p class="muted">{{ $ticketService->supportingCopy }}</p>
             <x-mascot-tip />
         </div>
+        <x-workspace.list-filters
+            :action="route($ticketService->routePrefix.'.index')"
+            :filters="$filters"
+            :statuses="$filterStatuses"
+            :assignees="$filterAssignees"
+            :show-assignee="$revealAssigneeIdentity"
+        />
         <div class="panel" id="list">
             <h2>{{ __('tickets::ui.index.blade.tickets') }}</h2>
             @if($tickets->isEmpty())

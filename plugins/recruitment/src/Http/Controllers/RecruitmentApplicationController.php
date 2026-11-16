@@ -50,7 +50,16 @@ class RecruitmentApplicationController extends Controller
 
         $selectedStatus = is_string($status) && $status !== '' ? $status : null;
         $selectedCategory = is_string($category) && $category !== '' ? $category : null;
+        $filters = \App\Core\Search\ListFilterQuery::fromRequest(
+            $request,
+            RecruitmentApplication::STATUSES,
+            supportsAssignee: false,
+        );
+        if ($selectedStatus === null && $filters['status'] !== null) {
+            $selectedStatus = $filters['status'];
+        }
 
+        $searchId = $filters['q'] !== null ? ltrim($filters['q'], '#') : null;
         $applications = RecruitmentApplication::query()
             ->visibleTo($user)
             ->with(['recruitmentRole', 'user'])
@@ -68,6 +77,33 @@ class RecruitmentApplicationController extends Controller
             ->when(
                 $selectedRoleId !== null,
                 static fn ($query) => $query->where('recruitment_role_id', $selectedRoleId),
+            )
+            ->when(
+                $filters['q'] !== null,
+                static function ($query) use ($filters, $searchId): void {
+                    $like = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $filters['q']).'%';
+                    $query->where(static function ($inner) use ($like, $searchId): void {
+                        $inner
+                            ->where('status', 'like', $like)
+                            ->orWhereHas('user', static function ($userQuery) use ($like): void {
+                                $userQuery->where('name', 'like', $like)->orWhere('email', 'like', $like);
+                            })
+                            ->orWhereHas('recruitmentRole', static function ($roleQuery) use ($like): void {
+                                $roleQuery->where('title', 'like', $like);
+                            });
+                        if (is_string($searchId) && ctype_digit($searchId)) {
+                            $inner->orWhere('id', (int) $searchId);
+                        }
+                    });
+                },
+            )
+            ->when(
+                $filters['date_from'] !== null,
+                static fn ($query) => $query->whereDate('submitted_at', '>=', $filters['date_from']),
+            )
+            ->when(
+                $filters['date_to'] !== null,
+                static fn ($query) => $query->whereDate('submitted_at', '<=', $filters['date_to']),
             )
             ->latest('submitted_at')
             ->latest('id')
@@ -87,6 +123,7 @@ class RecruitmentApplicationController extends Controller
             'selectedStatus' => $selectedStatus,
             'selectedCategory' => $selectedCategory,
             'selectedRoleId' => $selectedRoleId,
+            'filters' => array_merge($filters, ['status' => $selectedStatus]),
             'statusLabels' => $this->statusLabels(),
             'canReview' => $user->can(RecruitmentApplication::PERMISSION_PREFIX.'review-applications'),
         ]);

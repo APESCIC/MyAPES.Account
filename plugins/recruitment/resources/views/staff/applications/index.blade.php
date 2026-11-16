@@ -17,6 +17,10 @@
             <form method="get" action="{{ route('apes-cic.recruitment.applications.index') }}" class="stack-spaced">
                 <div class="row">
                     <div>
+                        <label for="filter_q">{{ __('workspace.filters.search') }}</label>
+                        <input id="filter_q" type="search" name="q" value="{{ $filters['q'] ?? '' }}" autocomplete="off">
+                    </div>
+                    <div>
                         <label for="filter_status">{{ __('recruitment::staff.staff.index.blade.status') }}</label>
                         <select id="filter_status" name="status">
                             <option value="">{{ __('recruitment::staff.staff.index.blade.all_statuses') }}</option>
@@ -48,6 +52,14 @@
                                 </option>
                             @endforeach
                         </select>
+                    </div>
+                    <div>
+                        <label for="filter_date_from">{{ __('workspace.filters.date_from') }}</label>
+                        <input id="filter_date_from" type="date" name="date_from" value="{{ $filters['date_from'] ?? '' }}">
+                    </div>
+                    <div>
+                        <label for="filter_date_to">{{ __('workspace.filters.date_to') }}</label>
+                        <input id="filter_date_to" type="date" name="date_to" value="{{ $filters['date_to'] ?? '' }}">
                     </div>
                 </div>
                 <div class="actions">
