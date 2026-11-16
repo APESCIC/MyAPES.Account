@@ -9,8 +9,9 @@ $parseCsv = static function (?string $raw): array {
 };
 
 return [
-    // Developer sign-in / QA role switcher: local Herd only. Must stay unset on Cloudron.
-    'qa_login_enabled' => (bool) env('QA_LOGIN_ENABLED', false),
+    // Developer sign-in / QA role switcher: local Herd only. Null when unset so
+    // QaLogin can auto-enable on local; must stay unset on Cloudron.
+    'qa_login_enabled' => env('QA_LOGIN_ENABLED'),
 
     'oidc' => [
         'issuer' => env('OIDC_ISSUER', env('CLOUDRON_OIDC_ISSUER')),

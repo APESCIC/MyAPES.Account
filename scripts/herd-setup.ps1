@@ -11,11 +11,12 @@
       4. links the site (herd link), pins it to the profile's PHP version
          (herd isolate) and secures it for HTTPS (herd secure), unless that is
          already done;
-      5. creates .env from .env.example when it is missing and compares it with
-         the profile;
+      5. creates .env from .env.example when it is missing, upserts
+         QA_LOGIN_ENABLED=true, and compares other values with the profile;
       6. installs dependencies and generates APP_KEY when it is blank;
       7. creates this project's database (its name must end in _local), runs the
-         migrations and checks the selective media boundary;
+         migrations, always seeds LocalQaSeeder, and checks the selective media
+         boundary;
       8. offers to load the fake demo data, builds the assets and checks /healthz.
 
     It only touches this project's site link, .env and database. It never
@@ -74,6 +75,20 @@ function Get-EnvValue([string]$Content, [string]$Key) {
     $match = [regex]::Match($Content, "(?m)^$([regex]::Escape($Key))=(?<value>.*)$")
     if (-not $match.Success) { return '' }
     return $match.Groups['value'].Value.Trim().Trim('"').Trim("'")
+}
+
+function Set-EnvValue([string]$Path, [string]$Key, [string]$Value) {
+    $content = [System.IO.File]::ReadAllText($Path)
+    $line = "$Key=$Value"
+    if ([regex]::IsMatch($content, "(?m)^$([regex]::Escape($Key))=")) {
+        $content = [regex]::Replace($content, "(?m)^$([regex]::Escape($Key))=.*$", $line)
+    } else {
+        if ($content.Length -gt 0 -and -not $content.EndsWith("`n") -and -not $content.EndsWith("`r`n")) {
+            $content += [Environment]::NewLine
+        }
+        $content += $line + [Environment]::NewLine
+    }
+    [System.IO.File]::WriteAllText($Path, $content)
 }
 
 if ($Demo -and $NoDemo) { throw 'Use -Demo or -NoDemo, not both.' }
@@ -219,6 +234,12 @@ try {
     if ($appEnvironment -ne 'local') {
         throw "Refusing to continue: APP_ENV in .env is '$appEnvironment'. Herd setup only runs with APP_ENV=local."
     }
+
+    # Developer sign-in / QA role switcher: always on for local Herd.
+    Set-EnvValue -Path $envPath -Key 'QA_LOGIN_ENABLED' -Value 'true'
+    $envContent = [System.IO.File]::ReadAllText($envPath)
+    Write-Ok 'QA_LOGIN_ENABLED=true (Developer sign-in / QA role switcher)'
+
     $expected = [ordered]@{
         APP_URL       = $p.appUrl
         DB_CONNECTION = $p.database.engine
@@ -268,6 +289,12 @@ try {
         Write-Ok 'APP_KEY already set'
     }
 
+    $configCache = Join-Path $repo 'bootstrap\cache\config.php'
+    if (Test-Path -LiteralPath $configCache) {
+        Write-Warn 'bootstrap/cache/config.php exists; clearing config cache so QA_LOGIN_ENABLED is picked up.'
+        Invoke-Checked 'config:clear' { php artisan config:clear --no-interaction }
+    }
+
     # 7. Database ----------------------------------------------------------------
     Write-Step "Creating database $dbName (if missing)"
     $mysqlArgs = @("--host=$dbHost", "--port=$dbPort", "--user=$dbUser", '--protocol=TCP')
@@ -279,6 +306,11 @@ try {
 
     Write-Step 'Running migrations'
     Invoke-Checked 'migrate' { php artisan migrate --force --no-interaction }
+
+    # Always seed LocalQa profiles so Developer sign-in works without full demo data.
+    Write-Step 'Seeding LocalQa accounts'
+    Invoke-Checked 'LocalQaSeeder' { php artisan db:seed --class=Database\Seeders\LocalQaSeeder --force --no-interaction }
+    Write-Ok 'LocalQaSeeder applied (independent of demo data)'
 
     # Dot-sourcing selective-media-boundary.ps1 declares a script-level $RootDir param that
     # would overwrite a caller variable of the same name; keep the repo path separate.
@@ -297,6 +329,7 @@ try {
     } else {
         Write-Host ''
         Write-Host '    Skipped demo data. Load it any time with: composer demo:seed'
+        Write-Host '    LocalQa accounts are already seeded for Developer sign-in.'
     }
 
     if (-not $SkipBuild) {

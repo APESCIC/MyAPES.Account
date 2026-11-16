@@ -26,20 +26,54 @@ class QaLoginTest extends TestCase
         $this->withoutMiddleware(PreventRequestForgery::class);
     }
 
-    private function enableQa(string $environment = 'local', bool $flag = true): void
+    private function enableQa(string $environment = 'local', bool|string|null $flag = true): void
     {
         config(['myapes.qa_login_enabled' => $flag]);
         app()->detectEnvironment(static fn (): string => $environment);
+    }
+
+    public function test_is_enabled_on_local_when_the_flag_is_unset(): void
+    {
+        $this->enableQa(flag: null);
+
+        $this->assertTrue(QaLogin::enabled());
+        $this->get(route('public.login'))->assertOk()
+            ->assertSee('id="developer-signin"', false)
+            ->assertSee('Developer sign-in');
+    }
+
+    public function test_is_enabled_on_local_when_the_flag_is_empty(): void
+    {
+        $this->enableQa(flag: '');
+
+        $this->assertTrue(QaLogin::enabled());
     }
 
     public function test_is_not_found_when_the_flag_is_off(): void
     {
         $this->enableQa(flag: false);
 
+        $this->assertFalse(QaLogin::enabled());
         $this->get(route('qa.index'))->assertNotFound();
         $this->post(route('qa.login'), ['profile' => 'admin'])->assertNotFound();
         $this->post(route('qa.logout'))->assertNotFound();
         $this->assertGuest();
+    }
+
+    public function test_explicit_false_string_disables_on_local(): void
+    {
+        $this->enableQa(flag: 'false');
+
+        $this->assertFalse(QaLogin::enabled());
+        $this->get(route('public.login'))->assertOk()
+            ->assertDontSee('developer-signin');
+    }
+
+    public function test_explicit_zero_disables_on_local(): void
+    {
+        $this->enableQa(flag: '0');
+
+        $this->assertFalse(QaLogin::enabled());
     }
 
     #[DataProvider('nonLocalEnvironments')]
@@ -52,6 +86,14 @@ class QaLoginTest extends TestCase
         $this->post(route('qa.login'), ['profile' => 'admin'])->assertNotFound();
         $this->post(route('qa.logout'))->assertNotFound();
         $this->assertGuest();
+    }
+
+    #[DataProvider('nonLocalEnvironments')]
+    public function test_stays_off_outside_local_when_the_flag_is_unset(string $environment): void
+    {
+        $this->enableQa($environment, null);
+
+        $this->assertFalse(QaLogin::enabled());
     }
 
     public static function nonLocalEnvironments(): array

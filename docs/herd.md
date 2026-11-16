@@ -64,7 +64,7 @@ Both commands give the same data every time. They refuse to run unless `APP_ENV=
 
 ### Developer sign-in (local only)
 
-`.env.example` sets `QA_LOGIN_ENABLED=true` for Herd. With `APP_ENV=local`, `/login` and `/staff/login` show an amber **Developer sign-in** panel (tagged Local only). Choose an account type or common stack to sign in as a fake QA profile in one click. The amber **QA pill** in the user dock switches profile in place and offers **Sign out of QA**. `/qa` is the same panel as a fallback. QA accounts have random unknown passwords — use the panel, not the password form. Leave the flag unset on Cloudron; the feature is off in testing, staging and production.
+On local Herd, Developer sign-in is on by default: when `APP_ENV=local` and `QA_LOGIN_ENABLED` is unset (or true), `/login` and `/staff/login` show an amber **Developer sign-in** panel (tagged Local only). `composer setup` / `scripts\herd-setup.ps1` upserts `QA_LOGIN_ENABLED=true` on every run and always seeds `LocalQaSeeder` after migrate (even with `-NoDemo`), so the fake profiles exist without full demo data. Choose an account type or common stack to sign in in one click. The amber **QA pill** in the user dock switches profile in place and offers **Sign out of QA**. `/qa` is the same panel as a fallback. QA accounts have random unknown passwords — use the panel, not the password form. Set `QA_LOGIN_ENABLED=false` locally only if you need to debug with it off. Leave the flag unset on Cloudron; the feature is off in testing, staging and production.
 
 ## 4. Live preview
 
