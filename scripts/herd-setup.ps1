@@ -146,7 +146,21 @@ if (-not $mysqlRow) {
     throw "Herd has no MySQL service on port $($p.database.port). Create one in Herd > Services (MySQL $($p.database.version), port $($p.database.port))."
 }
 if ($mysqlRow -notmatch "\|\s*$([regex]::Escape($p.database.version))\.\d+\s*\|") { Write-Warn "The MySQL service on port $($p.database.port) is not version $($p.database.version): $($mysqlRow.Trim())" }
-if (-not (Get-NetTCPConnection -State Listen -LocalPort $p.database.port -ErrorAction SilentlyContinue)) {
+$dbHost = if ($p.database.host) { [string]$p.database.host } else { '127.0.0.1' }
+$dbListening = @(Get-NetTCPConnection -State Listen -LocalPort $p.database.port -ErrorAction SilentlyContinue).Count -gt 0
+if (-not $dbListening) {
+    $client = [System.Net.Sockets.TcpClient]::new()
+    try {
+        $async = $client.BeginConnect($dbHost, [int]$p.database.port, $null, $null)
+        $dbListening = $async.AsyncWaitHandle.WaitOne(1500)
+        if ($dbListening) { $client.EndConnect($async) }
+    } catch {
+        $dbListening = $false
+    } finally {
+        $client.Dispose()
+    }
+}
+if (-not $dbListening) {
     throw "Herd's MySQL service on port $($p.database.port) is not running. Start it in Herd > Services, then run this again."
 }
 $mysqlDir = Get-ChildItem (Join-Path $herdBin 'services\mysql') -Directory -ErrorAction SilentlyContinue |

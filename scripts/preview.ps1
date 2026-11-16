@@ -76,7 +76,29 @@ function Get-DevServer {
 }
 
 function Get-DevListener {
-    return Get-NetTCPConnection -State Listen -LocalPort $p.viteDevServerPort -ErrorAction SilentlyContinue | Select-Object -First 1
+    $conn = Get-NetTCPConnection -State Listen -LocalPort $p.viteDevServerPort -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($conn) { return $conn }
+    # Get-NetTCPConnection can miss listeners on this host; treat a successful TCP connect as listening.
+    if (Test-TcpPortOpen '127.0.0.1' ([int]$p.viteDevServerPort)) {
+        return [pscustomobject]@{ LocalPort = [int]$p.viteDevServerPort; OwningProcess = 0 }
+    }
+    return $null
+}
+
+function Test-TcpPortOpen([string]$HostName, [int]$Port, [int]$TimeoutMs = 1500) {
+    # Prefer a real connect: Get-NetTCPConnection can miss listeners whose OwningProcess is 0
+    # (seen with Herd MySQL on Windows ARM), which made the gate fail while mysql still answered.
+    $client = [System.Net.Sockets.TcpClient]::new()
+    try {
+        $async = $client.BeginConnect($HostName, $Port, $null, $null)
+        if (-not $async.AsyncWaitHandle.WaitOne($TimeoutMs)) { return $false }
+        $client.EndConnect($async)
+        return $true
+    } catch {
+        return $false
+    } finally {
+        $client.Dispose()
+    }
 }
 
 function Get-HotUrl {
@@ -184,7 +206,10 @@ try {
     Write-Step "Herd preview $($p.appUrl)"
     $missing = @('Herd', 'nginx' | Where-Object { -not (Get-Process $_ -ErrorAction SilentlyContinue) })
     if ($missing.Count -gt 0) { Stop-Preview 1 "Not running: $($missing -join ', '). Open Herd." }
-    if (-not (Get-NetTCPConnection -State Listen -LocalPort $p.database.port -ErrorAction SilentlyContinue)) { Stop-Preview 1 "Nothing listens on MySQL's port $($p.database.port). Start Herd's MySQL service (Herd > Services)." }
+    $dbHost = if ($p.database.host) { [string]$p.database.host } else { '127.0.0.1' }
+    $dbListening = @(Get-NetTCPConnection -State Listen -LocalPort $p.database.port -ErrorAction SilentlyContinue).Count -gt 0
+    if (-not $dbListening) { $dbListening = Test-TcpPortOpen $dbHost ([int]$p.database.port) }
+    if (-not $dbListening) { Stop-Preview 1 "Nothing listens on MySQL's port $($p.database.port). Start Herd's MySQL service (Herd > Services)." }
     if ($p.appUrl -like 'https://*' -and -not (Test-Path (Join-Path $HerdRoot "config\valet\Certificates\$($p.hostname).crt"))) { Stop-Preview 1 "$($p.herdSite) is not secured, so $($p.appUrl) does not answer. Run scripts\herd-setup.ps1 (it runs herd secure $($p.herdSite))." }
     $health = Get-Page "$($p.appUrl)/healthz" | ConvertFrom-Json
     if ($null -eq $health -or $null -eq $health.local) { Stop-Preview 1 "$($p.appUrl)/healthz did not answer with the local block. Is APP_ENV=local in .env, and does 'herd links' list $($p.herdSite)?" }
@@ -201,16 +226,23 @@ try {
     # 4. Dev server ------------------------------------------------------------
     Write-Step "Dev server on port $($p.viteDevServerPort)"
     $listener = Get-DevListener
+    $ours = @(Get-DevServer)
     if ($listener) {
-        if (Get-DevServer | Where-Object { $_.ProcessId -eq $listener.OwningProcess }) {
+        $ownedByUs = $ours.Count -gt 0 -and (
+            ($listener.OwningProcess -gt 0 -and ($ours | Where-Object { $_.ProcessId -eq $listener.OwningProcess })) -or
+            ($listener.OwningProcess -eq 0)
+        )
+        if ($ownedByUs) {
             if (-not (Get-HotUrl)) {
                 # Something removed public\hot while Vite kept running; without it the pages load the built assets.
                 [System.IO.File]::WriteAllText((Join-Path $repo 'public\hot'), "$($p.appUrl):$($p.viteDevServerPort)")
                 Write-Ok 'Restored public\hot for the running Vite'
             }
             Write-Ok "Already running at $(Get-HotUrl)"
+        } elseif ($listener.OwningProcess -gt 0) {
+            Write-Warn "Port $($p.viteDevServerPort) is used by $((Get-Process -Id $listener.OwningProcess -ErrorAction SilentlyContinue).ProcessName), not this repository's Vite. Stop it, or set a free VITE_PORT in .env."
         } else {
-            Write-Warn "Port $($p.viteDevServerPort) is used by $((Get-Process -Id $listener.OwningProcess).ProcessName), not this repository's Vite. Stop it, or set a free VITE_PORT in .env."
+            Write-Warn "Port $($p.viteDevServerPort) answers but this repository's Vite process was not found. Stop whatever owns it, or set a free VITE_PORT in .env."
         }
     } elseif ($NoDevServer) {
         Write-Warn 'Not running (-NoDevServer). Run this script without -NoDevServer to start it.'
