@@ -9,6 +9,13 @@
             <span class="service-label apes-petcare">{{ __('consultations::ui.index.blade.apes_pet_care_clinic') }}</span>
             <h1>{{ __('consultations::ui.index.blade.consultation_management') }}</h1>
         </div>
+        <x-workspace.list-filters
+            :action="route('petcare.consultations.index')"
+            :filters="$filters"
+            :statuses="$filterStatuses"
+            :assignees="$filterAssignees"
+            :show-assignee="$revealAssigneeIdentity"
+        />
         <div class="panel" id="list">
             <h2>{{ __('consultations::ui.index.blade.consultations') }}</h2>
             @if($reviewCount !== null)

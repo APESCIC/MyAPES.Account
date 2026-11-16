@@ -1,6 +1,13 @@
 @props(['menu'])
 @php($commands = $menu->paletteCommands())
-<div class="sg-overlay sg-palette-overlay" data-workspace-palette hidden>
+<div
+    class="sg-overlay sg-palette-overlay"
+    data-workspace-palette
+    @auth
+        data-workspace-record-search-url="{{ route('workspace.search.records') }}"
+    @endauth
+    hidden
+>
     <div
         class="sg-dialog"
         role="dialog"

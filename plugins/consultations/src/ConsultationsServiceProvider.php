@@ -12,6 +12,7 @@ use App\Core\Extensions\Plugins\PluginServiceProvider;
 use App\Core\Extensions\Plugins\PluginSettingsSchema;
 use App\Core\Mail\MailCategory;
 use App\Core\Mail\MailTemplate;
+use App\Core\Search\RecordSearchRegistry;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Plugins\Consultations\Console\FlagPublicCreatedConsultations;
@@ -23,6 +24,7 @@ use Plugins\Consultations\Dashboard\PetCareConsultationSummaryProvider;
 use Plugins\Consultations\Models\PetCareConsultation;
 use Plugins\Consultations\Notifications\ConsultationUpdatedNotification;
 use Plugins\Consultations\Policies\PetCareConsultationPolicy;
+use Plugins\Consultations\Search\ConsultationsRecordSearchProvider;
 use Plugins\Consultations\View\TicketConsultationsComposer;
 
 class ConsultationsServiceProvider extends PluginServiceProvider
@@ -32,6 +34,10 @@ class ConsultationsServiceProvider extends PluginServiceProvider
         parent::boot();
 
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'consultations');
+
+        $this->app->make(RecordSearchRegistry::class)->contribute(
+            fn (): array => [$this->app->make(ConsultationsRecordSearchProvider::class)],
+        );
 
         Gate::policy(PetCareConsultation::class, PetCareConsultationPolicy::class);
         View::composer('tickets::tickets.show', TicketConsultationsComposer::class);
@@ -113,6 +119,7 @@ class ConsultationsServiceProvider extends PluginServiceProvider
             recentActivityProvider: PetCareConsultationRecentActivityProvider::class,
             analyticsProvider: PetCareConsultationAnalyticsProvider::class,
             attentionProvider: ConsultationAttentionProvider::class,
+            migrationsPath: dirname(__DIR__).'/database/migrations',
             staffRouteFiles: [
                 dirname(__DIR__).'/routes/petcare.php',
             ],

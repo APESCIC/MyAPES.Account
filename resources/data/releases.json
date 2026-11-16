@@ -1,5 +1,54 @@
 [
   {
+    "version": "0.67.0",
+    "date": "2026-11-16",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Record search",
+    "summary": "Staff, volunteers and students can find pets, tickets, cases, consultations, users and applications from Ctrl+K and plugin list filters, with group-scoped results.",
+    "changes": [
+      "Ctrl+K searches live records (pets, tickets, cases, consultations, users, applications) through a debounced JSON endpoint, with typed groups and keyboard navigation.",
+      "Each plugin contributes a RecordSearch provider that reuses view-all/view-own and per-group access from the list pages.",
+      "Exact reference or microchip matches rank first; status filters are supported on search and list pages.",
+      "Plugin index pages gain accessible query-string filter bars for search, status, assignee and dates.",
+      "Additive, reversible search indexes (MySQL FULLTEXT where supported; plain indexes for SQLite CI) and an optional pet microchip field."
+    ],
+    "affected_areas": [
+      "Workspace command palette (Ctrl+K)",
+      "Tickets, pets, cases, consultations and recruitment application lists",
+      "User and client profile deep links",
+      "Search indexes (MySQL / SQLite)"
+    ],
+    "categories": [
+      "added"
+    ],
+    "audiences": [
+      "public-facing",
+      "internal-only"
+    ],
+    "version_rationale": "Minor: new record-search capability for staff-side workspace users without breaking existing palette navigation or list routes.",
+    "validation": [
+      "RecordSearchTest (7 tests) and command-palette.test.js green locally.",
+      "Herd preview gate on BM-OMEN-HOMEPC; migrations applied including search indexes.",
+      "composer milestone:bump --check and myapes:changelog-validate --base-ref=origin/main."
+    ],
+    "known_limitations": [
+      "Record search returns at most five hits per type in the palette; full filtering remains on plugin list pages."
+    ],
+    "rollback": "Redeploy the previous release tag. New search indexes and the optional pet microchip column are additive and reversible.",
+    "provenance": "Milestone epic #526 and pull request #856 on the milestone/v0-67-0-record-search branch.",
+    "references": [
+      {
+        "label": "Issue #526",
+        "url": "https://github.com/APESCIC/MyAPES-Account/issues/526"
+      },
+      {
+        "label": "Pull request #856",
+        "url": "https://github.com/APESCIC/MyAPES-Account/pull/856"
+      }
+    ]
+  },
+  {
     "version": "0.66.1",
     "date": "2026-11-16",
     "channel": "stable",

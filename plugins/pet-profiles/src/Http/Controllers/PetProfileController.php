@@ -22,10 +22,10 @@ class PetProfileController extends Controller
         private readonly ModuleContext $moduleContext,
     ) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
         $area = $this->area();
-        $user = request()->user();
+        $user = $request->user();
         if ($area->requireIndexAbility) {
             abort_unless(
                 $user->can($area->permission('view-own'))
@@ -36,14 +36,32 @@ class PetProfileController extends Controller
             Gate::authorize('viewAny', PetProfile::class);
         }
 
+        $filters = \App\Core\Search\ListFilterQuery::fromRequest($request, [], supportsAssignee: false);
         $query = PetProfile::query()
             ->visibleTo($user, $area->serviceDomain)
+            ->with('user')
             ->latest();
+        $searchId = $filters['q'] !== null ? ltrim($filters['q'], '#') : null;
+        $hasMicrochip = \Illuminate\Support\Facades\Schema::hasColumn((new PetProfile)->getTable(), 'microchip');
+        \App\Core\Search\ListFilterQuery::apply(
+            $query,
+            $filters,
+            array_values(array_filter(['name', $hasMicrochip ? 'microchip' : null])),
+            searchExtra: static function ($inner, string $like) use ($searchId): void {
+                $inner->orWhereHas('user', static function ($userQuery) use ($like): void {
+                    $userQuery->where('name', 'like', $like)->orWhere('email', 'like', $like);
+                });
+                if (is_string($searchId) && ctype_digit($searchId)) {
+                    $inner->orWhere('id', (int) $searchId);
+                }
+            },
+        );
 
         return view('pet-profiles::pets.index', [
-            'pets' => $query->paginate(20)->fragment('list'),
+            'pets' => $query->paginate(20)->withQueryString()->fragment('list'),
+            'filters' => $filters,
             'canCreatePet' => $user->can($area->permission('create')),
-            'returnTo' => StaffPetCreateReturn::requestedKey(request('return_to')),
+            'returnTo' => StaffPetCreateReturn::requestedKey($request->query('return_to')),
             'area' => $area,
         ]);
     }

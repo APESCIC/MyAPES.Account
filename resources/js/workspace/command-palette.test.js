@@ -4,7 +4,10 @@ import {
     filterCommands,
     iconExportName,
     isPaletteShortcut,
+    mergePaletteResults,
     moveIndex,
+    moveSelectableIndex,
+    selectableIndexes,
     shortcutLabel,
 } from './command-palette.js';
 
@@ -56,4 +59,29 @@ test('Ctrl K and Cmd K open the palette, other keys do not', () => {
 test('icon names map to lucide export names', () => {
     assert.equal(iconExportName('circle-user-round'), 'CircleUserRound');
     assert.equal(iconExportName('building-2'), 'Building2');
+});
+
+test('record groups render under typed headings and stay keyboard-selectable', () => {
+    const rows = mergePaletteResults(
+        [{ id: 'staff:dashboard', label: 'Dashboard', section: 'Staff' }],
+        [{
+            type: 'tickets',
+            label: 'Tickets',
+            hits: [
+                { id: '12', label: 'Broken cage', url: '/tickets/12', subtitle: '#12' },
+                { id: '13', label: 'Lost key', url: '/tickets/13', subtitle: '#13' },
+            ],
+        }],
+    );
+
+    assert.equal(rows[0].kind, 'command');
+    assert.equal(rows[1].kind, 'heading');
+    assert.equal(rows[1].selectable, false);
+    assert.equal(rows[2].kind, 'record');
+    assert.equal(rows[2].url, '/tickets/12');
+    assert.deepEqual(selectableIndexes(rows), [0, 2, 3]);
+    assert.equal(moveSelectableIndex(rows, 0, 1), 2);
+    assert.equal(moveSelectableIndex(rows, 2, 1), 3);
+    assert.equal(moveSelectableIndex(rows, 3, 1), 0);
+    assert.equal(moveSelectableIndex(rows, 0, -1), 3);
 });

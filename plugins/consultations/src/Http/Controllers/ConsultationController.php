@@ -36,17 +36,36 @@ class ConsultationController extends Controller
         Gate::authorize('viewAny', PetCareConsultation::class);
         $canReview = $user->can(PetCareConsultation::PERMISSION_UPDATE_ALL);
         $reviewFilter = $canReview && $request->query('review') === 'needed';
+        $statuses = ['open', 'in_progress', 'closed'];
+        $filters = \App\Core\Search\ListFilterQuery::fromRequest($request, $statuses);
         $query = PetCareConsultation::query()
             ->forPetCareDomain()
             ->visibleTo($user)
             ->when($reviewFilter, static fn ($query) => $query->needsVetReview())
-            ->with(['petProfile', 'assignedTo'])
+            ->with(['petProfile', 'assignedTo', 'user'])
             ->latest();
+        $searchId = $filters['q'] !== null ? ltrim($filters['q'], '#') : null;
+        \App\Core\Search\ListFilterQuery::apply(
+            $query,
+            $filters,
+            ['subject', 'status'],
+            searchExtra: static function ($inner, string $like) use ($searchId): void {
+                $inner->orWhereHas('user', static function ($userQuery) use ($like): void {
+                    $userQuery->where('name', 'like', $like)->orWhere('email', 'like', $like);
+                })->orWhereHas('petProfile', static function ($petQuery) use ($like): void {
+                    $petQuery->where('name', 'like', $like);
+                });
+                if (is_string($searchId) && ctype_digit($searchId)) {
+                    $inner->orWhere('id', (int) $searchId);
+                }
+            },
+        );
 
         $domain = $this->petProfiles->domainForModule('pet-care-clinic');
         $petProfiles = $this->petProfiles->visibleOrdered($user, $domain);
         $canCreate = Gate::allows('create', PetCareConsultation::class);
         $fromTicket = $canCreate ? $this->tickets->findForStaff($user, $request->query('ticket')) : null;
+        $revealAssigneeIdentity = $user->can(PetCareConsultation::PERMISSION_VIEW_ALL);
 
         if ($fromTicket !== null) {
             $petProfiles = $petProfiles->where('user_id', $fromTicket->user_id)->values();
@@ -55,6 +74,21 @@ class ConsultationController extends Controller
         return view('consultations::index', [
             'fromTicket' => $fromTicket,
             'consultations' => $query->paginate(20)->withQueryString()->fragment('list'),
+            'filters' => $filters,
+            'filterStatuses' => $statuses,
+            'filterAssignees' => $revealAssigneeIdentity
+                ? \App\Core\Accounts\User::query()
+                    ->whereHas('roles', static fn ($roles) => $roles->whereIn('name', [
+                        \App\Core\Accounts\User::ROLE_STAFF,
+                        \App\Core\Accounts\User::ROLE_ADMIN,
+                        \App\Core\Accounts\User::ROLE_VOLUNTEER,
+                        \App\Core\Accounts\User::ROLE_STUDENT,
+                    ]))
+                    ->orderBy('name')
+                    ->limit(100)
+                    ->get(['id', 'name'])
+                : collect(),
+            'revealAssigneeIdentity' => $revealAssigneeIdentity,
             'reviewFilter' => $reviewFilter,
             'reviewCount' => $canReview
                 ? PetCareConsultation::query()->forPetCareDomain()->visibleTo($user)->needsVetReview()->count()

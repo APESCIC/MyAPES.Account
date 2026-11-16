@@ -71,18 +71,49 @@ class TicketController extends Controller
             $user->can($prefix.'view-own') || $user->can($prefix.'view-all'),
             403,
         );
+        $statuses = ['open', 'in_progress', 'resolved', 'closed'];
+        $filters = \App\Core\Search\ListFilterQuery::fromRequest($request, $statuses);
         $query = SupportTicket::query()
             ->forSubCore($instance->subCore->key)
             ->visibleTo($user, $instance->subCore->key)
             ->with(['user', 'assignedTo'])
             ->latest();
+        $searchId = $filters['q'] !== null ? ltrim($filters['q'], '#') : null;
+        \App\Core\Search\ListFilterQuery::apply(
+            $query,
+            $filters,
+            ['subject', 'status'],
+            searchExtra: static function ($inner, string $like) use ($searchId): void {
+                $inner->orWhereHas('user', static function ($userQuery) use ($like): void {
+                    $userQuery->where('name', 'like', $like)->orWhere('email', 'like', $like);
+                });
+                if (is_string($searchId) && ctype_digit($searchId)) {
+                    $inner->orWhere('id', (int) $searchId);
+                }
+            },
+        );
 
         $isApesCic = $this->area()->usesHierarchicalCategories;
         $prefill = $request->query('service_area');
+        $revealAssigneeIdentity = $user->can($prefix.'view-all');
 
         return view('tickets::tickets.index', [
             'prefillServiceArea' => is_string($prefill) && in_array($prefill, $ticketService->serviceAreas, true) ? $prefill : null,
-            'tickets' => $query->paginate(20)->fragment('list'),
+            'tickets' => $query->paginate(20)->withQueryString()->fragment('list'),
+            'filters' => $filters,
+            'filterStatuses' => $statuses,
+            'filterAssignees' => $revealAssigneeIdentity
+                ? \App\Core\Accounts\User::query()
+                    ->whereHas('roles', static fn ($roles) => $roles->whereIn('name', [
+                        \App\Core\Accounts\User::ROLE_STAFF,
+                        \App\Core\Accounts\User::ROLE_ADMIN,
+                        \App\Core\Accounts\User::ROLE_VOLUNTEER,
+                        \App\Core\Accounts\User::ROLE_STUDENT,
+                    ]))
+                    ->orderBy('name')
+                    ->limit(100)
+                    ->get(['id', 'name'])
+                : collect(),
             'serviceAreas' => $ticketService->serviceAreas,
             'serviceAreaGroups' => $isApesCic
                 ? $this->categories->serviceAreas($instance->subCore->key)
@@ -94,7 +125,7 @@ class TicketController extends Controller
             'uploadsEnabled' => $this->area()->supportsAttachments
                 && $this->uploads->enabledFor($this->area()->moduleSlug),
             'canCreateTicket' => $user->can($prefix.'create'),
-            'revealAssigneeIdentity' => $user->can($prefix.'view-all'),
+            'revealAssigneeIdentity' => $revealAssigneeIdentity,
             'priorities' => self::createPrioritiesFor($user, $prefix),
             'ticketService' => $ticketService,
             'categoryResolver' => $this->categories,

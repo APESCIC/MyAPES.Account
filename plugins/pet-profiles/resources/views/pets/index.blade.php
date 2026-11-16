@@ -8,6 +8,12 @@
             <span class="service-label {{ $area->serviceLabelClass }}">{{ $area->serviceLabel }}</span>
             <h1>{{ __('pet_profiles::ui.index.blade.pet_profiles') }}</h1>
         </div>
+        <x-workspace.list-filters
+            :action="route($area->indexRouteName())"
+            :filters="$filters"
+            :show-status="false"
+            :show-assignee="false"
+        />
         <div class="panel" id="list">
             <h2>{{ __('pet_profiles::ui.index.blade.profiles') }}</h2>
             @if($pets->isEmpty())

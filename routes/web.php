@@ -47,6 +47,7 @@ use App\Http\Controllers\Staff\ClientController;
 use App\Http\Controllers\Staff\ClientNoteController;
 use App\Http\Controllers\Staff\StaffClientRecordController;
 use App\Http\Controllers\SubCoreController;
+use App\Http\Controllers\Workspace\WorkspaceRecordSearchController;
 use App\Http\Controllers\SupportAttachmentController;
 use App\Http\Middleware\EnsureLocalReplyLoop;
 use App\Support\Tour\GuidedTour;
@@ -194,6 +195,9 @@ Route::middleware([
     'account.ready',
 ])->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('/workspace/search/records', WorkspaceRecordSearchController::class)
+        ->middleware('throttle:60,1')
+        ->name('workspace.search.records');
     Route::get('/help/staff', [HelpController::class, 'staff'])->name('help.staff');
     Route::get('/help/admin', [HelpController::class, 'admin'])->name('help.admin');
     Route::post('/tour/{audience}/complete', [GuidedTourController::class, 'complete'])

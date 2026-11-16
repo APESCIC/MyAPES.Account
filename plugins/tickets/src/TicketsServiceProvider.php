@@ -15,6 +15,7 @@ use App\Core\Extensions\Settings\ManagedListDefinition;
 use App\Core\Extensions\Settings\ManagedListRegistry;
 use App\Core\Mail\MailCategory;
 use App\Core\Mail\MailTemplate;
+use App\Core\Search\RecordSearchRegistry;
 use App\Core\Webhooks\WebhookEvents;
 use App\Core\Webhooks\WebhookSources;
 use Illuminate\Support\Facades\Gate;
@@ -27,6 +28,7 @@ use Plugins\Tickets\Inbound\TicketEmailReplyHandler;
 use Plugins\Tickets\Models\SupportTicket;
 use Plugins\Tickets\Notifications\TicketUpdatedNotification;
 use Plugins\Tickets\Policies\SupportTicketPolicy;
+use Plugins\Tickets\Search\TicketsRecordSearchProvider;
 
 class TicketsServiceProvider extends PluginServiceProvider
 {
@@ -37,6 +39,9 @@ class TicketsServiceProvider extends PluginServiceProvider
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'tickets');
 
         Gate::policy(SupportTicket::class, SupportTicketPolicy::class);
+        app(RecordSearchRegistry::class)->contribute(static fn (): array => [
+            app(TicketsRecordSearchProvider::class),
+        ]);
         WebhookSources::changes(SupportTicket::class, WebhookEvents::TICKET_CREATED, WebhookEvents::TICKET_UPDATED, 'ticket_id', static fn (SupportTicket $ticket): string => $ticket->sub_core_key);
 
         foreach (['apes-cic', 'shelter-rescue', 'pet-care-clinic'] as $module) {
@@ -161,6 +166,7 @@ class TicketsServiceProvider extends PluginServiceProvider
             recentActivityProvider: SupportTicketRecentActivityProvider::class,
             analyticsProvider: SupportTicketAnalyticsProvider::class,
             attentionProvider: SupportTicketAttentionProvider::class,
+            migrationsPath: dirname(__DIR__).'/database/migrations',
             staffRouteFiles: [
                 dirname(__DIR__).'/routes/apes-cic.php',
                 dirname(__DIR__).'/routes/shelter.php',
