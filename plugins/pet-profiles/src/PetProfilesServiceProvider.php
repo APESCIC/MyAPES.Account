@@ -8,6 +8,7 @@ use App\Core\Extensions\Plugins\PluginManifest;
 use App\Core\Extensions\Plugins\PluginNavigationItem;
 use App\Core\Extensions\Plugins\PluginServiceProvider;
 use App\Core\Extensions\Plugins\PluginSettingsSchema;
+use App\Core\Search\RecordSearchRegistry;
 use App\Core\Webhooks\WebhookEvents;
 use App\Core\Webhooks\WebhookSources;
 use Illuminate\Support\Facades\Gate;
@@ -18,6 +19,7 @@ use Plugins\PetProfiles\Dashboard\PetProfileRecentActivityProvider;
 use Plugins\PetProfiles\Dashboard\PetProfileSummaryProvider;
 use Plugins\PetProfiles\Models\PetProfile;
 use Plugins\PetProfiles\Policies\PetProfilePolicy;
+use Plugins\PetProfiles\Search\PetsRecordSearchProvider;
 use Plugins\PetProfiles\Services\PetProfiles;
 
 class PetProfilesServiceProvider extends PluginServiceProvider
@@ -36,6 +38,9 @@ class PetProfilesServiceProvider extends PluginServiceProvider
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'pet-profiles');
 
         Gate::policy(PetProfile::class, PetProfilePolicy::class);
+        app(RecordSearchRegistry::class)->contribute(static fn (): array => [
+            app(PetsRecordSearchProvider::class),
+        ]);
         WebhookSources::changes(PetProfile::class, WebhookEvents::PET_CREATED, WebhookEvents::PET_UPDATED, 'pet_id', static fn (PetProfile $pet): ?string => match ($pet->service_domain) {
             PetProfile::DOMAIN_SHELTER => 'shelter-rescue',
             PetProfile::DOMAIN_PETCARE => 'pet-care-clinic',
@@ -81,6 +86,7 @@ class PetProfilesServiceProvider extends PluginServiceProvider
             summaryProvider: PetProfileSummaryProvider::class,
             recentActivityProvider: PetProfileRecentActivityProvider::class,
             analyticsProvider: PetProfileAnalyticsProvider::class,
+            migrationsPath: dirname(__DIR__).'/database/migrations',
             staffRouteFiles: [
                 dirname(__DIR__).'/routes/shelter.php',
                 dirname(__DIR__).'/routes/petcare.php',

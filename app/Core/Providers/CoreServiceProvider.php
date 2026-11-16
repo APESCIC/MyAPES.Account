@@ -10,6 +10,9 @@ use App\Core\Attachments\Scanning\VirusScanner;
 use App\Core\Eloquent\MorphMap;
 use App\Core\Integrations\CoreIntegrations;
 use App\Core\Integrations\IntegrationRegistry;
+use App\Core\Search\Providers\UsersRecordSearchProvider;
+use App\Core\Search\RecordSearch;
+use App\Core\Search\RecordSearchRegistry;
 use App\Core\Settings\AppSettings;
 use App\Core\Settings\GeneralSettings;
 use Illuminate\Support\ServiceProvider;
@@ -23,6 +26,16 @@ class CoreServiceProvider extends ServiceProvider
         $this->app->afterResolving(AppSettings::class, static fn (AppSettings $settings) => $settings->define(...GeneralSettings::definitions()));
         $this->app->singleton(IntegrationRegistry::class);
         $this->app->afterResolving(IntegrationRegistry::class, static fn (IntegrationRegistry $registry) => $registry->register(...CoreIntegrations::all()));
+        $this->app->singleton(RecordSearchRegistry::class);
+        $this->app->singleton(RecordSearch::class);
+        $this->app->afterResolving(
+            RecordSearchRegistry::class,
+            static function (RecordSearchRegistry $registry): void {
+                $registry->contribute(static fn (): array => [
+                    app(UsersRecordSearchProvider::class),
+                ]);
+            },
+        );
         $this->app->singleton(VirusScanner::class, static fn (): VirusScanner => match (config('myapes.attachments.scanner')) {
             'clamd' => new ClamdScanner(
                 (string) config('myapes.attachments.clamd.host', ''),

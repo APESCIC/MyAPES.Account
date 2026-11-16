@@ -70,6 +70,16 @@ return [
         'quick_actions' => 'Quick actions',
         'settings_section' => 'Settings',
         'close_hint' => 'Esc',
+        'records' => [
+            'pets' => 'Pets',
+            'tickets' => 'Tickets',
+            'cases' => 'Cases',
+            'consultations' => 'Consultations',
+            'users' => 'Users',
+            'applications' => 'Applications',
+            'heading' => 'Records',
+            'searching' => 'Searching records…',
+        ],
     ],
 
     'quick' => [
@@ -83,6 +93,19 @@ return [
             'consultations' => 'Book consultation',
             'recruitment' => 'Create recruitment role',
         ],
+    ],
+
+    'filters' => [
+        'panel' => 'Filter the list',
+        'search' => 'Search',
+        'status' => 'Status',
+        'all_statuses' => 'All statuses',
+        'assignee' => 'Assignee',
+        'any_assignee' => 'Any assignee',
+        'date_from' => 'From',
+        'date_to' => 'To',
+        'apply' => 'Apply filters',
+        'clear' => 'Clear',
     ],
 
     'keywords' => [

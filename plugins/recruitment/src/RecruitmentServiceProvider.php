@@ -14,6 +14,7 @@ use App\Core\Extensions\Plugins\PluginServiceProvider;
 use App\Core\Extensions\Plugins\PluginSettingsSchema;
 use App\Core\Mail\MailCategory;
 use App\Core\Mail\MailTemplate;
+use App\Core\Search\RecordSearchRegistry;
 use App\Services\ModuleCatalogueProjection;
 use App\Services\ModuleSettingsService;
 use Illuminate\Support\Facades\Gate;
@@ -25,6 +26,7 @@ use Plugins\Recruitment\Notifications\RecruitmentApplicationReceivedNotification
 use Plugins\Recruitment\Notifications\RecruitmentApplicationStatusNotification;
 use Plugins\Recruitment\Policies\RecruitmentApplicationPolicy;
 use Plugins\Recruitment\Policies\RecruitmentRolePolicy;
+use Plugins\Recruitment\Search\ApplicationsRecordSearchProvider;
 
 class RecruitmentServiceProvider extends PluginServiceProvider
 {
@@ -33,6 +35,10 @@ class RecruitmentServiceProvider extends PluginServiceProvider
         parent::boot();
 
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'recruitment');
+
+        $this->app->make(RecordSearchRegistry::class)->contribute(
+            fn (): array => [$this->app->make(ApplicationsRecordSearchProvider::class)],
+        );
 
         Gate::policy(RecruitmentRole::class, RecruitmentRolePolicy::class);
         Gate::policy(RecruitmentApplication::class, RecruitmentApplicationPolicy::class);
@@ -85,6 +91,7 @@ class RecruitmentServiceProvider extends PluginServiceProvider
             translationNamespace: 'recruitment',
             searchKeywordsKey: 'recruitment::plugin.keywords',
             activeRecordDetector: RecruitmentActiveRecordDetector::class,
+            migrationsPath: dirname(__DIR__).'/database/migrations',
             publicRouteFiles: [
                 dirname(__DIR__).'/routes/public.php',
                 dirname(__DIR__).'/routes/public-auth.php',
