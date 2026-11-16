@@ -8,6 +8,6 @@
         <a
             href="{{ route($tabRoute, [$tabParam => $tabSubject, 'tab' => $tabKey]) }}"
             @if($hubTab === $tabKey) aria-current="page" @endif
-        >{{ __('admin.users.hub.tabs.'.$tabKey) }}</a>
+        >{{ __("admin.users.hub.tabs.{$tabKey}") }}</a>
     @endforeach
 </nav>
