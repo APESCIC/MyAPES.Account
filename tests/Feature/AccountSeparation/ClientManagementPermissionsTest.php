@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Gate;
 use Tests\TestCase;
 
 /**
- * Client account management permissions (#613): client.search, client.manage
- * and client.sensitive, mapped to protected roles, capability packs and
- * default job roles.
+ * Client account management permissions (#613): staff.clients.search,
+ * staff.clients.manage and staff.clients.sensitive, mapped to protected
+ * roles, capability packs and default job roles.
  */
 class ClientManagementPermissionsTest extends TestCase
 {
@@ -34,7 +34,7 @@ class ClientManagementPermissionsTest extends TestCase
                 Gate::forUser($user)->allows(
                     AuthorizationProfile::PERMISSION_CLIENT_SEARCH,
                 ),
-                "[{$role}] should hold client.search.",
+                "[{$role}] should hold staff.clients.search.",
             );
         }
 
@@ -58,7 +58,7 @@ class ClientManagementPermissionsTest extends TestCase
                 Gate::forUser($user)->allows(
                     AuthorizationProfile::PERMISSION_CLIENT_MANAGE,
                 ),
-                "[{$role}] should hold client.manage.",
+                "[{$role}] should hold staff.clients.manage.",
             );
         }
 
@@ -70,7 +70,7 @@ class ClientManagementPermissionsTest extends TestCase
                 Gate::forUser($user)->allows(
                     AuthorizationProfile::PERMISSION_CLIENT_MANAGE,
                 ),
-                "[{$role}] must not hold client.manage.",
+                "[{$role}] must not hold staff.clients.manage.",
             );
         }
     }
@@ -94,7 +94,7 @@ class ClientManagementPermissionsTest extends TestCase
                 Gate::forUser($user)->allows(
                     AuthorizationProfile::PERMISSION_CLIENT_SENSITIVE,
                 ),
-                "[{$role}] must not hold client.sensitive.",
+                "[{$role}] must not hold staff.clients.sensitive.",
             );
         }
 
@@ -107,12 +107,12 @@ class ClientManagementPermissionsTest extends TestCase
 
     public function test_permissions_are_seeded_as_code_owned_and_linked_to_roles(): void
     {
-        // client.search: the four protected roles plus the Management, Client
-        // Services Advisor and Receptionist default job roles.
+        // staff.clients.search: the four protected roles plus the Management,
+        // Client Services Advisor and Receptionist default job roles.
         $expected = [
-            'client.search' => 7,
-            'client.manage' => 2,
-            'client.sensitive' => 1,
+            'staff.clients.search' => 7,
+            'staff.clients.manage' => 2,
+            'staff.clients.sensitive' => 1,
         ];
 
         foreach ($expected as $name => $expectedRoles) {

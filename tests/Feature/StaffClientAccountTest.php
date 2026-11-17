@@ -155,6 +155,22 @@ class StaffClientAccountTest extends TestCase
         ])->assertSessionHasErrors('email');
     }
 
+    public function test_client_search_returns_public_clients_and_hides_staff_accounts(): void
+    {
+        $staff = User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create();
+        $client = User::factory()->create(['name' => 'Ziggy Public Client']);
+        User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create([
+            'name' => 'Ziggy Staff Only',
+        ]);
+
+        $this->actingAs($staff)
+            ->get(route('clients.index', ['q' => 'Ziggy']))
+            ->assertOk()
+            ->assertSee('Ziggy Public Client')
+            ->assertDontSee('Ziggy Staff Only')
+            ->assertSee(route('clients.show', $client), false);
+    }
+
     public function test_public_users_and_guests_cannot_create_clients(): void
     {
         $this->get(route('clients.index'))->assertRedirect();

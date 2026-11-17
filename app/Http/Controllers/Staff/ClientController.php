@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Staff;
 
+use App\Core\Accounts\AccountClassifier;
 use App\Core\Accounts\PhoneVerificationPinService;
 use App\Core\Accounts\User;
 use App\Core\Search\RecordSearch;
@@ -30,25 +31,21 @@ class ClientController extends Controller
         private readonly AuthorizationProfile $profile,
     ) {}
 
-    public function index(Request $request, RecordSearch $search): View
+    public function index(Request $request, RecordSearch $search, AccountClassifier $accounts): View
     {
         Gate::authorize(AuthorizationProfile::PERMISSION_CLIENT_SEARCH);
 
         $q = trim((string) $request->query('q', ''));
+        $clients = collect();
 
-        if ($q !== '' && strlen($q) >= 2) {
-            $results = $search->search(
-                $request->user(),
-                $q,
-                perType: 25,
-            );
+        if (strlen($q) >= 2) {
+            $results = $search->search($request->user(), $q, perType: 25);
+            $hits = collect($results['groups'])->firstWhere('type', 'users')['hits'] ?? [];
 
-            $clients = collect($results['groups'][0]['hits'] ?? [])
-                ->map(fn (array $hit) => User::find($hit['id']))
-                ->filter()
+            $clients = collect($hits)
+                ->map(fn (array $hit): ?User => User::query()->with('roles')->find($hit['id']))
+                ->filter(fn (?User $user): bool => $user instanceof User && ! $accounts->isStaffSide($user))
                 ->values();
-        } else {
-            $clients = collect();
         }
 
         return view('clients.index', [

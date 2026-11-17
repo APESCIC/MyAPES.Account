@@ -5,6 +5,8 @@ return [
     'title' => 'Clients',
     'intro' => 'Create a public client account for someone who cannot register themselves. They appear in Caller search afterwards.',
     'search' => 'Search clients',
+    'search_submit' => 'Search',
+    'clear' => 'Clear',
     'search_placeholder' => 'Name, email, phone or postcode...',
     'search_results' => 'Search results',
     'no_results' => 'No clients found for ":query".',

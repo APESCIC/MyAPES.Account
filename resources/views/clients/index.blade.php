@@ -10,9 +10,9 @@
         <form method="get" action="{{ route('clients.index') }}">
             <label for="q">{{ __('clients.search') }}</label>
             <input id="q" name="q" value="{{ $q ?? '' }}" placeholder="{{ __('clients.search_placeholder') }}" autocomplete="off" autofocus>
-            <button type="submit">Search</button>
+            <button type="submit">{{ __('clients.search_submit') }}</button>
             @if($q ?? '')
-                <a href="{{ route('clients.index') }}">Clear</a>
+                <a href="{{ route('clients.index') }}">{{ __('clients.clear') }}</a>
             @endif
         </form>
     </div>

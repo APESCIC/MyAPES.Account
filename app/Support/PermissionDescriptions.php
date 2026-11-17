@@ -46,6 +46,21 @@ final class PermissionDescriptions
             'description' => 'Open a public client profile hub, see their records, add internal notes, and start a ticket or case for them.',
             'group' => 'Accounts',
         ],
+        'staff.clients.search' => [
+            'title' => 'Search public client accounts',
+            'description' => 'Search public client accounts by name, email, username or phone on the Clients page.',
+            'group' => 'Accounts',
+        ],
+        'staff.clients.manage' => [
+            'title' => 'Manage public client accounts',
+            'description' => 'Update public client accounts beyond search and profile view (staff and administrators).',
+            'group' => 'Accounts',
+        ],
+        'staff.clients.sensitive' => [
+            'title' => 'View sensitive client account data',
+            'description' => 'Access sensitive client account fields reserved for administrators.',
+            'group' => 'Accounts',
+        ],
         'admin.analytics.view' => [
             'title' => 'View admin overview',
             'description' => 'See operational KPIs on the Admin overview.',
