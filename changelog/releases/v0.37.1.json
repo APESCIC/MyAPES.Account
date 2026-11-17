@@ -1,0 +1,48 @@
+{
+    "version": "0.37.1",
+    "date": "2026-09-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Cloudron restart survives release symlink ownership drift",
+    "summary": "Cloudron restarts after backup no longer leave MyAPES Core stuck offline when release symlink ownership drifts. Sign-in and pages behave the same once the app is running again.",
+    "changes": [
+        "Recreate root-owned release symlinks (current, previous, storage, env, avatars) before restoring runtime ownership on Cloudron boot.",
+        "Recover automatically when the ownership check fails after a Cloudron backup or container restart.",
+        "Keep the authenticated deployment-control contract covered by the packaging unit test for this repair path."
+    ],
+    "affected_areas": [
+        "Cloudron deploy and restart",
+        "Application runtime launcher",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on v0.37.x: production restart recovery only, with no change to product behaviour, URLs, or stored permissions.",
+    "validation": [
+        "php artisan test --compact --filter=test_cloudron_restart_restores_root_ownership_before_application_code_runs",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "Cloudron workflow_dispatch with app_version from VERSION after merge; live /healthz and /change-log confirm the deployed version."
+    ],
+    "known_limitations": [
+        "Does not change Cloudron platform chown behaviour; it repairs the expected release symlink layout after that chown runs."
+    ],
+    "rollback": "Redeploy the previous application version. The prior runtime launcher is restored with that deploy; no database migration is involved.",
+    "provenance": "Cloudron restart symlink ownership fix for issue #299, pull request #300.",
+    "references": [
+        {
+            "label": "Issue #299",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/299"
+        },
+        {
+            "label": "Pull request #300",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/300"
+        }
+    ],
+    "slug": "release-v0-37-1",
+    "previous_version": "0.37.0"
+}

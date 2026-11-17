@@ -1,0 +1,45 @@
+{
+    "version": "0.61.1",
+    "date": "2026-11-12",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Dependency security updates",
+    "summary": "Security updates to the libraries MyAPES Account is built on, with no change to how the app works.",
+    "changes": [
+        "The Laravel framework, the Symfony components and the Markdown library MyAPES Account uses are updated to versions with the latest security fixes.",
+        "The tools used to build the app's styles and scripts are updated to versions with the latest security fixes."
+    ],
+    "affected_areas": [
+        "Security",
+        "Dependencies"
+    ],
+    "categories": [
+        "fixed",
+        "security"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch: dependency security updates within their current major versions, with no new feature and no change to routes or behaviour.",
+    "validation": [
+        "composer audit and npm audit report no advisories; the full test suite, the frontend tests and the frontend build passed locally; the Laragon preview served the app on the updated libraries."
+    ],
+    "known_limitations": [
+        "None."
+    ],
+    "rollback": "Deploy v0.61.0 with deploy-cloudron.yml; this release adds no database migrations.",
+    "provenance": "Milestone v0.61.1 Beta: Dependency security updates, epic #763 with issue #764, pull request #765.",
+    "references": [
+        {
+            "label": "Issue #764",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/764"
+        },
+        {
+            "label": "Pull request #765",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/765"
+        }
+    ],
+    "slug": "release-v0-61-1",
+    "previous_version": "0.61.0"
+}

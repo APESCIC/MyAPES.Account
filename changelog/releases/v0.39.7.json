@@ -1,0 +1,54 @@
+{
+    "version": "0.39.7",
+    "date": "2026-09-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Account security PHPUnit matrix",
+    "summary": "Adds a focused PHPUnit account-security matrix that covers the Account security checklist: username and password hardening, verification gates, step-up protected changes, TOTP and passkey factories, branded security mail assertions, and Cloudron OIDC no-local-reset regression.",
+    "changes": [
+        "Add tests/Feature/AccountSecurity matrix suites for epic checklist coverage.",
+        "Extend User factory with withTotp, withPasskey, and withoutMfa states for local MFA fixtures.",
+        "Assert Cloudron OIDC and directory identities cannot use local password reset or enrol MFA.",
+        "Mail-fake coverage for the branded auth and security-event notification kit.",
+        "Mark Account security / v0.39.x as the completed line in AGENTS.md."
+    ],
+    "affected_areas": [
+        "PHPUnit account-security tests",
+        "User factory MFA fixtures",
+        "Agent documentation"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.39.x Account security line: closing matrix (#234) after passkeys (0.39.6).",
+    "validation": [
+        "PHPUnit tests/Feature/AccountSecurity (14 tests).",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Deep behavioural coverage for each child remains in tests/Feature/Auth; the matrix asserts cross-cutting checklist cohesion.",
+        "Mandatory admin 2FA remains deferred."
+    ],
+    "rollback": "Redeploy the previous release package. Tests and documentation-only changes do not alter runtime auth behaviour.",
+    "provenance": "Issue #234; pull request #329; closes epic #225 and milestone 5 after deploy.",
+    "references": [
+        {
+            "label": "Issue #234",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/234"
+        },
+        {
+            "label": "Pull request #329",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/329"
+        },
+        {
+            "label": "Epic #225",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/225"
+        }
+    ],
+    "slug": "release-v0-39-7",
+    "previous_version": "0.39.6"
+}

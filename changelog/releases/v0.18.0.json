@@ -1,0 +1,50 @@
+{
+    "version": "0.18.0",
+    "date": "2026-08-20",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Admin operational analytics dashboard",
+    "summary": "Administrators with analytics access now get a desert-styled operations dashboard on /admin, with range-bounded account and workload KPIs, Chart.js trends, module warnings, and recent privileged events. Agents are also required to fill complete GitHub issue metadata.",
+    "changes": [
+        "Replaced the three-count admin overview with range-selectable operational analytics, current-open workload, accessible data tables, and locally bundled Chart.js charts.",
+        "Cached anonymous aggregates briefly in the application cache, gated Overview on admin.analytics.view, and skipped Laravel maintenance down-file reads while the application is up.",
+        "Documented required GitHub issue sidebar metadata in AGENTS.md, an always-on Cursor rule, and a Task issue template."
+    ],
+    "affected_areas": [
+        "Admin overview, module analytics providers, maintenance gateway, GitHub agent instructions, and Chart.js frontend bundle"
+    ],
+    "categories": [
+        "added",
+        "changed",
+        "accessibility"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible minor release adding the remaining public-release analytics dashboard without changing service-module workflows or authorization catalogues.",
+    "validation": [
+        "Feature tests cover analytics authorization, 7/30/90 range bounds, fixture KPIs, disabled modules, cache expiry, privileged-event redaction, changelog validation, and the maintenance down-file skip."
+    ],
+    "known_limitations": [
+        "Median closure is shown as not available until at least one item closes in the selected range.",
+        "This release does not bump nanoid and does not authorize production LDAP or deploy."
+    ],
+    "rollback": "Revert this release record, VERSION, runtime manifest version, admin analytics aggregator and dashboard, Chart.js Vite entry, agent issue-metadata files, and the maintenance data() skip. No database rollback is needed.",
+    "provenance": "Defined by the admin analytics dashboard work for MyAPES Account issues #15 and #60, completing roadmap #17.",
+    "references": [
+        {
+            "label": "Issue #15",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/15"
+        },
+        {
+            "label": "Issue #60",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/60"
+        },
+        {
+            "label": "Issue #17",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/17"
+        }
+    ],
+    "slug": "release-v0-18-0",
+    "previous_version": "0.17.0"
+}

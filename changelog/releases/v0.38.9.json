@@ -1,0 +1,55 @@
+{
+    "version": "0.38.9",
+    "date": "2026-09-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "User locale preference and CI missing-key hard-fail",
+    "summary": "Accounts store a per-user language preference (UK English today) so a second locale can be added later without schema work. Continuous integration now fails when a translation key is missing from en_GB, while unused keys stay informational.",
+    "changes": [
+        "Add users.locale (default en_GB), SetLocale middleware, and supported_locales config with a language switcher that stays hidden until a second locale exists.",
+        "Keep Cloudron OIDC and directory sync from overwriting a stored locale; honour preferredLocale for notifications.",
+        "Flip php artisan lang:check to hard-fail on missing keys in CI; unused-key reporting remains non-blocking.",
+        "Document locale preference and CI hard-fail in docs/localisation.md; mark the Language line shipped in AGENTS.md."
+    ],
+    "affected_areas": [
+        "User accounts and profile",
+        "Request locale middleware",
+        "CI translation key checks",
+        "Localisation docs"
+    ],
+    "categories": [
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.38.x Language line: user locale groundwork and CI missing-key hard-fail after public SEO and Admin keywords (0.38.8). Closes milestone 8.",
+    "validation": [
+        "PHPUnit UserLocalePreferenceTest, TranslationKeyHardFailTest, LocalisationBaselineTest, LocalisationAuthExtractionTest, PluginTranslationNamespacesTest.",
+        "php artisan lang:check --fail-on-missing (0 missing keys).",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Only en_GB is supported; the language switcher remains hidden until a second locale is added.",
+        "Accept-Language negotiation for guests is documented as off for now."
+    ],
+    "rollback": "Redeploy the previous release package and roll back the users.locale migration if required. Locale middleware and CI hard-fail return to the prior report-only behaviour.",
+    "provenance": "Issues #275 and #276; pull request #321.",
+    "references": [
+        {
+            "label": "Issue #275",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/275"
+        },
+        {
+            "label": "Issue #276",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/276"
+        },
+        {
+            "label": "Pull request #321",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/321"
+        }
+    ],
+    "slug": "release-v0-38-9",
+    "previous_version": "0.38.8"
+}

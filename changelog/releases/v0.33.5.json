@@ -1,0 +1,47 @@
+{
+    "version": "0.33.5",
+    "date": "2026-09-23",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Staff Login chase for pending first login",
+    "summary": "Admins can send a Staff Login reminder to directory accounts that have not completed first login. The reminder opens Staff Login / Cloudron only — not the public password reset.",
+    "changes": [
+        "Add a Staff Login reminder action on Admin user detail for PENDING FIRST LOGIN directory accounts.",
+        "Send chase mail that links to Staff Login / Cloudron and refuse the public-local password reset path for those accounts."
+    ],
+    "affected_areas": [
+        "Admin user detail",
+        "Staff Login",
+        "Directory account onboarding"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: adds a Staff Login chase for pending first-login directory users without changing public password reset or Cloudron identity linking.",
+    "validation": [
+        "PHPUnit AdminPendingFirstLoginChaseTest covers directory chase, public-local refusal, confirm gate, and Staff Login mail content.",
+        "PHPUnit AdminLocalPublicPasswordResetTest still refuses local password reset for pending first-login accounts.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Chase does not create Cloudron accounts or reset Cloudron passwords; recipients must already exist in the directory and complete Staff Login themselves."
+    ],
+    "rollback": "Redeploy the previous application version to remove the Staff Login chase action and reminder mail.",
+    "provenance": "PENDING FIRST LOGIN Staff Login chase for issue #138, pull request #238.",
+    "references": [
+        {
+            "label": "Issue #138",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/138"
+        },
+        {
+            "label": "Pull request #238",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/238"
+        }
+    ],
+    "slug": "release-v0-33-5",
+    "previous_version": "0.33.4"
+}

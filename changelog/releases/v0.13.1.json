@@ -1,0 +1,42 @@
+{
+    "version": "0.13.1",
+    "date": "2026-08-11",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Repository discovery and support metadata",
+    "summary": "Added accurate GitHub About metadata and a direct README link to the enabled Discussions area while retaining existing application behavior and runtime configuration.",
+    "changes": [
+        "Set the approved repository description, production homepage, and focused product and platform topics.",
+        "Added a direct README link to GitHub Discussions and refreshed the repository-health review after verifying links, workflows, support routes, and release information."
+    ],
+    "affected_areas": [
+        "GitHub repository metadata and repository documentation"
+    ],
+    "categories": [
+        "changed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible patch release keeping repository discovery, support, and source-controlled release metadata aligned.",
+    "validation": [
+        "GitHub CLI and API reads verify the exact About metadata, HTTPS checks verify the published website and change log, and release-history validation covers the source-controlled patch record."
+    ],
+    "known_limitations": [
+        "No application code, runtime configuration, deployment, or data behavior changes are included."
+    ],
+    "rollback": "Before merge, revert this patch record, VERSION change, and README update, and independently restore the prior GitHub About fields if required; no database rollback is needed.",
+    "provenance": "Defined by the GitHub About metadata and repository-health work for MyAPES Account issue #42 and pull request #43.",
+    "references": [
+        {
+            "label": "Issue #42",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/42"
+        },
+        {
+            "label": "PR #43",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/43"
+        }
+    ],
+    "slug": "release-v0-13-1",
+    "previous_version": "0.13.0"
+}

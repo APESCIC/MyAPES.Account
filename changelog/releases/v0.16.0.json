@@ -1,0 +1,43 @@
+{
+    "version": "0.16.0",
+    "date": "2026-08-19",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Desert theme and Spike helper",
+    "summary": "Refreshed MyAPES Account with a warmer desert visual system and introduced Spike, a cartoon bearded dragon who offers short operational tips on key pages.",
+    "changes": [
+        "Updated light and dark colour tokens, sidebar, canvas texture, and browser theme colour to a sun-baked sand, sage, and clay palette while keeping teal as the accessible oasis accent.",
+        "Replaced the photorealistic bearded dragon portrait with cartoon Spike artwork on landing, staff sign-in, and the dashboard identity card.",
+        "Added reusable Spike tip callouts, a dismissible page-keyed helper dock, and operational copy for first-run, dashboard, and service list pages."
+    ],
+    "affected_areas": [
+        "Shared visual theme, mascot artwork, dashboard, landing and authentication pages, and in-page help copy"
+    ],
+    "categories": [
+        "added",
+        "changed",
+        "accessibility"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible minor release adding the cartoon mascot helper and desert visual system without changing workflows, data, or authorization.",
+    "validation": [
+        "Theme, changelog, health, rollback-manifest, and mascot helper tests cover the refreshed interface, release record, and dismissible tip markup."
+    ],
+    "known_limitations": [
+        "Spike tips are static page copy. They are not a chatbot and do not change authorization, records, or module availability.",
+        "No database migration is included. Theme choice remains a local browser preference."
+    ],
+    "rollback": "Revert this release record, VERSION, runtime manifest version, theme, mascot, and helper files. No database rollback is needed.",
+    "provenance": "Defined by the desert theme and cartoon mascot helper work for MyAPES Account issue #47.",
+    "references": [
+        {
+            "label": "Issue #47",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/47"
+        }
+    ],
+    "slug": "release-v0-16-0",
+    "previous_version": "0.15.0"
+}

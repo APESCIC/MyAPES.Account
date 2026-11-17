@@ -1,0 +1,69 @@
+{
+    "version": "0.36.0",
+    "date": "2026-09-25",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Public Recruitment navigation IA",
+    "summary": "Public Recruitment uses one primary menu item with an Open roles / My applications page submenu, so openings browsing and applicant tracking sit under a single Recruitment entry instead of dual Roles and My applications primaries.",
+    "changes": [
+        "Replace dual primary Roles and My applications links with one Recruitment primary in the site chrome.",
+        "Add an Admin-style Recruitment page submenu: Open roles for everyone when the public board is enabled, and My applications for signed-in applicants only.",
+        "Align the footer Recruitment label with the new primary; keep /recruitment and /recruitment/applications URLs unchanged.",
+        "Keep category filters (All / Staff / Volunteer / Student) on the Open roles board and avoid staff manage bleed into the public submenu.",
+        "Update AGENTS.md for the closed v0.35.x line, the v0.36.x dual-frontend backlog, and ship order 6 → 7 → 8 → 5.",
+        "Extend PublicRecruitmentBoardTest for Recruitment chrome, guest-safe applications gating, and signed-in submenu visibility."
+    ],
+    "affected_areas": [
+        "Public primary navigation",
+        "Recruitment page submenu",
+        "Open roles board",
+        "My applications",
+        "Site footer",
+        "Change Log Hub",
+        "AGENTS.md"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Minor capability on the new v0.36.x line: public Recruitment information architecture (single primary + page submenu) without changing staff manage URLs or application workflow APIs.",
+    "validation": [
+        "PHPUnit PublicRecruitmentBoardTest passes (open board, category filters, Recruitment chrome, guest vs signed-in submenu, module-disabled 404).",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "composer pre-pr-verify (or equivalent local verify) on the PR branch before merge."
+    ],
+    "known_limitations": [
+        "Staff Recruitment manage shell and dual-frontend PHPUnit matrix remain on later 0.36.x patches (Wave 1 / issues #258, #259, #261).",
+        "Public Recruitment still ships only on the APES CIC sub-core and respects existing board/apply settings toggles."
+    ],
+    "rollback": "Redeploy the previous application version to restore dual Roles and My applications primary links and remove the Recruitment page submenu.",
+    "provenance": "Implements issues #260, #256, and #257 via pull request #277; closes epic #248.",
+    "references": [
+        {
+            "label": "Issue #260",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/260"
+        },
+        {
+            "label": "Issue #256",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/256"
+        },
+        {
+            "label": "Issue #257",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/257"
+        },
+        {
+            "label": "Issue #248",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/248"
+        },
+        {
+            "label": "Pull request #277",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/277"
+        }
+    ],
+    "slug": "release-v0-36-0",
+    "previous_version": "0.35.1"
+}

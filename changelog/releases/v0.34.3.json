@@ -1,0 +1,51 @@
+{
+    "version": "0.34.3",
+    "date": "2026-09-24",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Recruitment application model and status workflow",
+    "summary": "Applications against open APES CIC recruitment roles can be stored with a validated status workflow from submitted through review outcomes.",
+    "changes": [
+        "Add the RecruitmentApplication model, migration, and factory with status states submitted, under_review, shortlisted, rejected, accepted, withdrawn, and closed.",
+        "Enforce validated status transitions and block applications against draft or closed recruitment roles.",
+        "Register an ownership and staff review policy so applicants own their rows and staff with review-applications can review non-terminal applications.",
+        "Cover model, factory, policy, open-role gating, and transition rules with feature tests."
+    ],
+    "affected_areas": [
+        "APES CIC Recruitment",
+        "Recruitment applications",
+        "Module permissions",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release on the v0.34.x line: the application model and status workflow build on the public roles board from 0.34.2 without shipping public apply or staff review UI yet.",
+    "validation": [
+        "PHPUnit RecruitmentApplicationWorkflowTest, RecruitmentRoleWorkflowTest, and PublicRecruitmentBoardTest pass for model, policy, and related recruitment coverage.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "composer pre-pr-verify (or equivalent local verify) on the PR branch before merge."
+    ],
+    "known_limitations": [
+        "Public apply and staff application review UI are not included; those ship in a later 0.34.x patch.",
+        "Recruitment remains APES CIC only (not Shelter or Pet Care Clinic)."
+    ],
+    "rollback": "Redeploy the previous application version to remove the RecruitmentApplication model, policy, and recruitment_applications migration from the live app.",
+    "provenance": "RecruitmentApplication model and status workflow for issue #221, pull request #244.",
+    "references": [
+        {
+            "label": "Issue #221",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/221"
+        },
+        {
+            "label": "Pull request #244",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/244"
+        }
+    ],
+    "slug": "release-v0-34-3",
+    "previous_version": "0.34.2"
+}

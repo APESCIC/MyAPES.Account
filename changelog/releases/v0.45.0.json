@@ -1,0 +1,48 @@
+{
+    "version": "0.45.0",
+    "date": "2026-10-30",
+    "channel": "stable",
+    "type": "minor",
+    "title": "One product name: MyAPES Account",
+    "summary": "MyAPES Account is now the only product name you will see, in page titles, the footer, Help, legal pages and documentation.",
+    "changes": [
+        "Replace the old name \"MyAPES Core\" with \"MyAPES Account\" in page titles, the footer, the service badge, Help, privacy, cookie and terms pages, and error and maintenance pages.",
+        "Every page title now ends with \"| MyAPES Account\", including ticket, case, consultation and recruitment pages.",
+        "Update the web app manifest, documentation, issue templates and release notes to the same name."
+    ],
+    "affected_areas": [
+        "Branding",
+        "Content"
+    ],
+    "categories": [
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Minor: opens the 0.45 quick-wins series with a visible product rename. Routes, permissions and stored data are unchanged.",
+    "validation": [
+        "PublicChromeNamingTest checks titles, footer and manifest, and fails if the old name returns to views or lang.",
+        "TerminologyGlossaryTest, ChangeLogPageTest, BrandedErrorPagesTest, PublicLegalPagesTest and HardCodedStringInventoryTest.",
+        "Full PHPUnit suite in CI.",
+        "Manual check of the home page, footer and page titles in the local preview."
+    ],
+    "known_limitations": [
+        "Earlier release notes keep the name they were published with."
+    ],
+    "rollback": "Redeploy the previous release package. No database change is involved.",
+    "provenance": "Epic #450, issue #451; pull request #555.",
+    "references": [
+        {
+            "label": "Issue #451",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/451"
+        },
+        {
+            "label": "Pull request #555",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/555"
+        }
+    ],
+    "slug": "release-v0-45-0",
+    "previous_version": "0.44.0"
+}

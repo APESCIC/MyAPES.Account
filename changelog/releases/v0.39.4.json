@@ -1,0 +1,50 @@
+{
+    "version": "0.39.4",
+    "date": "2026-09-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Secure email change",
+    "summary": "Local public accounts can change their email securely: confirm the new address with a signed link before it switches, notify both the old and new addresses, and cancel any outstanding request from the profile. Directory and Cloudron emails stay directory-sourced.",
+    "changes": [
+        "Replace the read-only profile email panel with a local-only secure email change flow gated by password confirmation.",
+        "Store a single pending email change, send a signed confirmation link to the new address, and update email plus verified status only after confirmation.",
+        "Notify the current address when a change starts and notify old and new addresses when it completes; allow cancelling a pending change.",
+        "Reject expired or invalid confirmation links and refuse email changes for directory-owned accounts."
+    ],
+    "affected_areas": [
+        "Profile account email",
+        "Account security email notifications",
+        "Local public identity settings"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.39.x Account security line: secure email change after username and verification hardening (0.39.3).",
+    "validation": [
+        "PHPUnit SecureEmailChangeTest, ProfileAccountEmailTest, AuthEmailBrandKitTest, StepUpAuthTest.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "TOTP and passkeys remain later Account security waves; this release does not add multifactor enrolment.",
+        "Directory and Cloudron OIDC staff emails remain directory-owned and cannot be changed in MyAPES Account."
+    ],
+    "rollback": "Redeploy the previous release package. Pending email-change rows become unused after rollback; no irreversible data migration beyond optional pending rows that can be dropped.",
+    "provenance": "Issue #228; pull request #326.",
+    "references": [
+        {
+            "label": "Issue #228",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/228"
+        },
+        {
+            "label": "Pull request #326",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/326"
+        }
+    ],
+    "slug": "release-v0-39-4",
+    "previous_version": "0.39.3"
+}

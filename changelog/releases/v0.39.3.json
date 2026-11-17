@@ -1,0 +1,56 @@
+{
+    "version": "0.39.3",
+    "date": "2026-09-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Username and verification hardening",
+    "summary": "Local public usernames follow a clearer policy (length, allowed characters, reserved names, uniqueness), and signed-in locals can change their username after confirming their password. Registration guidance is clearer, duplicate emails are rejected without revealing account details, and the email verification notice is branded with throttled resend.",
+    "changes": [
+        "Enforce username length, charset, reserved-name, and uniqueness rules on registration and local username change.",
+        "Allow local public accounts to change username on their profile after recent password confirmation; directory accounts stay directory-owned.",
+        "Keep login and forgot-password responses generic so account existence is not revealed by message text.",
+        "Clarify registration guidance for username, password, and email while keeping terms and privacy consent.",
+        "Reject registration when an email is already in use, with a single non-enumerating message for verified and unverified collisions.",
+        "Brand the email verification notice and throttle verification resend while continuing to block unverified locals from gated signed-in pages."
+    ],
+    "affected_areas": [
+        "Public registration and sign-in",
+        "Profile username change",
+        "Email verification notice and resend"
+    ],
+    "categories": [
+        "changed",
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.39.x Account security line: username hardening and registration/verification enforcement after password policy (0.39.2).",
+    "validation": [
+        "PHPUnit UsernameAndVerificationHardeningTest, StepUpAuthTest, PublicAccountLifecycleTest, PasswordPolicyHardeningTest, PublicLocalForgotPasswordTest, AuthEmailBrandKitTest.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Secure email change remains a later Account security wave; profile email stays read-only in this release.",
+        "Directory and Cloudron OIDC staff usernames remain directory-owned and cannot be changed in MyAPES Account."
+    ],
+    "rollback": "Redeploy the previous release package. Username policy and change UI revert, registration returns to the prior uniqueness messaging, and verification resend uses the previous throttle. No database migrations are included in this release.",
+    "provenance": "Issues #227 and #229; pull request #325.",
+    "references": [
+        {
+            "label": "Issue #227",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/227"
+        },
+        {
+            "label": "Issue #229",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/229"
+        },
+        {
+            "label": "Pull request #325",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/325"
+        }
+    ],
+    "slug": "release-v0-39-3",
+    "previous_version": "0.39.2"
+}

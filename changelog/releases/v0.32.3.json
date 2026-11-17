@@ -1,0 +1,44 @@
+{
+    "version": "0.32.3",
+    "date": "2026-09-06",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Ship-gate Account-only changelog hubs",
+    "summary": "Shipping no longer offers sibling website changelog or hub updates; Change Log Hub work stays on this MyAPES Account app only.",
+    "changes": [
+        "Remove the post-merge ship-gate option that asked to update sibling website changelogs and hubs.",
+        "Document that post-merge changelog and Change Log Hub checks cover this repository only."
+    ],
+    "affected_areas": [
+        "Ship-gate agent workflow",
+        "Release and Change Log Hub process docs"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: clarifies shipping scope for changelog hubs without changing runtime product behaviour.",
+    "validation": [
+        "Confirmed agent docs no longer list the sibling website changelog gate option.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "None. Runtime Change Log Hub behaviour is unchanged; this release updates agent shipping guidance only."
+    ],
+    "rollback": "Redeploy the previous application version and restore the prior ship-gate docs if the Account-only hub policy must be reversed.",
+    "provenance": "Ship-gate Account-only changelog hubs chore for issue #196, pull request #197.",
+    "references": [
+        {
+            "label": "Issue #196",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/196"
+        },
+        {
+            "label": "Pull request #197",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/197"
+        }
+    ],
+    "slug": "release-v0-32-3",
+    "previous_version": "0.32.2"
+}

@@ -1,0 +1,43 @@
+{
+    "version": "0.21.1",
+    "date": "2026-08-22",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Compact reporting range controls on admin overviews",
+    "summary": "Admin and Super Admin overview pages now show compact reporting-range radio options and an Update range button instead of oversized form controls.",
+    "changes": [
+        "Scoped analytics-range styles so radio inputs no longer inherit full-width form sizing.",
+        "Aligned reporting-range labels and the Update range button on a single compact toolbar row on Admin and Super Admin overview pages."
+    ],
+    "affected_areas": [
+        "Admin overview",
+        "Super Admin overview",
+        "Reporting range controls"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible patch release fixing oversized reporting-range controls on admin overview pages.",
+    "validation": [
+        "Verified compact layout on Admin and Super Admin overview pages in local preview.",
+        "AdminAnalyticsDashboardTest passed (9/9).",
+        "myapes:changelog-validate against origin/main."
+    ],
+    "known_limitations": [
+        "None for this release."
+    ],
+    "rollback": "Revert this release record, VERSION, runtime manifest version, the analytics-range CSS changes in resources/css/app.css, and related version-pinned tests. No database changes are required.",
+    "provenance": "Defined by the reporting range controls sizing issue #81.",
+    "references": [
+        {
+            "label": "Issue #81",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/81"
+        }
+    ],
+    "slug": "release-v0-21-1",
+    "previous_version": "0.21.0"
+}

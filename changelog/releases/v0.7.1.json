@@ -1,0 +1,39 @@
+{
+    "version": "0.7.1",
+    "date": "2026-07-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Guest authentication redirect correction",
+    "summary": "Corrected protected-route handling so signed-out visitors reach Public Login instead of a server error.",
+    "changes": [
+        "Directed browser guests from protected pages to the existing Public Login route while preserving their intended destination.",
+        "Restored unauthorized JSON responses for clients that explicitly request JSON."
+    ],
+    "affected_areas": [
+        "Guest authentication redirects and protected-route error handling"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing"
+    ],
+    "version_rationale": "A backward-compatible patch correcting guest access to the existing authentication entry point.",
+    "validation": [
+        "Automated feature tests cover browser redirects, intended destinations, and unauthorized JSON responses.",
+        "The complete application, release-validation, frontend, build, cache, migration, and deployment checks remain required before release."
+    ],
+    "known_limitations": [
+        "This correction does not change authentication methods, account authorization, or staff OIDC behavior."
+    ],
+    "rollback": "Restore the previous application release, accepting that signed-out protected-route requests will again return a server error.",
+    "provenance": "Defined by MyAPES Account issue #25 after the defect was reproduced during production acceptance.",
+    "references": [
+        {
+            "label": "Issue #25",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/25"
+        }
+    ],
+    "slug": "release-v0-7-1",
+    "previous_version": "0.7.0"
+}

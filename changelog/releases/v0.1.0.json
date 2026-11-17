@@ -1,0 +1,41 @@
+{
+    "version": "0.1.0",
+    "date": "2026-07-24",
+    "channel": "beta",
+    "type": "minor",
+    "title": "Deployment and local setup foundation",
+    "summary": "Established repeatable Laravel local setup and the first automated Cloudron delivery workflow.",
+    "changes": [
+        "Added Windows and Unix-like local bootstrap and development helpers.",
+        "Added automated testing and deployment workflow scaffolding for main-branch and manual runs.",
+        "Added guarded remote release steps and deployment documentation."
+    ],
+    "affected_areas": [
+        "Local development setup",
+        "Continuous integration and Cloudron delivery foundation",
+        "Repository operational documentation"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "The first minor beta release established the repository's development and delivery foundation.",
+    "validation": [
+        "The merged foundation included fail-fast configuration checks and post-restart health verification."
+    ],
+    "known_limitations": [
+        "The first workflow was later replaced and hardened as the application architecture matured."
+    ],
+    "rollback": "Remove the initial local helpers and automated delivery workflow to return to the pre-automation repository state.",
+    "provenance": "This historical record was reconstructed from merged pull request #1 and was not represented by a historical Git tag.",
+    "references": [
+        {
+            "label": "PR #1",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/1"
+        }
+    ],
+    "slug": "release-v0-1-0"
+}

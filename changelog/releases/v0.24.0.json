@@ -1,0 +1,51 @@
+{
+    "version": "0.24.0",
+    "date": "2026-08-24",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Core, Services, and Plugins product language",
+    "summary": "User-facing product language now presents MyAPES Core as the platform, Services as the APES CIC / Shelter / Pet Care hubs, and Plugins as Tickets, Cases, Pet Profiles, and Consultations. Runtime keys, routes, and permission names are unchanged.",
+    "changes": [
+        "Renamed signed-in chrome, Admin, changelog, and APP_NAME branding to MyAPES Core while keeping login and registration as MyAPES Account.",
+        "Relabelled Super Admin Modules navigation and registry copy to Plugins, and sub-core wording to Services.",
+        "Updated hub empty and summary headings, tips, permission titles, and flash messages to Plugins and Services language.",
+        "Documented the Core → Services → Plugins vocabulary in README and PRODUCT.md."
+    ],
+    "affected_areas": [
+        "Application branding and layout",
+        "Super Admin Plugins registry",
+        "Service hub dashboards",
+        "Permission catalogue titles",
+        "README and PRODUCT docs"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Minor: backward-compatible product language and documentation capability with no API, permission-key, or data-model break.",
+    "validation": [
+        "Focused PHPUnit suites for branding, maintenance, OIDC maintenance page, module administration/navigation, hub provider contracts, changelog page, and changelog prepare command all passed.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main after filling release notes."
+    ],
+    "known_limitations": [
+        "Internal class names, database tables, permission keys (admin.modules.*), URLs, and CLI commands still use module and sub-core identifiers.",
+        "Published historical release notes keep earlier Modules and MyAPES Account wording."
+    ],
+    "rollback": "Redeploy the previous application version. No database migration accompanies this release; label-only rollback restores prior copy.",
+    "provenance": "Defined by the Core, Services, and Plugins product language work for MyAPES Account issue #89 and pull request #90.",
+    "references": [
+        {
+            "label": "Issue #89",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/89"
+        },
+        {
+            "label": "Pull request #90",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/90"
+        }
+    ],
+    "slug": "release-v0-24-0",
+    "previous_version": "0.23.1"
+}

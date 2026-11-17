@@ -1,0 +1,52 @@
+{
+    "version": "0.38.7",
+    "date": "2026-09-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "APES CIC staff string extraction",
+    "summary": "APES CIC hub, Cases, Tickets, Consultations, and staff Recruitment manage screens now come from UK English lang files and plugin namespaces. Glossary Roles / Applications labels are used on staff Recruitment nav.",
+    "changes": [
+        "Move APES CIC and service-hub chrome into lang/en_GB/apes_cic.php.",
+        "Move Cases, Tickets, and Consultations UI, flashes, and validation messages into plugin ui lang files.",
+        "Move staff Recruitment manage Roles and Applications copy into recruitment::staff.*; keep glossary terms for nav labels.",
+        "Clear APES CIC staff and related plugin hard-coded inventory sections to 0."
+    ],
+    "affected_areas": [
+        "APES CIC and organisation service hubs",
+        "Cases and Tickets",
+        "Consultations",
+        "Staff Recruitment manage",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.38.x Language line: staff/plugin extraction after public-area extract (0.38.6).",
+    "validation": [
+        "PHPUnit LocalisationStaffExtractionTest, recruitment manage/dual-frontend, Cases/Tickets/Consultations workflows.",
+        "php artisan lang:inventory — APES CIC staff and related plugin sections count 0.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "lang:check remains report-only until Wave 4 (#276 hard-fail).",
+        "SEO titles and Admin search keywords remain Wave 3."
+    ],
+    "rollback": "Redeploy the previous release package. Staff UI returns to prior hard-coded English if lang keys are removed; no database migrations are included.",
+    "provenance": "Issue #269; pull request #319.",
+    "references": [
+        {
+            "label": "Issue #269",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/269"
+        },
+        {
+            "label": "Pull request #319",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/319"
+        }
+    ],
+    "slug": "release-v0-38-7",
+    "previous_version": "0.38.6"
+}

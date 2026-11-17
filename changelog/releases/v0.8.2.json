@@ -1,0 +1,40 @@
+{
+    "version": "0.8.2",
+    "date": "2026-08-05",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Post-restart deployment-control hardening",
+    "summary": "Hardened Cloudron release and rollback controls so platform ownership normalization cannot make authenticated runtime controls application-writable after a restart.",
+    "changes": [
+        "Added mode-based immutable release boundaries that survive Cloudron ownership normalization while retaining the required writable Laravel cache and shared-storage paths.",
+        "Reauthenticated the fixed deployment-control set into a root-only runtime directory after restart and immediately before rollback, then verified the live write boundaries before health acceptance."
+    ],
+    "affected_areas": [
+        "Cloudron release restart, runtime-control authentication, and exact-release rollback"
+    ],
+    "categories": [
+        "fixed",
+        "security"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible patch correcting the post-restart ownership boundary discovered during v0.8.1 production verification.",
+    "validation": [
+        "Deployment contract tests require authenticated post-restart and pre-rollback control extraction, exact fixed-path hashes, root-only runtime controls, and non-writable active and rollback release boundaries for the application user.",
+        "The complete SQLite, MySQL 8.4, MariaDB 11.4, frontend, packaging, migration, authorization, health, OIDC, and post-restart production gates remain required before issue completion."
+    ],
+    "known_limitations": [
+        "This patch changes deployment and rollback hardening only; it does not alter the v0.8.0 authorization or Admin feature set."
+    ],
+    "rollback": "Restore the exact pre-activation application release while retaining the forward-only Phase B database migration; rollback controls must still pass the externally authenticated runtime-control and immutable-release gates.",
+    "provenance": "Defined by post-restart production evidence for Phase B of MyAPES Account issue #10.",
+    "references": [
+        {
+            "label": "Issue #10",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/10"
+        }
+    ],
+    "slug": "release-v0-8-2",
+    "previous_version": "0.8.1"
+}

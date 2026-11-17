@@ -1,0 +1,65 @@
+{
+    "version": "0.37.4",
+    "date": "2026-09-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Module and plugin contracts with Core boundary",
+    "summary": "Organisation areas and reusable plugins now register through Core manifests, Core accounts and auth live under app/Core, and Admin can disable an entire module without changing live URLs or permission names.",
+    "changes": [
+        "Register APES CIC, Pet Care Clinic, and Shelter and Rescue through module package manifests with a Core ModulePackageRegistry.",
+        "Register Tickets, Cases, Recruitment, Consultations, and Pet Profiles through plugin manifests that declare settings, navigation, permissions, translationNamespace, and searchKeywordsKey.",
+        "Add Admin Modules enablement for organisation areas; disabled modules hide from navigation and return 404 on their routes.",
+        "Move Core auth identity types and account/access/audit/attachment/maintenance models into app/Core and split Core service providers.",
+        "Stop AppServiceProvider from registering plugin policies or reading Recruitment board toggles; plugins contribute public and staff navigation through Core contracts.",
+        "Raise the module runtime contract to schema version 2 with modules and plugins aliases while keeping rollback compatibility for schema version 1."
+    ],
+    "affected_areas": [
+        "Core extensions (module and plugin registries)",
+        "Admin Modules and Plugins pages",
+        "Primary navigation (public Recruitment and Recruit manage)",
+        "Core accounts and auth namespaces",
+        "Module runtime contract",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on v0.37.x: Structure Wave 1 contracts and Core boundary with no live URL or permission-string renames.",
+    "validation": [
+        "php artisan test --compact tests/Feature/StructureContractsWave1Test.php tests/Feature/ModuleRegistryTest.php tests/Feature/PluginSettingsRegistryTest.php tests/Feature/StructureLayoutMorphMapTest.php tests/Feature/ModuleRollbackCompatibilityTest.php",
+        "php artisan test --compact tests/Feature/Auth/StaffOidcAuthenticationTest.php tests/Feature/AdminShellNavigationTest.php tests/Feature/RecruitmentDualFrontendIaMatrixTest.php",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "composer pre-pr-verify / CI before merge; Cloudron workflow_dispatch with app_version from VERSION after merge."
+    ],
+    "known_limitations": [
+        "Plugin feature controllers and models remain under App\\Http and App\\Models until Waves 5–7 move them into plugins/<slug>.",
+        "Per-module plugin enablement storage beyond existing module_installations is Wave 2 (#288)."
+    ],
+    "rollback": "Redeploy the previous application version. If the organisation_modules migration already ran, the table can remain; restoring a pre-deployment Cloudron backup is only required when rolling back database state.",
+    "provenance": "Structure Wave 1 module contract #283, plugin contract #287, and Core boundary #282 via pull request #304.",
+    "references": [
+        {
+            "label": "Issue #283",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/283"
+        },
+        {
+            "label": "Issue #287",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/287"
+        },
+        {
+            "label": "Issue #282",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/282"
+        },
+        {
+            "label": "Pull request #304",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/304"
+        }
+    ],
+    "slug": "release-v0-37-4",
+    "previous_version": "0.37.3"
+}

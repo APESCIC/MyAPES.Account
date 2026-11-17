@@ -1,0 +1,63 @@
+{
+    "version": "0.35.1",
+    "date": "2026-09-24",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Plugin settings registry",
+    "summary": "Admin → Plugins settings are driven by a shared registry contract. Recruitment gains public board and apply toggles; plugins without settings show an explicit empty state.",
+    "changes": [
+        "Introduce a ModuleSettingsRegistry contract (supports settings, schema, route, permissions, nav label) as the single source of truth for plugin settings.",
+        "Adapt APES CIC tickets and cases settings to consume the registry as the reference websites/categories schema.",
+        "Add a Recruitment settings page for public board and public apply toggles, gated by admin.modules view/manage.",
+        "Show “No configurable settings” on the Plugins index for Consultations and Pet Profiles.",
+        "Respect Recruitment board/apply settings on the public roles board and application submit path.",
+        "Cover registry discovery, authorization fail-closed behaviour, and public gating with PHPUnit feature tests."
+    ],
+    "affected_areas": [
+        "Admin plugins registry",
+        "Plugin settings pages",
+        "Recruitment public board",
+        "Change Log Hub",
+        "AGENTS.md"
+    ],
+    "categories": [
+        "added",
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the v0.35.x line: completes the plugin settings registry and Recruitment settings without changing the Admin shell capability introduced in 0.35.0.",
+    "validation": [
+        "PHPUnit PluginSettingsRegistryTest, ApesCicTicketCaseEnhancementTest, ModuleAdministrationAndNavigationTest, PublicRecruitmentBoardTest, AdminShellNavigationTest, and RecruitmentApplicationWorkflowTest pass.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "composer pre-pr-verify (or equivalent local verify) on the PR branch before merge."
+    ],
+    "known_limitations": [
+        "Shelter and Pet Care tickets/cases instances remain without editable settings (explicit no-settings state).",
+        "Recruitment settings only cover public board and apply availability; role/application workflow options are unchanged."
+    ],
+    "rollback": "Redeploy the previous application version to restore hardcoded tickets/cases settings discovery and remove Recruitment board/apply toggles.",
+    "provenance": "Implements issues #253, #255, and #254 via pull request #263; closes epic #247.",
+    "references": [
+        {
+            "label": "Issue #253",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/253"
+        },
+        {
+            "label": "Issue #255",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/255"
+        },
+        {
+            "label": "Issue #254",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/254"
+        },
+        {
+            "label": "Pull request #263",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/263"
+        }
+    ],
+    "slug": "release-v0-35-1",
+    "previous_version": "0.35.0"
+}

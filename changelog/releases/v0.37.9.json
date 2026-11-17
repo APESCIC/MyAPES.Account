@@ -1,0 +1,53 @@
+{
+    "version": "0.37.9",
+    "date": "2026-09-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Shared Tickets and Cases plugins",
+    "summary": "Tickets and Cases now live as shared first-party plugins that any enabled organisation module can host, without changing live URLs or permission names.",
+    "changes": [
+        "Moved Tickets into plugins/tickets with one ModuleContext-driven controller and view set for APES CIC, Shelter, and Pet Care Clinic.",
+        "Moved Cases into plugins/cases with one controller set for APES CIC and Shelter; rows still use the shelter_cases table.",
+        "Shelter Cases continue to depend on the Pet Profiles plugin API for pet pickers and visibility.",
+        "Preserved live ticket and case URLs and permission strings; morph aliases and notification stubs keep existing records rendering."
+    ],
+    "affected_areas": [
+        "Tickets plugin package and staff ticket routes under /apes-cic, /shelter, and /petcare",
+        "Cases plugin package and staff case routes under /apes-cic and /shelter",
+        "Morph map aliases for support tickets and cases",
+        "Admin Plugins manifests for Tickets and Cases"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.37.x Structure line: relocates existing Tickets and Cases features into plugin packages without new public capability or breaking URL/permission changes.",
+    "validation": [
+        "Focused PHPUnit: StructureTicketsCasesWave6Test plus ticket/case workflow and morph/contracts suites",
+        "changelog-validate against origin/main",
+        "CI on PR #309"
+    ],
+    "known_limitations": [
+        "Recruitment and Consultations remain for a later Structure wave.",
+        "Architecture hard-fail tests still report-only until Wave 8.",
+        "Historical audit event key names are unchanged; new events continue to use the existing area prefixes."
+    ],
+    "rollback": "Redeploy the previous Cloudron package (0.37.8). No database rename was introduced; plugin namespaces resolve via morph aliases and notification stubs.",
+    "provenance": "Issue #289, pull request #309, branch bmurphy/wave6-tickets-cases-f73f (Structure Wave 6 after live 0.37.8).",
+    "references": [
+        {
+            "label": "Issue #289",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/289"
+        },
+        {
+            "label": "Pull request #309",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/309"
+        }
+    ],
+    "slug": "release-v0-37-9",
+    "previous_version": "0.37.8"
+}

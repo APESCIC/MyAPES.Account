@@ -1,0 +1,51 @@
+{
+    "version": "0.25.5",
+    "date": "2026-08-25",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Accept misspelled Cloudron volunteer group names",
+    "summary": "Directory readiness now accepts misspelled Cloudron volunteer group names such as myapesaccount.vounteer and temporary myapesaccont.* prefix typos, mapping them to the canonical myapesaccount.* groups so deploy can succeed while operators finish renames.",
+    "changes": [
+        "Normalize myapesaccount.vounteer and related misspellings to myapesaccount.volunteer during LDAP enumeration and membership resolution.",
+        "Accept temporary myapesaccont.* Cloudron group names as aliases of the canonical myapesaccount.* groups.",
+        "Document the misspelling aliases and the remaining operator rename to correctly spelled Cloudron groups."
+    ],
+    "affected_areas": [
+        "Directory LDAP group normalization",
+        "Authorization deploy preflight",
+        "Cloudron operator documentation"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: backward-compatible deploy readiness fix that maps misspelled directory group names without changing canonical myapesaccount.* authorization semantics.",
+    "validation": [
+        "LdapGroupResolverTest coverage for myapesaccount.vounteer and myapesaccont.* aliases.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main."
+    ],
+    "known_limitations": [
+        "Operators should still rename Cloudron myapesaccount.vounteer to myapesaccount.volunteer; aliases are a transition bridge only."
+    ],
+    "rollback": "Redeploy the previous application version. Directory authorization will again require exactly spelled myapesaccount.volunteer.",
+    "provenance": "Defined by the misspelled Cloudron volunteer group alias fix for MyAPES Account issue #113 under epic #108.",
+    "references": [
+        {
+            "label": "Issue #113",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/113"
+        },
+        {
+            "label": "Issue #108",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/108"
+        },
+        {
+            "label": "Pull request #114",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/114"
+        }
+    ],
+    "slug": "release-v0-25-5",
+    "previous_version": "0.25.4"
+}

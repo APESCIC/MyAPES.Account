@@ -1,0 +1,44 @@
+{
+    "version": "0.32.14",
+    "date": "2026-09-12",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Smaller Spike and logo images",
+    "summary": "Public pages now load smaller Spike and logo pictures, so those images appear sooner without a visible drop in quality.",
+    "changes": [
+        "Compressed and resized the public Spike welcome, tip, and dock pictures and the shared public logo."
+    ],
+    "affected_areas": [
+        "Public landing, sign-in, and shared chrome",
+        "Spike helper artwork"
+    ],
+    "categories": [
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: shrinks existing public images without changing routes, sign-in, or page layout.",
+    "validation": [
+        "PHPUnit HealthAndThemeTest and MascotHelperTest cover logo dimensions, srcset, and Spike image paths.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Other brand exports such as email and print logos are unchanged."
+    ],
+    "rollback": "Redeploy the previous application version to restore the larger Spike and logo image files.",
+    "provenance": "Compressed Spike and logo images for issue #127, pull request #208.",
+    "references": [
+        {
+            "label": "Issue #127",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/127"
+        },
+        {
+            "label": "Pull request #208",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/208"
+        }
+    ],
+    "slug": "release-v0-32-14",
+    "previous_version": "0.32.13"
+}

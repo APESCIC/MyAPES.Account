@@ -1,0 +1,41 @@
+{
+    "version": "0.11.0",
+    "date": "2026-08-09",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Explicit Cloudron identity linking",
+    "summary": "Added a password-confirmed, expiring, single-use flow for linking a verified public account to an eligible Cloudron staff identity without email-only auto-linking.",
+    "changes": [
+        "Separated staff-login and account-link OIDC state while retaining the established staff callback compatibility keys.",
+        "Required the current password, matching verified email, unclaimed OIDC subject, current exact LDAP eligibility, and an unconsumed link intent.",
+        "Preserved public capabilities on hybrid accounts while requiring a current OIDC session for directory-derived staff permissions."
+    ],
+    "affected_areas": [
+        "Public accounts, Cloudron authentication, protected staff authorization"
+    ],
+    "categories": [
+        "added",
+        "security"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible minor release completing the explicit hybrid identity capability planned in issue #19.",
+    "validation": [
+        "Link success, password proof, mismatched email, claimed subject, expired or replayed intent, directory eligibility, session rotation, and existing staff OIDC authentication are covered."
+    ],
+    "known_limitations": [
+        "Cloudron linking does not provision or modify accounts in external services and username changes remain unavailable."
+    ],
+    "rollback": "The preceding public-lifecycle release continues to operate with linked rows stored as hybrid accounts; directory permissions remain guarded by the existing authentication-context checks.",
+    "provenance": "Defined by the explicit identity-linking phase for MyAPES Account issue #19.",
+    "references": [
+        {
+            "label": "Issue #19",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/19"
+        }
+    ],
+    "slug": "release-v0-11-0",
+    "previous_version": "0.10.0"
+}

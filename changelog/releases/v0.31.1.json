@@ -1,0 +1,46 @@
+{
+    "version": "0.31.1",
+    "date": "2026-08-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Hide Internal-only changelog notes from guests and public",
+    "summary": "Guests and signed-in public accounts now see a public Change Log summary only. Internal-only records, rollback notes, and GitHub issue or pull-request links stay on staff and admin directory sessions.",
+    "changes": [
+        "Hide Internal-only release records from guests and signed-in public accounts on the Change Log Hub.",
+        "Hide the Internal-only filter chip and GitHub issue or pull-request links for those public audiences.",
+        "Keep the Internal-only chip, fuller notes, and GitHub links for Cloudron staff and admin directory sessions."
+    ],
+    "affected_areas": [
+        "Public Change Log Hub"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: withholds Internal-only changelog notes from guests and public accounts without changing how staff and admin directory sessions read the full history.",
+    "validation": [
+        "PHPUnit ChangeLogPageTest covers guest and signed-in public withholding of Internal-only records, the Internal-only chip, rollback notes, GHSA identifiers, and GitHub issue or pull-request links, plus staff and admin visibility of those notes.",
+        "ChangeLogPresenterTest covers public-facing projection of dual-audience records and omission of Internal-only-only rows.",
+        "Ran php artisan myapes:changelog-validate against the read-only profile email parent branch for this stacked change."
+    ],
+    "known_limitations": [
+        "Historical public-facing records may still mention directory or deploy work in their public summaries. SECURITY.md remains a separate v1.1.0 change."
+    ],
+    "rollback": "Redeploy the previous application version. Release history records are unchanged by rollback; guests would again see Internal-only notes on the Change Log Hub.",
+    "provenance": "Defined by the changelog guest Internal-only leak task for MyAPES Account issue #122 under epic #158 and pull request #164.",
+    "references": [
+        {
+            "label": "Issue #122",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/122"
+        },
+        {
+            "label": "Pull request #164",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/164"
+        }
+    ],
+    "slug": "release-v0-31-1",
+    "previous_version": "0.31.0"
+}

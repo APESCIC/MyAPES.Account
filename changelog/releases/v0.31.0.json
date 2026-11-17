@@ -1,0 +1,46 @@
+{
+    "version": "0.31.0",
+    "date": "2026-08-28",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Read-only account email on profile",
+    "summary": "Signed-in public accounts can see their login email on Profile as read-only, next to the password block, so they know where notifications and password-reset mail go.",
+    "changes": [
+        "Show the signed-in account email on Profile as read-only, next to the password block.",
+        "Explain that notifications and password-reset mail go to that address; do not offer an email-change form.",
+        "Keep directory and Cloudron password management in Cloudron; staff continue to see directory email on the staff profile."
+    ],
+    "affected_areas": [
+        "Public profile"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Minor release: adds a read-only account email on Profile without introducing an email-change flow.",
+    "validation": [
+        "PHPUnit ProfileAccountEmailTest covers local public visibility next to the password block, directory public email without a password form, staff read-only email, and profile update ignoring a forged email.",
+        "Related public profile tests remain green. No impersonation control is present, and email cannot be changed from Profile.",
+        "Ran php artisan myapes:changelog-validate against the signed-in local public password-change parent branch for this stacked change."
+    ],
+    "known_limitations": [
+        "Account email cannot be changed in MyAPES Account. Live production verification remains a separate change. Directory and Cloudron passwords continue to be managed in Cloudron."
+    ],
+    "rollback": "Redeploy the previous application version. Account email addresses are unchanged by this release.",
+    "provenance": "Defined by the read-only profile email task for MyAPES Account issue #148 under parent #147 and epic #158 and pull request #163.",
+    "references": [
+        {
+            "label": "Issue #148",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/148"
+        },
+        {
+            "label": "Pull request #163",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/163"
+        }
+    ],
+    "slug": "release-v0-31-0",
+    "previous_version": "0.30.0"
+}

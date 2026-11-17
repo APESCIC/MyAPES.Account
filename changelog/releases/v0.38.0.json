@@ -1,0 +1,59 @@
+{
+    "version": "0.38.0",
+    "date": "2026-09-29",
+    "channel": "stable",
+    "type": "minor",
+    "title": "UK English localisation baseline",
+    "summary": "MyAPES Account now runs in UK English (en_GB) by default, with published framework messages, friendly validation field names, and written localisation conventions for the Language line.",
+    "changes": [
+        "Set the application locale to en_GB (fallback en) in local env examples, CI, config defaults, and Cloudron production env guidance.",
+        "On Cloudron activate, upsert APP_LOCALE, APP_FALLBACK_LOCALE, and APP_FAKER_LOCALE so existing shared environments match the baseline.",
+        "Publish lang/en_GB framework files (auth, pagination, passwords, validation) with UK spelling and friendly validation attributes, keeping lang/en as fallback.",
+        "Add docs/localisation.md for key naming, plurals, placeholders, and plugin translation namespaces.",
+        "Align the HTML lang attribute with the app locale (en-GB) on primary layouts."
+    ],
+    "affected_areas": [
+        "Application locale configuration (local, CI, Cloudron)",
+        "Framework translation files (lang/en_GB and lang/en)",
+        "Validation attribute labels",
+        "Document language (html lang)",
+        "Localisation developer documentation",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Minor bump opens the v0.38.x Language & keywords line: UK English localisation baseline without renaming live URLs or stored permission strings.",
+    "validation": [
+        "PHPUnit LocalisationBaselineTest and DeploymentAuthenticationContractTest locale upsert coverage.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "composer pre-pr-verify (or equivalent local verify) on the PR branch before merge."
+    ],
+    "known_limitations": [
+        "Most user-facing copy remains hard-coded until later Language extraction waves.",
+        "Glossary, plugin translation namespaces, SEO, and user locale preference ship in later 0.38.x patches.",
+        "Display name / title chrome still says MyAPES Core until glossary and SEO waves."
+    ],
+    "rollback": "Redeploy the previous Cloudron package (0.37.11). Locale env keys can be set back to en if needed; no database migrations ship in this release.",
+    "provenance": "Language Wave 0 localisation baseline for issue #265, pull request #312.",
+    "references": [
+        {
+            "label": "Issue #265",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/265"
+        },
+        {
+            "label": "Issue #264",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/264"
+        },
+        {
+            "label": "Pull request #312",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/312"
+        }
+    ],
+    "slug": "release-v0-38-0",
+    "previous_version": "0.37.11"
+}

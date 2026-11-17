@@ -1,0 +1,45 @@
+{
+    "version": "0.33.3",
+    "date": "2026-09-23",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Super Admin overview drops duplicate Admin KPIs",
+    "summary": "Super Admin overview no longer repeats the Admin day-to-day KPI cards. It shows Super Admin–only metrics for plugins, median closure, and plugin alerts, while Admin overview keeps the existing account and workload KPIs.",
+    "changes": [
+        "Remove the duplicated Admin account and workload KPI strip from Super Admin overview.",
+        "Keep Super Admin overview KPIs to enabled plugins, median closure, and plugin alert count."
+    ],
+    "affected_areas": [
+        "Super Admin overview",
+        "Admin overview"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: removes duplicate Super Admin KPI cards without changing Admin metrics or Super Admin charts and tables.",
+    "validation": [
+        "PHPUnit AdminAnalyticsDashboardTest asserts each data-kpi appears once per page and that Super Admin does not render Admin day-to-day KPI keys.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Super Admin still shows account identity tables and workload charts below the KPI strip; only the duplicated day-to-day KPI cards were removed."
+    ],
+    "rollback": "Redeploy the previous application version to restore the Admin day-to-day KPI cards on Super Admin overview.",
+    "provenance": "Duplicate Admin/Super Admin KPI cleanup for issue #141, pull request #236.",
+    "references": [
+        {
+            "label": "Issue #141",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/141"
+        },
+        {
+            "label": "Pull request #236",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/236"
+        }
+    ],
+    "slug": "release-v0-33-3",
+    "previous_version": "0.33.2"
+}

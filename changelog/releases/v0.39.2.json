@@ -1,0 +1,48 @@
+{
+    "version": "0.39.2",
+    "date": "2026-09-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Password policy hardening",
+    "summary": "Local public account passwords must be at least 12 characters and are checked against known breaches. Login and password-reset attempts are throttled per IP and per account, and a branded password-changed email is sent after a successful change or reset.",
+    "changes": [
+        "Require passwords of at least 12 characters and reject known-breached passwords on register, guest reset, and signed-in password change.",
+        "Tighten public login and password-reset rate limits so attempts are counted separately per IP address and per account.",
+        "Send the MyAPES Account password-changed security email after a successful local password change, guest reset, or admin local-password reset."
+    ],
+    "affected_areas": [
+        "Public registration and sign-in",
+        "Local password reset and profile password change",
+        "Account security email"
+    ],
+    "categories": [
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.39.x Account security line: password policy hardening after step-up confirmation (0.39.1).",
+    "validation": [
+        "PHPUnit PasswordPolicyHardeningTest, PublicLocalForgotPasswordTest, ProfileLocalPasswordChangeTest, AdminLocalPublicPasswordResetTest, StepUpAuthTest, ReviewFeedbackFixesTest.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Have I Been Pwned checks require outbound network access in production; tests stub the verifier so suites stay offline.",
+        "Directory and Cloudron OIDC staff accounts still have no local password reset or change paths."
+    ],
+    "rollback": "Redeploy the previous release package. Password length and breach checks return to the previous defaults, rate limiters use the prior combined keys, and password-changed emails stop firing from local password updates. No database migrations are included in this release.",
+    "provenance": "Issue #230; pull request #324.",
+    "references": [
+        {
+            "label": "Issue #230",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/230"
+        },
+        {
+            "label": "Pull request #324",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/324"
+        }
+    ],
+    "slug": "release-v0-39-2",
+    "previous_version": "0.39.1"
+}

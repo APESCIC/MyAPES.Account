@@ -1,0 +1,46 @@
+{
+    "version": "0.32.2",
+    "date": "2026-09-06",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Spike dock stays clear of form fields",
+    "summary": "Spike’s floating tip starts as a small avatar and keeps main content clear of the dock so Priority, Health, and similar form controls stay usable.",
+    "changes": [
+        "Collapse the Spike tip dock to an avatar-only control by default; expand the tip on demand.",
+        "Add bottom clearance on main content when the dock is present so lower form fields can scroll clear of the avatar."
+    ],
+    "affected_areas": [
+        "Spike tip dock",
+        "Ticket and pet create forms"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: keeps Spike available while fixing form-field overlap without changing tip content or dismiss behaviour.",
+    "validation": [
+        "PHPUnit MascotHelperTest covers collapsed dock markup, clearance class, ticket and pet create pages, and change-log dock hiding.",
+        "Local preview on CIC tickets and Shelter pets confirmed Priority and Health remain usable with the dock present.",
+        "composer pre-pr-verify run on the PR branch before merge."
+    ],
+    "known_limitations": [
+        "UK date formatting (#132) and later Public UX items remain separate follow-ups."
+    ],
+    "rollback": "Redeploy the previous application version to restore the always-expanded Spike tip dock without the new main-content clearance.",
+    "provenance": "Spike dock field overlap fix for issue #131, pull request #195.",
+    "references": [
+        {
+            "label": "Issue #131",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/131"
+        },
+        {
+            "label": "Pull request #195",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/195"
+        }
+    ],
+    "slug": "release-v0-32-2",
+    "previous_version": "0.32.1"
+}

@@ -1,0 +1,43 @@
+{
+    "version": "0.25.6",
+    "date": "2026-08-25",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Document local preview standard for agents",
+    "summary": "Agent instructions now document how to start the local Laravel and Vite preview, bootstrap a missing environment, and open the app in the built-in browser before UI edits.",
+    "changes": [
+        "Added a Local preview section to AGENTS.md covering composer run dev, platform wrappers, bootstrap when .env is missing, default URLs, and the agent browser requirement."
+    ],
+    "affected_areas": [
+        "Agent documentation",
+        "Local development guidance"
+    ],
+    "categories": [
+        "changed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: documentation-only clarification with no runtime behaviour change.",
+    "validation": [
+        "Reviewed AGENTS.md Local preview section against README local setup and scripts/local helpers.",
+        "Ran php artisan myapes:changelog-validate --base-ref=origin/main."
+    ],
+    "known_limitations": [
+        "None. Preview ports remain configurable via APP_PORT and Vite defaults."
+    ],
+    "rollback": "Redeploy the previous application version. Agent documentation reverts to the prior AGENTS.md content.",
+    "provenance": "Defined by the local preview documentation chore for MyAPES Account issue #103 under pull request #115.",
+    "references": [
+        {
+            "label": "Issue #103",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/103"
+        },
+        {
+            "label": "Pull request #115",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/115"
+        }
+    ],
+    "slug": "release-v0-25-6",
+    "previous_version": "0.25.5"
+}

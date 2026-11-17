@@ -1,0 +1,46 @@
+{
+    "version": "0.32.12",
+    "date": "2026-09-12",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Public chrome uses MyAPES Core consistently",
+    "summary": "Guest-visible platform chrome now says MyAPES Core in the document title, PWA name, social tags, footer, and logo text. Login and registration pages may still say MyAPES Account.",
+    "changes": [
+        "Keep PWA, Open Graph, Twitter, footer, and logo alt branding as MyAPES Core on public pages.",
+        "Keep login, register, password reset, and email verification titles as MyAPES Account."
+    ],
+    "affected_areas": [
+        "Public chrome",
+        "Login and registration titles"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: finishes leftover Core vs Account naming on public chrome without changing sign-in, roles, or routes.",
+    "validation": [
+        "PHPUnit PublicChromeNamingTest covers Core titles and chrome on guest platform pages, Account titles on login and register surfaces, PWA manifest names, onboarding, and email verification.",
+        "PHPUnit HealthAndThemeTest, BrandedErrorPagesTest, and PublicLegalPagesTest cover related public chrome.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "The GitHub repository name and other internal identifiers stay MyAPES-Account."
+    ],
+    "rollback": "Redeploy the previous application version to restore the earlier mix of Core and Account names on public chrome.",
+    "provenance": "Core vs Account public chrome naming for issue #125, pull request #206.",
+    "references": [
+        {
+            "label": "Issue #125",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/125"
+        },
+        {
+            "label": "Pull request #206",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/206"
+        }
+    ],
+    "slug": "release-v0-32-12",
+    "previous_version": "0.32.11"
+}

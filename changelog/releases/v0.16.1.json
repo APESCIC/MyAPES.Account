@@ -1,0 +1,42 @@
+{
+    "version": "0.16.1",
+    "date": "2026-08-19",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Cloudron deploy without Actions artifacts",
+    "summary": "Unblocked production deploys by packaging the tested revision on the Cloudron deploy runner instead of uploading the release tarball to GitHub Actions artifact storage.",
+    "changes": [
+        "Rebuilt and packaged the tested commit in the Cloudron deploy job so deploys no longer depend on GitHub Actions artifact storage quota.",
+        "Isolated pull-request CI from the Cloudron concurrency lock so pull-request runs cannot queue production deploys."
+    ],
+    "affected_areas": [
+        "GitHub Actions Cloudron deploy workflow and release packaging script"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible patch release restoring Cloudron delivery after GitHub Actions artifact storage quota blocked otherwise successful test and packaging jobs.",
+    "validation": [
+        "Deployment authentication contract tests cover packaging without Actions artifacts, and source-controlled release-history validation covers this patch record."
+    ],
+    "known_limitations": [
+        "This patch does not change application features, authorization, or data. GitHub Actions artifact storage quota may still apply to other workflows that upload artifacts."
+    ],
+    "rollback": "Revert this patch record, VERSION, runtime manifest version, deploy workflow, and package-release script. No database rollback is needed.",
+    "provenance": "Defined by the Cloudron deploy artifact-quota work for MyAPES Account issue #49 and pull request #50.",
+    "references": [
+        {
+            "label": "Issue #49",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/49"
+        },
+        {
+            "label": "PR #50",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/50"
+        }
+    ],
+    "slug": "release-v0-16-1",
+    "previous_version": "0.16.0"
+}

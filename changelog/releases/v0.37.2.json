@@ -1,0 +1,48 @@
+{
+    "version": "0.37.2",
+    "date": "2026-09-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Auth preflight accepts legacy User morph during Structure cutover",
+    "summary": "Cloudron activation can upgrade through the Structure morph-map cutover without failing authorization preflight on databases that still store the previous user class name in triggers.",
+    "changes": [
+        "Treat the previous App\\Models\\User trigger expression as equivalent to the user morph alias when checking that the authorization compatibility guard is installed.",
+        "Keep installing and rewriting triggers to the user alias once migrations run.",
+        "Cover the preflight cutover path with a guard regression test."
+    ],
+    "affected_areas": [
+        "Cloudron activation preflight",
+        "Authorization compatibility database guard",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on v0.37.x: deployment cutover compatibility only, with no change to product behaviour, URLs, or stored permissions after migrate.",
+    "validation": [
+        "php artisan test --compact --filter=test_guard_accepts_legacy_user_fqcn_morph_expression_during_cutover",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "Cloudron workflow_dispatch with app_version from VERSION after merge."
+    ],
+    "known_limitations": [
+        "After migrate, triggers are rewritten to the user alias; the dual acceptance exists only so preflight can pass before that rewrite."
+    ],
+    "rollback": "Redeploy the previous application version. No separate database rollback is required for this preflight comparison change.",
+    "provenance": "Auth preflight morph-alias cutover for issue #299, pull request #301.",
+    "references": [
+        {
+            "label": "Issue #299",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/299"
+        },
+        {
+            "label": "Pull request #301",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/301"
+        }
+    ],
+    "slug": "release-v0-37-2",
+    "previous_version": "0.37.1"
+}

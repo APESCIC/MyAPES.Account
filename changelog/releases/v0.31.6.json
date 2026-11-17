@@ -1,0 +1,43 @@
+{
+    "version": "0.31.6",
+    "date": "2026-08-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Laragon local dev testing setup",
+    "summary": "Windows developers can run MyAPES Core on a Laragon Apache virtual host with a dedicated env profile, bootstrap switch, and dev launcher that skips artisan serve.",
+    "changes": [
+        "Add .env.laragon.example with vhost URLs and VITE_DEV_SERVER_URL for Laragon Apache workflows.",
+        "Extend bootstrap.ps1 with -Laragon and optional -AppUrl for SQLite QA setup on a .test hostname.",
+        "Add composer run dev:laragon and dev-laragon.ps1 so Vite, queue, and logs run without php artisan serve.",
+        "Tune Vite dev-server HMR settings for pages served from a Laragon virtual host.",
+        "Document Laragon prerequisites, vhost setup, daily dev loop, and troubleshooting in README and AGENTS.md."
+    ],
+    "affected_areas": [
+        "Local development documentation",
+        "Local bootstrap and dev launcher scripts"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: local development tooling and documentation only; no production application behaviour change.",
+    "validation": [
+        "node --test scripts/local/dev-runner.test.mjs including Laragon mode without artisan serve.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main after filling release notes."
+    ],
+    "known_limitations": [
+        "Laragon virtual-host verification requires a local Laragon Apache install; the default composer run dev path on 127.0.0.1:8000 is unchanged."
+    ],
+    "rollback": "Redeploy the previous application version. To remove Laragon support, revert the Laragon env example, bootstrap switch, dev:laragon launcher, Vite HMR tweak, and README or AGENTS guidance from this release.",
+    "provenance": "Defined by the Laragon local dev testing setup for MyAPES Account issue #173.",
+    "references": [
+        {
+            "label": "Issue #173",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/173"
+        }
+    ],
+    "slug": "release-v0-31-6",
+    "previous_version": "0.31.5"
+}

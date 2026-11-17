@@ -1,0 +1,42 @@
+{
+    "version": "0.16.3",
+    "date": "2026-08-19",
+    "channel": "stable",
+    "type": "patch",
+    "title": "MySQL-only runtime and Cloudron Redis",
+    "summary": "Dropped MariaDB as a required dialect and pointed Cloudron production cache, sessions, queues, and maintenance at the container Redis service.",
+    "changes": [
+        "Removed the MariaDB 11.4 GitHub Actions contract job, the unused Laravel mariadb connection, and mariadb driver allowlists so hosted CI and production match Cloudron LAMP MySQL.",
+        "On activate, upsert Redis cache, session, queue, and maintenance keys when CLOUDRON_REDIS_HOST is present, fail closed when it is missing, and default those stores to redis in Laravel config when Cloudron Redis is injected."
+    ],
+    "affected_areas": [
+        "GitHub Actions database-compatibility job, database driver allowlists, Cloudron activate-release environment, and cache, queue, and session defaults"
+    ],
+    "categories": [
+        "changed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible patch aligning the runtime with Cloudron LAMP MySQL and Redis without changing application features or data.",
+    "validation": [
+        "Deployment authentication contract tests cover the MySQL-only contract job, Redis environment upsert, and Cloudron Redis config fallbacks, and source-controlled release-history validation covers this patch record."
+    ],
+    "known_limitations": [
+        "This patch does not change application features, authorization, or data. Local and PHPUnit environments still use file, array, and sync stores. MySQL advisory module locks and the CI jobs-table timeout probe remain on the database."
+    ],
+    "rollback": "Revert this patch record, VERSION, runtime manifest version, database-compatibility workflow, driver allowlists, activate-release Redis upsert, and cache, queue, and session defaults. No database rollback is needed.",
+    "provenance": "Defined by the MySQL-only Cloudron Redis work for MyAPES Account issue #56 and pull request #57.",
+    "references": [
+        {
+            "label": "Issue #56",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/56"
+        },
+        {
+            "label": "PR #57",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/57"
+        }
+    ],
+    "slug": "release-v0-16-3",
+    "previous_version": "0.16.1"
+}

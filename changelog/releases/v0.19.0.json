@@ -1,0 +1,42 @@
+{
+    "version": "0.19.0",
+    "date": "2026-08-20",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Agent release metadata prepare command",
+    "summary": "Adds myapes:changelog-prepare so agents scaffold and sync VERSION, releases.json, module-runtime-contract.json, and version-pinned tests in the same PR before merge and Cloudron deploy.",
+    "changes": [
+        "Added myapes:changelog-prepare with stub-then-fill release scaffolding, dry-run support, and guards against incomplete or repeated bumps.",
+        "Extended release validation to require module-runtime-contract.json application_version sync and reject scaffold TODO: placeholders.",
+        "Documented mandatory end-of-work release steps in AGENTS.md, a Cursor rule, and a release-metadata skill."
+    ],
+    "affected_areas": [
+        "Release history validation",
+        "Agent instructions and Cursor skills",
+        "Cloudron deploy pre-merge contract"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible minor release adding agent-facing release preparation tooling without changing runtime application behavior.",
+    "validation": [
+        "PrepareChangeLog and ReleaseHistory phpunit suites, myapes:changelog-validate, and myapes:changelog-prepare dry-run against the repository."
+    ],
+    "known_limitations": [
+        "Agents must still replace scaffold TODO: narrative fields before validation passes; the prepare command does not author public release prose."
+    ],
+    "rollback": "Revert this release record, VERSION, runtime manifest version, the prepare command and preparer service, validator extensions, agent docs, and version-pinned test updates. No database rollback is needed.",
+    "provenance": "Defined by the agent release metadata prepare command work for MyAPES Account issue #67.",
+    "references": [
+        {
+            "label": "Issue #67",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/67"
+        }
+    ],
+    "slug": "release-v0-19-0",
+    "previous_version": "0.18.2"
+}

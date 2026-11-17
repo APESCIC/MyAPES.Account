@@ -1,0 +1,39 @@
+{
+    "version": "0.4.1",
+    "date": "2026-07-24",
+    "channel": "beta",
+    "type": "patch",
+    "title": "Continuous-integration application-key correction",
+    "summary": "Made automated Laravel tests independent from an untracked local environment file.",
+    "changes": [
+        "Added a deterministic non-secret testing key to the PHPUnit environment.",
+        "Kept production secrets and runtime environment configuration outside the repository."
+    ],
+    "affected_areas": [
+        "Automated PHP test configuration"
+    ],
+    "categories": [
+        "fixed",
+        "security"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "A compatible patch restoring reliable continuous-integration testing.",
+    "validation": [
+        "The complete automated PHP test suite passed with the corrected test-only configuration."
+    ],
+    "known_limitations": [
+        "The correction affected testing only and did not deploy application code by itself."
+    ],
+    "rollback": "Restore the previous PHPUnit environment configuration, accepting that automated tests would again depend on an external application key.",
+    "provenance": "This historical record was reconstructed from merged pull request #6 and was not represented by a historical Git tag.",
+    "references": [
+        {
+            "label": "PR #6",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/6"
+        }
+    ],
+    "slug": "release-v0-4-1",
+    "previous_version": "0.4.0"
+}

@@ -1,0 +1,47 @@
+{
+    "version": "0.25.8",
+    "date": "2026-08-25",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Catalogue and list only myapesaccount Cloudron groups",
+    "summary": "Directory catalogue sync and Super Admin Groups now keep only managed myapesaccount.* Cloudron groups in the working catalogue view, while historical non-prefix rows remain stored for audits.",
+    "changes": [
+        "Filter catalogue persistence to managed myapesaccount.* groups, including legacy alias rewriting.",
+        "Show managed myapesaccount.* groups in Super Admin Groups and hide historical non-prefix noise.",
+        "Document the catalogue filter and audit retention behaviour in the README and Admin Groups page."
+    ],
+    "affected_areas": [
+        "Directory catalogue synchronization",
+        "Super Admin Groups",
+        "Authorization documentation"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: hardens existing myapesaccount.* catalogue behaviour and Admin listing without changing sign-in or role mappings.",
+    "validation": [
+        "PHPUnit DirectoryCatalogueSynchronizerTest and AdminDirectoryManagementTest cover noise exclusion and managed-prefix listing.",
+        "Ran php artisan myapes:changelog-validate --base-ref=origin/main."
+    ],
+    "known_limitations": [
+        "Historical non-prefix directory_groups rows are retained and hidden rather than deleted or marked missing."
+    ],
+    "rollback": "Redeploy the previous application version. Catalogue sync and Admin Groups revert to the prior filtering behaviour.",
+    "provenance": "Defined by the myapesaccount.* catalogue listing story for MyAPES Account issue #94 under epic #91 and pull request #117.",
+    "references": [
+        {
+            "label": "Issue #94",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/94"
+        },
+        {
+            "label": "Pull request #117",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/117"
+        }
+    ],
+    "slug": "release-v0-25-8",
+    "previous_version": "0.25.7"
+}

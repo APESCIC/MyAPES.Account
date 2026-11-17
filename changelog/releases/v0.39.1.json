@@ -1,0 +1,48 @@
+{
+    "version": "0.39.1",
+    "date": "2026-09-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Step-up password confirmation",
+    "summary": "Local public accounts must confirm their password again before changing it on the profile page. Confirmation expires after a short window so older elevation does not stay open.",
+    "changes": [
+        "Add a confirm-password screen and routes that re-check the local account password before sensitive profile password changes.",
+        "Require recent password confirmation on the signed-in local password-change action, with a short timeout that re-prompts when it expires.",
+        "Regenerate the session after a successful confirmation so privilege elevation uses a fresh session id."
+    ],
+    "affected_areas": [
+        "Public profile password change",
+        "Account security step-up",
+        "Auth session handling"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.39.x Account security line: step-up password confirmation after the auth email brand kit (0.39.0).",
+    "validation": [
+        "PHPUnit StepUpAuthTest and ProfileLocalPasswordChangeTest.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Passkey-based confirmation is not included yet; later Account security work will extend the same step-up gate.",
+        "Username, email, authenticator, and passkey change flows will adopt this gate as those waves land."
+    ],
+    "rollback": "Redeploy the previous release package. Profile password change returns to current-password validation only, without the separate confirm-password step. No database migrations are included in this release.",
+    "provenance": "Issue #233; pull request #323.",
+    "references": [
+        {
+            "label": "Issue #233",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/233"
+        },
+        {
+            "label": "Pull request #323",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/323"
+        }
+    ],
+    "slug": "release-v0-39-1",
+    "previous_version": "0.39.0"
+}

@@ -1,0 +1,53 @@
+{
+    "version": "0.69.0",
+    "date": "2026-11-17",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Embeddable guest open-a-ticket form",
+    "summary": "Administrators can publish guest open-a-ticket forms that other APES websites embed in an iframe, with email confirmation before staff are notified.",
+    "changes": [
+        "Admin → Embed forms manages guest ticket forms, allowed parent origins, public keys and the copy-paste loader snippet.",
+        "Other websites load /embed/tickets/loader.js; the form page has no workspace chrome and uses signed origin tokens with CSP frame-ancestors limited to the allowlist.",
+        "Guests submit name, email, service, area, subject and details with GDPR consent; reCAPTCHA v3 and honeypot reuse the existing bot protection.",
+        "Staff are notified only after the guest confirms their email. Matching public accounts own the ticket after verify; staff Cloudron emails cannot become guest owners.",
+        "/open-a-ticket stays the login-first public flow from v0.65. Help and the Tickets wiki describe the embed path."
+    ],
+    "affected_areas": [
+        "Public embed ticket form",
+        "Admin Embed forms",
+        "Tickets plugin",
+        "Security headers (CSP frame-ancestors on embed responses)",
+        "Help and wiki"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Minor: new embeddable guest ticket capability without breaking the existing login-first /open-a-ticket path.",
+    "validation": [
+        "TicketEmbedFormTest feature suite on the local Herd PHPUnit run (9 tests).",
+        "php artisan myapes:changelog-validate --base-ref=origin/main",
+        "composer milestone:bump -- v0.69.0 --check"
+    ],
+    "known_limitations": [
+        "Text-only submissions; file uploads on the embed form are not in this release.",
+        "Guest tickets do not create a Public Account yet; that lands with v0.82.0."
+    ],
+    "rollback": "Redeploy the v0.68.1 tag. Embed tables and nullable guest columns are additive; disable or delete embed forms in Admin if needed before rolling back.",
+    "provenance": "Issue #681 and pull request #979 on milestone/v0-69-0-embeddable-guest-open-ticket.",
+    "references": [
+        {
+            "label": "Issue #681",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/681"
+        },
+        {
+            "label": "Pull request #979",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/979"
+        }
+    ],
+    "slug": "release-v0-69-0",
+    "previous_version": "0.68.1"
+}

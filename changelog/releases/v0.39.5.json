@@ -1,0 +1,52 @@
+{
+    "version": "0.39.5",
+    "date": "2026-09-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "TOTP 2FA with recovery codes",
+    "summary": "Local public accounts can protect sign-in with an authenticator app (one-time codes) and one-time recovery codes. Setup confirms before enable; enrolled accounts face a second step after password at Public Login. Disable and recovery-code refresh require recent password confirmation, with security emails on enable and disable.",
+    "changes": [
+        "Add authenticator-app enrolment on the local profile: scan a QR code (or use the otpauth link), save recovery codes once, and confirm with a one-time code before the feature turns on.",
+        "Challenge enrolled local accounts with an authenticator or recovery code after a successful password at Public Login.",
+        "Hash recovery codes at rest, encrypt the authenticator secret, invalidate each recovery code after one successful use, and allow regenerating codes after password confirmation.",
+        "Disable authenticator sign-in after password confirmation and email the account when authenticator sign-in is enabled or disabled.",
+        "Leave Cloudron OIDC-only staff sign-in unchanged; authenticator enrolment stays local-password accounts only."
+    ],
+    "affected_areas": [
+        "Public Login",
+        "Profile security settings",
+        "Account security email notifications"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.39.x Account security line: custom TOTP 2FA after secure email change (0.39.4).",
+    "validation": [
+        "PHPUnit TotpTwoFactorTest, StepUpAuthTest, SecureEmailChangeTest, AuthEmailBrandKitTest, PasswordPolicyHardeningTest.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Passkeys remain a later Account security wave; this release does not add WebAuthn.",
+        "Authenticator enrolment is not offered for Cloudron OIDC-only staff accounts.",
+        "Requiring 2FA for administrator local accounts is deferred."
+    ],
+    "rollback": "Redeploy the previous release package. Two-factor columns on users become unused after rollback and can remain null without blocking sign-in.",
+    "provenance": "Issue #231; pull request #327.",
+    "references": [
+        {
+            "label": "Issue #231",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/231"
+        },
+        {
+            "label": "Pull request #327",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/327"
+        }
+    ],
+    "slug": "release-v0-39-5",
+    "previous_version": "0.39.4"
+}

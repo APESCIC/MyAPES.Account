@@ -1,0 +1,46 @@
+{
+    "version": "0.7.0",
+    "date": "2026-07-27",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Access-control compatibility foundation",
+    "summary": "Added the transitional identity and access-level foundation required for the protected role-based access-control rollout while preserving current access behavior.",
+    "changes": [
+        "Added explicit local and Cloudron identity classifications plus a centralized legacy access-level contract.",
+        "Kept the existing role field synchronized through application dual-writes and a transitional database guard so in-flight legacy writes remain compatible during cutover and rollback.",
+        "Added guarded pre-activation reconciliation with database-guard and postcondition checks for safe migration, rollback, and retry behavior."
+    ],
+    "affected_areas": [
+        "User identity and access-level compatibility data",
+        "Authentication, directory revalidation, and staff-scoped application queries",
+        "Release activation and database compatibility checks"
+    ],
+    "categories": [
+        "added",
+        "changed",
+        "security"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible minor release introducing the first independently deployable capability for the staged authorization architecture.",
+    "validation": [
+        "Automated SQLite and MySQL upgrade, fresh-install, database-guard, dual-write, role-absent, authentication, authorization, and activation-order tests cover the compatibility contract.",
+        "The complete application test and build checks continue to verify unchanged public, staff, and administrator behavior."
+    ],
+    "known_limitations": [
+        "This release does not add granular permissions, role-management pages, directory-group mappings, or the final role-based access-control system.",
+        "The legacy access level remains the authorization source until Phase B is separately deployed and verified.",
+        "Phase B must remove the transitional database guard before removing the legacy role column."
+    ],
+    "rollback": "Restore the previous application release; the existing role field remains available and the transitional database guard keeps legacy writes aligned with the additive compatibility fields.",
+    "provenance": "Defined by Phase A of MyAPES Account issue #10 as the compatibility release required before the protected RBAC rollout.",
+    "references": [
+        {
+            "label": "Issue #10",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/10"
+        }
+    ],
+    "slug": "release-v0-7-0",
+    "previous_version": "0.6.1"
+}

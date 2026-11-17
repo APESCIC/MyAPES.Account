@@ -1,0 +1,44 @@
+{
+    "version": "0.19.3",
+    "date": "2026-08-20",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Group dashboard service totals by subcore panels",
+    "summary": "Dashboard service totals now appear as separate accented panels for each sub-core, so Tickets and other shared modules are clearly tied to APES CIC, Shelter and Rescue, or Pet Care Clinic.",
+    "changes": [
+        "Grouped dashboard service totals into per-sub-core panels with accent rails, short module labels, and Open service links to each hub.",
+        "Dropped redundant service prefixes from Cases and Pet profiles labels when modules sit under their sub-core heading."
+    ],
+    "affected_areas": [
+        "Account dashboard service totals",
+        "Dashboard presentation styles"
+    ],
+    "categories": [
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible patch improving dashboard service-total clarity without changing module data, permissions, or routes.",
+    "validation": [
+        "ModuleProviderContractTest and DashboardAttentionTest feature coverage for grouped summaries, plus myapes:changelog-validate against origin/main."
+    ],
+    "known_limitations": [
+        "None for this release."
+    ],
+    "rollback": "Revert this release record, VERSION, runtime manifest version, ModuleSummaryGroup and dashboard summary grouping, dashboard Blade and CSS, short summary labels, and related feature assertions. No database rollback is needed.",
+    "provenance": "Defined by the dashboard service-summary sub-core panel work for MyAPES Account issue #63 and pull request #73.",
+    "references": [
+        {
+            "label": "Issue #63",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/63"
+        },
+        {
+            "label": "Pull request #73",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/73"
+        }
+    ],
+    "slug": "release-v0-19-3",
+    "previous_version": "0.19.2"
+}

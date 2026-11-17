@@ -1,0 +1,54 @@
+{
+    "version": "0.39.6",
+    "date": "2026-09-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Passkeys via WebAuthn",
+    "summary": "Local public accounts can register device passkeys for phishing-resistant sign-in and for confirming sensitive account changes. Password sign-in remains available, including authenticator-app codes when enabled. Passkeys are bound to the application host from APP_URL.",
+    "changes": [
+        "Add laravel/passkeys with relying party ID and allowed origins derived from APP_URL for the live MyAPES Account host.",
+        "Let local accounts register, list, and remove named passkeys on the profile after recent password or passkey confirmation.",
+        "Offer passkey sign-in on Public Login while keeping password (and authenticator codes when enrolled) as a fallback.",
+        "Allow confirming sensitive account actions with a registered passkey as well as with the account password.",
+        "Email the account when a passkey is added or removed, and document Laragon HTTPS requirements for local WebAuthn."
+    ],
+    "affected_areas": [
+        "Public Login",
+        "Profile security settings",
+        "Step-up confirmation",
+        "Account security email notifications"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.39.x Account security line: WebAuthn passkeys after custom TOTP (0.39.5).",
+    "validation": [
+        "PHPUnit PasskeysTest, TotpTwoFactorTest, StepUpAuthTest, AuthEmailBrandKitTest.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "npm run build with @laravel/passkeys client."
+    ],
+    "known_limitations": [
+        "Passkey enrolment is not offered for Cloudron OIDC-only staff accounts.",
+        "Local WebAuthn ceremonies need a secure context (HTTPS Laragon or equivalent); plain http://127.0.0.1 is not supported by browsers.",
+        "Changing the relying party ID (APP_URL host) invalidates existing passkeys."
+    ],
+    "rollback": "Redeploy the previous release package. The passkeys table becomes unused after rollback and can remain without blocking password or authenticator sign-in.",
+    "provenance": "Issue #232; pull request #328.",
+    "references": [
+        {
+            "label": "Issue #232",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/232"
+        },
+        {
+            "label": "Pull request #328",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/328"
+        }
+    ],
+    "slug": "release-v0-39-6",
+    "previous_version": "0.39.5"
+}

@@ -1,0 +1,41 @@
+{
+    "version": "0.2.1",
+    "date": "2026-07-24",
+    "channel": "beta",
+    "type": "patch",
+    "title": "Local quality-assurance and review hardening",
+    "summary": "Added deterministic local accounts, seeded service records, and repeatable setup paths for end-to-end review.",
+    "changes": [
+        "Added deterministic public, staff, administrator, and superadministrator quality-assurance users and service records.",
+        "Added fresh and non-destructive local bootstrap modes for Windows and Unix-like systems.",
+        "Added environment-gated local sign-in shortcuts and a role switcher for rapid review.",
+        "Documented the local feature matrix and seeded workflows."
+    ],
+    "affected_areas": [
+        "Local setup, seeded data, test authentication, and quality-assurance documentation"
+    ],
+    "categories": [
+        "changed",
+        "fixed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "A compatible patch hardening local review and correcting setup gaps after the application baseline.",
+    "validation": [
+        "Fresh migration and seeding plus the automated PHP test suite passed for the merged change."
+    ],
+    "known_limitations": [
+        "Local authentication shortcuts remain strictly limited to local and testing environments."
+    ],
+    "rollback": "Remove the deterministic seed and environment-gated quality-assurance helpers while retaining the underlying application baseline.",
+    "provenance": "This historical record was reconstructed from merged pull request #2 and was not represented by a historical Git tag.",
+    "references": [
+        {
+            "label": "PR #2",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/2"
+        }
+    ],
+    "slug": "release-v0-2-1",
+    "previous_version": "0.2.0"
+}

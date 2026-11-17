@@ -1,0 +1,39 @@
+{
+    "version": "0.12.1",
+    "date": "2026-08-10",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Supported GitHub Actions runtimes",
+    "summary": "Pinned the first-party CI and artifact Actions to reviewed Node 24 releases while preserving the existing test, package, and deployment gates.",
+    "changes": [
+        "Pinned checkout, Node setup, artifact upload, and artifact download Actions to immutable reviewed commit SHAs with auditable version comments.",
+        "Preserved exact-revision packaging, pull-request deployment exclusion, deployment-control authentication, backup, activation, rollback, and health verification behavior."
+    ],
+    "affected_areas": [
+        "Continuous integration, release packaging, and deployment orchestration"
+    ],
+    "categories": [
+        "changed",
+        "security"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible patch release updating trusted workflow dependencies without changing application behavior.",
+    "validation": [
+        "Workflow contracts require the exact reviewed pins and reject the deprecated references; pull-request CI verifies the complete matrix without admitting deployment."
+    ],
+    "known_limitations": [
+        "Immutable Action pins require a separate reviewed update when a future supported release is adopted."
+    ],
+    "rollback": "The preceding workflow remains application-compatible; reverting the workflow commit restores its prior Action references without changing application data or schema.",
+    "provenance": "Defined by the supported GitHub Actions runtime work for MyAPES Account issue #31.",
+    "references": [
+        {
+            "label": "Issue #31",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/31"
+        }
+    ],
+    "slug": "release-v0-12-1",
+    "previous_version": "0.12.0"
+}

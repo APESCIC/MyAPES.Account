@@ -1,0 +1,40 @@
+{
+    "version": "0.19.1",
+    "date": "2026-08-20",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Clearer Admin Modules registry layout",
+    "summary": "The Admin Modules page now groups capabilities by sub-core with compact shipped-module rows and short incompatible chips, making installation state easier to scan without changing lifecycle controls.",
+    "changes": [
+        "Replaced the dense Admin Modules compatibility matrix with sub-core sections, compact shipped-module rows, and chip-style incompatible summaries.",
+        "Kept guarded enable, disable, and install confirmations available under a Manage disclosure for authorized super-admins."
+    ],
+    "affected_areas": [
+        "Admin Modules registry page",
+        "Admin Modules presentation styles"
+    ],
+    "categories": [
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible patch improving Admin Modules readability without changing module catalogue data, permissions, or lifecycle transition contracts.",
+    "validation": [
+        "ModuleAdministrationAndNavigationTest feature suite and myapes:changelog-validate against origin/main."
+    ],
+    "known_limitations": [
+        "None for this release."
+    ],
+    "rollback": "Revert this release record, VERSION, runtime manifest version, the Admin Modules Blade view and related CSS, and the updated feature assertions. No database rollback is needed.",
+    "provenance": "Defined by the Admin Modules sub-core section layout work for MyAPES Account issue #69.",
+    "references": [
+        {
+            "label": "Issue #69",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/69"
+        }
+    ],
+    "slug": "release-v0-19-1",
+    "previous_version": "0.19.0"
+}

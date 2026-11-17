@@ -1,0 +1,45 @@
+{
+    "version": "0.32.5",
+    "date": "2026-09-12",
+    "channel": "stable",
+    "type": "patch",
+    "title": "CIC ticket subcategory no longer stays on Select",
+    "summary": "Creating an APES CIC ticket no longer leaves Service area pre-filled while Subcategory stays on Select subcategory, and Affected website is marked required when it is shown.",
+    "changes": [
+        "Stop pre-selecting the first CIC service area so Subcategory is not left on a placeholder while an area looks chosen.",
+        "Mark Affected website as required when a subcategory needs a website."
+    ],
+    "affected_areas": [
+        "APES CIC public ticket create form",
+        "CIC service area and subcategory cascade"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: corrects CIC ticket create defaults and required-field marking without changing ticket storage or category lists.",
+    "validation": [
+        "PHPUnit ApesCicTicketCaseEnhancementTest covers the empty Service area default, the required Affected website mark, subcategory validation, and restoring a chosen Service area after validation errors.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "APES CIC case create still pre-selects the first category; that form is out of scope for this ticket."
+    ],
+    "rollback": "Redeploy the previous application version to restore the first Service area being pre-selected on CIC ticket create and the unmarked Affected website label.",
+    "provenance": "CIC ticket subcategory default fix for issue #149, pull request #199.",
+    "references": [
+        {
+            "label": "Issue #149",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/149"
+        },
+        {
+            "label": "Pull request #199",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/199"
+        }
+    ],
+    "slug": "release-v0-32-5",
+    "previous_version": "0.32.4"
+}

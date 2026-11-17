@@ -1,0 +1,43 @@
+{
+    "version": "0.25.2",
+    "date": "2026-08-24",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Accept legacy myapes LDAP groups during deploy readiness",
+    "summary": "Deploy preflight now accepts legacy myapes.* Cloudron LDAP groups by normalizing them to the canonical myapesaccount.* names, so production can upgrade before operators rename directory groups.",
+    "changes": [
+        "Normalize legacy myapes.* LDAP group names to myapesaccount.* during directory enumeration and managed group filtering.",
+        "Allow authorization preflight and super-admin eligibility checks to succeed when production still exposes the previous Cloudron group prefix."
+    ],
+    "affected_areas": [
+        "Cloudron deployment activation",
+        "LDAP directory readiness",
+        "Staff OIDC authorization preflight"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: backward-compatible deploy fix that maps legacy directory group names during readiness without changing canonical myapesaccount.* authorization semantics after Cloudron groups are renamed.",
+    "validation": [
+        "LdapGroupResolver unit tests for legacy group normalization.",
+        "Auth readiness and authorization preflight feature tests with legacy myapes.* groups.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main after filling release notes."
+    ],
+    "known_limitations": [
+        "Cloudron operators should still rename groups to myapesaccount.* and run directory sync after deploy; legacy names are accepted only as a transition bridge."
+    ],
+    "rollback": "Redeploy the previous application version. Legacy group normalization is removed on rollback; ensure Cloudron groups match the target release expectations before re-attempting deploy.",
+    "provenance": "Defined by the deploy directory readiness fix for MyAPES Account issue #106.",
+    "references": [
+        {
+            "label": "Issue #106",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/106"
+        }
+    ],
+    "slug": "release-v0-25-2",
+    "previous_version": "0.25.1"
+}

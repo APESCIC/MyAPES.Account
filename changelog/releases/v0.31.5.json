@@ -1,0 +1,46 @@
+{
+    "version": "0.31.5",
+    "date": "2026-08-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Mark v1.0.0 Beta complete in agent order",
+    "summary": "Agent implement order now records v1.0.0 Beta as complete on live and no longer blocks starting v1.1.0 Public UX work.",
+    "changes": [
+        "Mark milestone 1 / v1.0.0 Beta complete on live v0.31.2 in AGENTS.md, including closed epic #91 and live-verify #159.",
+        "Remove the remaining-gate wording that blocked v1.1.0 until #159 closed on live.",
+        "Leave the documented v1.1.0 and v1.2.0 implement lists ready for the next asked slice."
+    ],
+    "affected_areas": [
+        "Agent implement-order documentation",
+        "Release and ship workflow guidance"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: agent documentation only; no end-user product behaviour change.",
+    "validation": [
+        "Confirmed milestone 1 closed with zero open issues after epic #91 completed.",
+        "Reviewed AGENTS.md v1.0.0 and v1.1.0 sections against closed issues #91 and #159.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main after filling release notes."
+    ],
+    "known_limitations": [
+        "Starting a v1.1.0 feature still requires an explicit operator request; this change only unlocks the documented order."
+    ],
+    "rollback": "Redeploy the previous application version. To restore the #159 gate wording, revert the AGENTS.md implement-order section from this release.",
+    "provenance": "Defined by the AGENTS.md v1.0.0 Beta complete sync for MyAPES Account issue #171 and pull request #172.",
+    "references": [
+        {
+            "label": "Issue #171",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/171"
+        },
+        {
+            "label": "Pull request #172",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/172"
+        }
+    ],
+    "slug": "release-v0-31-5",
+    "previous_version": "0.31.4"
+}

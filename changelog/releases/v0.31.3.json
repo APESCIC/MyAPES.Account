@@ -1,0 +1,47 @@
+{
+    "version": "0.31.3",
+    "date": "2026-08-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Manual Cloudron deploy and ship-gate workflow",
+    "summary": "Cloudron deploy is operator-triggered only. Cursor agents follow a ship-gate: ask after CI, ask to deploy after merge, verify Change Log hubs, then ask whether to create a GitHub Release.",
+    "changes": [
+        "Stop auto-deploy on green main; Deploy MyAPES Core to Cloudron runs only on workflow_dispatch.",
+        "Add ship-gate agent rule and skill with next-actions menus for merge, deploy, changelog hubs, and GitHub Release.",
+        "Document that the app Change Log Hub updates from releases.json on the same Cloudron deploy, and that sibling website changelogs need an explicit operator ask."
+    ],
+    "affected_areas": [
+        "Cloudron deployment workflow",
+        "Agent ship-gate documentation",
+        "Public Change Log Hub (via deploy)"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: changes how operators and agents trigger deploy and release without changing application product features for end users.",
+    "validation": [
+        "DeploymentAuthenticationContractTest asserts deploy-cloudron.yml uses workflow_dispatch and does not use workflow_run.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main after filling release notes."
+    ],
+    "known_limitations": [
+        "Sibling APES website Change Log Hubs are not updated automatically by this deploy; operators must approve those updates separately."
+    ],
+    "rollback": "Redeploy the previous application version. To restore auto-deploy behaviour, reintroduce the workflow_run trigger on Deploy MyAPES Core to Cloudron.",
+    "provenance": "Defined by the ship-gate manual deploy and GitHub Release workflow for MyAPES Account issue #167 and pull request #168.",
+    "references": [
+        {
+            "label": "Issue #167",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/167"
+        },
+        {
+            "label": "Pull request #168",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/168"
+        }
+    ],
+    "slug": "release-v0-31-3",
+    "previous_version": "0.31.2"
+}

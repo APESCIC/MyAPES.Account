@@ -1,0 +1,48 @@
+{
+    "version": "0.31.2",
+    "date": "2026-08-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Redirect stale Super Admin plugins and groups URLs",
+    "summary": "Stale Super Admin addresses for Plugins and Groups now send people to the live Admin pages instead of a bare Laravel 404.",
+    "changes": [
+        "Redirect /superadmin/plugins and the older /superadmin/modules address to the live Plugins page at /admin/modules.",
+        "Redirect /superadmin/groups to the live Groups address at /admin/groups, which continues into the Access Groups tab.",
+        "Keep Super Admin navigation pointed at the live Access and Plugins pages so those chrome links do not use the stale addresses."
+    ],
+    "affected_areas": [
+        "Super Admin navigation",
+        "Super Admin compatibility URLs"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: restores existing Super Admin Plugins and Groups destinations without adding a new workspace.",
+    "validation": [
+        "PHPUnit AdminAccessWorkspaceTest covers guest login redirects, administrator 403s, Super Admin redirects from /superadmin/plugins and /superadmin/groups, and follow-through to the live Admin pages.",
+        "AdminAccessAndViewsTest covers administrator, public, and volunteer denials of the stale Super Admin addresses.",
+        "AuthorizationRuntimeSourceContractTest covers changelog internal-note visibility using staff, volunteer, and student permission gates rather than a scalar staff helper.",
+        "Ran php artisan myapes:changelog-validate against the changelog guest-filter parent branch for this stacked change."
+    ],
+    "known_limitations": [
+        "Unknown URLs still show the default Laravel 404. Branded unknown-URL pages remain a separate change. Hub Create/View addresses are a separate change."
+    ],
+    "rollback": "Redeploy the previous application version. Stale Super Admin Plugins and Groups addresses would 404 again.",
+    "provenance": "Defined by the stale Super Admin route fix for MyAPES Account issue #133, stacked on pull request #164, and pull request #165.",
+    "references": [
+        {
+            "label": "Issue #133",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/133"
+        },
+        {
+            "label": "Pull request #165",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/165"
+        }
+    ],
+    "slug": "release-v0-31-2",
+    "previous_version": "0.31.1"
+}

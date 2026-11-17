@@ -1,0 +1,53 @@
+{
+    "version": "0.31.9",
+    "date": "2026-08-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "GitHub Release backfill and changelog sync",
+    "summary": "All 72 documented app versions now have matching GitHub Release tags (v{VERSION}), and release prepare requires a pull request reference so future versions stay aligned with GitHub.",
+    "changes": [
+        "Backfill GitHub Releases and tags for v0.1.0 through v0.31.6 mapped to their merge commits on main.",
+        "Add scripts/local/map-release-commits.mjs and scripts/local/backfill-github-releases.mjs with dry-run, resume, and batch support.",
+        "Require --pr on myapes:changelog-prepare so every new release cites its merging pull request.",
+        "Show a GitHub Release link in the Change Log Hub Source section for staff and admin viewers.",
+        "Document GitHub Release tag parity and the deploy SHA versus version introduction commit distinction in README and ship-gate guidance."
+    ],
+    "affected_areas": [
+        "GitHub Releases and tags",
+        "Release metadata workflow",
+        "Change Log Hub staff references",
+        "Agent ship-gate documentation"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: aligns external GitHub versioning with in-app semver and tightens release metadata hygiene without changing production application behaviour.",
+    "validation": [
+        "node --test scripts/local/release-backfill.test.mjs",
+        "PHPUnit ChangeLogPresenterTest and PrepareChangeLogCommandTest for --pr requirement and GitHub Release references.",
+        "Verified 72 GitHub Releases on APESCIC/MyAPES-Account and live /healthz still reports 0.31.6 before deploy of this release."
+    ],
+    "known_limitations": [
+        "GitHub milestone descriptions may still need a manual update when API permissions are unavailable.",
+        "PR #166 remains a documented docs-only exception without its own version bump.",
+        "Live Cloudron will show v0.31.9 only after the next deploy; GitHub tags for prior versions are already published."
+    ],
+    "rollback": "Redeploy the previous application version. GitHub Releases already published remain on the repository; remove them only with an explicit operator decision.",
+    "provenance": "Defined by the changelog and GitHub version sync audit for MyAPES Account issue #178.",
+    "references": [
+        {
+            "label": "Issue #178",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/178"
+        },
+        {
+            "label": "Pull request #181",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/181"
+        }
+    ],
+    "slug": "release-v0-31-9",
+    "previous_version": "0.31.8"
+}

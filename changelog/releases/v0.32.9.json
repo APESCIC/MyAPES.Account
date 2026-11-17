@@ -1,0 +1,46 @@
+{
+    "version": "0.32.9",
+    "date": "2026-09-12",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Public pet and ticket save shows a success flash",
+    "summary": "Public create and save of a Shelter pet, and public ticket create or comment, now show a short success message. The wording stays everyday language.",
+    "changes": [
+        "Show a success flash after a public Shelter pet is created or saved.",
+        "Show a success flash after a public ticket is created or a comment is added."
+    ],
+    "affected_areas": [
+        "Public Shelter pet create and save",
+        "Public ticket create and comment"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: adds a missing success flash on public pet and ticket save without changing permissions or ticket lifecycle.",
+    "validation": [
+        "PHPUnit PublicShelterPetSaveFlashTest covers public Shelter pet create and save flashes and persisted pet data.",
+        "PHPUnit PublicTicketSaveFlashTest covers public ticket create and comment flashes on APES CIC, Shelter, and Pet Care.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "The Pet Care clinic pet create path is unchanged and still has no create flash."
+    ],
+    "rollback": "Redeploy the previous application version to restore silent redirects after public pet create and ticket create.",
+    "provenance": "Public pet and ticket save success flash for issue #153, pull request #203.",
+    "references": [
+        {
+            "label": "Issue #153",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/153"
+        },
+        {
+            "label": "Pull request #203",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/203"
+        }
+    ],
+    "slug": "release-v0-32-9",
+    "previous_version": "0.32.8"
+}

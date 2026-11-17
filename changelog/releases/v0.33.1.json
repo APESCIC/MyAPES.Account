@@ -1,0 +1,48 @@
+{
+    "version": "0.33.1",
+    "date": "2026-09-14",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Staff create forms explain an empty pet dropdown",
+    "summary": "When a Shelter case or Pet Care consultation create form has no pet to choose, staff now see an explanation and a link to add a pet, then return to the original form with that pet ready to use.",
+    "changes": [
+        "Show a clear empty state on staff Shelter case and Pet Care consultation create forms when no pet profiles are available.",
+        "Let staff add a pet first and return to the original create form with that pet selected."
+    ],
+    "affected_areas": [
+        "Shelter case create form",
+        "Pet Care consultation create form",
+        "Shelter and Pet Care pet profile create"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: explains an empty staff pet dropdown and restores the create flow without changing public own-record pages.",
+    "validation": [
+        "PHPUnit StaffEmptyPetSelectTest covers empty-state copy, the add-pet return path, public users keeping a blank select, and rejected external return addresses.",
+        "PHPUnit StaffPetCreateReturnTest covers the allowed return keys.",
+        "PHPUnit AuthorizationRuntimeSourceContractTest confirms staff empty-state detection uses permission checks instead of scalar access helpers.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Public own-record empty pet dropdowns are unchanged until a later ticket."
+    ],
+    "rollback": "Redeploy the previous application version to restore blank pet dropdowns on staff create forms and remove the add-pet return path.",
+    "provenance": "Empty staff pet dropdown fix for issue #143, pull request #210.",
+    "references": [
+        {
+            "label": "Issue #143",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/143"
+        },
+        {
+            "label": "Pull request #210",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/210"
+        }
+    ],
+    "slug": "release-v0-33-1",
+    "previous_version": "0.33.0"
+}

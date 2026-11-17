@@ -1,0 +1,45 @@
+{
+    "version": "0.32.7",
+    "date": "2026-09-12",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Public ticket Activity shows the description",
+    "summary": "A new public ticket now shows its description in Activity, and the owner is told they can add an update. Tickets stay comment-only after submit.",
+    "changes": [
+        "Show the ticket description as the first Activity item on a brand-new public ticket.",
+        "Tell the owner they can add an update (comment). Edit, close, and withdraw stay unavailable after submit."
+    ],
+    "affected_areas": [
+        "Public ticket Activity thread",
+        "APES CIC, Shelter, and Pet Care ticket show pages"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: fills the empty public ticket Activity thread without changing owner permissions or ticket lifecycle.",
+    "validation": [
+        "PHPUnit PublicTicketActivityTest covers a new public ticket, a ticket with no messages, the owner update hint, description remaining after a staff public reply, hidden internal notes, and staff seeing the description without the owner hint.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Owners still cannot edit, close, or withdraw a ticket after submit. That remains comment-only by design."
+    ],
+    "rollback": "Redeploy the previous application version to restore Activity showing only later messages, without the opening description or owner update hint.",
+    "provenance": "Public ticket Activity description fix for issue #150, pull request #201.",
+    "references": [
+        {
+            "label": "Issue #150",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/150"
+        },
+        {
+            "label": "Pull request #201",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/201"
+        }
+    ],
+    "slug": "release-v0-32-7",
+    "previous_version": "0.32.6"
+}

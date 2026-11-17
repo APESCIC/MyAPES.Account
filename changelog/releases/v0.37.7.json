@@ -1,0 +1,62 @@
+{
+    "version": "0.37.7",
+    "date": "2026-09-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Organisation module packages on the Structure contract",
+    "summary": "APES CIC, Pet Care Clinic, and Shelter and Rescue now load as module packages with package-owned manifests, hubs, live prefixes, and composed plugins. Settings defaults and per-module plugin dependencies move out of Core hard-coding while live URLs and permission strings stay the same.",
+    "changes": [
+        "Add module.php manifests for apes-cic, pet-care-clinic, and shelter-rescue covering nav, hub route, live prefix, enabled flag, and composed plugins.",
+        "Move APES CIC tickets, cases, and recruitment settings defaults into the apes-cic package config so Core no longer special-cases that module.",
+        "Declare Cases → Pet Profiles for Shelter and Consultations → Pet Profiles for Pet Care on plugin manifests instead of a hard-coded matrix match.",
+        "Keep the shared Core hub view fed by each module manifest; plugin controllers and models stay under App until later Structure waves."
+    ],
+    "affected_areas": [
+        "Organisation module packages",
+        "Plugin enablement dependencies",
+        "Plugin settings defaults",
+        "Service hubs",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on v0.37.x: Structure Wave 4 module packages with no live URL or permission-string renames.",
+    "validation": [
+        "php artisan test --compact tests/Feature/StructureModulesWave4Test.php tests/Feature/ModuleRegistryTest.php tests/Feature/StructureContractsWave1Test.php tests/Feature/PluginSettingsRegistryTest.php tests/Feature/StructureEnablementWave2Test.php",
+        "php artisan test --compact tests/Feature/StructurePermsUrlsWave3Test.php tests/Feature/ModuleAdministrationAndNavigationTest.php tests/Feature/ModuleRollbackCompatibilityTest.php tests/Feature/ModuleLifecycleTest.php",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "composer pre-pr-verify / CI before merge; Cloudron workflow_dispatch with app_version from VERSION after merge."
+    ],
+    "known_limitations": [
+        "Plugin controllers and models remain under App\\Http and App\\Models until Waves 5–7 move them into plugins/<slug>.",
+        "Module hub views still use the shared Core sub-cores.show template; packages may override via hubView later."
+    ],
+    "rollback": "Redeploy the previous application version. No database migration runs in this release; rolling back application code restores Core-owned settings defaults and the hard-coded matrix dependency match.",
+    "provenance": "Structure Wave 4 module packages #284 (APES CIC), #285 (Pet Care Clinic), and #286 (Shelter and Rescue) via pull request #307.",
+    "references": [
+        {
+            "label": "Issue #284",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/284"
+        },
+        {
+            "label": "Issue #285",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/285"
+        },
+        {
+            "label": "Issue #286",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/286"
+        },
+        {
+            "label": "Pull request #307",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/307"
+        }
+    ],
+    "slug": "release-v0-37-7",
+    "previous_version": "0.37.6"
+}

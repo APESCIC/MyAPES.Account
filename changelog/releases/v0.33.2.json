@@ -1,0 +1,53 @@
+{
+    "version": "0.33.2",
+    "date": "2026-09-23",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Staff lists show empty states and list first",
+    "summary": "Staff ticket and pet lists now show a clear empty state when there is nothing to display, and the list appears above the create form so existing records are easier to scan without losing hub Create and View links.",
+    "changes": [
+        "Show Spike empty states on staff ticket and pet profile lists when no records are available.",
+        "Put the list above the create form on staff ticket, pet, case, and consultation indexes while keeping #list and #create hub fragments."
+    ],
+    "affected_areas": [
+        "Staff ticket lists",
+        "Shelter and Pet Care pet profile lists",
+        "Staff case and consultation indexes"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: improves staff list empty states and page order without changing public own-record pages or hub fragment URLs.",
+    "validation": [
+        "PHPUnit StaffListUxTest covers empty-state markup on ticket and pet indexes and asserts #list appears before #create on staff indexes.",
+        "PHPUnit ServiceHubQuickLinksTest covers hub Create and View fragment URLs remaining distinct.",
+        "PHPUnit StaffEmptyPetSelectTest covers the add-pet return path after list-first reorder.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Public own-record empty states remain unchanged until a later ticket.",
+        "Shelter case and Pet Care consultation indexes still use a blank table when empty; empty-state copy there was out of scope for this release."
+    ],
+    "rollback": "Redeploy the previous application version to restore create-above-list layout and blank ticket/pet tables without Spike empty states.",
+    "provenance": "Staff list empty states and list-first layout for issues #134 and #135, pull request #235.",
+    "references": [
+        {
+            "label": "Issue #134",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/134"
+        },
+        {
+            "label": "Issue #135",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/135"
+        },
+        {
+            "label": "Pull request #235",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/235"
+        }
+    ],
+    "slug": "release-v0-33-2",
+    "previous_version": "0.33.1"
+}

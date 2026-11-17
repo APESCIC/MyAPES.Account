@@ -1,0 +1,45 @@
+{
+    "version": "0.9.0",
+    "date": "2026-08-07",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Core registry and guarded module lifecycle",
+    "summary": "Introduced a first-party registry for MyAPES sub-cores and modules, with guarded installation state, generated navigation, and super-admin lifecycle controls.",
+    "changes": [
+        "Registered the permanent APES CIC, Shelter and Rescue, and Pet Care Clinic sub-cores with four reusable module types and five enabled shipped instances.",
+        "Added an accessible Admin module matrix, dependency and active-record safeguards, consistent disabled-route handling, generated sub-core navigation, and registry-backed dashboard summaries.",
+        "Added deployment preflight, lifecycle-serialized dependency-aware synchronization, integrity, durable full-operation locking, and forward-only rollback compatibility checks for module state.",
+        "Applied each ticket comment, update, close, and assignment permission independently while preserving owner comment-only behavior and existing ticket state.",
+        "Hardened stale-transition protection, exact code-owned permission teardown, post-commit projection publication, database-scoped lifecycle locks, fail-closed activation classification, and authenticated post-switch rollback while preserving non-disclosing module availability responses.",
+        "Updated the Markdown rendering dependency to its patched release after the locked dependency audit."
+    ],
+    "affected_areas": [
+        "Sub-core navigation, dashboard summaries, module administration, authorization, and guarded deployment rollback"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing"
+    ],
+    "version_rationale": "A backward-compatible minor release adding the first-party module registry and lifecycle foundation while preserving existing feature URLs and authorization behavior.",
+    "validation": [
+        "Registry validation and dependency cycles, compatibility, namespaced ticket action permissions, exact permission rollback, lifecycle, same-second stale forms, long-running and cross-database locks, active records, cross-sub-core route isolation, navigation, committed cache invalidation, cross-process dependency repair, reordered manifests, maintenance-gated pre-switch current-matrix restoration, post-switch activation classification, target authorization reconciliation, migration, rollback compatibility, and deployment contracts are covered on SQLite, MySQL 8.4, and MariaDB 11.4.",
+        "The release gate retains full PHP and frontend suites, production asset compilation, append-only change-log validation, cache compilation, and accessible responsive browser review."
+    ],
+    "known_limitations": [
+        "Compatible Tickets instances for Shelter and Rescue and Pet Care Clinic, and Cases for APES CIC, are shown as Code not shipped and cannot be installed in this release.",
+        "Reusable feature refactors and granular module-policy cutovers remain scoped to issues #12, #13, and #14; v0.9.0 keeps the existing feature policies layered beneath module state."
+    ],
+    "rollback": "Restore only a target release that passes the quiesced module capability check. A target without a capability manifest is treated as v0.8.3 and is allowed only while the exact five legacy-visible instances remain enabled with no additional installation state. A pre-switch activation failure retains the recovered prior release without rollback; post-switch rollback requires exact current and previous SHA link parity. Activation and rollback keep the active release in maintenance until any required authorization restoration is verified, and staging evidence is retained unless restored environment, health, and OIDC verification all succeed.",
+    "provenance": "Defined by the reviewed v0.9.0 implementation for MyAPES Account issue #11; the date must be corrected if merge occurs after 2026-08-07.",
+    "references": [
+        {
+            "label": "Issue #11",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/11"
+        }
+    ],
+    "slug": "release-v0-9-0",
+    "previous_version": "0.8.3"
+}

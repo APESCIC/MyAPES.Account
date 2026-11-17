@@ -1,0 +1,45 @@
+{
+    "version": "0.32.4",
+    "date": "2026-09-12",
+    "channel": "stable",
+    "type": "patch",
+    "title": "UK consultation scheduled-for dates",
+    "summary": "Consultation Scheduled for dates now show and accept UK dd/mm/yyyy in Europe/London, so 5 March is not stored as 3 May.",
+    "changes": [
+        "Display consultation scheduled-for times as dd/mm/yyyy HH:mm:ss in Europe/London.",
+        "Accept UK slash dates on create and update, and keep stored UTC timestamps unchanged."
+    ],
+    "affected_areas": [
+        "APES Pet Care Clinic consultations",
+        "Consultation scheduled-for create and update forms"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: corrects UK date display and input for an existing consultation field without changing stored UTC timestamps.",
+    "validation": [
+        "PHPUnit UkDateTimeTest and PetCareConsultationWorkflowTest cover UK day/month order, Europe/London display, and invalid dates.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Other guest and staff date fields outside consultation scheduled-for are unchanged and remain later Public UX follow-ups."
+    ],
+    "rollback": "Redeploy the previous application version to restore ISO datetime-local scheduled-for inputs and UTC wall-clock display.",
+    "provenance": "UK consultation scheduled-for date format fix for issue #132, pull request #198.",
+    "references": [
+        {
+            "label": "Issue #132",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/132"
+        },
+        {
+            "label": "Pull request #198",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/198"
+        }
+    ],
+    "slug": "release-v0-32-4",
+    "previous_version": "0.32.3"
+}

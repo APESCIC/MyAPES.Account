@@ -1,0 +1,43 @@
+{
+    "version": "0.3.0",
+    "date": "2026-07-24",
+    "channel": "beta",
+    "type": "minor",
+    "title": "Mascot-led interface and product direction",
+    "summary": "Refreshed the shared application interface with a warmer mascot-led visual system and documented product design principles.",
+    "changes": [
+        "Integrated approved brand, browser, progressive-web-app, and social assets.",
+        "Added reusable mascot artwork to key entry and dashboard surfaces.",
+        "Unified shared styling for navigation, panels, forms, tables, alerts, and the footer.",
+        "Added product direction covering users, purpose, personality, anti-references, and accessibility."
+    ],
+    "affected_areas": [
+        "Authentication, dashboard, administration, and service screens",
+        "Shared layout, branding, and product documentation"
+    ],
+    "categories": [
+        "added",
+        "changed",
+        "accessibility"
+    ],
+    "audiences": [
+        "public-facing"
+    ],
+    "version_rationale": "A backward-compatible minor release delivering a substantial visual and product-design capability.",
+    "validation": [
+        "The automated PHP test suite passed for the merged interface refresh."
+    ],
+    "known_limitations": [
+        "The release concentrated visual behavior in the shared layout and did not change service data contracts."
+    ],
+    "rollback": "Restore the previous shared layout, view styling, documentation, and application-facing brand assets.",
+    "provenance": "This historical record was reconstructed from merged pull request #4 and was not represented by a historical Git tag.",
+    "references": [
+        {
+            "label": "PR #4",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/4"
+        }
+    ],
+    "slug": "release-v0-3-0",
+    "previous_version": "0.2.1"
+}

@@ -1,0 +1,43 @@
+{
+    "version": "0.32.13",
+    "date": "2026-09-12",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Add SECURITY.md with a private reporting path",
+    "summary": "The repository now includes SECURITY.md so suspected vulnerabilities can be reported privately instead of in a public issue.",
+    "changes": [
+        "Added SECURITY.md and linked it from the README."
+    ],
+    "affected_areas": [
+        "Repository documentation"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: adds the missing security policy file without changing application behaviour.",
+    "validation": [
+        "PHPUnit SecurityPolicyDocumentationTest covers the private reporting path and README link.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "None."
+    ],
+    "rollback": "Redeploy the previous application version to remove SECURITY.md and the README link.",
+    "provenance": "SECURITY.md private reporting path for issue #126, pull request #207.",
+    "references": [
+        {
+            "label": "Issue #126",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/126"
+        },
+        {
+            "label": "Pull request #207",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/207"
+        }
+    ],
+    "slug": "release-v0-32-13",
+    "previous_version": "0.32.12"
+}

@@ -1,0 +1,37 @@
+{
+    "version": "0.9.2",
+    "date": "2026-08-09",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Consent configuration deployment correction",
+    "summary": "Corrected the account-lifecycle readiness gate to consume the source-controlled consent configuration namespace used by production environment values.",
+    "changes": [
+        "Aligned account preflight with the configured consent policy version and privacy notice URL so valid production settings are recognized during activation."
+    ],
+    "affected_areas": [
+        "Account lifecycle deployment readiness"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible patch correcting the pre-switch deployment gate before the public lifecycle cutover.",
+    "validation": [
+        "Account readiness tests use the production consent namespace and cover valid configuration, missing legal configuration, collisions, and post-migration defaults."
+    ],
+    "known_limitations": [
+        "Registration, onboarding, service gating, and explicit identity linking remain disabled until the following compatible releases."
+    ],
+    "rollback": "The previous release remains compatible with the additive account-lifecycle schema; database migrations stay forward-only and no user data is removed.",
+    "provenance": "Defined by the pre-switch v0.9.1 production activation failure for MyAPES Account issue #19.",
+    "references": [
+        {
+            "label": "Issue #19",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/19"
+        }
+    ],
+    "slug": "release-v0-9-2",
+    "previous_version": "0.9.1"
+}

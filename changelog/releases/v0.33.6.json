@@ -1,0 +1,46 @@
+{
+    "version": "0.33.6",
+    "date": "2026-09-23",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Consistent Incompatible module status copy",
+    "summary": "Super Admin overview plugin warnings now use Incompatible and Code not shipped — the same labels as the modules registry — instead of calling those cells Blocked.",
+    "changes": [
+        "Label Super Admin module alerts for incompatible and code-not-shipped plugins with the same terms as the modules registry chips.",
+        "Keep Disabled and Active records as separate alert kinds with their existing meanings."
+    ],
+    "affected_areas": [
+        "Super Admin overview",
+        "Modules registry labels"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: aligns staff-facing status copy without changing the module incompatibility matrix or lifecycle behaviour.",
+    "validation": [
+        "PHPUnit AdminAnalyticsDashboardTest asserts Super Admin alerts use Incompatible (not Blocked) and match modules registry copy.",
+        "PHPUnit ModuleAdministrationAndNavigationTest still shows Incompatible on the modules registry.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "None for this copy alignment; underlying module availability rules are unchanged."
+    ],
+    "rollback": "Redeploy the previous application version to restore Blocked labels on Super Admin incompatible plugin alerts.",
+    "provenance": "Blocked vs Incompatible copy alignment for issue #139, pull request #239.",
+    "references": [
+        {
+            "label": "Issue #139",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/139"
+        },
+        {
+            "label": "Pull request #239",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/239"
+        }
+    ],
+    "slug": "release-v0-33-6",
+    "previous_version": "0.33.5"
+}

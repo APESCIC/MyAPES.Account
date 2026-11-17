@@ -1,0 +1,47 @@
+{
+    "version": "0.27.1",
+    "date": "2026-08-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Authorization access matrix for Cloudron groups",
+    "summary": "PHPUnit now covers the Cloudron access table end to end: public, volunteer, student, staff, administrator, and super-admin, including alias names that map to canonical myapesaccount groups.",
+    "changes": [
+        "Add an authorization HTTP and Gate matrix for guest through super-admin service, delete, Admin Users, and Super Admin Access outcomes.",
+        "Cover canonical myapesaccount.superadmin plus legacy alias mapping without treating myapes.superadmin and myapes.superadmins as two live groups.",
+        "Confirm directory user sync rematerializes canonical groups and never creates identity_type=local public users."
+    ],
+    "affected_areas": [
+        "Authorization tests",
+        "Directory group alias mapping",
+        "Admin Access catalogue"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: adds PHPUnit coverage for the existing access model without changing protected roles or live Cloudron group names.",
+    "validation": [
+        "PHPUnit AuthorizationAccessMatrixTest, DirectoryRoleSynchronizerTest, DirectoryUserSynchronizerTest, and AdminAccessAndViewsTest are green.",
+        "Canonical myapesaccount.* groups and alias-to-canonical mapping are covered without creating a second live superadmin group.",
+        "Ran php artisan myapes:changelog-validate against the Access admin parent branch for this stacked change."
+    ],
+    "known_limitations": [
+        "The matrix uses local/testing QA session provenance for HTTP actors; production Staff Login remains Cloudron OIDC."
+    ],
+    "rollback": "Redeploy the previous application version. Runtime authorization behaviour is unchanged; only tests and release metadata are removed.",
+    "provenance": "Defined by the authorization access matrix task for MyAPES Account issue #98 under epic #91 and pull request #156.",
+    "references": [
+        {
+            "label": "Issue #98",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/98"
+        },
+        {
+            "label": "Pull request #156",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/156"
+        }
+    ],
+    "slug": "release-v0-27-1",
+    "previous_version": "0.27.0"
+}

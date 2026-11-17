@@ -1,0 +1,47 @@
+{
+    "version": "0.4.0",
+    "date": "2026-07-24",
+    "channel": "beta",
+    "type": "minor",
+    "title": "MyAPES takeover with secure staff identity",
+    "summary": "Introduced the Naturalist Notebook interface, deterministic local quality assurance, and protected staff sign-in backed by Cloudron identity and directory eligibility.",
+    "changes": [
+        "Added the approved light and dark application interface with role-scoped dashboard attention and local quality-assurance identities.",
+        "Added standards-based staff sign-in with protected authorization state and exact directory-group eligibility.",
+        "Added periodic directory revalidation, secure local logout behavior, readiness checks, and immutable release activation with rollback.",
+        "Added sanitized health and staff-login verification around the release workflow."
+    ],
+    "affected_areas": [
+        "Authentication, directory authorization, sessions, and staff logout",
+        "Shared application interface and role-scoped dashboard",
+        "Release activation, rollback, health, and post-release verification"
+    ],
+    "categories": [
+        "added",
+        "changed",
+        "security",
+        "accessibility"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible minor release introducing major application, identity, and deployment capabilities.",
+    "validation": [
+        "Automated tests covered identity redirects, claims, collisions, denials, role precedence, directory changes, outages, logout, readiness, release gates, and rollback.",
+        "Application tests, the frontend build, cache warm-up, script syntax, and public-route availability were reviewed."
+    ],
+    "known_limitations": [
+        "Production identity configuration and authenticated acceptance remained controlled human-administrator steps."
+    ],
+    "rollback": "Use the immutable code rollback process and restore the prior application interface and identity integration if release verification fails.",
+    "provenance": "This historical record was reconstructed from merged pull request #5 and was not represented by a historical Git tag.",
+    "references": [
+        {
+            "label": "PR #5",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/5"
+        }
+    ],
+    "slug": "release-v0-4-0",
+    "previous_version": "0.3.0"
+}

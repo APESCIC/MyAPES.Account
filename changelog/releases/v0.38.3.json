@@ -1,0 +1,54 @@
+{
+    "version": "0.38.3",
+    "date": "2026-09-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Plugin translation namespaces",
+    "summary": "MyAPES Account plugins now load their own UK English translation namespaces, and Admin Plugins shows plugin names and descriptions from those lang files. CI also runs a report-only translation key check.",
+    "changes": [
+        "Load Cases, Tickets, Recruitment, Consultations, and Pet Profiles translations under cases::, tickets::, recruitment::, consultations::, and pet_profiles:: namespaces.",
+        "Seed each plugin’s en_GB plugin.php with name, short_name, description, and keywords; Admin Plugins labels resolve via nameKey and descriptionKey.",
+        "Allow app-level overrides in lang/vendor/{namespace}/en_GB without changing plugin packages.",
+        "Add php artisan lang:check (report-only) to CI for missing/unused keys and hard-coded string counts; hard-fail remains for a later Language wave."
+    ],
+    "affected_areas": [
+        "Plugin translation namespaces",
+        "Admin Plugins registry labels",
+        "Localisation tooling (lang:check)",
+        "CI quality workflow",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.38.x Language line: plugin namespace wiring and report-only CI scaffolding — no broad string extraction yet.",
+    "validation": [
+        "PHPUnit PluginTranslationNamespacesTest (namespace resolution, Admin Plugins labels, vendor override, disabled-plugin safety, lang:check report-only).",
+        "Related Structure / Admin plugins / inventory tests on the PR branch.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "Local verify equivalent (changelog-validate, focused PHPUnit, frontend checks / build as available) before merge."
+    ],
+    "known_limitations": [
+        "Most user-facing Blade and flash strings remain hard-coded until Wave 2 extraction.",
+        "lang:check does not fail CI yet; hard-fail for missing keys is deferred to Wave 4 (#276).",
+        "Admin search keywords (#274) are seeded in lang but the search UI is not in this release."
+    ],
+    "rollback": "Redeploy the previous release package. Plugin labels fall back to English manifest text if translation files are removed; no database migrations are included.",
+    "provenance": "Issue #272 (namespaces); #276 report-only CI scaffold in the same patch; pull request #315.",
+    "references": [
+        {
+            "label": "Issue #272",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/272"
+        },
+        {
+            "label": "Pull request #315",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/315"
+        }
+    ],
+    "slug": "release-v0-38-3",
+    "previous_version": "0.38.2"
+}

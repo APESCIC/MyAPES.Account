@@ -1,0 +1,51 @@
+{
+    "version": "0.39.0",
+    "date": "2026-09-29",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Auth email brand kit",
+    "summary": "Account security emails for MyAPES Account now share one branded layout (logo, footer, Help link, UK tone). Verify-email, password-reset, and password-changed messages use the kit; further security-event templates are ready for later Account security work.",
+    "changes": [
+        "Add a shared auth mail layout under resources/views/mail/auth/ with MyAPES Account branding and a Help footer link.",
+        "Ship queued verify-email, password-reset, and password-changed notifications, and stub templates for authenticator, passkey, and email-change events.",
+        "Route User email verification and password-reset notifications through the brand kit; subjects and from-name use MyAPES Account.",
+        "Add en_GB mail copy and feature tests that assert delivery and render smoke without secrets in subjects."
+    ],
+    "affected_areas": [
+        "Auth and account security email",
+        "Public registration and password reset",
+        "Notification delivery",
+        "Localisation (mail strings)"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Minor bump opens the v0.39.x Account security line with the shared auth email brand kit that later MFA, passkey, and email-change work will reuse.",
+    "validation": [
+        "PHPUnit AuthEmailBrandKitTest, PublicLocalForgotPasswordTest, PublicAccountLifecycleTest, AdminPendingFirstLoginChaseTest.",
+        "php artisan lang:check --fail-on-missing (0 missing keys).",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Password-changed mail is available in the kit but is not yet fired from profile change or guest reset (follows in password-policy work).",
+        "Authenticator, passkey, and email-change notifications are stubs until those Account security waves land."
+    ],
+    "rollback": "Redeploy the previous release package. Auth emails return to the framework default verify/reset templates; no database migrations are included in this release.",
+    "provenance": "Issue #226; pull request #322.",
+    "references": [
+        {
+            "label": "Issue #226",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/226"
+        },
+        {
+            "label": "Pull request #322",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/322"
+        }
+    ],
+    "slug": "release-v0-39-0",
+    "previous_version": "0.38.9"
+}

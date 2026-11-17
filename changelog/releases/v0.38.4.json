@@ -1,0 +1,56 @@
+{
+    "version": "0.38.4",
+    "date": "2026-09-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Auth and notification string extraction",
+    "summary": "Auth screens, emails, notifications, flash messages, and validation attribute labels now come from UK English lang files. Password-reset copy stays non-enumerating, and accounts prefer en_GB for queued mail.",
+    "changes": [
+        "Move Public Login, Register, Staff Login, forgot/reset password, verify-email, and landing copy into lang/en_GB/auth.php.",
+        "Move shared flashes and auth abort messages into lang/en_GB/flash.php and auth.oidc.* keys.",
+        "Move pending first-login chase and Cases/Tickets/Consultations update emails into lang/en_GB/mail.php.",
+        "Keep password-reset status non-enumerating via passwords.request_status; expand validation.attributes for common form fields.",
+        "Implement HasLocalePreference on User so notifications render in en_GB (users.locale column arrives in a later Language wave)."
+    ],
+    "affected_areas": [
+        "Public and staff authentication screens",
+        "Password reset and profile flashes",
+        "Notification emails",
+        "Validation attribute labels",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.38.x Language line: auth/mail/flash extraction only — Admin, public chrome, and staff hub extracts follow in later patches.",
+    "validation": [
+        "PHPUnit LocalisationAuthExtractionTest (HasLocalePreference, auth copy, password-reset status, mail keys).",
+        "PublicLocalForgotPasswordTest, ProfileLocalPasswordChangeTest, PublicChromeNamingTest, AdminPendingFirstLoginChaseTest.",
+        "Ticket/case/consultation workflow suites covering notification mail paths.",
+        "php artisan lang:inventory — Auth section count 0; docs/i18n-inventory.md regenerated.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Admin shell, public chrome (legal/dashboard/recruitment board), and APES CIC staff hub strings remain hard-coded until subsequent Wave 2 patches.",
+        "users.locale column and SetLocale middleware are not in this release (#275).",
+        "lang:check remains report-only until Wave 4."
+    ],
+    "rollback": "Redeploy the previous release package. UI returns to prior hard-coded English strings if lang keys are removed; no database migrations are included.",
+    "provenance": "Issue #271; pull request #316.",
+    "references": [
+        {
+            "label": "Issue #271",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/271"
+        },
+        {
+            "label": "Pull request #316",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/316"
+        }
+    ],
+    "slug": "release-v0-38-4",
+    "previous_version": "0.38.3"
+}

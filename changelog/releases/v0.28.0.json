@@ -1,0 +1,47 @@
+{
+    "version": "0.28.0",
+    "date": "2026-08-28",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Admin reset of local public passwords",
+    "summary": "Admins and Super Admins can issue a one-time temporary password for a local public account from Admin → Public users. Directory and Cloudron accounts cannot be reset this way.",
+    "changes": [
+        "Add a local-password reset action on the Admin public-users list and detail screens for local service-user accounts.",
+        "Show the temporary password once after reset; it is not stored in audit history.",
+        "Refuse directory, Cloudron, pending first-login, and staff-eligible accounts so those passwords stay on Cloudron."
+    ],
+    "affected_areas": [
+        "Admin public users",
+        "Public local password sign-in"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Minor release: adds an Admin capability to recover local public passwords without changing protected roles or Cloudron directory sign-in.",
+    "validation": [
+        "PHPUnit AdminLocalPublicPasswordResetTest, AdminAccessAndViewsTest, and AdminProfileManagementTest are green.",
+        "Local public reset succeeds and directory, pending first-login, hybrid, and staff accounts are refused; no impersonation control is present.",
+        "Ran php artisan myapes:changelog-validate against the public-frontend hardening parent branch for this stacked change."
+    ],
+    "known_limitations": [
+        "Guest forgot-password for local public accounts remains a separate change. Directory and Cloudron passwords continue to be managed in Cloudron."
+    ],
+    "rollback": "Redeploy the previous application version. Temporary passwords already issued remain in effect until the account holder or an administrator sets a new password.",
+    "provenance": "Defined by the admin local public password reset task for MyAPES Account issue #142 under epic #158 and pull request #160.",
+    "references": [
+        {
+            "label": "Issue #142",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/142"
+        },
+        {
+            "label": "Pull request #160",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/160"
+        }
+    ],
+    "slug": "release-v0-28-0",
+    "previous_version": "0.27.2"
+}

@@ -1,0 +1,46 @@
+{
+    "version": "0.19.4",
+    "date": "2026-08-20",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Polish Spike tip dock dismiss and avatar",
+    "summary": "Spike tip dock dismiss control is a clear top-right close control, the dock avatar uses the pointing Spike artwork, and previous page dismissals are reset so the redesigned tip can appear again.",
+    "changes": [
+        "Replaced the Hide tip text control with a high-contrast top-right × close button on the tip bubble.",
+        "Swapped the dock avatar to full-body pointing Spike artwork oriented toward the tip bubble.",
+        "Rotated the local dismiss storage key so earlier page hide choices do not conceal the redesigned tip dock."
+    ],
+    "affected_areas": [
+        "Spike tip dock helper",
+        "Page tip dismiss persistence"
+    ],
+    "categories": [
+        "fixed",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible patch polishing tip-dock presentation and dismiss behaviour without changing tip copy, routes, or permissions.",
+    "validation": [
+        "MascotHelperTest feature coverage for the dock avatar and dismiss control, plus myapes:changelog-validate against origin/main."
+    ],
+    "known_limitations": [
+        "Previously dismissed tips reappear once under the new dismiss storage key; hiding a tip again still remembers that page locally."
+    ],
+    "rollback": "Revert this release record, VERSION, runtime manifest version, tip-dock Blade/CSS/JS updates, spike-dock artwork, README asset note, and related feature assertions. No database rollback is needed.",
+    "provenance": "Defined by the Spike tip dock dismiss and avatar polish for MyAPES Account issue #74 and pull request #75.",
+    "references": [
+        {
+            "label": "Issue #74",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/74"
+        },
+        {
+            "label": "Pull request #75",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/75"
+        }
+    ],
+    "slug": "release-v0-19-4",
+    "previous_version": "0.19.3"
+}

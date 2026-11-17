@@ -1,0 +1,49 @@
+{
+    "version": "0.24.1",
+    "date": "2026-08-24",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Accept plural Cloudron superadmins group",
+    "summary": "Directory authorization now accepts both the singular and plural Cloudron superadmin group names so either group can grant Super Admin and satisfy deploy readiness.",
+    "changes": [
+        "Mapped both myapes.superadmin and myapes.superadmins immutably to the super-admin role.",
+        "Updated auth readiness so at least one of those groups must have members, while staff and admin groups remain required and membered.",
+        "Aligned preflight eligibility, integrity checks, Local QA fixtures, and documentation with the dual group names."
+    ],
+    "affected_areas": [
+        "Directory role mapping and sync",
+        "Authentication readiness and authorization preflight",
+        "Staff login authorization",
+        "Local QA fixtures and README"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch: backward-compatible fix that adds an alternate exact group name without changing role semantics or public account flows.",
+    "validation": [
+        "Focused PHPUnit for AuthReadiness, AuthorizationSchema, AuthorizationLifecycle, DirectoryRoleSynchronizer, StaffOidcAuthentication, and FreshInstallAuthorizationSeeder all passed.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main after filling release notes."
+    ],
+    "known_limitations": [
+        "Cloudron still needs the plural group created and staff assigned before membership takes effect.",
+        "Staff must complete Staff Login after directory sync for the new mapping to rematerialize on their account."
+    ],
+    "rollback": "Redeploy the previous application version. Authorization sync will restore the prior immutable catalogue on the previous release; no data migration accompanies this patch.",
+    "provenance": "Defined by the plural Cloudron superadmins group mapping fix for MyAPES Account issue #92 and pull request #100.",
+    "references": [
+        {
+            "label": "Issue #92",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/92"
+        },
+        {
+            "label": "Pull request #100",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/100"
+        }
+    ],
+    "slug": "release-v0-24-1",
+    "previous_version": "0.24.0"
+}

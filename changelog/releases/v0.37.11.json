@@ -1,0 +1,61 @@
+{
+    "version": "0.37.11",
+    "date": "2026-09-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Architecture hard-fail and package generators",
+    "summary": "Structure architecture rules now hard-fail in CI, and developers can scaffold new module and plugin packages with Artisan generators without editing Core.",
+    "changes": [
+        "Architecture dependency tests hard-fail in CI: Core must not import Modules or Plugins; plugins use only declared dependencies via public API; modules must not import other modules.",
+        "Added php artisan make:module and make:plugin stubs with a developer guide so new packages register without editing app/Core.",
+        "Documented Structure as shipped in AGENTS.md (ship order 7 → 9 → 8 → 5) and updated architecture docs for the hard-fail suite.",
+        "Moved the shared record-owner validation rule into App\\Rules so Cases does not import Tickets rules."
+    ],
+    "affected_areas": [
+        "Architecture PHPUnit suite (tests/Architecture)",
+        "Artisan make:module / make:plugin generators and stubs",
+        "Developer guide and agent new-plugin skill",
+        "AGENTS.md and architecture documentation"
+    ],
+    "categories": [
+        "added",
+        "changed",
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.37.x Structure line: hardens architecture enforcement and adds developer tooling without changing live URLs or permission strings.",
+    "validation": [
+        "Focused PHPUnit: Architecture suite, StructureGeneratorsWave8Test, Wave 6/7 structure suites",
+        "changelog-validate against origin/main",
+        "CI on PR #311"
+    ],
+    "known_limitations": [
+        "Generated packages still need a routes/web.php require and module.php plugins list entry to appear in live navigation.",
+        "UI glossary wording for Core / Module / Plugin remains with #267."
+    ],
+    "rollback": "Redeploy the previous Cloudron package (0.37.10). No database migrations ship in this release.",
+    "provenance": "Structure Wave 8 for issues #294 and #295; pull request #311.",
+    "references": [
+        {
+            "label": "Issue #294",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/294"
+        },
+        {
+            "label": "Issue #295",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/295"
+        },
+        {
+            "label": "Issue #278",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/278"
+        },
+        {
+            "label": "Pull request #311",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/311"
+        }
+    ],
+    "slug": "release-v0-37-11",
+    "previous_version": "0.37.10"
+}

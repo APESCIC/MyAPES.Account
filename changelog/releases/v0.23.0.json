@@ -1,0 +1,52 @@
+{
+    "version": "0.23.0",
+    "date": "2026-08-22",
+    "channel": "stable",
+    "type": "minor",
+    "title": "APES CIC tickets, cases and module settings",
+    "summary": "APES CIC support tickets and formal cases now use hierarchical categories, optional website selection, screenshot and screencast attachments, clearer ownership fields, and Super Admin editable module settings. The Super Admin modules page also shows modules in a three-column card grid.",
+    "changes": [
+        "Added hierarchical service areas and subcategories for APES CIC tickets, including CIC-oriented areas such as web development, IT, governance, finance, fundraising, and membership support.",
+        "Added formal case categories for data access, privacy requests, complaints, membership casework, welfare concerns, and related escalations.",
+        "Allowed website selection and screenshot or screencast attachments where a subcategory requires them.",
+        "Surfaced ticket and case owner and assigned staff more clearly, including staff reassignment where permitted.",
+        "Added database-backed module settings with Super Admin editing for APES CIC tickets and cases.",
+        "Restyled the Super Admin modules page to show up to three module cards per row."
+    ],
+    "affected_areas": [
+        "APES CIC tickets and cases",
+        "Super Admin modules registry and module settings",
+        "Support attachment uploads"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible minor release that adds new optional fields, settings, and UI capabilities without removing existing ticket or case workflows for other services.",
+    "validation": [
+        "ApesCicTicketCaseEnhancementTest, ApesCicCasesWorkflowTest, ApesCicModuleFoundationTest, ModuleAdministrationAndNavigationTest, ShelterTicketWorkflowTest, and PetCareTicketWorkflowTest feature coverage.",
+        "myapes:changelog-validate against origin/main."
+    ],
+    "known_limitations": [
+        "Shelter and Pet Care ticket modules keep their existing flat service areas and do not gain attachments or hierarchical categories in this release.",
+        "Module settings editing is limited to APES CIC tickets and cases.",
+        "Screencasts are stored for download only; no in-browser playback or transcoding is provided."
+    ],
+    "rollback": "Revert this release record, VERSION, runtime manifest version, migrations for module settings and attachments, ticket and case workflow changes, admin modules UI updates, and related tests. After code rollback, remove newly created module_settings and support_attachments rows if a database recovery is required.",
+    "provenance": "Defined by the APES CIC tickets, cases, and admin modules enhancement work for MyAPES Account issue #85.",
+    "references": [
+        {
+            "label": "Issue #85",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/85"
+        },
+        {
+            "label": "Pull request #86",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/86"
+        }
+    ],
+    "slug": "release-v0-23-0",
+    "previous_version": "0.22.0"
+}
