@@ -52,6 +52,11 @@
             <p>{{ __('public.legal.help.blade.open_a_ticket_staff') }}</p>
         </section>
 
+        <section id="embed-ticket">
+            <h2>{{ __('public.legal.help.blade.embed_ticket') }}</h2>
+            <p>{{ __('public.legal.help.blade.embed_ticket_intro') }}</p>
+        </section>
+
         <section id="bookings">
             <h2>{{ __('public.legal.help.blade.bookings') }}</h2>
             <p>{{ __('public.legal.help.blade.bookings_body') }}</p>

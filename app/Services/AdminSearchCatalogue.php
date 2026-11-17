@@ -188,6 +188,14 @@ final class AdminSearchCatalogue
                 'abilities' => ['admin.emails.view'],
             ],
             [
+                'id' => 'admin.tickets.embed-forms',
+                'label' => __('admin.nav.embed_forms'),
+                'description' => __('admin.search.sections.embed_forms'),
+                'url' => route('admin.tickets.embed-forms.index'),
+                'keywords_key' => 'admin.search.keywords.embed_forms',
+                'abilities' => ['admin.settings.manage'],
+            ],
+            [
                 'id' => 'admin.settings',
                 'label' => __('admin.nav.settings'),
                 'description' => __('admin.search.sections.settings'),

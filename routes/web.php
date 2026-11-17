@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminVersionController;
 use App\Http\Controllers\Admin\AdminWebhookController;
 use App\Http\Controllers\Admin\StaffAdminController;
+use Plugins\Tickets\Http\Controllers\Admin\AdminTicketEmbedFormController;
 use App\Http\Controllers\Auth\ConfirmPasswordController;
 use App\Http\Controllers\Auth\EmailChangeController;
 use App\Http\Controllers\Auth\OidcAuthController;
@@ -91,6 +92,7 @@ Route::middleware('plugin.enabled:apes-cic,recruitment')->group(function (): voi
     require base_path('plugins/recruitment/routes/public.php');
 });
 require base_path('plugins/tickets/routes/public.php');
+require base_path('plugins/tickets/routes/embed.php');
 Route::get('/storage/pet-profiles/{path?}', static fn () => abort(404))
     ->where('path', '.*');
 
@@ -540,6 +542,30 @@ Route::middleware([
             Route::post('/settings/webhooks/deliveries/{webhookDelivery}/replay', [AdminWebhookController::class, 'replay'])
                 ->middleware(['can:admin.settings.manage', 'throttle:30,1'])
                 ->name('settings.webhooks.replay');
+            Route::get('/tickets/embed-forms', [AdminTicketEmbedFormController::class, 'index'])
+                ->middleware('can:admin.settings.manage')
+                ->name('tickets.embed-forms.index');
+            Route::get('/tickets/embed-forms/create', [AdminTicketEmbedFormController::class, 'create'])
+                ->middleware('can:admin.settings.manage')
+                ->name('tickets.embed-forms.create');
+            Route::post('/tickets/embed-forms', [AdminTicketEmbedFormController::class, 'store'])
+                ->middleware(['can:admin.settings.manage', 'throttle:20,1'])
+                ->name('tickets.embed-forms.store');
+            Route::get('/tickets/embed-forms/{embedForm}/edit', [AdminTicketEmbedFormController::class, 'edit'])
+                ->middleware('can:admin.settings.manage')
+                ->name('tickets.embed-forms.edit');
+            Route::put('/tickets/embed-forms/{embedForm}', [AdminTicketEmbedFormController::class, 'update'])
+                ->middleware('can:admin.settings.manage')
+                ->name('tickets.embed-forms.update');
+            Route::post('/tickets/embed-forms/{embedForm}/toggle', [AdminTicketEmbedFormController::class, 'toggle'])
+                ->middleware('can:admin.settings.manage')
+                ->name('tickets.embed-forms.toggle');
+            Route::post('/tickets/embed-forms/{embedForm}/rotate', [AdminTicketEmbedFormController::class, 'rotate'])
+                ->middleware(['can:admin.settings.manage', 'throttle:20,1'])
+                ->name('tickets.embed-forms.rotate');
+            Route::delete('/tickets/embed-forms/{embedForm}', [AdminTicketEmbedFormController::class, 'destroy'])
+                ->middleware('can:admin.settings.manage')
+                ->name('tickets.embed-forms.destroy');
             Route::post('/emails/inbound/local/reply', [AdminLocalRepliesController::class, 'reply'])
                 ->middleware(['can:admin.emails.manage', EnsureLocalReplyLoop::class])
                 ->name('emails.inbound.local.reply');

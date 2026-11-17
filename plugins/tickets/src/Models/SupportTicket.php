@@ -18,6 +18,14 @@ use Plugins\Tickets\TicketsArea;
 #[Fillable([
     'sub_core_key',
     'user_id',
+    'guest_name',
+    'guest_email',
+    'guest_email_verified_at',
+    'embed_form_id',
+    'staff_notified_at',
+    'guest_consent_method',
+    'guest_consent_policy_version',
+    'guest_consented_at',
     'assigned_to',
     'service_area',
     'sub_category',
@@ -67,6 +75,9 @@ class SupportTicket extends Model implements HasSupportAttachments
         return [
             'description' => SanitisedHtml::class,
             'closed_at' => 'datetime',
+            'guest_email_verified_at' => 'datetime',
+            'staff_notified_at' => 'datetime',
+            'guest_consented_at' => 'datetime',
         ];
     }
 

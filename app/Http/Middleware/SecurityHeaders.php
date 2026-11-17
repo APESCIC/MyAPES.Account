@@ -50,6 +50,12 @@ class SecurityHeaders
             $directives['report-uri'] = [route('csp.report', absolute: false)];
         }
 
+        // Embed ticket responses (#685) replace frame-ancestors with the form allowlist only.
+        $embedAncestors = request()->attributes->get('tickets.embed.frame_ancestors');
+        if (is_array($embedAncestors) && $embedAncestors !== []) {
+            $directives['frame-ancestors'] = array_values($embedAncestors);
+        }
+
         return collect($directives)
             ->map(static fn (array $sources, string $name): string => trim($name.' '.implode(' ', array_unique($sources))))
             ->implode('; ');

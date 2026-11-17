@@ -58,6 +58,8 @@ return [
                 'open_a_ticket_link' => 'Open a ticket',
                 'open_a_ticket_steps' => 'asks you to pick the service and area, then sends the ticket straight into that service\'s ticket system — there is no separate triage queue.',
                 'open_a_ticket_staff' => 'Old per-service start links still work: they sign you in if needed and open the same form with the service and area already chosen.',
+                'embed_ticket' => 'Embed ticket form',
+                'embed_ticket_intro' => 'Other APES websites can embed a guest open-a-ticket form (no sign-in). That path is separate from Open a ticket above: administrators manage forms and the embed code under Admin → Embed forms, guests confirm their email, and staff are notified only after verification.',
                 'bookings' => 'Bookings',
                 'bookings_body' => 'Bookings sits under Tools for guests and public users. Staff, volunteers, students and administrators do not use Bookings in this app — those menu entries are hidden and the pages return an error.',
                 'cookie_notice' => 'cookie notice',
