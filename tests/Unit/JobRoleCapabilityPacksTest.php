@@ -19,11 +19,11 @@ class JobRoleCapabilityPacksTest extends TestCase
             $definitions['admin-overview']['permissions'],
         );
         $this->assertSame(
-            ['admin.users.view'],
+            ['admin.users.view', 'client.search'],
             $definitions['view-accounts']['permissions'],
         );
         $this->assertSame(
-            ['admin.users.manage'],
+            ['admin.users.manage', 'client.manage'],
             $definitions['manage-accounts']['permissions'],
         );
 
@@ -44,7 +44,7 @@ class JobRoleCapabilityPacksTest extends TestCase
             'on',
             JobRoleCapabilityPacks::state(
                 'view-accounts',
-                ['admin.users.view', 'admin.analytics.view'],
+                ['admin.users.view', 'client.search', 'admin.analytics.view'],
                 $modules,
             ),
         );
@@ -67,14 +67,14 @@ class JobRoleCapabilityPacksTest extends TestCase
         $modules = app(ModuleRegistry::class);
 
         $merged = JobRoleCapabilityPacks::merge(
-            ['admin.analytics.view', 'admin.users.view'],
+            ['admin.analytics.view', 'admin.users.view', 'client.search'],
             ['manage-accounts'],
             ['view-accounts'],
             $modules,
         );
 
         $this->assertSame(
-            ['admin.analytics.view', 'admin.users.manage'],
+            ['admin.analytics.view', 'admin.users.manage', 'client.manage'],
             $merged,
         );
     }

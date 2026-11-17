@@ -38,5 +38,11 @@
     },
     "node": "22",
     "npmMinimum": "11.10.0",
+    "redis": {
+        "host": "127.0.0.1",
+        "port": 6379,
+        "version": "7.0.0",
+        "usedFor": ["cache", "queue", "sessions"]
+    },
     "viteDevServerPort": 5175
 }

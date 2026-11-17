@@ -12,6 +12,9 @@ use Illuminate\Http\Request;
 
 class ApplicationAuthorizationGate
 {
+    /** @var array<string, bool|null> */
+    private array $cache = [];
+
     public function __construct(
         private readonly AuthorizationProfile $profile,
         private readonly AuthorizationDirectPermissionPolicy $permissionPolicy,
@@ -24,14 +27,19 @@ class ApplicationAuthorizationGate
 
     public function authorize(User $user, string $ability): ?bool
     {
+        $key = $user->getKey() . ':' . $ability;
+        if (array_key_exists($key, $this->cache)) {
+            return $this->cache[$key];
+        }
+
         if ($user->suspended_at !== null) {
-            return false;
+            return $this->cache[$key] = false;
         }
 
         $ability = PermissionNaming::resolve($ability);
 
         if (! $this->profile->isApplicationPermission($ability)) {
-            return null;
+            return $this->cache[$key] = null;
         }
 
         $modulePermission = $this->modules->permission($ability);
@@ -88,7 +96,7 @@ class ApplicationAuthorizationGate
             }
         }
 
-        return $this->hasApplicationPermission($user, $ability);
+        return $this->cache[$key] = $this->hasApplicationPermission($user, $ability);
     }
 
     private function hasApplicationPermission(User $user, string $ability): bool
@@ -115,5 +123,10 @@ class ApplicationAuthorizationGate
                         ))
                 ),
         );
+    }
+
+    public function reset(): void
+    {
+        $this->cache = [];
     }
 }

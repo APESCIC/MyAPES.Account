@@ -14,9 +14,10 @@ Laravel Herd (Pro) on Windows is the only supported local development setup for 
 | Database engine | Herd's MySQL 8.4 service on port 3306 |
 | Database name | `myapes_account_local` (`utf8mb4`, `utf8mb4_unicode_ci`) |
 | Database user | `root` with an empty password (Herd default, local only) |
-| Node | 22 from Herd's nvm (`%USERPROFILE%\.config\herd\bin\nvm\v22.*`) with npm 11.10 or newer. Herd's global Node default can be another version; the scripts pick Node 22 themselves |
+| Node | 22 from Herd's nvm (`%USERPROFILE%\.config\herd\bin\nvm\v22.*`) with npm 11.10 or newer, first on the user PATH. A standalone Node install in `C:\Program Files\nodejs` can shadow Herd's nvm; the scripts probe Herd's exact binaries and the preview gate fails on drift |
 | Vite dev server port | `5175` (unique to this project) |
 | Vite dev server | `https://myapes-account.test:5175` with Herd's site certificate (an HTTPS page cannot load plain-HTTP assets), started with no window by `scripts\preview.ps1` (stop with `-StopDevServer`), output in `storage/logs/vite-dev.log` |
+| Redis | Herd's Redis 7.0 service on port 6379 (`herd services:create redis`), carrying the cache, the queue and sessions (`CACHE_STORE=redis`, `QUEUE_CONNECTION=redis`, `SESSION_DRIVER=redis`, `REDIS_HOST=127.0.0.1`, `REDIS_PORT=6379`). The queue needs a worker: `composer run dev` starts one |
 | Mail | Herd's mail catcher: SMTP on `127.0.0.1:2525`, read in Herd > Mail. Nothing is delivered |
 | Tests | In-memory SQLite (`phpunit.xml`); they never touch `myapes_account_local` |
 

@@ -197,6 +197,19 @@ try {
         if ($run.Code -ne 0) { Stop-Preview 1 "npm ci failed: $($run.Output)" }
         Write-Ok 'Ran npm ci (restart the dev server if it was running)'
     } else { Write-Ok 'npm dependencies are current' }
+    # Herd's Node and npm must match the profile: Vite runs on Node $($p.node) and npm ci needs
+    # npm 11.10+ (repo .npmrc sets min-release-age). A standalone Node install elsewhere on PATH
+    # can shadow Herd's nvm, so probe the exact binaries this gate put first on PATH.
+    $nodeVersion = (& (Join-Path $nodeDir.FullName 'node.exe') -v).Trim()
+    if ($nodeVersion -notlike "v$($p.node).*") { Stop-Preview 1 "Herd's Node is $($nodeVersion), not major $($p.node). Run: herd node:install $($p.node)" }
+    $npmVersion = (& (Join-Path $nodeDir.FullName 'npm.cmd') -v)
+    if ($npmVersion) { $npmVersion = "$npmVersion".Trim() }
+    if (-not $npmVersion) { Stop-Preview 1 'npm did not report a version. Check Herd Node installation in Herd > Settings > JavaScript.' }
+    $npmMin = if ($p.npmMinimum) { [version]$p.npmMinimum } else { [version]'11.10.0' }
+    if ([version]$npmVersion -lt $npmMin) {
+        Stop-Preview 1 "npm $npmVersion is older than the profile minimum $($npmMin). Update Herd's Node's npm with: & `"$($nodeDir.FullName)\npm.cmd`" install -g npm@latest"
+    }
+    Write-Ok "Node $nodeVersion and npm $npmVersion meet the profile (Node $($p.node), npm >= $npmMin)"
     $pending = Invoke-Native { php artisan migrate:status --pending --no-ansi }
     if ($pending.Code -eq 0 -and $pending.Output -match '\bPending\b' -and $pending.Output -notmatch 'No pending migrations') {
         Write-Warn 'There are migrations that have not run. Ask before running php artisan migrate.'
@@ -222,6 +235,20 @@ try {
     if ($health.local.php -notlike "$($p.php).*") { Stop-Preview 1 "The preview runs PHP $($health.local.php), not $($p.php). Pin the site with: herd isolate $($p.php) --site=$($p.herdSite)" }
     Write-Ok "Serves $short on PHP $($health.local.php) through FastCGI"
     if ($health.status -ne 'ok') { Write-Warn "/healthz reports $($health.status). The preview still works; start the Herd service it needs if the task needs it." }
+    # The FastCGI account must be able to write storage\framework\cache: a cache file created
+    # by another identity (an elevated shell or a service account) made throttled routes fail
+    # with fopen Permission denied (LockableFile). Probe, self-heal the ACLs, and fail loudly.
+    $cacheDir = Join-Path $repo 'storage\framework\cache'
+    New-Item -ItemType Directory -Force (Join-Path $cacheDir 'data') | Out-Null
+    $probe = Join-Path $cacheDir ('data\preview-gate-' + [guid]::NewGuid().ToString('N') + '.tmp')
+    try { [System.IO.File]::WriteAllText($probe, 'probe') } catch {
+        Invoke-Native { icacls "$cacheDir" /reset /t /q } | Out-Null
+        try { [System.IO.File]::WriteAllText($probe, 'probe') } catch {
+            Stop-Preview 1 "Cannot write storage\framework\cache ($($_.Exception.Message)). Reset its ACLs with: icacls `"$cacheDir`" /reset /t /q"
+        }
+    }
+    Remove-Item $probe -Force -ErrorAction SilentlyContinue
+    Write-Ok 'storage\framework\cache is writable'
 
     # 4. Dev server ------------------------------------------------------------
     Write-Step "Dev server on port $($p.viteDevServerPort)"

@@ -14,6 +14,9 @@ final class ModulePackageRegistry
     /** @var array<string, ModuleManifest> */
     private array $manifests = [];
 
+    /** @var array<string, bool>|null */
+    private ?array $enabledCache = null;
+
     public function register(ModuleManifest $manifest): void
     {
         $this->manifests[$manifest->slug] = $manifest;
@@ -58,13 +61,13 @@ final class ModulePackageRegistry
             return $manifest->enabledByDefault;
         }
 
-        $row = OrganisationModule::query()->where('slug', $slug)->first();
-
-        if ($row === null) {
-            return $manifest->enabledByDefault;
+        if ($this->enabledCache === null) {
+            $this->enabledCache = OrganisationModule::query()
+                ->pluck('enabled', 'slug')
+                ->all();
         }
 
-        return $row->enabled;
+        return $this->enabledCache[$slug] ?? $manifest->enabledByDefault;
     }
 
     private function organisationModulesTableReady(): bool
