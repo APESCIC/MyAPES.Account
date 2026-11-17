@@ -31,7 +31,9 @@ class ReleaseEntryValidatorTest extends TestCase
         $errors = $this->validator->validatePayload($this->sample(), 'v0.2.0.json');
 
         $this->assertNotEmpty($errors);
-        $this->assertStringContainsString('Filename must match version', $errors[0]);
+        $this->assertTrue(collect($errors)->contains(
+            fn (string $e) => str_contains($e, 'Release filename must be'),
+        ));
     }
 
     #[Test]
@@ -42,7 +44,9 @@ class ReleaseEntryValidatorTest extends TestCase
 
         $errors = $this->validator->validatePayload($payload, 'v0.1.0.json');
 
-        $this->assertTrue(collect($errors)->contains(fn (string $e) => str_contains($e, 'date must be a real')));
+        $this->assertTrue(collect($errors)->contains(
+            fn (string $e) => str_contains($e, 'invalid ISO release date'),
+        ));
     }
 
     #[Test]
@@ -53,7 +57,9 @@ class ReleaseEntryValidatorTest extends TestCase
 
         $errors = $this->validator->validatePayload($payload, 'v0.1.0.json');
 
-        $this->assertTrue(collect($errors)->contains(fn (string $e) => str_contains($e, 'channel must be')));
+        $this->assertTrue(collect($errors)->contains(
+            fn (string $e) => str_contains($e, 'unsupported channel'),
+        ));
     }
 
     #[Test]

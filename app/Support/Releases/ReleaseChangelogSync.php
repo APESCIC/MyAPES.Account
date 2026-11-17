@@ -3,15 +3,19 @@
 namespace App\Support\Releases;
 
 use App\Models\Release;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use RuntimeException;
+use Throwable;
 
 /**
  * Deterministic transactional sync from changelog/releases/*.json into releases (#704).
  */
 class ReleaseChangelogSync
 {
+    public const LOCK_KEY = 'myapes.releases.sync';
+
     public function __construct(
         private readonly ReleaseEntryValidator $validator,
     ) {}
@@ -52,20 +56,16 @@ class ReleaseChangelogSync
     }
 
     /**
-     * Upsert every file-backed release. Current = VERSION, not highest future.
+     * Validate every file without writing. Throws on the first invalid entry.
      *
-     * @return int Number of rows upserted
+     * @return list<array{path: string, payload: array<string, mixed>, slug: string, checksum: ?string}>
      */
-    public function sync(?string $currentVersion = null): int
+    public function validateAll(): array
     {
         $paths = $this->entryPaths();
         if ($paths === []) {
             throw new RuntimeException('No changelog/releases/*.json entries found.');
         }
-
-        $currentVersion = $currentVersion !== null
-            ? ltrim(trim($currentVersion), 'vV')
-            : trim((string) file_get_contents(base_path('VERSION')));
 
         $payloads = [];
         $seenVersions = [];
@@ -95,77 +95,116 @@ class ReleaseChangelogSync
             ];
         }
 
-        if (! isset($seenVersions[$currentVersion])) {
-            throw new RuntimeException(
-                "VERSION [{$currentVersion}] has no matching changelog/releases file; current cannot be set.",
-            );
+        return $payloads;
+    }
+
+    /**
+     * Upsert every file-backed release. Current = VERSION, not highest future.
+     *
+     * @return int Number of rows upserted
+     */
+    public function sync(?string $currentVersion = null): int
+    {
+        $lock = Cache::lock(self::LOCK_KEY, 120);
+
+        if (! $lock->get()) {
+            throw new RuntimeException('Another releases sync is already running.');
         }
 
-        return (int) DB::transaction(function () use ($payloads, $currentVersion): int {
-            $previousVersion = null;
-            $upserted = 0;
-            $touchedIds = [];
+        try {
+            $payloads = $this->validateAll();
 
+            $currentVersion = $currentVersion !== null
+                ? ltrim(trim($currentVersion), 'vV')
+                : trim((string) file_get_contents(base_path('VERSION')));
+
+            $seenVersions = [];
             foreach ($payloads as $entry) {
-                /** @var array<string, mixed> $payload */
-                $payload = $entry['payload'];
-                $version = (string) $payload['version'];
-                $slug = $entry['slug'];
-
-                $existingBySlug = Release::query()->where('slug', $slug)->first();
-                if ($existingBySlug !== null && $existingBySlug->version !== $version) {
-                    throw new RuntimeException(
-                        "Slug [{$slug}] already belongs to {$existingBySlug->version}.",
-                    );
-                }
-
-                $attributes = [
-                    'version' => $version,
-                    'slug' => $slug,
-                    'previous_version' => is_string($payload['previous_version'] ?? null)
-                        ? $payload['previous_version']
-                        : $previousVersion,
-                    'released_at' => $payload['date'],
-                    'channel' => $payload['channel'],
-                    'type' => $payload['type'],
-                    'title' => $payload['title'],
-                    'is_current' => false,
-                    'is_published' => true,
-                    'summary' => $payload['summary'],
-                    'changes' => $payload['changes'],
-                    'affected_areas' => $payload['affected_areas'],
-                    'categories' => $payload['categories'],
-                    'audiences' => $payload['audiences'],
-                    'version_rationale' => $payload['version_rationale'],
-                    'validation' => $payload['validation'],
-                    'known_limitations' => $payload['known_limitations'],
-                    'rollback' => $payload['rollback'],
-                    'provenance' => $payload['provenance'],
-                    'references' => $payload['references'],
-                    'source_checksum' => $entry['checksum'],
-                    'source_path' => 'changelog/releases/'.basename($entry['path']),
-                ];
-
-                $row = Release::query()->updateOrCreate(['version' => $version], $attributes);
-                $touchedIds[] = $row->id;
-                $previousVersion = $version;
-                $upserted++;
+                $seenVersions[(string) $entry['payload']['version']] = true;
             }
 
-            // Fail closed on missing historical files: prune only when every
-            // previously published row is still represented by a file.
-            $orphanCount = Release::query()->whereNotIn('id', $touchedIds)->count();
-            if ($orphanCount > 0) {
+            if (! isset($seenVersions[$currentVersion])) {
                 throw new RuntimeException(
-                    "Sync refused: {$orphanCount} database release(s) have no matching file (history must not be pruned silently).",
+                    "VERSION [{$currentVersion}] has no matching changelog/releases file; current cannot be set.",
                 );
             }
 
-            Release::query()->update(['is_current' => false]);
-            Release::query()->where('version', $currentVersion)->update(['is_current' => true]);
+            return (int) DB::transaction(function () use ($payloads, $currentVersion): int {
+                $previousVersion = null;
+                $upserted = 0;
+                $touchedIds = [];
 
-            return $upserted;
-        });
+                foreach ($payloads as $entry) {
+                    /** @var array<string, mixed> $payload */
+                    $payload = $entry['payload'];
+                    $version = (string) $payload['version'];
+                    $slug = $entry['slug'];
+
+                    $existingBySlug = Release::query()->where('slug', $slug)->first();
+                    if ($existingBySlug !== null && $existingBySlug->version !== $version) {
+                        throw new RuntimeException(
+                            "Slug [{$slug}] already belongs to {$existingBySlug->version}.",
+                        );
+                    }
+
+                    if (! is_string($payload['date'] ?? null) || trim((string) $payload['date']) === '') {
+                        throw new RuntimeException(
+                            "Release [{$version}] is missing a release date; refusing to default to today.",
+                        );
+                    }
+
+                    $attributes = [
+                        'version' => $version,
+                        'slug' => $slug,
+                        'previous_version' => is_string($payload['previous_version'] ?? null)
+                            ? $payload['previous_version']
+                            : $previousVersion,
+                        'released_at' => $payload['date'],
+                        'channel' => $payload['channel'],
+                        'type' => $payload['type'],
+                        'title' => $payload['title'],
+                        'is_current' => false,
+                        'is_published' => true,
+                        'summary' => $payload['summary'],
+                        'changes' => $payload['changes'],
+                        'affected_areas' => $payload['affected_areas'],
+                        'categories' => $payload['categories'],
+                        'audiences' => $payload['audiences'],
+                        'version_rationale' => $payload['version_rationale'],
+                        'validation' => $payload['validation'],
+                        'known_limitations' => $payload['known_limitations'],
+                        'rollback' => $payload['rollback'],
+                        'provenance' => $payload['provenance'],
+                        'references' => $payload['references'],
+                        'source_checksum' => $entry['checksum'],
+                        'source_path' => 'changelog/releases/'.basename($entry['path']),
+                    ];
+
+                    $row = Release::query()->updateOrCreate(['version' => $version], $attributes);
+                    $touchedIds[] = $row->id;
+                    $previousVersion = $version;
+                    $upserted++;
+                }
+
+                // Fail closed on missing historical files: prune only when every
+                // previously published row is still represented by a file.
+                $orphanCount = Release::query()->whereNotIn('id', $touchedIds)->count();
+                if ($orphanCount > 0) {
+                    throw new RuntimeException(
+                        "Sync refused: {$orphanCount} database release(s) have no matching file (history must not be pruned silently).",
+                    );
+                }
+
+                Release::query()->update(['is_current' => false]);
+                Release::query()->where('version', $currentVersion)->update(['is_current' => true]);
+
+                return $upserted;
+            });
+        } catch (Throwable $exception) {
+            throw $exception;
+        } finally {
+            $lock->release();
+        }
     }
 
     private function versionFromBasename(string $basename): string

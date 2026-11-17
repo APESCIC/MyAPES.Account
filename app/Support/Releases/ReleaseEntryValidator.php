@@ -114,7 +114,22 @@ class ReleaseEntryValidator
         }
 
         foreach (self::REQUIRED_FIELDS as $field) {
-            if (! array_key_exists($field, $entry) || $this->isEmpty($entry[$field])) {
+            if (! array_key_exists($field, $entry)) {
+                $errors[] = "Release entry is missing required field [{$field}].";
+
+                continue;
+            }
+
+            // known_limitations and validation may be empty lists; the key must still exist.
+            if (in_array($field, ['known_limitations', 'validation'], true)) {
+                if (! is_array($entry[$field]) || ! array_is_list($entry[$field])) {
+                    $errors[] = "Release entry field [{$field}] must be a JSON list.";
+                }
+
+                continue;
+            }
+
+            if ($this->isEmpty($entry[$field])) {
                 $errors[] = "Release entry is missing required field [{$field}].";
             }
         }

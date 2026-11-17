@@ -56,7 +56,7 @@ class Release extends Model
      */
     public static function slugFromVersion(string $version): string
     {
-        $normalized = trim($version);
+        $normalized = ltrim(trim($version), 'vV');
 
         if (preg_match('/\A(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\z/', $normalized) !== 1) {
             throw new \InvalidArgumentException("Invalid semantic version [{$version}].");
@@ -67,7 +67,7 @@ class Release extends Model
 
     public static function filenameForVersion(string $version): string
     {
-        $normalized = trim($version);
+        $normalized = ltrim(trim($version), 'vV');
 
         return 'v'.$normalized.'.json';
     }
