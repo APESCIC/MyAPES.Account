@@ -4,7 +4,7 @@ Cursor's user rules and skills set how work is done here (branches, issues, pull
 
 Among the repository's own docs, this file is the agent summary: if an issue template, wiki page or other doc disagrees with it, fix the other doc in the same change.
 
-Cursor/agent layout standard: https://github.com/apescic-director/Cursor/blob/main/docs/cursor-agent-standards.md
+Cursor user rules and personal skills (Agent Store) own process; this file fills named slots only.
 
 The owner is Bambie Murphy. Write UK English (organisation, behaviour, colour, licence) in the product, docs, issues and pull requests. Never print, paste or commit secrets. Secrets live only in APES Vault (Bitwarden) and in the documented server/Admin locations — never in git.
 
