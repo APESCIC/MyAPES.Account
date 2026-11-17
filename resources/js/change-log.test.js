@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { filterReleases, matchesRelease } from './change-log.js';
+import { filterReleases, hashToReleaseId, matchesRelease } from './change-log.js';
 
 const releases = [
     {
@@ -91,4 +91,14 @@ test('all releases resets filtering while preserving the active search', () => {
 
 test('an unmatched search produces an empty result', () => {
     assert.deepEqual(filterReleases(releases, 'consultation scheduling', 'all'), []);
+});
+
+test('hashToReleaseId accepts release article hashes and rejects everything else', () => {
+    assert.equal(hashToReleaseId('#release-v0-69-0'), 'release-v0-69-0');
+    assert.equal(hashToReleaseId('release-v1-11-0'), 'release-v1-11-0');
+    assert.equal(hashToReleaseId('#RELEASE-V0-6-0'), 'release-v0-6-0');
+    assert.equal(hashToReleaseId(''), null);
+    assert.equal(hashToReleaseId('#'), null);
+    assert.equal(hashToReleaseId('#not-a-release'), null);
+    assert.equal(hashToReleaseId('#release-v'), null);
 });
