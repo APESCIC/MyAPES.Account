@@ -47,7 +47,13 @@ final class RecaptchaVerifier
 
     public function threshold(string $form): float
     {
-        $value = $this->registry->value(CoreIntegrations::RECAPTCHA, 'threshold_'.$form);
+        $override = request()->attributes->get('bot_protection.threshold_override');
+        if (is_numeric($override)) {
+            return max(0.0, min(1.0, (float) $override));
+        }
+
+        $value = $this->registry->value(CoreIntegrations::RECAPTCHA, 'threshold_'.$form)
+            ?? $this->registry->value(CoreIntegrations::RECAPTCHA, 'threshold_ticket');
 
         return is_numeric($value) ? max(0.0, min(1.0, (float) $value)) : 0.5;
     }

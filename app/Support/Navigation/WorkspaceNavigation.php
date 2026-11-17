@@ -296,6 +296,7 @@ final class WorkspaceNavigation
             'system' => [
                 ['admin.emails', __('admin.nav.emails'), route('admin.emails.index'), 'mail', ['admin.emails.view'], ['admin.emails.*']],
                 ['admin.emails.import', __('admin.nav.email_import'), route('admin.emails.import.index'), 'inbox', ['admin.emails.view'], ['admin.emails.import.*']],
+                ['admin.tickets.embed-forms', __('admin.nav.embed_forms'), route('admin.tickets.embed-forms.index'), 'code-2', ['admin.settings.manage'], ['admin.tickets.embed-forms.*']],
                 ['admin.settings', __('admin.nav.settings'), route('admin.settings.show', AdminSettingsController::TAB_GENERAL), 'settings', ['admin.settings.view'], ['admin.settings.*']],
                 ['admin.maintenance', __('admin.nav.maintenance'), route('admin.maintenance.index'), 'circle-pause', ['admin.maintenance.manage'], ['admin.maintenance.*']],
             ],

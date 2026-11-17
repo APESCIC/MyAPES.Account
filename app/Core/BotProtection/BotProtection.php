@@ -25,11 +25,13 @@ final class BotProtection
 
     public const TICKET = 'ticket';
 
+    public const TICKET_EMBED = 'ticket_embed';
+
     public const RECRUITMENT = 'recruitment';
 
     public const LOGIN = 'login';
 
-    public const FORMS = [self::REGISTER, self::FORGOT_PASSWORD, self::TICKET, self::RECRUITMENT, self::LOGIN];
+    public const FORMS = [self::REGISTER, self::FORGOT_PASSWORD, self::TICKET, self::TICKET_EMBED, self::RECRUITMENT, self::LOGIN];
 
     public const HONEYPOT_FIELD = 'website_url';
 
