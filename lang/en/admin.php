@@ -430,6 +430,9 @@ return [
         'plugins' => 'Plugins',
         'versions' => 'Versions',
         'emails' => 'Email Templates',
+        'email_import' => 'Email import',
+        'embed_forms' => 'Embed forms',
+        'settings' => 'Settings',
         'maintenance' => 'Maintenance',
     ],
     'emails' => [

@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
@@ -27,7 +28,6 @@ return new class extends Migration
         });
 
         Schema::table('support_tickets', function (Blueprint $table): void {
-            $table->foreignId('user_id')->nullable()->change();
             $table->string('guest_name')->nullable()->after('user_id');
             $table->string('guest_email')->nullable()->after('guest_name');
             $table->timestamp('guest_email_verified_at')->nullable()->after('guest_email');
@@ -38,6 +38,8 @@ return new class extends Migration
             $table->string('guest_consent_policy_version', 64)->nullable()->after('guest_consent_method');
             $table->timestamp('guest_consented_at')->nullable()->after('guest_consent_policy_version');
         });
+
+        $this->makeUserIdNullable();
 
         Schema::create('ticket_embed_verifications', function (Blueprint $table): void {
             $table->id();
@@ -65,9 +67,55 @@ return new class extends Migration
                 'guest_consent_policy_version',
                 'guest_consented_at',
             ]);
-            $table->foreignId('user_id')->nullable(false)->change();
         });
 
+        $this->makeUserIdRequired();
+
         Schema::dropIfExists('ticket_embed_forms');
+    }
+
+    private function makeUserIdNullable(): void
+    {
+        $driver = Schema::getConnection()->getDriverName();
+
+        if ($driver === 'sqlite') {
+            // SQLite rebuilds the table for nullable FK changes via Laravel's schema grammar.
+            Schema::table('support_tickets', function (Blueprint $table): void {
+                $table->unsignedBigInteger('user_id')->nullable()->change();
+            });
+
+            return;
+        }
+
+        Schema::table('support_tickets', function (Blueprint $table): void {
+            $table->dropForeign(['user_id']);
+        });
+
+        Schema::table('support_tickets', function (Blueprint $table): void {
+            $table->unsignedBigInteger('user_id')->nullable()->change();
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
+        });
+    }
+
+    private function makeUserIdRequired(): void
+    {
+        $driver = Schema::getConnection()->getDriverName();
+
+        if ($driver === 'sqlite') {
+            Schema::table('support_tickets', function (Blueprint $table): void {
+                $table->unsignedBigInteger('user_id')->nullable(false)->change();
+            });
+
+            return;
+        }
+
+        Schema::table('support_tickets', function (Blueprint $table): void {
+            $table->dropForeign(['user_id']);
+        });
+
+        Schema::table('support_tickets', function (Blueprint $table): void {
+            $table->unsignedBigInteger('user_id')->nullable(false)->change();
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
+        });
     }
 };
