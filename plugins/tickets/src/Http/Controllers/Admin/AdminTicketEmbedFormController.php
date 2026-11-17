@@ -33,10 +33,13 @@ class AdminTicketEmbedFormController extends Controller
     {
         $this->authorizeManage();
 
+        $defaults = $this->defaultLocalOrigins();
+
         return view('tickets::admin.embed-forms.edit', [
             'form' => null,
             'serviceOptions' => $this->serviceOptions(),
-            'defaultOrigins' => $this->defaultLocalOrigins(),
+            'defaultOrigins' => $defaults,
+            'originsText' => $this->originsText(null, $defaults),
         ]);
     }
 
@@ -63,83 +66,89 @@ class AdminTicketEmbedFormController extends Controller
             ->with('status', __('tickets::embed.admin.created', ['name' => $form->name]));
     }
 
-    public function edit(TicketEmbedForm $embedForm): View
+    public function edit(int $embedForm): View
     {
         $this->authorizeManage();
+        $form = TicketEmbedForm::query()->findOrFail($embedForm);
 
         return view('tickets::admin.embed-forms.edit', [
-            'form' => $embedForm,
+            'form' => $form,
             'serviceOptions' => $this->serviceOptions(),
             'defaultOrigins' => $this->defaultLocalOrigins(),
+            'originsText' => $this->originsText($form, $this->defaultLocalOrigins()),
             'loaderUrl' => route('tickets.embed.loader'),
-            'embedSnippet' => $this->snippet($embedForm),
+            'embedSnippet' => $this->snippet($form),
         ]);
     }
 
-    public function update(Request $request, TicketEmbedForm $embedForm, AuditLogger $audit): RedirectResponse
+    public function update(Request $request, int $embedForm, AuditLogger $audit): RedirectResponse
     {
         $this->authorizeManage();
+        $form = TicketEmbedForm::query()->findOrFail($embedForm);
         $validated = $this->validated($request);
-        $embedForm->fill($validated)->save();
+        $form->fill($validated)->save();
 
         $audit->record('admin.tickets.embed_form_updated', $request->user(), context: [
-            'ticket_embed_form_id' => $embedForm->id,
-            'name' => $embedForm->name,
+            'ticket_embed_form_id' => $form->id,
+            'name' => $form->name,
         ]);
 
         return redirect()
-            ->route('admin.tickets.embed-forms.edit', $embedForm)
-            ->with('status', __('tickets::embed.admin.updated', ['name' => $embedForm->name]));
+            ->route('admin.tickets.embed-forms.edit', $form)
+            ->with('status', __('tickets::embed.admin.updated', ['name' => $form->name]));
     }
 
-    public function destroy(Request $request, TicketEmbedForm $embedForm, AuditLogger $audit): RedirectResponse
+    public function destroy(Request $request, int $embedForm, AuditLogger $audit): RedirectResponse
     {
         $this->authorizeManage();
-        $name = $embedForm->name;
+        $form = TicketEmbedForm::query()->findOrFail($embedForm);
+        $name = $form->name;
         $audit->record('admin.tickets.embed_form_deleted', $request->user(), context: [
             'name' => $name,
-            'public_key' => $embedForm->public_key,
+            'public_key' => $form->public_key,
         ]);
-        $embedForm->delete();
+        $form->delete();
 
         return redirect()
             ->route('admin.tickets.embed-forms.index')
             ->with('status', __('tickets::embed.admin.deleted', ['name' => $name]));
     }
 
-    public function toggle(Request $request, TicketEmbedForm $embedForm, AuditLogger $audit): RedirectResponse
+    public function toggle(Request $request, int $embedForm, AuditLogger $audit): RedirectResponse
     {
         $this->authorizeManage();
-        $embedForm->forceFill(['is_active' => ! $embedForm->is_active])->save();
+        $form = TicketEmbedForm::query()->findOrFail($embedForm);
+        $form->forceFill(['is_active' => ! $form->is_active])->save();
         $audit->record(
-            $embedForm->is_active ? 'admin.tickets.embed_form_enabled' : 'admin.tickets.embed_form_disabled',
+            $form->is_active ? 'admin.tickets.embed_form_enabled' : 'admin.tickets.embed_form_disabled',
             $request->user(),
-            context: ['ticket_embed_form_id' => $embedForm->id],
+            context: ['ticket_embed_form_id' => $form->id],
         );
 
         return redirect()
-            ->route('admin.tickets.embed-forms.edit', $embedForm)
-            ->with('status', __($embedForm->is_active ? 'tickets::embed.admin.enabled' : 'tickets::embed.admin.disabled', [
-                'name' => $embedForm->name,
+            ->route('admin.tickets.embed-forms.edit', $form)
+            ->with('status', __($form->is_active ? 'tickets::embed.admin.enabled' : 'tickets::embed.admin.disabled', [
+                'name' => $form->name,
             ]));
     }
 
-    public function rotate(Request $request, TicketEmbedForm $embedForm, AuditLogger $audit): RedirectResponse
+    public function rotate(Request $request, int $embedForm, AuditLogger $audit): RedirectResponse
     {
         $this->authorizeManage();
-        $embedForm->forceFill([
+        $form = TicketEmbedForm::query()->findOrFail($embedForm);
+        $form->forceFill([
             'public_key' => TicketEmbedForm::newPublicKey(),
             'signing_secret' => TicketEmbedForm::newSigningSecret(),
         ])->save();
 
         $audit->record('admin.tickets.embed_form_rotated', $request->user(), context: [
-            'ticket_embed_form_id' => $embedForm->id,
-            'public_key' => $embedForm->public_key,
+            'ticket_embed_form_id' => $form->id,
+            'public_key' => $form->public_key,
         ]);
 
         return redirect()
-            ->route('admin.tickets.embed-forms.edit', $embedForm)
-            ->with('status', __('tickets::embed.admin.rotated', ['name' => $embedForm->name]));
+            ->route('admin.tickets.embed-forms.edit', $form)
+            ->with('status', __('tickets::embed.admin.rotated', ['name' => $form->name]));
     }
 
     private function authorizeManage(): void
@@ -231,5 +240,18 @@ class AdminTicketEmbedFormController extends Controller
 <div data-myapes-ticket-embed data-public-key="{$key}"></div>
 <script src="{$loader}" async defer></script>
 HTML;
+    }
+
+    /**
+     * @param  list<string>  $defaults
+     */
+    private function originsText(?TicketEmbedForm $form, array $defaults): string
+    {
+        $old = old('allowed_origins_text');
+        if (is_string($old)) {
+            return $old;
+        }
+
+        return implode("\n", $form?->allowed_origins ?? $defaults);
     }
 }

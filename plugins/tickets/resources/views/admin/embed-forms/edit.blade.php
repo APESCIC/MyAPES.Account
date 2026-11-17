@@ -48,13 +48,7 @@
 
             <p>
                 <label for="allowed_origins_text">{{ __('tickets::embed.admin.origins') }}</label>
-                <textarea id="allowed_origins_text" name="allowed_origins_text" rows="6" required>@php
-                    $origins = old('allowed_origins_text');
-                    if ($origins === null) {
-                        $origins = implode("\n", $form->allowed_origins ?? $defaultOrigins);
-                    }
-                    echo e($origins);
-                @endphp</textarea>
+                <textarea id="allowed_origins_text" name="allowed_origins_text" rows="6" required>{{ $originsText }}</textarea>
                 <span class="muted">{{ __('tickets::embed.admin.origins_help') }}</span>
             </p>
 
@@ -85,11 +79,11 @@
                     @csrf
                     <button type="submit">{{ $form->is_active ? __('tickets::embed.admin.toggle_off') : __('tickets::embed.admin.toggle_on') }}</button>
                 </form>
-                <form method="post" action="{{ route('admin.tickets.embed-forms.rotate', $form) }}" onsubmit="return confirm('Rotate keys? Existing embeds will stop until updated.');">
+                <form method="post" action="{{ route('admin.tickets.embed-forms.rotate', $form) }}" data-confirm="{{ __('tickets::embed.admin.rotate_confirm') }}">
                     @csrf
                     <button type="submit">{{ __('tickets::embed.admin.rotate') }}</button>
                 </form>
-                <form method="post" action="{{ route('admin.tickets.embed-forms.destroy', $form) }}" onsubmit="return confirm('Delete this embed form?');">
+                <form method="post" action="{{ route('admin.tickets.embed-forms.destroy', $form) }}" data-confirm="{{ __('tickets::embed.admin.delete_confirm') }}">
                     @csrf
                     @method('DELETE')
                     <button type="submit">{{ __('tickets::embed.admin.delete') }}</button>

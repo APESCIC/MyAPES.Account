@@ -4,7 +4,11 @@
     @if ($form->confirmation_text)
         <p>{{ $form->confirmation_text }}</p>
     @endif
+    <div hidden data-embed-submitted data-reference="{{ '#'.$ticket->id }}"></div>
     @push('embed_events')
-        post('submitted', { reference: @json('#'.$ticket->id) });
+        var submitted = document.querySelector('[data-embed-submitted]');
+        if (submitted) {
+            post('submitted', { reference: submitted.getAttribute('data-reference') });
+        }
     @endpush
 </x-tickets::embed.layout>

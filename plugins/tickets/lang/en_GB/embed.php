@@ -65,6 +65,8 @@ return [
         'enabled' => 'Enabled embed form “:name”.',
         'disabled' => 'Disabled embed form “:name”.',
         'rotated' => 'Rotated keys for “:name”. Update any pasted embed code.',
+        'rotate_confirm' => 'Rotate keys? Existing embeds will stop until updated.',
+        'delete_confirm' => 'Delete this embed form?',
         'none' => 'No embed forms yet.',
         'status_active' => 'Active',
         'status_inactive' => 'Inactive',
