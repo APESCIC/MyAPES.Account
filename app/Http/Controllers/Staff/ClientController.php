@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Staff;
 
 use App\Core\Accounts\PhoneVerificationPinService;
 use App\Core\Accounts\User;
+use App\Core\Search\RecordSearch;
 use App\Services\UserActivityTimeline;
 use App\Services\UserProfileHubActions;
 use App\Services\UserRecordsSummary;
@@ -29,21 +30,29 @@ class ClientController extends Controller
         private readonly AuthorizationProfile $profile,
     ) {}
 
-    public function index(Request $request): View
+    public function index(Request $request, RecordSearch $search): View
     {
-        Gate::authorize(AuthorizationProfile::PERMISSION_CLIENT_CREATE);
+        Gate::authorize(AuthorizationProfile::PERMISSION_CLIENT_SEARCH);
 
-        $clients = User::query()
-            ->where('identity_type', User::IDENTITY_LOCAL)
-            ->whereDoesntHave('roles', function ($query): void {
-                $query->whereIn('name', $this->profile->directoryProtectedRoles());
-            })
-            ->whereNotNull('registration_consent_staff_id')
-            ->latest('id')
-            ->limit(50)
-            ->get();
+        $q = trim((string) $request->query('q', ''));
+
+        if ($q !== '' && strlen($q) >= 2) {
+            $results = $search->search(
+                $request->user(),
+                $q,
+                perType: 25,
+            );
+
+            $clients = collect($results['groups'][0]['hits'] ?? [])
+                ->map(fn (array $hit) => User::find($hit['id']))
+                ->filter()
+                ->values();
+        } else {
+            $clients = collect();
+        }
 
         return view('clients.index', [
+            'q' => $q,
             'clients' => $clients,
             'pinMin' => PhoneVerificationPinService::MIN_LENGTH,
             'pinMax' => PhoneVerificationPinService::MAX_LENGTH,

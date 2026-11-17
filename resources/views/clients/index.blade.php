@@ -3,10 +3,35 @@
 @section('title', __('clients.title').' | '.__('workspace.app_name'))
 
 @section('content')
-    <div class="panel" data-clients>
+    <div class="panel">
         <h1>{{ __('clients.title') }}</h1>
         <p class="muted">{{ __('clients.intro') }}</p>
+
+        <form method="get" action="{{ route('clients.index') }}">
+            <label for="q">{{ __('clients.search') }}</label>
+            <input id="q" name="q" value="{{ $q ?? '' }}" placeholder="{{ __('clients.search_placeholder') }}" autocomplete="off" autofocus>
+            <button type="submit">Search</button>
+            @if($q ?? '')
+                <a href="{{ route('clients.index') }}">Clear</a>
+            @endif
+        </form>
     </div>
+
+    @if(($q ?? '') !== '')
+        <div class="panel">
+            <h2>{{ __('clients.search_results') }}</h2>
+            @if($clients->isNotEmpty())
+                @foreach($clients as $client)
+                    <p>
+                        <a href="{{ route('clients.show', $client) }}">{{ $client->name }}</a>
+                        <span class="muted">· {{ $client->email ?: $client->username }}</span>
+                    </p>
+                @endforeach
+            @else
+                <p class="muted">{{ __('clients.no_results', ['query' => $q]) }}</p>
+            @endif
+        </div>
+    @endif
 
     <div class="panel" id="create" data-client-create>
         <h2>{{ __('clients.create_heading') }}</h2>
@@ -78,17 +103,5 @@
 
             <button type="submit">{{ __('clients.create_submit') }}</button>
         </form>
-    </div>
-
-    <div class="panel" data-client-list>
-        <h2>{{ __('clients.recent_heading') }}</h2>
-        @forelse($clients as $client)
-            <p data-client-result="{{ $client->id }}">
-                <a href="{{ route('clients.show', $client) }}">{{ $client->name }}</a>
-                <span class="muted">· {{ $client->username }}</span>
-            </p>
-        @empty
-            <p class="muted">{{ __('clients.none') }}</p>
-        @endforelse
     </div>
 @endsection
