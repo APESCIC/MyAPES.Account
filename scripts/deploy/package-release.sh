@@ -60,6 +60,7 @@ grep -qx './artisan' build/archive-list.txt
 grep -qx './public/build/manifest.json' build/archive-list.txt
 grep -qx './public/storage/.myapes-selective-media' build/archive-list.txt
 grep -qx './resources/data/releases.json' build/archive-list.txt
+grep -q './changelog/releases/' build/archive-list.txt
 grep -qx './resources/data/module-runtime-contract.json' build/archive-list.txt
 grep -qx './config/modules.php' build/archive-list.txt
 grep -qx './config/permission.php' build/archive-list.txt

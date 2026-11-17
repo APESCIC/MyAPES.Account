@@ -1113,6 +1113,7 @@ class DeploymentAuthenticationContractTest extends TestCase
             'vendor/autoload.php',
             'public/build/manifest.json',
             'resources/data/releases.json',
+            'changelog/releases',
             'resources/data/module-runtime-contract.json',
             'config/modules.php',
             'config/permission.php',
@@ -1135,6 +1136,12 @@ class DeploymentAuthenticationContractTest extends TestCase
             'scripts/deploy/production.env.example',
             'DEPLOYMENT-CONTROLS.sha256',
         ], $requiredPaths);
+        $this->assertStringContainsString('run_artisan myapes:releases-sync --no-interaction --no-ansi', $script);
+        // PHPUnit assertLessThan($expected, $actual) ⇒ $actual < $expected (migrate before sync).
+        $this->assertLessThan(
+            $this->position($script, 'run_artisan myapes:releases-sync --no-interaction --no-ansi'),
+            $this->position($script, 'run_artisan migrate --force'),
+        );
     }
 
     public function test_workflow_restarts_after_activation_and_rolls_back_restart_or_verification_failures(): void
@@ -1257,7 +1264,8 @@ class DeploymentAuthenticationContractTest extends TestCase
         $this->assertMatchesRegularExpression('/permissions:\s*\R\s*contents: write\s*\R\s*issues: read/m', $workflow);
         $this->assertStringContainsString('if [[ "$GITHUB_REF_NAME" != "v$app_version" ]]; then', $workflow);
         $this->assertStringContainsString('compare/$GITHUB_SHA...main', $workflow);
-        $this->assertStringContainsString('scripts/deploy/github-release-notes.sh resources/data/releases.json', $workflow);
+        $this->assertStringContainsString('notes_file="changelog/releases/v${APP_VERSION}.json"', $workflow);
+        $this->assertStringContainsString('scripts/deploy/github-release-notes.sh "$notes_file"', $workflow);
         $this->assertStringContainsString('repos/$GITHUB_REPOSITORY/milestones?state=all', $workflow);
         $this->assertStringContainsString('select(startswith("v" + env.APP_VERSION + " ") or startswith("v" + env.APP_VERSION + ":"))', $workflow);
         $this->assertStringContainsString('gh release create "$GITHUB_REF_NAME" --verify-tag --title "$RELEASE_TITLE"', $workflow);
@@ -1481,6 +1489,7 @@ class DeploymentAuthenticationContractTest extends TestCase
         $this->assertStringContainsString('app_version=', $workflow);
         $this->assertStringContainsString('scripts/deploy/package-release.sh', $workflow);
         $this->assertStringContainsString("grep -qx './VERSION' build/archive-list.txt", $packaging);
+        $this->assertStringContainsString("grep -q './changelog/releases/' build/archive-list.txt", $packaging);
         foreach ([
             'resources/data/releases.json',
             'resources/data/module-runtime-contract.json',
