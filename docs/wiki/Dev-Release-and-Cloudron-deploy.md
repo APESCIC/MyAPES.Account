@@ -10,15 +10,15 @@ Work ships once per milestone: all the milestone's issues are completed on the m
 The milestone's version is the `vMAJOR.MINOR.PATCH` at the start of its GitHub milestone title, for example `v0.63.1 Dev: Laravel Herd local development`. Branch, pull request, tag and release names all come from it, never from GitHub's milestone number. See [version-shipping.mdc](https://github.com/APESCIC/MyAPES.Account/blob/main/.cursor/rules/version-shipping.mdc).
 
 ## The milestone pull request
-1. Prepend exactly one new record, at the milestone's version, to `resources/data/releases.json`:
+1. Scaffold the milestone release with `php artisan myapes:changelog-prepare` (adds `changelog/releases/vX.Y.Z.json`, sets `VERSION` and `application_version`, and regenerates `resources/data/releases.json`):
    ```powershell
    php artisan myapes:changelog-prepare --type=<patch|minor|major> --title="Short public title" --issue=<n> --pr=<n>
    ```
-   Pick the `--type` that produces the milestone's version (try `--dry-run` first). Replace every `TODO:` field.
-2. Set `VERSION` and `resources/data/module-runtime-contract.json` `application_version` to the same version with `composer milestone:bump -- vX.Y.Z`.
+   Pick the `--type` that produces the milestone's version (try `--dry-run` first). Edit the new per-release file only; do not hand-edit `resources/data/releases.json`.
+2. Replace every `TODO:` in `changelog/releases/vX.Y.Z.json`.
 3. Update the version-pinned tests (change log, health, rollback, release history).
-4. Validate: `php artisan myapes:changelog-validate --base-ref=origin/main`.
-5. Public notes never contain credentials, personal data or exploitable detail.
+4. Validate: `php artisan myapes:changelog-validate --base-ref=origin/main`, then `composer milestone:bump -- vX.Y.Z --check`.
+5. Public notes never contain credentials, personal data or exploitable detail. There is no Admin release editor; APES Newsroom is the interaction reference for the hub UI only.
 
 ## After merge
 Merge with a merge commit (no squash), only after Bambie has approved the milestone.
@@ -30,6 +30,11 @@ Merge with a merge commit (no squash), only after Bambie has approved the milest
 5. The milestone closes by itself. After a successful deploy, [milestone-close.yml](https://github.com/APESCIC/MyAPES.Account/blob/main/.github/workflows/milestone-close.yml) closes any milestone whose issues are all closed (closing a finished epic first). A milestone where nothing shipped closes without a deploy. To check by hand, run `composer milestone:close-ready -- --dry-run`.
 
 Deploy secrets live in the `cloudron-deploy` GitHub environment. Never print or commit them. Rollback is forward-only; see the README's maintenance section.
+
+## Change log on Cloudron
+- Canonical release copy lives in git under `changelog/releases/vX.Y.Z.json`. Production sets `MYAPES_CHANGELOG_USE_DATABASE=true` so `/change-log` reads the projected `releases` table.
+- During deploy, `scripts/deploy/activate-release.sh` runs `php artisan myapes:releases-sync` after migrations and before the app is switched live (fail-closed if sync fails).
+- Local development uses Laravel Herd only (see [[Local setup (Herd)|Dev-Local-setup-Herd]]); run `php artisan myapes:releases-sync` when you need the database view to match files.
 
 ## Queue worker, migrations and health (from v0.62.0)
 - **Migrations** run on every deploy (`activate-release.sh` runs `php artisan migrate --force` before the switch). v0.62.0 adds `api_clients`, `personal_access_tokens` and the webhook tables; nothing is dropped or renamed.

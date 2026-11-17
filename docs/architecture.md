@@ -18,7 +18,7 @@ Always on. Core has no knowledge of a specific organisation area or feature.
 - Notifications (the delivery mechanism, not a feature's message copy). Mail templates, branding, the outbound log and Admin Emails: [mail.md](mail.md)
 - Settings: the shared store `App\Core\Settings\AppSettings` (table `app_settings`; a non-empty `.env` value wins). General options (support contact, public registration, site banner) are the `general` group, read through `App\Core\Settings\GeneralSettings` and edited on Admin → Settings → General ([wiki](wiki/General-settings.md))
 - Unified Admin shell, including maintenance
-- Audit, health, and the change log
+- Audit, health, and the change log (public `/change-log` hub; no Admin release editor)
 - Shared attachments
 
 Core depends only on the framework and vendor packages. It exposes contracts that modules and plugins implement: registry, navigation, dashboard providers, settings, permissions, and the current module context.
@@ -154,6 +154,17 @@ The app has three areas ([#464](https://github.com/APESCIC/MyAPES-Account/issues
 | Admin | Administrators and anyone granted an `admin.*` permission | `/admin` | — |
 
 The Staff | Admin switch only appears when a user can use both panels.
+
+## Release history and change log hub
+
+| Layer | Role |
+| --- | --- |
+| Git (`changelog/releases/vX.Y.Z.json`) | Source of truth for public release copy; authored with `php artisan myapes:changelog-prepare` |
+| Git (`resources/data/releases.json`) | Generated compatibility aggregate; not hand-edited |
+| Database (`releases` table) | Production projection for `/change-log` when `MYAPES_CHANGELOG_USE_DATABASE=true` |
+| Deploy | `activate-release.sh` runs `php artisan myapes:releases-sync` after migrations |
+
+Local development uses Laravel Herd (never Laragon). There is no Admin UI to edit releases. Hub interaction patterns follow APES Newsroom as a reference only.
 
 ## What is out of this document
 
