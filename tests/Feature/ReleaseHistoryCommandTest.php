@@ -295,7 +295,7 @@ class ReleaseHistoryCommandTest extends TestCase
         foreach ([
             'clients page',
             'staff-side accounts',
-            'client.search',
+            'staff.clients.search',
             'pull request #860',
             'v0.68.0 tag',
         ] as $requiredReleaseText) {

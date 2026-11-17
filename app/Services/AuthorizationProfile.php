@@ -30,11 +30,11 @@ class AuthorizationProfile
 
     public const PERMISSION_CLIENT_VIEW = 'staff.clients.view';
 
-    public const PERMISSION_CLIENT_SEARCH = 'client.search';
+    public const PERMISSION_CLIENT_SEARCH = 'staff.clients.search';
 
-    public const PERMISSION_CLIENT_MANAGE = 'client.manage';
+    public const PERMISSION_CLIENT_MANAGE = 'staff.clients.manage';
 
-    public const PERMISSION_CLIENT_SENSITIVE = 'client.sensitive';
+    public const PERMISSION_CLIENT_SENSITIVE = 'staff.clients.sensitive';
 
     private const BASE_PERMISSION_MATRIX = [
         self::ROLE_SERVICE_USER => [],

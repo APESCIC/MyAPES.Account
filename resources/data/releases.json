@@ -9,7 +9,7 @@
     "changes": [
       "Staff, Clients has a search box. Two or more characters match name, email, username or phone, and each result opens the client profile.",
       "Staff-side accounts are left out of that search.",
-      "New permissions client.search, client.manage and client.sensitive are on the View accounts and Manage accounts packs."
+      "New permissions staff.clients.search, staff.clients.manage and staff.clients.sensitive are on the View accounts and Manage accounts packs."
     ],
     "affected_areas": [
       "Staff area (Clients search)",
