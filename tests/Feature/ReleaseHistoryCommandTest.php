@@ -274,32 +274,32 @@ class ReleaseHistoryCommandTest extends TestCase
         $this->assertSame('2026-07-24', $releases[248]['date']);
         $this->assertSame('2026-07-24', $releases[249]['date']);
 
-        foreach (array_slice($releases, 241) as $release) {
+        foreach (array_slice($releases, 242) as $release) {
             $this->assertStringContainsString('reconstructed from merged pull request', $release['provenance']);
         }
 
         $current = $repository->current();
         $this->assertSame('stable', $current['channel']);
-        $this->assertSame('minor', $current['type']);
+        $this->assertSame('patch', $current['type']);
         $this->assertSame(
             [
                 [
-                    'label' => 'Issue #526',
-                    'url' => 'https://github.com/APESCIC/MyAPES-Account/issues/526',
+                    'label' => 'Issue #857',
+                    'url' => 'https://github.com/APESCIC/MyAPES-Account/issues/857',
                 ],
                 [
-                    'label' => 'Pull request #856',
-                    'url' => 'https://github.com/APESCIC/MyAPES-Account/pull/856',
+                    'label' => 'Pull request #858',
+                    'url' => 'https://github.com/APESCIC/MyAPES-Account/pull/858',
                 ],
             ],
             $current['references'],
         );
         $currentText = strtolower(json_encode($current, JSON_THROW_ON_ERROR));
         foreach ([
-            'record search',
-            'ctrl+k',
-            'microchip',
-            'pull request #856',
+            'agent store',
+            'agents.md',
+            'documentation-only',
+            'pull request #858',
         ] as $requiredReleaseText) {
             $this->assertStringContainsString($requiredReleaseText, $currentText);
         }
