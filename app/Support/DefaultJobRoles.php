@@ -49,18 +49,21 @@ final class DefaultJobRoles
                 'permissions' => [
                     'admin.analytics.view',
                     'admin.users.view',
+                    'client.search',
                 ],
             ],
             self::CLIENT_SERVICES_ADVISOR => [
                 'title' => 'Client Services Advisor',
                 'permissions' => [
                     'admin.users.view',
+                    'client.search',
                 ],
             ],
             self::RECEPTIONIST => [
                 'title' => 'Receptionist',
                 'permissions' => [
                     'admin.users.view',
+                    'client.search',
                 ],
             ],
             self::HUMAN_RESOURCES => [

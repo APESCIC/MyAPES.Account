@@ -36,11 +36,11 @@ final class JobRoleCapabilityPacks
             ],
             'view-accounts' => [
                 'title' => 'View accounts',
-                'permissions' => ['admin.users.view'],
+                'permissions' => ['admin.users.view', 'client.search'],
             ],
             'manage-accounts' => [
                 'title' => 'Manage accounts',
-                'permissions' => ['admin.users.manage'],
+                'permissions' => ['admin.users.manage', 'client.manage'],
             ],
             'staff-module-work' => [
                 'title' => 'Staff module work',

@@ -30,28 +30,41 @@ class AuthorizationProfile
 
     public const PERMISSION_CLIENT_VIEW = 'staff.clients.view';
 
+    public const PERMISSION_CLIENT_SEARCH = 'client.search';
+
+    public const PERMISSION_CLIENT_MANAGE = 'client.manage';
+
+    public const PERMISSION_CLIENT_SENSITIVE = 'client.sensitive';
+
     private const BASE_PERMISSION_MATRIX = [
         self::ROLE_SERVICE_USER => [],
         self::ROLE_STUDENT => [
             self::PERMISSION_STUDENT_ACCESS,
             self::PERMISSION_CLIENT_CREATE,
             self::PERMISSION_CLIENT_VIEW,
+            self::PERMISSION_CLIENT_SEARCH,
         ],
         self::ROLE_VOLUNTEER => [
             self::PERMISSION_VOLUNTEER_ACCESS,
             self::PERMISSION_CLIENT_CREATE,
             self::PERMISSION_CLIENT_VIEW,
+            self::PERMISSION_CLIENT_SEARCH,
         ],
         self::ROLE_STAFF => [
             self::PERMISSION_STAFF_ACCESS,
             self::PERMISSION_CLIENT_CREATE,
             self::PERMISSION_CLIENT_VIEW,
+            self::PERMISSION_CLIENT_SEARCH,
+            self::PERMISSION_CLIENT_MANAGE,
         ],
         self::ROLE_ADMINISTRATOR => [
             self::PERMISSION_STAFF_ACCESS,
             self::PERMISSION_ADMIN_ACCESS,
             self::PERMISSION_CLIENT_CREATE,
             self::PERMISSION_CLIENT_VIEW,
+            self::PERMISSION_CLIENT_SEARCH,
+            self::PERMISSION_CLIENT_MANAGE,
+            self::PERMISSION_CLIENT_SENSITIVE,
             'admin.users.view',
             'admin.users.manage',
             'admin.groups.view',
@@ -90,6 +103,7 @@ class AuthorizationProfile
         'admin.emails.manage',
         'admin.settings.view',
         'admin.settings.manage',
+        self::PERMISSION_CLIENT_SENSITIVE,
     ];
 
     private const LEGACY_TO_PROTECTED = [
