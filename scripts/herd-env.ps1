@@ -11,6 +11,11 @@
     version; this only changes the current session. Also sets XDEBUG_MODE=off.
     Changes nothing on disk.
 
+    Idempotent: re-sourcing strips previous Herd prefixes from this session's
+    PATH before prepending once. Blind prepends used to grow PATH past the
+    Windows limit (~8191), which made `herd` / `php` vanish mid-session and
+    broke local tooling even while nginx still served the site.
+
     Dot-source it, so the settings stay in your terminal:
 
         . .\scripts\herd-env.ps1
@@ -44,8 +49,40 @@ if (-not $nodeDir) {
     return
 }
 
-$prefix = @($phpDir, $herdBin, $nodeDir.FullName)
-if ($mysqlDir) { $prefix += Join-Path $mysqlDir.FullName 'bin' }
-$env:Path = ($prefix -join ';') + ';' + $env:Path
+$prefix = [System.Collections.Generic.List[string]]::new()
+$prefix.Add($phpDir)
+$prefix.Add($herdBin)
+$prefix.Add($nodeDir.FullName)
+if ($mysqlDir) {
+    $prefix.Add((Join-Path $mysqlDir.FullName 'bin'))
+}
+
+# Drop earlier Herd prefixes / duplicates so this script is safe to re-run.
+$managed = {
+    param([string]$Entry)
+    if ([string]::IsNullOrWhiteSpace($Entry)) { return $true }
+    $n = $Entry.TrimEnd('\')
+    foreach ($p in $prefix) {
+        if ($n.Equals($p.TrimEnd('\'), [StringComparison]::OrdinalIgnoreCase)) { return $true }
+    }
+    if ($n -match '(?i)[\\/]\.config[\\/]herd[\\/]bin$') { return $true }
+    if ($n -match '(?i)[\\/]\.config[\\/]herd[\\/]bin[\\/]php\d+$') { return $true }
+    if ($n -match '(?i)[\\/]\.config[\\/]herd[\\/]bin[\\/]nvm[\\/]') { return $true }
+    if ($n -match '(?i)[\\/]\.config[\\/]herd[\\/]bin[\\/]services[\\/]mysql[\\/]') { return $true }
+    return $false
+}
+
+$seen = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+$rest = foreach ($entry in ($env:Path -split ';')) {
+    if (& $managed $entry) { continue }
+    if ($seen.Add($entry)) { $entry }
+}
+
+$env:Path = (@($prefix) + @($rest)) -join ';'
 $env:XDEBUG_MODE = 'off'
+
+if ($env:Path.Length -gt 6000) {
+    Write-Warning "PATH is $($env:Path.Length) characters after herd-env. Windows can truncate near 8191 and drop System32/herd. Open a fresh shell if tools go missing."
+}
+
 Write-Host "Herd PHP $($herdProfile.php) ($phpDir), Node $($nodeDir.Name), Composer$(if ($mysqlDir) { " and MySQL $($mysqlDir.Name)" }) are first on PATH; XDEBUG_MODE=off."
