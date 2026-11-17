@@ -94,6 +94,26 @@ class ReleaseChangelogSyncTest extends TestCase
     }
 
     #[Test]
+    public function rollback_unpublishes_newer_only_rows_without_deleting_them(): void
+    {
+        $this->writeReleaseFile('0.1.0', '2026-01-01');
+        $this->writeReleaseFile('0.1.1', '2026-01-02');
+        $this->writeReleaseFile('0.2.0', '2026-01-03');
+
+        $sync = $this->app->make(ReleaseChangelogSync::class);
+        $sync->sync('0.2.0');
+
+        File::delete($this->dir.DIRECTORY_SEPARATOR.'v0.2.0.json');
+        $sync->sync('0.1.1');
+
+        $newer = Release::query()->where('version', '0.2.0')->firstOrFail();
+        $this->assertFalse($newer->is_published);
+        $this->assertFalse($newer->is_current);
+        $this->assertTrue(Release::query()->where('version', '0.1.1')->value('is_current'));
+        $this->assertSame(3, Release::query()->count());
+    }
+
+    #[Test]
     public function current_follows_version_not_highest_future_entry(): void
     {
         $this->writeReleaseFile('0.1.0', '2026-01-01');

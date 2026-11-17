@@ -186,13 +186,21 @@ class ReleaseChangelogSync
                     $upserted++;
                 }
 
-                // Fail closed on missing historical files: prune only when every
-                // previously published row is still represented by a file.
-                $orphanCount = Release::query()->whereNotIn('id', $touchedIds)->count();
-                if ($orphanCount > 0) {
-                    throw new RuntimeException(
-                        "Sync refused: {$orphanCount} database release(s) have no matching file (history must not be pruned silently).",
-                    );
+                // Fail closed on missing historical files (version <= current).
+                // Newer-only rows (version > VERSION) are unpublished so rollback
+                // can select the older current without inventing or deleting history (#711).
+                $orphans = Release::query()->whereNotIn('id', $touchedIds)->get();
+                foreach ($orphans as $orphan) {
+                    if (version_compare((string) $orphan->version, $currentVersion, '<=')) {
+                        throw new RuntimeException(
+                            "Sync refused: database release [{$orphan->version}] has no matching file (history must not be pruned silently).",
+                        );
+                    }
+
+                    $orphan->forceFill([
+                        'is_published' => false,
+                        'is_current' => false,
+                    ])->save();
                 }
 
                 Release::query()->update(['is_current' => false]);

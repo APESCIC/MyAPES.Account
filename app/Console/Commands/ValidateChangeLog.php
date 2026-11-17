@@ -2,8 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Release;
 use App\Support\ReleaseHistoryRepository;
 use App\Support\ReleaseHistoryValidator;
+use App\Support\Releases\ReleaseEntryValidator;
 use Illuminate\Console\Command;
 use RuntimeException;
 use Symfony\Component\Process\Process;
@@ -19,6 +21,7 @@ class ValidateChangeLog extends Command
     public function handle(
         ReleaseHistoryRepository $repository,
         ReleaseHistoryValidator $validator,
+        ReleaseEntryValidator $entryValidator,
     ): int {
         try {
             $version = $repository->readVersionFile(base_path('VERSION'));
@@ -28,6 +31,7 @@ class ValidateChangeLog extends Command
             $errors = [
                 ...$errors,
                 ...$validator->validateVersionPinnedTests($version),
+                ...$this->validatePerReleaseFiles($repository, $entryValidator, $releases, $version),
             ];
 
             $baseRef = trim((string) $this->option('base-ref'));
@@ -69,6 +73,61 @@ class ValidateChangeLog extends Command
         $this->components->info("Release history is valid at v{$version}.");
 
         return self::SUCCESS;
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $aggregate
+     * @return list<string>
+     */
+    private function validatePerReleaseFiles(
+        ReleaseHistoryRepository $repository,
+        ReleaseEntryValidator $entryValidator,
+        array $aggregate,
+        string $version,
+    ): array {
+        $dir = $repository->changelogDirectory();
+
+        if (! is_dir($dir)) {
+            return ['Per-release changelog directory is missing.'];
+        }
+
+        $errors = $entryValidator->validateDirectory($dir);
+        $fromFiles = $repository->aggregateFromPerReleaseFiles();
+
+        if (count($fromFiles) !== count($aggregate)) {
+            $errors[] = sprintf(
+                'Per-release file count (%d) does not match resources/data/releases.json (%d).',
+                count($fromFiles),
+                count($aggregate),
+            );
+        }
+
+        foreach ($aggregate as $index => $release) {
+            $fileRelease = $fromFiles[$index] ?? null;
+            if (! is_array($fileRelease)) {
+                continue;
+            }
+
+            foreach ($release as $field => $value) {
+                if (($fileRelease[$field] ?? null) !== $value) {
+                    $errors[] = "Aggregate and per-release file diverge at index {$index} field [{$field}].";
+                    break;
+                }
+            }
+
+            $releaseVersion = (string) ($release['version'] ?? '');
+            $path = $dir.DIRECTORY_SEPARATOR.Release::filenameForVersion($releaseVersion);
+            if (! is_file($path)) {
+                $errors[] = "Missing per-release file for v{$releaseVersion}.";
+            }
+        }
+
+        $currentPath = $dir.DIRECTORY_SEPARATOR.Release::filenameForVersion($version);
+        if (! is_file($currentPath)) {
+            $errors[] = "VERSION [{$version}] has no matching changelog/releases file.";
+        }
+
+        return $errors;
     }
 
     /**
