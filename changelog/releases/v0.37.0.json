@@ -1,0 +1,54 @@
+{
+    "version": "0.37.0",
+    "date": "2026-09-28",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Structure layout: Core, Modules, and Plugins skeletons",
+    "summary": "MyAPES Core now has empty Core, Module, and Plugin package folders ready for later structure moves. Sign-in, pages, permissions, and addresses behave the same.",
+    "changes": [
+        "Add empty Core, Module (APES CIC, Pet Care Clinic, Shelter and Rescue), and Plugin (Tickets, Cases, Recruitment, Consultations, Pet Profiles) package skeletons with providers.",
+        "Register stable polymorphic aliases and rewrite existing stored class names so later model moves keep audit, attachments, notifications, and access grants resolving.",
+        "Include the new package trees in Cloudron release packaging and frontend/test scan paths.",
+        "Keep live web addresses and permission names unchanged; no feature controllers or screens moved yet."
+    ],
+    "affected_areas": [
+        "Application package layout",
+        "Polymorphic audit and attachment records",
+        "Access grant pivots",
+        "Cloudron release packaging",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Minor bump opens the v0.37 Structure line: new layout capability without changing user-facing behaviour, URLs, or permission strings.",
+    "validation": [
+        "php artisan test --compact tests/Feature/StructureLayoutMorphMapTest.php tests/Architecture/StructureLayoutBaselineTest.php and focused authorization/cases suites.",
+        "php artisan route:list --json --except-vendor still reports 126 routes.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "composer dump-autoload and empty module/plugin providers boot without registering routes."
+    ],
+    "known_limitations": [
+        "Feature code still lives under app/ until later Structure children move it into the new packages.",
+        "Architecture tests are report-only and do not fail CI yet.",
+        "On-screen wording still waits for the glossary and is unchanged."
+    ],
+    "rollback": "Redeploy the previous application version. Empty package folders are removed with that deploy. Polymorphic type aliases and the data migration roll back with the prior release; accounts and grants remain intact because permission names and URLs did not change.",
+    "provenance": "Structure layout and morph map for issue #281, pull request #298.",
+    "references": [
+        {
+            "label": "Issue #281",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/281"
+        },
+        {
+            "label": "Pull request #298",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/298"
+        }
+    ],
+    "slug": "release-v0-37-0",
+    "previous_version": "0.36.2"
+}

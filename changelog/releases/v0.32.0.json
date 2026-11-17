@@ -1,0 +1,54 @@
+{
+    "version": "0.32.0",
+    "date": "2026-09-03",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Branded 404 and 403 pages",
+    "summary": "Unknown addresses and permission denials now use the same MyAPES Core chrome as the rest of the public site, instead of bare framework error pages.",
+    "changes": [
+        "Show a branded Page not found page for genuinely unknown URLs.",
+        "Show a branded Access denied page when a signed-in user is not allowed to open a page, including public users visiting Admin or Super Admin.",
+        "Keep intentional abort(403) messages visible on the branded Access denied page (for example staff email-collision guidance), while Gate denials keep the friendly public wording.",
+        "Keep denial status codes unchanged so public users stay blocked from staff areas.",
+        "Allow the production-upgrade preflight contract test to run without the LDAP PHP extension.",
+        "Stop local bootstrap from losing its project root when sourcing the selective-media boundary script."
+    ],
+    "affected_areas": [
+        "Public and signed-in error pages",
+        "Authorization denial presentation",
+        "Local pre-PR verify scripts and contract tests"
+    ],
+    "categories": [
+        "added",
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Minor release: first Public UX capability in the v0.32.x line — branded error pages without changing who can access what. Includes small local-verify fixes needed to clear the pre-PR gate.",
+    "validation": [
+        "PHPUnit BrandedErrorPagesTest covers unknown-URL 404 branding, service-user Admin/Super Admin 403 branding, and abort(403) message passthrough.",
+        "Local Laragon preview confirmed branded 404 chrome at an unknown path.",
+        "Existing public separation tests continue to assert Forbidden for public-class Admin routes.",
+        "composer pre-pr-verify contract gate and seeded bootstrap completed after LDAP-fake and bootstrap RootDir fixes."
+    ],
+    "known_limitations": [
+        "Privacy, cookies, help, and terms routes remain planned under issue #123.",
+        "Signed-in home login doors (#130) and Spike dock field overlap (#131) are separate follow-ups."
+    ],
+    "rollback": "Redeploy the previous application version to restore the prior framework default 403 and 404 pages.",
+    "provenance": "Branded 404 and 403 pages for issue #128, pull request #193.",
+    "references": [
+        {
+            "label": "Issue #128",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/128"
+        },
+        {
+            "label": "Pull request #193",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/193"
+        }
+    ],
+    "slug": "release-v0-32-0",
+    "previous_version": "0.31.12"
+}

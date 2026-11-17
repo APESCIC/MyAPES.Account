@@ -1,0 +1,46 @@
+{
+    "version": "0.15.0",
+    "date": "2026-08-14",
+    "channel": "stable",
+    "type": "minor",
+    "title": "APES Pet Care Clinic modules",
+    "summary": "Completed APES Pet Care Clinic Pet Profiles, Tickets, and Consultations as three working, instance-scoped modules, adding Pet Care Clinic Tickets as the eighth shipped installation while preserving existing Pet Care records, routes, media, schedules, assignments, notifications, and audit identities.",
+    "changes": [
+        "Completed APES Pet Care Clinic Pet Profiles, Tickets, and Consultations with stable /petcare routes, registry-generated navigation, instance-scoped lifecycle checks, dashboard summaries, bounded recent activity, analytics, and attention behavior.",
+        "Enforced the exact pet-care-clinic.pet-profiles view-own, create, update-own, view-all, and update-all abilities; the exact pet-care-clinic.tickets view-own, create, comment-own, view-all, update-all, assign, close, and delete abilities; and the exact pet-care-clinic.consultations view-own, create, update-own, view-all, update-all, assign, and close abilities. Owners require the matching exact owner ability, while staff-wide access, assignee choices, and staff recipients require protected staff eligibility plus the exact module-namespace permission; update, assignment, and terminal-transition abilities remain independent.",
+        "Preserved public and internal Ticket messages with internal bodies hidden from owners and excluded from notification and audit metadata, kept Consultation notes out of notification and audit metadata, and retained authenticated authorization-checked Pet Profile photo delivery. The code-owned Pet Care Clinic Ticket delete permission has no Pet Care Clinic DELETE route or user control.",
+        "Reused the existing pet_profiles, pet_care_consultations, support_tickets, and support_ticket_messages tables with no database migration, record copy, or identifier rewrite, preserving owners, pet links, assignments, schedules, statuses, closure timestamps, audit and notification identities, media paths, and physical media.",
+        "Synchronized eight shipped installations, 59 first-party module permissions, and 72 total application permissions, and added three deterministic Pet Care Clinic Ticket fixtures with open, in-progress, and closed states, unassigned, staff-assigned, and administrator-assigned examples, and public and internal messages."
+    ],
+    "affected_areas": [
+        "APES Pet Care Clinic Pet Profiles, Tickets, Consultations, shared module providers, authorization, notifications, protected media, local QA data, and rollback compatibility"
+    ],
+    "categories": [
+        "added",
+        "changed",
+        "security"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible minor release completing the APES Pet Care Clinic module set and its exact permission, privacy, provider, QA, runtime, and rollback contracts.",
+    "validation": [
+        "Focused registry, synchronization, authorization, Pet Profile, Ticket, Consultation, provider, privacy, local-seeder, runtime-manifest, rollback, release-history, health, footer, wording, route-inventory, and migration-inventory coverage verifies the release contract; full repository and browser verification remains assigned to the final Issue #14 verification task."
+    ],
+    "known_limitations": [
+        "The implementation reuses the existing shared tables with no database migration: it does not copy existing records or rewrite record IDs, owners, pet relationships, assignments, schedules, statuses, closure timestamps, audit or notification identities, media paths, or physical media.",
+        "After synchronization persists pet-care-clinic:tickets as the eighth installation, v0.14.0 cannot represent the database state and the fail-closed compatibility checker returns target_contract_unrepresentable; disabling or deleting the installation is not a supported workaround.",
+        "Payments, prescriptions as clinical records, external practice-management integration, runtime packages, deployment, and production verification remain outside this release."
+    ],
+    "rollback": "Take and verify the normal pre-deployment backup. Once the eighth installation exists, code rollback to v0.14.0 is rejected with target_contract_unrepresentable; restoring the corresponding pre-deployment database backup is the supported recovery boundary, and no installation or shared data may be disabled or deleted to force compatibility.",
+    "provenance": "Defined by the APES Pet Care Clinic module delivery for MyAPES Account issue #14.",
+    "references": [
+        {
+            "label": "Issue #14",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/14"
+        }
+    ],
+    "slug": "release-v0-15-0",
+    "previous_version": "0.14.0"
+}

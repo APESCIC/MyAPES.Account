@@ -1,0 +1,49 @@
+{
+    "version": "0.27.2",
+    "date": "2026-08-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Harden public frontends vs Cloudron accounts",
+    "summary": "Public password login is limited to local service-user accounts. Cloudron directory users must use Staff Login, and directory sync still never creates local public users.",
+    "changes": [
+        "Reject directory identities on the public login form and remember-me restoration so Staff Login remains the production Cloudron sign-in path.",
+        "Hide and 404 the local staff password form outside local and testing environments.",
+        "Keep public, volunteer, and student accounts off Admin and Super Admin routes, and document the public versus Cloudron account split."
+    ],
+    "affected_areas": [
+        "Public login",
+        "Staff Login",
+        "Directory user sync",
+        "Admin and Super Admin navigation"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: tightens public versus Cloudron account separation without adding access tiers or changing canonical myapesaccount group names.",
+    "validation": [
+        "PHPUnit PublicFrontendSeparationTest, AuthorizationAuthenticationTest, AuthorizationAccessMatrixTest, DirectoryUserSynchronizerTest, AdminAccessAndViewsTest, and LocalQaAuthTest are green.",
+        "Public, volunteer, and student actors receive 403 on Admin and Super Admin routes; production Staff Login shows Cloudron only.",
+        "Ran php artisan myapes:changelog-validate against the authorization matrix parent branch for this stacked change."
+    ],
+    "known_limitations": [
+        "Local staff password login remains available in local and testing for QA. Public password reset is tracked separately and is not part of this release."
+    ],
+    "rollback": "Redeploy the previous application version. Public directory identities would again be able to use the public password form if they still have a local password hash.",
+    "provenance": "Defined by the public-frontend hardening task for MyAPES Account issue #99 under epic #91 and pull request #157.",
+    "references": [
+        {
+            "label": "Issue #99",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/99"
+        },
+        {
+            "label": "Pull request #157",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/157"
+        }
+    ],
+    "slug": "release-v0-27-2",
+    "previous_version": "0.27.1"
+}

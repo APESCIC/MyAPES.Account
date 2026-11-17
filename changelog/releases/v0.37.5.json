@@ -1,0 +1,55 @@
+{
+    "version": "0.37.5",
+    "date": "2026-09-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Per-module plugin enablement",
+    "summary": "Admin can enable or disable each plugin per organisation module. Disabled plugins return 404, hide from navigation, and stop appearing in Access editors, while existing grants and live URLs stay the same.",
+    "changes": [
+        "Copy plugin enablement and settings rows into module_plugins and module_plugin_settings without changing which plugins are already enabled.",
+        "Add a PluginEnablement service and plugin.enabled route middleware, keeping the older module.available alias as a wrapper.",
+        "Show organisation Modules and Plugins as separate Admin pages, with per-module toggles, dependency checks, and settings links on Plugins.",
+        "Skip Access and job-role permission offers for a module×plugin while it is disabled, without deleting existing grants.",
+        "Publish enablements on the module runtime contract while keeping shipped_instances and legacy_visible_instances for rollback checks."
+    ],
+    "affected_areas": [
+        "Admin Modules and Plugins pages",
+        "Plugin route and navigation gating",
+        "Access and job-role permission editors",
+        "Module runtime contract",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on v0.37.x: Structure Wave 2 per-module plugin enablement with no live URL or permission-string renames.",
+    "validation": [
+        "php artisan test --compact tests/Feature/StructureEnablementWave2Test.php tests/Feature/ModuleLifecycleTest.php tests/Feature/ModuleLifecycleConcurrencyTest.php tests/Feature/ModuleStateMiddlewareTest.php",
+        "php artisan test --compact tests/Feature/ModuleAdministrationAndNavigationTest.php tests/Feature/ModuleRollbackCompatibilityTest.php tests/Feature/ModulePermissionMigrationTest.php tests/Feature/StructureContractsWave1Test.php",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "composer pre-pr-verify / CI before merge; Cloudron workflow_dispatch with app_version from VERSION after merge."
+    ],
+    "known_limitations": [
+        "Plugin controllers and models remain under App\\Http and App\\Models until later Structure waves move them into plugins/<slug>.",
+        "Permission and URL naming conventions are Wave 3 (#292 / #293)."
+    ],
+    "rollback": "Redeploy the previous application version. If the module_plugins migration already ran, restore a pre-deployment Cloudron backup before rolling back database state, or leave the new tables in place when only application code is rolled back.",
+    "provenance": "Structure Wave 2 per-module plugin enablement #288 via pull request #305.",
+    "references": [
+        {
+            "label": "Issue #288",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/288"
+        },
+        {
+            "label": "Pull request #305",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/305"
+        }
+    ],
+    "slug": "release-v0-37-5",
+    "previous_version": "0.37.4"
+}

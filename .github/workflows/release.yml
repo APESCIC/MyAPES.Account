@@ -48,11 +48,16 @@ jobs:
           fi
           echo "APP_VERSION=$app_version" >> "$GITHUB_ENV"
 
-      - name: Build the release notes from releases.json
+      - name: Build the release notes from the current per-release file
         shell: bash
         run: |
           set -euo pipefail
-          bash scripts/deploy/github-release-notes.sh resources/data/releases.json > release-notes.md
+          notes_file="changelog/releases/v${APP_VERSION}.json"
+          if [[ ! -f "$notes_file" ]]; then
+            echo "::error::Missing per-release notes file $notes_file"
+            exit 1
+          fi
+          bash scripts/deploy/github-release-notes.sh "$notes_file" > release-notes.md
           test -s release-notes.md
 
       - name: Resolve the release title from the milestone

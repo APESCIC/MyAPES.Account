@@ -1,0 +1,38 @@
+{
+    "version": "0.18.1",
+    "date": "2026-08-20",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Remediate development nanoid advisory",
+    "summary": "Clears the high-severity development-only nanoid advisory by resolving the Vite/PostCSS transitive dependency to nanoid 3.3.18 without changing application runtime behavior.",
+    "changes": [
+        "Updated package-lock.json so the development dependency graph resolves nanoid 3.3.18 instead of the affected 3.3.16 release under PostCSS."
+    ],
+    "affected_areas": [
+        "Frontend development lockfile (Vite → PostCSS → nanoid)"
+    ],
+    "categories": [
+        "fixed",
+        "security"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible patch release remediating GHSA-2v37-7h3g-55p8 in the development dependency graph without changing production packages or application behavior.",
+    "validation": [
+        "npm ci, npm audit (full and omit=dev), npm run test:frontend, npm run build, focused release/changelog/health contract tests, composer test, and myapes:changelog-validate against origin/main."
+    ],
+    "known_limitations": [
+        "This patch does not change application features, authorization, or data. No production LDAP or deploy is authorized by this release."
+    ],
+    "rollback": "Revert this patch record, VERSION, runtime manifest version, and package-lock.json nanoid resolution. No database rollback is needed.",
+    "provenance": "Defined by the development nanoid advisory remediation for MyAPES Account issue #45.",
+    "references": [
+        {
+            "label": "Issue #45",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/45"
+        }
+    ],
+    "slug": "release-v0-18-1",
+    "previous_version": "0.18.0"
+}

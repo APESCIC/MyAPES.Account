@@ -1,0 +1,42 @@
+{
+    "version": "0.68.1",
+    "date": "2026-11-17",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Client account search and management",
+    "summary": "Staff can search public client accounts on the Clients page. Staff-side accounts are not listed.",
+    "changes": [
+        "Staff, Clients has a search box. Two or more characters match name, email, username or phone, and each result opens the client profile.",
+        "Staff-side accounts are left out of that search.",
+        "New permissions staff.clients.search, staff.clients.manage and staff.clients.sensitive are on the View accounts and Manage accounts packs."
+    ],
+    "affected_areas": [
+        "Staff area (Clients search)",
+        "Permissions"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "Patch number: the v0.68.0 tag was created before VERSION was bumped and cannot be moved, so this ships the merged client search as v0.68.1.",
+    "validation": [
+        "Client search feature test on the local Herd PHPUnit run.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main"
+    ],
+    "known_limitations": [
+        "Filters, suspend, merge, GDPR export and the account-history tab are not in this release.",
+        "Finding a client from a pet, microchip, ticket or case is not in this release."
+    ],
+    "rollback": "Redeploy the v0.67.1 tag. The search page and new permissions are additive.",
+    "provenance": "Issue #606 and pull requests #859 and #860. The v0.68.0 tag was not published.",
+    "references": [
+        {
+            "label": "Pull request #860",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/860"
+        }
+    ],
+    "slug": "release-v0-68-1",
+    "previous_version": "0.67.1"
+}

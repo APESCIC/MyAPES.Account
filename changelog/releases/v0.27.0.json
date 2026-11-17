@@ -1,0 +1,51 @@
+{
+    "version": "0.27.0",
+    "date": "2026-08-28",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Simplify Access admin for groups and job roles",
+    "summary": "Super Admins now manage Cloudron group mappings, job-role capability packs, and the permission catalogue from a single Access workspace instead of three separate admin pages.",
+    "changes": [
+        "Replace Super Admin Groups, Roles, and Permissions with one /admin/access workspace (Groups, Job roles, Permission catalogue tabs).",
+        "Add reviewed job-role capability packs with Advanced fine-grained permissions for custom and default job roles.",
+        "Redirect legacy /admin/groups, /admin/roles, and /admin/permissions URLs into the matching Access tab while keeping immutable mappings and denial audits unchanged."
+    ],
+    "affected_areas": [
+        "Super Admin Access workspace",
+        "Directory group mappings",
+        "Job role management",
+        "Permission catalogue"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Minor release: consolidates authorization admin UX into one workspace with capability packs without changing protected tiers, sync semantics, or mutation services.",
+    "validation": [
+        "PHPUnit covers JobRoleCapabilityPacks, AdminAccessWorkspaceTest, updated Admin directory and role management suites, and authorization gate regressions.",
+        "Legacy admin URLs redirect into Access tabs; denial audits target admin.access.* routes.",
+        "Job-role Advanced permissions stay collapsed by default so capability packs are the primary editor.",
+        "Ran php artisan myapes:changelog-validate --base-ref=origin/main."
+    ],
+    "known_limitations": [
+        "Capability pack toggles use progressive enhancement; without JavaScript, job-role permissions are edited through Advanced checkboxes only.",
+        "Protected access-tier roles remain hidden from the Job roles editor."
+    ],
+    "rollback": "Redeploy the previous application version. Legacy Groups, Roles, and Permissions routes return; Access workspace routes are removed.",
+    "provenance": "Defined by the Access admin UX story for MyAPES Account issue #97 under epic #91 and pull request #120.",
+    "references": [
+        {
+            "label": "Issue #97",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/97"
+        },
+        {
+            "label": "Pull request #120",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/120"
+        }
+    ],
+    "slug": "release-v0-27-0",
+    "previous_version": "0.26.1"
+}

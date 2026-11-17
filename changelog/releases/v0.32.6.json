@@ -1,0 +1,47 @@
+{
+    "version": "0.32.6",
+    "date": "2026-09-12",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Hide Urgent from public ticket create",
+    "summary": "Public ticket create no longer offers Urgent. Staff can still choose Urgent when they create or update a ticket.",
+    "changes": [
+        "Hide Urgent from the public ticket create Priority list on CIC, Shelter, and Pet Care.",
+        "Reject Urgent if a public user submits it on ticket create.",
+        "Keep Urgent available for staff on ticket create and later ticket updates."
+    ],
+    "affected_areas": [
+        "Public ticket create form",
+        "Staff ticket create and update"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: removes Urgent from public ticket create without changing staff priority options or stored ticket records.",
+    "validation": [
+        "PHPUnit PublicTicketPriorityTest covers public forms omitting Urgent, public create rejecting Urgent across CIC, Shelter, and Pet Care, staff create accepting Urgent, public High still succeeding, and staff update still showing Urgent.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Public case create can still choose Urgent; that form is out of scope for this ticket.",
+        "Existing tickets already marked Urgent stay Urgent until staff change them."
+    ],
+    "rollback": "Redeploy the previous application version to restore Urgent on the public ticket create Priority list.",
+    "provenance": "Hide Urgent from public ticket create for issue #152, pull request #200.",
+    "references": [
+        {
+            "label": "Issue #152",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/152"
+        },
+        {
+            "label": "Pull request #200",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/200"
+        }
+    ],
+    "slug": "release-v0-32-6",
+    "previous_version": "0.32.5"
+}

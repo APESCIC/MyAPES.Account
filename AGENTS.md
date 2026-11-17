@@ -73,7 +73,7 @@ Shipping follows Cursor's `github-milestone-completion` and `ship-gate` skills a
 | --- | --- |
 | Milestone branch pattern | `milestone/vX-Y-Z-<slug>` (`composer milestone:next` / `milestone:branch`) |
 | Milestone PR title | `v<version>: <milestone name>` |
-| Version files | `VERSION`, `resources/data/module-runtime-contract.json` (`application_version`); release history in `resources/data/releases.json` via `php artisan myapes:changelog-prepare` then `composer milestone:bump -- vX.Y.Z --check` |
+| Version files | `VERSION`, `resources/data/module-runtime-contract.json` (`application_version`); canonical release history in `changelog/releases/vX.Y.Z.json` (author with `php artisan myapes:changelog-prepare`, which also regenerates the compatibility aggregate `resources/data/releases.json` — never hand-edit the aggregate); then `composer milestone:bump -- vX.Y.Z --check` |
 | Release tooling | Push tag `vX.Y.Z`; `release.yml` publishes the GitHub Release |
 | Area labels | only `area:admin`, `area:public`, `area:auth`, `area:tests`, `area:cloudron` |
 | Issue title prefix | `[v0.N.x] NN` with a two-digit index (`00` = epic) |
@@ -92,7 +92,7 @@ Development is tracked only in GitHub issues, sub-issues and `vMAJOR.MINOR.PATCH
 ### Shipping facts this rule relies on
 
 - `composer milestone:next`, `milestone:bump`, `milestone:check-title`, `milestone:check-branch`, `milestone:check-release` and `milestone:close-ready` (`scripts/milestone-version`). CI runs the title and branch checks on every PR.
-- Release links in `releases.json` must start with `https://github.com/APESCIC/MyAPES-Account/` (hyphen). No credentials, personal data or exploitable detail in release notes.
+- Release links in per-release changelog JSON must start with `https://github.com/APESCIC/MyAPES-Account/` (hyphen). No credentials, personal data or exploitable detail in release notes.
 - Dependabot opens grouped weekly pull requests into the long-lived `dependencies` branch, never `main`. Merge them there once green; merge `origin/dependencies` into the milestone branch when work starts, and `origin/main` into `dependencies` after each milestone ships.
 - Security checks use only free GitHub features: Dependabot, dependency review and CodeQL (Actions and JavaScript/TypeScript; PHP is covered by PHPUnit and lint). Do not use Aikido.
 - If the milestone's version is already taken on `main`, stop and report it to the owner. Don't pick another number or rename the milestone yourself.
@@ -124,10 +124,12 @@ Every Cloudron app is production. Read-only status/logs are fine; mutating or de
 - Something outside the repo (likely Herd's dev-process badge) can delete `public/hot` while Vite keeps running; `scripts\preview.ps1` rewrites it when it finds this repo's Vite running.
 - `herd services:list` can show the MySQL service as `stopped` while it answers on 3306; the scripts check the port instead.
 - On this Windows ARM host, `Get-NetTCPConnection -State Listen` can miss Herd MySQL and Vite even while they answer on 3306/5175. `scripts\preview.ps1` falls back to a TCP connect. Use `. .\scripts\herd-env.ps1` before `npm ci`, and stop Vite first if `npm ci` hits `EPERM` on `*.node` files.
+- 2026-11-17: repeatedly dot-sourcing `scripts\herd-env.ps1` (or running `preview.ps1`) used to prepend Herd paths without stripping old ones, growing `PATH` past ~8191 characters so Windows dropped `System32` / `herd` / `php` from the session even while nginx still served https://myapes-account.test. `herd-env.ps1` is now idempotent (strips managed Herd prefixes, then prepends once); `preview.ps1` sources it instead of prepending itself. If `herd` says "No usable PHP version found" or `php` vanishes mid-session, open a fresh shell and run `. .\scripts\herd-env.ps1` once.
 - 2026-11-14: the local Herd site is served over HTTPS (Herd secure, Vite on https 5175 with Herd's certificate). Decided by Bambie.
 - An https page with an http `public/hot` is unstyled (mixed content). Restart Vite after securing (`scripts\preview.ps1 -StopDevServer`, then `scripts\preview.ps1`).
 - Switching the site between http and https leaves Cursor's browser replaying cached 301s; load URLs with a fresh query string, or send CDP `Network.setCacheDisabled`.
-- Release order: run `php artisan myapes:changelog-prepare --type=<patch|minor|major>` first, then `composer milestone:bump -- vX.Y.Z --check`. Update version-pinned tests (including `array_slice` in `ReleaseHistoryCommandTest`) by hand. The "SQLite test and package" check stays red until that release commit lands.
+- Release order: run `php artisan myapes:changelog-prepare --type=<patch|minor|major>` first (writes `changelog/releases/vX.Y.Z.json` and regenerates `resources/data/releases.json`), fill every `TODO:` in the new per-release file, then `composer milestone:bump -- vX.Y.Z --check`. Update version-pinned tests (including `array_slice` in `ReleaseHistoryCommandTest`) by hand. The "SQLite test and package" check stays red until that release commit lands.
+- Change log hub: there is no Admin release editor. Author in git only (`changelog/releases/`). Production serves `/change-log` from the `releases` table (`MYAPES_CHANGELOG_USE_DATABASE=true`); `scripts/deploy/activate-release.sh` runs `php artisan myapes:releases-sync` before traffic returns. Local Herd may keep the env flag false and read files until you sync. APES Newsroom is the interaction reference for hub layout and behaviour only, not a second editor.
 - Full suite needs more than the CLI's default 128 MB: `php -d memory_limit=-1 vendor/bin/phpunit` for a local full run.
 - CI runs `php artisan lang:check --fail-on-missing`; build dynamic keys with interpolation, not concatenation.
 - `gh` with `--jq` in Windows PowerShell 5.1 loses inner double quotes; pipe `--json` to `ConvertFrom-Json` instead.
@@ -136,7 +138,7 @@ Every Cloudron app is production. Read-only status/logs are fine; mutating or de
 
 - Wiki: https://github.com/APESCIC/MyAPES.Account/wiki. Source [`docs/wiki`](docs/wiki), published by `.github/workflows/wiki-sync.yml` on merge to `main`. Edit through pull requests only.
 - Discussions: https://github.com/APESCIC/MyAPES.Account/discussions, with forms in `.github/DISCUSSION_TEMPLATE`.
-- Change log: `/change-log` in the app, and `resources/data/releases.json`.
+- Change log: `/change-log` in the app; sources in `changelog/releases/vX.Y.Z.json` (see `changelog/releases/README.md`). Aggregate `resources/data/releases.json` is generated for compatibility and GitHub release notes tooling.
 - Security: [SECURITY.md](SECURITY.md). Conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 - Developer guide: [docs/developer-guide.md](docs/developer-guide.md).
 - API, webhooks and integrations (v0.62.0): [docs/api/openapi-v1.yaml](docs/api/openapi-v1.yaml), and the wiki pages [Integrations](docs/wiki/Integrations.md), [API clients](docs/wiki/API-clients.md) and [Webhooks](docs/wiki/Webhooks.md). Change `routes/api.php` and the spec together (`OpenApiSpecTest` checks them). Real keys, tokens and signing secrets live only in APES Vault ('API Keys & Tokens') and in Admin → Settings.

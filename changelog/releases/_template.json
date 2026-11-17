@@ -1,0 +1,37 @@
+{
+  "version": "0.0.0",
+  "date": "2026-01-01",
+  "channel": "stable",
+  "type": "patch",
+  "title": "Short release title",
+  "summary": "One-sentence public summary.",
+  "changes": [
+    "Bullet describing a user-visible change."
+  ],
+  "affected_areas": [
+    "Area touched by this release"
+  ],
+  "categories": [
+    "fixed"
+  ],
+  "audiences": [
+    "public-facing"
+  ],
+  "version_rationale": "Why this is a patch, minor or major.",
+  "validation": [
+    "How this release was verified."
+  ],
+  "known_limitations": [
+    "Known gaps that stay open."
+  ],
+  "rollback": "How to roll back safely.",
+  "provenance": "Issue and pull request that shipped this version.",
+  "references": [
+    {
+      "label": "Issue #0",
+      "url": "https://github.com/APESCIC/MyAPES-Account/issues/0"
+    }
+  ],
+  "slug": "release-v0-0-0",
+  "previous_version": null
+}

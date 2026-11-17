@@ -1,0 +1,52 @@
+{
+    "version": "0.38.6",
+    "date": "2026-09-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Public area string extraction",
+    "summary": "Public chrome, dashboard, profile, legal/help, Recruitment Open roles / My applications, and Pet Profiles labels now come from UK English lang files. Glossary wording for Open roles and My applications is unchanged in meaning.",
+    "changes": [
+        "Move dashboard, profile, onboarding flash, legal/help, chrome, branded errors, and change-log copy into lang/en_GB/public.php.",
+        "Move public Recruitment board and My applications copy into recruitment::public.* plugin keys; keep terms.open_roles / terms.my_applications for nav labels.",
+        "Move Pet Profiles public UI labels into pet_profiles::ui.* plugin keys.",
+        "Clear the public hard-coded string inventory section to 0 (Blade fragment false positives allow-listed)."
+    ],
+    "affected_areas": [
+        "Public dashboard and profile",
+        "Legal, help, cookies, terms, footer",
+        "Recruitment Open roles and My applications",
+        "Pet Profiles",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.38.x Language line: public-area extraction after Admin shell extract (0.38.5).",
+    "validation": [
+        "PHPUnit LocalisationPublicExtractionTest, PublicRecruitmentBoardTest, RecruitmentDualFrontendIaMatrixTest, PublicLegalPagesTest.",
+        "php artisan lang:inventory — public section count 0.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "APES CIC staff hub, Cases, Tickets, and staff recruitment strings remain hard-coded until #269.",
+        "lang:check remains report-only until Wave 4."
+    ],
+    "rollback": "Redeploy the previous release package. Public UI returns to prior hard-coded English if lang keys are removed; no database migrations are included.",
+    "provenance": "Issue #268; pull request #318.",
+    "references": [
+        {
+            "label": "Issue #268",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/268"
+        },
+        {
+            "label": "Pull request #318",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/318"
+        }
+    ],
+    "slug": "release-v0-38-6",
+    "previous_version": "0.38.5"
+}

@@ -33,20 +33,35 @@ class ChangeLogPresenter
     {
         $showInternal = $this->viewerCanSeeInternalNotes($user);
         $current = $this->releases->current();
+        $currentVersion = (string) ($current['version'] ?? $this->releases->version());
 
         if ($showInternal) {
+            $releases = array_map(
+                function (array $release) use ($currentVersion): array {
+                    $annotated = self::withGithubReleaseReference($release);
+                    $annotated['is_current'] = ((string) ($annotated['version'] ?? '')) === $currentVersion;
+
+                    return $annotated;
+                },
+                $this->releases->all(),
+            );
+
             return [
                 'currentRelease' => self::withGithubReleaseReference($current),
-                'releases' => array_map(
-                    static fn (array $release): array => self::withGithubReleaseReference($release),
-                    $this->releases->all(),
-                ),
+                'releases' => $releases,
                 'showInternalAudienceFilter' => true,
                 'showInternalNotes' => true,
             ];
         }
 
-        $releases = self::forPublicAudience($this->releases->all());
+        $releases = array_map(
+            static function (array $release) use ($currentVersion): array {
+                $release['is_current'] = ((string) ($release['version'] ?? '')) === $currentVersion;
+
+                return $release;
+            },
+            self::forPublicAudience($this->releases->all()),
+        );
 
         return [
             'currentRelease' => self::isPublicFacing($current)

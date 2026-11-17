@@ -1,0 +1,44 @@
+{
+    "version": "0.32.8",
+    "date": "2026-09-12",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Public pet page shows owner, created date, and ID",
+    "summary": "The public Shelter pet page now shows the owner, the created date, and the record ID. It does not add case or clinic links for this role.",
+    "changes": [
+        "Show owner, created date (UK dd/mm/yyyy), and record ID on the Shelter pet page.",
+        "Keep case and clinic records off this page so service users are not sent to links that refuse them."
+    ],
+    "affected_areas": [
+        "Public Shelter pet page"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: adds missing owner, created date, and ID on the public pet page without changing permissions or adding new navigation.",
+    "validation": [
+        "PHPUnit PublicShelterPetPageTest covers owner, created date, and ID on the public Shelter pet page, escaped owner markup, and no case or clinic links when related records exist.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "The Pet Care clinic pet page is unchanged and still does not show owner, created date, or ID."
+    ],
+    "rollback": "Redeploy the previous application version to hide owner, created date, and ID on the Shelter pet page again.",
+    "provenance": "Public Shelter pet page owner, created date, and ID for issue #151, pull request #202.",
+    "references": [
+        {
+            "label": "Issue #151",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/151"
+        },
+        {
+            "label": "Pull request #202",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/202"
+        }
+    ],
+    "slug": "release-v0-32-8",
+    "previous_version": "0.32.7"
+}

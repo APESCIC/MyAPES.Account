@@ -1,0 +1,51 @@
+{
+    "version": "0.31.10",
+    "date": "2026-08-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Version-stamped deploy and Beta release titles",
+    "summary": "Cloudron deploy now stamps GitHub Deployments, publishes GitHub Releases automatically, and uses the display title format {VERSION} Beta for deployments and releases.",
+    "changes": [
+        "Automate Cloudron deploy GitHub Release publishing on successful deploy with notes from scripts/deploy/github-release-notes.sh.",
+        "Set deployment description and GitHub Release display name to {VERSION} Beta; keep tags as v{VERSION}.",
+        "Change workflow run-name to {VERSION} Beta without a Deploy prefix.",
+        "Add scripts/github/rename-release-titles.sh and scripts/github/migrate-beta-milestones.sh for release title and milestone migration."
+    ],
+    "affected_areas": [
+        "Cloudron deployment workflow",
+        "GitHub Releases and Deployments",
+        "Agent ship-gate and issue milestone guidance"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: deployment and release automation plus display-title correction; no end-user product behaviour change.",
+    "validation": [
+        "php artisan myapes:changelog-prepare --type=patch with --issue and --pr before merge.",
+        "DeploymentAuthenticationContractTest covers RELEASE_DISPLAY_TITLE and publish-github-release workflow contracts.",
+        "bash scripts/github/rename-release-titles.sh supports --dry-run idempotent title edits.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main after filling release notes."
+    ],
+    "known_limitations": [
+        "Past deployment records cannot be renamed via the GitHub API; only future deploys show the new title.",
+        "Run scripts/github/rename-release-titles.sh once with admin gh auth to fix existing release display titles.",
+        "Run scripts/github/migrate-beta-milestones.sh with repo admin access to rename milestones."
+    ],
+    "rollback": "Redeploy the previous application version. To remove version-stamped releases, revert deploy-cloudron.yml, ship-gate docs, and the helper scripts from this release.",
+    "provenance": "Defined by version-stamped deploys, releases, and Beta milestones for MyAPES Account issue #183.",
+    "references": [
+        {
+            "label": "Issue #183",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/183"
+        },
+        {
+            "label": "Pull request #184",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/184"
+        }
+    ],
+    "slug": "release-v0-31-10",
+    "previous_version": "0.31.9"
+}

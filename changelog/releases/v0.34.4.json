@@ -1,0 +1,62 @@
+{
+    "version": "0.34.4",
+    "date": "2026-09-24",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Public apply and staff recruitment review",
+    "summary": "Signed-in public users can apply to open APES CIC roles and manage their own applications, and staff can review applications from the recruitment hub.",
+    "changes": [
+        "Add apply on the public role detail page (one application per person per role) with a required interest statement.",
+        "Add My applications list and detail so signed-in public users can view status and withdraw when the workflow allows.",
+        "Add staff applications list with status, category, and role filters, plus review transitions and staff-only notes.",
+        "Prompt guests on open role detail to sign in or register before applying; deny access to other people’s applications and to staff review for public users.",
+        "Cover public apply, own-manage, staff review, and denial paths with PHPUnit feature tests."
+    ],
+    "affected_areas": [
+        "APES CIC Recruitment",
+        "Public roles board",
+        "Recruitment applications",
+        "Staff APES CIC hub",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release on the v0.34.x line: completes the public apply and staff review UI on the application model from 0.34.3 without changing the roles board browse behaviour.",
+    "validation": [
+        "PHPUnit RecruitmentApplicationManageTest, RecruitmentApplicationWorkflowTest, RecruitmentRoleWorkflowTest, PublicRecruitmentBoardTest, and ModuleStateMiddlewareTest pass.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "composer pre-pr-verify (or equivalent local verify) on the PR branch before merge."
+    ],
+    "known_limitations": [
+        "Recruitment remains APES CIC only (not Shelter or Pet Care Clinic).",
+        "Each person may apply once per role; withdrawn applications cannot be resubmitted for the same role.",
+        "CV or document upload is not included in this release."
+    ],
+    "rollback": "Redeploy the previous application version to remove public apply, My applications, and staff application review routes and views from the live app.",
+    "provenance": "Public apply and manage (#222), staff review (#223), and PHPUnit manage matrix (#224); pull request #245.",
+    "references": [
+        {
+            "label": "Issue #222",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/222"
+        },
+        {
+            "label": "Issue #223",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/223"
+        },
+        {
+            "label": "Issue #224",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/224"
+        },
+        {
+            "label": "Pull request #245",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/245"
+        }
+    ],
+    "slug": "release-v0-34-4",
+    "previous_version": "0.34.3"
+}

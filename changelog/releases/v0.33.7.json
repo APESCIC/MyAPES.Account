@@ -1,0 +1,52 @@
+{
+    "version": "0.33.7",
+    "date": "2026-09-23",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Groups membership view and last-sync as of",
+    "summary": "Admin Groups member counts open a live directory membership view, and the Groups totals caption shows when the catalogue was last synced.",
+    "changes": [
+        "Make Access Groups member counts open a membership page that lists live directory members for that group.",
+        "Fail closed when the directory cannot be read so membership details stay hidden, and do not start a directory sync from that page.",
+        "Show the catalogue last-sync time as an as-of stamp next to the Groups totals."
+    ],
+    "affected_areas": [
+        "Access Groups",
+        "Admin group membership"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: adds a Groups membership view and last-sync as-of display without changing directory sync lease or scheduling.",
+    "validation": [
+        "PHPUnit AdminGroupMembershipTest covers clickable counts, last-sync as-of, live membership listing, fail-closed directory errors, permission denial, and unmanaged group 404.",
+        "PHPUnit AdminAccessWorkspaceTest and AdminDirectoryManagementTest still pass for Access Groups redirects and mappings.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Membership is read live from the directory; catalogue member counts can differ briefly until the next successful sync.",
+        "Directory sync behaviour, lease, and scheduling are unchanged."
+    ],
+    "rollback": "Redeploy the previous application version to remove the membership view and Groups last-sync as-of stamp.",
+    "provenance": "Groups membership view and last-sync as-of for issues #140 and #145, pull request #240.",
+    "references": [
+        {
+            "label": "Issue #140",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/140"
+        },
+        {
+            "label": "Issue #145",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/145"
+        },
+        {
+            "label": "Pull request #240",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/240"
+        }
+    ],
+    "slug": "release-v0-33-7",
+    "previous_version": "0.33.6"
+}

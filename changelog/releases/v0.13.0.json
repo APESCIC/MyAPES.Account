@@ -1,0 +1,43 @@
+{
+    "version": "0.13.0",
+    "date": "2026-08-10",
+    "channel": "stable",
+    "type": "minor",
+    "title": "APES CIC Tickets and Cases",
+    "summary": "Added the complete owner- and permission-scoped APES CIC Cases workflow while strengthening Tickets with instance isolation, explicit reply visibility, reusable activity, and analytics contracts.",
+    "changes": [
+        "Added APES CIC Cases with categories, priorities, assignment, terminal transitions, public updates, internal staff notes, private notifications, and bounded audit metadata.",
+        "Added explicit sub-core storage and instance-scoped authorization, lifecycle detectors, dashboard summaries, recent hub activity, and typed analytics providers for APES CIC Tickets and Cases.",
+        "Expanded the compatible Shelter case store additively, preserved existing record and audit identities, and installed APES CIC Cases as the sixth shipped module instance."
+    ],
+    "affected_areas": [
+        "APES CIC Tickets and Cases, shared case storage, module registry, dashboard, sub-core hub, authorization, notifications, analytics, and rollback compatibility"
+    ],
+    "categories": [
+        "added",
+        "changed",
+        "security"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible minor application release adding the planned APES CIC Cases capability and reusable module-provider contracts.",
+    "validation": [
+        "Focused migration, registry, lifecycle, owner/staff workflow, privacy, dashboard, activity, analytics, and rollback-contract coverage is included; full environment verification is recorded with the implementation handoff."
+    ],
+    "known_limitations": [
+        "Shelter Tickets, Pet Care Tickets, ticket-to-case escalation, the Admin analytics interface, module uninstall, ASM integration, release, deployment, and production verification remain outside this release.",
+        "After the sixth module installation is persisted, v0.12.1 cannot represent the database state; recovery requires the pre-deployment backup and established database recovery boundary."
+    ],
+    "rollback": "Before deployment, take and verify the normal backup. Once apes-cic:cases is persisted, the existing fail-closed compatibility checker rejects code rollback to v0.12.1 with target_contract_unrepresentable; restoring the pre-deployment backup/database state is the recovery boundary.",
+    "provenance": "Defined by the APES CIC Tickets and Cases delivery for MyAPES Account issue #12.",
+    "references": [
+        {
+            "label": "Issue #12",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/12"
+        }
+    ],
+    "slug": "release-v0-13-0",
+    "previous_version": "0.12.1"
+}

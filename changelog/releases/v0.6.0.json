@@ -1,0 +1,47 @@
+{
+    "version": "0.6.0",
+    "date": "2026-07-27",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Public Change Log Hub and semantic versioning",
+    "summary": "Introduced a public, searchable MyAPES release history and a source-controlled semantic version contract for future releases.",
+    "changes": [
+        "Added the public Change Log Hub with search, release filters, expandable records, current-release navigation, and accessible result feedback.",
+        "Added a shared footer version link so guests, public users, and staff can reach the current release record from every application screen.",
+        "Added append-only release validation for pull requests and main-branch updates without creating a database-backed editor.",
+        "Separated the semantic application version from the immutable deployment commit identity in health and release verification."
+    ],
+    "affected_areas": [
+        "Public Change Log Hub and shared application footer",
+        "Release metadata validation and continuous integration",
+        "Health reporting and immutable release packaging"
+    ],
+    "categories": [
+        "added",
+        "changed",
+        "accessibility"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible minor release establishing a new public capability and the release-management contract for later roadmap work.",
+    "validation": [
+        "Release schema, append-only history, public access, footer consistency, health reporting, filtering behavior, and packaging contracts are covered by automated tests.",
+        "Responsive light and dark layouts, keyboard operation, focus visibility, reduced motion, and no-JavaScript readability are included in local acceptance."
+    ],
+    "known_limitations": [
+        "Release history is reviewed source-controlled data and has no database editor.",
+        "No Git tag, GitHub Release, production deployment, or authenticated production acceptance is included in this release implementation pass."
+    ],
+    "rollback": "Restore the previous application release; its deployment identity remains available through the existing immutable commit and code-rollback process.",
+    "provenance": "Defined by MyAPES Account issue #20 and implemented as the release foundation for roadmap issue #17.",
+    "references": [
+        {
+            "label": "Issue #20",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/20"
+        }
+    ],
+    "slug": "release-v0-6-0",
+    "previous_version": "0.5.0"
+}

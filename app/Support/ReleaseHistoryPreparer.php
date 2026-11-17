@@ -77,6 +77,7 @@ class ReleaseHistoryPreparer
             'stub_record' => $stubRecord,
             'files' => [
                 'VERSION',
+                'changelog/releases/v'.$nextVersion.'.json',
                 'resources/data/releases.json',
                 'resources/data/module-runtime-contract.json',
                 ...self::TEST_FILES,
@@ -107,6 +108,7 @@ class ReleaseHistoryPreparer
         array_unshift($releases, $plan['stub_record']);
 
         $this->writeVersion($plan['next_version']);
+        $this->writePerReleaseFile($plan['stub_record'], $plan['previous_version']);
         $this->writeReleases($releases);
         $this->writeManifestVersion($plan['next_version']);
         $this->patchTestFiles($plan['previous_version'], $plan['next_version'], $date);
@@ -244,6 +246,42 @@ class ReleaseHistoryPreparer
 
         if (file_put_contents($path, $version.PHP_EOL) === false) {
             throw new RuntimeException("Unable to write version file [{$path}].");
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $stub
+     */
+    private function writePerReleaseFile(array $stub, string $previousVersion): void
+    {
+        $version = (string) $stub['version'];
+        $dir = $this->path('changelog/releases');
+
+        if (! is_dir($dir) && ! mkdir($dir, 0775, true) && ! is_dir($dir)) {
+            throw new RuntimeException("Unable to create per-release directory [{$dir}].");
+        }
+
+        $path = $dir.DIRECTORY_SEPARATOR.'v'.$version.'.json';
+
+        if (is_file($path)) {
+            throw new RuntimeException("Per-release file already exists [{$path}]; refusing to overwrite a published version.");
+        }
+
+        $payload = $stub;
+        $payload['slug'] = 'release-v'.str_replace('.', '-', $version);
+        $payload['previous_version'] = $previousVersion;
+
+        try {
+            $encoded = json_encode(
+                $payload,
+                JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR,
+            );
+        } catch (JsonException $exception) {
+            throw new RuntimeException('Unable to encode per-release file.', previous: $exception);
+        }
+
+        if (file_put_contents($path, $encoded.PHP_EOL) === false) {
+            throw new RuntimeException("Unable to write per-release file [{$path}].");
         }
     }
 

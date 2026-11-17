@@ -1,0 +1,47 @@
+{
+    "version": "0.25.0",
+    "date": "2026-08-24",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Migrate LDAP groups to myapesaccount prefix with volunteer and student roles",
+    "summary": "Staff directory authorization now uses five preset Cloudron groups under the myapesaccount prefix, including new volunteer and student roles, with LDAP-driven user provisioning before first sign-in.",
+    "changes": [
+        "Replaced legacy myapes.* directory groups with five preset myapesaccount.* Cloudron groups mapped to staff, administrator, super-admin, volunteer, and student protected roles.",
+        "Synchronize only myapesaccount-prefixed LDAP groups and pre-provision Cloudron OIDC users plus staff profiles during directory sync.",
+        "Removed admin enable/disable and custom directory mapping controls; the groups catalogue is read-only apart from manual sync.",
+        "Added a data migration to rename legacy directory group records and refresh authorization metadata for existing installs."
+    ],
+    "affected_areas": [
+        "Staff Cloudron OIDC sign-in",
+        "LDAP directory synchronization",
+        "Admin Groups and Users",
+        "Authorization roles and permissions"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Minor release: adds volunteer and student protected roles and changes directory group naming and sync behaviour while keeping existing staff and administrator sign-in paths compatible after Cloudron group migration.",
+    "validation": [
+        "PHPUnit feature and unit suite (excluding GD-dependent attachment tests on hosts without the extension).",
+        "Auth readiness and authorization lifecycle command coverage for five preset groups.",
+        "Staff OIDC, directory catalogue sync, and role synchronizer regression tests."
+    ],
+    "known_limitations": [
+        "Cloudron operators must create or rename the five myapesaccount.* groups and move members off legacy myapes.* groups before deploy.",
+        "Volunteer and student groups must exist in LDAP but are not required to contain members for readiness checks."
+    ],
+    "rollback": "Restore the previous release, recreate legacy Cloudron groups if needed, and run directory plus authorization sync after reversing the Cloudron group layout.",
+    "provenance": "Developed for Issue #101 on branch cursor/feature/101-myapesaccount-ldap-groups.",
+    "references": [
+        {
+            "label": "Issue #101",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/101"
+        }
+    ],
+    "slug": "release-v0-25-0",
+    "previous_version": "0.24.1"
+}

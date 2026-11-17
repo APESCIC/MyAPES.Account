@@ -1,0 +1,45 @@
+{
+    "version": "0.31.4",
+    "date": "2026-08-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Ship-gate pre-PR commit options",
+    "summary": "Ship-gate now asks before the first commit or push: when committing is best, plus numbered options to commit, open a PR, save WIP, or keep working uncommitted.",
+    "changes": [
+        "Add a Before PR / commit gate to the ship-gate agent rule and skill, including when-to-commit guidance.",
+        "Offer Next-actions options for commit and PR, commit only, WIP checkpoint, keep uncommitted, or stop.",
+        "Document the commit gate in the AGENTS.md end-of-work checklist before open/update PR."
+    ],
+    "affected_areas": [
+        "Agent ship-gate documentation",
+        "Release and ship workflow guidance"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: agent workflow documentation only; no end-user product behaviour change.",
+    "validation": [
+        "Reviewed ship-gate rule and skill Next-actions format against existing merge/deploy/release gates.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main after filling release notes."
+    ],
+    "known_limitations": [
+        "Commit and push still require an explicit operator or user pick; agents do not auto-commit."
+    ],
+    "rollback": "Redeploy the previous application version. To remove the commit gate, restore the prior ship-gate rule and skill without the Before PR section.",
+    "provenance": "Defined by the ship-gate pre-PR commit gate work for MyAPES Account issue #169 and pull request #170.",
+    "references": [
+        {
+            "label": "Issue #169",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/169"
+        },
+        {
+            "label": "Pull request #170",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/170"
+        }
+    ],
+    "slug": "release-v0-31-4",
+    "previous_version": "0.31.3"
+}

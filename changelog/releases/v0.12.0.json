@@ -1,0 +1,41 @@
+{
+    "version": "0.12.0",
+    "date": "2026-08-10",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Guarded Admin maintenance controls",
+    "summary": "Added a permission-gated Admin recovery console for auditable Laravel maintenance activation, deactivation, and partial-failure reconciliation.",
+    "changes": [
+        "Added database-backed maintenance-window history with a cross-database single-current-window guard and bounded failure details.",
+        "Added branded HTML and sanitized JSON maintenance responses while preserving health, staff authentication, and authorized Admin recovery routes.",
+        "Protected native maintenance transitions with atomic locks and made deployment and rollback controls preserve pre-existing operator maintenance."
+    ],
+    "affected_areas": [
+        "Admin operations, recovery routing, health reporting, deployment and rollback controls"
+    ],
+    "categories": [
+        "added",
+        "security",
+        "changed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible minor release adding the guarded operational capability planned in issue #16.",
+    "validation": [
+        "Authorization, confirmations, concurrency, native and history partial failures, reconciliation, branded responses, OIDC recovery, health reporting, and deployment ownership are covered."
+    ],
+    "known_limitations": [
+        "Planned end times are informational only; maintenance restoration remains an explicit authorized operation."
+    ],
+    "rollback": "Compatible rollback preserves the authoritative Redis-backed Laravel maintenance state. Releases without the Admin console retain emergency recovery through the Laravel CLI.",
+    "provenance": "Defined by the guarded Admin maintenance-control work for MyAPES Account issue #16.",
+    "references": [
+        {
+            "label": "Issue #16",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/16"
+        }
+    ],
+    "slug": "release-v0-12-0",
+    "previous_version": "0.11.0"
+}

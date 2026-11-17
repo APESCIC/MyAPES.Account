@@ -1,0 +1,48 @@
+{
+    "version": "0.25.9",
+    "date": "2026-08-25",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Mirror Cloudron directory disable during user sync",
+    "summary": "Directory synchronization now suspends Cloudron staff accounts that disappear from required myapesaccount.* groups, blocks Staff Login while suspended, and can clear only directory-disabled suspensions when membership returns.",
+    "changes": [
+        "Suspend directory users missing from required Cloudron group membership with reason directory-disabled during manual and scheduled sync.",
+        "Clear directory-disabled suspensions when membership returns through sync or a successful Staff Login directory proof.",
+        "Keep public local accounts untouched by directory user sync and document the disable-mirroring behaviour."
+    ],
+    "affected_areas": [
+        "Directory user synchronization",
+        "Staff Login and directory revalidation",
+        "Authorization documentation"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: completes disable mirroring for already-shipped directory user sync without changing group naming or public account rules.",
+    "validation": [
+        "PHPUnit DirectoryUserSynchronizerTest covers create, local skip, suspend, unsuspend, and session denial paths.",
+        "Staff OIDC and directory sync wiring regression suites remain green.",
+        "Ran php artisan myapes:changelog-validate --base-ref=origin/main."
+    ],
+    "known_limitations": [
+        "Admin-initiated suspensions are never cleared by directory sync; only directory-disabled suspensions are reversible through directory proof."
+    ],
+    "rollback": "Redeploy the previous application version. Directory sync will stop applying directory-disabled suspensions for missing memberships.",
+    "provenance": "Defined by the Cloudron user sync and disable mirroring story for MyAPES Account issue #95 under epic #91 and pull request #118.",
+    "references": [
+        {
+            "label": "Issue #95",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/95"
+        },
+        {
+            "label": "Pull request #118",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/118"
+        }
+    ],
+    "slug": "release-v0-25-9",
+    "previous_version": "0.25.8"
+}

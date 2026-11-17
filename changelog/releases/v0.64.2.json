@@ -1,0 +1,51 @@
+{
+    "version": "0.64.2",
+    "date": "2026-11-14",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Admin navigation, keys clarity and local secret testing",
+    "summary": "Admin Settings, Email Templates and Access use clearer button-style section tabs; the Email Templates menu label matches the page; and live Cloudron docs steer operators to Keys and secrets for the mailbox password, with a secrets inventory and a local Herd testing path that never puts secret values in the repository.",
+    "changes": [
+        "Admin Settings, Email Templates and Access share one button-style sub-navigation (the same pill style as other Admin section tabs), with the current section marked for screen readers.",
+        "The Admin sidebar and page heading for outbound mail templates now read Email Templates; Email import and Inbound stay separate.",
+        "Live operator docs and the wiki treat Admin → Settings → Keys and secrets (enter, Test, save) as the primary path for the communications@ mailbox password; the server .env is emergency or fallback only. A names-only inventory lists which secrets have an Admin UI and which stay .env-only.",
+        "Herd local docs describe how to exercise Keys and secrets and Integrations with machine-local values or typed Admin values only — never commit or paste production secrets."
+    ],
+    "affected_areas": [
+        "Admin navigation",
+        "Admin settings",
+        "Email Templates",
+        "Operator docs and wiki",
+        "Local Herd development"
+    ],
+    "categories": [
+        "changed",
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch: clearer Admin navigation and labels, plus documentation of Keys-primary live secrets handling; no migrations and no new Admin fields for env-only secrets.",
+    "validation": [
+        "PHPUnit coverage for Email Templates nav labels and admin-subnav aria-current on Settings and Email Templates pages passed locally.",
+        "composer pre-pr-verify and CI checks on the milestone pull request."
+    ],
+    "known_limitations": [
+        "None for this patch. OIDC, LDAP, APP_KEY and INBOUND_MAIL_TOKEN_KEY remain .env-only until a later decision."
+    ],
+    "rollback": "Deploy v0.64.1 with deploy-cloudron.yml. Admin subnav returns to unstyled links and the Emails label returns until a later release; Keys and secrets behaviour is unchanged by this patch.",
+    "provenance": "Milestone v0.64.2 Beta: Admin navigation, keys clarity and local secret testing, epic #826 with issues #827–#832; pull request #833.",
+    "references": [
+        {
+            "label": "Issue #826",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/826"
+        },
+        {
+            "label": "Pull request #833",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/833"
+        }
+    ],
+    "slug": "release-v0-64-2",
+    "previous_version": "0.64.1"
+}

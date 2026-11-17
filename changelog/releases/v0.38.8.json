@@ -1,0 +1,55 @@
+{
+    "version": "0.38.8",
+    "date": "2026-09-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Public SEO and Admin search keywords",
+    "summary": "Public pages get unique UK English titles, meta descriptions, Open Graph tags, and canonical URLs. Signed-in and Admin pages stay out of search indexes. Admin shell search finds plugins and sections by synonym (for example jobs, helpdesk, permissions).",
+    "changes": [
+        "Add lang/en_GB/seo.php and an SEO layout component for titles, descriptions, Open Graph, canonical URLs, and html lang=en-GB.",
+        "Serve /robots.txt that disallows staff paths and /sitemap.xml that lists public pages plus open Recruitment roles only.",
+        "Add permission-gated Admin search powered by plugin searchKeywordsKey synonyms and Core admin.search.keywords.* lists.",
+        "Expand Recruitment, Tickets, Cases, Consultations, and Pet Profiles keyword lists; document searchKeywordsKey on the plugin settings contract."
+    ],
+    "affected_areas": [
+        "Public SEO meta and recruitment Open roles",
+        "robots.txt and sitemap.xml",
+        "Admin shell search",
+        "Plugin keyword lang files"
+    ],
+    "categories": [
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.38.x Language line: public SEO and Admin keyword search after APES CIC staff string extraction (0.38.7).",
+    "validation": [
+        "PHPUnit PublicSeoTest, AdminSearchKeywordsTest, PublicChromeNamingTest, and related Admin/plugin suites.",
+        "node --test resources/js/admin-search.test.js",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Sidebar and footer still show MyAPES Core chrome labels; SEO titles and Open Graph use MyAPES Account per the glossary.",
+        "User locale preference and CI hard-fail for missing keys remain for Wave 4 (#275, #276)."
+    ],
+    "rollback": "Redeploy the previous release package. Public SEO and Admin search return to the prior generic meta and no Admin keyword filter; no database migrations are included.",
+    "provenance": "Issues #273 and #274; pull request #320.",
+    "references": [
+        {
+            "label": "Issue #273",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/273"
+        },
+        {
+            "label": "Issue #274",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/274"
+        },
+        {
+            "label": "Pull request #320",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/320"
+        }
+    ],
+    "slug": "release-v0-38-8",
+    "previous_version": "0.38.7"
+}

@@ -1,0 +1,43 @@
+{
+    "version": "0.17.0",
+    "date": "2026-08-19",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Separate public and staff profiles",
+    "summary": "Public service-user accounts keep the existing contact profile, while staff accounts now have a workplace profile. Public and staff identities stay on separate accounts, and administrators can manage both profile types.",
+    "changes": [
+        "Added a staff profile for job title, team, work phone, and photo, with Cloudron directory name, email, and groups remaining read-only.",
+        "Stopped creating hybrid public-and-staff accounts and converted existing hybrid users to staff-only Cloudron identities.",
+        "Gave administrators Public users and Staff lists with editors for each profile type."
+    ],
+    "affected_areas": [
+        "Account profiles, staff and public authentication, admin user management, and local QA fixtures"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible minor release splitting public and staff profile data without changing service modules or directory group mappings.",
+    "validation": [
+        "Feature tests cover staff profile schema and cutover, own-profile and admin editors, OIDC collision copy, public login blocking for staff-eligible accounts, readiness checks, and changelog validation."
+    ],
+    "known_limitations": [
+        "People who need both public and staff access must use two accounts with different email addresses.",
+        "Existing hybrid accounts become staff-only. Leftover public UserProfile rows are retained and unused.",
+        "Rolling back this release requires reversing the staff_profiles migration after code rollback."
+    ],
+    "rollback": "Revert this release record, VERSION, runtime manifest version, staff profile schema, profile and admin views, OIDC linking removal, and QA fixtures. Then roll back the staff_profiles migration.",
+    "provenance": "Defined by the separate user and staff profiles work for MyAPES Account issue #58.",
+    "references": [
+        {
+            "label": "Issue #58",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/58"
+        }
+    ],
+    "slug": "release-v0-17-0",
+    "previous_version": "0.16.3"
+}

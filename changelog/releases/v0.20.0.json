@@ -1,0 +1,57 @@
+{
+    "version": "0.20.0",
+    "date": "2026-08-20",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Admin Super Admin panel and overview chart fix",
+    "summary": "Administrators get a clearer day-to-day Admin panel, while Cloudron super-admins gain a dedicated Super Admin area for technical controls. Overview charts no longer grow endlessly down the page.",
+    "changes": [
+        "Added a Super Admin panel and sidebar entry for Cloudron myapes.superadmin members, covering directory groups, roles, permissions, modules, maintenance, and technical analytics.",
+        "Simplified the Admin overview and user management for ordinary administrators.",
+        "Labeled Cloudron MyAPES versus other Cloudron directory groups, and protected versus custom role mappings.",
+        "Made roles and permissions easier to read with plain-language titles, descriptions, and grouped catalogues.",
+        "Showed module manage controls open by default instead of collapsed disclosures.",
+        "Fixed Chart.js overview canvases so fixed-height wrappers stop infinite page growth and broken chart imagery.",
+        "Enabled the Local QA role switcher to sign into the seeded Super Admin account for local Super Admin panel testing.",
+        "Tidied the Local QA role switcher layout so four roles and the environment label stay readable without overlap."
+    ],
+    "affected_areas": [
+        "Admin panel",
+        "Super Admin panel",
+        "Directory groups",
+        "Roles and permissions",
+        "Modules administration",
+        "Maintenance recovery",
+        "Admin analytics charts"
+    ],
+    "categories": [
+        "added",
+        "changed",
+        "fixed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible minor release introducing the Super Admin panel capability and clearer admin authorization boundaries, plus a chart rendering fix.",
+    "validation": [
+        "PHPUnit coverage for admin access, Super Admin routes, authorization gates, modules, maintenance, roles, and analytics dashboards; Aikido scan on key changed files; myapes:changelog-validate against origin/main."
+    ],
+    "known_limitations": [
+        "Custom app-owned groups are not introduced; groups remain Cloudron directory catalogue entries with optional custom role mappings.",
+        "Existing /admin technical URLs remain at the same paths and are now Super Admin–gated rather than relocated under /superadmin except for the new overview."
+    ],
+    "rollback": "Revert this release record, VERSION, runtime manifest version, Super Admin views and routes, authorization matrix updates, admin UI Blade/CSS/JS changes, and related feature assertions. Re-run authorization metadata synchronization after rollback so protected role permissions match the restored matrix. No database schema rollback is required beyond restoring permission seed expectations.",
+    "provenance": "Defined by the Admin UX cleanup with Super Admin technical panel for MyAPES Account issue #76 and pull request #77.",
+    "references": [
+        {
+            "label": "Issue #76",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/76"
+        },
+        {
+            "label": "Pull request #77",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/77"
+        }
+    ],
+    "slug": "release-v0-20-0",
+    "previous_version": "0.19.4"
+}

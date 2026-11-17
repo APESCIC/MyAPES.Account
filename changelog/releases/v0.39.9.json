@@ -1,0 +1,50 @@
+{
+    "version": "0.39.9",
+    "date": "2026-09-30",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Nav cleanup and Lucide menu icons",
+    "summary": "Primary Admin navigation only appears when you can open an Admin section, and missing menu icons now render correctly across Admin, Recruitment, and service hubs.",
+    "changes": [
+        "Show the Admin primary menu only when at least one Admin page is allowed, and open the first permitted section.",
+        "Register Lucide icons used by Recruitment, hub Create actions, and page submenus so labels no longer appear without icons.",
+        "Add icons to Admin and Recruitment page submenus and to hub “What you can do” tool links."
+    ],
+    "affected_areas": [
+        "Primary navigation",
+        "Admin shell page submenu",
+        "Recruitment public and staff page submenus",
+        "Service hub tool lists",
+        "Frontend icon bundle"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.39.x line: navigation visibility and icon rendering polish with no new product capability.",
+    "validation": [
+        "php artisan test --compact tests/Feature/AdminShellNavigationTest.php tests/Feature/ModuleRuntimeSourceContractTest.php tests/Feature/RecruitmentDualFrontendIaMatrixTest.php",
+        "php artisan myapes:changelog-validate --base-ref=origin/main",
+        "Live QA role switcher checks for Public, Staff, Admin, and Super Admin menus and icons"
+    ],
+    "known_limitations": [
+        "None."
+    ],
+    "rollback": "Redeploy the previous release package. No data migrations are included.",
+    "provenance": "Issue #331; pull request #332.",
+    "references": [
+        {
+            "label": "Issue #331",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/331"
+        },
+        {
+            "label": "Pull request #332",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/332"
+        }
+    ],
+    "slug": "release-v0-39-9",
+    "previous_version": "0.39.8"
+}

@@ -1,0 +1,47 @@
+{
+    "version": "0.25.7",
+    "date": "2026-08-25",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Exclude delete abilities for volunteers and students",
+    "summary": "Volunteers and students keep staff-class service access across enabled modules but no longer receive ticket or case delete abilities; local QA fixtures and documentation cover the Student and Volunteer switcher roles.",
+    "changes": [
+        "Grant module delete abilities only to staff, administrator, and super-admin protected roles.",
+        "Seed local QA Student and Volunteer accounts and expose them in the QA role switcher.",
+        "Document volunteer and student access tiers, including the no-delete rule, in the README auth architecture."
+    ],
+    "affected_areas": [
+        "First-party module permission defaults",
+        "Local QA seeding and role switcher",
+        "Authorization documentation"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: corrects delete grants for already-shipped volunteer and student protected roles without changing directory group naming.",
+    "validation": [
+        "PHPUnit ModulePermissionGateTest, ModuleRegistryTest, LocalQaAuthTest, and FreshInstallAuthorizationSeederTest coverage for the delete boundary and QA fixtures.",
+        "Ran php artisan myapes:changelog-validate against the stacked base branch."
+    ],
+    "known_limitations": [
+        "Operators must run authorization metadata sync after upgrade so existing volunteer and student role permission pivots drop delete abilities."
+    ],
+    "rollback": "Redeploy the previous application version and re-run authorization metadata sync so volunteer and student roles regain the prior delete defaults.",
+    "provenance": "Defined by the volunteer and student no-delete story for MyAPES Account issue #93 under epic #91 and pull request #116.",
+    "references": [
+        {
+            "label": "Issue #93",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/93"
+        },
+        {
+            "label": "Pull request #116",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/116"
+        }
+    ],
+    "slug": "release-v0-25-7",
+    "previous_version": "0.25.6"
+}

@@ -1,0 +1,46 @@
+{
+    "version": "0.32.10",
+    "date": "2026-09-12",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Public privacy, cookies, help, and terms pages",
+    "summary": "Guests and signed-in users can now open branded Privacy, Cookies, Help, and Terms pages in MyAPES Core, and reach them from the footer, register, and other public chrome.",
+    "changes": [
+        "Add branded /privacy, /cookies, /help, and /terms pages with APES CIC notices and a short Help guide.",
+        "Link those pages from the site footer, register, sidebar Help, and the profile privacy notice fallback."
+    ],
+    "affected_areas": [
+        "Public legal and help pages",
+        "Register, footer, sidebar, and profile chrome"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: adds the missing public policy and help routes without changing sign-in, consent capture, or account permissions.",
+    "validation": [
+        "PHPUnit PublicLegalPagesTest covers branded content on all four routes, signed-in public access, public chrome links, and the guest privacy contact path.",
+        "PHPUnit HealthAndThemeTest, ChangeLogPageTest, MascotHelperTest, PublicAccountLifecycleTest, and AccountLifecycleReadinessTest cover footer links, Help tip, the privacy notice fallback, and deploy preflight accepting the in-app /privacy page.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Register still does not record a consent timestamp. That remains a separate issue."
+    ],
+    "rollback": "Redeploy the previous application version to remove the public policy and help routes and their chrome links.",
+    "provenance": "Public privacy, cookies, help, and terms pages for issue #123, pull request #204.",
+    "references": [
+        {
+            "label": "Issue #123",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/123"
+        },
+        {
+            "label": "Pull request #204",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/204"
+        }
+    ],
+    "slug": "release-v0-32-10",
+    "previous_version": "0.32.9"
+}

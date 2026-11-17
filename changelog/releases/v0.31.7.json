@@ -1,0 +1,43 @@
+{
+    "version": "0.31.7",
+    "date": "2026-08-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "GitHub links in footer and change log",
+    "summary": "Guests and signed-in users can open the MyAPES Core GitHub repository, start a new issue, or browse discussions from the shared footer and Change Log Hub.",
+    "changes": [
+        "Add GitHub, Open an issue, and Discussions links to the shared site footer on every layout screen.",
+        "Add a public Feedback & source section on the Change Log Hub with the same GitHub links.",
+        "Centralize repository, issue chooser, and discussions URLs in config/myapes.php for reuse and optional env overrides."
+    ],
+    "affected_areas": [
+        "Shared site footer",
+        "Change Log Hub",
+        "Public chrome configuration"
+    ],
+    "categories": [
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: backward-compatible public navigation to GitHub feedback channels; no API or auth behaviour change.",
+    "validation": [
+        "php artisan test --filter=ChangeLogPageTest covering public GitHub links on the footer and change log while staff-only release references stay hidden from guests.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main after filling release notes."
+    ],
+    "known_limitations": [
+        "Links open GitHub in a new browser tab; users need a GitHub account to file issues or post in discussions."
+    ],
+    "rollback": "Redeploy the previous application version. To remove the links, revert the footer nav, Change Log Hub community block, config entries, and related styles from this release.",
+    "provenance": "Defined by GitHub links in footer and Change Log Hub for MyAPES Account issue #179.",
+    "references": [
+        {
+            "label": "Issue #179",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/179"
+        }
+    ],
+    "slug": "release-v0-31-7",
+    "previous_version": "0.31.6"
+}

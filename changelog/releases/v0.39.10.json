@@ -1,0 +1,47 @@
+{
+    "version": "0.39.10",
+    "date": "2026-10-08",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Milestones use full version numbers",
+    "summary": "GitHub milestones now carry full version numbers instead of v0.N.x: closed lines show the last version they shipped and open lines show their projected final version, and the agent docs and milestone migration script follow the new convention.",
+    "changes": [
+        "Rename closed milestones to their last shipped version (for example v0.38.9 Beta) and open milestones to a projected final version (for example v0.40.7 Beta).",
+        "Fold the nav cleanup issue into the 0.39 milestone and remove the empty 0.40 placeholder, so the open lines run v0.40.7, v0.41.7, v0.42.11 and v0.43.10.",
+        "Derive milestone titles in migrate-beta-milestones.sh from the highest version in releases.json and rename legacy v0.N.x titles in place.",
+        "Document the full-version milestone convention in AGENTS.md, the GitHub issues rule, the task issue template, the ship-gate skill and the release-metadata design spec."
+    ],
+    "affected_areas": [
+        "GitHub milestones",
+        "Release ops scripts and agent documentation"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the completed 0.39.x line: repository and GitHub hygiene only; no application feature changes.",
+    "validation": [
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "Verified every milestone title against releases.json with the GitHub milestones API."
+    ],
+    "known_limitations": [
+        "Open milestone titles are projections and are renamed by hand when their scope changes; the migration script only manages closed lines."
+    ],
+    "rollback": "Redeploy the previous release package. Milestone titles can be renamed back on GitHub; documentation and script changes do not alter runtime application behaviour.",
+    "provenance": "Issue #377; pull request #378.",
+    "references": [
+        {
+            "label": "Issue #377",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/377"
+        },
+        {
+            "label": "Pull request #378",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/378"
+        }
+    ],
+    "slug": "release-v0-39-10",
+    "previous_version": "0.39.9"
+}

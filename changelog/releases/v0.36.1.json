@@ -1,0 +1,69 @@
+{
+    "version": "0.36.1",
+    "date": "2026-09-25",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Staff Recruitment manage IA",
+    "summary": "Staff Recruitment manage gets an independent Recruit manage primary with a Roles / Applications page submenu, so roles CRUD and applications review are reachable outside the APES CIC hub alone while staying separate from public Recruitment.",
+    "changes": [
+        "Add a permission-gated Recruit manage primary for staff with any apes-cic.recruitment view-all, create, update, delete, or review-applications ability.",
+        "Add a Roles | Applications page submenu on staff /apes-cic/recruitment* pages (URLs unchanged).",
+        "Keep APES CIC hub Recruitment links working; do not bury manage only inside the hub.",
+        "Document and cover the HR review-applications-only path: Applications submenu visible, roles CRUD fail-closed.",
+        "Add PHPUnit RecruitmentDualFrontendIaMatrixTest for guest, public, HR, staff, admin, and superadmin chrome and fail-closed manage URLs.",
+        "Extend AGENTS.md staff manage shell notes for the dual-frontend IA."
+    ],
+    "affected_areas": [
+        "Staff primary navigation",
+        "Recruitment manage page submenu",
+        "APES CIC recruitment roles CRUD",
+        "APES CIC recruitment applications review",
+        "Change Log Hub",
+        "AGENTS.md"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the v0.36.x line: staff manage information architecture and dual-frontend test matrix without changing public URLs, staff URL baselines, or permission definitions.",
+    "validation": [
+        "PHPUnit RecruitmentDualFrontendIaMatrixTest passes (guest / public / HR / staff / admin / superadmin).",
+        "Related PublicRecruitmentBoardTest, RecruitmentRoleWorkflowTest, RecruitmentApplicationManageTest, and AdminShellNavigationTest pass.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "composer pre-pr-verify (or equivalent local verify) on the PR branch before merge."
+    ],
+    "known_limitations": [
+        "Staff manage still ships only on the APES CIC sub-core.",
+        "Public applicants with view-own may still open the staff roles list URL without the Recruit manage primary; create/edit and applications review remain fail-closed."
+    ],
+    "rollback": "Redeploy the previous application version to remove the Recruit manage primary and Roles / Applications staff page submenu.",
+    "provenance": "Implements issues #258, #259, and #261 via pull request #296; closes epic #249.",
+    "references": [
+        {
+            "label": "Issue #258",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/258"
+        },
+        {
+            "label": "Issue #259",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/259"
+        },
+        {
+            "label": "Issue #261",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/261"
+        },
+        {
+            "label": "Issue #249",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/249"
+        },
+        {
+            "label": "Pull request #296",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/296"
+        }
+    ],
+    "slug": "release-v0-36-1",
+    "previous_version": "0.36.0"
+}

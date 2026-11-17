@@ -1,0 +1,48 @@
+{
+    "version": "0.66.1",
+    "date": "2026-11-16",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Herd QA always on",
+    "summary": "Local Herd always shows Developer sign-in and the QA role switcher by default when APP_ENV is local. Production and Cloudron stay hard-off.",
+    "changes": [
+        "When APP_ENV=local and QA_LOGIN_ENABLED is unset or empty, Developer sign-in and the QA pill turn on automatically; explicit false or 0 still disables them locally.",
+        "composer setup / herd-setup.ps1 upserts QA_LOGIN_ENABLED=true on every run, always seeds LocalQaSeeder after migrate (even without demo data), and clears a stale config cache when present.",
+        "QaLoginTest, .env.example, docs/herd.md and AGENTS.md document the local default and the production refuse."
+    ],
+    "affected_areas": [
+        "Authentication (Developer sign-in)",
+        "Local development (Herd)",
+        "Deploy preflight (Cloudron QA refuse unchanged)"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch: restores expected local Herd behaviour without changing production defaults or the Cloudron refuse.",
+    "validation": [
+        "QaLoginTest (36 tests) green locally, including local unset on, local explicit false off, and non-local still off.",
+        "Herd preview on BambiesSumsung: Developer sign-in panel on /login and QA pill after sign-in.",
+        "composer milestone:bump --check and myapes:changelog-validate --base-ref=origin/main."
+    ],
+    "known_limitations": [
+        "None for this release."
+    ],
+    "rollback": "Redeploy the previous release tag. No database schema changes.",
+    "provenance": "Milestone epic #849 and pull request #853 on the milestone/v0-66-1-herd-qa-always branch.",
+    "references": [
+        {
+            "label": "Issue #849",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/849"
+        },
+        {
+            "label": "Pull request #853",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/853"
+        }
+    ],
+    "slug": "release-v0-66-1",
+    "previous_version": "0.66.0"
+}

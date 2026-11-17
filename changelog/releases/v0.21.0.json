@@ -1,0 +1,46 @@
+{
+    "version": "0.21.0",
+    "date": "2026-08-20",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Enable or disable Cloudron groups for app access",
+    "summary": "Super-admins can enable or disable Cloudron directory groups for MyAPES Account so only enabled groups grant access through role mappings.",
+    "changes": [
+        "Added an app allowlist on directory groups with Enable and Disable controls in Admin Groups.",
+        "Directory role synchronization ignores disabled groups even when they still have role mappings.",
+        "Required Cloudron MyAPES groups stay always enabled; newly discovered non-required groups default to disabled until opted in."
+    ],
+    "affected_areas": [
+        "Admin Groups",
+        "Directory authorization",
+        "Cloudron LDAP group catalogue"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible minor release introducing an app-level Cloudron group allowlist for MyAPES access control.",
+    "validation": [
+        "PHPUnit coverage for directory catalogue sync defaults, role synchronizer gating, group enable/disable mutations, and Admin Groups UI; Aikido scan on key changed files; myapes:changelog-validate against origin/main."
+    ],
+    "known_limitations": [
+        "Catalogue sync still lists all Cloudron groups; disable only removes them from MyAPES authorization, not from Cloudron.",
+        "Existing mapped non-required groups remain enabled after upgrade so current access paths are preserved."
+    ],
+    "rollback": "Revert this release record, VERSION, runtime manifest version, the app_enabled migration (after rolling back the schema change), Groups UI and authorization gating changes, and related tests. Re-run authorization metadata synchronization after rollback. No other schema changes are required.",
+    "provenance": "Defined by the Cloudron directory group app allowlist for MyAPES Account issue #78 and pull request #79.",
+    "references": [
+        {
+            "label": "Issue #78",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/78"
+        },
+        {
+            "label": "Pull request #79",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/79"
+        }
+    ],
+    "slug": "release-v0-21-0",
+    "previous_version": "0.20.0"
+}

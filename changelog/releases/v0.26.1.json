@@ -1,0 +1,45 @@
+{
+    "version": "0.26.1",
+    "date": "2026-08-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Document live public walkthrough account",
+    "summary": "README now documents the live production public walkthrough account so operators and QA can sign in through public login without using a superadmin session.",
+    "changes": [
+        "Added a Live public walkthrough account (production) section to README with account identity, separation rules, and operator secret-store guidance.",
+        "Recorded that local QA seeds remain local/testing-only and that Staff Login or directory sync must never own the live walkthrough account."
+    ],
+    "affected_areas": [
+        "Documentation",
+        "Public authentication and account separation"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "Patch release for operator documentation only; no application code or runtime behaviour changed.",
+    "validation": [
+        "Live walkthrough account verified on production: public login succeeds, public hubs return 200, and admin or superadmin routes return 403.",
+        "Production identity confirmed as local service-user with no OIDC subject; myapes:accounts:check remained green.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main"
+    ],
+    "known_limitations": [
+        "Walkthrough account credentials are stored only in the operator secret store; public password reset remains tracked separately in issue #121."
+    ],
+    "rollback": "Revert README and release metadata; the live walkthrough account row in production is unaffected by this documentation-only release.",
+    "provenance": "Issue #129; pull request #146.",
+    "references": [
+        {
+            "label": "Issue #129",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/129"
+        },
+        {
+            "label": "Pull request #146",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/146"
+        }
+    ],
+    "slug": "release-v0-26-1",
+    "previous_version": "0.26.0"
+}

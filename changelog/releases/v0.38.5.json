@@ -1,0 +1,52 @@
+{
+    "version": "0.38.5",
+    "date": "2026-09-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Admin shell string extraction",
+    "summary": "Admin shell chrome, Access screens, Plugins, Maintenance, flashes, and permission display labels now come from UK English lang files. Stored permission keys and URLs are unchanged.",
+    "changes": [
+        "Move Admin nav, Overview, Users, Access, Plugins, and Maintenance copy into lang/en_GB/admin.php.",
+        "Move Admin controller flash messages into admin.flash.* keys.",
+        "Resolve permission display titles via admin.permissions.labels.* while leaving stored permission names untouched.",
+        "Keep Super Admin out of Admin shell nav wording; regenerate the hard-coded string inventory (Admin section 0)."
+    ],
+    "affected_areas": [
+        "Admin shell and page submenu",
+        "Access (groups, job roles, permissions)",
+        "Admin Plugins and Maintenance",
+        "Permission display labels",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.38.x Language line: Admin shell extraction after auth/mail extract (0.38.4).",
+    "validation": [
+        "PHPUnit LocalisationAdminExtractionTest and AdminShellNavigationTest.",
+        "php artisan lang:inventory — Admin section count 0.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Public chrome and APES CIC staff hub strings remain hard-coded until subsequent Wave 2 patches (#268, #269).",
+        "lang:check remains report-only until Wave 4."
+    ],
+    "rollback": "Redeploy the previous release package. Admin UI returns to prior hard-coded English if lang keys are removed; no database migrations are included.",
+    "provenance": "Issue #270; pull request #317.",
+    "references": [
+        {
+            "label": "Issue #270",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/270"
+        },
+        {
+            "label": "Pull request #317",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/317"
+        }
+    ],
+    "slug": "release-v0-38-5",
+    "previous_version": "0.38.4"
+}

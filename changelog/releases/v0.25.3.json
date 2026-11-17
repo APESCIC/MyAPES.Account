@@ -1,0 +1,45 @@
+{
+    "version": "0.25.3",
+    "date": "2026-08-24",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Make LDAP group rename migration idempotent",
+    "summary": "Cloudron deploy no longer fails when the LDAP group rename migration finds both legacy myapes.* and canonical myapesaccount.* directory groups already present.",
+    "changes": [
+        "Make the myapes-to-myapesaccount directory group rename migration merge duplicate rows instead of renaming into an existing unique name.",
+        "Reassign directory mappings and role sources to the canonical group before deleting the legacy duplicate."
+    ],
+    "affected_areas": [
+        "Cloudron deployment activation",
+        "Directory groups migration"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: backward-compatible deploy fix for a partial-upgrade database state without changing authorization semantics.",
+    "validation": [
+        "Feature test covering legacy-plus-canonical directory group merge during migration re-run.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main after filling release notes."
+    ],
+    "known_limitations": [
+        "Operators should still rename Cloudron LDAP groups to myapesaccount.* after a successful deploy; this patch only makes the database rename step safe."
+    ],
+    "rollback": "Redeploy the previous application version. The idempotent rename migration is not reversed automatically on rollback.",
+    "provenance": "Defined by the duplicate directory group deploy fix for MyAPES Account issue #109 and pull request #110.",
+    "references": [
+        {
+            "label": "Issue #109",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/109"
+        },
+        {
+            "label": "Pull request #110",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/110"
+        }
+    ],
+    "slug": "release-v0-25-3",
+    "previous_version": "0.25.2"
+}

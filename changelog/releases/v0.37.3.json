@@ -1,0 +1,49 @@
+{
+    "version": "0.37.3",
+    "date": "2026-09-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Morph rewrite drops auth triggers during cutover",
+    "summary": "Cloudron can finish the Structure morph-map cutover: role and permission pivots rewrite from the previous user class name to the stable user alias without the authorization guard blocking the update.",
+    "changes": [
+        "Drop authorization compatibility triggers for the morph FQCN rewrite window, then reinstall them with the user alias.",
+        "Keep audit, attachment, notification, and Spatie pivot rewrites in the same migration after triggers are suspended.",
+        "Cover the provenanced model_has_roles rewrite path with a Structure layout regression test."
+    ],
+    "affected_areas": [
+        "Cloudron activation migrations",
+        "Polymorphic morph-type cutover",
+        "Authorization compatibility database guard",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on v0.37.x: deploy cutover fix only, with no change to product behaviour, URLs, or permission strings after migrate.",
+    "validation": [
+        "php artisan test --compact --filter=StructureLayoutMorphMapTest",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "Cloudron workflow_dispatch with app_version from VERSION after merge; live /healthz and /change-log confirm the deployed version."
+    ],
+    "known_limitations": [
+        "Triggers are absent only for the brief rewrite window inside this migration; they are reinstalled before activation continues."
+    ],
+    "rollback": "Redeploy the previous application version. If this migration already completed, morph aliases remain; restore from the pre-deployment Cloudron backup only if a database rollback is required.",
+    "provenance": "Morph rewrite auth-trigger suspend for issue #302, pull request #303.",
+    "references": [
+        {
+            "label": "Issue #302",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/302"
+        },
+        {
+            "label": "Pull request #303",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/303"
+        }
+    ],
+    "slug": "release-v0-37-3",
+    "previous_version": "0.37.2"
+}

@@ -1,0 +1,40 @@
+{
+    "version": "0.8.3",
+    "date": "2026-08-06",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Root-owned runtime release boundaries",
+    "summary": "Restored root ownership after Cloudron startup normalization so application code cannot relax immutable release and deployment-control permissions.",
+    "changes": [
+        "Made the launcher accept only the verified Cloudron ownership-normalization contract, restore root ownership synchronously, and refuse Apache startup until the protected runtime boundary is verified.",
+        "Added post-restart ownership restoration and complete ownership verification for active and rollback releases while retaining writable Laravel cache and shared-storage paths."
+    ],
+    "affected_areas": [
+        "Cloudron application startup, immutable release ownership, and rollback verification"
+    ],
+    "categories": [
+        "fixed",
+        "security"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible patch correcting the ownership-control gap found during v0.8.2 production acceptance.",
+    "validation": [
+        "Deployment contracts require root ownership for protected runtime paths and every immutable-release path outside Laravel bootstrap cache, with the shared environment root-owned and readable only by the application group.",
+        "The post-restart gate restores ownership before reading the retained archive, reauthenticates deployment controls, preserves only required cache and storage writes, and reruns exact release health, OIDC, and authorization checks."
+    ],
+    "known_limitations": [
+        "This patch changes deployment ownership enforcement only; it does not alter the v0.8.0 authorization or Admin feature set."
+    ],
+    "rollback": "Restore the exact pre-activation application release while retaining the forward-only Phase B database migration; rollback remains fail-closed unless the previous release and authenticated controls retain root-owned immutable boundaries.",
+    "provenance": "Defined by v0.8.2 production ownership evidence for Phase B of MyAPES Account issue #10.",
+    "references": [
+        {
+            "label": "Issue #10",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/10"
+        }
+    ],
+    "slug": "release-v0-8-3",
+    "previous_version": "0.8.2"
+}

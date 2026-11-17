@@ -1,0 +1,45 @@
+{
+    "version": "0.31.12",
+    "date": "2026-08-30",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Local-first ship-gate workflow",
+    "summary": "Agent shipping workflow now verifies changes on local dev before a PR and treats Cloudron deploy as the last post-merge step.",
+    "changes": [
+        "Add a pre-merge local dev verify gate to ship-gate rules and skills.",
+        "Reorder post-merge gates to changelog metadata, Cloudron deploy last, then live hub and GitHub Release verification.",
+        "Add composer pre-pr-verify to wrap pre-merge checks and a non-destructive local bootstrap."
+    ],
+    "affected_areas": [
+        "Agent workflow documentation",
+        "Local development scripts"
+    ],
+    "categories": [
+        "changed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: agent shipping workflow and local verify script only; no production application behaviour change.",
+    "validation": [
+        "Ship-gate and release-metadata docs updated consistently across AGENTS.md, README.md, and .cursor rules.",
+        "composer pre-pr-verify script added with pre-merge and bootstrap seed steps."
+    ],
+    "known_limitations": [
+        "None apply."
+    ],
+    "rollback": "Redeploy the previous application version. To revert this workflow change, restore the prior ship-gate docs and remove the pre-pr-verify script from this release.",
+    "provenance": "Local-first ship-gate workflow for issue #189, pull request #191.",
+    "references": [
+        {
+            "label": "Issue #189",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/189"
+        },
+        {
+            "label": "Pull request #191",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/191"
+        }
+    ],
+    "slug": "release-v0-31-12",
+    "previous_version": "0.31.11"
+}

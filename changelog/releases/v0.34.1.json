@@ -1,0 +1,54 @@
+{
+    "version": "0.34.1",
+    "date": "2026-09-24",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Recruitment role staff CRUD on APES CIC",
+    "summary": "Staff on APES CIC can create, edit, publish, and close recruitment roles (staff, volunteer, and student) from the Recruitment hub, replacing the Wave 0 stub with real role management.",
+    "changes": [
+        "Add the RecruitmentRole model, migration, factory, and policy with draft, open, and closed lifecycle states.",
+        "Ship staff CRUD under the APES CIC Recruitment hub with list and create anchors, plus publish and close transitions.",
+        "Gate role create and updates to staff abilities so guests and public service users cannot mutate roles.",
+        "Cover staff happy-path CRUD, unauthorized denial, and hub quick links with feature tests."
+    ],
+    "affected_areas": [
+        "APES CIC Recruitment",
+        "Module permissions",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release on the v0.34.x line: staff RecruitmentRole CRUD builds on the 0.34.0 registry without changing the public board or applications yet.",
+    "validation": [
+        "PHPUnit RecruitmentRoleWorkflowTest, ModuleRegistryTest, ServiceHubQuickLinksTest, and JobRoleCapabilityPacksTest pass for role CRUD and staff-only create.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "composer pre-pr-verify (or equivalent local verify) on the PR branch before merge."
+    ],
+    "known_limitations": [
+        "The public roles board and application review are not included; those ship in later 0.34.x patches.",
+        "Recruitment remains APES CIC only (not Shelter or Pet Care Clinic)."
+    ],
+    "rollback": "Redeploy the previous application version to remove RecruitmentRole CRUD routes, views, and the recruitment_roles table migration from the live app.",
+    "provenance": "RecruitmentRole staff CRUD for issues #213 and #220, pull request #242.",
+    "references": [
+        {
+            "label": "Issue #213",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/213"
+        },
+        {
+            "label": "Issue #220",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/220"
+        },
+        {
+            "label": "Pull request #242",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/242"
+        }
+    ],
+    "slug": "release-v0-34-1",
+    "previous_version": "0.34.0"
+}

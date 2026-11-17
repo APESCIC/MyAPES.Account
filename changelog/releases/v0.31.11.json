@@ -1,0 +1,49 @@
+{
+    "version": "0.31.11",
+    "date": "2026-08-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Move GitHub support links to sidebar",
+    "summary": "Public GitHub support links now live in a sidebar App Support section with icon-led pills instead of the shared footer.",
+    "changes": [
+        "Move GitHub, Open an issue, and Discussions links from the shared footer into a new App Support section at the bottom of the left sidebar.",
+        "Show App Support below Log out for signed-in users and after the theme toggle for guests.",
+        "Style each support link as a pill with a Lucide icon and a hover lift effect.",
+        "Keep the Change Log Hub Feedback and source block unchanged."
+    ],
+    "affected_areas": [
+        "Shared layout sidebar",
+        "Shared layout footer",
+        "Public navigation chrome"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: relocates existing public GitHub links within the shared layout without changing URLs or access rules.",
+    "validation": [
+        "PHPUnit ChangeLogPageTest and HealthAndThemeTest for sidebar App Support placement and footer removal.",
+        "Verified guest and authenticated layouts render the three external GitHub links in the sidebar."
+    ],
+    "known_limitations": [
+        "Change Log Hub still shows a separate Feedback and source link group in the page hero.",
+        "Privacy, cookies, help, and terms routes remain planned under issue #123."
+    ],
+    "rollback": "Redeploy the previous application version to restore footer GitHub links.",
+    "provenance": "Defined by MyAPES Account issue #185 and pull request #186.",
+    "references": [
+        {
+            "label": "Issue #185",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/185"
+        },
+        {
+            "label": "Pull request #186",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/186"
+        }
+    ],
+    "slug": "release-v0-31-11",
+    "previous_version": "0.31.10"
+}

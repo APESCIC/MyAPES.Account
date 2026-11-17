@@ -1,0 +1,47 @@
+{
+    "version": "0.23.1",
+    "date": "2026-08-23",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Clearer directory groups on staff profile",
+    "summary": "Directory groups on staff profile and admin user pages now show as wrapping chips instead of a hard-to-scan comma-separated list.",
+    "changes": [
+        "Replaced the comma-separated monospace directory groups list with wrapping chips on the staff profile page.",
+        "Applied the same chip layout to normalized directory groups on the admin user detail page.",
+        "Added Local QA sample directory groups for staff, admin, and superadmin accounts so the layout is easy to check locally."
+    ],
+    "affected_areas": [
+        "Staff profile page",
+        "Admin user detail page",
+        "Local QA fixtures"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible patch that only changes how existing directory group values are displayed.",
+    "validation": [
+        "StaffProfileWorkflowTest and AdminProfileManagementTest feature coverage.",
+        "myapes:changelog-validate against origin/main."
+    ],
+    "known_limitations": [
+        "Directory group names remain as stored Cloudron identifiers; this release does not rename or humanize them."
+    ],
+    "rollback": "Revert this release record, VERSION, runtime manifest version, the directory group list component and styles, related blade updates, Local QA seeder group fixtures, and related tests.",
+    "provenance": "Defined by the staff profile directory groups readability fix for MyAPES Account issue #87 and pull request #88.",
+    "references": [
+        {
+            "label": "Issue #87",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/87"
+        },
+        {
+            "label": "Pull request #88",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/88"
+        }
+    ],
+    "slug": "release-v0-23-1",
+    "previous_version": "0.23.0"
+}

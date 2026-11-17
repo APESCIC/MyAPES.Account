@@ -1,0 +1,42 @@
+{
+    "version": "0.67.1",
+    "date": "2026-11-17",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Agent Store AGENTS scrub",
+    "summary": "Agent guidance now points at the local Agent Store for personal skills instead of an abandoned GitHub hub link.",
+    "changes": [
+        "AGENTS.md no longer links to the abandoned personal skills GitHub repository; Cursor user rules and the Agent Store own process guidance."
+    ],
+    "affected_areas": [
+        "Repository agent documentation (AGENTS.md)"
+    ],
+    "categories": [
+        "changed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "Patch: documentation-only correction with no product behaviour change.",
+    "validation": [
+        "php artisan myapes:changelog-validate --base-ref=origin/main",
+        "composer milestone:bump -- v0.67.1 --check"
+    ],
+    "known_limitations": [
+        "None."
+    ],
+    "rollback": "Redeploy the previous release tag. Documentation-only change.",
+    "provenance": "Issue #857 and pull request #858 on milestone/v0-67-1-agent-store-agents-scrub.",
+    "references": [
+        {
+            "label": "Issue #857",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/857"
+        },
+        {
+            "label": "Pull request #858",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/858"
+        }
+    ],
+    "slug": "release-v0-67-1",
+    "previous_version": "0.67.0"
+}

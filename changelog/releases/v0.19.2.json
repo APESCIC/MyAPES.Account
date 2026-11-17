@@ -1,0 +1,41 @@
+{
+    "version": "0.19.2",
+    "date": "2026-08-20",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Fix release history tests for v0.19.1",
+    "summary": "Corrects pinned release history feature assertions so they match the published v0.19.1 Admin Modules registry sequence and current head metadata.",
+    "changes": [
+        "Updated ReleaseHistoryCommandTest date indices, current-release expectations, and historical release lookups after the v0.19.1 Modules registry release."
+    ],
+    "affected_areas": [
+        "Release history feature tests"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible patch restoring green release history coverage without changing application runtime behavior.",
+    "validation": [
+        "ReleaseHistoryCommandTest, ChangeLogPageTest, and ModuleAdministrationAndNavigationTest feature suites plus myapes:changelog-validate against origin/main."
+    ],
+    "known_limitations": [
+        "None for this release."
+    ],
+    "rollback": "Revert this release record, VERSION, runtime manifest version, and the ReleaseHistoryCommandTest updates. No database rollback is needed.",
+    "provenance": "Defined by the follow-up release history test alignment for MyAPES Account issue #71 after pull request #70.",
+    "references": [
+        {
+            "label": "Issue #71",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/71"
+        },
+        {
+            "label": "Pull request #70",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/70"
+        }
+    ],
+    "slug": "release-v0-19-2",
+    "previous_version": "0.19.1"
+}

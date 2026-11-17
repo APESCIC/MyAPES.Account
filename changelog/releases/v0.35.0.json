@@ -1,0 +1,61 @@
+{
+    "version": "0.35.0",
+    "date": "2026-09-24",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Unified Admin shell",
+    "summary": "Admin and Super Admin are one Admin area: a single primary nav item, a permission-gated page submenu, Super Admin diagnostics on the shared Overview when entitled, and legacy /superadmin URLs that redirect into Admin.",
+    "changes": [
+        "Show one primary Admin link when the signed-in user can open any Admin child; hide Admin entirely for everyone else.",
+        "Merge Overview, Public users, Staff, Access, Plugins, and Maintenance into one permission-gated Admin page submenu.",
+        "Render Super Admin technical KPIs, charts, and operational context on the same /admin Overview when the user has superadmin.access.",
+        "Redirect legacy /superadmin (and remaining children) into Admin equivalents while keeping destination authorization.",
+        "Cover public, staff, administrator, and Super Admin navigation, fail-closed URLs, and the redirect map with PHPUnit feature tests."
+    ],
+    "affected_areas": [
+        "Admin navigation",
+        "Admin overview",
+        "Legacy Super Admin URLs",
+        "Change Log Hub",
+        "AGENTS.md"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Minor release opening the v0.35.x line: unifies the Admin shell as a new capability without changing action permission gates.",
+    "validation": [
+        "PHPUnit AdminShellNavigationTest, AdminAnalyticsDashboardTest, AuthorizationAccessMatrixTest, AdminAccessWorkspaceTest, and LocalQaAuthTest pass.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "composer pre-pr-verify (or equivalent local verify) on the PR branch before merge."
+    ],
+    "known_limitations": [
+        "Per-plugin settings registry and Recruitment settings pages ship in a later 0.35.x patch.",
+        "Action middleware and permission gates are unchanged; only chrome and Overview composition were unified."
+    ],
+    "rollback": "Redeploy the previous application version to restore separate Admin and Super Admin primary navigation and the Super Admin overview page.",
+    "provenance": "Implements issues #251, #250, and #252 via pull request #262 (shell half of #254).",
+    "references": [
+        {
+            "label": "Issue #251",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/251"
+        },
+        {
+            "label": "Issue #250",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/250"
+        },
+        {
+            "label": "Issue #252",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/252"
+        },
+        {
+            "label": "Pull request #262",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/262"
+        }
+    ],
+    "slug": "release-v0-35-0",
+    "previous_version": "0.34.4"
+}

@@ -1,0 +1,38 @@
+{
+    "version": "0.4.2",
+    "date": "2026-07-24",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Initial Cloudron release activation correction",
+    "summary": "Corrected first-release activation so an absent current-release link is handled safely.",
+    "changes": [
+        "Changed activation guards to resolve current and previous release targets only when those paths are symbolic links.",
+        "Preserved the existing fail-closed release-path checks and immutable activation behavior."
+    ],
+    "affected_areas": [
+        "Cloudron release activation and rollback safeguards"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "A compatible patch correcting the initial activation path without changing the release architecture.",
+    "validation": [
+        "Automated application tests, deployment shell syntax, and an absent-link activation probe passed for the merged correction."
+    ],
+    "known_limitations": [
+        "The earlier blocked upload was not accepted as the live release."
+    ],
+    "rollback": "Restore the earlier activation guard if the corrected symbolic-link handling must be withdrawn.",
+    "provenance": "This historical record was reconstructed from merged pull request #7 and was not represented by a historical Git tag.",
+    "references": [
+        {
+            "label": "PR #7",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/7"
+        }
+    ],
+    "slug": "release-v0-4-2",
+    "previous_version": "0.4.1"
+}

@@ -341,16 +341,15 @@ Separation rules:
 
 ## Release history and semantic versioning
 
-The current application version is stored in the root `VERSION` file without a display-only `v` prefix. Reviewed public release records live in `resources/data/releases.json`; the newest record is authoritative and must match `VERSION`. The shared footer links the displayed version to the public `/change-log` hub.
+The current application version is stored in the root `VERSION` file without a display-only `v` prefix. Reviewed public release copy lives in `changelog/releases/vX.Y.Z.json` (one file per version). `php artisan myapes:changelog-prepare` writes the new per-release file, bumps `VERSION` and `application_version`, and regenerates the compatibility aggregate `resources/data/releases.json` — do not hand-edit that aggregate as the source of truth. The newest version must match `VERSION`. The shared footer links the displayed version to the public `/change-log` hub. There is no Admin release editor; APES Newsroom is the interaction reference for hub layout only.
 
 Every future change merged to `main` must:
 
-1. Prepend exactly one higher semantic version to `resources/data/releases.json`. That version is the milestone's version: the `vMAJOR.MINOR.PATCH` at the start of its GitHub milestone title (see [`.cursor/rules/version-shipping.mdc`](.cursor/rules/version-shipping.mdc)).
-2. Update `VERSION` to that same version.
-3. Keep `resources/data/module-runtime-contract.json` → `application_version` in sync with `VERSION`.
-4. Leave every previously published record unchanged and in the same order.
-5. Milestones are titled with a minor version for a new backward-compatible capability and a patch version for a compatible fix. While the application remains pre-1.0, document a breaking change explicitly and advance the minor version.
-6. Keep public notes free of credentials, personal data, private operational identifiers, exploitable security detail, and unnecessary infrastructure detail.
+1. Add exactly one higher semantic version via `php artisan myapes:changelog-prepare`. That version is the milestone's version: the `vMAJOR.MINOR.PATCH` at the start of its GitHub milestone title (see [`.cursor/rules/version-shipping.mdc`](.cursor/rules/version-shipping.mdc)).
+2. Keep `VERSION` and `resources/data/module-runtime-contract.json` → `application_version` in sync (prepare sets both).
+3. Leave every previously published per-release file unchanged.
+4. Milestones are titled with a minor version for a new backward-compatible capability and a patch version for a compatible fix. While the application remains pre-1.0, document a breaking change explicitly and advance the minor version.
+5. Keep public notes free of credentials, personal data, private operational identifiers, exploitable security detail, and unnecessary infrastructure detail.
 
 Preferred workflow (agents and humans): work ships once per milestone (see [Shipping and versioning](AGENTS.md#shipping-and-versioning)), so scaffold the next release in the milestone's pull request into `main`:
 
@@ -358,7 +357,7 @@ Preferred workflow (agents and humans): work ships once per milestone (see [Ship
 php artisan myapes:changelog-prepare --type=<patch|minor|major> --title="Short public title" --issue=<n> --pr=<n>
 ```
 
-Pick the `--type` that produces the milestone's version; run it with `--dry-run` first. Replace every `TODO:` field in the new head record, then validate:
+Pick the `--type` that produces the milestone's version; run it with `--dry-run` first. Replace every `TODO:` field in `changelog/releases/vX.Y.Z.json`, then validate:
 
 ```powershell
 php artisan myapes:changelog-validate
@@ -375,7 +374,7 @@ Pull-request and `main` workflows perform the same append-only comparison. Manua
 
 ### GitHub Release tags
 
-Every documented app version in `releases.json` has a matching GitHub Release tag `v{VERSION}` (for example `v0.31.6` for `VERSION` `0.31.6`). The Change Log Hub and `/healthz` `version` field read from `VERSION` / `releases.json`; GitHub Releases are the external mirror on [the repository Releases page](https://github.com/APESCIC/MyAPES-Account/releases). `release.yml` publishes the GitHub Release when the `v{VERSION}` tag is pushed, titled `v{VERSION} <milestone name>`, for example `v0.60.0 Repository standards and Cloudron mailbox`. Releases published before this change keep their old titles.
+Every documented app version has a matching GitHub Release tag `v{VERSION}` (for example `v0.31.6` for `VERSION` `0.31.6`). The Change Log Hub reads projected release data (`MYAPES_CHANGELOG_USE_DATABASE=true` on production after `php artisan myapes:releases-sync` in `activate-release.sh`); `/healthz` `version` comes from `VERSION`. GitHub Releases are the external mirror on [the repository Releases page](https://github.com/APESCIC/MyAPES-Account/releases). `release.yml` publishes the GitHub Release when the `v{VERSION}` tag is pushed, titled `v{VERSION} <milestone name>`, for example `v0.60.0 Repository standards and Cloudron mailbox`. Releases published before this change keep their old titles.
 
 - Map versions to merge commits: `node scripts/local/map-release-commits.mjs --write`
 - Backfill or verify releases: `node scripts/local/backfill-github-releases.mjs --dry-run` then `node scripts/local/backfill-github-releases.mjs --resume`
@@ -390,7 +389,7 @@ Deployments are handled by `.github/workflows/deploy-cloudron.yml`.
 
 1. Deploy runs only on manual `workflow_dispatch` on a published release tag: `gh workflow run deploy-cloudron.yml --ref vX.Y.Z`. It refuses `main`, a branch, a tag without a published GitHub Release, or a tag whose commit is not on `main`. There is no auto-deploy after a green `main` test run.
 2. Run local dev verify on the PR branch before merge (`composer pre-pr-verify` or ship-gate steps). Prefer Cloudron deploy only after `test-cloudron.yml` has succeeded for the target `main` revision, local verify passed, and changelog metadata on `main` is confirmed. Cloudron is the **last** step, after the merge and the release (ship-gate).
-3. After a successful Cloudron deploy, the app Change Log Hub at `/change-log` shows the head `releases.json` record, and the deploy workflow publishes GitHub Release `v{VERSION} {suffix}` with tag `v{VERSION}`. Sibling APES websites keep separate changelogs; update those only when the operator asks (ship-gate).
+3. After a successful Cloudron deploy, the app Change Log Hub at `/change-log` shows the synced head release, and the deploy workflow publishes GitHub Release `v{VERSION} {suffix}` with tag `v{VERSION}`. Sibling APES websites keep separate changelogs; update those only when the operator asks (ship-gate).
 
 ### Target app
 

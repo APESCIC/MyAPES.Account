@@ -1,0 +1,46 @@
+{
+    "version": "0.32.1",
+    "date": "2026-09-06",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Signed-in home skips login doors",
+    "summary": "Signed-in users who open the site home are taken to the in-app dashboard instead of the guest Public Login / Register / Staff Login doors.",
+    "changes": [
+        "Redirect authenticated visitors from `/` to the dashboard so they no longer see the public login doors.",
+        "Keep the guest landing page with Public Login, Register, and Staff Login for signed-out visitors."
+    ],
+    "affected_areas": [
+        "Public home landing",
+        "Signed-in session navigation"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: corrects signed-in home routing without changing guest landing or authorization rules.",
+    "validation": [
+        "PHPUnit HomeLandingRedirectTest covers guest doors on `/` and service-user plus Super Admin redirects to the dashboard.",
+        "Related home, mascot, theme, maintenance, and guest-auth redirect tests remain green.",
+        "composer pre-pr-verify run on the PR branch before merge."
+    ],
+    "known_limitations": [
+        "Spike dock field overlap (#131) and later Public UX items remain separate follow-ups."
+    ],
+    "rollback": "Redeploy the previous application version to restore the prior guest landing behaviour for authenticated visitors on `/`.",
+    "provenance": "Signed-in home login doors fix for issue #130, pull request #194.",
+    "references": [
+        {
+            "label": "Issue #130",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/130"
+        },
+        {
+            "label": "Pull request #194",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/194"
+        }
+    ],
+    "slug": "release-v0-32-1",
+    "previous_version": "0.32.0"
+}

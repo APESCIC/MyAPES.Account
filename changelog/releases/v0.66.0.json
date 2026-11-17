@@ -1,0 +1,56 @@
+{
+    "version": "0.66.0",
+    "date": "2026-11-16",
+    "channel": "stable",
+    "type": "minor",
+    "title": "User profile hub",
+    "summary": "Admin and staff get a tabbed user profile hub with records, quick actions, internal notes, a unified activity timeline, and admin contact-preference and 2FA reset tools. Local development docs and scripts complete the Herd switch from Laragon.",
+    "changes": [
+        "Admin user show is a tabbed profile hub (Overview, Details, Access, Records, Activity) with flash toasts for saves.",
+        "Records and Activity panels summarise tickets, cases, pets, bookings, applications and notes for the profile subject without exposing secrets.",
+        "Staff clients.show uses the same hub for public clients (staff accounts stay 404), gated by staff.clients.view for staff, volunteer and student roles.",
+        "Staff with the relevant view-all abilities can start a ticket or case owned by the client from the hub; ClientNote supports private notes visible only to the author and admins.",
+        "Admins can update contact preferences and reset TOTP 2FA for a user with audited actions and no secrets in flash or logs.",
+        "Local development documentation and preview scripts finish the Laragon-to-Herd switch (#846, #847)."
+    ],
+    "affected_areas": [
+        "Admin Users",
+        "Staff Clients",
+        "Authorisation (staff.clients.view)",
+        "Tickets",
+        "Cases",
+        "Audit log",
+        "Local development (Herd)",
+        "Help and wiki"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Minor: new profile hub experience, staff.clients.view permission, client notes, and admin contact/2FA tools.",
+    "validation": [
+        "PHPUnit feature coverage for UserProfileHubTest and AdminUserDetailUxTest.",
+        "composer pre-pr-verify and CI checks on the milestone pull request."
+    ],
+    "known_limitations": [
+        "None for this release."
+    ],
+    "rollback": "Redeploy the previous release tag and restore the previous database backup if the client_notes table or staff.clients.view grants need to be removed.",
+    "provenance": "Milestone epic #517 and pull request #848 on the milestone/v0-66-0-user-profile-hub branch.",
+    "references": [
+        {
+            "label": "Issue #517",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/517"
+        },
+        {
+            "label": "Pull request #848",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/848"
+        }
+    ],
+    "slug": "release-v0-66-0",
+    "previous_version": "0.65.0"
+}

@@ -1,0 +1,54 @@
+{
+    "version": "0.8.0",
+    "date": "2026-08-05",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Protected RBAC and authorization administration",
+    "summary": "Introduced protected role-based authorization, context-aware sessions, exact directory synchronization, suspension controls, and complete Admin authorization management.",
+    "changes": [
+        "Introduced four protected roles and thirteen code-owned permissions enforced through application-owned Gate and policy decisions, with provenance-guarded direct user permissions available only to central authorization services.",
+        "Added source-provenanced role assignments with mandatory persisted actors for local grants and actor-free non-local sources, authorization epochs, context-aware password, Cloudron OIDC, and local quality-assurance sessions, plus suspension and forced reauthentication controls.",
+        "Added exact normalized directory-group mappings, catalogue synchronization, eligibility revocation, and lifecycle commands for guarded activation and verification.",
+        "Added accessible Admin Users, Groups, Roles, and Permissions sections with transactional assignment, mapping, suspension, custom-role, and final-super-admin safeguards.",
+        "Aligned Admin user permission inventories with the runtime Gate by combining role and provenanced direct grants without exposing an arbitrary direct-assignment interface.",
+        "Restricted assignment and operational notifications to unsuspended staff whose protected baseline and qualifying provenance agree, with uniform authorization-first denial handling.",
+        "Bound and coalesced directory synchronization work, made final and repeated queue-failure callbacks durably invalidate prior directory sessions while clearing only their matching lease, and pinned the production application environment.",
+        "Serialized privileged mutations behind authorization-state locks with session, epoch, generation, exact-role provenance, and present-group revalidation, including one final-super-admin predicate shared by runtime and lifecycle checks.",
+        "Derived deployment-control trust directly from the exact Git revision before third-party actions or dependencies and published root-owned, application-non-writable activation and rollback controls."
+    ],
+    "affected_areas": [
+        "Authentication sessions, authorization, policies, and account suspension",
+        "Directory group catalogue, mappings, synchronization, and revocation",
+        "Admin Users, Groups, Roles, and Permissions",
+        "Authorization migration, activation, verification, and rollback compatibility"
+    ],
+    "categories": [
+        "added",
+        "changed",
+        "security",
+        "accessibility"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible minor release completing the protected authorization and administration capability planned in issue #10.",
+    "validation": [
+        "Automated tests cover the guarded cutover, exact source and pivot parity, roleless and interrupted retries, protected permission matrix, actor-attributed local grants, actor-free non-local sources, direct-permission inventory parity, correlated provenance, session context, suspension, assignment integrity, uniform denial responses, bounded directory synchronization, lifecycle commands, and Admin authorization boundaries.",
+        "The release gate requires complete SQLite coverage plus deterministic two-process row-lock and reconciliation tests and a real correlated queue-timeout probe on MySQL 8.4 and MariaDB 11.4, queue and LDAP bounds, transaction-time privileged reauthorization, Git-derived deployment-control authentication, root-owned control-use checks, exact environment and rollback contracts, frontend tests, production assets, archive checks, and exact post-restart health and OIDC verification."
+    ],
+    "known_limitations": [
+        "Issue #11 public identity and consent work is not included.",
+        "Issue #19 version-management automation is not included."
+    ],
+    "rollback": "Code rollback is idempotent and bound to the exact failed and pre-activation releases, with complete runtime controls derived from the exact Git revision and consumed from a root-owned application-non-writable directory, while retaining the Phase B database migrations. A deliberate maintenance downgrade refuses unrepresentable revocation state and invalidates sessions first; the pre-deployment backup remains the database recovery boundary.",
+    "provenance": "Defined by Phase B of MyAPES Account issue #10.",
+    "references": [
+        {
+            "label": "Issue #10",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/10"
+        }
+    ],
+    "slug": "release-v0-8-0",
+    "previous_version": "0.7.1"
+}

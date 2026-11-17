@@ -1,0 +1,40 @@
+{
+    "version": "0.9.1",
+    "date": "2026-08-08",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Compatible public-account lifecycle foundation",
+    "summary": "Added rollback-compatible account, service-selection, contact-preference, consent-evidence, and identity-linking storage ahead of the public lifecycle cutover.",
+    "changes": [
+        "Added normalized username and onboarding state plus additive UK contact fields while retaining the legacy phone field.",
+        "Added per-user service selections, current contact preferences, append-only consent evidence, and expiring OIDC link intents.",
+        "Backfilled existing public accounts with all three services and false contact defaults without inventing consent events."
+    ],
+    "affected_areas": [
+        "Account storage and upgrade compatibility"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "A compatible patch establishing additive storage and backfills before user-facing account lifecycle behavior is enabled.",
+    "validation": [
+        "Fresh and upgrade migration tests cover schema, email collision refusal, service backfills, false consent defaults, and preserved OIDC-only accounts."
+    ],
+    "known_limitations": [
+        "Registration, onboarding, service gating, and explicit identity linking remain disabled until the following compatible releases."
+    ],
+    "rollback": "The previous release ignores the additive columns and tables. Existing records and legacy phone data remain available; no destructive cleanup is performed.",
+    "provenance": "Defined by the first compatible delivery phase for MyAPES Account issue #19.",
+    "references": [
+        {
+            "label": "Issue #19",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/19"
+        }
+    ],
+    "slug": "release-v0-9-1",
+    "previous_version": "0.9.0"
+}

@@ -1,0 +1,48 @@
+{
+    "version": "0.33.0",
+    "date": "2026-09-13",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Staff hub Create and View use distinct URLs",
+    "summary": "On APES CIC, Shelter, and Pet Care service hubs, Create and View now go to different places: Create opens the compose form, and View opens the list. Shelter Pet Profiles now opens the live pets list instead of a missing address.",
+    "changes": [
+        "Give hub Create and View distinct destinations so staff can tell compose from browse.",
+        "Point the Shelter Pet Profiles hub label and View link at the live pets list.",
+        "Send the old Shelter and Pet Care pet-profiles addresses to the live pets list."
+    ],
+    "affected_areas": [
+        "Staff service hubs",
+        "Shelter and Pet Care pet profile lists"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Minor release: opens the Staff UX line and ships the first hub navigation fix without changing public own-record pages.",
+    "validation": [
+        "PHPUnit ServiceHubQuickLinksTest covers distinct Create and View URLs on the three service hubs, the Shelter pets list path, and the pet-profiles redirects.",
+        "PHPUnit ModuleAdministrationAndNavigationTest and ModuleStateMiddlewareTest cover the Shelter hub pets route and alias middleware.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Create and list still share one page; putting the list above the form remains a separate change.",
+        "Public own-record hubs are unchanged until a later ticket."
+    ],
+    "rollback": "Redeploy the previous application version to restore shared Create and View hub addresses and remove the pet-profiles redirects.",
+    "provenance": "Staff hub Create and View URL fix for issue #136, pull request #209.",
+    "references": [
+        {
+            "label": "Issue #136",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/136"
+        },
+        {
+            "label": "Pull request #209",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/209"
+        }
+    ],
+    "slug": "release-v0-33-0",
+    "previous_version": "0.32.14"
+}

@@ -1,0 +1,48 @@
+{
+    "version": "0.30.0",
+    "date": "2026-08-28",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Signed-in local public password change",
+    "summary": "Signed-in local public accounts can change their password on Profile. Directory and Cloudron accounts continue to manage passwords in Cloudron.",
+    "changes": [
+        "Add current, new, and confirm password fields on Profile for local service-user accounts.",
+        "Require the current password; keep the signed-in session after a successful change and invalidate other sessions.",
+        "Hide the change-password form for Cloudron directory, pending first-login, hybrid, and staff-eligible accounts.",
+        "Set current-password and new-password autocomplete hints on the Profile password fields."
+    ],
+    "affected_areas": [
+        "Public profile",
+        "Public local password sign-in"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Minor release: adds a signed-in password-change path for local public accounts without changing Cloudron directory sign-in.",
+    "validation": [
+        "PHPUnit ProfileLocalPasswordChangeTest covers local public change versus directory, Cloudron, pending first-login, hybrid, and staff refusal, plus current-password and confirmation checks, autocomplete hints, and no dashboard password form.",
+        "Related public auth and profile tests remain green. No impersonation control is present, and password values are not stored in audit history.",
+        "Ran php artisan myapes:changelog-validate against the public local forgot-password parent branch for this stacked change."
+    ],
+    "known_limitations": [
+        "Read-only account email on Profile remains a separate change. Directory and Cloudron passwords continue to be managed in Cloudron."
+    ],
+    "rollback": "Redeploy the previous application version. Passwords already changed through this flow remain in effect until the account holder or an administrator sets a new password.",
+    "provenance": "Defined by the signed-in local public password-change task for MyAPES Account issue #147 under parent #121 and epic #158 and pull request #162.",
+    "references": [
+        {
+            "label": "Issue #147",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/147"
+        },
+        {
+            "label": "Pull request #162",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/162"
+        }
+    ],
+    "slug": "release-v0-30-0",
+    "previous_version": "0.29.0"
+}

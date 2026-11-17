@@ -1,0 +1,54 @@
+{
+    "version": "0.64.3",
+    "date": "2026-11-14",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Developer sign-in and QA role switcher",
+    "summary": "Local Herd installs gain a Developer sign-in panel and QA role switcher for fake test profiles. The feature stays off in testing, staging and production.",
+    "changes": [
+        "With QA_LOGIN_ENABLED and APP_ENV=local, /login and /staff/login show an amber Developer sign-in panel (Local only) for one-click sign-in as account types and common staff stacks; /qa is the same panel as a fallback.",
+        "Signed-in QA accounts see an amber QA pill that switches profile in place and offers Sign out of QA; ordinary accounts keep normal Sign out.",
+        "QA accounts use random unknown passwords; the shared QA password constant is removed. Demo account password sign-in on /staff/login is unchanged.",
+        "Step-up for QA accounts uses a Confirm QA profile prompt instead of a password; every QA sign-in, switch and sign-out is audited with method qa.",
+        "Automated tests and the Cloudron deploy script keep the feature off outside local Herd; QA_LOGIN_ENABLED must stay unset on Cloudron."
+    ],
+    "affected_areas": [
+        "Local development (Herd)",
+        "Sign-in pages",
+        "Workspace user dock",
+        "Step-up confirmation",
+        "Audit log",
+        "Deploy safety checks"
+    ],
+    "categories": [
+        "added",
+        "changed",
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch: local-only developer tooling with no production behaviour change when the flag is unset.",
+    "validation": [
+        "PHPUnit QaLoginTest coverage for gate-off, production/staging/testing, panel, pill, switch, return paths, step-up, audit and deploy check passed locally.",
+        "composer pre-pr-verify and CI checks on the milestone pull request."
+    ],
+    "known_limitations": [
+        "Developer sign-in works only on local Herd with QA_LOGIN_ENABLED=true. Live admin log-in-as-user is out of scope and never planned."
+    ],
+    "rollback": "Deploy v0.64.2 with deploy-cloudron.yml. Local installs lose the Developer sign-in panel and QA pill until a later release; production is unchanged when the flag was unset.",
+    "provenance": "Milestone v0.64.3 Dev: Developer sign-in and QA role switcher, epic #834 with issues #835–#842; pull request #843.",
+    "references": [
+        {
+            "label": "Issue #834",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/834"
+        },
+        {
+            "label": "Pull request #843",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/843"
+        }
+    ],
+    "slug": "release-v0-64-3",
+    "previous_version": "0.64.2"
+}

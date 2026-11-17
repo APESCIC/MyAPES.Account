@@ -123,8 +123,9 @@ function Stop-DevServer {
     return @($ids | Select-Object -Unique).Count
 }
 
-# Herd's PHP for the profile's version and Node of the profile's major version; Herd's global
-# Node default may be another major version.
+# Herd's PHP / Node / MySQL for this profile. Source herd-env (idempotent) so
+# repeated preview runs do not blow PATH past the Windows limit.
+. (Join-Path $PSScriptRoot 'herd-env.ps1') -HerdRoot $HerdRoot
 $herdBin = Join-Path $HerdRoot 'bin'
 $phpDir = Join-Path $herdBin "php$($p.php -replace '\.', '')"
 if (-not (Test-Path (Join-Path $phpDir 'php.exe'))) { Stop-Preview 1 "Herd has no PHP $($p.php) in $phpDir. Run scripts\herd-setup.ps1." }
@@ -134,8 +135,6 @@ $nodeDir = Get-ChildItem (Join-Path $herdBin 'nvm') -Directory -ErrorAction Sile
     Sort-Object { [version]($_.Name.TrimStart('v')) } -Descending |
     Select-Object -First 1
 if (-not $nodeDir) { Stop-Preview 1 "Herd's nvm has no Node $($p.node). Turn on Node.js in Herd > Settings, then run: herd node:install $($p.node)" }
-$env:Path = "$phpDir;$herdBin;$($nodeDir.FullName);" + $env:Path
-if (-not $env:XDEBUG_MODE) { $env:XDEBUG_MODE = 'off' }
 
 Push-Location $repo
 try {

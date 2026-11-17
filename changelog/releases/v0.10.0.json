@@ -1,0 +1,40 @@
+{
+    "version": "0.10.0",
+    "date": "2026-08-09",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Verified public account lifecycle",
+    "summary": "Introduced normalized usernames, verified-email registration, required UK onboarding, auditable optional contact choices, and per-user MyAPES service selections.",
+    "changes": [
+        "Added username-or-email login, signed expiring verification links, required onboarding, and canonical UK telephone storage.",
+        "Added explicit all-false contact confirmation with policy-versioned grant and withdrawal events.",
+        "Aligned navigation, public permissions, and direct service routes with selections while preserving OIDC staff access and all existing service records."
+    ],
+    "affected_areas": [
+        "Registration, login, profiles, navigation, service access, and contact preferences"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing"
+    ],
+    "version_rationale": "A backward-compatible minor release adding the user-facing public account lifecycle planned in issue #19.",
+    "validation": [
+        "Registration, case-insensitive login, verification and onboarding gates, UK contact validation, consent evidence, navigation, permissions, route gating, and retained service selections are covered."
+    ],
+    "known_limitations": [
+        "Explicit Cloudron identity linking is delivered in the following compatible release and final consent wording remains subject to APES GDPR approval."
+    ],
+    "rollback": "The compatible v0.9.1 storage remains intact and the previous application ignores the new preference state without deleting service records.",
+    "provenance": "Defined by the public lifecycle phase for MyAPES Account issue #19.",
+    "references": [
+        {
+            "label": "Issue #19",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/19"
+        }
+    ],
+    "slug": "release-v0-10-0",
+    "previous_version": "0.9.2"
+}

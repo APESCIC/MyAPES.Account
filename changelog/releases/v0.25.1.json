@@ -1,0 +1,42 @@
+{
+    "version": "0.25.1",
+    "date": "2026-08-24",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Fix deploy preflight for authorization guard upgrade",
+    "summary": "Cloudron deployments from v0.25.0 no longer fail authorization preflight when the database still has the previous authorization guard triggers until the upgrade migration runs.",
+    "changes": [
+        "Allow legacy Phase B authorization guard triggers during preflight while the guard upgrade migration is still pending.",
+        "Force reinstall authorization compatibility triggers during the volunteer and student role migration."
+    ],
+    "affected_areas": [
+        "Cloudron deployment activation",
+        "Authorization preflight",
+        "Database guard migrations"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release fixing a production deployment blocker introduced in v0.25.0 without changing the LDAP group migration behaviour.",
+    "validation": [
+        "Authorization lifecycle and cutover guard feature tests covering legacy guard detection and preflight acceptance.",
+        "Deployment activation contract tests confirming the fail-closed command order is unchanged."
+    ],
+    "known_limitations": [
+        "Cloudron LDAP groups must still be renamed to the myapesaccount prefix before directory readiness checks can succeed on production."
+    ],
+    "rollback": "Redeploy the previous release if activation fails after migration; database migrations from v0.25.0 onward are retained and may require backup recovery for a full schema rollback.",
+    "provenance": "Reconstructed from merged pull request work tracked in issue #104.",
+    "references": [
+        {
+            "label": "Issue #104",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/104"
+        }
+    ],
+    "slug": "release-v0-25-1",
+    "previous_version": "0.25.0"
+}

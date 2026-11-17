@@ -1,0 +1,54 @@
+{
+    "version": "0.25.4",
+    "date": "2026-08-25",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Harden merge and deploy reliability gates",
+    "summary": "Splits CI from Cloudron deploy, adds pre-merge release gates, upgrade-preflight simulation, and clearer deploy failure summaries so merge and deploy fail less often and recover faster.",
+    "changes": [
+        "Split GitHub Actions into test-cloudron.yml and deploy-cloudron.yml so failed deploys can be retried without rerunning the full test matrix.",
+        "Retry transient directory_readiness failures during activation preflight and write sanitized failure summaries to GitHub Actions.",
+        "Add ProductionUpgradePreflightTest plus composer pre-merge for release and deploy contract checks before push.",
+        "Auto-patch ReleaseHistoryCommandTest date indices during changelog prepare and cross-check version-pinned tests in changelog validate."
+    ],
+    "affected_areas": [
+        "GitHub Actions CI and deploy",
+        "Cloudron deployment activation",
+        "Release metadata validation",
+        "Agent pre-merge workflow"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release hardening merge and deploy reliability without changing end-user product behavior.",
+    "validation": [
+        "DeploymentAuthenticationContractTest, ProductionUpgradePreflightTest, PrepareChangeLogCommandTest, ReleaseHistoryCommandTest, and ChangeLogPageTest.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main."
+    ],
+    "known_limitations": [
+        "Deploy still requires live LDAP during preflight; CI simulates legacy catalogue behavior but not production network conditions.",
+        "Manual Cloudron staging preflight before merge remains optional and is not automated in this release."
+    ],
+    "rollback": "Redeploy the previous application version. If reverting the workflow split, restore the monolithic Test and deploy workflow from the prior release.",
+    "provenance": "Defined by merge and deploy reliability hardening for MyAPES Account issue #111 under epic #108.",
+    "references": [
+        {
+            "label": "Issue #111",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/111"
+        },
+        {
+            "label": "Issue #108",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/108"
+        },
+        {
+            "label": "Pull request #112",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/112"
+        }
+    ],
+    "slug": "release-v0-25-4",
+    "previous_version": "0.25.3"
+}

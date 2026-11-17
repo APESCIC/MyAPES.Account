@@ -917,6 +917,7 @@ required_paths=(
   vendor/autoload.php
   public/build/manifest.json
   resources/data/releases.json
+  changelog/releases
   resources/data/module-runtime-contract.json
   config/modules.php
   config/permission.php
@@ -1162,6 +1163,12 @@ if [[ -n "$CURRENT_TARGET_BEFORE" && "$CURRENT_TARGET_BEFORE" != "$RELEASE_DIR" 
 fi
 PRE_SWITCH_DATABASE_MUTATED=true
 run_artisan migrate --force
+# Project changelog/releases/*.json into the releases table before traffic is restored (#711).
+# Fail closed: an invalid or incomplete sync keeps maintenance mode active.
+if ! run_artisan myapes:releases-sync --no-interaction --no-ansi; then
+  echo "Release changelog sync failed; refusing to activate this release."
+  exit 1
+fi
 run_artisan myapes:modules:sync --no-interaction --no-ansi
 run_artisan config:cache
 run_artisan route:cache

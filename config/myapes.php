@@ -145,4 +145,12 @@ return [
         'new_issue_url' => env('MYAPES_GITHUB_NEW_ISSUE_URL', 'https://github.com/APESCIC/MyAPES-Account/issues/new/choose'),
         'discussions_url' => env('MYAPES_GITHUB_DISCUSSIONS_URL', 'https://github.com/APESCIC/MyAPES-Account/discussions'),
     ],
+
+    // Per-release changelog files (#705+). Canonical source after conversion (#706);
+    // resources/data/releases.json remains until consumers move (#707) then becomes a
+    // generated compatibility artefact.
+    'changelog' => [
+        'path' => env('MYAPES_CHANGELOG_PATH', base_path('changelog/releases')),
+        'use_database' => (bool) env('MYAPES_CHANGELOG_USE_DATABASE', false),
+    ],
 ];

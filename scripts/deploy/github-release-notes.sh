@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [[ $# -ne 1 ]]; then
-  echo "Usage: $0 <releases.json>" >&2
+  echo "Usage: $0 <releases.json|changelog/releases/vX.Y.Z.json>" >&2
   exit 1
 fi
 
@@ -13,8 +13,9 @@ if [[ ! -f "$releases_file" ]]; then
   exit 1
 fi
 
+# Accept either the legacy aggregate (array, newest first) or a single per-release object (#712).
 jq -r '
-  .[0] as $release |
+  (if type == "array" then .[0] else . end) as $release |
   ($release.title // "") as $title |
   ($release.summary // "") as $summary |
   [

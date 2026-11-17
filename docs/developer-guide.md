@@ -74,10 +74,10 @@ Every merge to `main` includes release metadata in the **same PR**:
 
 ```bash
 php artisan myapes:changelog-prepare --type=patch --title="Short public title" --issue=N --pr=N
-# Fill every TODO: in resources/data/releases.json head record
+# Fill every TODO: in changelog/releases/vX.Y.Z.json (prepare also regenerates resources/data/releases.json — do not hand-edit that aggregate)
 git fetch origin
 php artisan myapes:changelog-validate --base-ref=origin/main
 composer pre-pr-verify   # or ship-gate manual steps
 ```
 
-Keep `VERSION`, `resources/data/releases.json`, and `resources/data/module-runtime-contract.json` → `application_version` in sync.
+Keep `VERSION`, the new `changelog/releases/vX.Y.Z.json`, the generated `resources/data/releases.json`, and `resources/data/module-runtime-contract.json` → `application_version` in sync. There is no Admin UI to edit releases; the public hub at `/change-log` is not editable in Admin (APES Newsroom informs interaction design only).

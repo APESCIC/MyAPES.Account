@@ -1,0 +1,55 @@
+{
+    "version": "0.34.0",
+    "date": "2026-09-24",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Recruitment module registered for APES CIC",
+    "summary": "Registers the first-party Recruitment plugin on APES CIC only, with hub navigation and permission abilities, so staff can open a stub recruitment surface while role CRUD and the public board land in follow-up releases.",
+    "changes": [
+        "Add the recruitment module type to the first-party registry, compatible and shipped only on APES CIC.",
+        "Ship abilities for view-own, view-all, create, update, delete, and review-applications with the same default role matrix pattern as sibling modules.",
+        "Wire APES CIC hub navigation to a stub recruitment index so View and Create quick links resolve.",
+        "Update the module runtime contract and agent planning docs for the v0.34.x Recruitment milestone."
+    ],
+    "affected_areas": [
+        "Module registry",
+        "APES CIC hub",
+        "Recruitment (stub)",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Minor release: first backward-compatible Recruitment capability on the v0.34.x line (registry, permissions, and hub entry) without public apply or staff role CRUD yet.",
+    "validation": [
+        "PHPUnit ModuleRegistryTest, ModuleInstallationSynchronizationTest, ModuleRollbackCompatibilityTest, ModuleStateMiddlewareTest, ModuleAdministrationAndNavigationTest, ServiceHubQuickLinksTest, ModuleProviderContractTest, ModuleLifecycleTest, and JobRoleCapabilityPacksTest pass for the expanded catalogue.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "composer pre-pr-verify (or equivalent local verify) on the PR branch before merge."
+    ],
+    "known_limitations": [
+        "RecruitmentRole CRUD, the public roles board, and application review are not included; those ship in later 0.34.x patches.",
+        "Recruitment is not available on Shelter or Pet Care Clinic sub-cores."
+    ],
+    "rollback": "Redeploy the previous application version to remove the recruitment registry entry, permissions, and APES CIC hub stub.",
+    "provenance": "Recruitment module scaffold and APES CIC registration for issues #212 and #219, pull request #241.",
+    "references": [
+        {
+            "label": "Issue #212",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/212"
+        },
+        {
+            "label": "Issue #219",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/219"
+        },
+        {
+            "label": "Pull request #241",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/241"
+        }
+    ],
+    "slug": "release-v0-34-0",
+    "previous_version": "0.33.7"
+}

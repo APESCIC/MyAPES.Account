@@ -1,0 +1,50 @@
+{
+    "version": "0.33.4",
+    "date": "2026-09-23",
+    "channel": "stable",
+    "type": "patch",
+    "title": "User detail shows access summary and suspend confirm",
+    "summary": "Admin user detail now summarises job roles and capability packs instead of dumping every effective permission, and suspending an account requires an explicit confirmation checkbox.",
+    "changes": [
+        "Replace the raw effective-permission list on Admin user detail with a job-role and capability-pack summary; keep fine-grained permissions under Advanced.",
+        "Require an explicit confirm checkbox before suspend, and add a jump link to the suspend form from the account summary."
+    ],
+    "affected_areas": [
+        "Admin user detail",
+        "Account suspension"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: improves Admin user detail readability and adds a suspend confirm gate without changing who may suspend or which permissions apply.",
+    "validation": [
+        "PHPUnit AdminUserDetailUxTest covers the access summary UI and suspend confirm validation gate.",
+        "PHPUnit AdminAccessAndViewsTest and AdminRoleAndUserManagementTest updated for Advanced permission markup and confirm field.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Fine-grained permissions remain available under Advanced for any Admin who can view the account; Super Admin–only hiding was not required for this release."
+    ],
+    "rollback": "Redeploy the previous application version to restore the raw effective-permission dump and suspend-without-confirm behaviour.",
+    "provenance": "User detail access summary and suspend confirm for issues #137 and #144, pull request #237.",
+    "references": [
+        {
+            "label": "Issue #137",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/137"
+        },
+        {
+            "label": "Issue #144",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/144"
+        },
+        {
+            "label": "Pull request #237",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/237"
+        }
+    ],
+    "slug": "release-v0-33-4",
+    "previous_version": "0.33.3"
+}

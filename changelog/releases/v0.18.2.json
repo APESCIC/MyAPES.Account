@@ -1,0 +1,45 @@
+{
+    "version": "0.18.2",
+    "date": "2026-08-20",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Fix sub-core hub Recent activity layout",
+    "summary": "Restores full-width Recent activity rows on APES CIC, Shelter and Rescue, and Pet Care Clinic hub pages by aligning hub markup with the dashboard attention-item grid.",
+    "changes": [
+        "Added a shared attention-item link component with icon, body, meta, and chevron columns used by the dashboard and sub-core hubs.",
+        "Mapped hub recent-activity module types to the correct icon and style modifiers, including pet-profile rows."
+    ],
+    "affected_areas": [
+        "Sub-core hub Recent activity",
+        "Dashboard attention feed",
+        "Shared attention-item presentation"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible patch release fixing a pre-existing layout regression where hub recent activity content was squashed into the icon column.",
+    "validation": [
+        "Focused hub recent-activity layout tests, dashboard attention tests, composer test, npm run build, and myapes:changelog-validate against origin/main."
+    ],
+    "known_limitations": [
+        "This patch does not change authorization, data, or module query behavior."
+    ],
+    "rollback": "Revert this patch record, VERSION, runtime manifest version, and the shared attention-item component changes. No database rollback is needed.",
+    "provenance": "Defined by the sub-core Recent activity layout fix for MyAPES Account issue #64 and pull request #65.",
+    "references": [
+        {
+            "label": "Issue #64",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/64"
+        },
+        {
+            "label": "Pull request #65",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/65"
+        }
+    ],
+    "slug": "release-v0-18-2",
+    "previous_version": "0.18.1"
+}

@@ -1,0 +1,44 @@
+{
+    "version": "0.5.0",
+    "date": "2026-07-27",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Responsive sidebar and refreshed MyAPES branding",
+    "summary": "Replaced the shared horizontal navigation with a responsive sidebar and mobile drawer while refreshing the application brand assets.",
+    "changes": [
+        "Introduced one responsive navigation shell for authenticated and guest pages while preserving role-aware routes and theme behavior.",
+        "Regenerated browser, progressive-web-app, login, email, and social assets from the approved APES artwork.",
+        "Added deterministic brand-asset generation and design quality-assurance evidence."
+    ],
+    "affected_areas": [
+        "Shared navigation, mobile drawer, footer, and themes",
+        "Browser, progressive-web-app, login, email, and social brand assets",
+        "Design quality-assurance tooling and documentation"
+    ],
+    "categories": [
+        "added",
+        "changed",
+        "accessibility"
+    ],
+    "audiences": [
+        "public-facing"
+    ],
+    "version_rationale": "A backward-compatible minor release with a substantial user-visible navigation and branding improvement.",
+    "validation": [
+        "Automated PHP tests and the production frontend build passed for the merged change.",
+        "Desktop light and dark layouts plus mobile open and closed navigation states received browser-based design review."
+    ],
+    "known_limitations": [
+        "The release did not change application APIs, database schema, authentication roles, or deployment endpoints."
+    ],
+    "rollback": "Restore the previous shared layout, stylesheet, JavaScript entry point, and generated brand assets.",
+    "provenance": "This historical record was reconstructed from merged pull request #9 and was not represented by a historical Git tag.",
+    "references": [
+        {
+            "label": "PR #9",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/9"
+        }
+    ],
+    "slug": "release-v0-5-0",
+    "previous_version": "0.4.2"
+}

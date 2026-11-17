@@ -1,0 +1,45 @@
+{
+    "version": "0.14.0",
+    "date": "2026-08-14",
+    "channel": "stable",
+    "type": "minor",
+    "title": "APES Shelter and Rescue modules",
+    "summary": "Shipped APES Shelter and Rescue Pet Profiles, Tickets, and Cases as three working, instance-scoped modules, adding Shelter Tickets as the seventh shipped installation while preserving existing Shelter records and routes.",
+    "changes": [
+        "Shipped APES Shelter and Rescue Pet Profiles, Tickets, and Cases with fail-closed owner, domain, sub-core, lifecycle, dashboard, recent-activity, analytics, and attention behavior.",
+        "Enforced the exact shelter-rescue.pet-profiles view-own, create, update-own, view-all, and update-all abilities; the exact shelter-rescue.tickets view-own, create, comment-own, view-all, update-all, assign, close, and delete abilities; and the exact shelter-rescue.cases view-own, create, update-own, comment-own, view-all, update-all, assign, close, and delete abilities. Owners require exact view-own, while staff-wide access, assignees, and recipients require protected staff eligibility plus the exact namespace view-all permission; assign, close, and update abilities remain independent, and the code-owned Shelter delete permissions have no Shelter route or control.",
+        "Preserved public and internal Ticket messages and Case updates with internal content hidden from owners and excluded from notification and audit metadata.",
+        "Delivered Pet Profile photos only through authenticated, authorization-checked Shelter and Pet Care routes while preserving stored media paths; direct pet-profile storage access is denied and avatars are the only public-storage runtime link.",
+        "Synchronized seven shipped installations, 51 first-party module permissions, and 64 total application permissions, and expanded deterministic local QA fixtures with three Shelter Ticket states plus public and internal Ticket and Case activity."
+    ],
+    "affected_areas": [
+        "APES Shelter and Rescue Pet Profiles, Tickets, Cases, shared module providers, authorization, notifications, protected media, local QA data, and rollback compatibility"
+    ],
+    "categories": [
+        "added",
+        "changed",
+        "security"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible minor release shipping the complete APES Shelter and Rescue module set and its privacy, media, QA, and runtime contracts.",
+    "validation": [
+        "Focused seeder idempotence, runtime manifest, rollback, release-history, authorization, Shelter/APES workflow, provider/dashboard, and deployment-authentication coverage verifies the release contract; full repository and browser verification remains assigned to the final Issue #13 verification task."
+    ],
+    "known_limitations": [
+        "The implementation reuses the existing shared tables with no database migration: it does not copy existing records or rewrite record IDs, ownership, assignment, morph identities, media paths, or physical media.",
+        "After synchronization persists shelter-rescue:tickets as the seventh installation, v0.13.1 cannot represent the database state and the fail-closed compatibility checker returns target_contract_unrepresentable; disabling or deleting the installation is not a supported workaround."
+    ],
+    "rollback": "Take and verify the normal pre-deployment backup. Once the seventh installation exists, code rollback to v0.13.1 is rejected with target_contract_unrepresentable; restoring the corresponding pre-deployment database backup is the supported recovery boundary, and no installation or shared data may be deleted to force compatibility.",
+    "provenance": "Defined by the APES Shelter and Rescue module delivery for MyAPES Account issue #13.",
+    "references": [
+        {
+            "label": "Issue #13",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/13"
+        }
+    ],
+    "slug": "release-v0-14-0",
+    "previous_version": "0.13.1"
+}

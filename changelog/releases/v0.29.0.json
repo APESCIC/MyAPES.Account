@@ -1,0 +1,48 @@
+{
+    "version": "0.29.0",
+    "date": "2026-08-28",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Public local forgot-password",
+    "summary": "Local public accounts can request a password reset from Public Login. Directory and Cloudron accounts continue to use Staff Login and Cloudron.",
+    "changes": [
+        "Add guest forgot-password and reset-password pages for local service-user accounts, linked from Public Login.",
+        "Send a reset email only for eligible local public accounts; directory, Cloudron, pending first-login, and staff-eligible accounts receive the same generic confirmation without a reset mail.",
+        "Set username, current-password, and new-password autocomplete hints on public login, register, forgot-password, and reset fields."
+    ],
+    "affected_areas": [
+        "Public login",
+        "Public registration",
+        "Guest password reset"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Minor release: adds a guest password-recovery path for local public accounts without changing Cloudron directory sign-in.",
+    "validation": [
+        "PHPUnit PublicLocalForgotPasswordTest covers local public reset versus directory, Cloudron, pending first-login, hybrid, and staff refusal, plus expired tokens and autocomplete hints.",
+        "Related public auth tests remain green. No impersonation control is present, and reset values are not stored in audit history.",
+        "Ran php artisan myapes:changelog-validate against the admin local public password reset parent branch for this stacked change."
+    ],
+    "known_limitations": [
+        "Signed-in profile change-password remains a separate change. Directory and Cloudron passwords continue to be managed in Cloudron."
+    ],
+    "rollback": "Redeploy the previous application version. Passwords already changed through this flow remain in effect until the account holder or an administrator sets a new password.",
+    "provenance": "Defined by the public local forgot-password task for MyAPES Account issue #121 under epic #158 and pull request #161.",
+    "references": [
+        {
+            "label": "Issue #121",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/121"
+        },
+        {
+            "label": "Pull request #161",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/161"
+        }
+    ],
+    "slug": "release-v0-29-0",
+    "previous_version": "0.28.0"
+}

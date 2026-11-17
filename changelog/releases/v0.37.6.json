@@ -1,0 +1,59 @@
+{
+    "version": "0.37.6",
+    "date": "2026-09-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Permission and URL conventions",
+    "summary": "Structure Wave 3 documents and enforces permission and URL conventions without renaming live grants or prefixes. Legacy Super Admin and pet-profiles paths become permanent 301 redirects.",
+    "changes": [
+        "Document and enforce Core / Module / Plugin permission naming while keeping every existing admin.* and {module}.{plugin}.* string (no rename to core.*).",
+        "Group the Access permission catalogue by Core, Module, and Plugin, with grant-count reporting on myapes:authorization-check.",
+        "Add an id-preserving permission rename helper and grant reporter; the alias map stays empty so grants are unchanged.",
+        "Publish a LegacyRedirectTable for stable live prefixes and convert Super Admin, Access deep-links, and pet-profiles redirects to HTTP 301.",
+        "Keep placeholders for later plugin package route moves without changing live URIs."
+    ],
+    "affected_areas": [
+        "Access permission catalogue",
+        "Authorization check reporting",
+        "Legacy Super Admin and pet-profiles redirects",
+        "Architecture docs",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on v0.37.x: Structure Wave 3 permission and URL conventions with zero permission renames and 301s only for already-moved legacy paths.",
+    "validation": [
+        "php artisan test --compact tests/Feature/StructurePermsUrlsWave3Test.php tests/Feature/AdminShellNavigationTest.php tests/Feature/ServiceHubQuickLinksTest.php",
+        "php artisan test --compact tests/Feature/ModulePermissionGateTest.php tests/Feature/ModulePermissionMigrationTest.php tests/Feature/StructureEnablementWave2Test.php tests/Feature/StructureContractsWave1Test.php",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "composer pre-pr-verify / CI before merge; Cloudron workflow_dispatch with app_version from VERSION after merge."
+    ],
+    "known_limitations": [
+        "Plugin controllers and models remain under App\\Http and App\\Models until later Structure waves move them into plugins/<slug>.",
+        "Module and plugin package route files are still placeholders; live URIs do not move in this release."
+    ],
+    "rollback": "Redeploy the previous application version. No database migration runs in this release; rolling back application code restores the prior 302 redirect status codes and Access catalogue grouping.",
+    "provenance": "Structure Wave 3 permission naming #292 and URL conventions #293 via pull request #306.",
+    "references": [
+        {
+            "label": "Issue #292",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/292"
+        },
+        {
+            "label": "Issue #293",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/293"
+        },
+        {
+            "label": "Pull request #306",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/306"
+        }
+    ],
+    "slug": "release-v0-37-6",
+    "previous_version": "0.37.5"
+}

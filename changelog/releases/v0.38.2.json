@@ -1,0 +1,52 @@
+{
+    "version": "0.38.2",
+    "date": "2026-09-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Hard-coded UI string inventory",
+    "summary": "MyAPES Account now ships a regenerable inventory of hard-coded user-facing strings so Language extraction work can track Public, Admin, Auth, and plugin copy down to zero.",
+    "changes": [
+        "Add php artisan lang:inventory to scan Blade and PHP flash, abort, mail, and notification strings offline.",
+        "Commit docs/i18n-inventory.md grouped by Public, APES CIC staff, Admin, Auth, and per-plugin sections with stable anchors for extraction issues.",
+        "Add config/lang_inventory.php allow-list and a reusable HardCodedStringScanner for later CI hard-coded warnings.",
+        "Document inventory paths and regeneration in localisation and architecture docs."
+    ],
+    "affected_areas": [
+        "Localisation tooling (lang:inventory)",
+        "Hard-coded string inventory documentation",
+        "Language extraction checklist for Public, Admin, Auth, and plugins",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.38.x Language line: inventory and scanner only — no broad string extraction or user-visible copy changes.",
+    "validation": [
+        "PHPUnit HardCodedStringInventoryTest (scanner fixture, committed inventory anchors, write path).",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "composer pre-pr-verify (or equivalent local verify) on the PR branch before merge."
+    ],
+    "known_limitations": [
+        "Inventory counts are heuristic and may include residual false positives; refine the allow-list as extraction proceeds.",
+        "No user-facing strings were moved into lang files in this release (extraction is Wave 2).",
+        "CI hard-coded warnings (#276) are not enabled yet; this release only publishes the reusable scanner."
+    ],
+    "rollback": "Redeploy the previous release package. Removing docs/i18n-inventory.md and the lang:inventory command has no runtime effect on signed-in product behaviour.",
+    "provenance": "Issue #266; pull request #314.",
+    "references": [
+        {
+            "label": "Issue #266",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/266"
+        },
+        {
+            "label": "Pull request #314",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/314"
+        }
+    ],
+    "slug": "release-v0-38-2",
+    "previous_version": "0.38.1"
+}

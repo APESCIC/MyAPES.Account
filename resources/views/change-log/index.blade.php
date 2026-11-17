@@ -82,7 +82,7 @@
 
     <section class="change-log__records" aria-label="{{ __('public.change_log.release_history') }}">
         @foreach($releases as $release)
-            @php($isCurrent = $loop->first)
+            @php($isCurrent = (bool) ($release['is_current'] ?? $loop->first))
             <article
                 id="release-v{{ str_replace('.', '-', $release['version']) }}"
                 class="change-log__release"

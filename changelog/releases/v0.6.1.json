@@ -1,0 +1,40 @@
+{
+    "version": "0.6.1",
+    "date": "2026-07-27",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Post-merge release validation correction",
+    "summary": "Corrected the bootstrap validation test so the release foundation remains verifiable after it is merged to the main branch.",
+    "changes": [
+        "Changed the bootstrap comparison test to use the repository root commit, which permanently predates source-controlled release metadata.",
+        "Removed the incorrect assumption that origin/main remains a pre-release-contract base after the foundation is merged."
+    ],
+    "affected_areas": [
+        "Release-history command regression coverage",
+        "Post-merge continuous integration and deployment gating"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "A compatible patch correcting a post-merge test assumption without changing the public Change Log Hub or release contract.",
+    "validation": [
+        "The focused bootstrap comparison test and complete application suite pass when run from a branch based on the merged release foundation.",
+        "Append-only comparison against the current main branch confirms exactly one higher release record."
+    ],
+    "known_limitations": [
+        "This patch changes test setup only and does not add a user-facing application capability."
+    ],
+    "rollback": "Restore the earlier test base only if the release foundation is also removed from the main branch.",
+    "provenance": "Defined during post-merge deployment verification for MyAPES Account issue #20.",
+    "references": [
+        {
+            "label": "Issue #20",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/20"
+        }
+    ],
+    "slug": "release-v0-6-1",
+    "previous_version": "0.6.0"
+}

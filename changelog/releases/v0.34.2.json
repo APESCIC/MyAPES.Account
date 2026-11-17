@@ -1,0 +1,63 @@
+{
+    "version": "0.34.2",
+    "date": "2026-09-24",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Public recruitment roles board",
+    "summary": "Guests can browse open APES CIC recruitment roles by staff, volunteer, and student category from a public board, with draft and closed roles kept private.",
+    "changes": [
+        "Add guest-accessible /recruitment list and detail pages that show only open roles, with staff, volunteer, and student filters.",
+        "Surface a Roles discovery link in public chrome (sidebar, footer, and landing) when the Recruitment module is enabled.",
+        "Seed Local QA demo open roles in all three categories plus draft and closed fixtures for visibility checks.",
+        "Cover public visibility, filters, detail privacy, navigation, and seeder behaviour with feature tests."
+    ],
+    "affected_areas": [
+        "Public recruitment board",
+        "Public navigation",
+        "Local QA seeds",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release on the v0.34.x line: the public roles board builds on staff CRUD from 0.34.1 without changing applications or staff review yet.",
+    "validation": [
+        "PHPUnit PublicRecruitmentBoardTest, RecruitmentRoleWorkflowTest, PublicLegalPagesTest, and PublicChromeNamingTest pass for board visibility and chrome.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "composer pre-pr-verify (or equivalent local verify) on the PR branch before merge."
+    ],
+    "known_limitations": [
+        "Public apply and staff application review are not included; those ship in later 0.34.x patches.",
+        "Recruitment remains APES CIC only (not Shelter or Pet Care Clinic)."
+    ],
+    "rollback": "Redeploy the previous application version to remove the public /recruitment routes, views, and chrome links from the live app.",
+    "provenance": "Public recruitment roles board for issues #214, #215, #217, and #216, pull request #243.",
+    "references": [
+        {
+            "label": "Issue #214",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/214"
+        },
+        {
+            "label": "Issue #215",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/215"
+        },
+        {
+            "label": "Issue #217",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/217"
+        },
+        {
+            "label": "Issue #216",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/216"
+        },
+        {
+            "label": "Pull request #243",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/243"
+        }
+    ],
+    "slug": "release-v0-34-2",
+    "previous_version": "0.34.1"
+}

@@ -29,6 +29,25 @@ export const filterReleases = (releases, query = '', filter = 'all') => releases
     (release) => matchesRelease(release, query, filter),
 );
 
+const RELEASE_HASH_PATTERN = /^release-v[\d]+(?:-[\d]+)*$/i;
+
+export const hashToReleaseId = (hash = '') => {
+    const trimmed = String(hash ?? '').trim();
+
+    if (trimmed === '' || trimmed === '#') {
+        return null;
+    }
+
+    const id = trimmed.startsWith('#') ? trimmed.slice(1) : trimmed;
+
+    return RELEASE_HASH_PATTERN.test(id) ? id.toLocaleLowerCase() : null;
+};
+
+const prefersReducedMotion = () => (
+    typeof window !== 'undefined'
+    && window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true
+);
+
 const tokens = (value) => normalize(value).split(/\s+/).filter(Boolean);
 
 const releaseFromElement = (element) => ({
@@ -55,6 +74,84 @@ export const initChangeLog = (root = document.querySelector('[data-change-log]')
     const expandButton = root.querySelector('[data-change-log-expand]');
     const collapseButton = root.querySelector('[data-change-log-collapse]');
     let activeFilter = 'all';
+    let suppressHashUpdate = false;
+
+    const setFilterToAll = () => {
+        activeFilter = 'all';
+
+        for (const candidate of filterButtons) {
+            const value = candidate.dataset.changeLogFilter ?? 'all';
+            candidate.setAttribute('aria-pressed', String(value === 'all'));
+        }
+    };
+
+    const ensureReleaseVisible = (release) => {
+        if (! release.element.hidden) {
+            return true;
+        }
+
+        setFilterToAll();
+        render();
+
+        if (! release.element.hidden) {
+            return true;
+        }
+
+        if (search) {
+            search.value = '';
+        }
+
+        render();
+
+        return ! release.element.hidden;
+    };
+
+    const scrollReleaseIntoView = (element) => {
+        element.scrollIntoView({
+            behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+            block: 'start',
+        });
+    };
+
+    const setHashWithoutScroll = (id) => {
+        if (! id) {
+            return;
+        }
+
+        const url = new URL(window.location.href);
+        url.hash = id;
+        window.history.replaceState(null, '', url);
+    };
+
+    const openReleaseFromHash = ({ scroll = false } = {}) => {
+        const id = hashToReleaseId(window.location.hash);
+
+        if (! id) {
+            return;
+        }
+
+        const release = releaseRecords.find((record) => record.element.id === id);
+
+        if (! release) {
+            return;
+        }
+
+        if (! ensureReleaseVisible(release)) {
+            return;
+        }
+
+        const details = release.element.querySelector('[data-release-details]');
+
+        if (details instanceof HTMLDetailsElement) {
+            suppressHashUpdate = true;
+            details.open = true;
+            suppressHashUpdate = false;
+        }
+
+        if (scroll) {
+            scrollReleaseIntoView(release.element);
+        }
+    };
 
     const render = () => {
         const visible = new Set(filterReleases(releaseRecords, search?.value ?? '', activeFilter));
@@ -104,5 +201,30 @@ export const initChangeLog = (root = document.querySelector('[data-change-log]')
     expandButton?.addEventListener('click', () => setVisibleDetailsOpen(true));
     collapseButton?.addEventListener('click', () => setVisibleDetailsOpen(false));
 
+    for (const release of releaseRecords) {
+        const details = release.element.querySelector('[data-release-details]');
+
+        if (! (details instanceof HTMLDetailsElement)) {
+            continue;
+        }
+
+        details.addEventListener('toggle', () => {
+            if (suppressHashUpdate || ! details.open) {
+                return;
+            }
+
+            const { id } = release.element;
+
+            if (id) {
+                setHashWithoutScroll(id);
+            }
+        });
+    }
+
+    window.addEventListener('hashchange', () => {
+        openReleaseFromHash({ scroll: true });
+    });
+
     render();
+    openReleaseFromHash({ scroll: true });
 };

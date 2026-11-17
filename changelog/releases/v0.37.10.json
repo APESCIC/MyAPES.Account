@@ -1,0 +1,52 @@
+{
+    "version": "0.37.10",
+    "date": "2026-09-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Recruitment and Consultations plugin packages",
+    "summary": "Recruitment (public board and staff manage) and Pet Care Consultations now live as first-party plugin packages, without changing live URLs, permission names, or the RecruitmentRole vacancy model.",
+    "changes": [
+        "Moved Recruitment into plugins/recruitment with public /recruitment* board and apply paths plus staff /apes-cic/recruitment* manage routes.",
+        "Kept RecruitmentRole as the vacancy model (never Spatie Role) and preserved the public versus staff dual-frontend IA from 0.36.x.",
+        "Moved Consultations into plugins/consultations for Pet Care Clinic, declaring the Pet Profiles plugin dependency.",
+        "Preserved live recruitment and consultation URLs and permission strings; morph aliases and a notification stub keep existing records rendering."
+    ],
+    "affected_areas": [
+        "Recruitment plugin package — public /recruitment* and staff /apes-cic/recruitment*",
+        "Consultations plugin package — staff /petcare/consultations*",
+        "Morph map aliases for recruitment roles, applications, and consultations",
+        "Admin Plugins manifests for Recruitment and Consultations"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.37.x Structure line: relocates existing Recruitment and Consultations features into plugin packages without new public capability or breaking URL/permission changes.",
+    "validation": [
+        "Focused PHPUnit: StructureRecruitConsultWave7Test, Recruitment dual-frontend IA matrix, recruitment/consultation workflow suites, morph/contracts",
+        "changelog-validate against origin/main",
+        "CI on PR #310"
+    ],
+    "known_limitations": [
+        "Architecture hard-fail tests still report-only until Wave 8.",
+        "Historical audit event key names are unchanged; new events continue to use the existing area prefixes."
+    ],
+    "rollback": "Redeploy the previous Cloudron package (0.37.9). No database rename was introduced; plugin namespaces resolve via morph aliases and notification stubs.",
+    "provenance": "Structure Wave 7 for issue #290 via pull request #310.",
+    "references": [
+        {
+            "label": "Issue #290",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/290"
+        },
+        {
+            "label": "Pull request #310",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/310"
+        }
+    ],
+    "slug": "release-v0-37-10",
+    "previous_version": "0.37.9"
+}

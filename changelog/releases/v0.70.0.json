@@ -1,0 +1,56 @@
+{
+    "version": "0.70.0",
+    "date": "2026-11-17",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Newsroom-style changelog hub and per-release files",
+    "summary": "Release history now lives as one file per version with a Newsroom-style expandable change log hub, database projection on deploy, and safer public/internal isolation.",
+    "changes": [
+        "Split published history into changelog/releases/vX.Y.Z.json files with lossless conversion from the legacy aggregate.",
+        "Added an additive releases table and deterministic myapes:releases-sync that sets current from VERSION and fails closed on missing history.",
+        "Routed the /change-log hub and runtime consumers through the release repository, with optional database projection after deploy sync.",
+        "Matched Newsroom hub interactions for search, filters, expand/collapse and hash deep links while keeping Blade and plain JS.",
+        "Kept guests free of internal-only notes; staff, volunteers and students retain gated internal detail.",
+        "Updated prepare, CI validation and Cloudron activate-release so GitHub notes and deploys use the current per-release file."
+    ],
+    "affected_areas": [
+        "Change log hub (/change-log)",
+        "Release history authoring and CI validation",
+        "Cloudron deploy activation and rollback current selection",
+        "Health endpoint version reporting",
+        "Agent and developer documentation"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Minor: new per-release changelog capability and hub parity without breaking VERSION or module-runtime contract semantics.",
+    "validation": [
+        "PHPUnit ReleaseEntryValidatorTest, ReleaseSchemaProjectionTest, ReleaseChangelogSyncTest, ReleaseHistoryConversionTest, ReleaseHistoryDatabaseConsumerTest, ChangeLogAudienceIsolationTest, ChangeLogPageTest.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main after the release commit.",
+        "npm run test:frontend for change-log hash and filter behaviour.",
+        "composer milestone:bump -- v0.70.0 --check."
+    ],
+    "known_limitations": [
+        "resources/data/releases.json remains a generated compatibility artefact during transition and must not be hand-edited.",
+        "Database projection requires MYAPES_CHANGELOG_USE_DATABASE=true after a successful releases-sync on activate."
+    ],
+    "rollback": "Redeploy the previous release tag. activate-release syncs that package's changelog files, sets current to its VERSION, and unpublishes newer-only projected rows without deleting them.",
+    "provenance": "Epic #703 with children #704–#715; milestone PR #981 on branch milestone/v0-70-0-newsroom-style-changelog-hub.",
+    "references": [
+        {
+            "label": "Issue #703",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/703"
+        },
+        {
+            "label": "Pull request #981",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/981"
+        }
+    ],
+    "slug": "release-v0-70-0",
+    "previous_version": "0.69.0"
+}

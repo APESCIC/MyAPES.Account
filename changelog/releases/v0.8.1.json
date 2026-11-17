@@ -1,0 +1,40 @@
+{
+    "version": "0.8.1",
+    "date": "2026-08-05",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Root-controlled public storage activation",
+    "summary": "Corrected Cloudron release activation so the shared public-storage link is installed by the root-controlled deployment path before application commands run.",
+    "changes": [
+        "Moved public-storage link installation out of the application user process and into the root-controlled immutable release preparation step.",
+        "Added fail-closed target and ownership checks so the application user cannot replace the release public directory or redirect the shared storage link."
+    ],
+    "affected_areas": [
+        "Cloudron release activation and immutable shared-storage preparation"
+    ],
+    "categories": [
+        "fixed",
+        "security"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible patch correcting the deployment-time public-storage link boundary discovered during the v0.8.0 production activation attempt.",
+    "validation": [
+        "Deployment contract tests require root-controlled link creation before Artisan, exact shared-storage targeting, and a non-writable immutable public directory for the application user.",
+        "The complete SQLite, MySQL 8.4, MariaDB 11.4, frontend, packaging, authenticated-control, migration, authorization, health, and OIDC deployment gates remain required before release."
+    ],
+    "known_limitations": [
+        "This patch changes deployment preparation only and does not alter the v0.8.0 authorization or Admin feature set."
+    ],
+    "rollback": "Restore the exact pre-activation application release while retaining the forward-only Phase B database migration; the authenticated control and backup boundaries remain unchanged.",
+    "provenance": "Defined by the production activation evidence for Phase B of MyAPES Account issue #10.",
+    "references": [
+        {
+            "label": "Issue #10",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/10"
+        }
+    ],
+    "slug": "release-v0-8-1",
+    "previous_version": "0.8.0"
+}

@@ -1,0 +1,56 @@
+{
+    "version": "0.37.8",
+    "date": "2026-09-28",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Shared Pet Profiles plugin for Clinic and Shelter",
+    "summary": "Pet Profiles is now one shared plugin used by Pet Care Clinic and Shelter and Rescue. Staff keep the same /pets URLs and permissions while Cases and Consultations use a small public Pet Profiles API for pet pickers.",
+    "changes": [
+        "Move Pet Profiles model, policy, photo handling, dashboard providers, and views into plugins/pet-profiles.",
+        "Replace the dual Shelter and Pet Care controllers with one ModuleContext-driven controller and view set.",
+        "Keep live /shelter/pets and /petcare/pets routes, legacy pet-profiles redirects, and permission strings unchanged.",
+        "Expose PetProfilesContract so Cases and Consultations select pets through the plugin public API.",
+        "Point the pet_profile morph alias at the plugin model namespace."
+    ],
+    "affected_areas": [
+        "Pet Profiles plugin",
+        "Pet Care Clinic pets",
+        "Shelter and Rescue pets",
+        "Cases and Consultations pet pickers",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on v0.37.x: Structure Wave 5 moves Pet Profiles into a shared plugin without live URL or permission-string renames.",
+    "validation": [
+        "php artisan test --compact tests/Feature/StructurePetProfilesWave5Test.php tests/Feature/ShelterPetProfileWorkflowTest.php tests/Feature/PetCarePetProfileWorkflowTest.php",
+        "php artisan test --compact tests/Feature/PublicShelterPetPageTest.php tests/Feature/PublicShelterPetSaveFlashTest.php tests/Feature/StaffEmptyPetSelectTest.php tests/Unit/StaffPetCreateReturnTest.php",
+        "php artisan test --compact tests/Feature/ShelterCaseWorkflowTest.php tests/Feature/PetCareConsultationWorkflowTest.php tests/Feature/StructureLayoutMorphMapTest.php",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "composer pre-pr-verify / CI before merge; Cloudron workflow_dispatch with app_version from VERSION after merge."
+    ],
+    "known_limitations": [
+        "Tickets, Cases, Recruitment, and Consultations plugin packages are still stubs; their controllers remain under App until Waves 6–7.",
+        "Historical pet_profiles migration stays in database/migrations for forward-only discoverability."
+    ],
+    "rollback": "Redeploy the previous application version. No database migration runs in this release; rolling back application code restores the dual App controllers and App\\\\Models\\\\PetProfile namespace.",
+    "provenance": "Structure Wave 5 Pet Profiles shared plugin #291 via pull request #308.",
+    "references": [
+        {
+            "label": "Issue #291",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/291"
+        },
+        {
+            "label": "Pull request #308",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/308"
+        }
+    ],
+    "slug": "release-v0-37-8",
+    "previous_version": "0.37.7"
+}

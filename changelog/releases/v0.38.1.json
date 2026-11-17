@@ -1,0 +1,54 @@
+{
+    "version": "0.38.1",
+    "date": "2026-09-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Terminology glossary for Language line",
+    "summary": "MyAPES Account now has a published product terminology glossary and canonical UK English term labels so screens, docs, and later CI checks share one vocabulary.",
+    "changes": [
+        "Add docs/glossary.md covering Account vs Core, Public vs Staff, Recruitment role vs Access job role vs Spatie Role, Plugin vs Module, organisation areas, plugin names, Admin (retire Super Admin nav wording), statuses, and en_GB spelling.",
+        "Publish lang/en_GB/terms.php (with lang/en fallback) for canonical singular and plural labels.",
+        "Add config/glossary.php with machine-readable deprecated synonyms for later CI lint.",
+        "Link the glossary from architecture, localisation, and ADR documentation."
+    ],
+    "affected_areas": [
+        "Product terminology documentation",
+        "Translation terms (lang/en_GB/terms.php)",
+        "Glossary synonym config for CI",
+        "Architecture and localisation docs",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the 0.38.x Language line: glossary and term labels without renaming live URLs or stored permission strings.",
+    "validation": [
+        "PHPUnit TerminologyGlossaryTest plus LocalisationBaselineTest and AdminShellNavigationTest.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "composer pre-pr-verify (or equivalent local verify) on the PR branch before merge."
+    ],
+    "known_limitations": [
+        "Most user-facing Blade copy still uses legacy strings (including MyAPES Core chrome) until later Language extraction waves.",
+        "Deprecated-synonym CI lint ships with #276; this release only publishes the synonym list.",
+        "Admin Access pages that still say Super Admin in headings are deferred to Admin string extraction (#270)."
+    ],
+    "rollback": "Redeploy the previous Cloudron package (0.38.0). No database migrations ship in this release.",
+    "provenance": "Language Wave 0b terminology glossary for issue #267, pull request #313.",
+    "references": [
+        {
+            "label": "Issue #267",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/267"
+        },
+        {
+            "label": "Pull request #313",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/313"
+        }
+    ],
+    "slug": "release-v0-38-1",
+    "previous_version": "0.38.0"
+}

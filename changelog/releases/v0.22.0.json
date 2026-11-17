@@ -1,0 +1,44 @@
+{
+    "version": "0.22.0",
+    "date": "2026-08-22",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Service hub dashboards and public wording",
+    "summary": "APES CIC, Shelter and Rescue, and Pet Care Clinic hub pages are now service dashboards with friendly public wording, open-item attention, numeric support-service totals, quick links, and recent updates.",
+    "changes": [
+        "Replaced member-visible sub-core and module jargon on service hub pages with support service and support tool wording.",
+        "Redesigned each service hub as a spaced dashboard showing what needs attention, available support services with totals, permission-aware quick links, and recent updates.",
+        "Scoped hub attention and summary data to the active service while reusing the existing dashboard providers and privacy model."
+    ],
+    "affected_areas": [
+        "APES CIC, Shelter and Rescue, and Pet Care Clinic hub pages",
+        "Service hub layout and styles",
+        "Spike mascot tips on service hub routes"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible minor release adding richer service hub dashboards and clearer public-facing language without changing routes, permissions, or record data.",
+    "validation": [
+        "ModuleProviderContractTest feature coverage for hub dashboards, scoped attention, public wording, and existing hub privacy behavior.",
+        "myapes:changelog-validate against origin/main."
+    ],
+    "known_limitations": [
+        "Quick create links route to existing index pages where inline create forms already live; dedicated create shortcuts are not added.",
+        "Historical Change Log release notes retain earlier internal terminology."
+    ],
+    "rollback": "Revert this release record, VERSION, runtime manifest version, service hub Blade and CSS changes, dashboard service scoping, mascot tip copy, and related feature assertions. No database rollback is needed.",
+    "provenance": "Defined by the service hub dashboard and public wording work for MyAPES Account issue #83.",
+    "references": [
+        {
+            "label": "Issue #83",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/83"
+        }
+    ],
+    "slug": "release-v0-22-0",
+    "previous_version": "0.21.1"
+}

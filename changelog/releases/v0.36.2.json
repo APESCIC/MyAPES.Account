@@ -1,0 +1,53 @@
+{
+    "version": "0.36.2",
+    "date": "2026-09-25",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Architecture map for Core, Modules, and Plugins",
+    "summary": "Contributor documentation now names three layers — Core, Modules, and Plugins — and lists where today's code sits. Sign-in, pages, permissions, and addresses behave the same.",
+    "changes": [
+        "Add an architecture decision that names Core, Modules (APES CIC, Pet Care Clinic, Shelter and Rescue), and Plugins (Tickets, Cases, Recruitment, Consultations, Pet Profiles).",
+        "Publish an inventory of routes, code, and permissions against those layers, without moving any of them.",
+        "Record that existing permission names and web addresses stay as they are until a later change says otherwise.",
+        "Point contributor instructions at the architecture docs and the v0.37 structure line."
+    ],
+    "affected_areas": [
+        "Contributor documentation",
+        "Change Log Hub"
+    ],
+    "categories": [
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on v0.36.x: documentation only, with no change to behaviour, URLs, or stored permissions.",
+    "validation": [
+        "php artisan route:list --json was used to build the route inventory.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "No application code, routes, migrations, or permission strings were edited."
+    ],
+    "known_limitations": [
+        "The new folder layout is approved for a later change and is not created in this release.",
+        "On-screen wording still waits for the glossary. This release does not rename buttons or menus."
+    ],
+    "rollback": "Redeploy the previous application version. That removes the architecture docs and this change log entry. It does not change accounts, permissions, or addresses, because this release did not change them.",
+    "provenance": "Architecture decision and inventory for issues #279 and #280, pull request #297.",
+    "references": [
+        {
+            "label": "Issue #279",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/279"
+        },
+        {
+            "label": "Issue #280",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/280"
+        },
+        {
+            "label": "Pull request #297",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/297"
+        }
+    ],
+    "slug": "release-v0-36-2",
+    "previous_version": "0.36.1"
+}

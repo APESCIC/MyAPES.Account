@@ -1,0 +1,46 @@
+{
+    "version": "0.32.11",
+    "date": "2026-09-12",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Register stores a visible consent timestamp",
+    "summary": "Creating a public account now requires a visible tick that you accept the terms of use and privacy notice. MyAPES Core stores the time of that consent on the account.",
+    "changes": [
+        "Show a required consent checkbox on public register, with links to the terms of use and privacy notice.",
+        "Refuse registration until consent is given, and store the consent timestamp on the public local account."
+    ],
+    "affected_areas": [
+        "Public register",
+        "Public local accounts"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: adds the missing register consent tick and stored timestamp without changing sign-in, roles, or existing accounts.",
+    "validation": [
+        "PHPUnit PublicAccountLifecycleTest covers the required consent control, rejected submit without consent, and the stored registration timestamp.",
+        "PHPUnit PublicLegalPagesTest, AccountLifecycleSchemaTest, AuthorizationAuthenticationTest, and RolelessApplicationCompatibilityTest cover register legal links, the nullable consent column, and existing registration paths.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
+    ],
+    "known_limitations": [
+        "Accounts created before this release do not receive a backfilled consent timestamp."
+    ],
+    "rollback": "Redeploy the previous application version to remove the required register consent tick and stop storing a new consent timestamp.",
+    "provenance": "Register consent timestamp for issue #124, pull request #205.",
+    "references": [
+        {
+            "label": "Issue #124",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/124"
+        },
+        {
+            "label": "Pull request #205",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/205"
+        }
+    ],
+    "slug": "release-v0-32-11",
+    "previous_version": "0.32.10"
+}

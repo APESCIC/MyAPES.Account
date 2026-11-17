@@ -1,0 +1,44 @@
+{
+    "version": "0.2.0",
+    "date": "2026-07-24",
+    "channel": "beta",
+    "type": "minor",
+    "title": "Application baseline and approved branding",
+    "summary": "Introduced the full Laravel application structure, initial service areas, and the approved MyAPES branding pack.",
+    "changes": [
+        "Added controllers, models, routes, views, configuration, migrations, tests, and local development scripts.",
+        "Added role-aware APES CIC, Shelter, and Pet Care areas with the initial account and administration surfaces.",
+        "Integrated the approved header, browser, progressive-web-app, and social artwork.",
+        "Aligned local setup and Cloudron deployment automation with the expanded application."
+    ],
+    "affected_areas": [
+        "Whole MyAPES Laravel application baseline",
+        "APES CIC, Shelter, Pet Care, accounts, and administration",
+        "Application branding and local/deployment tooling"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "A backward-compatible minor release introducing the main application baseline and service capabilities.",
+    "validation": [
+        "Repository review covered the complete runnable baseline and approved brand integration."
+    ],
+    "known_limitations": [
+        "The initial baseline preceded the later identity, release, and responsive-navigation hardening."
+    ],
+    "rollback": "Restore the earlier deployment-only foundation and remove the introduced application baseline and brand integration.",
+    "provenance": "This historical record was reconstructed from merged pull request #3 and was not represented by a historical Git tag.",
+    "references": [
+        {
+            "label": "PR #3",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/3"
+        }
+    ],
+    "slug": "release-v0-2-0",
+    "previous_version": "0.1.0"
+}

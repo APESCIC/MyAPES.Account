@@ -1,0 +1,53 @@
+{
+    "version": "0.39.8",
+    "date": "2026-09-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Release ops Beta milestones and GitHub hygiene",
+    "summary": "Completes GitHub release and milestone hygiene so every version in the Change Log Hub has a matching tag and Beta title, product milestones use the v0.N.x Beta naming convention, and agent docs match the enforced changelog-prepare workflow.",
+    "changes": [
+        "Backfill six missing GitHub Releases so release history matches the Change Log Hub (141 tags).",
+        "Rename remaining historical release display titles to the {VERSION} Beta convention.",
+        "Extend migrate-beta-milestones.sh to rename product milestones #1–#9 with completed-line descriptions.",
+        "Document milestone migration in ship-gate and require --pr in the release-metadata skill table.",
+        "Clarify AGENTS.md that v0.31.x–v0.39.x Beta product lines are closed with no open backlog milestone."
+    ],
+    "affected_areas": [
+        "GitHub Releases and milestones",
+        "Release ops scripts and agent documentation",
+        "Change Log Hub source links"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Patch on the completed 0.39.x line: repository and GitHub hygiene only; no application feature changes.",
+    "validation": [
+        "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
+        "Verified GitHub Releases count matches releases.json and milestone titles use v0.N.x Beta."
+    ],
+    "known_limitations": [
+        "GitHub ops (backfill, title rename, milestone migrate) were applied directly on the repository before merge; rerunning scripts is idempotent."
+    ],
+    "rollback": "Redeploy the previous release package. Documentation and script changes do not alter runtime application behaviour.",
+    "provenance": "Issues #182 and #177; pull request #330; closes remaining open repository issues after deploy.",
+    "references": [
+        {
+            "label": "Issue #182",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/182"
+        },
+        {
+            "label": "Issue #177",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/177"
+        },
+        {
+            "label": "Pull request #330",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/330"
+        }
+    ],
+    "slug": "release-v0-39-8",
+    "previous_version": "0.39.7"
+}

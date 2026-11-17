@@ -1,0 +1,46 @@
+{
+    "version": "0.31.8",
+    "date": "2026-08-29",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Laravel Boost MCP for local dev",
+    "summary": "Local developers can use Laravel Boost MCP in Cursor with Laragon, including AI guidelines and skills wired for this repository.",
+    "changes": [
+        "Install laravel/boost and add boost.json for Cursor MCP integration.",
+        "Add Cursor AI guidelines and Laravel, Tailwind, and testing skills under .cursor/skills.",
+        "Document Laragon PHP 8.4 requirement for boost:mcp in AGENTS.md."
+    ],
+    "affected_areas": [
+        "Local development documentation",
+        "Composer dev dependencies",
+        "Cursor agent configuration"
+    ],
+    "categories": [
+        "fixed"
+    ],
+    "audiences": [
+        "internal-only"
+    ],
+    "version_rationale": "Patch release: local development tooling and documentation only; no production application behaviour change.",
+    "validation": [
+        "composer install on PHP 8.4+ with laravel/boost dependency resolved.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main after filling release notes."
+    ],
+    "known_limitations": [
+        "boost:mcp requires PHP 8.4 or newer; Laragon Apache may need a PHP 8.4 FastCGI handler until Laragon ships 8.4 mod_php."
+    ],
+    "rollback": "Redeploy the previous application version. To remove Laravel Boost, revert the composer dependency, boost.json, Cursor skills, and AGENTS.md guidance from this release.",
+    "provenance": "Defined by the Laravel Boost MCP setup for MyAPES Account issue #175.",
+    "references": [
+        {
+            "label": "Issue #175",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/175"
+        },
+        {
+            "label": "Pull request #176",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/176"
+        }
+    ],
+    "slug": "release-v0-31-8",
+    "previous_version": "0.31.7"
+}

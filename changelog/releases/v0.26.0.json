@@ -1,0 +1,48 @@
+{
+    "version": "0.26.0",
+    "date": "2026-08-25",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Seed default organisational job roles",
+    "summary": "Fresh installs now include four organisational job roles with reviewed default permission packs, and Super Admins can map those roles onto managed Cloudron groups without changing preset access-tier mappings.",
+    "changes": [
+        "Seed board-of-directors, management, client-services-advisor, and receptionist as custom job roles during authorization metadata sync.",
+        "Keep Super Admin permission edits on later syncs, and exclude Super Admin-only permissions from the default packs.",
+        "Allow mutable job-role mappings on managed myapesaccount.* groups while preset protected mappings stay immutable."
+    ],
+    "affected_areas": [
+        "Authorization metadata sync",
+        "Admin Groups and Roles",
+        "Directory group mappings"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Minor release: adds seeded organisational job roles and optional group-to-job-role mappings without changing protected access tiers.",
+    "validation": [
+        "PHPUnit covers fresh-install seeding, Super Admin job-role permission edits, and mutable mappings that preserve preset protected mappings.",
+        "Directory rematerialization tests confirm job roles do not replace missing staff-class directory eligibility.",
+        "Ran php artisan myapes:changelog-validate --base-ref=origin/main."
+    ],
+    "known_limitations": [
+        "The Access workspace UX in issue #97 is not included; job-role mapping uses the existing Groups and Roles pages."
+    ],
+    "rollback": "Redeploy the previous application version. Seeded job roles and mutable mappings remain in the database until an administrator removes them.",
+    "provenance": "Defined by the seed default job roles story for MyAPES Account issue #96 under epic #91 and pull request #119.",
+    "references": [
+        {
+            "label": "Issue #96",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/96"
+        },
+        {
+            "label": "Pull request #119",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/119"
+        }
+    ],
+    "slug": "release-v0-26-0",
+    "previous_version": "0.25.9"
+}
