@@ -43,7 +43,7 @@
     </div>
 
     <div data-push-state="home_screen" hidden>
-        <p>{{ __('push.device.home_screen') }}</p>
+        <x-push.home-screen-guide />
     </div>
 
     <div data-push-state="default">
@@ -68,7 +68,7 @@
         <p>{{ __('push.device.subscribed') }}</p>
     </div>
 
-    <div class="push-device__actions">
+    <div class="push-device__actions" data-push-actions>
         <x-button type="button" variant="primary" size="sm" data-push-turn-on icon="bell">
             {{ __('push.device.turn_on') }}
         </x-button>

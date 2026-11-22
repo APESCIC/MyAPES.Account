@@ -13,7 +13,6 @@ return [
         'turn_on' => 'Turn on',
         'turn_off' => 'Turn off',
         'unsupported' => 'This browser does not support web push notifications.',
-        'home_screen' => 'On iPhone and iPad, add MyAPES Account to your Home Screen first, then open it from there to turn on notifications.',
         'default' => 'Notifications are not turned on for this device yet.',
         'granted' => 'This browser allows notifications, but this device is not subscribed yet. Choose Turn on to finish.',
         'blocked_intro' => 'Notifications are blocked for this site. Unblock them in your browser, then choose Turn on again.',
@@ -27,7 +26,7 @@ return [
         'unblock_safari' => 'Open Safari → Settings for This Website and set Notifications to Allow.',
         'subscribed' => 'Notifications are turned on for this device.',
         'status_unsupported' => 'Push notifications are not supported in this browser.',
-        'status_home_screen' => 'Add MyAPES Account to your Home Screen to use notifications on this device.',
+        'status_home_screen' => 'Follow the Add to Home Screen steps below to turn on notifications on this iPhone or iPad.',
         'status_default' => 'Notifications are off on this device.',
         'status_granted' => 'Finish turning on notifications on this device.',
         'status_blocked' => 'Notifications are blocked in this browser.',
@@ -35,6 +34,46 @@ return [
         'status_turned_off' => 'Notifications are off for this device.',
         'status_dismissed' => 'You can turn on notifications later from your profile.',
         'status_error' => 'Something went wrong while updating notifications. Try again.',
+    ],
+
+    'home_screen' => [
+        'heading' => 'Add MyAPES Account to your Home Screen',
+        'lead' => 'Apple only allows web push after you open MyAPES Account from a Home Screen icon, not from a normal Safari tab.',
+        'version_label' => 'Software: ',
+        'version_requirement' => 'iOS or iPadOS 16.4 or later is required for web push notifications.',
+        'footnote' => 'The Home Screen app should show the name MyAPES Account and open your account home page. After you open it from the icon, choose Turn on in the notification settings here.',
+        'steps' => [
+            [
+                'title' => 'Tap Share',
+                'body' => 'In Safari, tap the Share button at the bottom of the screen (a square with an arrow pointing up).',
+                'image' => 'images/push/ios-home-screen/step-share.svg',
+                'image_alt' => 'Share button at the bottom of Safari on iPhone.',
+            ],
+            [
+                'title' => 'Choose Add to Home Screen',
+                'body' => 'Scroll the share sheet and tap Add to Home Screen.',
+                'image' => 'images/push/ios-home-screen/step-add-to-home.svg',
+                'image_alt' => 'Add to Home Screen option in the Safari share sheet.',
+            ],
+            [
+                'title' => 'Keep Open as Web App on',
+                'body' => 'Before you confirm, make sure Open as Web App stays switched on so notifications can work.',
+                'image' => 'images/push/ios-home-screen/step-open-as-web-app.svg',
+                'image_alt' => 'Open as Web App switch turned on when adding to the Home Screen.',
+            ],
+            [
+                'title' => 'Open from your Home Screen',
+                'body' => 'Tap Add, then leave Safari and open MyAPES Account from the new Home Screen icon.',
+                'image' => 'images/push/ios-home-screen/step-open-from-home.svg',
+                'image_alt' => 'MyAPES Account icon on the iPhone Home Screen.',
+            ],
+            [
+                'title' => 'Turn on notifications',
+                'body' => 'In the installed app, return to notification settings and tap Turn on, then allow notifications when asked.',
+                'image' => 'images/push/ios-home-screen/step-turn-on.svg',
+                'image_alt' => 'Turn on button for notifications inside MyAPES Account.',
+            ],
+        ],
     ],
 
     'types' => [

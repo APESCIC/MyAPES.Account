@@ -26,6 +26,38 @@ test('detectPushEnvironment marks iOS browsers without Home Screen install', () 
     assert.equal(detectPushEnvironment(win, nav).kind, 'home_screen');
 });
 
+test('detectPushEnvironment treats iOS Home Screen install as supported', () => {
+    const win = {
+        matchMedia: (query) => ({ matches: query === '(display-mode: standalone)' }),
+        navigator: { standalone: true },
+        Notification: {},
+        PushManager: function PushManager() {},
+    };
+    const nav = {
+        userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)',
+        maxTouchPoints: 5,
+        serviceWorker: {},
+    };
+
+    assert.equal(detectPushEnvironment(win, nav).kind, 'supported');
+});
+
+test('detectPushEnvironment treats iPadOS desktop UA in Safari tab as home_screen', () => {
+    const win = {
+        matchMedia: () => ({ matches: false }),
+        navigator: { standalone: false },
+        Notification: {},
+        PushManager: function PushManager() {},
+    };
+    const nav = {
+        userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15',
+        maxTouchPoints: 5,
+        serviceWorker: {},
+    };
+
+    assert.equal(detectPushEnvironment(win, nav).kind, 'home_screen');
+});
+
 test('snooze hides the soft prompt for thirty days', () => {
     const storage = {
         values: new Map(),
@@ -63,6 +95,16 @@ test('soft prompt only appears for default permission before subscribe', () => {
     assert.equal(
         shouldShowSoftPrompt({ ...base, permission: 'default', hasSubscription: false, snoozed: true }),
         false,
+    );
+    assert.equal(
+        shouldShowSoftPrompt({
+            environment: { kind: 'home_screen' },
+            permission: 'default',
+            hasSubscription: false,
+            snoozed: false,
+            softMode: true,
+        }),
+        true,
     );
 });
 

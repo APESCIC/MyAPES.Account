@@ -34,7 +34,7 @@ const announceStatus = (root, message) => {
     live.textContent = message;
 };
 
-const setVisibleState = (root, state, messages) => {
+export const setVisibleState = (root, state, messages) => {
     const regions = root.querySelectorAll('[data-push-state]');
 
     regions.forEach((region) => {
@@ -42,7 +42,9 @@ const setVisibleState = (root, state, messages) => {
             return;
         }
 
-        const regionState = region.dataset?.pushState ?? '';
+        const regionState = region.getAttribute?.('data-push-state')
+            ?? region.dataset?.pushState
+            ?? '';
         const show = regionState === state;
         region.hidden = !show;
     });
@@ -67,7 +69,14 @@ const setVisibleState = (root, state, messages) => {
 
     if (notNow && 'hidden' in notNow) {
         const softMode = root.hasAttribute('data-push-soft-prompt');
-        notNow.hidden = !softMode || state !== 'default';
+        const mayDismiss = state === 'default' || state === 'home_screen';
+        notNow.hidden = !softMode || !mayDismiss;
+    }
+
+    const actions = root.querySelector('[data-push-actions]');
+
+    if (actions && 'hidden' in actions) {
+        actions.hidden = !showTurnOn && !showTurnOff;
     }
 
     const message = messages?.[state];

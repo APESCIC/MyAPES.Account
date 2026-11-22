@@ -283,5 +283,7 @@ export const shouldShowSoftPrompt = ({
         return false;
     }
 
-    return resolveDeviceState({ environment, permission, hasSubscription }) === 'default';
+    const state = resolveDeviceState({ environment, permission, hasSubscription });
+
+    return state === 'default' || state === 'home_screen';
 };

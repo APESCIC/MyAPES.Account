@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { bindPushDeviceRoot, bindPushLogoutCleanup } from './soft-prompt.js';
+import { bindPushDeviceRoot, bindPushLogoutCleanup, setVisibleState } from './soft-prompt.js';
 
 const config = {
     vapidUrl: '/push/vapid-public-key',
@@ -87,8 +87,14 @@ const makeElement = (tag, attrs = {}, children = []) => {
                 return attrs['data-push-status'] !== undefined;
             }
 
+            if (selector === '[data-push-actions]') {
+                return attrs['data-push-actions'] !== undefined;
+            }
+
             if (selector.startsWith('[data-push-state')) {
-                return attrs['data-push-state'] === selector.match(/"(.+)"/)?.[1];
+                const value = selector.match(/"(.+)"/)?.[1];
+
+                return attrs.dataset?.pushState === value || attrs['data-push-state'] === value;
             }
 
             return false;
@@ -99,24 +105,46 @@ const makeElement = (tag, attrs = {}, children = []) => {
         value: (name) => name in attrs || Object.keys(attrs).includes(name),
     });
 
+    el.getAttribute = (name) => {
+        if (name === 'data-push-state') {
+            return attrs.dataset?.pushState ?? attrs['data-push-state'] ?? null;
+        }
+
+        return attrs[name] ?? null;
+    };
+
     return el;
 };
 
 const buildRoot = () => {
     const status = makeElement('p', { 'data-push-status': '' });
     const defaultState = makeElement('div', { 'data-push-state': '', dataset: { pushState: 'default' } });
+    const homeState = makeElement('div', { 'data-push-state': '', dataset: { pushState: 'home_screen' }, hidden: true });
     const turnOn = makeElement('button', { 'data-push-turn-on': '', type: 'button' });
     const notNow = makeElement('button', { 'data-push-not-now': '', type: 'button', hidden: true });
     const turnOff = makeElement('button', { 'data-push-turn-off': '', type: 'button', hidden: true });
+    const actions = makeElement('div', { 'data-push-actions': '' }, [turnOn, notNow, turnOff]);
 
     const root = makeElement('div', {
         'data-push-device': '',
         'data-push-soft-prompt': '',
         dataset: { pushConfig: JSON.stringify(config) },
-    }, [status, defaultState, turnOn, notNow, turnOff]);
+    }, [status, defaultState, homeState, actions]);
 
-    return { root, turnOn, notNow, status };
+    return { root, turnOn, notNow, status, homeState, actions, defaultState };
 };
+
+test('home_screen state shows the guide region and hides Turn on', () => {
+    const { root, turnOn, homeState, actions, defaultState } = buildRoot();
+
+    setVisibleState(root, 'home_screen', { home_screen: 'Use the guide.' });
+
+    assert.equal(homeState.hidden, false);
+    assert.equal(defaultState.hidden, true);
+    assert.equal(turnOn.hidden, true);
+    assert.equal(turnOn.disabled, true);
+    assert.equal(actions.hidden, true);
+});
 
 test('initialising the soft prompt does not call Notification.requestPermission', async () => {
     const { root } = buildRoot();

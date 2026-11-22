@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-hidden="true">
+  <rect width="120" height="120" rx="12" fill="#e8f7f9"/>
+  <path d="M60 28c-8 0-14 6-14 14v8c0 8 6 14 14 22 8-8 14-14 14-22v-8c0-8-6-14-14-14z" fill="none" stroke="#107481" stroke-width="3"/>
+  <rect x="38" y="76" width="44" height="18" rx="9" fill="#107481"/>
+  <text x="60" y="88" text-anchor="middle" font-family="system-ui,sans-serif" font-size="8" fill="#fff">Turn on</text>
+</svg>
