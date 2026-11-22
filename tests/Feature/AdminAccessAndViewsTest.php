@@ -396,6 +396,7 @@ class AdminAccessAndViewsTest extends TestCase
             ->get();
         $this->assertCount(10, $audits);
         $this->assertEqualsCanonicalizing([
+            'admin.public-accounts.show',
             'admin.users.show',
             'admin.users.roles.update',
             'admin.users.suspension.store',

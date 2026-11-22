@@ -140,7 +140,7 @@ class HealthAndThemeTest extends TestCase
         }
 
         $this->view('auth.staff-login')
-            ->assertSeeText('APES Pet Care Clinic')
+            ->assertSeeText(__('auth.staff_login.heading'))
             ->assertDontSee('>APES Pet Care<', false)
             ->assertDontSee('and APES Pet Care.</p>', false);
 
