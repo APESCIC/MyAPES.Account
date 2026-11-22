@@ -109,6 +109,10 @@ final class WorkspaceNavigation
             if ($user->can(AuthorizationProfile::PERMISSION_CLIENT_SEARCH)) {
                 $overview[] = new NavItem('clients', __('clients.nav'), route('clients.index'), 'user-plus', ['clients.*'], ['client', 'create', 'public', 'pin', 'register', 'search']);
             }
+            if ($user->can(AuthorizationProfile::PERMISSION_MESSAGES_SEND)
+                || $user->can(AuthorizationProfile::PERMISSION_MESSAGES_HISTORY_VIEW)) {
+                $overview[] = new NavItem('messages', __('staff_messages.nav'), route('messages.index'), 'mail', ['messages.*'], ['message', 'email', 'mail', 'campaign', 'broadcast']);
+            }
         }
 
         $groups = [

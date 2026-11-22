@@ -3,6 +3,7 @@
 namespace App\Core\Mail;
 
 use App\Core\Accounts\User;
+use App\Core\Mail\StaffMessage;
 use App\Core\Mail\Inbound\Diagnostics\FailureType;
 use App\Notifications\Auth\EmailChangeCompletedNotification;
 use App\Notifications\Auth\EmailChangeConfirmNotification;
@@ -20,6 +21,7 @@ use App\Notifications\InboundImportFailingNotification;
 use App\Notifications\InboundImportRecoveredNotification;
 use App\Notifications\PendingFirstLoginChaseNotification;
 use App\Notifications\StaffClientRecordsArchivedNotification;
+use App\Notifications\StaffMessageNotification;
 use Closure;
 use Illuminate\Notifications\Notification;
 
@@ -106,6 +108,23 @@ final class CoreMailTemplates
                 sample: static fn (): EmailReplyNotPostedNotification => new EmailReplyNotPostedNotification('Ticket #1024', url('/apes-cic/tickets/1024')),
                 subjectKey: 'mail.reply_not_posted.subject',
                 introKey: 'mail.reply_not_posted.line_closed',
+            ),
+            new MailTemplate(
+                key: 'staff.staff_message',
+                notification: StaffMessageNotification::class,
+                category: MailCategory::Service,
+                labelKey: 'mail.templates.staff.staff_message.name',
+                descriptionKey: 'mail.templates.staff.staff_message.description',
+                sample: static function (User $recipient): StaffMessageNotification {
+                    $sender = new User(['name' => 'Sample Staff Member', 'email' => 'staff@example.com']);
+                    $message = new StaffMessage([
+                        'category' => StaffMessage::CATEGORY_SERVICE,
+                        'subject' => __('mail.staff_message.sample_subject'),
+                        'body_html' => '<p>'.e(__('mail.staff_message.sample_body')).'</p>',
+                    ]);
+
+                    return new StaffMessageNotification($message, $sender);
+                },
             ),
         ];
     }

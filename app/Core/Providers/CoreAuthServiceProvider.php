@@ -160,6 +160,10 @@ class CoreAuthServiceProvider extends ServiceProvider
             ];
         });
 
+        RateLimiter::for('staff-messages', static function (): Limit {
+            return Limit::perMinute(30)->by('staff-messages:global');
+        });
+
         // Legacy alias kept for any remaining throttle:public-password-reset references.
         RateLimiter::for('public-password-reset', function (Request $request): array {
             $email = Str::lower((string) $request->input('email'));

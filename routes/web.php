@@ -38,6 +38,8 @@ use App\Http\Controllers\GuidedTourController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MailReplyLinkController;
+use App\Http\Controllers\MailUnsubscribeController;
+use App\Http\Controllers\Staff\StaffMessageController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PhoneVerificationPinController;
 use App\Http\Controllers\ProfileController;
@@ -85,6 +87,11 @@ Route::view('/terms', 'legal.terms')->name('terms');
 Route::get('/mail/reply', MailReplyLinkController::class)
     ->middleware(['signed', 'throttle:30,1'])
     ->name('mail.reply');
+Route::get('/mail/unsubscribe/{user}', MailUnsubscribeController::class)
+    ->middleware(['signed', 'throttle:30,1'])
+    ->whereNumber('user')
+    ->name('mail.unsubscribe');
+Route::get('/log-in', static fn () => redirect()->route('public.login'))->name('login');
 Route::get('/email/change/confirm/{user}/{hash}', [EmailChangeController::class, 'confirm'])
     ->middleware(['signed', 'throttle:6,1'])
     ->name('email.change.confirm');
@@ -219,6 +226,17 @@ Route::middleware([
         Route::post('/{caller}/end-call', [CallerController::class, 'endCall'])->whereNumber('caller')->name('end-call');
         Route::put('/{caller}/details', [CallerController::class, 'updateDetails'])->whereNumber('caller')->name('details.update');
         Route::post('/{caller}/call-logs', [CallerController::class, 'storeCallLog'])->whereNumber('caller')->name('call-logs.store');
+    });
+    Route::prefix('staff/messages')->name('messages.')->group(function (): void {
+        Route::get('/', [StaffMessageController::class, 'index'])->name('index');
+        Route::get('/create', [StaffMessageController::class, 'create'])->name('create');
+        Route::post('/', [StaffMessageController::class, 'store'])->middleware('throttle:30,1')->name('store');
+        Route::get('/user-candidates', [StaffMessageController::class, 'userCandidates'])->name('user-candidates');
+        Route::get('/{message}', [StaffMessageController::class, 'show'])->whereNumber('message')->name('show');
+        Route::get('/{message}/edit', [StaffMessageController::class, 'edit'])->whereNumber('message')->name('edit');
+        Route::put('/{message}', [StaffMessageController::class, 'update'])->whereNumber('message')->middleware('throttle:30,1')->name('update');
+        Route::get('/{message}/preview', [StaffMessageController::class, 'preview'])->whereNumber('message')->name('preview');
+        Route::post('/{message}/confirm', [StaffMessageController::class, 'confirm'])->whereNumber('message')->middleware('throttle:staff-messages')->name('confirm');
     });
     Route::prefix('staff/clients')->name('clients.')->group(function (): void {
         Route::get('/', [ClientController::class, 'index'])->name('index');

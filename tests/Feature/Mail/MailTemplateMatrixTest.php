@@ -60,7 +60,13 @@ class MailTemplateMatrixTest extends TestCase
         'inbound.reply_not_posted',
         'recruitment.application_received',
         'recruitment.application_status',
+        'staff.staff_message',
         'tickets.ticket_updated',
+    ];
+
+    /** Templates that show the sending staff member as the From display name (#505). */
+    private const STAFF_SENDER_FROM_KEYS = [
+        'staff.staff_message',
     ];
 
     /** Templates that can be answered by replying to the email (#578). */
@@ -95,7 +101,11 @@ class MailTemplateMatrixTest extends TestCase
 
         $this->assertNotSame($template->labelKey, $template->label());
         $this->assertInstanceOf(ShouldQueue::class, $notification);
-        $this->assertSame(__('terms.app_name'), $mail->from[1] ?? null);
+        if (in_array($key, self::STAFF_SENDER_FROM_KEYS, true)) {
+            $this->assertNotSame('', (string) ($mail->from[1] ?? ''));
+        } else {
+            $this->assertSame(__('terms.app_name'), $mail->from[1] ?? null);
+        }
         $this->assertStringContainsString(url('/logos/myapes-header-light-600x128.png'), $html);
         $this->assertStringContainsString(__('mail.brand.footer.help'), $html);
         $this->assertStringContainsString(route('help'), $html);
