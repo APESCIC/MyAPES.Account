@@ -1,0 +1,60 @@
+{
+    "version": "0.72.0",
+    "date": "2026-11-22",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Web push notifications",
+    "summary": "Staff, volunteers, students and service users can turn on optional browser push alerts for tickets, cases, consultations, recruitment, account security and staff messages. Each person chooses notification types, quiet hours and subscribed devices on Profile → Notifications; administrators manage VAPID keys, pause all delivery and review anonymous stats in Admin.",
+    "changes": [
+        "Added Core web push: VAPID configuration, device subscriptions, queued delivery on the push queue, and metadata-only push_deliveries records (no message bodies, endpoints or keys in logs).",
+        "Registered a service worker, web app manifest and Content Security Policy updates so secure origins can subscribe and receive private type-and-reference payloads with authorised deep links.",
+        "Added a dashboard soft prompt and per-browser subscribe flow; Profile → Notifications lists devices, notification types, role-aware defaults, quiet hours and an iPhone and iPad Add to Home Screen guide.",
+        "Wired push for ticket, case, consultation, recruitment and account-security events per the milestone routing table, plus staff Optional messages after v0.71.0.",
+        "Added an in-app notification bell and list backed by stored database notifications alongside push.",
+        "Added Admin → Settings → Push notifications for VAPID key status (Keys and secrets), pause all web push, count-only stats and operator test push.",
+        "Documented Cloudron push worker expectations (queue:work including push), privacy notice text and wiki guides."
+    ],
+    "affected_areas": [
+        "Profile → Notifications and dashboard soft prompt",
+        "In-app notification bell",
+        "Tickets, cases, consultations and recruitment modules",
+        "Admin → Settings → Push notifications and Keys and secrets",
+        "Service worker, manifest and CSP",
+        "push queue, push_deliveries and Cloudron queue worker",
+        "Public change log and privacy notice"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Minor: new optional web push capability and preferences without breaking VERSION or module-runtime contract semantics.",
+    "validation": [
+        "PHPUnit tests under tests/Feature/Push and tests/Feature/Admin/PushNotificationsSettingsTest.",
+        "php artisan myapes:changelog-validate --base-ref=origin/main after the release commit.",
+        "composer milestone:bump -- v0.72.0 --check.",
+        "Local Herd preview at https://myapes-account.test (HTTPS required for subscribe)."
+    ],
+    "known_limitations": [
+        "Apple devices need an installed Home Screen web app (iOS or iPadOS 16.4+) for push; Safari tabs alone cannot subscribe.",
+        "Payloads carry notification type and reference only; full message content remains in the app or email.",
+        "Rotating VAPID keys clears every subscription; users must allow notifications again on each device.",
+        "Marketing or broadcast push campaigns and third-party push platforms are out of scope."
+    ],
+    "rollback": "Redeploy the previous release tag (v0.71.0). activate-release syncs that package's changelog files and sets current to its VERSION. Push tables remain additive and unused after rollback.",
+    "provenance": "Epic #791 with children #792–#806; milestone PR #983 on branch milestone/v0-72-0-web-push-notifications.",
+    "references": [
+        {
+            "label": "Issue #791",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/791"
+        },
+        {
+            "label": "Pull request #983",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/983"
+        }
+    ],
+    "slug": "release-v0-72-0",
+    "previous_version": "0.71.0"
+}
