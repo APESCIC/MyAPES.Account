@@ -148,6 +148,13 @@ return [
         'log_retention_days' => (int) env('MAIL_LOG_RETENTION_DAYS', 90),
     ],
 
+    'push' => [
+        'log_retention_days' => (int) env('PUSH_LOG_RETENTION_DAYS', 90),
+        'http_timeout_seconds' => max(1, min(60, (int) env('PUSH_HTTP_TIMEOUT_SECONDS', 10))),
+        'max_attempts' => max(1, min(5, (int) env('PUSH_MAX_ATTEMPTS', 3))),
+        'remove_after_consecutive_failures' => max(1, min(20, (int) env('PUSH_REMOVE_AFTER_CONSECUTIVE_FAILURES', 5))),
+    ],
+
     'consent' => [
         'policy_version' => env('CONTACT_CONSENT_POLICY_VERSION', '2026-08'),
         'privacy_notice_url' => env('PRIVACY_NOTICE_URL'),

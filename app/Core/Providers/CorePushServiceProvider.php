@@ -3,17 +3,35 @@
 namespace App\Core\Providers;
 
 use App\Core\Accounts\User;
+use App\Core\Push\PushDeliveryRecorder;
+use App\Core\Push\PushReportHandler;
+use App\Core\Push\QueuedWebPushChannel;
 use App\Core\Push\VapidCredentials;
+use App\Core\Push\WebPushDeliveryService;
+use App\Core\Push\WebPushFactory;
 use App\Core\Secrets\SecretDefinition;
 use App\Core\Secrets\SecretRegistry;
+use Illuminate\Notifications\ChannelManager;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\ServiceProvider;
+use Minishlink\WebPush\WebPush;
+use NotificationChannels\WebPush\ReportHandlerInterface;
+use NotificationChannels\WebPush\WebPushChannel;
 
 class CorePushServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
         $this->app->singleton(VapidCredentials::class);
+        $this->app->singleton(WebPushFactory::class);
+        $this->app->singleton(PushDeliveryRecorder::class);
+        $this->app->singleton(WebPushDeliveryService::class);
+
+        $this->app->bind(ReportHandlerInterface::class, PushReportHandler::class);
+
+        $this->app->singleton(WebPush::class, fn ($app): WebPush => $app->make(WebPushFactory::class)->make());
+
+        $this->app->bind(WebPushChannel::class, QueuedWebPushChannel::class);
 
         $this->app->afterResolving(SecretRegistry::class, static function (SecretRegistry $registry): void {
             $registry->register(
@@ -42,6 +60,10 @@ class CorePushServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->applyVapidConfig();
+
+        $this->app->afterResolving(ChannelManager::class, static function (ChannelManager $manager, $app): void {
+            $manager->extend('WebPush', fn () => $app->make(QueuedWebPushChannel::class));
+        });
 
         User::deleting(static function (User $user): void {
             $user->pushSubscriptions()->delete();

@@ -4,6 +4,7 @@ use App\Core\Accounts\AuditLog;
 use App\Core\Accounts\CallLog;
 use App\Core\Accounts\DirectorySyncRun;
 use App\Core\Mail\OutboundMailLog;
+use App\Core\Push\PushDelivery;
 use App\Jobs\RunDirectorySync;
 use App\Services\AuditLogger;
 use Illuminate\Foundation\Inspiring;
@@ -38,6 +39,18 @@ Artisan::command('mail:prune-log {--days= : Number of days of outbound mail meta
     $this->info("Deleted {$deleted} outbound mail log record(s) older than {$retentionDays} days.");
 })->purpose('Prune outbound mail metadata using the retention policy');
 
+Artisan::command('push:prune-log {--days= : Number of days of push delivery metadata to keep}', function () {
+    $days = $this->option('days');
+    $retentionDays = is_numeric($days) ? (int) $days : (int) config('myapes.push.log_retention_days', 90);
+    $threshold = now()->subDays($retentionDays);
+
+    $deleted = PushDelivery::query()
+        ->where('created_at', '<', $threshold)
+        ->delete();
+
+    $this->info("Deleted {$deleted} push delivery record(s) older than {$retentionDays} days.");
+})->purpose('Prune web push delivery metadata using the retention policy');
+
 Artisan::command('call-logs:prune {--months= : Number of months of call logs to keep}', function () {
     $months = $this->option('months');
     $retentionMonths = is_numeric($months) ? (int) $months : (int) config('myapes.call_logs.retention_months', 24);
@@ -67,6 +80,7 @@ Artisan::command('call-logs:prune {--months= : Number of months of call logs to 
 Schedule::command('audit:prune')->daily();
 Schedule::command('call-logs:prune')->daily();
 Schedule::command('mail:prune-log')->daily();
+Schedule::command('push:prune-log')->daily();
 Schedule::command('tickets:inbound-poll')->everyMinute()->withoutOverlapping(10);
 Schedule::command('inbound-mail:prune')->daily();
 Schedule::command('inbound-mail:empty-folders')->daily();
