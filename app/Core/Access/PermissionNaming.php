@@ -50,6 +50,10 @@ final class PermissionNaming
         'staff.clients.search',
         'staff.clients.manage',
         'staff.clients.sensitive',
+        // Staff email to users (#500).
+        'staff.messages.send',
+        'staff.messages.send.all',
+        'staff.messages.history.view',
     ];
 
     /**

@@ -63,7 +63,10 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->append(SecurityHeaders::class);
-        $middleware->validateCsrfTokens(except: ['csp-report']);
+        $middleware->validateCsrfTokens(except: [
+            'csp-report',
+            'mail/unsubscribe/*',
+        ]);
 
         $middleware->alias([
             'admin.denial-audit' => AuditAdminAuthorizationDenial::class,

@@ -13,6 +13,7 @@ use App\Core\Api\ApiClient;
 use App\Core\Attachments\SupportAttachment;
 use App\Core\Extensions\Models\ModuleInstallation;
 use App\Core\Mail\Inbound\InboundEmail;
+use App\Core\Mail\StaffMessage;
 use App\Core\Maintenance\MaintenanceWindow;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
@@ -50,6 +51,7 @@ final class MorphMap
             'directory_group_role_mapping' => DirectoryGroupRoleMapping::class,
             'module_installation' => ModuleInstallation::class,
             'inbound_email' => InboundEmail::class,
+            'staff_message' => StaffMessage::class,
             'api_client' => ApiClient::class,
         ];
     }

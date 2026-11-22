@@ -61,6 +61,21 @@ final class PermissionDescriptions
             'description' => 'Access sensitive client account fields reserved for administrators.',
             'group' => 'Accounts',
         ],
+        'staff.messages.send' => [
+            'title' => 'Send email to own-module users',
+            'description' => 'Compose and send staff email to users in modules the sender can access (staff, volunteers and students by default).',
+            'group' => 'Messaging',
+        ],
+        'staff.messages.send.all' => [
+            'title' => 'Send email to all users',
+            'description' => 'Send staff email to any recipient group, including all users. Granted to administrators by default; grantable to other groups.',
+            'group' => 'Messaging',
+        ],
+        'staff.messages.history.view' => [
+            'title' => 'View own sent email history',
+            'description' => 'Open the staff email history for messages the sender queued or sent.',
+            'group' => 'Messaging',
+        ],
         'admin.analytics.view' => [
             'title' => 'View admin overview',
             'description' => 'See operational KPIs on the Admin overview.',

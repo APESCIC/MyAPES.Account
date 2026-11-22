@@ -1,0 +1,54 @@
+{
+    "version": "0.71.0",
+    "date": "2026-11-22",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Staff email to users",
+    "summary": "Staff, volunteers and students can email MyAPES Account users from the workspace: compose Service or Optional messages, pick recipients, preview and confirm, then send through a queued, rate-limited pipeline with no-reply branding, consent-aware Optional mail and campaign history.",
+    "changes": [
+        "Added staff.messages.send, staff.messages.send.all and staff.messages.history.view permissions with default grants for staff, volunteers and students (own-module send) and administrators (including send.all).",
+        "Added Staff › Messages compose, draft save, recipient picker (all, group, module or individuals), preview with opt-out counts and typed confirmation for large or all-user sends.",
+        "Queued SendStaffMessageJob with per-sender daily and global per-minute rate limits, campaign delivery totals and OutboundMailLog rows per recipient.",
+        "Registered the staff.staff_message mail template with a no-reply From line, login footer and, for Optional mail, RespectsMailPreference plus signed unsubscribe and List-Unsubscribe headers.",
+        "Added read-only campaign history (own messages for senders; all for administrators) with flash feedback, status badges and AuditLogger events for queued sends."
+    ],
+    "affected_areas": [
+        "Staff workspace Messages (/staff/messages)",
+        "Authorization matrix and PermissionNaming Core catalogue",
+        "Outbound mail templates, Optional contact preference and unsubscribe",
+        "Queue workers and staff-messages rate limiter",
+        "Admin Security audit log (staff.messages.queued)"
+    ],
+    "categories": [
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "Minor: new staff email campaign capability without breaking VERSION or module-runtime contract semantics.",
+    "validation": [
+        "PHPUnit StaffMessagePermissionsTest and StaffMessageFlowTest; php artisan test --filter=Staff (351 passed).",
+        "php artisan myapes:changelog-validate --base-ref=origin/main after the release commit.",
+        "composer milestone:bump -- v0.71.0 --check.",
+        "Local Herd preview at https://myapes-account.test."
+    ],
+    "known_limitations": [
+        "Optional mail opt-out is the Email contact preference only; a fuller Privacy page arrives in a later milestone.",
+        "Campaign history stores subject and body for staff review; per-recipient OutboundMailLog remains metadata-only."
+    ],
+    "rollback": "Redeploy the previous release tag (v0.70.0). activate-release syncs that package's changelog files and sets current to its VERSION. Staff message tables remain additive and unused after rollback.",
+    "provenance": "Epic #499 with children #500–#509; milestone PR #982 on branch milestone/v0-71-0-staff-email-users.",
+    "references": [
+        {
+            "label": "Issue #499",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/499"
+        },
+        {
+            "label": "Pull request #982",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/982"
+        }
+    ],
+    "slug": "release-v0-71-0",
+    "previous_version": "0.70.0"
+}

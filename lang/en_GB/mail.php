@@ -78,6 +78,12 @@ return [
                 'description' => 'Sent to a staff, volunteer, student or admin account after its personal client records were archived.',
             ],
         ],
+        'staff' => [
+            'staff_message' => [
+                'name' => 'Staff message to users',
+                'description' => 'Sent when staff queue a Service or Optional campaign from the Staff workspace.',
+            ],
+        ],
         'inbound' => [
             'import_failing' => [
                 'name' => 'Email import stopped',
@@ -92,6 +98,11 @@ return [
                 'description' => 'Sent, at most once an hour, when an account holder replies by email to a closed ticket or case, or with a reply that cannot be matched to one.',
             ],
         ],
+    ],
+
+    'staff_message' => [
+        'sample_subject' => 'Example staff message',
+        'sample_body' => 'This is sample content for the Admin email preview.',
     ],
 
     'staff_client_records_archived' => [
