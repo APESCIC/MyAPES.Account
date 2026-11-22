@@ -13,6 +13,7 @@ return [
         'turn_on' => 'Turn on',
         'turn_off' => 'Turn off',
         'unsupported' => 'This browser does not support web push notifications.',
+        'unavailable' => 'Push is not available yet',
         'default' => 'Notifications are not turned on for this device yet.',
         'granted' => 'This browser allows notifications, but this device is not subscribed yet. Choose Turn on to finish.',
         'blocked_intro' => 'Notifications are blocked for this site. Unblock them in your browser, then choose Turn on again.',

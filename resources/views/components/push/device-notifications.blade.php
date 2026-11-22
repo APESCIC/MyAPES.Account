@@ -1,5 +1,6 @@
 @props(['soft' => false])
 @php
+    $pushAvailable = app(\App\Core\Push\VapidCredentials::class)->isConfigured();
     $pushConfig = [
         'vapidUrl' => route('push.vapid-public-key'),
         'storeUrl' => route('push.subscriptions.store'),
@@ -38,7 +39,13 @@
 
     <p class="visually-hidden" role="status" aria-live="polite" data-push-status></p>
 
-    <div data-push-state="unsupported" hidden>
+    @unless($pushAvailable)
+        <div data-push-state="unavailable">
+            <p>{{ __('push.device.unavailable') }}</p>
+        </div>
+    @endunless
+
+    <div data-push-state="unsupported" @unless($pushAvailable) hidden @endunless>
         <p>{{ __('push.device.unsupported') }}</p>
     </div>
 
@@ -46,7 +53,7 @@
         <x-push.home-screen-guide />
     </div>
 
-    <div data-push-state="default">
+    <div data-push-state="default" @unless($pushAvailable) hidden @endunless>
         <p>{{ __('push.device.default') }}</p>
     </div>
 
@@ -68,7 +75,7 @@
         <p>{{ __('push.device.subscribed') }}</p>
     </div>
 
-    <div class="push-device__actions" data-push-actions>
+    <div class="push-device__actions" data-push-actions @unless($pushAvailable) hidden @endunless>
         <x-button type="button" variant="primary" size="sm" data-push-turn-on icon="bell">
             {{ __('push.device.turn_on') }}
         </x-button>

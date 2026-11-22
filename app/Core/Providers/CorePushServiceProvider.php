@@ -5,7 +5,11 @@ namespace App\Core\Providers;
 use App\Core\Accounts\User;
 use App\Core\Push\CanReceivePush;
 use App\Core\Push\ProfileNotificationTypeCatalogue;
+use App\Core\Push\PushAdminStats;
 use App\Core\Push\PushDeliveryRecorder;
+use App\Core\Push\PushSettings;
+use App\Core\Push\PushSubscriptionPurger;
+use App\Core\Push\VapidConfigurationSync;
 use App\Core\Push\PushDeviceLabels;
 use App\Core\Push\PushDivisionPreferenceReader;
 use App\Core\Push\PushNotificationPreferenceUpdater;
@@ -23,8 +27,8 @@ use App\Core\Push\WebPushDeliveryService;
 use App\Core\Push\WebPushFactory;
 use App\Core\Secrets\SecretDefinition;
 use App\Core\Secrets\SecretRegistry;
+use App\Core\Settings\AppSettings;
 use Illuminate\Notifications\ChannelManager;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\ServiceProvider;
 use Minishlink\WebPush\WebPush;
 use NotificationChannels\WebPush\ReportHandlerInterface;
@@ -50,6 +54,14 @@ class CorePushServiceProvider extends ServiceProvider
         $this->app->singleton(WebPushFactory::class);
         $this->app->singleton(PushDeliveryRecorder::class);
         $this->app->singleton(WebPushDeliveryService::class);
+        $this->app->singleton(PushSettings::class);
+        $this->app->singleton(PushSubscriptionPurger::class);
+        $this->app->singleton(VapidConfigurationSync::class);
+        $this->app->singleton(PushAdminStats::class);
+
+        $this->app->afterResolving(AppSettings::class, static function (AppSettings $settings): void {
+            $settings->define(...PushSettings::definitions());
+        });
 
         $this->app->bind(ReportHandlerInterface::class, PushReportHandler::class);
 
@@ -104,14 +116,6 @@ class CorePushServiceProvider extends ServiceProvider
 
     private function applyVapidConfig(): void
     {
-        $credentials = $this->app->make(VapidCredentials::class);
-
-        if (! $credentials->isConfigured()) {
-            return;
-        }
-
-        Config::set('webpush.vapid.public_key', $credentials->publicKey());
-        Config::set('webpush.vapid.private_key', $credentials->privateKey());
-        Config::set('webpush.vapid.subject', $credentials->subject());
+        $this->app->make(VapidConfigurationSync::class)->sync();
     }
 }

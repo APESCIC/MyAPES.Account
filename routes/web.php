@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\AdminGroupController;
 use App\Http\Controllers\Admin\AdminInboundEmailController;
 use App\Http\Controllers\Admin\AdminIntegrationController;
 use App\Http\Controllers\Admin\AdminKeysAndSecretsController;
+use App\Http\Controllers\Admin\AdminPushNotificationsController;
 use App\Http\Controllers\Admin\AdminLocalRepliesController;
 use App\Http\Controllers\Admin\AdminMaintenanceController;
 use App\Http\Controllers\Admin\AdminManagedListController;
@@ -568,6 +569,21 @@ Route::middleware([
             Route::post('/settings/keys-and-secrets/mailbox-password/test', [AdminKeysAndSecretsController::class, 'test'])
                 ->middleware(['can:admin.settings.manage', 'account.step-up', 'throttle:5,1'])
                 ->name('settings.keys-and-secrets.test');
+            Route::put('/settings/push-notifications/vapid', [AdminPushNotificationsController::class, 'storeVapid'])
+                ->middleware(['can:admin.settings.manage', 'account.step-up'])
+                ->name('settings.push-notifications.vapid.store');
+            Route::delete('/settings/push-notifications/vapid', [AdminPushNotificationsController::class, 'clearVapid'])
+                ->middleware(['can:admin.settings.manage', 'account.step-up'])
+                ->name('settings.push-notifications.vapid.clear');
+            Route::post('/settings/push-notifications/vapid/generate', [AdminPushNotificationsController::class, 'generateVapid'])
+                ->middleware(['can:admin.settings.manage', 'account.step-up'])
+                ->name('settings.push-notifications.vapid.generate');
+            Route::put('/settings/push-notifications/pause', [AdminPushNotificationsController::class, 'updatePause'])
+                ->middleware(['can:admin.settings.manage', 'account.step-up'])
+                ->name('settings.push-notifications.pause.update');
+            Route::post('/settings/push-notifications/test', [AdminPushNotificationsController::class, 'sendTest'])
+                ->middleware(['can:admin.settings.manage', 'account.step-up', 'throttle:5,1'])
+                ->name('settings.push-notifications.test');
             Route::put('/settings/integrations/{integration}', [AdminIntegrationController::class, 'update'])
                 ->middleware('can:admin.settings.manage')
                 ->name('settings.integrations.update');

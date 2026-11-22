@@ -19,6 +19,14 @@ final class PushRecipientFilter
 
     public function allows(User $user, PushRecipientContext $context): bool
     {
+        if (app(PushSettings::class)->paused()) {
+            return false;
+        }
+
+        if (! app(VapidCredentials::class)->isConfigured()) {
+            return false;
+        }
+
         if ($user->suspended_at !== null) {
             return false;
         }
