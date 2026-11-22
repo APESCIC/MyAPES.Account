@@ -36,6 +36,7 @@ final class PushPreferenceInitializer
                 'user_id' => $user->id,
                 'type' => $type->key,
                 'enabled' => $default->enabledByDefault(),
+                'email_enabled' => $type->securityLocked || $default->enabledByDefault(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ];

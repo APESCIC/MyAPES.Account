@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Core\Accounts\PhoneVerificationPinService;
 use App\Core\Accounts\StaffProfile;
+use App\Core\Accounts\User;
+use App\Core\Push\ProfileNotificationTypeCatalogue;
+use App\Core\Push\UserNotificationSetting;
 use App\Rules\Username;
 use App\Services\AuditLogger;
 use App\Services\AuthorizationProfile;
@@ -36,13 +39,17 @@ class ProfileController extends Controller
         LocalPublicPasswordResetService $passwordResets,
         SecureEmailChangeService $emailChanges,
         TotpTwoFactorService $twoFactor,
+        ProfileNotificationTypeCatalogue $notifications,
     ): View {
         $user = $request->user();
+
+        $notificationView = $this->notificationViewData($user, $notifications);
 
         if ($this->authorization->hasDirectoryProtectedEligibility($user)) {
             return view('profile.staff-edit', [
                 'staffProfile' => $user->staffProfile,
                 'teams' => $this->teamOptions(),
+                ...$notificationView,
             ]);
         }
 
@@ -66,7 +73,26 @@ class ProfileController extends Controller
             'plainRecoveryCodes' => is_array($plainRecoveryCodes) ? $plainRecoveryCodes : [],
             'canManagePasskeys' => $canManagePasskeys,
             'passkeys' => $canManagePasskeys ? $user->passkeys()->orderByDesc('created_at')->get() : collect(),
+            ...$notificationView,
         ]);
+    }
+
+    /**
+     * @return array{
+     *     notificationTypes: list<array<string, mixed>>,
+     *     notificationDivisions: list<array<string, mixed>>,
+     *     notificationDevices: list<array<string, mixed>>,
+     *     notificationSettings: UserNotificationSetting|null,
+     * }
+     */
+    private function notificationViewData(User $user, ProfileNotificationTypeCatalogue $catalogue): array
+    {
+        return [
+            'notificationTypes' => $catalogue->typesFor($user),
+            'notificationDivisions' => $catalogue->divisionsFor($user),
+            'notificationDevices' => $catalogue->devicesFor($user),
+            'notificationSettings' => $user->notificationSetting,
+        ];
     }
 
     public function updateUsername(Request $request, AuditLogger $auditLogger): RedirectResponse

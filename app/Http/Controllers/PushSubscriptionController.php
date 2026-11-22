@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Core\Push\PushDeviceLabels;
 use App\Core\Push\PushEndpointValidator;
 use App\Core\Push\PushPreferenceInitializer;
 use App\Core\Push\VapidCredentials;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use NotificationChannels\WebPush\PushSubscription;
 
 class PushSubscriptionController extends Controller
 {
@@ -49,6 +51,15 @@ class PushSubscriptionController extends Controller
         if ($firstDevice) {
             app(PushPreferenceInitializer::class)->seedDefaultsForUser($user);
         }
+
+        $labels = app(PushDeviceLabels::class)->summarise($request->userAgent());
+        PushSubscription::query()
+            ->where('endpoint', $validated['endpoint'])
+            ->update([
+                'device_browser' => $labels['browser'],
+                'device_system' => $labels['system'],
+                'user_agent' => mb_substr((string) $request->userAgent(), 0, 512),
+            ]);
 
         return response()->json(['saved' => true]);
     }

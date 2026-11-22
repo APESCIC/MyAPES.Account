@@ -2,6 +2,8 @@
 
 namespace App\Core\Accounts;
 
+use App\Core\Push\UserNotificationSetting;
+use App\Core\Push\UserPushDivisionPreference;
 use App\Core\Push\UserPushPreference;
 use App\Notifications\Auth\ResetPasswordNotification;
 use App\Notifications\Auth\VerifyEmailNotification;
@@ -181,6 +183,16 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     public function pushPreferences(): HasMany
     {
         return $this->hasMany(UserPushPreference::class);
+    }
+
+    public function notificationSetting(): HasOne
+    {
+        return $this->hasOne(UserNotificationSetting::class);
+    }
+
+    public function pushDivisionPreferences(): HasMany
+    {
+        return $this->hasMany(UserPushDivisionPreference::class);
     }
 
     public function clientNotes(): HasMany

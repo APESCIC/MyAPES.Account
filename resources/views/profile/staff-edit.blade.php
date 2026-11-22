@@ -45,6 +45,11 @@
     </div>
 
     <div class="panel" id="notifications">
-        <x-push.device-notifications />
+        <x-push.profile-notifications
+            :types="$notificationTypes"
+            :divisions="$notificationDivisions"
+            :devices="$notificationDevices"
+            :settings="$notificationSettings"
+        />
     </div>
 @endsection

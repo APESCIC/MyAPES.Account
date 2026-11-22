@@ -30,4 +30,28 @@ final class PushPreferenceReader
 
         return (bool) $stored;
     }
+
+    public function isEmailEnabled(User $user, string $typeKey): bool
+    {
+        $type = $this->types->get($typeKey);
+        if ($type->securityLocked) {
+            return true;
+        }
+
+        $pushRole = $this->roles->forUser($user);
+
+        if (! $type->availableForRole($pushRole)) {
+            return false;
+        }
+
+        $stored = $user->pushPreferences()
+            ->where('type', $typeKey)
+            ->value('email_enabled');
+
+        if ($stored === null) {
+            return $type->defaultForRole($pushRole)->enabledByDefault();
+        }
+
+        return (bool) $stored;
+    }
 }

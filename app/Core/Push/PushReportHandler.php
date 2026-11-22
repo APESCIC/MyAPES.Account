@@ -35,6 +35,7 @@ class PushReportHandler implements ReportHandlerInterface
         if ($report->isSuccess()) {
             $this->recorder->recordSent($userId, $subscriptionHash, $notificationType, $resultCode, $attempt);
             $this->resetConsecutiveFailures($subscription);
+            $subscription->forceFill(['last_used_at' => now()])->save();
             $this->events->dispatch(new NotificationSent($report, $subscription, $message));
 
             return;

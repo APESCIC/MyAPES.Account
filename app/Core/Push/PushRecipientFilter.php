@@ -13,6 +13,8 @@ final class PushRecipientFilter
         private readonly PushNotificationTypeRegistry $types,
         private readonly PushRoleResolver $roles,
         private readonly PushPreferenceReader $preferences,
+        private readonly PushQuietHoursEvaluator $quietHours,
+        private readonly PushDivisionPreferenceReader $divisionPreferences,
     ) {}
 
     public function allows(User $user, PushRecipientContext $context): bool
@@ -29,11 +31,22 @@ final class PushRecipientFilter
             return false;
         }
 
+        if ($this->quietHours->isQuietForUser($user)) {
+            return false;
+        }
+
         if (! $this->preferences->isTypeEnabled($user, $context->typeKey)) {
             return false;
         }
 
         $type = $this->types->get($context->typeKey);
+
+        if ($type->divisionScoped) {
+            $divisionKey = PushDivisionKey::fromPermission($context->divisionPermission);
+            if ($divisionKey !== null && ! $this->divisionPreferences->isEnabled($user, $divisionKey)) {
+                return false;
+            }
+        }
         $pushRole = $this->roles->forUser($user);
 
         if (! $type->availableForRole($pushRole)) {

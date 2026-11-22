@@ -41,6 +41,7 @@ use App\Http\Controllers\MailUnsubscribeController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PhoneVerificationPinController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProfileNotificationController;
 use App\Http\Controllers\PushServiceWorkerController;
 use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\RobotsTxtController;
@@ -323,6 +324,18 @@ Route::middleware([
     Route::delete('/push/subscriptions', [PushSubscriptionController::class, 'destroy'])
         ->middleware('throttle:30,1')
         ->name('push.subscriptions.destroy');
+
+    Route::put('/profile/notifications', [ProfileNotificationController::class, 'update'])
+        ->middleware('throttle:30,1')
+        ->name('profile.notifications.update');
+    Route::delete('/profile/notifications/devices/{subscription}', [ProfileNotificationController::class, 'destroyDevice'])
+        ->whereNumber('subscription')
+        ->middleware('throttle:30,1')
+        ->name('profile.notifications.devices.destroy');
+    Route::post('/profile/notifications/devices/{subscription}/test', [ProfileNotificationController::class, 'sendTest'])
+        ->whereNumber('subscription')
+        ->middleware('throttle:30,1')
+        ->name('profile.notifications.devices.test');
 
     Route::get('/user/confirm-password', [ConfirmPasswordController::class, 'show'])
         ->name('password.confirm');
