@@ -16,7 +16,7 @@ The **support email address** and **support phone number** people can use to rea
 - anyone who opens the Public Register page, or sends its form, is taken to **Public Login** with a notice that registration is closed;
 - links that would normally send a guest to register (for example **Open a ticket** or applying for a role) send them to Public Login instead.
 
-People who already have an account can still sign in. Staff and administrators still sign in through **APES Cloudron** (Staff Login), which this switch never affects.
+People who already have an account can still sign in. Staff and administrators still sign in through **Staff Login**, which this switch never affects.
 
 ## Site banner
 A short notice shown at the top of public pages, for example planned downtime. Tick **Show the banner on public pages** and type the **banner text** (plain text, up to 500 characters). The banner is not shown on Admin pages. It is hidden when it is switched off or has no text.

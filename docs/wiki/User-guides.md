@@ -5,7 +5,7 @@
 **Audience:** everyone  
 **Purpose:** point each group to the right guide.
 
-## Public users
+## Public Accounts
 Guides for pet owners, clients and job applicants live in the app, so you never need a GitHub account:
 - Help: [https://myaccount.myapes.me.uk/help](https://myaccount.myapes.me.uk/help)
 - Privacy: [https://myaccount.myapes.me.uk/privacy](https://myaccount.myapes.me.uk/privacy)
