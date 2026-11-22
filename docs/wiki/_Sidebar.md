@@ -7,6 +7,7 @@
 - [[Admins|Guide-Admins]]
 - [[Roles and access|Roles-and-access]]
 - [[Replies by email|Replies-by-email]]
+- [[Push notifications|Push-notifications]]
 - [[General settings|General-settings]]
 - [[Integrations]]
 - [[API clients|API-clients]]

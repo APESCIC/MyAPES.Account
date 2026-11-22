@@ -10,6 +10,7 @@ Guides for pet owners, clients and job applicants live in the app, so you never 
 - Help: [https://myaccount.myapes.me.uk/help](https://myaccount.myapes.me.uk/help)
 - Privacy: [https://myaccount.myapes.me.uk/privacy](https://myaccount.myapes.me.uk/privacy)
 - Terms: [https://myaccount.myapes.me.uk/terms](https://myaccount.myapes.me.uk/terms)
+- Push notifications: [[Push notifications|Push-notifications]] (wiki; also **Profile → Notifications** in the app)
 
 Questions: [Help for public users](https://github.com/APESCIC/MyAPES.Account/discussions/categories/help-for-public-users) in Discussions. Never post personal data.
 

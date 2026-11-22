@@ -17,3 +17,9 @@ Staff, volunteers and students with `staff.clients.create` can open **Clients** 
 Bookings stays under **Tools** for guests and public users only; staff-side roles get a 403 on `/bookings`.
 
 In-app detail: **Staff guide → Creating a public client account**.
+
+## Push notifications (v0.72.0)
+
+Open **Profile → Notifications** to turn push on for this browser, choose which types may use push or email, set **quiet hours**, and follow the iPhone **Add to Home Screen** guide when Safari needs it. Staff and volunteers can filter **new ticket** pushes by division.
+
+See [[Push notifications|Push-notifications]] for unblock steps and what appears on the lock screen.

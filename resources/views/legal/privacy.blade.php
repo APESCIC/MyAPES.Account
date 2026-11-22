@@ -55,6 +55,14 @@
             <p>{{ __('public.legal.privacy.blade.spam_protection_body') }}</p>
         </section>
 
+        <section data-privacy-web-push>
+            <h2>Web push notifications</h2>
+            <p>If you turn on web push in Profile → Notifications, we store a subscription for each browser or Home Screen app you allow. That includes a browser label, operating system label, and a one-way hash so we can target that device without keeping the raw subscription address in our delivery log.</p>
+            <p>When an event you asked for happens, we send a short alert. The text on your lock screen is built from the notification type and a record reference (for example a ticket number), not the full message from a ticket or case.</p>
+            <p>Delivery uses your browser's push service. Depending on your browser and device, that may be run by Google, Mozilla, Microsoft or Apple. They carry the message in encrypted form from us to your device. They can see the device address needed for delivery; they do not receive the content of your tickets, cases or other records through that channel.</p>
+            <p>We keep metadata about whether a push was sent, failed or expired (notification type and status only). Those records are removed after a limited retention period. We do not store message bodies in push delivery records.</p>
+        </section>
+
         <section>
             <h2>{{ __('public.legal.privacy.blade.your_rights') }}</h2>
             <p>You can ask APES CIC for a copy of the personal information we hold, and you can ask us to correct it or, where the law allows, delete it or limit how we use it. You can also complain to the Information Commissioner's Office if you are unhappy with how we handle your information.</p>
