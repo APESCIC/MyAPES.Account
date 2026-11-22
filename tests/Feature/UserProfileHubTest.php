@@ -40,7 +40,7 @@ class UserProfileHubTest extends TestCase
         ]);
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.show', ['user' => $client, 'tab' => 'overview']))
+            ->get(route('admin.public-accounts.show', ['user' => $client, 'tab' => 'overview']))
             ->assertOk()
             ->assertSee('data-profile-hub-tabs', false)
             ->assertSee(__('admin.users.hub.tabs.overview'))
@@ -48,7 +48,7 @@ class UserProfileHubTest extends TestCase
             ->assertSee(__('admin.users.hub.admin_tools.heading'));
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.show', ['user' => $client, 'tab' => 'records']))
+            ->get(route('admin.public-accounts.show', ['user' => $client, 'tab' => 'records']))
             ->assertOk()
             ->assertSee('Hub ticket');
     }
@@ -127,7 +127,7 @@ class UserProfileHubTest extends TestCase
             ->post(route('admin.users.two-factor.reset', $client), [
                 'confirm_two_factor_reset' => '1',
             ])
-            ->assertRedirect(route('admin.users.show', ['user' => $client, 'tab' => 'overview']))
+            ->assertRedirect(route('admin.public-accounts.show', ['user' => $client, 'tab' => 'overview']))
             ->assertSessionHas('status');
 
         $this->assertFalse($twoFactor->hasEnabledTwoFactor($client->fresh()));

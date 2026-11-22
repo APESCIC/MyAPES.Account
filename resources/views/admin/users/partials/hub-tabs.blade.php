@@ -1,5 +1,5 @@
 @php
-    $tabRoute = $tabRoute ?? 'admin.users.show';
+    $tabRoute = $tabRoute ?? ($accountShowRoute ?? 'admin.users.show');
     $tabParam = $tabParam ?? 'user';
     $tabSubject = $tabSubject ?? $managedUser;
 @endphp

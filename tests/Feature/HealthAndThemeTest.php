@@ -118,7 +118,7 @@ class HealthAndThemeTest extends TestCase
         $response->assertSee('href="'.route('staff.login').'"', false);
         $response->assertSee('data-workspace-dock', false);
         $response->assertSeeText(__('workspace.groups.support'));
-        $response->assertSee('https://github.com/APESCIC/MyAPES-Account"', false);
+        $response->assertDontSee('https://github.com/APESCIC/MyAPES-Account"', false);
         $response->assertSee('site-footer__links', false);
         $response->assertSee('href="'.route('privacy').'"', false);
         $response->assertSee('href="'.route('cookies').'"', false);

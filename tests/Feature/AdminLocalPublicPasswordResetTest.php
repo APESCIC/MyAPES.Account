@@ -32,13 +32,13 @@ class AdminLocalPublicPasswordResetTest extends TestCase
         $list->assertOk()
             ->assertSee('Reset password')
             ->assertSee(
-                route('admin.users.show', ['user' => $public, 'tab' => 'details']).'#local-password',
+                route('admin.public-accounts.show', ['user' => $public, 'tab' => 'details']).'#local-password',
                 false,
             );
         $this->assertDoesNotOfferImpersonation($list->getContent());
 
         $detail = $this->actingAs($administrator)
-            ->get(route('admin.users.show', ['user' => $public, 'tab' => 'details']));
+            ->get(route('admin.public-accounts.show', ['user' => $public, 'tab' => 'details']));
         $detail->assertOk()
             ->assertSee('Reset local password')
             ->assertSee('name="confirm"', false)
@@ -46,12 +46,12 @@ class AdminLocalPublicPasswordResetTest extends TestCase
         $this->assertDoesNotOfferImpersonation($detail->getContent());
 
         $response = $this->actingAs($administrator)
-            ->from(route('admin.users.show', ['user' => $public, 'tab' => 'details']))
+            ->from(route('admin.public-accounts.show', ['user' => $public, 'tab' => 'details']))
             ->post(route('admin.users.password-reset', $public), [
                 'confirm' => '1',
             ]);
 
-        $response->assertRedirect(route('admin.users.show', $public));
+        $response->assertRedirect(route('admin.public-accounts.show', $public));
         $response->assertSessionHas('temporary_password');
         $response->assertSessionHas('status');
         $temporaryPassword = $response->getSession()->get('temporary_password');
@@ -60,13 +60,13 @@ class AdminLocalPublicPasswordResetTest extends TestCase
         $this->assertNotSame('password', $temporaryPassword);
 
         $shown = $this->actingAs($administrator)
-            ->get(route('admin.users.show', $public));
+            ->get(route('admin.public-accounts.show', $public));
         $shown->assertOk()
             ->assertSee('One-time temporary password')
             ->assertSee($temporaryPassword);
 
         $again = $this->actingAs($administrator)
-            ->get(route('admin.users.show', $public));
+            ->get(route('admin.public-accounts.show', $public));
         $again->assertOk()
             ->assertDontSee('One-time temporary password')
             ->assertDontSee($temporaryPassword);
@@ -120,7 +120,7 @@ class AdminLocalPublicPasswordResetTest extends TestCase
             ->post(route('admin.users.password-reset', $public), [
                 'confirm' => '1',
             ])
-            ->assertRedirect(route('admin.users.show', $public))
+            ->assertRedirect(route('admin.public-accounts.show', $public))
             ->assertSessionHas('temporary_password');
 
         $public->refresh();
@@ -179,24 +179,24 @@ class AdminLocalPublicPasswordResetTest extends TestCase
             ->assertSeeText('Directory Public')
             ->assertSeeText('Pending Directory')
             ->assertDontSee(
-                route('admin.users.show', ['user' => $directoryPublic, 'tab' => 'details']).'#local-password',
+                route('admin.public-accounts.show', ['user' => $directoryPublic, 'tab' => 'details']).'#local-password',
                 false,
             )
             ->assertDontSee(
-                route('admin.users.show', ['user' => $pendingFirstLogin, 'tab' => 'details']).'#local-password',
+                route('admin.staff-accounts.show', ['user' => $pendingFirstLogin, 'tab' => 'details']).'#local-password',
                 false,
             );
         $this->assertDoesNotOfferImpersonation($staffList->getContent());
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.show', ['user' => $directoryPublic, 'tab' => 'details']))
+            ->get(route('admin.public-accounts.show', ['user' => $directoryPublic, 'tab' => 'details']))
             ->assertOk()
             ->assertSeeText('This account uses Cloudron directory sign-in.')
             ->assertDontSee('Reset local password')
             ->assertDontSee('name="confirm"', false);
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.show', ['user' => $pendingFirstLogin, 'tab' => 'details']))
+            ->get(route('admin.staff-accounts.show', ['user' => $pendingFirstLogin, 'tab' => 'details']))
             ->assertOk()
             ->assertSeeText('This directory account has not completed Staff Login yet.')
             ->assertSeeText('Pending first login')
@@ -204,7 +204,7 @@ class AdminLocalPublicPasswordResetTest extends TestCase
             ->assertDontSee('Reset local password');
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.show', ['user' => $directoryStaff, 'tab' => 'details']))
+            ->get(route('admin.staff-accounts.show', ['user' => $directoryStaff, 'tab' => 'details']))
             ->assertOk()
             ->assertDontSee('Reset local password')
             ->assertDontSee('name="confirm"', false);
@@ -217,7 +217,7 @@ class AdminLocalPublicPasswordResetTest extends TestCase
             $localStaff,
         ] as $refused) {
             $this->actingAs($administrator)
-                ->from(route('admin.users.show', $refused))
+                ->from(route('admin.public-accounts.show', $refused))
                 ->post(route('admin.users.password-reset', $refused), [
                     'confirm' => '1',
                 ])
@@ -260,9 +260,9 @@ class AdminLocalPublicPasswordResetTest extends TestCase
         ]);
 
         $this->actingAs($administrator)
-            ->from(route('admin.users.show', $public))
+            ->from(route('admin.public-accounts.show', $public))
             ->post(route('admin.users.password-reset', $public))
-            ->assertRedirect(route('admin.users.show', $public))
+            ->assertRedirect(route('admin.public-accounts.show', $public))
             ->assertSessionHasErrors('confirm')
             ->assertSessionMissing('temporary_password');
 

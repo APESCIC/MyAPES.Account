@@ -25,7 +25,7 @@ Machine JSON (gitignored under storage): `storage/app/lang-inventory.json`.
 
 | Area | Count |
 | --- | ---: |
-| [Public](#public-268) | 0 |
+| [Public](#public-268) | 4 |
 | [APES CIC staff](#apes-cic-staff-269) | 0 |
 | [Admin shell](#admin-shell-270) | 0 |
 | [Auth / emails / notifications / flash / validation](#auth-emails-flash-validation-271) | 0 |
@@ -35,10 +35,10 @@ Machine JSON (gitignored under storage): `storage/app/lang-inventory.json`.
 | [Plugin: Consultations](#plugin-consultations) | 0 |
 | [Plugin: Pet Profiles](#plugin-pet-profiles) | 0 |
 | [Other / unclassified](#other-unclassified) | 0 |
-| **All (inventory)** | **0** |
-| Allow-listed (omitted below) | 109 |
+| **All (inventory)** | **4** |
+| Allow-listed (omitted below) | 104 |
 
-_Generated at 2026-11-22T15:22:31+00:00_
+_Generated at 2026-11-22T20:37:02+00:00_
 
 <a id="public-268"></a>
 
@@ -46,7 +46,14 @@ _Generated at 2026-11-22T15:22:31+00:00_
 
 Path anchor for children: `docs/i18n-inventory.md#public-268` — extraction [#268](https://github.com/APESCIC/MyAPES-Account/issues/268).
 
-_No hard-coded findings in this area (or all allow-listed)._
+| File | Line | Kind | Snippet | Suggested key | Target |
+| --- | ---: | --- | --- | --- | --- |
+| `resources/views/change-log/index.blade.php` | 12 | `blade.text` | isStaffSide($changeLogUser) ); | `nav.index.is_staff_side_change_log_user` | `lang/en_GB/nav.php` |
+| `resources/views/legal/help.blade.php` | 23 | `blade.text` | is for clients who created a MyAPES account. Use your username or email and the password you chose at register. | `legal.help.is_for_clients_who_created_a_my_a_p_e_s_acco` | `lang/en_GB/legal.php` |
+| `resources/views/legal/help.blade.php` | 67 | `blade.text` | Signed-in public accounts should open a ticket in the service they need. Use an APES CIC case when the matter is a privacy request, complaint, or other formal … | `legal.help.signed_in_public_accounts_should_open_a` | `lang/en_GB/legal.php` |
+| `resources/views/legal/privacy.blade.php` | 40 | `blade.text` | Public Accounts see their own profile, pets, and the tickets or cases available to them. Staff and administrators see the records their role allows, so they ca… | `legal.privacy.public_accounts_see_their_own_profile_pe` | `lang/en_GB/legal.php` |
+
+**Section total:** 4
 
 <a id="apes-cic-staff-269"></a>
 

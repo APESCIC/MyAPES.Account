@@ -133,7 +133,7 @@ class AdminAccessAndViewsTest extends TestCase
             ->assertSee('<caption', false);
 
         $this->actingAs($administrator)
-            ->get("/admin/users/{$target->id}")
+            ->followingRedirects()->get("/admin/users/{$target->id}")
             ->assertOk()
             ->assertSee('Needle Person')
             ->assertSee('needle@example.test')
@@ -145,12 +145,12 @@ class AdminAccessAndViewsTest extends TestCase
             ->assertSee('<section', false);
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.show', ['user' => $target, 'tab' => 'access']))
+            ->get(route('admin.public-accounts.show', ['user' => $target, 'tab' => 'access']))
             ->assertOk()
             ->assertSee('staff.access');
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.show', ['user' => $target, 'tab' => 'activity']))
+            ->get(route('admin.public-accounts.show', ['user' => $target, 'tab' => 'activity']))
             ->assertOk()
             ->assertSee('safe_history_code')
             ->assertDontSee('directory-subject-must-not-render')
@@ -206,12 +206,12 @@ class AdminAccessAndViewsTest extends TestCase
 
         $deniedStaff = $this->userWithAccess(User::ROLE_STAFF);
         $this->actingAs($deniedStaff)
-            ->get(route('admin.users.show', $target))
+            ->get(route('admin.public-accounts.show', $target))
             ->assertForbidden()
             ->assertDontSee('admin.users.*');
 
         $response = $this->actingAs($reviewingAdministrator)
-            ->get(route('admin.users.show', ['user' => $target, 'tab' => 'access']))
+            ->get(route('admin.public-accounts.show', ['user' => $target, 'tab' => 'access']))
             ->assertOk()
             ->assertSee('Effective access')
             ->assertSee('Advanced permissions')
@@ -337,9 +337,9 @@ class AdminAccessAndViewsTest extends TestCase
         $pairs = [
             [
                 $this->actingAs($staff)
-                    ->get(route('admin.users.show', $target)),
+                    ->get(route('admin.public-accounts.show', $target)),
                 $this->actingAs($staff)
-                    ->get(route('admin.users.show', 999999)),
+                    ->followingRedirects()->get(route('admin.users.show', 999999)),
             ],
             [
                 $this->actingAs($staff)->put(
@@ -553,7 +553,7 @@ class AdminAccessAndViewsTest extends TestCase
         ]);
 
         $this->actingAs($superAdmin)
-            ->get(route('admin.users.show', 999999))
+            ->followingRedirects()->get(route('admin.users.show', 999999))
             ->assertNotFound();
         $this->actingAs($superAdmin)
             ->post(route('admin.users.password-reset', 999999), [

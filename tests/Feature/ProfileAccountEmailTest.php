@@ -60,7 +60,7 @@ class ProfileAccountEmailTest extends TestCase
             ->assertDontSee('name="current_password"', false)
             ->assertDontSee('name="password_confirmation"', false)
             ->assertDontSee('Change password')
-            ->assertSeeText('This account uses Cloudron directory sign-in.');
+            ->assertSeeText('This account uses organisation directory sign-in.');
 
         $this->assertAccountEmailIsReadOnly($html, 'directory.public.email@example.com');
         $this->assertDoesNotOfferImpersonation($html);

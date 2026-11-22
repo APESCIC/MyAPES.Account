@@ -342,6 +342,10 @@ class AdminUserController extends Controller
 
         return view('admin.users.show', [
             'managedUser' => $managedUser,
+            'accountShowRoute' => $this->accountShowRouteName($managedUser),
+            'accountIndexRoute' => app(AccountClassifier::class)->isStaffSide($managedUser)
+                ? 'admin.staff-accounts.index'
+                : 'admin.public-accounts.index',
             'permissions' => $permissions,
             'packDefinitions' => $packDefinitions,
             'packStates' => $packStates,
@@ -429,7 +433,7 @@ class AdminUserController extends Controller
         ]);
 
         return redirect()
-            ->route('admin.users.show', ['user' => $managedUser, 'tab' => 'overview'])
+            ->route($this->accountShowRouteName($managedUser), ['user' => $managedUser, 'tab' => 'overview'])
             ->with('status', __('admin.flash.contact_preferences_updated'));
     }
 
@@ -455,7 +459,7 @@ class AdminUserController extends Controller
         }
 
         return redirect()
-            ->route('admin.users.show', ['user' => $managedUser, 'tab' => 'overview'])
+            ->route($this->accountShowRouteName($managedUser), ['user' => $managedUser, 'tab' => 'overview'])
             ->with('status', __('admin.flash.two_factor_reset'));
     }
 
@@ -493,7 +497,7 @@ class AdminUserController extends Controller
         }
 
         return redirect()
-            ->route('admin.users.show', $user)
+            ->route($this->accountShowRouteName($managedUser), $managedUser)
             ->with('status', __('admin.flash.local_role_assignments_updated'));
     }
 
@@ -522,7 +526,7 @@ class AdminUserController extends Controller
         }
 
         return redirect()
-            ->route('admin.users.show', $user)
+            ->route($this->accountShowRouteName($managedUser), $managedUser)
             ->with('status', __('admin.flash.user_suspended'));
     }
 
@@ -543,7 +547,7 @@ class AdminUserController extends Controller
         }
 
         return redirect()
-            ->route('admin.users.show', $user)
+            ->route($this->accountShowRouteName($managedUser), $managedUser)
             ->with('status', __('admin.flash.user_reactivated'));
     }
 
@@ -626,7 +630,7 @@ class AdminUserController extends Controller
         ]);
 
         return redirect()
-            ->route('admin.users.show', $managedUser)
+            ->route($this->accountShowRouteName($managedUser), $managedUser)
             ->with('status', __('admin.flash.public_profile_updated'));
     }
 
@@ -690,7 +694,7 @@ class AdminUserController extends Controller
         ]);
 
         return redirect()
-            ->route('admin.users.show', $managedUser)
+            ->route($this->accountShowRouteName($managedUser), $managedUser)
             ->with('status', __('admin.flash.staff_profile_updated'));
     }
 
@@ -725,7 +729,7 @@ class AdminUserController extends Controller
         }
 
         return redirect()
-            ->route('admin.users.show', $managedUser)
+            ->route($this->accountShowRouteName($managedUser), $managedUser)
             ->with(
                 'status',
                 __('admin.flash.temporary_password_generated'),
@@ -751,10 +755,17 @@ class AdminUserController extends Controller
         }
 
         return redirect()
-            ->route('admin.users.show', $managedUser)
+            ->route($this->accountShowRouteName($managedUser), $managedUser)
             ->with(
                 'status',
                 __('admin.flash.staff_login_reminder_sent'),
             );
+    }
+
+    private function accountShowRouteName(User $user): string
+    {
+        return app(AccountClassifier::class)->isStaffSide($user)
+            ? 'admin.staff-accounts.show'
+            : 'admin.public-accounts.show';
     }
 }

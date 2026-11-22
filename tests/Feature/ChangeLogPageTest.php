@@ -22,7 +22,7 @@ class ChangeLogPageTest extends TestCase
         $response
             ->assertOk()
             ->assertSeeText('Change Log Hub')
-            ->assertDontSeeText('Feedback & source')
+            ->assertDontSee('change-log__community', false)
             ->assertSeeText('Current version v0.73.0')
             ->assertSee('data-change-log', false)
             ->assertSee('data-change-log-controls hidden', false)
@@ -213,7 +213,7 @@ class ChangeLogPageTest extends TestCase
             ->assertSeeText('GitHub')
             ->assertSeeText('Open an issue')
             ->assertSeeText('Discussions')
-            ->assertDontSeeText('Report a problem');
+            ->assertDontSee('href="'.route('staff.report-problem.create').'"', false);
     }
 
     private function assertStaffReportProblemLink(TestResponse $response): void
@@ -222,8 +222,7 @@ class ChangeLogPageTest extends TestCase
             ->assertSee('href="'.route('staff.report-problem.create').'"', false)
             ->assertSeeText('Report a problem')
             ->assertDontSee('https://github.com/APESCIC/MyAPES-Account/issues/new/choose"', false)
-            ->assertDontSeeText('Open an issue')
-            ->assertDontSeeText('Discussions');
+            ->assertDontSee('https://github.com/APESCIC/MyAPES-Account/discussions"', false);
     }
 
     private function assertNoGithubOrReportProblemLinks(TestResponse $response): void

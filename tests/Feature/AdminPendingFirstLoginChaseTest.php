@@ -30,22 +30,22 @@ class AdminPendingFirstLoginChaseTest extends TestCase
         ]);
 
         $detail = $this->actingAs($administrator)
-            ->get(route('admin.users.show', ['user' => $pending, 'tab' => 'details']));
+            ->get(route('admin.staff-accounts.show', ['user' => $pending, 'tab' => 'details']));
         $detail->assertOk()
             ->assertSee('Pending first login')
             ->assertSee('Send Staff Login reminder')
             ->assertSee('name="confirm_chase"', false)
-            ->assertSee(route('staff.login'), false)
+            ->assertSeeText('Staff Login')
             ->assertDontSee('Reset local password')
             ->assertDontSee(route('password.request'), false)
             ->assertDontSeeText('Forgot password');
 
         $this->actingAs($administrator)
-            ->from(route('admin.users.show', $pending))
+            ->from(route('admin.staff-accounts.show', $pending))
             ->post(route('admin.users.pending-first-login-chase', $pending), [
                 'confirm_chase' => '1',
             ])
-            ->assertRedirect(route('admin.users.show', $pending))
+            ->assertRedirect(route('admin.staff-accounts.show', $pending))
             ->assertSessionHas('status');
 
         Notification::assertSentTo(
@@ -90,14 +90,14 @@ class AdminPendingFirstLoginChaseTest extends TestCase
         ]);
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.show', ['user' => $public, 'tab' => 'details']))
+            ->get(route('admin.public-accounts.show', ['user' => $public, 'tab' => 'details']))
             ->assertOk()
             ->assertSee('Reset local password')
             ->assertDontSee('Send Staff Login reminder')
             ->assertDontSee('name="confirm_chase"', false);
 
         $this->actingAs($administrator)
-            ->from(route('admin.users.show', $public))
+            ->from(route('admin.public-accounts.show', $public))
             ->post(route('admin.users.pending-first-login-chase', $public), [
                 'confirm_chase' => '1',
             ])
@@ -126,7 +126,7 @@ class AdminPendingFirstLoginChaseTest extends TestCase
             ]);
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.show', ['user' => $directory, 'tab' => 'details']))
+            ->get(route('admin.staff-accounts.show', ['user' => $directory, 'tab' => 'details']))
             ->assertOk()
             ->assertDontSee('Send Staff Login reminder');
 
@@ -151,9 +151,9 @@ class AdminPendingFirstLoginChaseTest extends TestCase
         ]);
 
         $this->actingAs($administrator)
-            ->from(route('admin.users.show', $pending))
+            ->from(route('admin.staff-accounts.show', $pending))
             ->post(route('admin.users.pending-first-login-chase', $pending))
-            ->assertRedirect(route('admin.users.show', $pending))
+            ->assertRedirect(route('admin.staff-accounts.show', $pending))
             ->assertSessionHasErrors('confirm_chase');
 
         Notification::assertNothingSent();

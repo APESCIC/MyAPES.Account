@@ -27,7 +27,7 @@ class WorkspaceShellTest extends TestCase
             'apes cic' => ['administrator', '/apes-cic'],
             'plugin list' => ['administrator', '/apes-cic/tickets'],
             'admin' => ['administrator', '/admin'],
-            'admin users' => ['administrator', '/admin/users?account_type=staff'],
+            'admin users' => ['administrator', '/admin/staff-accounts'],
             'admin maintenance' => ['administrator', '/admin/maintenance'],
             'staff dashboard' => ['staff', '/dashboard'],
         ];

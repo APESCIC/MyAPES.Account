@@ -64,7 +64,7 @@ class AdminProfileManagementTest extends TestCase
                 'services' => ['apes-cic'],
                 'contact_preferences_confirmed' => '1',
             ])
-            ->assertRedirect(route('admin.users.show', $public));
+            ->assertRedirect(route('admin.public-accounts.show', $public));
 
         $public->refresh();
         $this->assertSame('Managed Public', $public->profile->preferred_name);
@@ -103,7 +103,7 @@ class AdminProfileManagementTest extends TestCase
                 'team' => StaffProfile::TEAM_PET_CARE_CLINIC,
                 'work_phone' => '+447400333444',
             ])
-            ->assertRedirect(route('admin.users.show', $staff));
+            ->assertRedirect(route('admin.staff-accounts.show', $staff));
 
         $staff->refresh();
         $this->assertSame('Directory Staff', $staff->name);

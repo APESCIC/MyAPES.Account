@@ -103,13 +103,13 @@ class AdminEmailSendTestAndResendTest extends TestCase
         $target = User::factory()->protectedRole(AuthorizationProfile::ROLE_SERVICE_USER)->unverified()->create();
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.show', $target))
+            ->get(route('admin.public-accounts.show', $target))
             ->assertOk()
             ->assertSee('action="'.route('admin.users.resend-verification', $target).'"', false);
 
         $this->actingAs($administrator)
             ->post(route('admin.users.resend-verification', $target))
-            ->assertRedirect(route('admin.users.show', $target))
+            ->assertRedirect(route('admin.public-accounts.show', $target))
             ->assertSessionHas('status', __('admin.flash.verification_resent'));
         $firstUrl = $this->latestVerificationUrl($target);
 
@@ -158,7 +158,7 @@ class AdminEmailSendTestAndResendTest extends TestCase
 
         foreach ([$verified, $directory] as $target) {
             $this->actingAs($administrator)
-                ->get(route('admin.users.show', $target))
+                ->get(route('admin.public-accounts.show', $target))
                 ->assertOk()
                 ->assertDontSee('action="'.route('admin.users.resend-verification', $target).'"', false);
 

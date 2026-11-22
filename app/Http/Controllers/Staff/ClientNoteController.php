@@ -92,7 +92,7 @@ class ClientNoteController extends Controller
     private function redirectBack(Request $request, User $client): RedirectResponse
     {
         if ($request->user()?->can('admin.users.view') && $request->boolean('admin_hub')) {
-            return redirect()->route('admin.users.show', [
+            return redirect()->route('admin.public-accounts.show', [
                 'user' => $client,
                 'tab' => 'overview',
             ]);

@@ -136,13 +136,13 @@ return [
 
         [
             'path' => 'resources/views/',
-            'pattern' => '#(values\(\);|user\(\)\);?|homeRouteName\)|\'Terms\', \];|The\$|Use\$|Read the\$|first, or|explains how|cover using|Open service|Planned end:|Feedback & source|Showing releases|Development mode|View the MyAPES Account change log|© Association|Protect exotic species|MyAPES Account sets a small|Keeps you signed in|Helps stop another|Set only if you tick|theme control|Association of Protecting|Staff accounts are created|We use this information|Public users see their own|We keep account|is for service users|is for APES staff|to create a public account|Signed-in public users should|If you cannot sign in|You can also read more|This page checks again)#',
-            'reason' => 'Partial Blade/HTML interpolations after public __() extraction (#268).',
+            'pattern' => '#(values\(\);|user\(\)\);?|isStaffSide\(|homeRouteName\)|\'Terms\', \];|The\$|Use\$|Read the\$|first, or|explains how|cover using|Open service|Planned end:|Feedback & source|Showing releases|Development mode|View the MyAPES Account change log|© Association|Protect exotic species|MyAPES Account sets a small|Keeps you signed in|Helps stop another|Set only if you tick|theme control|Association of Protecting|Staff accounts are created|We use this information|Public Accounts see their own|Public users see their own|We keep account|is for clients|is for service users|is for APES staff|to create a public account|Signed-in public accounts should|Signed-in public users should|If you cannot sign in|You can also read more|This page checks again)#',
+            'reason' => 'Partial Blade/HTML interpolations after public __() extraction (#268); patterns updated for Public/Staff Account wording (#872).',
         ],
 
         [
             'path' => 'resources/views/admin/',
-            'pattern' => '#(ordered by|match these filters|Use lower kebab|Last days|not available minutes|Maintenance is|Redis queue worker|· v ·|· RECRUITMENT|Edit websites|Restore the shipped|Generate a one-time|only sign-in path|permissions on this role|Members of|preset directory|job roles,|roles, ordered|users, ordered|Staff Public users|as of — last sync)#',
+            'pattern' => '#(ordered by|match these filters|Use lower kebab|Last days|not available minutes|Maintenance is|Redis queue worker|· v ·|· RECRUITMENT|Edit websites|Restore the shipped|Generate a one-time|only sign-in path|permissions on this role|Members of|preset directory|job roles,|roles, ordered|users, ordered|Staff Public users|Staff Accounts|Public Accounts|as of — last sync)#',
             'reason' => 'Partial Blade interpolations remaining after Admin __() extraction (#270); full sentences live in lang.',
         ],
 
