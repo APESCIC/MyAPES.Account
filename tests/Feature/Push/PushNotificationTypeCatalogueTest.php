@@ -225,4 +225,27 @@ class PushNotificationTypeCatalogueTest extends TestCase
 
         $this->assertSame(PushNotificationTypeKeys::catalogueKeys(), array_values($keys));
     }
+
+    #[DataProvider('epicRows')]
+    public function test_every_role_and_event_row_matches_catalogue_availability(
+        string $key,
+        string $labelKey,
+        array $roleDefaults,
+        bool $securityLocked,
+        bool $divisionScoped,
+    ): void {
+        unset($labelKey, $securityLocked, $divisionScoped);
+
+        $type = app(PushNotificationTypeRegistry::class)->get($key);
+
+        foreach (PushRoleResolver::catalogueRoles() as $role) {
+            $default = $roleDefaults[$role] ?? PushRoleDefault::NotApplicable;
+
+            $this->assertSame(
+                $default->availableToRole(),
+                $type->availableForRole($role),
+                "{$key} availability for {$role}",
+            );
+        }
+    }
 }

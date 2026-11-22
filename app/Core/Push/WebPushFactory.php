@@ -14,8 +14,12 @@ use Psr\Http\Client\ClientInterface;
  */
 final class WebPushFactory
 {
+    public function __construct(private readonly VapidConfigurationSync $vapidSync) {}
+
     public function make(): WebPush
     {
+        $this->vapidSync->sync();
+
         $timeout = (float) config('myapes.push.http_timeout_seconds', 10);
         $options = array_merge((array) config('webpush.client_options', []), ['timeout' => $timeout]);
         $auth = $this->auth();

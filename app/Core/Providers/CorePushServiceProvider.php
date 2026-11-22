@@ -95,7 +95,9 @@ class CorePushServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->applyVapidConfig();
+        // VAPID config is synced lazily in WebPushFactory (and admin key actions).
+        // Eager sync here hits the database cache during `composer install` /
+        // package:discover before CI creates the SQLite file.
 
         $this->app->afterResolving(ChannelManager::class, static function (ChannelManager $manager, $app): void {
             $manager->extend('WebPush', fn () => $app->make(QueuedWebPushChannel::class));
@@ -112,10 +114,5 @@ class CorePushServiceProvider extends ServiceProvider
 
             $user->pushSubscriptions()->delete();
         });
-    }
-
-    private function applyVapidConfig(): void
-    {
-        $this->app->make(VapidConfigurationSync::class)->sync();
     }
 }
