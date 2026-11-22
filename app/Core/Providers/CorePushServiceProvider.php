@@ -3,8 +3,14 @@
 namespace App\Core\Providers;
 
 use App\Core\Accounts\User;
+use App\Core\Push\CanReceivePush;
 use App\Core\Push\PushDeliveryRecorder;
+use App\Core\Push\PushNotificationTypeRegistry;
+use App\Core\Push\PushPreferenceInitializer;
+use App\Core\Push\PushPreferenceReader;
+use App\Core\Push\PushRecipientFilter;
 use App\Core\Push\PushReportHandler;
+use App\Core\Push\PushRoleResolver;
 use App\Core\Push\QueuedWebPushChannel;
 use App\Core\Push\VapidCredentials;
 use App\Core\Push\WebPushDeliveryService;
@@ -23,6 +29,12 @@ class CorePushServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(VapidCredentials::class);
+        $this->app->singleton(PushNotificationTypeRegistry::class);
+        $this->app->singleton(PushRoleResolver::class);
+        $this->app->singleton(PushPreferenceReader::class);
+        $this->app->singleton(PushPreferenceInitializer::class);
+        $this->app->singleton(PushRecipientFilter::class);
+        $this->app->singleton(CanReceivePush::class);
         $this->app->singleton(WebPushFactory::class);
         $this->app->singleton(PushDeliveryRecorder::class);
         $this->app->singleton(WebPushDeliveryService::class);

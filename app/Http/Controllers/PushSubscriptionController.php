@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Core\Push\PushEndpointValidator;
+use App\Core\Push\PushPreferenceInitializer;
 use App\Core\Push\VapidCredentials;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -36,12 +37,18 @@ class PushSubscriptionController extends Controller
         $user = $request->user();
         abort_unless($user !== null, 401);
 
+        $firstDevice = ! $user->pushSubscriptions()->exists();
+
         $user->updatePushSubscription(
             $validated['endpoint'],
             $validated['keys']['p256dh'],
             $validated['keys']['auth'],
             $validated['contentEncoding'] ?? null,
         );
+
+        if ($firstDevice) {
+            app(PushPreferenceInitializer::class)->seedDefaultsForUser($user);
+        }
 
         return response()->json(['saved' => true]);
     }
