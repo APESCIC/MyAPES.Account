@@ -48,7 +48,7 @@ class StaffMessageController extends Controller
     {
         Gate::authorize(AuthorizationProfile::PERMISSION_MESSAGES_SEND);
 
-        return view('staff.messages.create', $this->formContext($request->user()));
+        return view('staff.messages.create', $this->formContext($request->user(), new StaffMessage));
     }
 
     public function store(Request $request): RedirectResponse
@@ -84,7 +84,7 @@ class StaffMessageController extends Controller
 
         return view('staff.messages.edit', [
             'message' => $message,
-            ...$this->formContext($request->user()),
+            ...$this->formContext($request->user(), $message),
         ]);
     }
 
@@ -245,10 +245,16 @@ class StaffMessageController extends Controller
     /**
      * @return array<string, mixed>
      */
-    private function formContext(User $user): array
+    private function formContext(User $user, StaffMessage $message): array
     {
+        $saved = is_array($message->recipient_filter) ? $message->recipient_filter : [];
+
         return [
             'canSendAll' => $user->can(AuthorizationProfile::PERMISSION_MESSAGES_SEND_ALL),
+            'filterMode' => old('filter_mode', $saved['mode'] ?? 'group'),
+            'selectedGroup' => old('filter_group', $saved['group'] ?? AccountClassifier::PUBLIC),
+            'selectedModule' => old('filter_module', $saved['module'] ?? ''),
+            'selectedUserIds' => old('filter_user_ids', $saved['user_ids'] ?? []),
             'moduleOptions' => collect($this->resolver->allowedModuleKeys($user))
                 ->map(static fn (string $key): array => ['key' => $key, 'label' => $key])
                 ->values()

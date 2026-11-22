@@ -1,9 +1,3 @@
-@php
-    use App\Core\Accounts\AccountClassifier;
-
-    $filter = old('filter_mode', $message->recipient_filter['mode'] ?? 'group');
-@endphp
-
 <fieldset>
     <legend>{{ __('staff_messages.fields.category') }}</legend>
     <label class="inline-check">
@@ -29,35 +23,35 @@
     <label for="filter_mode">{{ __('staff_messages.fields.filter_mode') }}</label>
     <select id="filter_mode" name="filter_mode" required data-staff-message-filter>
         @if($canSendAll)
-            <option value="all" @selected($filter === 'all')>{{ __('staff_messages.fields.mode_all') }}</option>
+            <option value="all" @selected($filterMode === 'all')>{{ __('staff_messages.fields.mode_all') }}</option>
         @endif
-        <option value="group" @selected($filter === 'group')>{{ __('staff_messages.fields.mode_group') }}</option>
-        <option value="module" @selected($filter === 'module')>{{ __('staff_messages.fields.mode_module') }}</option>
-        <option value="users" @selected($filter === 'users')>{{ __('staff_messages.fields.mode_users') }}</option>
+        <option value="group" @selected($filterMode === 'group')>{{ __('staff_messages.fields.mode_group') }}</option>
+        <option value="module" @selected($filterMode === 'module')>{{ __('staff_messages.fields.mode_module') }}</option>
+        <option value="users" @selected($filterMode === 'users')>{{ __('staff_messages.fields.mode_users') }}</option>
     </select>
 
-    <div data-filter-panel="group" @class(['hidden' => $filter !== 'group'])>
+    <div data-filter-panel="group" @class(['hidden' => $filterMode !== 'group'])>
         <label for="filter_group">{{ __('staff_messages.fields.mode_group') }}</label>
         <select id="filter_group" name="filter_group">
             @foreach($groups as $key => $label)
-                <option value="{{ $key }}" @selected(old('filter_group', $message->recipient_filter['group'] ?? AccountClassifier::PUBLIC) === $key)>{{ $label }}</option>
+                <option value="{{ $key }}" @selected($selectedGroup === $key)>{{ $label }}</option>
             @endforeach
         </select>
     </div>
 
-    <div data-filter-panel="module" @class(['hidden' => $filter !== 'module'])>
+    <div data-filter-panel="module" @class(['hidden' => $filterMode !== 'module'])>
         <label for="filter_module">{{ __('staff_messages.fields.mode_module') }}</label>
         <select id="filter_module" name="filter_module">
             @foreach($moduleOptions as $option)
-                <option value="{{ $option['key'] }}" @selected(old('filter_module', $message->recipient_filter['module'] ?? '') === $option['key'])>{{ $option['label'] }}</option>
+                <option value="{{ $option['key'] }}" @selected($selectedModule === $option['key'])>{{ $option['label'] }}</option>
             @endforeach
         </select>
     </div>
 
-    <div data-filter-panel="users" @class(['hidden' => $filter !== 'users'])>
+    <div data-filter-panel="users" @class(['hidden' => $filterMode !== 'users'])>
         <label for="filter_user_ids">{{ __('staff_messages.fields.mode_users') }}</label>
         <select id="filter_user_ids" name="filter_user_ids[]" multiple data-staff-message-user-picker data-endpoint="{{ route('messages.user-candidates') }}">
-            @foreach(old('filter_user_ids', $message->recipient_filter['user_ids'] ?? []) as $userId)
+            @foreach($selectedUserIds as $userId)
                 <option value="{{ $userId }}" selected>{{ $userId }}</option>
             @endforeach
         </select>

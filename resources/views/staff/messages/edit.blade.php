@@ -8,7 +8,7 @@
         <form method="post" action="{{ route('messages.update', $message) }}">
             @csrf
             @method('PUT')
-            @include('staff.messages._form', ['message' => $message, 'canSendAll' => $canSendAll, 'groups' => $groups, 'moduleOptions' => $moduleOptions])
+            @include('staff.messages._form')
             <button type="submit">{{ __('staff_messages.actions.continue_preview') }}</button>
         </form>
     </div>

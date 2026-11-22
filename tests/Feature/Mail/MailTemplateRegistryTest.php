@@ -47,6 +47,7 @@ class MailTemplateRegistryTest extends TestCase
             'inbound.reply_not_posted',
             'recruitment.application_received',
             'recruitment.application_status',
+            'staff.staff_message',
             'tickets.ticket_updated',
         ], $keys);
     }

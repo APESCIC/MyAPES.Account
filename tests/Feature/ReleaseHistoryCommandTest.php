@@ -288,23 +288,23 @@ class ReleaseHistoryCommandTest extends TestCase
         $this->assertSame(
             [
                 [
-                    'label' => 'Issue #703',
-                    'url' => 'https://github.com/APESCIC/MyAPES-Account/issues/703',
+                    'label' => 'Issue #499',
+                    'url' => 'https://github.com/APESCIC/MyAPES-Account/issues/499',
                 ],
                 [
-                    'label' => 'Pull request #981',
-                    'url' => 'https://github.com/APESCIC/MyAPES-Account/pull/981',
+                    'label' => 'Pull request #982',
+                    'url' => 'https://github.com/APESCIC/MyAPES-Account/pull/982',
                 ],
             ],
             $current['references'],
         );
         $currentText = strtolower(json_encode($current, JSON_THROW_ON_ERROR));
         foreach ([
-            'changelog',
-            'per-release',
-            'newsroom',
-            'pull request #981',
-            'issue #703',
+            'staff email',
+            'messages',
+            'optional',
+            'pull request #982',
+            'issue #499',
         ] as $requiredReleaseText) {
             $this->assertStringContainsString($requiredReleaseText, $currentText);
         }
