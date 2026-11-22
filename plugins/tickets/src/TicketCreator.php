@@ -15,6 +15,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Plugins\Tickets\Http\Controllers\TicketController;
 use Plugins\Tickets\Models\SupportTicket;
+use Plugins\Tickets\TicketPushKind;
 
 /**
  * Shared ticket create used by division stores and the public combined form (#664).
@@ -116,7 +117,13 @@ final class TicketCreator
             );
         }
 
-        $this->notifier->notify($ticket, $user, 'created', attachmentCount: $storedAttachments->count());
+        $this->notifier->notify(
+            $ticket,
+            $user,
+            'created',
+            attachmentCount: $storedAttachments->count(),
+            pushKind: TicketPushKind::CREATED,
+        );
         $auditLogger->record("{$ticketService->auditPrefix}.created", $user, $ticket, [
             'service_area' => $ticket->service_area,
             'sub_category' => $ticket->sub_category,

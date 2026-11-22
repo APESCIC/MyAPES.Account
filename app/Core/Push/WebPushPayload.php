@@ -18,6 +18,7 @@ final class WebPushPayload implements WebPushMessageInterface
         private readonly string $navigate,
         private readonly string $icon,
         private readonly string $badge,
+        private readonly ?string $topic,
     ) {}
 
     public static function make(
@@ -29,8 +30,9 @@ final class WebPushPayload implements WebPushMessageInterface
         string $navigate,
         string $icon,
         string $badge,
+        ?string $topic = null,
     ): self {
-        return new self($title, $body, $lang, $tag, $path, $navigate, $icon, $badge);
+        return new self($title, $body, $lang, $tag, $path, $navigate, $icon, $badge, $topic);
     }
 
     /**
@@ -72,6 +74,15 @@ final class WebPushPayload implements WebPushMessageInterface
      */
     public function getOptions(): array
     {
-        return [];
+        $options = [
+            'TTL' => (int) config('push-payloads.ttl_seconds', 86_400),
+            'urgency' => (string) config('push-payloads.urgency', 'normal'),
+        ];
+
+        if ($this->topic !== null && $this->topic !== '') {
+            $options['topic'] = $this->topic;
+        }
+
+        return $options;
     }
 }

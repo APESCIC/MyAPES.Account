@@ -15,6 +15,8 @@ final class TicketStakeholderNotifier
 {
     public function __construct(
         private readonly TicketServiceConfiguration $ticketServices,
+        private readonly TicketPushRecipientResolver $pushRecipients,
+        private readonly TicketPushKindResolver $pushKinds,
     ) {}
 
     public function notify(
@@ -23,6 +25,7 @@ final class TicketStakeholderNotifier
         string $eventLabel,
         bool $staffOnly = false,
         int $attachmentCount = 0,
+        ?string $pushKind = null,
     ): void {
         $subCoreKey = (string) $ticket->sub_core_key;
         $area = TicketsArea::forModule($subCoreKey);
@@ -36,18 +39,38 @@ final class TicketStakeholderNotifier
             $recipients->push($ticket->user);
         }
 
+        $resolvedPushKind = $pushKind ?? ($eventLabel === 'created'
+            ? $this->pushKinds->forCreation()
+            : null);
+
         $recipients
             ->unique('id')
             ->reject(fn (User $recipient): bool => $recipient->id === $actor->id)
-            ->each(fn (User $recipient) => $recipient->notify(new TicketUpdatedNotification(
+            ->each(function (User $recipient) use (
                 $ticket,
                 $actor,
                 $eventLabel,
                 $subCoreKey,
-                $area->showRouteName(),
-                $ticketService->serviceName,
+                $area,
+                $ticketService,
                 $attachmentCount,
-            )));
+                $resolvedPushKind,
+            ): void {
+                $pushTypeKey = $resolvedPushKind !== null
+                    ? $this->pushRecipients->resolveTypeKey($recipient, $resolvedPushKind, $ticket, $actor)
+                    : null;
+
+                $recipient->notify(new TicketUpdatedNotification(
+                    $ticket,
+                    $actor,
+                    $eventLabel,
+                    $subCoreKey,
+                    $area->showRouteName(),
+                    $ticketService->serviceName,
+                    $attachmentCount,
+                    $pushTypeKey,
+                ));
+            });
     }
 
     /**

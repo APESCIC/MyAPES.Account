@@ -21,6 +21,7 @@ final class PushPayloadBuilder
             navigate: $navigate,
             icon: (string) config('push-payloads.icon', '/icons/pwa-192x192.png'),
             badge: (string) config('push-payloads.badge', '/icons/pwa-192x192.png'),
+            topic: $this->topic($typeKey, $target),
         );
     }
 
@@ -62,5 +63,16 @@ final class PushPayloadBuilder
         return $reference === ''
             ? $typeKey
             : "{$typeKey}:{$reference}";
+    }
+
+    private function topic(string $typeKey, PushTarget $target): ?string
+    {
+        if (! str_starts_with($typeKey, 'ticket.')) {
+            return null;
+        }
+
+        $reference = $target->referenceForBody();
+
+        return $reference === '' ? null : "ticket:{$reference}";
     }
 }
