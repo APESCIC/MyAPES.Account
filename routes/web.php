@@ -41,6 +41,7 @@ use App\Http\Controllers\MailUnsubscribeController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PhoneVerificationPinController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PushServiceWorkerController;
 use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\RobotsTxtController;
 use App\Http\Controllers\SitemapController;
@@ -151,6 +152,10 @@ if (app()->environment(['local', 'testing'])) {
             Route::post('/qa/logout', 'destroy')->name('qa.logout');
         });
 }
+
+Route::get('/sw.js', PushServiceWorkerController::class)
+    ->middleware('throttle:60,1')
+    ->name('push.service-worker');
 
 Route::get('/push/vapid-public-key', [PushSubscriptionController::class, 'vapidPublicKey'])
     ->middleware('throttle:60,1')

@@ -55,6 +55,7 @@ import {
 import { initBotProtection } from './bot-protection.js';
 import { initChangeLog } from './change-log.js';
 import { initPasskeys } from './passkeys.js';
+import { initPushServiceWorker } from './push/register.js';
 import { initStaffMessageFilter } from './staff/message-filter.js';
 import { initOwnerPicker } from './tickets/owner-picker.js';
 import { initCommandPalette } from './workspace/command-palette.js';
@@ -154,6 +155,7 @@ applyTheme(document.documentElement.dataset.theme);
 initChangeLog();
 initBotProtection();
 initPasskeys();
+initPushServiceWorker();
 initToasts();
 initOwnerPicker();
 initStaffMessageFilter();

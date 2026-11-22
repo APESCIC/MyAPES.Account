@@ -28,7 +28,7 @@
     @stack('head')
 </head>
 @php($isAuthPage = request()->routeIs('public.login', 'public.register', 'staff.login', 'password.request', 'password.reset', 'password.confirm', 'two-factor.login', 'verification.notice', 'qa.index'))
-<body @class(['workspace-shell', 'is-auth-page' => $isAuthPage, 'has-mascot-dock' => $mascotTip])>
+<body @class(['workspace-shell', 'is-auth-page' => $isAuthPage, 'has-mascot-dock' => $mascotTip]) @auth data-push-register data-push-sw-url="{{ route('push.service-worker') }}" @endauth>
 <a class="skip-link" href="#main-content">{{ __('public.chrome.app.blade.skip_to_main_content') }}</a>
 
 <div class="sg-page" data-workspace-page>
