@@ -3,6 +3,10 @@
 namespace App\Notifications;
 
 use App\Core\Mail\Concerns\BuildsBrandedMail;
+use App\Core\Push\Concerns\SendsWebPush;
+use App\Core\Push\PushNotificationTypeKeys;
+use App\Core\Push\PushTargetFromUrl;
+use App\Core\Push\WebPushPayload;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -19,6 +23,7 @@ class EmailReplyNotPostedNotification extends Notification implements ShouldQueu
 {
     use BuildsBrandedMail;
     use Queueable;
+    use SendsWebPush;
 
     public const REASON_CLOSED = 'closed';
 
@@ -35,9 +40,19 @@ class EmailReplyNotPostedNotification extends Notification implements ShouldQueu
     /**
      * @return array<int, string>
      */
+    protected function pushNotificationTypeKey(): string
+    {
+        return PushNotificationTypeKeys::TICKET_EMAIL_REPLY_FAILED;
+    }
+
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return $this->optionalWebPushChannels($notifiable, ['mail'], $this->pushRecipientContext());
+    }
+
+    public function toWebPush(object $notifiable): WebPushPayload
+    {
+        return $this->privateWebPush(PushTargetFromUrl::resolve($this->recordUrl, $this->reference));
     }
 
     public function toMail(object $notifiable): MailMessage

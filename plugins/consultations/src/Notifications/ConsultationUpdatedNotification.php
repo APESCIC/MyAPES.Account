@@ -4,17 +4,22 @@ namespace Plugins\Consultations\Notifications;
 
 use App\Core\Accounts\User;
 use App\Core\Mail\Concerns\BuildsBrandedMail;
+use App\Core\Push\Concerns\SendsWebPush;
+use App\Core\Push\PushNotificationTypeKeys;
+use App\Core\Push\PushTarget;
+use App\Core\Push\WebPushPayload;
 use App\Support\WorkflowLabels;
+use Plugins\Consultations\Models\PetCareConsultation;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Plugins\Consultations\Models\PetCareConsultation;
 
 class ConsultationUpdatedNotification extends Notification implements ShouldQueue
 {
     use BuildsBrandedMail;
     use Queueable;
+    use SendsWebPush;
 
     public bool $deleteWhenMissingModels = true;
 
@@ -31,9 +36,28 @@ class ConsultationUpdatedNotification extends Notification implements ShouldQueu
      *
      * @return array<int, string>
      */
+    protected function pushNotificationTypeKey(): string
+    {
+        return PushNotificationTypeKeys::CONSULTATION_UPDATE;
+    }
+
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        return $this->optionalWebPushChannels(
+            $notifiable,
+            ['database', 'mail'],
+            $this->pushRecipientContext($this->actor, PetCareConsultation::PERMISSION_VIEW_ALL),
+        );
+    }
+
+    public function toWebPush(object $notifiable): WebPushPayload
+    {
+        return $this->privateWebPush(new PushTarget(
+            'petcare.consultations.show',
+            ['consultation' => $this->consultation->id],
+            (string) $this->consultation->id,
+            'APES Pet Care Clinic',
+        ));
     }
 
     /**

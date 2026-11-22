@@ -3,6 +3,10 @@
 namespace Plugins\Recruitment\Notifications;
 
 use App\Core\Mail\Concerns\BuildsBrandedMail;
+use App\Core\Push\Concerns\SendsWebPush;
+use App\Core\Push\PushNotificationTypeKeys;
+use App\Core\Push\PushTarget;
+use App\Core\Push\WebPushPayload;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -16,6 +20,7 @@ class RecruitmentApplicationReceivedNotification extends Notification implements
 {
     use BuildsBrandedMail;
     use Queueable;
+    use SendsWebPush;
 
     public bool $deleteWhenMissingModels = true;
 
@@ -28,9 +33,24 @@ class RecruitmentApplicationReceivedNotification extends Notification implements
     /**
      * @return array<int, string>
      */
+    protected function pushNotificationTypeKey(): string
+    {
+        return PushNotificationTypeKeys::RECRUITMENT_APPLICATION_UPDATE;
+    }
+
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return $this->optionalWebPushChannels($notifiable, ['mail'], $this->pushRecipientContext());
+    }
+
+    public function toWebPush(object $notifiable): WebPushPayload
+    {
+        return $this->privateWebPush(new PushTarget(
+            'recruitment.applications.show',
+            ['recruitmentApplication' => $this->application->id],
+            (string) $this->application->id,
+            'APES CIC',
+        ));
     }
 
     public function toMail(object $notifiable): MailMessage

@@ -4,6 +4,10 @@ namespace Plugins\Recruitment\Notifications;
 
 use App\Core\Mail\Concerns\BuildsBrandedMail;
 use App\Core\Mail\Concerns\RespectsMailPreference;
+use App\Core\Push\Concerns\SendsWebPush;
+use App\Core\Push\PushNotificationTypeKeys;
+use App\Core\Push\PushTarget;
+use App\Core\Push\WebPushPayload;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -19,6 +23,7 @@ class RecruitmentApplicationStatusNotification extends Notification implements S
     use BuildsBrandedMail;
     use Queueable;
     use RespectsMailPreference;
+    use SendsWebPush;
 
     public const NOTIFIED_STATUSES = [
         RecruitmentApplication::STATUS_SHORTLISTED,
@@ -43,9 +48,28 @@ class RecruitmentApplicationStatusNotification extends Notification implements S
     /**
      * @return array<int, string>
      */
+    protected function pushNotificationTypeKey(): string
+    {
+        return PushNotificationTypeKeys::RECRUITMENT_APPLICATION_UPDATE;
+    }
+
     public function via(object $notifiable): array
     {
-        return $this->optionalMailChannels($notifiable);
+        return $this->optionalWebPushChannels(
+            $notifiable,
+            $this->optionalMailChannels($notifiable),
+            $this->pushRecipientContext(),
+        );
+    }
+
+    public function toWebPush(object $notifiable): WebPushPayload
+    {
+        return $this->privateWebPush(new PushTarget(
+            'recruitment.applications.show',
+            ['recruitmentApplication' => $this->application->id],
+            (string) $this->application->id,
+            'APES CIC',
+        ));
     }
 
     public function toMail(object $notifiable): MailMessage

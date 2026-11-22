@@ -71,7 +71,7 @@ class PushPrivatePayloadTest extends TestCase
             ],
             PushNotificationTypeKeys::MAIL_IMPORT_ATTENTION => [
                 PushNotificationTypeKeys::MAIL_IMPORT_ATTENTION,
-                new PushTarget('admin.emails.inbound.show', ['inboundEmail' => 3], '3'),
+                new PushTarget('admin.emails.import.index', [], '3'),
             ],
             PushNotificationTypeKeys::STAFF_MESSAGE => [
                 PushNotificationTypeKeys::STAFF_MESSAGE,

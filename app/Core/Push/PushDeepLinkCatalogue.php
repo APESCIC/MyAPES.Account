@@ -45,7 +45,7 @@ final class PushDeepLinkCatalogue
                 'profile.edit',
             ],
             PushNotificationTypeKeys::MAIL_IMPORT_ATTENTION => [
-                'admin.emails.inbound.show',
+                'admin.emails.import.index',
             ],
             PushNotificationTypeKeys::STAFF_MESSAGE => [
                 'dashboard',

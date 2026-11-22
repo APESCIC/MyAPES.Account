@@ -7,6 +7,10 @@ use App\Core\Content\RichText;
 use App\Core\Mail\Concerns\BuildsBrandedMail;
 use App\Core\Mail\Concerns\RespectsMailPreference;
 use App\Core\Mail\StaffMessage;
+use App\Core\Push\Concerns\SendsWebPush;
+use App\Core\Push\PushNotificationTypeKeys;
+use App\Core\Push\PushTarget;
+use App\Core\Push\WebPushPayload;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -26,6 +30,7 @@ class StaffMessageNotification extends Notification implements ShouldQueue
     use BuildsBrandedMail;
     use Queueable;
     use RespectsMailPreference;
+    use SendsWebPush;
 
     public function __construct(
         private readonly StaffMessage $message,
@@ -37,13 +42,31 @@ class StaffMessageNotification extends Notification implements ShouldQueue
     /**
      * @return array<int, string>
      */
+    protected function pushNotificationTypeKey(): string
+    {
+        return PushNotificationTypeKeys::STAFF_MESSAGE;
+    }
+
     public function via(object $notifiable): array
     {
-        if ($this->message->isOptional()) {
-            return $this->optionalMailChannels($notifiable);
-        }
+        $channels = $this->message->isOptional()
+            ? $this->optionalMailChannels($notifiable)
+            : ['mail'];
 
-        return ['mail'];
+        return $this->optionalWebPushChannels(
+            $notifiable,
+            $channels,
+            $this->pushRecipientContext($this->sender),
+        );
+    }
+
+    public function toWebPush(object $notifiable): WebPushPayload
+    {
+        return $this->privateWebPush(new PushTarget(
+            'dashboard',
+            [],
+            (string) $this->message->id,
+        ));
     }
 
     public function toMail(object $notifiable): MailMessage
