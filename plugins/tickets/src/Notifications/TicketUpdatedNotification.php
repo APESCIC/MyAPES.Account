@@ -6,12 +6,17 @@ use App\Core\Accounts\User;
 use App\Core\Mail\Concerns\BuildsBrandedMail;
 use App\Core\Mail\Concerns\MentionsAttachments;
 use App\Core\Mail\Concerns\OffersEmailReply;
+use App\Core\Push\Concerns\SendsWebPush;
+use App\Core\Push\PushRecipientContext;
+use App\Core\Push\PushTarget;
+use App\Core\Push\WebPushPayload;
 use App\Support\WorkflowLabels;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Plugins\Tickets\Models\SupportTicket;
+use Plugins\Tickets\TicketsArea;
 
 class TicketUpdatedNotification extends Notification implements ShouldQueue
 {
@@ -19,6 +24,7 @@ class TicketUpdatedNotification extends Notification implements ShouldQueue
     use MentionsAttachments;
     use OffersEmailReply;
     use Queueable;
+    use SendsWebPush;
 
     public bool $deleteWhenMissingModels = true;
 
@@ -30,8 +36,19 @@ class TicketUpdatedNotification extends Notification implements ShouldQueue
         private readonly string $showRouteName,
         private readonly string $serviceName,
         private readonly int $attachmentCount = 0,
+        private readonly ?string $pushTypeKey = null,
     ) {
         $this->afterCommit();
+    }
+
+    protected function pushNotificationTypeKey(): string
+    {
+        return (string) $this->pushTypeKey;
+    }
+
+    public function pushTypeKey(): ?string
+    {
+        return $this->pushTypeKey;
     }
 
     /**
@@ -41,7 +58,30 @@ class TicketUpdatedNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        $channels = ['database', 'mail'];
+
+        if ($this->pushTypeKey === null) {
+            return $channels;
+        }
+
+        $area = TicketsArea::forModule($this->subCoreKey);
+        $context = new PushRecipientContext(
+            $this->pushTypeKey,
+            $this->actor->id,
+            $area->permission('view-all'),
+        );
+
+        return $this->optionalWebPushChannels($notifiable, $channels, $context);
+    }
+
+    public function toWebPush(object $notifiable): WebPushPayload
+    {
+        return $this->privateWebPush(new PushTarget(
+            $this->showRouteName,
+            ['ticket' => $this->ticket->id],
+            (string) $this->ticket->id,
+            $this->serviceName,
+        ));
     }
 
     /**

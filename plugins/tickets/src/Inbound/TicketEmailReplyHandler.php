@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Plugins\Tickets\Models\SupportTicket;
 use Plugins\Tickets\TicketCategoryResolver;
+use Plugins\Tickets\TicketPushKindResolver;
 use Plugins\Tickets\TicketsArea;
 use Plugins\Tickets\TicketServiceConfiguration;
 use Plugins\Tickets\TicketStakeholderNotifier;
@@ -27,6 +28,7 @@ final class TicketEmailReplyHandler implements InboundReplyHandler
 {
     public function __construct(
         private readonly TicketStakeholderNotifier $notifier,
+        private readonly TicketPushKindResolver $pushKinds,
         private readonly SupportAttachmentService $attachments,
         private readonly TicketCategoryResolver $categories,
         private readonly TicketServiceConfiguration $ticketServices,
@@ -125,7 +127,13 @@ final class TicketEmailReplyHandler implements InboundReplyHandler
             return [$message, $stored];
         });
 
-        $this->notifier->notify($ticket, $sender, 'updated', attachmentCount: $stored->count());
+        $this->notifier->notify(
+            $ticket,
+            $sender,
+            'updated',
+            attachmentCount: $stored->count(),
+            pushKind: $this->pushKinds->forInboundReply($sender),
+        );
         $this->audit->record("{$ticketService->auditPrefix}.updated", $sender, $ticket, [
             'via' => 'email',
             'sub_core_key' => $ticket->sub_core_key,

@@ -28,7 +28,8 @@
     @stack('head')
 </head>
 @php($isAuthPage = request()->routeIs('public.login', 'public.register', 'staff.login', 'password.request', 'password.reset', 'password.confirm', 'two-factor.login', 'verification.notice', 'qa.index'))
-<body @class(['workspace-shell', 'is-auth-page' => $isAuthPage, 'has-mascot-dock' => $mascotTip])>
+@php($showPushSoftPrompt = auth()->check() && (request()->routeIs('dashboard') || request()->routeIs('*.tickets.show')))
+<body @class(['workspace-shell', 'is-auth-page' => $isAuthPage, 'has-mascot-dock' => $mascotTip]) @auth data-push-register data-push-sw-url="{{ route('push.service-worker') }}" data-push-destroy-url="{{ route('push.subscriptions.destroy') }}" @endauth>
 <a class="skip-link" href="#main-content">{{ __('public.chrome.app.blade.skip_to_main_content') }}</a>
 
 <div class="sg-page" data-workspace-page>
@@ -67,6 +68,9 @@
             @endif
 
             <main id="main-content" class="app-main" tabindex="-1">
+                @if($showPushSoftPrompt ?? false)
+                    <x-push.device-notifications soft />
+                @endif
                 @include('partials.site-banner')
                 <x-flash-toasts />
                 @include('partials.client-records-notice')

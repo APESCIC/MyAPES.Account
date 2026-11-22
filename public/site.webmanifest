@@ -1,4 +1,5 @@
 {
+  "id": "/",
   "name": "MyAPES Account",
   "short_name": "MyAPES",
   "description": "MyAPES Account web application",
@@ -31,6 +32,12 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "/icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }

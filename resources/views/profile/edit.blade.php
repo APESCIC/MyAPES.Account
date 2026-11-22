@@ -236,6 +236,15 @@
             </div>
         @endif
 
+        <div class="panel" id="notifications">
+            <x-push.profile-notifications
+                :types="$notificationTypes"
+                :divisions="$notificationDivisions"
+                :devices="$notificationDevices"
+                :settings="$notificationSettings"
+            />
+        </div>
+
         @if($canManagePasskeys)
             <div class="panel" id="passkeys" data-passkeys-manage>
                 <h2>{{ __('auth.passkeys.heading') }}</h2>

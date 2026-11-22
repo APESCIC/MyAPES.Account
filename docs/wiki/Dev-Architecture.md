@@ -8,7 +8,7 @@
 ## Layers
 | Layer | What it is | Where |
 |---|---|---|
-| Core | Sign-in, people, roles, settings, mail, navigation, search | `app/Core`, `app/` |
+| Core | Sign-in, people, roles, settings, mail, **web push** (VAPID, subscriptions, queued delivery, profile preferences), navigation, search | `app/Core`, `app/` |
 | Modules | Organisation areas: APES CIC (`/apes-cic`), Shelter and Rescue (`/shelter`), Pet Care Clinic (`/petcare`) | `modules/` |
 | Plugins | Reusable features: tickets, pet profiles, cases, recruitment, consultations | `plugins/` |
 
@@ -18,6 +18,12 @@
 - A plugin may use another plugin only through its `Contracts`, `Models` or `Support` namespaces, declared with `PluginDependency`.
 - Permissions are named `{module}.{plugin}.{ability}`.
 - Architecture tests in `tests/Architecture` enforce these rules and fail CI.
+
+## Web push (v0.72.0)
+
+- **Core** owns VAPID credentials, device subscriptions, user preferences (types, quiet hours, divisions), the `push` queue job, metadata-only `push_deliveries` records, and the service worker assets. Features add push through `SendsWebPush` and notification type keys — not by calling the push HTTP client directly.
+- **Lock-screen payloads** use notification type and record reference only (`PushPayloadBuilder`).
+- **Browser vendors** relay encrypted messages; APES does not host a push gateway. See [[Push notifications|Push-notifications]] and the privacy notice.
 
 ## More
 - [Architecture inventory](https://github.com/APESCIC/MyAPES.Account/blob/main/docs/architecture-inventory.md)

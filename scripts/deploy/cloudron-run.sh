@@ -332,6 +332,7 @@ start_laravel_runtime() {
   if ! pgrep -f "${CURRENT_DIR}/artisan queue:work" >/dev/null 2>&1; then
     start_laravel_worker "${LOG_DIR}/queue-worker.log" \
       "$PHP_BIN" "${CURRENT_DIR}/artisan" queue:work \
+      --queue=default,push \
       --sleep=3 \
       --tries=3 \
       --timeout=60

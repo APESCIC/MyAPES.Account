@@ -71,6 +71,9 @@
     @endif
 
     <div class="sg-dock__tools" role="group" aria-label="{{ __('workspace.dock.tools') }}">
+        @auth
+            <x-notifications.bell />
+        @endauth
         <button
             type="button"
             class="sg-icon-btn sg-icon-btn--sm theme-toggle"

@@ -97,6 +97,16 @@ return [
             'reason' => 'PHP fragment false positive in Blade (@auth user()) (#268).',
         ],
         [
+            'path' => 'resources/views/components/notifications/bell.blade.php',
+            'pattern' => '#AccountNotificationPresenter::present#',
+            'reason' => 'Blade @php notification mapping; not user-facing copy (#805).',
+        ],
+        [
+            'path' => 'resources/views/components/push/profile-notifications.blade.php',
+            'pattern' => '#quiet_hours_(start|end)#',
+            'reason' => 'Blade @php quiet-hours time truncation; defaults live in config (#805).',
+        ],
+        [
             'path' => 'resources/views/',
             'pattern' => '#^\$item->title$#',
             'reason' => 'Dynamic attention-item title binding, not hard-coded copy (#268/#269).',

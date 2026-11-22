@@ -36,6 +36,10 @@ class SecurityHeadersTest extends TestCase
         $this->assertStringContainsString("default-src 'self'", $policy);
         $this->assertMatchesRegularExpression("/script-src 'self' https:\/\/\*\.tiny\.cloud https:\/\/\*\.tinymce\.com https:\/\/www\.google\.com\/recaptcha\/ https:\/\/www\.gstatic\.com\/recaptcha\/ 'nonce-[A-Za-z0-9+\/=]+'/", $policy);
         $this->assertStringContainsString("connect-src 'self' blob: https://*.tiny.cloud https://*.tinymce.com https://www.google.com/recaptcha/", $policy);
+        $this->assertStringContainsString('https://fcm.googleapis.com', $policy);
+        $this->assertStringContainsString('https://web.push.apple.com', $policy);
+        $this->assertStringContainsString("worker-src 'self'", $policy);
+        $this->assertStringContainsString("manifest-src 'self'", $policy);
         $this->assertStringContainsString('https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/', $policy);
         $this->assertStringContainsString("img-src 'self' data: blob: https:", $policy);
         $this->assertStringContainsString("frame-src 'self' https://bookings.cloud.microsoft https://outlook.office365.com", $policy);

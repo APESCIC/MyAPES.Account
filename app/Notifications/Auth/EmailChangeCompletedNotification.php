@@ -3,6 +3,7 @@
 namespace App\Notifications\Auth;
 
 use App\Core\Mail\Concerns\BuildsBrandedMail;
+use App\Core\Push\Concerns\SendsAccountSecurityWebPush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -15,13 +16,14 @@ class EmailChangeCompletedNotification extends Notification implements ShouldQue
 {
     use BuildsBrandedMail;
     use Queueable;
+    use SendsAccountSecurityWebPush;
 
     /**
      * @return array<int, string>
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return $this->accountSecurityVia($notifiable);
     }
 
     public function toMail(object $notifiable): MailMessage

@@ -55,6 +55,14 @@
             <p>{{ __('public.legal.privacy.blade.spam_protection_body') }}</p>
         </section>
 
+        <section data-privacy-web-push>
+            <h2>{{ __('public.legal.privacy.blade.web_push_notifications') }}</h2>
+            <p>{{ __('public.legal.privacy.blade.web_push_subscriptions') }}</p>
+            <p>{{ __('public.legal.privacy.blade.web_push_alert_content') }}</p>
+            <p>{{ __('public.legal.privacy.blade.web_push_delivery') }}</p>
+            <p>{{ __('public.legal.privacy.blade.web_push_retention') }}</p>
+        </section>
+
         <section>
             <h2>{{ __('public.legal.privacy.blade.your_rights') }}</h2>
             <p>You can ask APES CIC for a copy of the personal information we hold, and you can ask us to correct it or, where the law allows, delete it or limit how we use it. You can also complain to the Information Commissioner's Office if you are unhappy with how we handle your information.</p>

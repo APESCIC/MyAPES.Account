@@ -33,7 +33,9 @@ use Plugins\Tickets\TicketCreator;
 use Plugins\Tickets\TicketOwnerCandidates;
 use Plugins\Tickets\TicketsArea;
 use Plugins\Tickets\TicketServiceConfiguration;
+use Plugins\Tickets\TicketPushKindResolver;
 use Plugins\Tickets\TicketStakeholderNotifier;
+use Plugins\Tickets\TicketUpdatePushContext;
 
 class TicketController extends Controller
 {
@@ -59,6 +61,7 @@ class TicketController extends Controller
         private readonly TicketOwnerCandidates $ownerCandidates,
         private readonly UploadSettings $uploads,
         private readonly TicketStakeholderNotifier $notifier,
+        private readonly TicketPushKindResolver $pushKinds,
     ) {}
 
     public function index(Request $request): View
@@ -354,11 +357,14 @@ class TicketController extends Controller
         }
 
         $updates = [];
+        $statusChanged = false;
+        $statusNowTerminal = false;
         if ($ticketUpdateRequested) {
             $requestedStatus = $validated['status'];
             $statusChanged = $requestedStatus !== $ticket->status;
             $wasTerminal = in_array($ticket->status, ['resolved', 'closed'], true);
             $willBeTerminal = in_array($requestedStatus, ['resolved', 'closed'], true);
+            $statusNowTerminal = $willBeTerminal;
             if ($statusChanged && ($wasTerminal || $willBeTerminal)) {
                 Gate::authorize($prefix.'close');
             }
@@ -375,6 +381,7 @@ class TicketController extends Controller
             }
         }
 
+        $assignmentChanged = false;
         if ($assignmentRequested) {
             $assignedTo = isset($validated['assigned_to'])
                 ? (int) $validated['assigned_to']
@@ -384,6 +391,7 @@ class TicketController extends Controller
                 : (int) $ticket->assigned_to;
             if ($assignedTo !== $currentAssignee) {
                 $updates['assigned_to'] = $assignedTo;
+                $assignmentChanged = true;
             }
         }
 
@@ -435,12 +443,21 @@ class TicketController extends Controller
         if (($hasMessage && ! $internal && ! $ticketChanged) || ($hasAttachments && ! $internal)) {
             $ticket->touch();
         }
+        $pushKind = $this->pushKinds->forUpdate($request->user(), new TicketUpdatePushContext(
+            publicMessage: $hasMessage && ! $internal,
+            internalMessage: $internal && $hasMessage,
+            assignmentChanged: $assignmentChanged,
+            statusChanged: $statusChanged,
+            statusNowTerminal: $statusNowTerminal && $statusChanged,
+        ));
+
         $this->notifier->notify(
             $ticket,
             $request->user(),
             'updated',
             $internal && ! $ticketChanged,
             $storedAttachments->count(),
+            pushKind: $pushKind,
         );
         $auditLogger->record("{$ticketService->auditPrefix}.updated", $request->user(), $ticket, [
             'status' => $ticket->status,

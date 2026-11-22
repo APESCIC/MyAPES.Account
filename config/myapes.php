@@ -93,7 +93,20 @@ return [
             'style-src' => ["'self'", "'unsafe-inline'", 'https://*.tiny.cloud', 'https://*.tinymce.com'],
             'img-src' => ["'self'", 'data:', 'blob:', 'https:'],
             'font-src' => ["'self'", 'data:', 'https://*.tiny.cloud', 'https://*.tinymce.com'],
-            'connect-src' => ["'self'", 'blob:', 'https://*.tiny.cloud', 'https://*.tinymce.com', 'https://www.google.com/recaptcha/'],
+            'connect-src' => [
+                "'self'",
+                'blob:',
+                'https://*.tiny.cloud',
+                'https://*.tinymce.com',
+                'https://www.google.com/recaptcha/',
+                'https://fcm.googleapis.com',
+                'https://updates.push.services.mozilla.com',
+                'https://web.push.apple.com',
+                'https://notify.windows.com',
+                'https://*.notify.windows.com',
+            ],
+            'worker-src' => ["'self'"],
+            'manifest-src' => ["'self'"],
             'frame-src' => ["'self'", 'https://bookings.cloud.microsoft', 'https://outlook.office365.com', 'https://www.google.com/recaptcha/', 'https://recaptcha.google.com/recaptcha/'],
             'object-src' => ["'none'"],
             'base-uri' => ["'self'"],
@@ -133,6 +146,13 @@ return [
 
     'mail' => [
         'log_retention_days' => (int) env('MAIL_LOG_RETENTION_DAYS', 90),
+    ],
+
+    'push' => [
+        'log_retention_days' => (int) env('PUSH_LOG_RETENTION_DAYS', 90),
+        'http_timeout_seconds' => max(1, min(60, (int) env('PUSH_HTTP_TIMEOUT_SECONDS', 10))),
+        'max_attempts' => max(1, min(5, (int) env('PUSH_MAX_ATTEMPTS', 3))),
+        'remove_after_consecutive_failures' => max(1, min(20, (int) env('PUSH_REMOVE_AFTER_CONSECUTIVE_FAILURES', 5))),
     ],
 
     'consent' => [

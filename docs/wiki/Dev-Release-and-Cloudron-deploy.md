@@ -38,7 +38,31 @@ Deploy secrets live in the `cloudron-deploy` GitHub environment. Never print or 
 
 ## Queue worker, migrations and health (from v0.62.0)
 - **Migrations** run on every deploy (`activate-release.sh` runs `php artisan migrate --force` before the switch). v0.62.0 adds `api_clients`, `personal_access_tokens` and the webhook tables; nothing is dropped or renamed.
-- **Queue worker:** `cloudron-run.sh` keeps one `artisan queue:work` and one `artisan schedule:work` running. Webhook deliveries are queued jobs (`App\Jobs\DeliverWebhook`) on that worker; the deploy restarts the app, so the worker picks up the new code.
+- **Queue worker:** `cloudron-run.sh` keeps one `artisan queue:work --queue=default,push` and one `artisan schedule:work` running. Webhook deliveries and web push jobs share that worker (`default` and `push` queues); the deploy restarts the app, so the worker picks up the new code. After deploy or an app restart, check `/app/data/shared/storage/logs/queue-worker.log` for `queue:work` processing the `push` queue.
 - **Health:** `/healthz` reports `checks.queue`: `ok`, or `delayed` when a webhook delivery has waited more than 15 minutes past its due time (the worker has probably stopped). It is reported only and never fails the deploy check, which still needs `status: ok`, the new `version` and the merge commit as `release`.
 - **After a deploy that touches webhooks,** check one delivery goes through: in Admin → Settings → Webhooks, add (or use) an endpoint and replay a recent delivery, or change a test record, then look for `Delivered` in the delivery log.
 - **Keys:** the reCAPTCHA keys, TinyMCE key, API tokens and webhook signing secrets are set in Admin → Settings, never in this repository. Keep the real values in APES Vault ('API Keys & Tokens').
+
+## Web push notifications (from v0.72.0)
+
+Production needs VAPID credentials, outbound HTTPS to push providers, and the `push` queue worker.
+
+### VAPID keys
+
+1. **Generate** a key pair on **Admin → Settings → Push notifications** (Generate key pair), or paste values from APES Vault. The subject should be a monitored APES `mailto:` address (for example `mailto:communications@myapes.me.uk`).
+2. **Preferred store:** Admin → Settings → Push notifications (saved in Keys and secrets; takes precedence over the server `.env`). The tab shows which source is active: keys saved here, or `VAPID_*` from `/app/data/shared/.env`.
+3. **Emergency fallback:** set empty placeholders in `scripts/deploy/production.env.example` (`VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`) on the server only, then restart the app so `cloudron-run.sh` reloads config.
+4. **Vault:** keep one copy outside the app in APES Vault (collection **API Keys & Tokens**), item **MyAPES Account – Web Push VAPID keys (production)**. Never put values in chat, issues, pull requests or logs.
+5. **Key change impact:** replacing, generating or clearing VAPID keys **removes every device subscription**. Users must turn push on again on each device. Plan comms before rotation.
+
+### Worker and network
+
+- **Queue:** push deliveries are queued on `push`. `cloudron-run.sh` runs `queue:work --queue=default,push` (see above). After deploy, confirm jobs appear in `queue-worker.log`.
+- **Outbound:** the app must reach browser push endpoints over **HTTPS (port 443)** from Cloudron (no extra inbound ports).
+- **Local Herd:** generate or paste **separate** test keys in `.env`; never use production VAPID material locally.
+
+### After deploy (smoke)
+
+1. `/healthz` reports `status: ok` and the new `version`.
+2. Admin → Settings → Push notifications shows **Configured** and the correct key source.
+3. Send **Send test push to my devices** from that tab (operator device subscribed first). Full production proof is part of post-deploy ops (#804); this page records the runbook only.

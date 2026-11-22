@@ -2,6 +2,7 @@
 
 use App\Core\Qa\Http\Controllers\QaLoginController;
 use App\Core\Qa\Http\Middleware\EnsureQaLoginEnabled;
+use App\Http\Controllers\AccountNotificationController;
 use App\Http\Controllers\Admin\AdminAccessController;
 use App\Http\Controllers\Admin\AdminApiClientController;
 use App\Http\Controllers\Admin\AdminEmailController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\Admin\AdminGroupController;
 use App\Http\Controllers\Admin\AdminInboundEmailController;
 use App\Http\Controllers\Admin\AdminIntegrationController;
 use App\Http\Controllers\Admin\AdminKeysAndSecretsController;
+use App\Http\Controllers\Admin\AdminPushNotificationsController;
 use App\Http\Controllers\Admin\AdminLocalRepliesController;
 use App\Http\Controllers\Admin\AdminMaintenanceController;
 use App\Http\Controllers\Admin\AdminManagedListController;
@@ -41,6 +43,9 @@ use App\Http\Controllers\MailUnsubscribeController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PhoneVerificationPinController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProfileNotificationController;
+use App\Http\Controllers\PushServiceWorkerController;
+use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\RobotsTxtController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Staff\CallerController;
@@ -151,6 +156,14 @@ if (app()->environment(['local', 'testing'])) {
         });
 }
 
+Route::get('/sw.js', PushServiceWorkerController::class)
+    ->middleware('throttle:60,1')
+    ->name('push.service-worker');
+
+Route::get('/push/vapid-public-key', [PushSubscriptionController::class, 'vapidPublicKey'])
+    ->middleware('throttle:60,1')
+    ->name('push.vapid-public-key');
+
 Route::prefix('staff/auth')->controller(OidcAuthController::class)->group(function (): void {
     Route::get('/login', 'login')->name('staff.auth.login');
     Route::get('/step-up', 'stepUp')->middleware('auth')->name('staff.auth.step-up');
@@ -208,6 +221,12 @@ Route::middleware([
     'account.ready',
 ])->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::prefix('notifications')->name('notifications.')->group(function (): void {
+        Route::get('/', [AccountNotificationController::class, 'index'])->name('index');
+        Route::get('/{notification}/open', [AccountNotificationController::class, 'open'])->name('open');
+        Route::patch('/{notification}/read', [AccountNotificationController::class, 'markRead'])->name('read');
+        Route::post('/read-all', [AccountNotificationController::class, 'markAllRead'])->name('read-all');
+    });
     Route::get('/workspace/search/records', WorkspaceRecordSearchController::class)
         ->middleware('throttle:60,1')
         ->name('workspace.search.records');
@@ -306,6 +325,25 @@ Route::middleware([
         ->middleware(['account.step-up', 'throttle:two-factor-manage'])
         ->name('two-factor.recovery.regenerate');
     Route::get('/profile/staff-photo', [ProfileController::class, 'staffPhoto'])->name('profile.staff-photo');
+
+    Route::post('/push/subscriptions', [PushSubscriptionController::class, 'store'])
+        ->middleware('throttle:30,1')
+        ->name('push.subscriptions.store');
+    Route::delete('/push/subscriptions', [PushSubscriptionController::class, 'destroy'])
+        ->middleware('throttle:30,1')
+        ->name('push.subscriptions.destroy');
+
+    Route::put('/profile/notifications', [ProfileNotificationController::class, 'update'])
+        ->middleware('throttle:30,1')
+        ->name('profile.notifications.update');
+    Route::delete('/profile/notifications/devices/{subscription}', [ProfileNotificationController::class, 'destroyDevice'])
+        ->whereNumber('subscription')
+        ->middleware('throttle:30,1')
+        ->name('profile.notifications.devices.destroy');
+    Route::post('/profile/notifications/devices/{subscription}/test', [ProfileNotificationController::class, 'sendTest'])
+        ->whereNumber('subscription')
+        ->middleware('throttle:30,1')
+        ->name('profile.notifications.devices.test');
 
     Route::get('/user/confirm-password', [ConfirmPasswordController::class, 'show'])
         ->name('password.confirm');
@@ -531,6 +569,21 @@ Route::middleware([
             Route::post('/settings/keys-and-secrets/mailbox-password/test', [AdminKeysAndSecretsController::class, 'test'])
                 ->middleware(['can:admin.settings.manage', 'account.step-up', 'throttle:5,1'])
                 ->name('settings.keys-and-secrets.test');
+            Route::put('/settings/push-notifications/vapid', [AdminPushNotificationsController::class, 'storeVapid'])
+                ->middleware(['can:admin.settings.manage', 'account.step-up'])
+                ->name('settings.push-notifications.vapid.store');
+            Route::delete('/settings/push-notifications/vapid', [AdminPushNotificationsController::class, 'clearVapid'])
+                ->middleware(['can:admin.settings.manage', 'account.step-up'])
+                ->name('settings.push-notifications.vapid.clear');
+            Route::post('/settings/push-notifications/vapid/generate', [AdminPushNotificationsController::class, 'generateVapid'])
+                ->middleware(['can:admin.settings.manage', 'account.step-up'])
+                ->name('settings.push-notifications.vapid.generate');
+            Route::put('/settings/push-notifications/pause', [AdminPushNotificationsController::class, 'updatePause'])
+                ->middleware(['can:admin.settings.manage', 'account.step-up'])
+                ->name('settings.push-notifications.pause.update');
+            Route::post('/settings/push-notifications/test', [AdminPushNotificationsController::class, 'sendTest'])
+                ->middleware(['can:admin.settings.manage', 'account.step-up', 'throttle:5,1'])
+                ->name('settings.push-notifications.test');
             Route::put('/settings/integrations/{integration}', [AdminIntegrationController::class, 'update'])
                 ->middleware('can:admin.settings.manage')
                 ->name('settings.integrations.update');

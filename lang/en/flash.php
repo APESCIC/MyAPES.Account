@@ -12,6 +12,8 @@ return [
     'passkey_added' => 'Passkey added.',
     'passkey_removed' => 'Passkey removed.',
     'profile_updated' => 'Profile updated.',
+    'notifications_updated' => 'Notification settings updated.',
+    'notifications_test_sent' => 'Test push sent to that device.',
     'staff_profile_updated' => 'Staff profile updated.',
     'qa_switched' => 'Switched to QA :role (:email).',
     'saved' => 'Saved.',

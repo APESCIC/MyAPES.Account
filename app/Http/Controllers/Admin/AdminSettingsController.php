@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\Settings\ApiDocsTab;
 use App\Http\Controllers\Admin\Settings\GeneralTab;
 use App\Http\Controllers\Admin\Settings\IntegrationsTab;
 use App\Http\Controllers\Admin\Settings\KeysAndSecretsTab;
+use App\Http\Controllers\Admin\Settings\PushNotificationsTab;
 use App\Http\Controllers\Admin\Settings\WebhooksTab;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -31,6 +32,8 @@ class AdminSettingsController extends Controller
 
     public const TAB_KEYS_AND_SECRETS = 'keys-and-secrets';
 
+    public const TAB_PUSH_NOTIFICATIONS = 'push-notifications';
+
     public function index(): RedirectResponse
     {
         return redirect()->route('admin.settings.show', self::TAB_GENERAL);
@@ -44,6 +47,7 @@ class AdminSettingsController extends Controller
         WebhooksTab $webhooks,
         ApiDocsTab $apiDocs,
         KeysAndSecretsTab $keysAndSecrets,
+        PushNotificationsTab $pushNotifications,
     ): Response {
         $tabs = $this->tabs();
         abort_unless(isset($tabs[$tab]), 404);
@@ -59,6 +63,7 @@ class AdminSettingsController extends Controller
                 self::TAB_WEBHOOKS => $webhooks->viewData(),
                 self::TAB_API_DOCS => $apiDocs->viewData(),
                 self::TAB_KEYS_AND_SECRETS => $keysAndSecrets->viewData(),
+                self::TAB_PUSH_NOTIFICATIONS => $pushNotifications->viewData(),
             },
         ])->header('Cache-Control', 'no-store, private');
     }
@@ -71,6 +76,7 @@ class AdminSettingsController extends Controller
         return [
             self::TAB_GENERAL => __('admin.settings.tabs.general'),
             self::TAB_INTEGRATIONS => __('admin.settings.tabs.integrations'),
+            self::TAB_PUSH_NOTIFICATIONS => __('admin.settings.tabs.push_notifications'),
             self::TAB_API_CLIENTS => __('admin.settings.tabs.api_clients'),
             self::TAB_WEBHOOKS => __('admin.settings.tabs.webhooks'),
             self::TAB_API_DOCS => __('admin.settings.tabs.api_docs'),

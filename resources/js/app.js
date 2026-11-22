@@ -1,6 +1,7 @@
 import {
     ArrowRight,
     BadgeCheck,
+    Bell,
     BookOpen,
     Briefcase,
     BriefcaseBusiness,
@@ -55,6 +56,8 @@ import {
 import { initBotProtection } from './bot-protection.js';
 import { initChangeLog } from './change-log.js';
 import { initPasskeys } from './passkeys.js';
+import { initPushServiceWorker } from './push/register.js';
+import { initPushSoftPrompt } from './push/soft-prompt.js';
 import { initStaffMessageFilter } from './staff/message-filter.js';
 import { initOwnerPicker } from './tickets/owner-picker.js';
 import { initCommandPalette } from './workspace/command-palette.js';
@@ -62,6 +65,7 @@ import { initWorkspaceDrawer } from './workspace/drawer.js';
 import { initFileUploads } from './workspace/file-upload.js';
 import { initFormActions } from './workspace/form-actions.js';
 import { initGuidedTour } from './workspace/guided-tour.js';
+import { initNotificationBell } from './workspace/notification-bell.js';
 import { initQaSwitcher } from './workspace/qa-switcher.js';
 import { initRichTextEditors } from './workspace/rich-text-editor.js';
 import { initToasts } from './workspace/toasts.js';
@@ -69,6 +73,7 @@ import { initToasts } from './workspace/toasts.js';
 const icons = {
     ArrowRight,
     BadgeCheck,
+    Bell,
     BookOpen,
     Briefcase,
     BriefcaseBusiness,
@@ -154,6 +159,8 @@ applyTheme(document.documentElement.dataset.theme);
 initChangeLog();
 initBotProtection();
 initPasskeys();
+initPushServiceWorker();
+initPushSoftPrompt();
 initToasts();
 initOwnerPicker();
 initStaffMessageFilter();
@@ -176,6 +183,7 @@ initCommandPalette({
     beforeOpen: () => drawer.close({ restoreFocus: false }),
 });
 initGuidedTour();
+initNotificationBell();
 initQaSwitcher();
 
 const mascotStorageKey = 'myapes-mascot-dismissed-v2';

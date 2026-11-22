@@ -30,6 +30,9 @@ return [
         'TINYMCE_API_KEY' => env('TINYMCE_API_KEY'),
         'RECAPTCHA_SITE_KEY' => env('RECAPTCHA_SITE_KEY'),
         'RECAPTCHA_SECRET_KEY' => env('RECAPTCHA_SECRET_KEY'),
+        'VAPID_PUBLIC_KEY' => env('VAPID_PUBLIC_KEY'),
+        'VAPID_PRIVATE_KEY' => env('VAPID_PRIVATE_KEY'),
+        'VAPID_SUBJECT' => env('VAPID_SUBJECT'),
     ],
 
 ];

@@ -96,6 +96,21 @@ composer pre-merge     # release metadata, build and tests, as CI runs them
 composer pre-pr-verify # pre-merge, then the Herd setup; -Fresh also runs demo:reset
 ```
 
+### Web push browser smoke (local Herd only)
+
+`npm run test:push-smoke` uses Playwright against `https://myapes-account.test`. It checks that the dashboard does not call `Notification.requestPermission` on load, then subscribes and unsubscribes on Profile → Notifications. CI skips it unless you opt in.
+
+1. Install Chromium for Playwright once: `npx playwright install chromium`
+2. Configure VAPID keys locally (`.env` or Admin → Keys and secrets) and run the live preview gate so the site is up.
+3. Run:
+
+```powershell
+$env:MYAPES_PUSH_SMOKE = '1'
+npm run test:push-smoke
+```
+
+Without `MYAPES_PUSH_SMOKE=1`, or when the Herd site is unreachable, the script exits 0 with a skip message.
+
 ## Mail
 
 Every email goes to Herd's mail catcher (SMTP `127.0.0.1:2525`); read it in **Herd > Mail**. Nothing is delivered.

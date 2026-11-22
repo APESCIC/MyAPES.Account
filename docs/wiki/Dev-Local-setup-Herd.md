@@ -30,6 +30,18 @@ Open Herd first. `composer setup` runs `scripts/herd-setup.ps1`: it checks the v
 - `composer demo:seed` loads it; `composer demo:reset` wipes the local database and reloads it
 - Both refuse to run unless `APP_ENV=local`
 
+## HTTPS and web push
+
+Web push subscription requires a **secure origin**. This Herd site is served at `https://myapes-account.test` when the site is secured in Herd (Vite HMR uses `https://myapes-account.test:5175` with the same certificate). Securing the site (`herd secure myapes-account`) is an **owner-run** Herd change — do not alter other sites or global Herd settings without asking.
+
+For push locally:
+
+1. Use HTTPS URLs only (`https://myapes-account.test`, not `http://`).
+2. Set **separate test** VAPID keys in `.env` or **Admin → Settings → Push notifications** — never production Vault material.
+3. Optional smoke: `npm run test:push-smoke` with `MYAPES_PUSH_SMOKE=1` (see [docs/herd.md](https://github.com/APESCIC/MyAPES.Account/blob/main/docs/herd.md#web-push-browser-smoke-local-herd-only)).
+
+If styles vanish after securing, restart Vite (`scripts\preview.ps1 -StopDevServer`, then `scripts\preview.ps1`) so `public/hot` matches HTTPS.
+
 ## Before a pull request
 - `composer test` (or `php artisan test`)
 - `composer pre-merge`

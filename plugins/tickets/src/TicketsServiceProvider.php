@@ -15,6 +15,7 @@ use App\Core\Extensions\Settings\ManagedListDefinition;
 use App\Core\Extensions\Settings\ManagedListRegistry;
 use App\Core\Mail\MailCategory;
 use App\Core\Mail\MailTemplate;
+use App\Core\Push\PushRouteServiceLabelRegistry;
 use App\Core\Search\RecordSearchRegistry;
 use App\Core\Webhooks\WebhookEvents;
 use App\Core\Webhooks\WebhookSources;
@@ -28,6 +29,7 @@ use Plugins\Tickets\Inbound\TicketEmailReplyHandler;
 use Plugins\Tickets\Models\SupportTicket;
 use Plugins\Tickets\Notifications\TicketUpdatedNotification;
 use Plugins\Tickets\Policies\SupportTicketPolicy;
+use Plugins\Tickets\Push\TicketsPushRouteServiceLabels;
 use Plugins\Tickets\Search\TicketsRecordSearchProvider;
 
 class TicketsServiceProvider extends PluginServiceProvider
@@ -37,6 +39,8 @@ class TicketsServiceProvider extends PluginServiceProvider
         parent::boot();
 
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'tickets');
+
+        TicketsPushRouteServiceLabels::register(app(PushRouteServiceLabelRegistry::class));
 
         Gate::policy(SupportTicket::class, SupportTicketPolicy::class);
         app(RecordSearchRegistry::class)->contribute(static fn (): array => [

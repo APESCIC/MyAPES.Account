@@ -6,7 +6,12 @@ use App\Core\Accounts\User;
 use App\Core\Mail\Concerns\BuildsBrandedMail;
 use App\Core\Mail\Concerns\MentionsAttachments;
 use App\Core\Mail\Concerns\OffersEmailReply;
+use App\Core\Push\Concerns\SendsWebPush;
+use App\Core\Push\PushNotificationTypeKeys;
+use App\Core\Push\PushTarget;
+use App\Core\Push\WebPushPayload;
 use App\Support\WorkflowLabels;
+use Plugins\Cases\CasesArea;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -19,6 +24,7 @@ class ApesCicCaseUpdatedNotification extends Notification implements ShouldQueue
     use MentionsAttachments;
     use OffersEmailReply;
     use Queueable;
+    use SendsWebPush;
 
     public bool $deleteWhenMissingModels = true;
 
@@ -33,9 +39,32 @@ class ApesCicCaseUpdatedNotification extends Notification implements ShouldQueue
         $this->afterCommit();
     }
 
+    protected function pushNotificationTypeKey(): string
+    {
+        return PushNotificationTypeKeys::CASE_UPDATE_SHARED;
+    }
+
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        $area = CasesArea::forModule($this->subCoreKey);
+
+        return $this->optionalWebPushChannels(
+            $notifiable,
+            ['database', 'mail'],
+            $this->pushRecipientContext($this->actor, $area->permission('view-all')),
+        );
+    }
+
+    public function toWebPush(object $notifiable): WebPushPayload
+    {
+        $area = CasesArea::forModule($this->subCoreKey);
+
+        return $this->privateWebPush(new PushTarget(
+            $this->showRouteName,
+            ['case' => $this->case->id],
+            (string) $this->case->id,
+            $area->serviceLabel,
+        ));
     }
 
     public function toMail(object $notifiable): MailMessage
