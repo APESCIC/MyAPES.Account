@@ -13,7 +13,7 @@
 
         <section>
             <h2>{{ __('public.legal.privacy.blade.who_we_are') }}</h2>
-            <p>Association of Protecting Exotic Species CIC (CIC No. 16253848) is the controller for personal information processed in MyAPES Account. This notice covers the public portal used by service users, and the staff tools that support APES CIC, APES Shelter and Rescue, and APES Pet Care Clinic.</p>
+            <p>Association of Protecting Exotic Species CIC (CIC No. 16253848) is the controller for personal information processed in MyAPES Account. This notice covers the public portal used by clients, and the staff tools that support APES CIC, APES Shelter and Rescue, and APES Pet Care Clinic.</p>
             <p>You can also read more about APES CIC on the <a href="https://www.apes.org.uk" rel="noopener noreferrer">{{ __('public.legal.help.blade.apes_website') }}</a>.</p>
         </section>
 
@@ -37,7 +37,7 @@
 
         <section>
             <h2>{{ __('public.legal.privacy.blade.who_can_see_it') }}</h2>
-            <p>Public users see their own profile, pets, and the tickets or cases available to them. Staff and administrators see the records their role allows, so they can respond to support and animal-care work. Hosting and email providers process information only as needed to run the service.</p>
+            <p>Public Accounts see their own profile, pets, and the tickets or cases available to them. Staff and administrators see the records their role allows, so they can respond to support and animal-care work. Hosting and email providers process information only as needed to run the service.</p>
         </section>
 
         <section>
@@ -67,9 +67,9 @@
             <h2>{{ __('public.legal.privacy.blade.your_rights') }}</h2>
             <p>You can ask APES CIC for a copy of the personal information we hold, and you can ask us to correct it or, where the law allows, delete it or limit how we use it. You can also complain to the Information Commissioner's Office if you are unhappy with how we handle your information.</p>
             @registrationOpen
-                <p>Signed-in public users can start a privacy request through APES CIC cases. If you cannot sign in, create a <a href="{{ route('public.register') }}">{{ __('public.legal.privacy.blade.public_account') }}</a> and open a case, or contact APES CIC through the <a href="https://www.apes.org.uk" rel="noopener noreferrer">{{ __('public.legal.help.blade.apes_website') }}</a>.</p>
+                <p>Signed-in public accounts can start a privacy request through APES CIC cases. If you cannot sign in, create a <a href="{{ route('public.register') }}">{{ __('public.legal.privacy.blade.public_account') }}</a> and open a case, or contact APES CIC through the <a href="https://www.apes.org.uk" rel="noopener noreferrer">{{ __('public.legal.help.blade.apes_website') }}</a>.</p>
             @else
-                <p>Signed-in public users can start a privacy request through APES CIC cases. If you cannot sign in, contact APES CIC through the <a href="https://www.apes.org.uk" rel="noopener noreferrer">{{ __('public.legal.help.blade.apes_website') }}</a>.</p>
+                <p>Signed-in public accounts can start a privacy request through APES CIC cases. If you cannot sign in, contact APES CIC through the <a href="https://www.apes.org.uk" rel="noopener noreferrer">{{ __('public.legal.help.blade.apes_website') }}</a>.</p>
             @endregistrationOpen
         </section>
 

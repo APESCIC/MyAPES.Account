@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
  *
  * A directory-linked account (Cloudron OIDC or hybrid) with no protected
  * staff-side role still counts as staff, flagged as unmapped, so it never
- * lands in Public users. This classifies accounts for lists, navigation and
+ * lands in Public Accounts. This classifies accounts for lists, navigation and
  * counts only: route gates keep using AuthorizationProfile.
  */
 final class AccountClassifier

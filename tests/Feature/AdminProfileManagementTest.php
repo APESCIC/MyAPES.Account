@@ -31,7 +31,7 @@ class AdminProfileManagementTest extends TestCase
             ->assertOk()
             ->assertSeeText('Public Listed User')
             ->assertDontSeeText('Staff Listed User')
-            ->assertSee('Public users')
+            ->assertSee('Public Accounts')
             ->assertSee('Staff');
 
         $this->actingAs($administrator)

@@ -20,9 +20,17 @@ class TerminologyGlossaryTest extends TestCase
         $this->assertNull(config('glossary.canonical.platform_name'));
         $this->assertSame('Plugin', trans_choice('terms.plugin', 1));
         $this->assertSame('Plugins', trans_choice('terms.plugin', 2));
-        $this->assertSame('Public user', trans_choice('terms.public_user', 1));
-        $this->assertSame('Public users', trans_choice('terms.public_user', 2));
+        $this->assertSame('Public Account', trans_choice('terms.public_account', 1));
+        $this->assertSame('Public Accounts', trans_choice('terms.public_account', 2));
+        $this->assertSame('Staff Account', trans_choice('terms.staff_account', 1));
+        $this->assertSame('Staff Accounts', __('terms.staff_accounts'));
+        $this->assertSame('Public Profile', trans_choice('terms.public_profile', 1));
+        $this->assertSame('Client', trans_choice('terms.client', 1));
+        $this->assertSame('Caller', trans_choice('terms.caller', 1));
         $this->assertSame('Staff', __('terms.staff'));
+        // Deprecated keys retained for transition (#871).
+        $this->assertSame('Public user', trans_choice('terms.public_user', 1));
+        $this->assertSame('Public users', __('terms.public_users'));
         $this->assertSame('Staff users', __('terms.staff_users'));
         $this->assertSame('Role', trans_choice('terms.recruitment_role', 1));
         $this->assertSame('Roles', trans_choice('terms.recruitment_role', 2));

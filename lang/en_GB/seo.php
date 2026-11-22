@@ -40,7 +40,7 @@ return [
 
     'terms' => [
         'title' => 'Terms of use | MyAPES Account',
-        'description' => 'The rules for using MyAPES Account as a public service user or as APES staff.',
+        'description' => 'The rules for using MyAPES Account as a Public Account holder or as APES staff.',
         'keywords' => 'terms, MyAPES Account',
     ],
 
@@ -65,13 +65,13 @@ return [
 
     'public_login' => [
         'title' => 'Public Login | MyAPES Account',
-        'description' => 'Sign in to your MyAPES Account public user account.',
+        'description' => 'Sign in to your MyAPES Account public account.',
         'keywords' => 'public login, MyAPES Account',
     ],
 
     'register' => [
         'title' => 'Register | MyAPES Account',
-        'description' => 'Create a MyAPES Account public user account to access APES CIC services.',
+        'description' => 'Create a MyAPES Account public account to access APES CIC services.',
         'keywords' => 'register, MyAPES Account',
     ],
 

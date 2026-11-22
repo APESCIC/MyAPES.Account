@@ -90,7 +90,7 @@ return [
         ],
         'people' => [
             'heading' => 'People and access',
-            'body' => 'Public users and Staff users list every account by type. Open an account to check its profile and roles.',
+            'body' => 'Public Accounts and Staff Accounts list every account by type. Open an account to check its profile and roles.',
             'access' => 'Access holds groups, roles and permissions. Give access to a group rather than one person, so that everyone doing the same job sees the same things.',
         ],
         'modules' => [
@@ -113,7 +113,7 @@ return [
         ],
         'maintenance' => [
             'heading' => 'Maintenance',
-            'body' => 'Maintenance mode blocks public users and ordinary staff and pauses queued jobs. Health checks, staff sign-in and the Maintenance page stay available, so you can end it again once you have checked the app.',
+            'body' => 'Maintenance mode blocks public accounts and ordinary staff and pauses queued jobs. Health checks, staff sign-in and the Maintenance page stay available, so you can end it again once you have checked the app.',
         ],
         'security' => [
             'heading' => 'Security settings',

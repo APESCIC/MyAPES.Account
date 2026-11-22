@@ -163,8 +163,8 @@ class AdminUserController extends Controller
                 : null,
             'showAllAccountsLink' => $actor instanceof User && $profile->isAdministrator($actor),
             'listTitle' => match ($filters['account_type'] ?? null) {
-                'staff' => __('terms.staff_users'),
-                'public' => __('terms.public_users'),
+                'staff' => __('terms.staff_accounts'),
+                'public' => __('terms.public_accounts'),
                 default => __('admin.users.all_accounts'),
             },
             'clearFiltersUrl' => route('admin.users.index', array_filter([

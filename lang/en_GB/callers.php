@@ -10,7 +10,7 @@ return [
     'search_label' => 'Find a caller',
     'search_placeholder' => 'Name, email or username',
     'search' => 'Search',
-    'results' => 'Matching accounts',
+    'results' => 'Matching clients',
     'no_results' => 'No public accounts match that search.',
     'back' => 'Back to callers',
     'verify_heading' => 'Check who is calling',

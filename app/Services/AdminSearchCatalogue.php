@@ -133,7 +133,7 @@ final class AdminSearchCatalogue
             ],
             [
                 'id' => 'admin.users',
-                'label' => __('terms.public_users'),
+                'label' => __('terms.public_accounts'),
                 'description' => __('admin.search.sections.users'),
                 'url' => route('admin.users.index', ['account_type' => 'public']),
                 'keywords_key' => 'admin.search.keywords.users',
@@ -141,7 +141,7 @@ final class AdminSearchCatalogue
             ],
             [
                 'id' => 'admin.staff',
-                'label' => __('terms.staff_users'),
+                'label' => __('terms.staff_accounts'),
                 'description' => __('admin.search.sections.staff'),
                 'url' => route('admin.users.index', ['account_type' => 'staff']),
                 'keywords_key' => 'admin.search.keywords.staff',

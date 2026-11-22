@@ -20,7 +20,7 @@
 
         <section>
             <h2>{{ __('public.legal.help.blade.which_sign_in_should_i_use') }}</h2>
-            <p><a href="{{ route('public.login') }}">{{ __('public.chrome.app.blade.public_login') }}</a> is for service users who created a MyAPES account. Use your username or email and the password you chose at register.</p>
+            <p><a href="{{ route('public.login') }}">{{ __('public.chrome.app.blade.public_login') }}</a> is for clients who created a MyAPES account. Use your username or email and the password you chose at register.</p>
             <p><a href="{{ route('staff.login') }}">{{ __('public.chrome.app.blade.staff_login') }}</a> is for APES staff and administrators. Those accounts sign in through APES Cloudron, not the public password form.</p>
         </section>
 
@@ -64,7 +64,7 @@
 
         <section>
             <h2>{{ __('public.legal.help.blade.ask_apes_cic_for_help') }}</h2>
-            <p>Signed-in public users should open a ticket in the service they need. Use an APES CIC case when the matter is a privacy request, complaint, or other formal casework.</p>
+            <p>Signed-in public accounts should open a ticket in the service they need. Use an APES CIC case when the matter is a privacy request, complaint, or other formal casework.</p>
             <p>{{ __('public.legal.help.blade.if_something_in_the_software_looks_broken_the_app_suppo') }}</p>
         </section>
 

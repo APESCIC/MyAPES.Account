@@ -54,7 +54,7 @@ return [
         'title' => 'Welcome | MyAPES Account',
         'heading' => 'Welcome to MyAPES Account',
         'public_access' => 'Public access',
-        'public_access_blurb' => 'For service users managing support, profiles, and pets.',
+        'public_access_blurb' => 'For clients managing support, profiles, and pets.',
         'staff_access' => 'Staff access',
         'staff_access_blurb' => 'APES staff and administrators should use Cloudron sign-in.',
         'open_roles' => 'Open roles',

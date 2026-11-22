@@ -22,7 +22,7 @@ final class MascotTips
             ],
             'home' => [
                 'title' => 'Pick the door that matches you.',
-                'body' => 'Public Login is for service users. Staff and administrators should use Staff Login.',
+                'body' => 'Public Login is for clients. Staff and administrators should use Staff Login.',
             ],
             'recruitment.index' => [
                 'title' => 'Browse open roles.',
