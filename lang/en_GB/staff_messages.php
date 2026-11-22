@@ -72,11 +72,16 @@ return [
 
     'errors' => [
         'no_recipients' => 'No recipients match this filter.',
+        'queue_failed' => 'Could not queue this message. Try confirming again.',
     ],
 
     'unsubscribe' => [
         'title' => 'Unsubscribed',
         'heading' => 'You have opted out of Optional email',
         'body' => 'You will no longer receive Optional messages from MyAPES Account. Service and Security email may still be sent when needed.',
+        'confirm_title' => 'Confirm unsubscribe',
+        'confirm_heading' => 'Stop Optional email?',
+        'confirm_body' => 'Confirm to stop receiving Optional messages from MyAPES Account. Service and Security email may still be sent when needed.',
+        'confirm_action' => 'Unsubscribe from Optional email',
     ],
 ];

@@ -33,6 +33,8 @@ class StaffMessage extends Model
         'subject',
         'body_html',
         'recipient_filter',
+        'recipient_ids',
+        'send_offset',
         'status',
         'recipient_count',
         'opted_out_count',
@@ -49,6 +51,7 @@ class StaffMessage extends Model
     {
         return [
             'recipient_filter' => 'array',
+            'recipient_ids' => 'array',
             'queued_at' => 'datetime',
             'sent_at' => 'datetime',
         ];

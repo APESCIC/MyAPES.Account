@@ -21,7 +21,6 @@ use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminVersionController;
 use App\Http\Controllers\Admin\AdminWebhookController;
 use App\Http\Controllers\Admin\StaffAdminController;
-use Plugins\Tickets\Http\Controllers\Admin\AdminTicketEmbedFormController;
 use App\Http\Controllers\Auth\ConfirmPasswordController;
 use App\Http\Controllers\Auth\EmailChangeController;
 use App\Http\Controllers\Auth\OidcAuthController;
@@ -39,7 +38,6 @@ use App\Http\Controllers\HelpController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MailReplyLinkController;
 use App\Http\Controllers\MailUnsubscribeController;
-use App\Http\Controllers\Staff\StaffMessageController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PhoneVerificationPinController;
 use App\Http\Controllers\ProfileController;
@@ -49,14 +47,16 @@ use App\Http\Controllers\Staff\CallerController;
 use App\Http\Controllers\Staff\ClientController;
 use App\Http\Controllers\Staff\ClientNoteController;
 use App\Http\Controllers\Staff\StaffClientRecordController;
+use App\Http\Controllers\Staff\StaffMessageController;
 use App\Http\Controllers\SubCoreController;
-use App\Http\Controllers\Workspace\WorkspaceRecordSearchController;
 use App\Http\Controllers\SupportAttachmentController;
+use App\Http\Controllers\Workspace\WorkspaceRecordSearchController;
 use App\Http\Middleware\EnsureLocalReplyLoop;
 use App\Support\Tour\GuidedTour;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Plugins\Tickets\Http\Controllers\Admin\AdminTicketEmbedFormController;
 
 Route::middleware('guest')->group(function (): void {
     Route::view('/', 'auth.landing')->name('home');
@@ -87,10 +87,14 @@ Route::view('/terms', 'legal.terms')->name('terms');
 Route::get('/mail/reply', MailReplyLinkController::class)
     ->middleware(['signed', 'throttle:30,1'])
     ->name('mail.reply');
-Route::get('/mail/unsubscribe/{user}', MailUnsubscribeController::class)
+Route::get('/mail/unsubscribe/{user}', [MailUnsubscribeController::class, 'show'])
     ->middleware(['signed', 'throttle:30,1'])
     ->whereNumber('user')
     ->name('mail.unsubscribe');
+Route::post('/mail/unsubscribe/{user}', [MailUnsubscribeController::class, 'store'])
+    ->middleware(['signed', 'throttle:30,1'])
+    ->whereNumber('user')
+    ->name('mail.unsubscribe.store');
 Route::get('/log-in', static fn () => redirect()->route('public.login'))->name('login');
 Route::get('/email/change/confirm/{user}/{hash}', [EmailChangeController::class, 'confirm'])
     ->middleware(['signed', 'throttle:6,1'])

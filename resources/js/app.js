@@ -55,6 +55,7 @@ import {
 import { initBotProtection } from './bot-protection.js';
 import { initChangeLog } from './change-log.js';
 import { initPasskeys } from './passkeys.js';
+import { initStaffMessageFilter } from './staff/message-filter.js';
 import { initOwnerPicker } from './tickets/owner-picker.js';
 import { initCommandPalette } from './workspace/command-palette.js';
 import { initWorkspaceDrawer } from './workspace/drawer.js';
@@ -155,6 +156,7 @@ initBotProtection();
 initPasskeys();
 initToasts();
 initOwnerPicker();
+initStaffMessageFilter();
 initFormActions();
 initFileUploads();
 initRichTextEditors();

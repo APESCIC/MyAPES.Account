@@ -6,6 +6,7 @@ use App\Core\Accounts\AccountClassifier;
 use App\Core\Accounts\User;
 use App\Core\Content\RichText;
 use App\Core\Mail\StaffMessage;
+use App\Core\Mail\StaffMessageRecipientResolution;
 use App\Core\Mail\StaffMessageRecipientResolver;
 use App\Core\Search\RecordSearch;
 use App\Http\Controllers\Controller;
@@ -13,10 +14,15 @@ use App\Jobs\SendStaffMessageJob;
 use App\Services\AuditLogger;
 use App\Services\AuthorizationProfile;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Throwable;
 
 /**
  * Staff workspace email campaigns (#501–#508).
@@ -158,24 +164,18 @@ class StaffMessageController extends Controller
         Gate::authorize(AuthorizationProfile::PERMISSION_MESSAGES_SEND);
         $this->authorizeOwnMessage($request->user(), $message);
 
-        if (! in_array($message->status, [StaffMessage::STATUS_DRAFT, StaffMessage::STATUS_PREVIEW], true)) {
-            abort(403);
-        }
-
         $resolution = $this->resolveCounts(
             $request->user(),
             $message->recipient_filter,
             $message->category,
         );
 
-        $message->update([
-            'recipient_count' => $resolution->recipientCount(),
-            'opted_out_count' => $resolution->optedOutCount,
-        ]);
-
         if ($resolution->recipientCount() === 0) {
             return back()->withErrors(['recipients' => __('staff_messages.errors.no_recipients')]);
         }
+
+        $message->recipient_count = $resolution->recipientCount();
+        $message->opted_out_count = $resolution->optedOutCount;
 
         if ($this->requiresConfirmCount($message)) {
             $request->validate([
@@ -183,33 +183,72 @@ class StaffMessageController extends Controller
             ]);
         }
 
-        $message->update([
-            'status' => StaffMessage::STATUS_QUEUED,
-            'queued_at' => now(),
-            'sent_count' => 0,
-            'failed_count' => 0,
-        ]);
+        $recipientIds = $resolution->recipients->pluck('id')->map(static fn ($id): int => (int) $id)->values()->all();
 
-        $auditLogger->record(
-            'staff.messages.queued',
-            $request->user(),
-            $message,
-            [
-                'staff_message_id' => $message->id,
-                'recipient_count' => $message->recipient_count,
-                'category' => $message->category,
-                'subject' => $message->subject,
-            ],
-        );
+        try {
+            DB::transaction(function () use ($request, $message, $auditLogger, $resolution, $recipientIds): void {
+                $locked = StaffMessage::query()
+                    ->whereKey($message->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
-        SendStaffMessageJob::dispatch($message->id);
+                if (! in_array($locked->status, [StaffMessage::STATUS_DRAFT, StaffMessage::STATUS_PREVIEW], true)) {
+                    abort(403);
+                }
+
+                $locked->fill([
+                    'status' => StaffMessage::STATUS_QUEUED,
+                    'queued_at' => now(),
+                    'sent_count' => 0,
+                    'failed_count' => 0,
+                    'send_offset' => 0,
+                    'recipient_count' => $resolution->recipientCount(),
+                    'opted_out_count' => $resolution->optedOutCount,
+                    'recipient_ids' => $recipientIds,
+                ]);
+                $locked->save();
+
+                $auditLogger->record(
+                    'staff.messages.queued',
+                    $request->user(),
+                    $locked,
+                    [
+                        'staff_message_id' => $locked->id,
+                        'recipient_count' => $locked->recipient_count,
+                        'category' => $locked->category,
+                        'subject' => $locked->subject,
+                    ],
+                );
+
+                try {
+                    SendStaffMessageJob::dispatch($locked->id);
+                } catch (Throwable $exception) {
+                    $locked->update([
+                        'status' => StaffMessage::STATUS_PREVIEW,
+                        'queued_at' => null,
+                        'recipient_ids' => null,
+                        'send_offset' => 0,
+                    ]);
+
+                    throw $exception;
+                }
+            });
+        } catch (Throwable $exception) {
+            if ($exception instanceof HttpException) {
+                throw $exception;
+            }
+
+            report($exception);
+
+            return back()->withErrors(['recipients' => __('staff_messages.errors.queue_failed')]);
+        }
 
         return redirect()
             ->route('messages.show', $message)
             ->with('status', __('staff_messages.flash.queued'));
     }
 
-    public function userCandidates(Request $request, RecordSearch $search): \Illuminate\Http\JsonResponse
+    public function userCandidates(Request $request, RecordSearch $search): JsonResponse
     {
         Gate::authorize(AuthorizationProfile::PERMISSION_MESSAGES_SEND);
 
@@ -221,8 +260,14 @@ class StaffMessageController extends Controller
 
         $results = $search->search($request->user(), $q, perType: 15);
         $hits = collect($results['groups'])->firstWhere('type', 'users')['hits'] ?? [];
+        $canSendAll = $request->user()->can(AuthorizationProfile::PERMISSION_MESSAGES_SEND_ALL);
+        $hitIds = collect($hits)->pluck('id')->map(static fn ($id): int => (int) $id)->all();
+        $allowedIds = $canSendAll
+            ? $hitIds
+            : $this->resolver->userIdsWithinSenderScope($request->user(), $hitIds, false);
 
         $candidates = collect($hits)
+            ->filter(static fn (array $hit): bool => in_array((int) $hit['id'], $allowedIds, true))
             ->map(function (array $hit): ?array {
                 $user = User::query()->find($hit['id']);
 
@@ -259,14 +304,27 @@ class StaffMessageController extends Controller
                 ->map(static fn (string $key): array => ['key' => $key, 'label' => $key])
                 ->values()
                 ->all(),
-            'groups' => [
-                AccountClassifier::PUBLIC => __('staff_messages.filters.group_public'),
-                AccountClassifier::STUDENT => __('staff_messages.filters.group_student'),
-                AccountClassifier::VOLUNTEER => __('staff_messages.filters.group_volunteer'),
-                AccountClassifier::STAFF => __('staff_messages.filters.group_staff'),
-                AccountClassifier::ADMIN => __('staff_messages.filters.group_admin'),
-            ],
+            'groups' => $this->availableGroups($user),
         ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function availableGroups(User $user): array
+    {
+        $groups = [
+            AccountClassifier::PUBLIC => __('staff_messages.filters.group_public'),
+            AccountClassifier::STUDENT => __('staff_messages.filters.group_student'),
+            AccountClassifier::VOLUNTEER => __('staff_messages.filters.group_volunteer'),
+        ];
+
+        if ($user->can(AuthorizationProfile::PERMISSION_MESSAGES_SEND_ALL)) {
+            $groups[AccountClassifier::STAFF] = __('staff_messages.filters.group_staff');
+            $groups[AccountClassifier::ADMIN] = __('staff_messages.filters.group_admin');
+        }
+
+        return $groups;
     }
 
     /**
@@ -310,7 +368,7 @@ class StaffMessageController extends Controller
         };
     }
 
-    private function resolveCounts(User $sender, array $filter, string $category): \App\Core\Mail\StaffMessageRecipientResolution
+    private function resolveCounts(User $sender, array $filter, string $category): StaffMessageRecipientResolution
     {
         return $this->resolver->resolve(
             $sender,
@@ -364,9 +422,7 @@ class StaffMessageController extends Controller
 
     private function canViewAll(User $user): bool
     {
-        return $this->profile->isAdministrator($user)
-            || ($user->can(AuthorizationProfile::PERMISSION_MESSAGES_SEND_ALL)
-                && $user->can(AuthorizationProfile::PERMISSION_MESSAGES_HISTORY_VIEW));
+        return $this->profile->isAdministrator($user);
     }
 
     /**
@@ -375,22 +431,45 @@ class StaffMessageController extends Controller
     private function authorizeFilter(User $user, array $filter): void
     {
         $mode = $filter['mode'] ?? '';
+        $canSendAll = $user->can(AuthorizationProfile::PERMISSION_MESSAGES_SEND_ALL);
 
-        if ($mode === 'all' && ! $user->can(AuthorizationProfile::PERMISSION_MESSAGES_SEND_ALL)) {
+        if ($mode === 'all' && ! $canSendAll) {
             abort(403);
         }
 
         if ($mode === 'module'
-            && ! $user->can(AuthorizationProfile::PERMISSION_MESSAGES_SEND_ALL)
+            && ! $canSendAll
             && ! in_array((string) ($filter['module'] ?? ''), $this->resolver->allowedModuleKeys($user), true)) {
             abort(403);
+        }
+
+        if ($mode === 'group' && ! $canSendAll) {
+            $group = (string) ($filter['group'] ?? '');
+            if (in_array($group, [AccountClassifier::STAFF, AccountClassifier::ADMIN], true)) {
+                abort(403);
+            }
+        }
+
+        if ($mode === 'users' && ! $canSendAll) {
+            $requested = array_values(array_unique(array_map(
+                static fn ($id): int => (int) $id,
+                $filter['user_ids'] ?? [],
+            )));
+            $allowed = $this->resolver->userIdsWithinSenderScope($user, $requested, false);
+            sort($requested);
+            $allowedSorted = $allowed;
+            sort($allowedSorted);
+
+            if ($requested !== $allowedSorted) {
+                abort(403);
+            }
         }
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Builder<StaffMessage>
+     * @return Builder<StaffMessage>
      */
-    private function visibleQuery(User $user): \Illuminate\Database\Eloquent\Builder
+    private function visibleQuery(User $user): Builder
     {
         $query = StaffMessage::query();
 

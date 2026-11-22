@@ -16,8 +16,10 @@ return new class extends Migration
             $table->foreignId('sender_id')->constrained('users')->cascadeOnDelete();
             $table->string('category', 16);
             $table->string('subject');
-            $table->text('body_html');
+            $table->mediumText('body_html');
             $table->json('recipient_filter');
+            $table->json('recipient_ids')->nullable();
+            $table->unsignedInteger('send_offset')->default(0);
             $table->string('status', 16)->default('draft');
             $table->unsignedInteger('recipient_count')->default(0);
             $table->unsignedInteger('opted_out_count')->default(0);

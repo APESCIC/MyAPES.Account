@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
+use App\Core\Accounts\User;
 use App\Core\Mail\StaffMessage;
-use App\Core\Mail\StaffMessageRecipientResolver;
 use App\Notifications\StaffMessageNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -22,13 +22,19 @@ class SendStaffMessageJob implements ShouldQueue
 
     private const CHUNK_SIZE = 50;
 
-    public int $tries = 25;
+    public int $tries = 100;
+
+    public int $maxExceptions = 5;
 
     public function __construct(
         public int $staffMessageId,
-        public int $offset = 0,
     ) {
         $this->afterCommit();
+    }
+
+    public function retryUntil(): \DateTimeInterface
+    {
+        return now()->addDay();
     }
 
     /**
@@ -39,7 +45,7 @@ class SendStaffMessageJob implements ShouldQueue
         return [new RateLimited('staff-messages')];
     }
 
-    public function handle(StaffMessageRecipientResolver $resolver): void
+    public function handle(): void
     {
         $message = StaffMessage::query()->with('sender')->find($this->staffMessageId);
 
@@ -55,16 +61,19 @@ class SendStaffMessageJob implements ShouldQueue
             $message->update(['status' => StaffMessage::STATUS_SENDING]);
         }
 
-        $sender = $message->sender;
-        $resolution = $resolver->resolve(
-            $sender,
-            $message->recipient_filter,
-            $message->category,
-            $sender->can('staff.messages.send.all'),
-        );
+        $recipientIds = array_values(array_map(
+            static fn ($id): int => (int) $id,
+            is_array($message->recipient_ids) ? $message->recipient_ids : [],
+        ));
 
-        $recipientIds = $resolution->recipients->pluck('id')->values()->all();
-        $chunkIds = array_slice($recipientIds, $this->offset, self::CHUNK_SIZE);
+        if ($recipientIds === []) {
+            $this->finish($message);
+
+            return;
+        }
+
+        $offset = max(0, (int) $message->send_offset);
+        $chunkIds = array_slice($recipientIds, $offset, self::CHUNK_SIZE);
 
         if ($chunkIds === []) {
             $this->finish($message);
@@ -72,19 +81,25 @@ class SendStaffMessageJob implements ShouldQueue
             return;
         }
 
-        $users = $resolution->recipients
+        $users = User::query()
             ->whereIn('id', $chunkIds)
+            ->get()
+            ->sortBy(static fn (User $user): int => array_search($user->id, $chunkIds, true))
             ->values();
+
+        $sender = $message->sender;
+        $processed = 0;
 
         foreach ($users as $recipient) {
             if (! $this->consumeSenderQuota($sender->id)) {
+                $message->update(['send_offset' => $offset + $processed]);
                 $this->release(3600);
 
                 return;
             }
 
             try {
-                Notification::send($recipient, new StaffMessageNotification($message, $sender));
+                Notification::sendNow($recipient, new StaffMessageNotification($message, $sender));
                 $message->increment('sent_count');
             } catch (Throwable $exception) {
                 $message->increment('failed_count');
@@ -94,12 +109,15 @@ class SendStaffMessageJob implements ShouldQueue
                     'exception' => class_basename($exception),
                 ]);
             }
+
+            $processed++;
+            $message->update(['send_offset' => $offset + $processed]);
         }
 
-        $nextOffset = $this->offset + self::CHUNK_SIZE;
+        $nextOffset = $offset + $processed;
 
         if ($nextOffset < count($recipientIds)) {
-            self::dispatch($message->id, $nextOffset);
+            self::dispatch($message->id);
 
             return;
         }

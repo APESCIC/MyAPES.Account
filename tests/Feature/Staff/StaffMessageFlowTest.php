@@ -15,6 +15,7 @@ use App\Services\AuthorizationProfile;
 use App\Services\AuthorizationRoleMaterializer;
 use App\Services\ModuleInstallationSynchronizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Queue\Middleware\RateLimited;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
@@ -153,24 +154,59 @@ class StaffMessageFlowTest extends TestCase
         $this->assertNotNull(RateLimiter::limiter('staff-messages'));
 
         $middleware = (new SendStaffMessageJob(1))->middleware();
-        $this->assertInstanceOf(\Illuminate\Queue\Middleware\RateLimited::class, $middleware[0]);
+        $this->assertInstanceOf(RateLimited::class, $middleware[0]);
     }
 
-    public function test_signed_unsubscribe_sets_contact_preference_and_audits(): void
+    public function test_signed_unsubscribe_get_is_confirmation_only(): void
     {
         $user = User::factory()->create(['email' => 'unsub@example.com']);
         $user->contactPreference()->updateOrCreate([], ['email' => true, 'policy_version' => 'test', 'confirmed_at' => now()]);
 
         $url = URL::signedRoute('mail.unsubscribe', ['user' => $user]);
 
-        $this->get($url)->assertOk();
+        $this->get($url)
+            ->assertOk()
+            ->assertSee(__('staff_messages.unsubscribe.confirm_action'), false);
+
+        $this->assertTrue($user->contactPreference()->firstOrFail()->email);
+    }
+
+    public function test_signed_unsubscribe_post_sets_preference_consent_and_audits(): void
+    {
+        $user = User::factory()->create(['email' => 'unsub-post@example.com']);
+        $user->contactPreference()->updateOrCreate([], ['email' => true, 'policy_version' => 'test', 'confirmed_at' => now()]);
+
+        $url = URL::signedRoute('mail.unsubscribe.store', ['user' => $user]);
+
+        $this->post($url, ['List-Unsubscribe' => 'One-Click'])->assertOk();
 
         $this->assertFalse($user->contactPreference()->firstOrFail()->email);
+        $this->assertDatabaseHas('contact_consent_events', [
+            'user_id' => $user->id,
+            'channel' => 'email',
+            'granted' => 0,
+            'source' => 'staff_message_list_unsubscribe',
+        ]);
         $this->assertDatabaseHas('audit_logs', [
             'event' => 'contact_preferences.unsubscribed',
             'auditable_type' => 'user',
             'auditable_id' => $user->id,
         ]);
+    }
+
+    public function test_staff_without_send_all_cannot_target_admin_group(): void
+    {
+        $staff = User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create();
+
+        $this->actingAs($staff)
+            ->post(route('messages.store'), [
+                'category' => StaffMessage::CATEGORY_SERVICE,
+                'subject' => 'Admins only',
+                'body_html' => '<p>Hello</p>',
+                'filter_mode' => 'group',
+                'filter_group' => AccountClassifier::ADMIN,
+            ])
+            ->assertForbidden();
     }
 
     public function test_optional_notification_respects_opt_out(): void

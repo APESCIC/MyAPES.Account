@@ -44,6 +44,13 @@ final class StaffMessageRecipientResolver
             }
         }
 
+        if ($mode === 'group' && ! $canSendAll) {
+            $group = (string) ($filter['group'] ?? '');
+            if (in_array($group, [AccountClassifier::STAFF, AccountClassifier::ADMIN], true)) {
+                throw new AuthorizationException;
+            }
+        }
+
         $users = match ($mode) {
             'all' => $this->queryEligible()->get(),
             'group' => $this->resolveGroup((string) ($filter['group'] ?? '')),
@@ -51,6 +58,10 @@ final class StaffMessageRecipientResolver
             'users' => $this->resolveUsers($filter['user_ids'] ?? []),
             default => collect(),
         };
+
+        if (! $canSendAll && $mode === 'users') {
+            $users = $this->restrictNamedRecipients($sender, $users);
+        }
 
         $users = $this->deduplicateWithEmail($users);
 
@@ -90,6 +101,24 @@ final class StaffMessageRecipientResolver
             ->sort()
             ->values()
             ->all();
+    }
+
+    /**
+     * @param  list<int>  $userIds
+     * @return list<int>
+     */
+    public function userIdsWithinSenderScope(User $sender, array $userIds, bool $canSendAll): array
+    {
+        $normalized = array_values(array_unique(array_map(static fn ($id): int => (int) $id, $userIds)));
+
+        if ($canSendAll || $normalized === []) {
+            return $normalized;
+        }
+
+        $users = $this->resolveUsers($normalized);
+        $scoped = $this->restrictNamedRecipients($sender, $users);
+
+        return $scoped->pluck('id')->map(static fn ($id): int => (int) $id)->values()->all();
     }
 
     /**
@@ -159,6 +188,60 @@ final class StaffMessageRecipientResolver
                 );
             })
             ->get();
+    }
+
+    /**
+     * Without send-all, named recipients cannot include staff-side accounts, and
+     * senders who only have module navigation may only target users in those modules.
+     *
+     * @param  Collection<int, User>  $users
+     * @return Collection<int, User>
+     */
+    private function restrictNamedRecipients(User $sender, Collection $users): Collection
+    {
+        if ($users->isEmpty()) {
+            return $users;
+        }
+
+        $users = $users
+            ->reject(fn (User $user): bool => $this->accounts->isStaffSide($user))
+            ->values();
+
+        $allowedKeys = $this->allowedModuleKeys($sender);
+
+        if ($allowedKeys === [] || $this->accounts->isStaffSide($sender)) {
+            return $users;
+        }
+
+        $permissionNames = collect($allowedKeys)
+            ->flatMap(fn (string $key): array => $this->permissionsForModule($key))
+            ->unique()
+            ->values()
+            ->all();
+
+        if ($permissionNames === []) {
+            return collect();
+        }
+
+        $scopedIds = $this->queryEligible()
+            ->whereIn('id', $users->pluck('id')->all())
+            ->where(static function (Builder $query) use ($permissionNames): void {
+                $query->whereHas(
+                    'roles.permissions',
+                    static fn (Builder $permissionQuery): Builder => $permissionQuery
+                        ->where('permissions.guard_name', 'web')
+                        ->whereIn('permissions.name', $permissionNames),
+                )->orWhereHas(
+                    'permissions',
+                    static fn (Builder $permissionQuery): Builder => $permissionQuery
+                        ->where('permissions.guard_name', 'web')
+                        ->whereIn('permissions.name', $permissionNames),
+                );
+            })
+            ->pluck('id')
+            ->all();
+
+        return $users->whereIn('id', $scopedIds)->values();
     }
 
     /**
