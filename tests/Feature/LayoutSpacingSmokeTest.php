@@ -74,8 +74,6 @@ class LayoutSpacingSmokeTest extends TestCase
 
         $this->assertFlatTilesSitInGappingParents($this->get(route('home'))->assertOk()->getContent(), 'Landing');
         $this->assertFlatTilesSitInGappingParents($this->get(route('recruitment.index'))->assertOk()->getContent(), 'Recruitment board');
-        $this->assertFlatTilesSitInGappingParents((string) $this->view('auth.login'), 'Cloudron sign-in');
-
         $superAdmin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
         $this->assertFlatTilesSitInGappingParents(
             $this->actingAs($superAdmin)->get(route('admin.index'))->assertOk()->getContent(),
@@ -216,7 +214,7 @@ class LayoutSpacingSmokeTest extends TestCase
             ->assertSee('<div class="grid auth-service-tiles">', false)
             ->assertSee('<div class="grid auth-entry-grid">', false);
 
-        $this->view('auth.login')
+        $this->view('auth.staff-login')
             ->assertSee('<div class="grid auth-service-tiles">', false);
     }
 

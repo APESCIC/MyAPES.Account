@@ -139,7 +139,7 @@ class HealthAndThemeTest extends TestCase
             $this->assertStringNotContainsString('and APES Pet Care.</p>', $content);
         }
 
-        $this->view('auth.login')
+        $this->view('auth.staff-login')
             ->assertSeeText('APES Pet Care Clinic')
             ->assertDontSee('>APES Pet Care<', false)
             ->assertDontSee('and APES Pet Care.</p>', false);
