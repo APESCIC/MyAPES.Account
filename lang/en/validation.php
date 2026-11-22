@@ -179,6 +179,8 @@ return [
     |
     */
 
+    'push_endpoint' => 'The push endpoint must be a secure URL on an approved push service.',
+
     'custom' => [
         'attribute-name' => [
             'rule-name' => 'custom-message',

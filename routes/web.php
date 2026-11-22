@@ -41,6 +41,7 @@ use App\Http\Controllers\MailUnsubscribeController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PhoneVerificationPinController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\RobotsTxtController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Staff\CallerController;
@@ -150,6 +151,10 @@ if (app()->environment(['local', 'testing'])) {
             Route::post('/qa/logout', 'destroy')->name('qa.logout');
         });
 }
+
+Route::get('/push/vapid-public-key', [PushSubscriptionController::class, 'vapidPublicKey'])
+    ->middleware('throttle:60,1')
+    ->name('push.vapid-public-key');
 
 Route::prefix('staff/auth')->controller(OidcAuthController::class)->group(function (): void {
     Route::get('/login', 'login')->name('staff.auth.login');
@@ -306,6 +311,13 @@ Route::middleware([
         ->middleware(['account.step-up', 'throttle:two-factor-manage'])
         ->name('two-factor.recovery.regenerate');
     Route::get('/profile/staff-photo', [ProfileController::class, 'staffPhoto'])->name('profile.staff-photo');
+
+    Route::post('/push/subscriptions', [PushSubscriptionController::class, 'store'])
+        ->middleware('throttle:30,1')
+        ->name('push.subscriptions.store');
+    Route::delete('/push/subscriptions', [PushSubscriptionController::class, 'destroy'])
+        ->middleware('throttle:30,1')
+        ->name('push.subscriptions.destroy');
 
     Route::get('/user/confirm-password', [ConfirmPasswordController::class, 'show'])
         ->name('password.confirm');

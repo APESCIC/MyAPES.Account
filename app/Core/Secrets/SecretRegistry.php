@@ -26,6 +26,12 @@ final class SecretRegistry
 
     public const INBOUND_MAIL_IMAP_PASSWORD = 'inbound_mail_imap_password';
 
+    public const VAPID_PUBLIC_KEY = 'vapid_public_key';
+
+    public const VAPID_PRIVATE_KEY = 'vapid_private_key';
+
+    public const VAPID_SUBJECT = 'vapid_subject';
+
     /** @var array<string, SecretDefinition> */
     private array $secrets = [];
 
