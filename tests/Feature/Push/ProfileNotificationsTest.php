@@ -42,7 +42,7 @@ class ProfileNotificationsTest extends TestCase
     }
 
     #[DataProvider('roleTypeExpectations')]
-    public function test_profile_lists_only_types_available_to_each_role(string $role, array $mustSee, array $mustNotSee): void
+    public function test_profile_lists_only_types_available_to_each_role(string $role, array $mustSeeKeys, array $mustNotSeeKeys): void
     {
         $user = User::factory()->protectedRole($role)->create([
             'email_verified_at' => now(),
@@ -52,12 +52,12 @@ class ProfileNotificationsTest extends TestCase
         $response = $this->actingAs($user)->get(route('profile.edit'));
         $response->assertOk();
 
-        foreach ($mustSee as $label) {
-            $response->assertSee($label, false);
+        foreach ($mustSeeKeys as $labelKey) {
+            $response->assertSee(__($labelKey), false);
         }
 
-        foreach ($mustNotSee as $label) {
-            $response->assertDontSee($label, false);
+        foreach ($mustNotSeeKeys as $labelKey) {
+            $response->assertDontSee(__($labelKey), false);
         }
     }
 
@@ -69,28 +69,28 @@ class ProfileNotificationsTest extends TestCase
         return [
             'staff' => [
                 AuthorizationProfile::ROLE_STAFF,
-                [__('push.types.ticket_created'), __('push.types.account_security_change')],
-                [__('push.types.ticket_staff_reply')],
+                ['push.types.ticket_created', 'push.types.account_security_change'],
+                ['push.types.ticket_staff_reply'],
             ],
             'service_user' => [
                 AuthorizationProfile::ROLE_SERVICE_USER,
-                [__('push.types.ticket_staff_reply'), __('push.types.account_security_change')],
-                [__('push.types.ticket_created')],
+                ['push.types.ticket_staff_reply', 'push.types.account_security_change'],
+                ['push.types.ticket_created'],
             ],
             'administrator' => [
                 AuthorizationProfile::ROLE_ADMINISTRATOR,
-                [__('push.types.mail_import_attention')],
-                [__('push.types.ticket_staff_reply')],
+                ['push.types.mail_import_attention'],
+                ['push.types.ticket_staff_reply'],
             ],
             'volunteer' => [
                 AuthorizationProfile::ROLE_VOLUNTEER,
-                [__('push.types.ticket_client_reply'), __('push.types.ticket_created')],
-                [__('push.types.ticket_staff_reply')],
+                ['push.types.ticket_client_reply', 'push.types.ticket_created'],
+                ['push.types.ticket_staff_reply'],
             ],
             'student' => [
                 AuthorizationProfile::ROLE_STUDENT,
-                [__('push.types.ticket_assigned'), __('push.types.recruitment_application_update')],
-                [__('push.types.mail_import_attention')],
+                ['push.types.ticket_assigned', 'push.types.recruitment_application_update'],
+                ['push.types.mail_import_attention'],
             ],
         ];
     }

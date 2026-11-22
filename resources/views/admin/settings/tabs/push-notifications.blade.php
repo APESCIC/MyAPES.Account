@@ -123,7 +123,7 @@
     <dl class="detail-list" data-push-device-counts>
         @foreach($deviceCounts as $role => $count)
             <div>
-                <dt>{{ __('admin.settings.push_notifications.stats.roles.'.$role) }}</dt>
+                <dt>{{ \App\Core\Push\PushNotificationTypeKeys::statsRoleLabel($role) }}</dt>
                 <dd>{{ $count }}</dd>
             </div>
         @endforeach
@@ -145,7 +145,7 @@
             <tbody>
                 @foreach($deliveryCounts as $type => $totals)
                     <tr>
-                        <td>{{ __('push.types.'.$type, [], false) !== 'push.types.'.$type ? __('push.types.'.$type) : $type }}</td>
+                        <td>{{ \App\Core\Push\PushNotificationTypeKeys::typeLabel($type) }}</td>
                         <td>{{ $totals['sent'] }}</td>
                         <td>{{ $totals['failed'] }}</td>
                         <td>{{ $totals['expired'] }}</td>

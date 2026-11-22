@@ -40,20 +40,11 @@ final class PushPayloadBuilder
 
     private function body(string $typeKey, PushTarget $target): string
     {
-        $slug = str_replace('.', '_', $typeKey);
-        $reference = $target->referenceForBody();
-
-        if ($reference === '') {
-            return (string) __("push.payload.{$slug}");
-        }
-
-        $line = (string) __('push.payload.'.$slug, ['reference' => $reference]);
-
-        if ($target->serviceLabel !== null && $target->serviceLabel !== '') {
-            $line .= (string) __('push.payload.service_scope', ['service' => $target->serviceLabel]);
-        }
-
-        return $line;
+        return PushNotificationTypeKeys::payloadBody(
+            $typeKey,
+            $target->referenceForBody(),
+            $target->serviceLabel,
+        );
     }
 
     private function tag(string $typeKey, PushTarget $target): string

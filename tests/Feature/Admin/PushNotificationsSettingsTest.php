@@ -181,15 +181,22 @@ class PushNotificationsSettingsTest extends TestCase
     {
         $session = ['auth.password_confirmed_at' => now()->unix()];
 
+        $canGenerateOpenSslEc = true;
         try {
             VAPID::createVapidKeys();
         } catch (\Throwable) {
-            $this->markTestSkipped('OpenSSL EC key generation is unavailable in this environment.');
+            $canGenerateOpenSslEc = false;
         }
 
-        $this->actingAs($this->admin)->withSession($session)
-            ->post(route('admin.settings.push-notifications.vapid.generate'), ['subscriptions_confirm' => '1'])
-            ->assertSessionHasNoErrors();
+        if ($canGenerateOpenSslEc) {
+            $this->actingAs($this->admin)->withSession($session)
+                ->post(route('admin.settings.push-notifications.vapid.generate'), ['subscriptions_confirm' => '1'])
+                ->assertSessionHasNoErrors();
+        } else {
+            $this->actingAs($this->admin)->withSession($session)
+                ->put(route('admin.settings.push-notifications.vapid.store'), $this->vapidPayload())
+                ->assertSessionHasNoErrors();
+        }
 
         $this->assertSame(3, AuditLog::query()->where('event', 'admin.settings.secret_set')->count());
 
