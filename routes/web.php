@@ -2,6 +2,7 @@
 
 use App\Core\Qa\Http\Controllers\QaLoginController;
 use App\Core\Qa\Http\Middleware\EnsureQaLoginEnabled;
+use App\Http\Controllers\AccountNotificationController;
 use App\Http\Controllers\Admin\AdminAccessController;
 use App\Http\Controllers\Admin\AdminApiClientController;
 use App\Http\Controllers\Admin\AdminEmailController;
@@ -219,6 +220,12 @@ Route::middleware([
     'account.ready',
 ])->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::prefix('notifications')->name('notifications.')->group(function (): void {
+        Route::get('/', [AccountNotificationController::class, 'index'])->name('index');
+        Route::get('/{notification}/open', [AccountNotificationController::class, 'open'])->name('open');
+        Route::patch('/{notification}/read', [AccountNotificationController::class, 'markRead'])->name('read');
+        Route::post('/read-all', [AccountNotificationController::class, 'markAllRead'])->name('read-all');
+    });
     Route::get('/workspace/search/records', WorkspaceRecordSearchController::class)
         ->middleware('throttle:60,1')
         ->name('workspace.search.records');
