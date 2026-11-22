@@ -53,6 +53,7 @@ use App\Http\Controllers\Staff\ClientController;
 use App\Http\Controllers\Staff\ClientNoteController;
 use App\Http\Controllers\Staff\StaffClientRecordController;
 use App\Http\Controllers\Staff\StaffMessageController;
+use App\Http\Controllers\Staff\StaffReportProblemController;
 use App\Http\Controllers\SubCoreController;
 use App\Http\Controllers\SupportAttachmentController;
 use App\Http\Controllers\Workspace\WorkspaceRecordSearchController;
@@ -232,6 +233,11 @@ Route::middleware([
         ->name('workspace.search.records');
     Route::get('/help/staff', [HelpController::class, 'staff'])->name('help.staff');
     Route::get('/help/admin', [HelpController::class, 'admin'])->name('help.admin');
+    Route::get('/staff/report-problem', [StaffReportProblemController::class, 'create'])
+        ->name('staff.report-problem.create');
+    Route::post('/staff/report-problem', [StaffReportProblemController::class, 'store'])
+        ->middleware('throttle:20,1')
+        ->name('staff.report-problem.store');
     Route::post('/tour/{audience}/complete', [GuidedTourController::class, 'complete'])
         ->whereIn('audience', GuidedTour::AUDIENCES)
         ->middleware('throttle:20,1')

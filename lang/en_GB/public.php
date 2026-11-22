@@ -153,7 +153,7 @@ return [
     ],
     'change_log' => [
         'track_myapes_core_releases_fixes_compliance_work_access' => 'Track MyAPES Account releases, fixes, compliance work, accessibility improvements, and user-facing changes.',
-        'report_bugs_suggest_improvements_or_follow_project_disc' => 'Report bugs, suggest improvements, or follow project discussion on GitHub.',
+        'report_bugs_suggest_improvements_or_follow_project_disc' => 'Administrators can use GitHub for source and discussion. Staff can report a problem to open an internal ticket.',
         'try_a_different_search_or_choose_all_releases' => 'Try a different search or choose All releases.',
         'search_versions_changes_affected_areas' => 'Search versions, changes, affected areas…',
         'release_classifications' => 'Release classifications',

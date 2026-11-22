@@ -22,7 +22,7 @@ class ChangeLogPageTest extends TestCase
         $response
             ->assertOk()
             ->assertSeeText('Change Log Hub')
-            ->assertSeeText('Feedback & source')
+            ->assertDontSeeText('Feedback & source')
             ->assertSeeText('Current version v0.72.0')
             ->assertSee('data-change-log', false)
             ->assertSee('data-change-log-controls hidden', false)
@@ -74,7 +74,7 @@ class ChangeLogPageTest extends TestCase
             ->assertSeeText('APES CIC Tickets and Cases');
 
         $this->assertGuestOrPublicAudience($response, $publicVersions);
-        $this->assertPublicGithubLinks($response);
+        $this->assertNoGithubOrReportProblemLinks($response);
 
         $this->assertProgressiveDetailsContainReleaseContent($response);
     }
@@ -91,7 +91,7 @@ class ChangeLogPageTest extends TestCase
             ->assertSeeText('Current version v0.72.0');
 
         $this->assertGuestOrPublicAudience($response, $publicVersions);
-        $this->assertPublicGithubLinks($response);
+        $this->assertNoGithubOrReportProblemLinks($response);
     }
 
     public function test_staff_and_admin_can_read_internal_only_change_log_notes_and_links(): void
@@ -122,7 +122,11 @@ class ChangeLogPageTest extends TestCase
                 ->assertSee('https://github.com/APESCIC/MyAPES-Account/pull/163', false)
                 ->assertSee('https://github.com/APESCIC/MyAPES-Account/releases/tag/v0.31.10', false);
 
-            $this->assertPublicGithubLinks($response);
+            if ($role === User::ROLE_ADMIN) {
+                $this->assertAdminGithubLinks($response);
+            } else {
+                $this->assertStaffReportProblemLink($response);
+            }
 
             $this->assertSame(
                 count($allVersions),
@@ -162,7 +166,8 @@ class ChangeLogPageTest extends TestCase
                 ->assertSee('aria-label="View the MyAPES Account change log for version v0.72.0"', false)
                 ->assertSeeText('v0.72.0');
 
-            $this->assertPublicGithubLinks($response);
+            $this->assertNoGithubOrReportProblemLinks($response);
+            $this->assertFooterLegalLinks($response);
         }
 
         $loginResponse = $this->get('/login');
@@ -172,7 +177,8 @@ class ChangeLogPageTest extends TestCase
             ->assertSee('href="'.route('change-log.index').'"', false)
             ->assertSeeText('v0.72.0');
 
-        $this->assertPublicGithubLinks($loginResponse);
+        $this->assertNoGithubOrReportProblemLinks($loginResponse);
+        $this->assertFooterLegalLinks($loginResponse);
 
         $user = User::factory()->accessLevel(User::ROLE_SERVICE_USER)->create();
 
@@ -183,24 +189,49 @@ class ChangeLogPageTest extends TestCase
             ->assertSee('href="'.route('change-log.index').'"', false)
             ->assertSeeText('v0.72.0');
 
-        $this->assertPublicGithubLinks($dashboardResponse);
+        $this->assertNoGithubOrReportProblemLinks($dashboardResponse);
+        $this->assertFooterLegalLinks($dashboardResponse);
     }
 
-    private function assertPublicGithubLinks(TestResponse $response): void
+    private function assertFooterLegalLinks(TestResponse $response): void
     {
         $response
             ->assertSee('data-workspace-dock', false)
+            ->assertSee('site-footer__links', false)
+            ->assertSee('href="'.route('privacy').'"', false)
+            ->assertSee('href="'.route('cookies').'"', false)
+            ->assertSee('href="'.route('help').'"', false)
+            ->assertSee('href="'.route('terms').'"', false);
+    }
+
+    private function assertAdminGithubLinks(TestResponse $response): void
+    {
+        $response
             ->assertSee('https://github.com/APESCIC/MyAPES-Account"', false)
             ->assertSee('https://github.com/APESCIC/MyAPES-Account/issues/new/choose"', false)
             ->assertSee('https://github.com/APESCIC/MyAPES-Account/discussions"', false)
             ->assertSeeText('GitHub')
             ->assertSeeText('Open an issue')
             ->assertSeeText('Discussions')
-            ->assertSee('site-footer__links', false)
-            ->assertSee('href="'.route('privacy').'"', false)
-            ->assertSee('href="'.route('cookies').'"', false)
-            ->assertSee('href="'.route('help').'"', false)
-            ->assertSee('href="'.route('terms').'"', false);
+            ->assertDontSeeText('Report a problem');
+    }
+
+    private function assertStaffReportProblemLink(TestResponse $response): void
+    {
+        $response
+            ->assertSee('href="'.route('staff.report-problem.create').'"', false)
+            ->assertSeeText('Report a problem')
+            ->assertDontSee('https://github.com/APESCIC/MyAPES-Account/issues/new/choose"', false)
+            ->assertDontSeeText('Open an issue')
+            ->assertDontSeeText('Discussions');
+    }
+
+    private function assertNoGithubOrReportProblemLinks(TestResponse $response): void
+    {
+        $response
+            ->assertDontSee('https://github.com/APESCIC/MyAPES-Account/issues/new/choose"', false)
+            ->assertDontSee('https://github.com/APESCIC/MyAPES-Account/discussions"', false)
+            ->assertDontSee('href="'.route('staff.report-problem.create').'"', false);
     }
 
     /**
@@ -226,7 +257,7 @@ class ChangeLogPageTest extends TestCase
             ->assertDontSee('https://github.com/APESCIC/MyAPES-Account/issues/122', false)
             ->assertDontSee('https://github.com/APESCIC/MyAPES-Account/pull/164', false);
 
-        $this->assertPublicGithubLinks($response);
+        $this->assertNoGithubOrReportProblemLinks($response);
 
         $this->assertSame(count($publicVersions), substr_count($content, 'data-release-record'));
         $this->assertStringNotContainsString('>Internal-only<', $content);
