@@ -19,6 +19,18 @@ return [
 
     'admin' => 'Admin',
 
+    'public_account' => 'Public Account|Public Accounts',
+    'public_accounts' => 'Public Accounts',
+    'staff_account' => 'Staff Account|Staff Accounts',
+    'staff_accounts' => 'Staff Accounts',
+    'public_profile' => 'Public Profile|Public Profiles',
+    'public_profiles' => 'Public Profiles',
+    'client' => 'Client|Clients',
+    'clients' => 'Clients',
+    'caller' => 'Caller|Callers',
+    'callers' => 'Callers',
+
+    // Deprecated labels (kept for transition; prefer public_account / staff_account).
     'public_user' => 'Public user|Public users',
     'public_users' => 'Public users',
     'staff' => 'Staff',
