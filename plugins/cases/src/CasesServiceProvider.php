@@ -14,6 +14,7 @@ use App\Core\Extensions\Settings\ManagedListDefinition;
 use App\Core\Extensions\Settings\ManagedListRegistry;
 use App\Core\Mail\MailCategory;
 use App\Core\Mail\MailTemplate;
+use App\Core\Push\PushRouteServiceLabelRegistry;
 use App\Core\Search\RecordSearchRegistry;
 use App\Core\Webhooks\WebhookEvents;
 use App\Core\Webhooks\WebhookSources;
@@ -28,6 +29,7 @@ use Plugins\Cases\Models\ShelterCase;
 use Plugins\Cases\Notifications\ApesCicCaseUpdatedNotification;
 use Plugins\Cases\Notifications\ShelterCaseUpdatedNotification;
 use Plugins\Cases\Policies\ShelterCasePolicy;
+use Plugins\Cases\Push\CasesPushRouteServiceLabels;
 use Plugins\Cases\Search\CasesRecordSearchProvider;
 
 class CasesServiceProvider extends PluginServiceProvider
@@ -37,6 +39,8 @@ class CasesServiceProvider extends PluginServiceProvider
         parent::boot();
 
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'cases');
+
+        CasesPushRouteServiceLabels::register(app(PushRouteServiceLabelRegistry::class));
 
         Gate::policy(ShelterCase::class, ShelterCasePolicy::class);
         app(RecordSearchRegistry::class)->contribute(static fn (): array => [

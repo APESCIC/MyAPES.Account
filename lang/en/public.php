@@ -107,6 +107,13 @@ return [
                 'who_we_are' => 'Who we are',
                 'email_replies' => 'Replies by email',
                 'email_replies_body' => 'You can reply to ticket and case emails instead of logging in. Your reply goes to our communications mailbox; we check that it came from the address on your account, add the text and any allowed attachments to the ticket or case, and move it to a Processed folder in the mailbox, where it is deleted after 30 days. We keep the full email for :days days so we can check problems, then delete it and keep only a record of when it arrived, whether it was added and why.',
+                'spam_protection' => 'Protecting forms from spam',
+                'spam_protection_body' => 'To stop automated sign-ups and spam, the register, forgot password, open a ticket and job application forms, and Public Login after repeated failed attempts, use Google reCAPTCHA v3. It runs only on those forms. Google receives technical information such as your IP address, browser details and how the page is used, and returns a score; we do not store it. We rely on our legitimate interest in keeping the service secure. Google\'s Privacy Policy and Terms of Service apply to that processing. The forms also have hidden checks that do not send anything to Google.',
+                'web_push_notifications' => 'Web push notifications',
+                'web_push_subscriptions' => 'If you turn on web push in Profile → Notifications, we store a subscription for each browser or Home Screen app you allow. That includes a browser label, operating system label, and a one-way hash so we can target that device without keeping the raw subscription address in our delivery log.',
+                'web_push_alert_content' => 'When an event you asked for happens, we send a short alert. The text on your lock screen is built from the notification type and a record reference (for example a ticket number), not the full message from a ticket or case.',
+                'web_push_delivery' => 'Delivery uses your browser\'s push service. Depending on your browser and device, that may be run by Google, Mozilla, Microsoft or Apple. They carry the message in encrypted form from us to your device. They can see the device address needed for delivery; they do not receive the content of your tickets, cases or other records through that channel.',
+                'web_push_retention' => 'We keep metadata about whether a push was sent, failed or expired (notification type and status only). Those records are removed after a limited retention period. We do not store message bodies in push delivery records.',
             ],
         ],
         'terms' => [

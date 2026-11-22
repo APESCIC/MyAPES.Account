@@ -6,8 +6,12 @@
 ])
 @php
     $quietEnabled = (bool) ($settings?->quiet_hours_enabled ?? false);
-    $quietStart = $settings?->quiet_hours_start ? substr((string) $settings->quiet_hours_start, 0, 5) : '22:00';
-    $quietEnd = $settings?->quiet_hours_end ? substr((string) $settings->quiet_hours_end, 0, 5) : '07:00';
+    $quietStart = $settings?->quiet_hours_start
+        ? substr((string) $settings->quiet_hours_start, 0, 5)
+        : config('push-profile.quiet_hours_default_start');
+    $quietEnd = $settings?->quiet_hours_end
+        ? substr((string) $settings->quiet_hours_end, 0, 5)
+        : config('push-profile.quiet_hours_default_end');
 @endphp
 <div class="push-profile-notifications">
     <x-push.device-notifications />

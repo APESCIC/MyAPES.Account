@@ -3,9 +3,6 @@
 namespace App\Core\Push;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Plugins\Cases\CasesArea;
-use Plugins\Tickets\TicketsArea;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -31,7 +28,7 @@ final class PushTargetFromUrl
                 $routeName,
                 self::routeParameters($parameters),
                 self::referenceLabel($referenceLabel, $parameters),
-                self::serviceLabel($routeName, $parameters),
+                app(PushRouteServiceLabelRegistry::class)->resolve($routeName, $parameters),
             );
         } catch (NotFoundHttpException|MethodNotAllowedHttpException) {
             return new PushTarget('dashboard', [], self::referenceLabel($referenceLabel));
@@ -78,34 +75,5 @@ final class PushTargetFromUrl
         }
 
         return '';
-    }
-
-    /**
-     * @param  array<string, mixed>  $parameters
-     */
-    private static function serviceLabel(string $routeName, array $parameters): ?string
-    {
-        if (Str::startsWith($routeName, 'shelter.')) {
-            return CasesArea::forModule('shelter-rescue')->serviceLabel;
-        }
-
-        if (Str::startsWith($routeName, 'apes-cic.')) {
-            $module = 'apes-cic';
-            if (isset($parameters['ticket'])) {
-                $ticket = $parameters['ticket'];
-
-                return TicketsArea::forModule(
-                    is_object($ticket) ? (string) $ticket->sub_core_key : $module,
-                )->serviceLabel;
-            }
-
-            return CasesArea::forModule($module)->serviceLabel;
-        }
-
-        if (Str::startsWith($routeName, 'petcare.')) {
-            return TicketsArea::forModule('pet-care-clinic')->serviceLabel;
-        }
-
-        return null;
     }
 }
