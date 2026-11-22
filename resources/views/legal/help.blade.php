@@ -21,7 +21,7 @@
         <section>
             <h2>{{ __('public.legal.help.blade.which_sign_in_should_i_use') }}</h2>
             <p><a href="{{ route('public.login') }}">{{ __('public.chrome.app.blade.public_login') }}</a> is for clients who created a MyAPES account. Use your username or email and the password you chose at register.</p>
-            <p><a href="{{ route('staff.login') }}">{{ __('public.chrome.app.blade.staff_login') }}</a> is for APES staff and administrators. Those accounts sign in through APES Cloudron, not the public password form.</p>
+            <p>{{ __('public.legal.help.blade.staff_login_footer_only') }}</p>
         </section>
 
         <section>

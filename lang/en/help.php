@@ -22,22 +22,22 @@ return [
     'staff' => [
         'title' => 'Staff guide',
         'eyebrow' => 'Staff guide',
-        'intro' => 'How the Staff and Admin areas fit together, for staff, volunteers, students and administrators.',
+        'intro' => 'How to use MyAPES Account day to day, for staff, volunteers and students.',
         'public_guide_link' => 'Public guide',
         'areas' => [
-            'heading' => 'The three areas',
+            'heading' => 'The areas you may see',
             'public' => 'Public: pages anyone can open without signing in, such as Help, the change log and the legal notices.',
-            'staff' => 'Staff: your dashboard, profile and the services and plugins your group can use.',
-            'admin' => 'Admin: people, access, modules, plugins, emails and maintenance. Only administrators see it, and they switch with the Staff | Admin control at the top of the menu.',
+            'staff' => 'Staff: your dashboard, profile and the services and tools your team can use.',
+            'admin' => 'Admin: people, access, organisation settings, emails and maintenance. Only administrators see it, and they switch with the Staff | Admin control at the top of the menu.',
         ],
         'dashboard' => [
             'heading' => 'Your dashboard',
             'body' => 'After you sign in you land on the staff dashboard. It lists the open items that need you first, then a summary for each service you can use.',
         ],
         'services' => [
-            'heading' => 'Services and plugins',
-            'body' => 'Each service (APES CIC, APES Shelter and Rescue, APES Pet Care Clinic) has its own home in the menu. The plugins under it, such as Tickets, Cases, Pet Profiles, Consultations and Recruitment, depend on the access your administrator gave your group.',
-            'missing' => 'If a plugin you need is missing, ask an administrator to check the access matrix for your group.',
+            'heading' => 'Services and tools',
+            'body' => 'Each service (APES CIC, APES Shelter and Rescue, APES Pet Care Clinic) has its own home in the menu. The tools under it, such as Tickets, Cases, Pet Profiles, Consultations and Recruitment, depend on the access your administrator gave your team.',
+            'missing' => 'If a tool you need is missing, ask an administrator to check what your team can use.',
         ],
         'pets' => [
             'heading' => 'Pet records',
@@ -52,7 +52,7 @@ return [
         ],
         'clients' => [
             'heading' => 'Creating a public client account',
-            'body' => 'Staff, volunteers and students with the Create public client accounts permission can open Clients and create a local public account for someone who phones in. This never creates a Cloudron staff account.',
+            'body' => 'Staff, volunteers and students with the Create public client accounts permission can open Clients and create a local public account for someone who phones in. This never creates a Staff Account.',
             'pin' => 'You must set a 4–8 digit phone verification PIN. It is shown once after you save — write it down for the caller, then it disappears. The PIN is stored hashed and is never emailed, logged or printed again.',
             'email' => 'Email is optional. If you enter an email and tick the set-password option, the person gets a one-time link that expires after 72 hours. That email never includes the PIN or a password.',
             'consent' => 'Tick staff-assisted consent to record that you created the account with the person\'s agreement. The audit log stores who created it and whether the email was sent, without the PIN or password.',
@@ -71,18 +71,18 @@ return [
         ],
         'account' => [
             'heading' => 'Your account',
-            'body' => 'Staff accounts sign in through APES Cloudron. Use Profile to check your details, two-factor authentication and passkeys.',
+            'body' => 'Staff Accounts sign in through Staff Login. Use Profile to check your details, two-factor authentication and passkeys.',
         ],
         'support' => [
             'heading' => 'When something goes wrong',
-            'body' => 'If the software looks broken, open an issue from the Display and help menu. For anything about a person or a record, follow your service procedure first.',
+            'body' => 'If the software looks broken, use Report a problem from the Display and help menu. For anything about a person or a record, follow your service procedure first.',
         ],
     ],
 
     'admin' => [
         'title' => 'Admin guide',
         'eyebrow' => 'Admin guide',
-        'intro' => 'Where to find the Admin area tools and what to check first. You only see the parts your access allows.',
+        'intro' => 'Where to find the Admin area tools and what to check first. You only see the parts your access allows. Technical topics (plugins, modules, directory sync, OIDC, API, webhooks and the access matrix) live here rather than in the Staff guide.',
         'overview' => [
             'heading' => 'Admin overview',
             'body' => 'Overview shows account, service and plugin numbers at a glance. Switch to it with the Staff | Admin control at the top of the menu.',
@@ -91,11 +91,11 @@ return [
         'people' => [
             'heading' => 'People and access',
             'body' => 'Public Accounts and Staff Accounts list every account by type. Open an account to check its profile and roles.',
-            'access' => 'Access holds groups, roles and permissions. Give access to a group rather than one person, so that everyone doing the same job sees the same things.',
+            'access' => 'Access holds groups, roles and permissions. Give access to a group rather than one person, so that everyone doing the same job sees the same things. The access matrix and directory / OIDC group mappings are managed here.',
         ],
         'modules' => [
             'heading' => 'Modules, plugins and versions',
-            'body' => 'Modules are the services (APES CIC, APES Shelter and Rescue, APES Pet Care Clinic). Plugins add features to a module. Turning a plugin off hides it without deleting its records.',
+            'body' => 'Modules are the services (APES CIC, APES Shelter and Rescue, APES Pet Care Clinic). Plugins add features to a module. Turning a plugin off hides it without deleting its records. API clients and webhooks are also managed from Admin.',
             'versions' => 'Versions shows the installed version of each module and plugin and its history of changes.',
         ],
         'lists' => [

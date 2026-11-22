@@ -26,7 +26,7 @@
                 <li>{{ __('public.legal.privacy.blade.pet_profiles_tickets_cases_and_comments_you_create_or_t') }}</li>
                 <li>{{ __('public.legal.privacy.blade.technical_records_needed_to_keep_the_service_secure_suc') }}</li>
             </ul>
-            <p>Staff accounts are created through APES Cloudron. Those accounts follow the same service records once a person is signed in, and directory groups decide what they can open.</p>
+            <p>Staff accounts are created through Staff Login. Those accounts follow the same service records once a person is signed in, and directory groups decide what they can open.</p>
         </section>
 
         <section>

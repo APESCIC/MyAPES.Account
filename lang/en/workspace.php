@@ -125,7 +125,7 @@ return [
         'staff_plugin' => ['plugin'],
         'login' => ['sign in', 'log in'],
         'register' => ['sign up', 'create account', 'join'],
-        'staff_login' => ['staff', 'employee', 'cloudron', 'sign in'],
+        'staff_login' => ['staff', 'employee', 'sign in'],
         'switch_panel' => ['panel', 'workspace', 'switch'],
         'view_site' => ['home', 'public', 'site', 'landing'],
     ],

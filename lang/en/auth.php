@@ -56,7 +56,8 @@ return [
         'public_access' => 'Public access',
         'public_access_blurb' => 'For clients managing support, profiles, and pets.',
         'staff_access' => 'Staff access',
-        'staff_access_blurb' => 'APES staff and administrators should use Cloudron sign-in.',
+        'staff_access_blurb' => 'APES staff and administrators should use Staff Login.',
+        'staff_login_footer_hint' => 'Staff, volunteers and students: use Staff Login at the bottom of the page.',
         'open_roles' => 'Open roles',
         'open_roles_blurb' => 'Browse staff, volunteering, and student opportunities with APES CIC.',
         'view_open_roles' => 'View open roles',
@@ -101,7 +102,7 @@ return [
     'forgot_password' => [
         'title' => 'Forgot password | MyAPES Account',
         'heading' => 'Forgot password',
-        'intro' => 'Enter the email for your local public account. Directory and staff accounts should use Staff Login and Cloudron instead.',
+        'intro' => 'Enter the email for your local public account. Directory and staff accounts should use Staff Login instead.',
         'submit' => 'Send reset link',
     ],
 
@@ -155,7 +156,7 @@ return [
     'email_change' => [
         'heading' => 'Change email',
         'intro' => 'Notifications and password-reset mail go to this address. Local accounts can change it after confirming their password; we verify the new inbox before switching.',
-        'directory_owned' => 'Notifications and password-reset mail go to this address. Directory and Cloudron accounts keep the email sourced from the directory.',
+        'directory_owned' => 'Notifications and password-reset mail go to this address. Directory accounts keep the email sourced from the directory.',
         'new_email' => 'New email address',
         'submit' => 'Send confirmation link',
         'cancel' => 'Cancel pending change',
@@ -179,7 +180,7 @@ return [
 
     'two_factor' => [
         'heading' => 'Authenticator app (2FA)',
-        'intro' => 'Add a one-time code from an authenticator app when you sign in with your local password. Cloudron-only staff accounts are unchanged.',
+        'intro' => 'Add a one-time code from an authenticator app when you sign in with your local password. Staff directory accounts are unchanged.',
         'enable' => 'Set up authenticator app',
         'disable' => 'Disable authenticator app',
         'disable_note' => 'You will confirm your password first. Disabling removes the app and unused recovery codes.',
@@ -214,7 +215,7 @@ return [
 
     'passkeys' => [
         'heading' => 'Passkeys',
-        'intro' => 'Use a passkey (device unlock, security key, or password manager) for phishing-resistant sign-in. You can still use your password, and authenticator codes if enabled. Cloudron-only staff accounts are unchanged.',
+        'intro' => 'Use a passkey (device unlock, security key, or password manager) for phishing-resistant sign-in. You can still use your password, and authenticator codes if enabled. Staff directory accounts are unchanged.',
         'empty' => 'No passkeys registered yet.',
         'name_label' => 'Passkey name',
         'default_name' => 'This device',
