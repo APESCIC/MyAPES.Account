@@ -36,6 +36,12 @@ class AuthorizationProfile
 
     public const PERMISSION_CLIENT_SENSITIVE = 'staff.clients.sensitive';
 
+    public const PERMISSION_MESSAGES_SEND = 'staff.messages.send';
+
+    public const PERMISSION_MESSAGES_SEND_ALL = 'staff.messages.send.all';
+
+    public const PERMISSION_MESSAGES_HISTORY_VIEW = 'staff.messages.history.view';
+
     private const BASE_PERMISSION_MATRIX = [
         self::ROLE_SERVICE_USER => [],
         self::ROLE_STUDENT => [
@@ -43,12 +49,16 @@ class AuthorizationProfile
             self::PERMISSION_CLIENT_CREATE,
             self::PERMISSION_CLIENT_VIEW,
             self::PERMISSION_CLIENT_SEARCH,
+            self::PERMISSION_MESSAGES_SEND,
+            self::PERMISSION_MESSAGES_HISTORY_VIEW,
         ],
         self::ROLE_VOLUNTEER => [
             self::PERMISSION_VOLUNTEER_ACCESS,
             self::PERMISSION_CLIENT_CREATE,
             self::PERMISSION_CLIENT_VIEW,
             self::PERMISSION_CLIENT_SEARCH,
+            self::PERMISSION_MESSAGES_SEND,
+            self::PERMISSION_MESSAGES_HISTORY_VIEW,
         ],
         self::ROLE_STAFF => [
             self::PERMISSION_STAFF_ACCESS,
@@ -56,6 +66,8 @@ class AuthorizationProfile
             self::PERMISSION_CLIENT_VIEW,
             self::PERMISSION_CLIENT_SEARCH,
             self::PERMISSION_CLIENT_MANAGE,
+            self::PERMISSION_MESSAGES_SEND,
+            self::PERMISSION_MESSAGES_HISTORY_VIEW,
         ],
         self::ROLE_ADMINISTRATOR => [
             self::PERMISSION_STAFF_ACCESS,
@@ -65,6 +77,9 @@ class AuthorizationProfile
             self::PERMISSION_CLIENT_SEARCH,
             self::PERMISSION_CLIENT_MANAGE,
             self::PERMISSION_CLIENT_SENSITIVE,
+            self::PERMISSION_MESSAGES_SEND,
+            self::PERMISSION_MESSAGES_SEND_ALL,
+            self::PERMISSION_MESSAGES_HISTORY_VIEW,
             'admin.users.view',
             'admin.users.manage',
             'admin.groups.view',
