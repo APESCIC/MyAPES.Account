@@ -134,6 +134,9 @@
                     <a href="{{ route('cookies') }}" @if (request()->routeIs('cookies')) aria-current="page" @endif>{{ __('public.chrome.app.blade.cookies') }}</a>
                     <a href="{{ route('help') }}" data-tour-target="footer-help" @if (request()->routeIs('help')) aria-current="page" @endif>{{ __('public.chrome.app.blade.help') }}</a>
                     <a href="{{ route('terms') }}" @if (request()->routeIs('terms')) aria-current="page" @endif>{{ __('public.chrome.app.blade.terms') }}</a>
+                    @guest
+                        <a href="{{ route('staff.login') }}" @if (request()->routeIs('staff.login')) aria-current="page" @endif>{{ __('public.chrome.app.blade.staff_login') }}</a>
+                    @endguest
                 </nav>
                 <a
                     class="site-footer__version"

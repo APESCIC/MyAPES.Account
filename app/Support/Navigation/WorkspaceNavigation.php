@@ -352,7 +352,6 @@ final class WorkspaceNavigation
                 $this->general->registrationOpen()
                     ? new NavItem('public.register', __('public.chrome.app.blade.register'), route('public.register'), 'user-plus', ['public.register'], $this->words('workspace.keywords.register'))
                     : null,
-                new NavItem('staff.login', __('public.chrome.app.blade.staff_login'), route('staff.login'), 'badge-check', ['staff.*'], $this->words('workspace.keywords.staff_login')),
             ]))),
             new NavGroup('support', __('workspace.groups.support'), [
                 new NavItem('help', __('public.chrome.app.blade.help'), route('help'), 'circle-help', ['help'], $this->words('workspace.keywords.help')),

@@ -159,7 +159,7 @@
                                     <button type="submit">{{ __('admin.users.send_staff_login_reminder') }}</button>
                                 </div>
                             </form>
-                            <p class="muted"><a href="{{ route('staff.login') }}">{{ __('admin.users.staff_login') }}</a> {{ __('admin.users.only_sign_in_path') }}</p>
+                            <p class="muted">{{ __('admin.users.staff_login') }} {{ __('admin.users.only_sign_in_path') }}</p>
                         @endif
                     </section>
                 @elseif(! $isStaffAccount && ! $managedUser->isLocalPasswordIdentity())
