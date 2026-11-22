@@ -8,6 +8,7 @@ use App\Core\Mail\Concerns\BuildsBrandedMail;
 use App\Core\Mail\Concerns\RespectsMailPreference;
 use App\Core\Mail\StaffMessage;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\URL;
@@ -17,9 +18,10 @@ use Symfony\Component\Mime\Email;
 /**
  * Delivers one staff-authored campaign message (#505–#506).
  *
- * Sent synchronously from SendStaffMessageJob so campaign counts reflect delivery outcomes.
+ * Implements ShouldQueue for the outbound mail matrix. SendStaffMessageJob uses
+ * Notification::sendNow so campaign counts still reflect delivery outcomes.
  */
-class StaffMessageNotification extends Notification
+class StaffMessageNotification extends Notification implements ShouldQueue
 {
     use BuildsBrandedMail;
     use Queueable;
@@ -28,7 +30,9 @@ class StaffMessageNotification extends Notification
     public function __construct(
         private readonly StaffMessage $message,
         private readonly User $sender,
-    ) {}
+    ) {
+        $this->afterCommit();
+    }
 
     /**
      * @return array<int, string>
