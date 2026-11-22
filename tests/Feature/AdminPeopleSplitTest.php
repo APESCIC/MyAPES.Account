@@ -18,11 +18,11 @@ class AdminPeopleSplitTest extends TestCase
         $people = $this->people();
 
         $publicList = $this->actingAs($administrator)
-            ->get(route('admin.users.index', ['account_type' => 'public']))
+            ->get(route('admin.public-accounts.index'))
             ->assertOk()
             ->assertSeeText($people['public']->name);
         $staffList = $this->actingAs($administrator)
-            ->get(route('admin.users.index', ['account_type' => 'staff']))
+            ->get(route('admin.staff-accounts.index'))
             ->assertOk();
 
         $this->assertSame([$people['public']->id], $this->listedIds($publicList));
@@ -55,14 +55,14 @@ class AdminPeopleSplitTest extends TestCase
 
         foreach ($expected as $type => $ids) {
             $response = $this->actingAs($administrator)
-                ->get(route('admin.users.index', ['account_type' => 'staff', 'staff_type' => $type]))
+                ->get(route('admin.staff-accounts.index', ['staff_type' => $type]))
                 ->assertOk();
 
             $this->assertEqualsCanonicalizing($ids, $this->listedIds($response), "Role filter [{$type}]");
         }
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.index', ['account_type' => 'staff']))
+            ->get(route('admin.staff-accounts.index'))
             ->assertOk()
             ->assertSee('id="staff-type"', false)
             ->assertDontSee('id="protected-role"', false)
@@ -70,7 +70,7 @@ class AdminPeopleSplitTest extends TestCase
             ->assertSee('href="'.route('admin.users.index').'"', false);
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.index', ['account_type' => 'staff', 'staff_type' => 'owner']))
+            ->get(route('admin.staff-accounts.index', ['staff_type' => 'owner']))
             ->assertSessionHasErrors('staff_type');
     }
 
@@ -80,7 +80,7 @@ class AdminPeopleSplitTest extends TestCase
         $this->people();
 
         $content = $this->actingAs($administrator)
-            ->get(route('admin.users.index', ['account_type' => 'staff']))
+            ->get(route('admin.staff-accounts.index'))
             ->assertOk()
             ->assertSee('href="'.route('admin.access.index', ['tab' => 'groups']).'"', false)
             ->assertSeeText('No Cloudron group mapped')
@@ -89,7 +89,7 @@ class AdminPeopleSplitTest extends TestCase
         $this->assertSame(3, substr_count($content, 'data-badge="unmapped"'));
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.index', ['account_type' => 'staff', 'staff_type' => 'volunteer']))
+            ->get(route('admin.staff-accounts.index', ['staff_type' => 'volunteer']))
             ->assertOk()
             ->assertDontSee('data-badge="unmapped"', false);
 
@@ -103,7 +103,7 @@ class AdminPeopleSplitTest extends TestCase
         $administrator = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.index', ['account_type' => 'staff']))
+            ->get(route('admin.staff-accounts.index'))
             ->assertOk()
             ->assertSee('<title>Staff Accounts | MyAPES Account</title>', false)
             ->assertSee('<h1 id="admin-users-title">Staff Accounts</h1>', false)

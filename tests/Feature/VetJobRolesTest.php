@@ -90,7 +90,7 @@ class VetJobRolesTest extends TestCase
         User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create(['name' => 'Sam Staff']);
 
         $content = $this->actingAs($administrator)
-            ->get(route('admin.users.index', ['account_type' => 'staff']))
+            ->get(route('admin.staff-accounts.index'))
             ->assertOk()
             ->assertSee('<span class="status" data-badge="clinical">Vet</span>', false)
             ->assertSee('<span class="status" data-badge="clinical">Vet Nurse</span>', false)

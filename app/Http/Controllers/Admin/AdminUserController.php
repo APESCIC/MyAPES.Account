@@ -40,6 +40,117 @@ class AdminUserController extends Controller
 {
     use BuildsUserProfileHub;
 
+    public function publicAccountsIndex(
+        Request $request,
+        AuthorizationProfile $profile,
+        AccountClassifier $classifier,
+        LocalPublicPasswordResetService $passwordResets,
+    ): View {
+        $request->merge(['account_type' => 'public']);
+
+        return $this->index($request, $profile, $classifier, $passwordResets);
+    }
+
+    public function staffAccountsIndex(
+        Request $request,
+        AuthorizationProfile $profile,
+        AccountClassifier $classifier,
+        LocalPublicPasswordResetService $passwordResets,
+    ): View {
+        $request->merge(['account_type' => 'staff']);
+
+        return $this->index($request, $profile, $classifier, $passwordResets);
+    }
+
+    public function publicAccountShow(
+        Request $request,
+        string $user,
+        AuthorizationMutationService $mutations,
+        LocalPublicPasswordResetService $passwordResets,
+        PendingFirstLoginChaseService $pendingFirstLoginChase,
+        ModuleRegistry $modules,
+        VerificationResendService $verificationResends,
+        UserRecordsSummary $records,
+        UserProfileHubActions $actions,
+        UserActivityTimeline $timeline,
+        TotpTwoFactorService $twoFactor,
+    ): View {
+        return $this->show(
+            $request,
+            $user,
+            $mutations,
+            $passwordResets,
+            $pendingFirstLoginChase,
+            $modules,
+            $verificationResends,
+            $records,
+            $actions,
+            $timeline,
+            $twoFactor,
+        );
+    }
+
+    public function staffAccountShow(
+        Request $request,
+        string $user,
+        AuthorizationMutationService $mutations,
+        LocalPublicPasswordResetService $passwordResets,
+        PendingFirstLoginChaseService $pendingFirstLoginChase,
+        ModuleRegistry $modules,
+        VerificationResendService $verificationResends,
+        UserRecordsSummary $records,
+        UserProfileHubActions $actions,
+        UserActivityTimeline $timeline,
+        TotpTwoFactorService $twoFactor,
+    ): View {
+        return $this->show(
+            $request,
+            $user,
+            $mutations,
+            $passwordResets,
+            $pendingFirstLoginChase,
+            $modules,
+            $verificationResends,
+            $records,
+            $actions,
+            $timeline,
+            $twoFactor,
+        );
+    }
+
+    public function redirectLegacyUsersIndex(
+        Request $request,
+        AuthorizationProfile $profile,
+        AccountClassifier $classifier,
+        LocalPublicPasswordResetService $passwordResets,
+    ): RedirectResponse|View {
+        $type = $request->query('account_type');
+        $query = $request->except('account_type');
+
+        if ($type === 'public') {
+            return redirect()->route('admin.public-accounts.index', $query, 301);
+        }
+
+        if ($type === 'staff') {
+            return redirect()->route('admin.staff-accounts.index', $query, 301);
+        }
+
+        return $this->index($request, $profile, $classifier, $passwordResets);
+    }
+
+    public function redirectLegacyUsersShow(Request $request, string $user, AccountClassifier $classifier): RedirectResponse
+    {
+        $managed = User::query()->findOrFail($user);
+        $route = $classifier->isStaffSide($managed)
+            ? 'admin.staff-accounts.show'
+            : 'admin.public-accounts.show';
+
+        return redirect()->route($route, array_merge(
+            ['user' => $managed],
+            $request->query(),
+        ), 301);
+    }
+
     public function index(
         Request $request,
         AuthorizationProfile $profile,
@@ -167,9 +278,11 @@ class AdminUserController extends Controller
                 'public' => __('terms.public_accounts'),
                 default => __('admin.users.all_accounts'),
             },
-            'clearFiltersUrl' => route('admin.users.index', array_filter([
-                'account_type' => $filters['account_type'] ?? null,
-            ])),
+            'clearFiltersUrl' => match ($filters['account_type'] ?? null) {
+                'public' => route('admin.public-accounts.index'),
+                'staff' => route('admin.staff-accounts.index'),
+                default => route('admin.users.index'),
+            },
             'resettableUserIds' => $resettableUserIds,
         ]);
     }

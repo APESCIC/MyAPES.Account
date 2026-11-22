@@ -28,7 +28,7 @@ class AdminLocalPublicPasswordResetTest extends TestCase
         $originalEpoch = $public->authorization_epoch;
 
         $list = $this->actingAs($administrator)
-            ->get(route('admin.users.index', ['account_type' => 'public']));
+            ->get(route('admin.public-accounts.index'));
         $list->assertOk()
             ->assertSee('Reset password')
             ->assertSee(
@@ -168,13 +168,13 @@ class AdminLocalPublicPasswordResetTest extends TestCase
             ]);
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.index', ['account_type' => 'public']))
+            ->get(route('admin.public-accounts.index'))
             ->assertOk()
             ->assertDontSeeText('Directory Public')
             ->assertDontSeeText('Pending Directory');
 
         $staffList = $this->actingAs($administrator)
-            ->get(route('admin.users.index', ['account_type' => 'staff']));
+            ->get(route('admin.staff-accounts.index'));
         $staffList->assertOk()
             ->assertSeeText('Directory Public')
             ->assertSeeText('Pending Directory')

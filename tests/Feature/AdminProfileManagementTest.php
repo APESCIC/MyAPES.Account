@@ -27,7 +27,7 @@ class AdminProfileManagementTest extends TestCase
             ]);
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.index', ['account_type' => 'public']))
+            ->get(route('admin.public-accounts.index'))
             ->assertOk()
             ->assertSeeText('Public Listed User')
             ->assertDontSeeText('Staff Listed User')
@@ -35,7 +35,7 @@ class AdminProfileManagementTest extends TestCase
             ->assertSee('Staff');
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.index', ['account_type' => 'staff']))
+            ->get(route('admin.staff-accounts.index'))
             ->assertOk()
             ->assertSeeText('Staff Listed User')
             ->assertDontSeeText('Public Listed User');
@@ -49,7 +49,7 @@ class AdminProfileManagementTest extends TestCase
         ]);
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.show', ['user' => $public, 'tab' => 'details']))
+            ->get(route('admin.public-accounts.show', ['user' => $public, 'tab' => 'details']))
             ->assertOk()
             ->assertSee('name="address_line_1"', false)
             ->assertDontSee('name="job_title"', false);
@@ -88,7 +88,7 @@ class AdminProfileManagementTest extends TestCase
             ]);
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.show', ['user' => $staff, 'tab' => 'details']))
+            ->get(route('admin.staff-accounts.show', ['user' => $staff, 'tab' => 'details']))
             ->assertOk()
             ->assertSeeText('Directory Staff')
             ->assertSeeText('myapesaccount.staff')

@@ -182,7 +182,7 @@ class AdminShellNavigationTest extends TestCase
             ->get(route('dashboard'))
             ->assertOk()
             ->assertSee('>Admin</a>', false)
-            ->assertSee('href="'.route('admin.users.index', ['account_type' => 'public']).'"', false)
+            ->assertSee('href="'.route('admin.public-accounts.index').'"', false)
             ->assertDontSee('href="'.route('admin.index').'"', false);
     }
 

@@ -108,7 +108,7 @@ class WorkspaceNavigationTest extends TestCase
         $admin = $this->menuFor($actor, 'dashboard')->panels[NavPanel::ADMIN];
 
         $this->assertSame(['people', 'support'], array_map(static fn (NavGroup $group): string => $group->key, $admin->groups));
-        $this->assertSame(route('admin.users.index', ['account_type' => 'public']), $admin->home()?->url);
+        $this->assertSame(route('admin.public-accounts.index'), $admin->home()?->url);
     }
 
     /**

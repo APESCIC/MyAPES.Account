@@ -445,10 +445,23 @@ Route::middleware([
                 ->middleware('can:admin.analytics.view')
                 ->name('index');
 
-            Route::get('/users', [AdminUserController::class, 'index'])
+            Route::get('/public-accounts', [AdminUserController::class, 'publicAccountsIndex'])
+                ->middleware('can:admin.users.view')
+                ->name('public-accounts.index');
+            Route::get('/staff-accounts', [AdminUserController::class, 'staffAccountsIndex'])
+                ->middleware('can:admin.users.view')
+                ->name('staff-accounts.index');
+            Route::get('/public-accounts/{user}', [AdminUserController::class, 'publicAccountShow'])
+                ->middleware('can:admin.users.view')
+                ->name('public-accounts.show');
+            Route::get('/staff-accounts/{user}', [AdminUserController::class, 'staffAccountShow'])
+                ->middleware('can:admin.users.view')
+                ->name('staff-accounts.show');
+
+            Route::get('/users', [AdminUserController::class, 'redirectLegacyUsersIndex'])
                 ->middleware('can:admin.users.view')
                 ->name('users.index');
-            Route::get('/users/{user}', [AdminUserController::class, 'show'])
+            Route::get('/users/{user}', [AdminUserController::class, 'redirectLegacyUsersShow'])
                 ->middleware('can:admin.users.view')
                 ->name('users.show');
             Route::put('/users/{user}/profile', [AdminUserController::class, 'updateProfile'])
