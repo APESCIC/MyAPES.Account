@@ -78,4 +78,17 @@ class StaffMessage extends Model
     {
         return $this->isOptional() ? MailCategory::Optional : MailCategory::Service;
     }
+
+    public function statusLabel(): string
+    {
+        return match ($this->status) {
+            self::STATUS_DRAFT => __('staff_messages.status.draft'),
+            self::STATUS_PREVIEW => __('staff_messages.status.preview'),
+            self::STATUS_QUEUED => __('staff_messages.status.queued'),
+            self::STATUS_SENDING => __('staff_messages.status.sending'),
+            self::STATUS_SENT => __('staff_messages.status.sent'),
+            self::STATUS_FAILED => __('staff_messages.status.failed'),
+            default => (string) $this->status,
+        };
+    }
 }

@@ -6,7 +6,7 @@
     <div class="panel">
         <h1>{{ $message->subject }}</h1>
         <p class="muted">
-            {{ __('staff_messages.status.'.$message->status) }}
+            {{ $message->statusLabel() }}
             · {{ __('staff_messages.show.sent_by', ['name' => $message->sender->name]) }}
             @if($message->queued_at)
                 · {{ $message->queued_at->format('j M Y H:i') }}

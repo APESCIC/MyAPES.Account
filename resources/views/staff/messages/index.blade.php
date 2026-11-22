@@ -16,7 +16,7 @@
             <p>
                 <a href="{{ route('messages.show', $message) }}">{{ $message->subject }}</a>
                 <span class="muted">
-                    · {{ __('staff_messages.status.'.$message->status) }}
+                    · {{ $message->statusLabel() }}
                     · {{ __('staff_messages.show.sent_by', ['name' => $message->sender?->name ?? '—']) }}
                     · {{ $message->created_at->format('j M Y H:i') }}
                 </span>
