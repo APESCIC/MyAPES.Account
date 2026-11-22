@@ -43,4 +43,8 @@
         </form>
         <x-locale-switcher />
     </div>
+
+    <div class="panel" id="notifications">
+        <x-push.device-notifications />
+    </div>
 @endsection

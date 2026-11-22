@@ -2343,6 +2343,49 @@ ol.stack {
     }
 }
 
+.push-device {
+    margin-block: 1rem;
+}
+
+.push-device--soft {
+    margin-block: 0 1.25rem;
+}
+
+.push-device__heading {
+    margin-block: 0 0.35rem;
+}
+
+.push-device__intro {
+    margin-block: 0 0.75rem;
+}
+
+.push-device__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.85rem;
+}
+
+.push-device__unblock-list {
+    margin: 0.5rem 0 0;
+    padding-left: 1.25rem;
+}
+
+.push-device__unblock-list li + li {
+    margin-top: 0.45rem;
+}
+
+.push-device__alert {
+    margin-bottom: 0.75rem;
+}
+
+.push-device [data-push-turn-on]:focus-visible,
+.push-device [data-push-turn-off]:focus-visible,
+.push-device [data-push-not-now]:focus-visible {
+    outline: 2px solid var(--brand-teal);
+    outline-offset: 2px;
+}
+
 caption {
     padding: 0.5rem 0;
     color: var(--muted);

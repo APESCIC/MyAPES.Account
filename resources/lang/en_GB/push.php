@@ -1,6 +1,42 @@
 <?php
 
 return [
+    'soft' => [
+        'title' => 'Turn on notifications on this device',
+        'lead' => 'Stay up to date when something needs your attention. We only ask the browser after you choose Turn on.',
+        'not_now' => 'Not now',
+    ],
+
+    'device' => [
+        'heading' => 'Notifications on this device',
+        'intro' => 'Choose whether this browser may show MyAPES Account alerts. You can change this at any time.',
+        'turn_on' => 'Turn on',
+        'turn_off' => 'Turn off',
+        'unsupported' => 'This browser does not support web push notifications.',
+        'home_screen' => 'On iPhone and iPad, add MyAPES Account to your Home Screen first, then open it from there to turn on notifications.',
+        'default' => 'Notifications are not turned on for this device yet.',
+        'granted' => 'This browser allows notifications, but this device is not subscribed yet. Choose Turn on to finish.',
+        'blocked_intro' => 'Notifications are blocked for this site. Unblock them in your browser, then choose Turn on again.',
+        'unblock_chrome_label' => 'Chrome',
+        'unblock_chrome' => 'Open the padlock or tune icon in the address bar, open Site settings, and set Notifications to Allow.',
+        'unblock_edge_label' => 'Microsoft Edge',
+        'unblock_edge' => 'Open the padlock icon in the address bar, choose Permissions for this site, and set Notifications to Allow.',
+        'unblock_firefox_label' => 'Firefox',
+        'unblock_firefox' => 'Open the shield or padlock icon in the address bar, open Connection security, choose More information, then set Notifications to Allow.',
+        'unblock_safari_label' => 'Safari',
+        'unblock_safari' => 'Open Safari → Settings for This Website and set Notifications to Allow.',
+        'subscribed' => 'Notifications are turned on for this device.',
+        'status_unsupported' => 'Push notifications are not supported in this browser.',
+        'status_home_screen' => 'Add MyAPES Account to your Home Screen to use notifications on this device.',
+        'status_default' => 'Notifications are off on this device.',
+        'status_granted' => 'Finish turning on notifications on this device.',
+        'status_blocked' => 'Notifications are blocked in this browser.',
+        'status_subscribed' => 'Notifications are on for this device.',
+        'status_turned_off' => 'Notifications are off for this device.',
+        'status_dismissed' => 'You can turn on notifications later from your profile.',
+        'status_error' => 'Something went wrong while updating notifications. Try again.',
+    ],
+
     'types' => [
         'ticket_created' => 'New ticket in my division',
         'ticket_client_reply' => 'Client reply on a ticket',

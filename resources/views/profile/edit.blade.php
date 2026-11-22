@@ -236,6 +236,10 @@
             </div>
         @endif
 
+        <div class="panel" id="notifications">
+            <x-push.device-notifications />
+        </div>
+
         @if($canManagePasskeys)
             <div class="panel" id="passkeys" data-passkeys-manage>
                 <h2>{{ __('auth.passkeys.heading') }}</h2>
