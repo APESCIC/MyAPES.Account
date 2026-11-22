@@ -32,6 +32,25 @@ const resolveSameOriginNotificationUrl = (origin, candidate) => {
     }
 };
 
+const pickNotificationFields = (payload) => {
+    if (payload?.web_push === 8030 && payload.notification && typeof payload.notification === 'object') {
+        return payload.notification;
+    }
+
+    return payload;
+};
+
+const resolveNotificationPath = (fields, origin) => {
+  const dataUrl = typeof fields?.data?.url === 'string' ? fields.data.url : null;
+  const candidate = typeof fields.navigate === 'string'
+      ? fields.navigate
+      : typeof fields.url === 'string'
+          ? fields.url
+          : dataUrl;
+
+  return resolveSameOriginNotificationUrl(origin, candidate) ?? resolveSameOriginNotificationUrl(origin, dataUrl) ?? '/';
+};
+
 const parsePushPayload = (event) => {
     if (!event.data) {
         return { title: 'MyAPES Account', options: { icon: DEFAULT_ICON, badge: DEFAULT_BADGE } };
@@ -39,16 +58,19 @@ const parsePushPayload = (event) => {
 
     try {
         const payload = event.data.json();
+        const fields = pickNotificationFields(payload);
+        const targetPath = resolveNotificationPath(fields, self.location.origin);
 
         return {
-            title: typeof payload.title === 'string' && payload.title.trim() !== '' ? payload.title : 'MyAPES Account',
+            title: typeof fields.title === 'string' && fields.title.trim() !== '' ? fields.title : 'MyAPES Account',
             options: {
-                body: typeof payload.body === 'string' ? payload.body : '',
-                icon: typeof payload.icon === 'string' ? payload.icon : DEFAULT_ICON,
-                badge: typeof payload.badge === 'string' ? payload.badge : DEFAULT_BADGE,
-                tag: typeof payload.tag === 'string' ? payload.tag : undefined,
+                body: typeof fields.body === 'string' ? fields.body : '',
+                icon: typeof fields.icon === 'string' ? fields.icon : DEFAULT_ICON,
+                badge: typeof fields.badge === 'string' ? fields.badge : DEFAULT_BADGE,
+                tag: typeof fields.tag === 'string' ? fields.tag : undefined,
+                lang: typeof fields.lang === 'string' ? fields.lang : undefined,
                 data: {
-                    url: typeof payload.url === 'string' ? payload.url : '/',
+                    url: targetPath,
                 },
             },
         };

@@ -5,6 +5,7 @@ namespace App\Core\Providers;
 use App\Core\Accounts\User;
 use App\Core\Push\CanReceivePush;
 use App\Core\Push\PushDeliveryRecorder;
+use App\Core\Push\PushPayloadBuilder;
 use App\Core\Push\PushNotificationTypeRegistry;
 use App\Core\Push\PushPreferenceInitializer;
 use App\Core\Push\PushPreferenceReader;
@@ -33,6 +34,7 @@ class CorePushServiceProvider extends ServiceProvider
         $this->app->singleton(PushRoleResolver::class);
         $this->app->singleton(PushPreferenceReader::class);
         $this->app->singleton(PushPreferenceInitializer::class);
+        $this->app->singleton(PushPayloadBuilder::class);
         $this->app->singleton(PushRecipientFilter::class);
         $this->app->singleton(CanReceivePush::class);
         $this->app->singleton(WebPushFactory::class);

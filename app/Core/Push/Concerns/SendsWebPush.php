@@ -3,8 +3,11 @@
 namespace App\Core\Push\Concerns;
 
 use App\Core\Accounts\User;
+use App\Core\Push\PushPayloadBuilder;
 use App\Core\Push\PushRecipientContext;
 use App\Core\Push\PushRecipientFilter;
+use App\Core\Push\PushTarget;
+use App\Core\Push\WebPushPayload;
 use NotificationChannels\WebPush\WebPushChannel;
 
 /**
@@ -48,5 +51,10 @@ trait SendsWebPush
         }
 
         return [...$withoutPush, WebPushChannel::class];
+    }
+
+    protected function privateWebPush(PushTarget $target): WebPushPayload
+    {
+        return app(PushPayloadBuilder::class)->message($this->pushNotificationTypeKey(), $target);
     }
 }
