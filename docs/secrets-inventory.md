@@ -10,6 +10,7 @@ On **live Cloudron**, prefer Admin where a field exists. `/app/data/shared/.env`
 | TinyMCE API key | **Yes** — Settings → **Integrations** | Optional override | `.env` `TINYMCE_API_KEY` wins if set. |
 | Google reCAPTCHA site key + secret | **Yes** — Settings → **Integrations** (Test available) | Optional override | `.env` wins if set. Use Google’s public test keys locally only. |
 | Webhook signing secrets | **Yes** — Settings → **Webhooks** | No for day-to-day | Created/rotated in Admin; never shown again after save. |
+| Web Push VAPID keys (`VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`) | **Yes** — Settings → **Push notifications** | Fallback only | **Primary path on live is Push notifications** (Keys and secrets storage). Vault item name only: **MyAPES Account – Web Push VAPID keys (production)**. Changing keys clears every device subscription. |
 | API client tokens | **Yes** — Settings → **API clients** | No for day-to-day | Issued in Admin; treat like passwords. |
 | `APP_KEY` | No (Keys and secrets **server-only** panel shows set/missing) | **Yes** | Cloudron `/app/data/shared/.env`. Not enterable in Admin. |
 | `INBOUND_MAIL_TOKEN_KEY` | No (server-only panel) | **Yes** | Reply-token HMAC key. Locally: `php artisan inbound-mail:key`. Not enterable in Admin. |
