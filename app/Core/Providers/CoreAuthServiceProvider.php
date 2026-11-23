@@ -6,8 +6,10 @@ use App\Contracts\OidcIdentityProvider;
 use App\Core\Accounts\User;
 use App\Http\Responses\Passkeys\PasskeyConfirmationResponse;
 use App\Http\Responses\Passkeys\PasskeyLoginResponse;
+use App\Listeners\MergeGuestThemeOnLogin;
 use App\Listeners\SendPasskeyDeletedNotification;
 use App\Listeners\SendPasskeyRegisteredNotification;
+use Illuminate\Auth\Events\Login;
 use App\Services\AuthorizationProfile;
 use App\Services\JumbojettOidcIdentityProvider;
 use App\Services\TotpTwoFactorService;
@@ -43,6 +45,7 @@ class CoreAuthServiceProvider extends ServiceProvider
     {
         Event::listen(PasskeyRegistered::class, SendPasskeyRegisteredNotification::class);
         Event::listen(PasskeyDeleted::class, SendPasskeyDeletedNotification::class);
+        Event::listen(Login::class, MergeGuestThemeOnLogin::class);
 
         Passkeys::authorizeLoginUsing(function (Request $request, $user, Passkey $passkey): bool {
             if (! $user instanceof User) {

@@ -36,6 +36,7 @@ class GeneralSettingsTest extends TestCase
             'registration_enabled' => '1',
             'banner_enabled' => '0',
             'banner_text' => '',
+            'default_theme_skin' => 'glassy',
             ...$overrides,
         ];
     }
@@ -83,7 +84,10 @@ class GeneralSettingsTest extends TestCase
         $this->assertSame('+44 (0)1234 567890', $general->supportPhone());
 
         $audit = AuditLog::query()->where('event', 'admin.settings.general_saved')->sole();
-        $this->assertSame(['support_email', 'support_phone', 'registration_enabled', 'banner_enabled', 'banner_text'], $audit->context['changed']);
+        $this->assertSame(
+            ['support_email', 'support_phone', 'registration_enabled', 'banner_enabled', 'banner_text', 'default_theme_skin'],
+            $audit->context['changed'],
+        );
         $this->assertSame(['changed'], array_keys($audit->context));
         $this->assertStringNotContainsString('support@example.org', (string) json_encode($audit->context));
 

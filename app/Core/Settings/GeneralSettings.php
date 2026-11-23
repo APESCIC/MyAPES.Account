@@ -28,6 +28,7 @@ final class GeneralSettings
             $define('registration_enabled', SettingDefinition::BOOLEAN, true, ['boolean']),
             $define('banner_enabled', SettingDefinition::BOOLEAN, false, ['boolean']),
             $define('banner_text', SettingDefinition::STRING, null, ['string', 'max:'.self::BANNER_MAX_LENGTH]),
+            $define('default_theme_skin', SettingDefinition::STRING, 'glassy', ['string', 'in:glassy,jungle']),
         ];
     }
 
@@ -58,5 +59,16 @@ final class GeneralSettings
     public function supportPhone(): ?string
     {
         return $this->settings->get(self::GROUP, 'support_phone');
+    }
+
+    public function defaultThemeSkin(): string
+    {
+        $skin = (string) $this->settings->get(self::GROUP, 'default_theme_skin');
+
+        if ($skin !== '' && in_array($skin, ['glassy', 'jungle'], true)) {
+            return $skin;
+        }
+
+        return 'glassy';
     }
 }

@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-skin="glassy" data-theme="light">
+@php($appearance ??= ['skin' => 'glassy', 'mode' => 'light', 'calm' => false])
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-skin="{{ $appearance['skin'] }}" data-theme="{{ $appearance['mode'] }}" @if($appearance['calm']) data-calm @endif>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,10 +15,18 @@
     <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         (() => {
             try {
+                @auth
+                const skin = @json($appearance['skin']);
+                const theme = @json($appearance['mode']);
+                document.documentElement.dataset.skin = skin;
+                document.documentElement.dataset.theme = theme;
+                document.documentElement.style.colorScheme = theme;
+                @else
                 const savedTheme = localStorage.getItem('myapes-theme');
                 const theme = savedTheme === 'dark' ? 'dark' : 'light';
                 document.documentElement.dataset.theme = theme;
                 document.documentElement.style.colorScheme = theme;
+                @endauth
             } catch {
                 document.documentElement.dataset.theme = 'light';
                 document.documentElement.style.colorScheme = 'light';

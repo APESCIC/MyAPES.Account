@@ -40,6 +40,9 @@ use Spatie\Permission\Traits\HasRoles;
     'name',
     'email',
     'locale',
+    'theme_skin',
+    'theme_mode',
+    'theme_calm',
     'password',
     'onboarding_completed_at',
     'ldap_groups',
@@ -142,6 +145,7 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
             'two_factor_recovery_codes' => 'encrypted:array',
             'two_factor_confirmed_at' => 'datetime',
             'ldap_groups' => 'array',
+            'theme_calm' => 'boolean',
             'authorization_epoch' => 'integer',
             'suspended_at' => 'datetime',
         ];

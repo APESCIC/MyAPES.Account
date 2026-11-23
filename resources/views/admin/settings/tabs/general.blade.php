@@ -21,6 +21,19 @@
         </fieldset>
 
         <fieldset @disabled(! $canManage)>
+            <legend>{{ __('admin.settings.general.theme_heading') }}</legend>
+            <p class="muted">{{ __('admin.settings.general.theme_help') }}</p>
+
+            <label for="general-default-theme-skin">{{ __('admin.settings.general.fields.default_theme_skin') }}</label>
+            <select id="general-default-theme-skin" name="default_theme_skin">
+                @foreach (['glassy' => 'Glassy', 'jungle' => 'Jungle'] as $skinKey => $skinLabel)
+                    <option value="{{ $skinKey }}" @selected(old('default_theme_skin', $values['default_theme_skin']) === $skinKey)>{{ $skinLabel }}</option>
+                @endforeach
+            </select>
+            @error('default_theme_skin')<p class="error-list" role="alert">{{ $message }}</p>@enderror
+        </fieldset>
+
+        <fieldset @disabled(! $canManage)>
             <legend>{{ __('admin.settings.general.registration_heading') }}</legend>
             <label class="inline-check">
                 <input type="hidden" name="registration_enabled" value="0">
