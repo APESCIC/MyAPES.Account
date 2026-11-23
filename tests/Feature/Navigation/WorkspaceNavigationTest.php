@@ -216,7 +216,7 @@ class WorkspaceNavigationTest extends TestCase
 
     public function test_navigation_permissions_live_in_the_builder_not_in_blade(): void
     {
-        foreach (['layouts/app.blade.php', 'components/workspace/nav.blade.php', 'components/workspace/rail.blade.php', 'components/workspace/panel-switch.blade.php'] as $view) {
+        foreach (['layouts/app.blade.php', 'components/workspace/app-bar.blade.php', 'components/workspace/mega-menu.blade.php', 'components/workspace/user-menu.blade.php', 'components/workspace/drawer-nav.blade.php', 'components/workspace/panel-switch.blade.php'] as $view) {
             $source = (string) file_get_contents(resource_path('views/'.$view));
 
             foreach (['@can', '@canany', 'Gate::', '->can(', 'homeUrlFor', 'AdminPrimaryNav'] as $forbidden) {

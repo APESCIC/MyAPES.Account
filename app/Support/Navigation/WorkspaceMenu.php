@@ -175,7 +175,7 @@ final readonly class WorkspaceMenu
                 foreach ($group->items as $item) {
                     $commands[] = [
                         'id' => $panel->key.':'.$item->key,
-                        'label' => $item->label,
+                        'label' => $this->paletteNavLabel($group->heading, $item->label),
                         'section' => $panel->label.' · '.$group->heading,
                         'url' => $item->url,
                         'icon' => $item->icon,
@@ -190,7 +190,7 @@ final readonly class WorkspaceMenu
                 foreach ($group->items as $item) {
                     $commands[] = [
                         'id' => 'top:'.$item->key,
-                        'label' => $item->label,
+                        'label' => $this->paletteNavLabel($top->label, $item->label),
                         'section' => $top->label.' · '.$group->heading,
                         'url' => $item->url,
                         'icon' => $item->icon,
@@ -201,5 +201,14 @@ final readonly class WorkspaceMenu
         }
 
         return [...$commands, ...$this->extraCommands];
+    }
+
+    /**
+     * Palette rows show the label on its own; prefix with the module or group so
+     * repeated names such as Tickets stay distinct (#895).
+     */
+    private function paletteNavLabel(string $module, string $itemLabel): string
+    {
+        return $module === '' ? $itemLabel : $module.' — '.$itemLabel;
     }
 }

@@ -753,7 +753,7 @@ final class WorkspaceNavigation
 
             $commands[] = [
                 'id' => 'search:'.$entry['id'],
-                'label' => $entry['label'],
+                'label' => $this->settingsPaletteLabel($entry),
                 'section' => __('workspace.panels.admin').' · '.__('workspace.palette.settings_section'),
                 'url' => $entry['url'],
                 'icon' => $entry['group'] === 'plugin' ? 'puzzle' : 'settings',
@@ -762,6 +762,21 @@ final class WorkspaceNavigation
         }
 
         return $commands;
+    }
+
+    /**
+     * @param  array{id: string, label: string, description: string, url: string, keywords: list<string>, group: string}  $entry
+     */
+    private function settingsPaletteLabel(array $entry): string
+    {
+        if ($entry['group'] !== 'settings' || ! preg_match('/^settings\.([^.]+)\./', $entry['id'], $matches)) {
+            return $entry['label'];
+        }
+
+        $moduleLabel = $this->registry->subCores()[$matches[1]]->name
+            ?? str($matches[1])->headline()->toString();
+
+        return $moduleLabel.' — '.$entry['label'];
     }
 
     /**

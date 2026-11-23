@@ -86,6 +86,7 @@ class WorkspaceMenuTest extends TestCase
         );
         $this->assertStringContainsString('helpdesk', $commands[3]['keywords']);
         $this->assertSame('Staff · APES Shelter and Rescue', $commands[3]['section']);
+        $this->assertSame('APES Shelter and Rescue — Tickets', $commands[3]['label']);
     }
 
     /**

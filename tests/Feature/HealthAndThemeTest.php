@@ -101,9 +101,10 @@ class HealthAndThemeTest extends TestCase
         $response->assertOk();
         $response->assertSee('data-theme="light"', false);
         $response->assertSee("localStorage.getItem('myapes-theme')", false);
-        $response->assertSee('data-theme-toggle', false);
-        $response->assertSee('data-workspace-rail', false);
+        $response->assertSee('data-workspace-app-bar', false);
+        $response->assertSee('data-workspace-app-nav', false);
         $response->assertSee('data-workspace-menu-open', false);
+        $response->assertSee('data-workspace-drawer-source', false);
         $response->assertSee('logos/myapes-mark-40x40.png', false);
         $response->assertSee('logos/myapes-mark-80x80.png 2x', false);
         $response->assertSee('width="40"', false);
@@ -116,8 +117,7 @@ class HealthAndThemeTest extends TestCase
         $response->assertSee('href="'.route('public.login').'"', false);
         $response->assertSee('href="'.route('public.register').'"', false);
         $response->assertSee('href="'.route('staff.login').'"', false);
-        $response->assertSee('data-workspace-dock', false);
-        $response->assertSeeText(__('workspace.groups.support'));
+        $response->assertDontSee('data-workspace-user-menu', false);
         $response->assertDontSee('https://github.com/APESCIC/MyAPES-Account"', false);
         $response->assertSee('site-footer__links', false);
         $response->assertSee('href="'.route('privacy').'"', false);
@@ -153,20 +153,19 @@ class HealthAndThemeTest extends TestCase
 
     }
 
-    public function test_authenticated_workspace_rail_is_role_aware(): void
+    public function test_authenticated_app_menu_is_role_aware(): void
     {
         $serviceUser = User::factory()->accessLevel(User::ROLE_SERVICE_USER)->create();
 
         $this->actingAs($serviceUser)
             ->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('aria-current="page"', false)
+            ->assertSee('data-workspace-mega-root', false)
+            ->assertSee('data-workspace-user-menu', false)
             ->assertSee('href="'.route('profile.edit').'"', false)
             ->assertSee('href="'.route('apes-cic.tickets.index').'"', false)
             ->assertSee('href="'.route('shelter.pets.index').'"', false)
             ->assertSee('href="'.route('petcare.pets.index').'"', false)
-            ->assertSee('data-workspace-dock', false)
-            ->assertSeeText(__('workspace.groups.support'))
             ->assertDontSee('href="'.route('admin.index').'"', false);
 
         $admin = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
@@ -174,7 +173,8 @@ class HealthAndThemeTest extends TestCase
         $this->actingAs($admin)
             ->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('href="'.route('admin.index').'"', false);
+            ->assertSee('data-workspace-panel-switch', false)
+            ->assertSee('data-nav-key="staff.admin"', false);
     }
 
     public function test_generated_brand_assets_have_expected_dimensions(): void
