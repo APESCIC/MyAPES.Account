@@ -90,13 +90,16 @@
 [data-skin='jungle'][data-calm='true'] .sg-card::before,
 [data-skin='jungle'][data-calm='true'] .sg-card::after,
 [data-skin='jungle'][data-calm='true'] .panel::before,
-[data-skin='jungle'][data-calm='true'] .panel::after {
+[data-skin='jungle'][data-calm='true'] .panel::after,
+[data-skin='jungle'][data-calm='true'] .sg-mega__heading::before,
+[data-skin='jungle'][data-calm='true'] .jungle-decor {
     content: none;
     background: none;
 }
 
 [data-skin='jungle'][data-calm='true'] .jungle-vine,
-[data-skin='jungle'][data-calm='true'] .section-divider {
+[data-skin='jungle'][data-calm='true'] .section-divider,
+[data-skin='jungle'][data-calm='true'] .jungle-decor {
     height: auto;
     margin: 1.2rem 0;
     border-top: 1px solid var(--line);

@@ -31,3 +31,12 @@
     grid-column: 1 / -1;
     margin-bottom: 0.25rem;
 }
+
+/* Calm mode (#904): hide chrome critters; empty or error critters stay put. */
+[data-calm='true'] .critter-chrome {
+    display: none !important;
+}
+
+[data-calm='true'][data-skin='jungle'] .sg-mega__heading::before {
+    content: none;
+}
