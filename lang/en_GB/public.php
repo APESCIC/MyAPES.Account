@@ -33,7 +33,7 @@ return [
             'blade' => [
                 'signed_in_public_users_should_open_a_ticket_in_the_serv' => 'Signed-in public accounts should open a ticket in the service they need. Use an APES CIC case when the matter is a privacy request, complaint, or other formal cas…',
                 'if_you_cannot_sign_in_public_login_has_a_forgot_passwor' => 'If you cannot sign in, Public Login has a forgot-password link for local public accounts only. Staff directory passwords are managed separately through Staff Login.',
-                'if_something_in_the_software_looks_broken_the_app_suppo' => 'If something in the software looks broken, the App Support links in the sidebar go to the MyAPES Account GitHub repository, issue form, and discussions.',
+                'if_something_in_the_software_looks_broken_the_app_suppo' => 'If something in the software looks broken, administrators can open App Support from their user menu; everyone else can use the GitHub links on the change log page to reach the MyAPES Account repository, issue form and discussions.',
                 'is_for_service_users_who_created_a_myapes_account_use_y' => 'is for clients who created a MyAPES account. Use your username or email and the password you chose at register.',
                 'to_create_a_public_account_then_open_the_verification_l' => 'to create a public account, then open the verification link we send to your email before you finish profile setup.',
                 'is_for_apes_staff_and_administrators_those_accounts_sig' => 'is for APES staff and administrators. Those accounts use Staff Login, not the public password form.',

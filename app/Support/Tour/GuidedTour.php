@@ -29,9 +29,17 @@ final class GuidedTour
 
     private const MENU_BUTTON = '[data-workspace-menu-open]';
 
-    private const BRAND = ['[data-workspace-rail] .sg-brand', '[data-workspace-topbar] .sg-brand'];
+    private const APP_BAR = '[data-workspace-app-bar]';
 
-    private const SEARCH = ['[data-workspace-page-header] [data-workspace-palette-open]', '[data-workspace-topbar] [data-workspace-palette-open]'];
+    private const BRAND = [self::APP_BAR.' .sg-brand', '[data-workspace-topbar] .sg-brand'];
+
+    private const MEGA_ROOT = [self::APP_BAR.' [data-workspace-mega-root]', self::APP_BAR.' [data-workspace-app-nav]', self::MENU_BUTTON];
+
+    private const USER_MENU = [self::APP_BAR.' [data-workspace-user-menu]', '[data-workspace-rail] .sg-dock__card', self::MENU_BUTTON];
+
+    private const PANEL_SWITCH = [self::APP_BAR.' [data-workspace-panel-switch]', '[data-workspace-rail] [data-workspace-panel-switch]', self::MENU_BUTTON];
+
+    private const SEARCH = ['[data-workspace-page-header] [data-workspace-palette-open]', self::APP_BAR.' [data-workspace-palette-open]', '[data-workspace-topbar] [data-workspace-palette-open]'];
 
     private const FOOTER_HELP = '[data-tour-target="footer-help"]';
 
@@ -96,17 +104,17 @@ final class GuidedTour
             self::AUDIENCE_STAFF => __('tour.steps.welcome.staff'),
             default => __('tour.steps.welcome.public'),
         });
-        $menu = $this->step(['[data-workspace-rail] [data-workspace-nav]', self::MENU_BUTTON], __('tour.steps.menu.title'), $audience === self::AUDIENCE_PUBLIC
+        $menu = $this->step(self::MEGA_ROOT, __('tour.steps.menu.title'), $audience === self::AUDIENCE_PUBLIC
             ? __('tour.steps.menu.public')
             : __('tour.steps.menu.staff'));
         $search = $this->step(self::SEARCH, __('tour.steps.search.title'), __('tour.steps.search.body'));
-        $account = $this->step(['[data-workspace-rail] .sg-dock__card', self::MENU_BUTTON], __('tour.steps.account.title'), __('tour.steps.account.body'));
+        $account = $this->step(self::USER_MENU, __('tour.steps.account.title'), __('tour.steps.account.body'));
         $help = $this->step([self::FOOTER_HELP], __('tour.steps.help.title'), __('tour.steps.help.body'));
 
         return match ($audience) {
             self::AUDIENCE_ADMIN => [
                 $welcome,
-                $this->step(['[data-workspace-rail] [data-workspace-panel-switch]', self::MENU_BUTTON], __('tour.steps.panel_switch.title'), __('tour.steps.panel_switch.body')),
+                $this->step(self::PANEL_SWITCH, __('tour.steps.panel_switch.title'), __('tour.steps.panel_switch.body')),
                 $menu,
                 $this->step($this->navTarget('callers'), __('tour.steps.callers.title'), __('tour.steps.callers.body')),
                 $search,
@@ -139,7 +147,11 @@ final class GuidedTour
      */
     private function navTarget(string $key): array
     {
-        return ['[data-workspace-rail] [data-nav-key="'.$key.'"]', self::MENU_BUTTON];
+        return [
+            self::APP_BAR.' [data-nav-key="'.$key.'"]',
+            '[data-workspace-rail] [data-nav-key="'.$key.'"]',
+            self::MENU_BUTTON,
+        ];
     }
 
     /**

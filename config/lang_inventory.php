@@ -102,6 +102,11 @@ return [
             'reason' => 'Blade @php notification mapping; not user-facing copy (#805).',
         ],
         [
+            'path' => 'resources/views/components/workspace/',
+            'pattern' => '#^(activeTopItem\(\);|key;|user;)$#',
+            'reason' => 'Workspace shell Blade @php assignments mis-read as UI copy (#891 top app menu).',
+        ],
+        [
             'path' => 'resources/views/components/push/profile-notifications.blade.php',
             'pattern' => '#quiet_hours_(start|end)#',
             'reason' => 'Blade @php quiet-hours time truncation; defaults live in config (#805).',

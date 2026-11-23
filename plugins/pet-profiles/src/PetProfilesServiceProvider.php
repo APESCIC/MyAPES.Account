@@ -5,6 +5,7 @@ namespace Plugins\PetProfiles;
 use App\Core\Accounts\ClientRecords\ClientRecordType;
 use App\Core\Extensions\Plugins\PluginAbilityFactory;
 use App\Core\Extensions\Plugins\PluginManifest;
+use App\Core\Extensions\Plugins\PluginMenuAction;
 use App\Core\Extensions\Plugins\PluginNavigationItem;
 use App\Core\Extensions\Plugins\PluginServiceProvider;
 use App\Core\Extensions\Plugins\PluginSettingsSchema;
@@ -75,6 +76,12 @@ class PetProfilesServiceProvider extends PluginServiceProvider
             navigation: [
                 new PluginNavigationItem('Pet Profiles', 'shelter.pets.index', 'paw-print', 10, moduleSlug: 'shelter-rescue'),
                 new PluginNavigationItem('Pet Profiles', 'petcare.pets.index', 'paw-print', 10, moduleSlug: 'pet-care-clinic'),
+            ],
+            menuActions: [
+                new PluginMenuAction('View my pets', 'shelter.pets.index', 'paw-print', 10, PluginMenuAction::AUDIENCE_PUBLIC, 'shelter-rescue', 'view-own'),
+                new PluginMenuAction('Add a pet', 'shelter.pets.index', 'circle-plus', 20, PluginMenuAction::AUDIENCE_PUBLIC, 'shelter-rescue', 'create', '#create'),
+                new PluginMenuAction('View my pets', 'petcare.pets.index', 'paw-print', 10, PluginMenuAction::AUDIENCE_PUBLIC, 'pet-care-clinic', 'view-own'),
+                new PluginMenuAction('Add a pet', 'petcare.pets.index', 'circle-plus', 20, PluginMenuAction::AUDIENCE_PUBLIC, 'pet-care-clinic', 'create', '#create'),
             ],
             settingsByModule: [
                 'shelter-rescue' => new PluginSettingsSchema(supportsSettings: false),

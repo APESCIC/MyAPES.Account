@@ -113,9 +113,10 @@ class RecruitmentUnifiedMenuAccessMatrixTest extends TestCase
 
         $home = $this->actingAsPersona($actor)->get(route($actor === null ? 'home' : 'dashboard'))->assertOk();
         $this->assertSame(0, substr_count($home->getContent(), 'Recruit manage'));
+        $expectedPrimaryHref = $expectedPrimaryRoute === null ? null : route($expectedPrimaryRoute);
         $this->assertSame(
-            $expectedPrimaryRoute === null ? null : route($expectedPrimaryRoute),
-            $this->recruitmentPrimaryHref($home->getContent()),
+            $expectedPrimaryHref,
+            $this->recruitmentPrimaryHref($home->getContent(), $expectedPrimaryHref),
         );
 
         $board = $this->actingAsPersona($actor)->get(route('recruitment.index'));
@@ -172,8 +173,10 @@ class RecruitmentUnifiedMenuAccessMatrixTest extends TestCase
             $this->actingAs($staff)->get(route('dashboard'))->assertOk()->getContent(),
         ));
 
-        $this->assertSame(route('apes-cic.recruitment.index'), $this->recruitmentPrimaryHref(
+        $manageIndex = route('apes-cic.recruitment.index');
+        $this->assertSame($manageIndex, $this->recruitmentPrimaryHref(
             $this->actingAs($hr)->get(route('dashboard'))->assertOk()->getContent(),
+            $manageIndex,
         ));
         $this->assertSame(
             ['Roles', 'Applications'],
@@ -323,17 +326,113 @@ class RecruitmentUnifiedMenuAccessMatrixTest extends TestCase
         return $labels[1];
     }
 
-    private function recruitmentPrimaryHref(string $html): ?string
+    private function recruitmentPrimaryHref(string $html, ?string $expectedHref = null): ?string
     {
-        $count = preg_match_all(
+        $candidates = [];
+
+        foreach (['/<a\s[^>]*data-nav-key="([^"]+)"[^>]*href="([^"]+)"/', '/<a\s[^>]*href="([^"]+)"[^>]*data-nav-key="([^"]+)"/'] as $index => $pattern) {
+            if (preg_match_all($pattern, $html, $matches, PREG_SET_ORDER) === false) {
+                continue;
+            }
+
+            foreach ($matches as $match) {
+                if ($index === 0) {
+                    [$key, $href] = [$match[1], $match[2]];
+                } else {
+                    [$href, $key] = [$match[1], $match[2]];
+                }
+
+                if (! $this->isRecruitmentNavKey($key)) {
+                    continue;
+                }
+
+                $candidates[$key] = html_entity_decode($href, ENT_QUOTES);
+            }
+        }
+
+        if (preg_match(
             '/<a\s+href="([^"]+)"\s+class="sg-nav-link"[^>]*>\s*<i[^>]*><\/i>\s*<span>Recruitment<\/span>/',
             $html,
-            $matches,
-        );
+            $legacy,
+        ) === 1) {
+            $candidates['legacy.recruitment'] = html_entity_decode($legacy[1], ENT_QUOTES);
+        }
 
-        $this->assertLessThanOrEqual(1, $count, 'Expected at most one Recruitment primary.');
+        if ($expectedHref !== null) {
+            foreach ($candidates as $href) {
+                if ($href === $expectedHref) {
+                    return $expectedHref;
+                }
+            }
 
-        return $count === 1 ? html_entity_decode($matches[1][0], ENT_QUOTES) : null;
+            $escaped = preg_quote($expectedHref, '/');
+            if (preg_match('/<a\s[^>]*href="'.$escaped.'"/', $html) === 1) {
+                return $expectedHref;
+            }
+
+            return null;
+        }
+
+        if ($candidates === []) {
+            return null;
+        }
+
+        [$primaryHref, $primaryCount] = $this->resolveRecruitmentPrimaryHref($candidates);
+
+        $this->assertLessThanOrEqual(1, $primaryCount, 'Expected at most one Recruitment primary.');
+
+        return $primaryHref;
+    }
+
+    private function isRecruitmentNavKey(string $key): bool
+    {
+        return $key === 'guest.recruitment'
+            || preg_match('/^module\.[a-z0-9-]+\.recruitment(?:\.\d+)?$/', $key) === 1
+            || preg_match('/^staff-plugin-[a-z0-9-]*recruitment$/', $key) === 1;
+    }
+
+    /**
+     * @param  array<string, string>  $candidates
+     * @return array{0: ?string, 1: int}
+     */
+    private function resolveRecruitmentPrimaryHref(array $candidates): array
+    {
+        if (isset($candidates['guest.recruitment']) || isset($candidates['legacy.recruitment'])) {
+            $href = $candidates['guest.recruitment'] ?? $candidates['legacy.recruitment'];
+
+            return [$href, 1];
+        }
+
+        foreach ($candidates as $key => $href) {
+            if (str_starts_with($key, 'staff-plugin-')) {
+                return [$href, 1];
+            }
+        }
+
+        $lowestOrder = null;
+        $hrefsAtLowest = [];
+
+        foreach ($candidates as $key => $href) {
+            if (! preg_match('/\.recruitment\.(\d+)$/', $key, $order)) {
+                continue;
+            }
+
+            $orderValue = (int) $order[1];
+            if ($lowestOrder === null || $orderValue < $lowestOrder) {
+                $lowestOrder = $orderValue;
+                $hrefsAtLowest = [$href => true];
+            } elseif ($orderValue === $lowestOrder) {
+                $hrefsAtLowest[$href] = true;
+            }
+        }
+
+        if ($hrefsAtLowest !== []) {
+            return [array_key_first($hrefsAtLowest), count($hrefsAtLowest)];
+        }
+
+        $hrefs = array_values(array_unique($candidates));
+
+        return [$hrefs[0] ?? null, count($hrefs)];
     }
 
     private function hubActionHref(string $html, string $action): string

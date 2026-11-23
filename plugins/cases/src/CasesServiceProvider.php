@@ -7,6 +7,7 @@ use App\Core\Accounts\User;
 use App\Core\Extensions\Plugins\PluginAbilityFactory;
 use App\Core\Extensions\Plugins\PluginDependency;
 use App\Core\Extensions\Plugins\PluginManifest;
+use App\Core\Extensions\Plugins\PluginMenuAction;
 use App\Core\Extensions\Plugins\PluginNavigationItem;
 use App\Core\Extensions\Plugins\PluginServiceProvider;
 use App\Core\Extensions\Plugins\PluginSettingsSchema;
@@ -151,6 +152,12 @@ class CasesServiceProvider extends PluginServiceProvider
             navigation: [
                 new PluginNavigationItem('Cases', 'apes-cic.cases.index', 'briefcase-business', 20, moduleSlug: 'apes-cic'),
                 new PluginNavigationItem('Cases', 'shelter.cases.index', 'house', 30, moduleSlug: 'shelter-rescue'),
+            ],
+            menuActions: [
+                new PluginMenuAction('Open a case', 'apes-cic.cases.index', 'circle-plus', 10, PluginMenuAction::AUDIENCE_PUBLIC, 'apes-cic', 'create', '#create'),
+                new PluginMenuAction('View my cases', 'apes-cic.cases.index', 'briefcase-business', 20, PluginMenuAction::AUDIENCE_PUBLIC, 'apes-cic', 'view-own'),
+                new PluginMenuAction('Open a case', 'shelter.cases.index', 'circle-plus', 10, PluginMenuAction::AUDIENCE_PUBLIC, 'shelter-rescue', 'create', '#create'),
+                new PluginMenuAction('View my cases', 'shelter.cases.index', 'house', 20, PluginMenuAction::AUDIENCE_PUBLIC, 'shelter-rescue', 'view-own'),
             ],
             settingsByModule: [
                 'apes-cic' => new PluginSettingsSchema(

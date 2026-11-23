@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Workspace shell chrome (#382): rail, panel switch, user dock, page header
+ * Workspace shell chrome (#382): top app bar, mega menus, user menu, panel switch, page header
  * and command palette.
  */
 return [
@@ -31,8 +31,30 @@ return [
         'label' => 'Workspace navigation',
         'panel_switch' => 'Panel',
         'service_home' => 'Service home',
+        'overview' => 'Overview',
+        'overview_description' => 'Home for :module',
         'change_log' => 'Change log',
         'brand_home' => 'MyAPES Account home',
+        'top_bar' => 'App menu',
+        'user_menu' => 'User menu',
+        'mega_menu' => ':module menu',
+        'forms' => 'Forms',
+    ],
+
+    'clients' => [
+        'find' => 'Find a client',
+        'directory' => 'Client directory',
+        'add' => 'Add a client',
+        'find_caller' => 'Find a caller',
+        'tools' => 'Tools',
+        'mega_description' => 'Search public accounts, callers and staff tools',
+    ],
+
+    'mega' => [
+        'view' => 'View :plugin',
+        'create' => 'Create a :plugin',
+        'open' => 'Open :label',
+        'book_appointment' => 'Book an appointment',
     ],
 
     'mobile' => [
@@ -126,6 +148,7 @@ return [
         'login' => ['sign in', 'log in'],
         'register' => ['sign up', 'create account', 'join'],
         'staff_login' => ['staff', 'employee', 'sign in'],
+        'open_ticket' => ['ticket', 'support', 'open a ticket', 'help'],
         'switch_panel' => ['panel', 'workspace', 'switch'],
         'view_site' => ['home', 'public', 'site', 'landing'],
     ],

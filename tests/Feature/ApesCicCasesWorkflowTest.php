@@ -79,7 +79,7 @@ class ApesCicCasesWorkflowTest extends TestCase
             ->assertDontSee('action="'.route('apes-cic.tickets.store').'"', false);
         $this->get(route('apes-cic.cases.index'))
             ->assertOk()
-            ->assertDontSee('Open a case')
+            ->assertDontSee('data-nav-key="module.apes-cic.cases.10"', false)
             ->assertDontSee('action="'.route('apes-cic.cases.store').'"', false);
         $this->post(route('apes-cic.tickets.store'), [])->assertForbidden();
         $this->post(route('apes-cic.cases.store'), [])->assertForbidden();

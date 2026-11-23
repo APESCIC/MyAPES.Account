@@ -12,6 +12,9 @@ final readonly class WorkspaceMenu
      * @param  array<string, NavPanel>  $panels  keyed by NavPanel::STAFF / ADMIN / PUBLIC
      * @param  list<QuickAction>  $quickActions
      * @param  list<array{id: string, label: string, section: string, url: string, icon: string, keywords: string}>  $extraCommands
+     * @param  list<MegaMenuTopItem>  $topItems  module mega menus for the top bar (#885)
+     * @param  list<NavItem>  $userMenuItems  avatar menu links (#888)
+     * @param  list<NavItem>  $simpleLinks  signed-out plain links (#889)
      */
     public function __construct(
         public array $panels,
@@ -20,7 +23,45 @@ final readonly class WorkspaceMenu
         public array $quickActions = [],
         public array $extraCommands = [],
         public ?DockUser $user = null,
+        public array $topItems = [],
+        public array $userMenuItems = [],
+        public array $simpleLinks = [],
     ) {}
+
+    public function activeTopItem(): ?MegaMenuTopItem
+    {
+        if ($this->activeItemKey === null) {
+            return null;
+        }
+
+        $active = $this->activeItem();
+        $activeUrl = $active?->url;
+        $activePatterns = $active?->activePatterns ?? [];
+
+        foreach ($this->topItems as $top) {
+            if ($top->key === $this->activeItemKey) {
+                return $top;
+            }
+
+            foreach ($top->items() as $item) {
+                if ($item->key === $this->activeItemKey) {
+                    return $top;
+                }
+
+                // Panel and mega items can share a route with different keys; light the
+                // trigger when the URL or active patterns match (#1018 review).
+                if ($activeUrl !== null && $item->url === $activeUrl) {
+                    return $top;
+                }
+
+                if ($activePatterns !== [] && array_intersect($item->activePatterns, $activePatterns) !== []) {
+                    return $top;
+                }
+            }
+        }
+
+        return null;
+    }
 
     public function panel(string $key): ?NavPanel
     {
@@ -82,7 +123,17 @@ final readonly class WorkspaceMenu
 
     public function isActive(NavItem $item): bool
     {
-        return $this->activeItemKey !== null && $item->key === $this->activeItemKey;
+        if ($this->activeItemKey === null) {
+            return false;
+        }
+
+        if ($item->key === $this->activeItemKey) {
+            return true;
+        }
+
+        $active = $this->activeItem();
+
+        return $active !== null && $item->url === $active->url;
     }
 
     /**
@@ -148,7 +199,7 @@ final readonly class WorkspaceMenu
                 foreach ($group->items as $item) {
                     $commands[] = [
                         'id' => $panel->key.':'.$item->key,
-                        'label' => $item->label,
+                        'label' => $this->paletteNavLabel($group->heading, $item->label),
                         'section' => $panel->label.' · '.$group->heading,
                         'url' => $item->url,
                         'icon' => $item->icon,
@@ -158,6 +209,30 @@ final readonly class WorkspaceMenu
             }
         }
 
+        foreach ($this->topItems as $top) {
+            foreach ($top->groups as $group) {
+                foreach ($group->items as $item) {
+                    $commands[] = [
+                        'id' => 'top:'.$item->key,
+                        'label' => $this->paletteNavLabel($top->label, $item->label),
+                        'section' => $top->label.' · '.$group->heading,
+                        'url' => $item->url,
+                        'icon' => $item->icon,
+                        'keywords' => implode(' ', [$top->label, $group->heading, ...$item->keywords]),
+                    ];
+                }
+            }
+        }
+
         return [...$commands, ...$this->extraCommands];
+    }
+
+    /**
+     * Palette rows show the label on its own; prefix with the module or group so
+     * repeated names such as Tickets stay distinct (#895).
+     */
+    private function paletteNavLabel(string $module, string $itemLabel): string
+    {
+        return $module === '' ? $itemLabel : $module.' — '.$itemLabel;
     }
 }

@@ -34,13 +34,17 @@ class WorkspaceShellTest extends TestCase
     }
 
     #[DataProvider('staffAndAdminPages')]
-    public function test_pages_render_the_rail_with_exactly_one_current_link(string $persona, string $path): void
+    public function test_pages_render_the_app_bar_with_exactly_one_current_link(string $persona, string $path): void
     {
         $html = $this->actingAs(User::factory()->protectedRole($persona)->create())->get($path)->assertOk()->getContent();
 
-        $this->assertStringContainsString('data-workspace-rail', $html);
+        $this->assertStringContainsString('data-workspace-app-bar', $html);
+        $this->assertStringContainsString('data-workspace-mega-root', $html);
         $this->assertStringContainsString('aria-label="'.__('workspace.header.breadcrumb').'"', $html);
-        $this->assertSame(1, preg_match_all('/class="sg-nav-link"\s+data-nav-key="[^"]+"\s+aria-current="page"/', $html));
+        $this->assertMatchesRegularExpression(
+            '/class="sg-(?:nav-link|mega__link|mega__trigger)"[\s\S]*?aria-current="page"/',
+            $html,
+        );
         $this->assertStringNotContainsString('site-sidebar', $html);
         $this->assertStringNotContainsString('primary-nav', $html);
         $this->assertStringNotContainsString('data-sidebar', $html);
@@ -60,14 +64,14 @@ class WorkspaceShellTest extends TestCase
             ->assertSee('aria-current="true" >'.__('workspace.panels.admin').'</a>', false);
     }
 
-    public function test_user_dock_shows_name_role_account_and_sign_out(): void
+    public function test_user_menu_shows_name_role_profile_and_sign_out(): void
     {
         $user = User::factory()->protectedRole('administrator')->create(['name' => 'Ada Lovelace']);
 
         $this->actingAs($user)
             ->get('/dashboard')
             ->assertOk()
-            ->assertSee('data-workspace-dock', false)
+            ->assertSee('data-workspace-user-menu', false)
             ->assertSee('>AL</span>', false)
             ->assertSeeText('Ada Lovelace')
             ->assertSeeText('Admin')
@@ -76,14 +80,15 @@ class WorkspaceShellTest extends TestCase
             ->assertSeeText(__('workspace.dock.sign_out'));
     }
 
-    public function test_guests_get_the_public_panel_and_sign_in_dock(): void
+    public function test_guests_get_public_simple_links_and_sign_in_actions(): void
     {
         $this->get(route('home'))
             ->assertOk()
-            ->assertSeeText(__('workspace.panel_subtitle', ['panel' => __('workspace.panels.public')]))
+            ->assertSee('data-workspace-app-bar', false)
+            ->assertSeeText(__('tickets::public.nav'))
             ->assertSeeText(__('workspace.dock.log_in'))
             ->assertDontSee('data-workspace-panel-switch', false)
-            ->assertDontSee(__('workspace.dock.sign_out'));
+            ->assertDontSee('data-workspace-user-menu', false);
     }
 
     public function test_auth_pages_centre_the_card_under_the_horizontal_logo(): void

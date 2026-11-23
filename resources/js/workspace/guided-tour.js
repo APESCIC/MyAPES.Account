@@ -1,7 +1,7 @@
 // Spike's guided tour (#489), built on driver.js. The server renders the
 // steps into script[data-guided-tour] on the dashboard; each step lists
 // targets in order and the first visible one is highlighted, so a step falls
-// back to the mobile menu button when the desktop menu is hidden.
+// back to the mobile menu button when the desktop app bar mega menus are hidden.
 
 export const isVisible = (element, view = globalThis) => {
     if (!element || typeof element.getBoundingClientRect !== 'function') {

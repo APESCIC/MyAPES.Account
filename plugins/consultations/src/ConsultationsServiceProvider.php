@@ -7,6 +7,7 @@ use App\Core\Accounts\User;
 use App\Core\Extensions\Plugins\PluginAbilityFactory;
 use App\Core\Extensions\Plugins\PluginDependency;
 use App\Core\Extensions\Plugins\PluginManifest;
+use App\Core\Extensions\Plugins\PluginMenuAction;
 use App\Core\Extensions\Plugins\PluginNavigationItem;
 use App\Core\Extensions\Plugins\PluginServiceProvider;
 use App\Core\Extensions\Plugins\PluginSettingsSchema;
@@ -108,6 +109,9 @@ class ConsultationsServiceProvider extends PluginServiceProvider
                     30,
                     moduleSlug: 'pet-care-clinic',
                 ),
+            ],
+            menuActions: [
+                new PluginMenuAction('View my consultations', 'petcare.consultations.index', 'messages-square', 10, PluginMenuAction::AUDIENCE_PUBLIC, 'pet-care-clinic', 'view-own'),
             ],
             settingsByModule: [
                 'pet-care-clinic' => new PluginSettingsSchema(supportsSettings: false),

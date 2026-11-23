@@ -27,8 +27,8 @@ return [
         ],
         'menu' => [
             'title' => 'Your menu',
-            'public' => 'The menu lists your dashboard, profile and each APES service you use. On a small screen, open it with the menu button.',
-            'staff' => 'The menu lists your dashboard and every service and plugin your group can use. On a small screen, open it with the menu button.',
+            'public' => 'The top app menu lists your dashboard, profile and each APES service you use. On a small screen, open the same links from the menu button.',
+            'staff' => 'The top app menu lists your dashboard and every service and plugin your group can use. On a small screen, open it with the menu button.',
         ],
         'profile' => [
             'title' => 'Your profile',
@@ -53,7 +53,7 @@ return [
         ],
         'account' => [
             'title' => 'Your account',
-            'body' => 'Your name and role show here, with links to your account settings and Sign out.',
+            'body' => 'Open your avatar for your name and role, profile and account links, theme, and Sign out. On a small screen, the same links are in the menu drawer.',
         ],
         'help' => [
             'title' => 'Help is always here',

@@ -21,17 +21,6 @@
             </nav>
         @endif
         <div class="sg-page-header__tools">
-            <button
-                type="button"
-                class="sg-search-pill"
-                aria-keyshortcuts="Control+K Meta+K"
-                aria-haspopup="dialog"
-                data-workspace-palette-open
-            >
-                <i data-lucide="search" aria-hidden="true"></i>
-                <span class="sg-search-pill__label">{{ __('workspace.header.search') }}</span>
-                <kbd class="sg-kbd" aria-hidden="true" data-workspace-shortcut>Ctrl K</kbd>
-            </button>
             <a href="{{ route('home') }}" class="sg-btn sg-btn-secondary sg-btn-sm" title="{{ __('workspace.header.view_site_hint') }}">
                 <i data-lucide="external-link" aria-hidden="true"></i>
                 {{ __('workspace.header.view_site') }}

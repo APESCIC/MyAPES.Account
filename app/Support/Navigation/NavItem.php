@@ -13,6 +13,7 @@ final readonly class NavItem
      * @param  list<string>  $keywords  extra words the command palette matches on
      * @param  array<string, string>  $activeQuery  request values that must also match, e.g. account_type
      * @param  int|null  $badge  optional count shown beside the label (hidden when null or 0)
+     * @param  string|null  $description  short mega-menu blurb (#885)
      */
     public function __construct(
         public string $key,
@@ -23,6 +24,7 @@ final readonly class NavItem
         public array $keywords = [],
         public array $activeQuery = [],
         public ?int $badge = null,
+        public ?string $description = null,
     ) {}
 
     /**
@@ -39,6 +41,7 @@ final readonly class NavItem
             $this->keywords,
             $this->activeQuery,
             $this->badge,
+            $this->description,
         );
     }
 
@@ -53,6 +56,7 @@ final readonly class NavItem
             $this->keywords,
             $this->activeQuery,
             $badge !== null && $badge > 0 ? $badge : null,
+            $this->description,
         );
     }
 }

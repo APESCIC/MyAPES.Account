@@ -68,6 +68,13 @@ class WorkspaceNavigationTest extends TestCase
                     $this->actingAs($user)->get($item->url)->assertOk();
                 }
             }
+
+            foreach ($menu->topItems as $top) {
+                foreach ($top->items() as $item) {
+                    $url = strtok($item->url, '#');
+                    $this->actingAs($user)->get($url)->assertOk();
+                }
+            }
         }
     }
 
@@ -75,6 +82,7 @@ class WorkspaceNavigationTest extends TestCase
     {
         $menu = $this->menuFor(null, 'home');
         $keys = $this->itemKeys($menu->panels[NavPanel::PUBLIC]);
+        $simpleKeys = array_map(static fn (NavItem $item): string => $item->key, $menu->simpleLinks);
 
         $this->assertContains('public.login', $keys);
         $this->assertContains('public.register', $keys);
@@ -82,6 +90,11 @@ class WorkspaceNavigationTest extends TestCase
         $this->assertNotContains('staff.login', $keys);
         $this->assertNotContains('dashboard', $keys);
         $this->assertSame([], $menu->quickActions);
+        $this->assertContains('guest.ticket', $simpleKeys);
+        $this->assertContains('bookings', $simpleKeys);
+        $this->assertContains('help', $simpleKeys);
+        $this->assertContains('public.login', $simpleKeys);
+        $this->assertNotContains('staff.login', $simpleKeys);
     }
 
     public function test_administrator_admin_panel_shows_every_admin_group(): void
@@ -203,7 +216,7 @@ class WorkspaceNavigationTest extends TestCase
 
     public function test_navigation_permissions_live_in_the_builder_not_in_blade(): void
     {
-        foreach (['layouts/app.blade.php', 'components/workspace/nav.blade.php', 'components/workspace/rail.blade.php', 'components/workspace/panel-switch.blade.php'] as $view) {
+        foreach (['layouts/app.blade.php', 'components/workspace/app-bar.blade.php', 'components/workspace/mega-menu.blade.php', 'components/workspace/user-menu.blade.php', 'components/workspace/drawer-nav.blade.php', 'components/workspace/panel-switch.blade.php'] as $view) {
             $source = (string) file_get_contents(resource_path('views/'.$view));
 
             foreach (['@can', '@canany', 'Gate::', '->can(', 'homeUrlFor', 'AdminPrimaryNav'] as $forbidden) {

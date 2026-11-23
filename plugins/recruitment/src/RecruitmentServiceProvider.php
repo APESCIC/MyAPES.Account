@@ -9,6 +9,7 @@ use App\Core\Extensions\Navigation\StaffPluginNavigationItem;
 use App\Core\Extensions\Navigation\StaffPluginNavigationRegistry;
 use App\Core\Extensions\Plugins\PluginAbilityFactory;
 use App\Core\Extensions\Plugins\PluginManifest;
+use App\Core\Extensions\Plugins\PluginMenuAction;
 use App\Core\Extensions\Plugins\PluginNavigationItem;
 use App\Core\Extensions\Plugins\PluginServiceProvider;
 use App\Core\Extensions\Plugins\PluginSettingsSchema;
@@ -80,6 +81,19 @@ class RecruitmentServiceProvider extends PluginServiceProvider
                     30,
                     requiredAbility: 'view-all',
                     moduleSlug: 'apes-cic',
+                ),
+            ],
+            menuActions: [
+                new PluginMenuAction('Open roles', 'recruitment.index', 'briefcase-business', 10, PluginMenuAction::AUDIENCE_PUBLIC, 'apes-cic'),
+                new PluginMenuAction('My applications', 'recruitment.applications.index', 'clipboard-list', 20, PluginMenuAction::AUDIENCE_PUBLIC, 'apes-cic', 'view-own'),
+                new PluginMenuAction(
+                    'Applications',
+                    'apes-cic.recruitment.applications.index',
+                    'clipboard-list',
+                    25,
+                    PluginMenuAction::AUDIENCE_STAFF,
+                    'apes-cic',
+                    'review-applications',
                 ),
             ],
             settingsByModule: [

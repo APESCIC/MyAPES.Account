@@ -20,6 +20,7 @@ use App\Modules\ModuleNavigationItem;
 use App\Modules\SubCoreNavigation;
 use App\Services\AdminSearchCatalogue;
 use App\Services\AuthorizationProfile;
+use App\Services\ModuleSettingsService;
 use App\Support\Tour\GuidedTour;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Http\Request;
@@ -44,6 +45,8 @@ final class WorkspaceNavigation
         private readonly AccountClassifier $accounts,
         private readonly GeneralSettings $general,
         private readonly ImportQueue $importQueue,
+        private readonly ModuleMegaMenuBuilder $megaMenus,
+        private readonly StaffTopMenuBuilder $staffTopMenus,
     ) {}
 
     public function forRequest(?User $user, Request $request): WorkspaceMenu
@@ -60,7 +63,15 @@ final class WorkspaceNavigation
 
         $panels = array_filter($panels, static fn (NavPanel $panel): bool => $panel->groups !== []);
 
-        [$currentPanelKey, $activeItemKey] = $this->resolveActive($panels, $request, $user);
+        $audience = $user !== null && $this->accounts->hasStaffSideRole($user)
+            ? \App\Core\Extensions\Plugins\PluginMenuAction::AUDIENCE_STAFF
+            : \App\Core\Extensions\Plugins\PluginMenuAction::AUDIENCE_PUBLIC;
+
+        $topItems = $user === null
+            ? []
+            : $this->buildTopItems($user, $moduleNavigation, $audience, $request, $panels);
+
+        [$currentPanelKey, $activeItemKey] = $this->resolveActive($panels, $request, $user, $topItems);
 
         return new WorkspaceMenu(
             $panels,
@@ -69,7 +80,183 @@ final class WorkspaceNavigation
             $user === null ? [] : $this->quickActions($user, $moduleNavigation, $panels, $currentPanelKey),
             $this->settingsCommands($adminCatalogue),
             $user === null ? null : $this->dockUser($user),
+            $topItems,
+            $user === null ? [] : $this->userMenuItems($user, isset($panels[NavPanel::ADMIN])),
+            $user === null ? $this->simpleLinks() : [],
         );
+    }
+
+    /**
+     * @return list<NavItem>
+     */
+    private function simpleLinks(): array
+    {
+        $links = [];
+
+        if (Route::has('tickets.public.index')) {
+            $links[] = new NavItem(
+                'guest.ticket',
+                __('tickets::public.nav'),
+                route('tickets.public.index'),
+                'ticket',
+                ['tickets.public.*'],
+                $this->words('workspace.keywords.open_ticket'),
+            );
+        }
+
+        if (Route::has('recruitment.index') && app(ModuleSettingsService::class)->recruitmentPublicBoardEnabled()) {
+            $links[] = new NavItem(
+                'guest.recruitment',
+                __('recruitment::plugin.name'),
+                route('recruitment.index'),
+                'briefcase-business',
+                ['recruitment.*'],
+                $this->pluginKeywords('recruitment'),
+            );
+        }
+
+        $links[] = $this->bookingsItem();
+        $links[] = new NavItem(
+            'help',
+            __('public.chrome.app.blade.help'),
+            route('help'),
+            'circle-help',
+            ['help'],
+            $this->words('workspace.keywords.help'),
+        );
+        $links[] = new NavItem(
+            'public.login',
+            __('public.chrome.app.blade.public_login'),
+            route('public.login'),
+            'log-in',
+            ['public.login', 'password.*', 'two-factor.login'],
+            $this->words('workspace.keywords.login'),
+        );
+
+        if ($this->general->registrationOpen()) {
+            $links[] = new NavItem(
+                'public.register',
+                __('public.chrome.app.blade.register'),
+                route('public.register'),
+                'user-plus',
+                ['public.register'],
+                $this->words('workspace.keywords.register'),
+            );
+        }
+
+        return $links;
+    }
+
+    /**
+     * @return list<NavItem>
+     */
+    /**
+     * @param  array<string, NavPanel>  $panels
+     * @return list<MegaMenuTopItem>
+     */
+    private function buildTopItems(
+        User $user,
+        array $moduleNavigation,
+        string $audience,
+        Request $request,
+        array $panels,
+    ): array {
+        $hasAdminPanel = isset($panels[NavPanel::ADMIN]);
+        $routeName = $request->route()?->getName() ?? '';
+        $onAdminPanel = $hasAdminPanel
+            && (is_string($routeName) && str_starts_with($routeName, 'admin.'));
+
+        if ($onAdminPanel && $hasAdminPanel) {
+            return $this->staffTopMenus->adminPanelTopItems($panels[NavPanel::ADMIN]);
+        }
+
+        $items = $this->megaMenus->forAudience($user, $moduleNavigation, $audience);
+
+        if ($audience === \App\Core\Extensions\Plugins\PluginMenuAction::AUDIENCE_STAFF) {
+            $clients = $this->staffTopMenus->clientsMegaMenu($user);
+            if ($clients !== null) {
+                $items[] = $clients;
+            }
+
+            $forms = $this->staffTopMenus->formsMegaMenu($user, $hasAdminPanel);
+            if ($forms !== null) {
+                $items[] = $forms;
+            }
+
+            if ($hasAdminPanel) {
+                $admin = $this->staffTopMenus->staffAdminMegaMenu($user, $panels[NavPanel::ADMIN]);
+                if ($admin !== null) {
+                    $items[] = $admin;
+                }
+            }
+        }
+
+        return $items;
+    }
+
+    private function userMenuItems(User $user, bool $hasAdminPanel): array
+    {
+        $items = [
+            new NavItem(
+                'user.profile',
+                __('public.chrome.app.blade.profile'),
+                route('profile.edit'),
+                'circle-user-round',
+                ['profile.*', 'two-factor.setup'],
+                $this->words('workspace.keywords.profile'),
+            ),
+            new NavItem(
+                'user.help',
+                __('public.chrome.app.blade.help'),
+                route('help'),
+                'circle-help',
+                ['help'],
+                $this->words('workspace.keywords.help'),
+            ),
+        ];
+
+        if ($this->profile->isAdministrator($user)) {
+            $items[] = new NavItem(
+                'user.github',
+                __('workspace.dock.github'),
+                config('myapes.github.repository_url'),
+                'github',
+                [],
+                ['github', 'repository', 'source'],
+            );
+            $items[] = new NavItem(
+                'user.issue',
+                __('workspace.dock.open_an_issue'),
+                config('myapes.github.new_issue_url'),
+                'circle-plus',
+                [],
+                ['issue', 'bug', 'github'],
+            );
+            $items[] = new NavItem(
+                'user.discussions',
+                __('workspace.dock.discussions'),
+                config('myapes.github.discussions_url'),
+                'messages-square',
+                [],
+                ['discussions', 'community', 'github'],
+            );
+        } elseif ($this->accounts->isStaffSide($user)) {
+            $items[] = new NavItem(
+                'user.report_problem',
+                __('workspace.dock.report_problem'),
+                route('staff.report-problem.create'),
+                'life-buoy',
+                ['staff.report-problem.*'],
+                ['report', 'problem', 'bug', 'help'],
+            );
+        }
+
+        $forms = $this->staffTopMenus->formsUserMenuItem($user, $hasAdminPanel);
+        if ($forms !== null) {
+            $items[] = $forms;
+        }
+
+        return $items;
     }
 
     private function dockUser(User $user): DockUser
@@ -384,7 +571,12 @@ final class WorkspaceNavigation
      * @param  array<string, NavPanel>  $panels
      * @return array{0: string, 1: ?string}
      */
-    private function resolveActive(array $panels, Request $request, ?User $user): array
+    /**
+     * @param  array<string, NavPanel>  $panels
+     * @param  list<MegaMenuTopItem>  $topItems
+     * @return array{0: string, 1: ?string}
+     */
+    private function resolveActive(array $panels, Request $request, ?User $user, array $topItems = []): array
     {
         $route = $request->route();
         $routeName = $route?->getName();
@@ -398,6 +590,22 @@ final class WorkspaceNavigation
                     $score = $this->matchScore($item, $routeName, $query);
                     if ($score !== null && ($best === null || $score > $best[2])) {
                         $best = [$panelKey, $item->key, $score];
+                    }
+                }
+            }
+
+            $panelForTop = match (true) {
+                $best !== null => $best[0],
+                $user === null => NavPanel::PUBLIC,
+                str_starts_with($routeName, 'admin.') => NavPanel::ADMIN,
+                default => NavPanel::STAFF,
+            };
+
+            foreach ($topItems as $top) {
+                foreach ($top->items() as $item) {
+                    $score = $this->matchScore($item, $routeName, $query);
+                    if ($score !== null && ($best === null || $score > $best[2])) {
+                        $best = [$panelForTop, $item->key, $score];
                     }
                 }
             }
@@ -546,7 +754,7 @@ final class WorkspaceNavigation
 
             $commands[] = [
                 'id' => 'search:'.$entry['id'],
-                'label' => $entry['label'],
+                'label' => $this->settingsPaletteLabel($entry),
                 'section' => __('workspace.panels.admin').' · '.__('workspace.palette.settings_section'),
                 'url' => $entry['url'],
                 'icon' => $entry['group'] === 'plugin' ? 'puzzle' : 'settings',
@@ -555,6 +763,21 @@ final class WorkspaceNavigation
         }
 
         return $commands;
+    }
+
+    /**
+     * @param  array{id: string, label: string, description: string, url: string, keywords: list<string>, group: string}  $entry
+     */
+    private function settingsPaletteLabel(array $entry): string
+    {
+        if ($entry['group'] !== 'settings' || ! preg_match('/^settings\.([^.]+)\./', $entry['id'], $matches)) {
+            return $entry['label'];
+        }
+
+        $moduleLabel = $this->registry->subCores()[$matches[1]]->name
+            ?? str($matches[1])->headline()->toString();
+
+        return $moduleLabel.' — '.$entry['label'];
     }
 
     /**

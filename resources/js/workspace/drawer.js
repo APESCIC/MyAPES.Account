@@ -27,7 +27,8 @@ export const cloneRail = (rail) => {
 export const initWorkspaceDrawer = ({ onOpen } = {}) => {
     const overlay = document.querySelector('[data-workspace-drawer]');
     const panel = overlay?.querySelector('[data-workspace-drawer-panel]');
-    const rail = document.querySelector('[data-workspace-rail-dock] [data-workspace-rail]');
+    const source = document.querySelector('[data-workspace-drawer-source]');
+    const rail = source?.querySelector('[data-workspace-rail]');
     const trigger = document.querySelector('[data-workspace-menu-open]');
     const page = document.querySelector('[data-workspace-page]');
 

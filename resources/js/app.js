@@ -7,6 +7,7 @@ import {
     BriefcaseBusiness,
     Building2,
     Calendar,
+    ChevronDown,
     ChevronRight,
     Circle,
     CircleHelp,
@@ -29,6 +30,7 @@ import {
     Inbox,
     LayoutDashboard,
     Leaf,
+    LifeBuoy,
     LogIn,
     LogOut,
     Mail,
@@ -62,6 +64,7 @@ import { initStaffMessageFilter } from './staff/message-filter.js';
 import { initOwnerPicker } from './tickets/owner-picker.js';
 import { initCommandPalette } from './workspace/command-palette.js';
 import { initWorkspaceDrawer } from './workspace/drawer.js';
+import { initWorkspaceMegaMenu, initWorkspaceUserMenu } from './workspace/mega-menu.js';
 import { initFileUploads } from './workspace/file-upload.js';
 import { initFormActions } from './workspace/form-actions.js';
 import { initGuidedTour } from './workspace/guided-tour.js';
@@ -79,6 +82,7 @@ const icons = {
     BriefcaseBusiness,
     Building2,
     Calendar,
+    ChevronDown,
     ChevronRight,
     Circle,
     CircleHelp,
@@ -99,6 +103,7 @@ const icons = {
     Inbox,
     LayoutDashboard,
     Leaf,
+    LifeBuoy,
     LogIn,
     LogOut,
     Mail,
@@ -177,6 +182,8 @@ document.addEventListener('click', (event) => {
 const drawer = initWorkspaceDrawer({
     onOpen: () => applyTheme(document.documentElement.dataset.theme),
 });
+initWorkspaceMegaMenu();
+initWorkspaceUserMenu();
 initCommandPalette({
     icons,
     createElement,
