@@ -50,7 +50,7 @@
                                         @endif
                                     </span>
                                     @if(($item->badge ?? null) !== null && $item->badge > 0)
-                                        <span class="sg-nav-badge">{{ $item->badge }}</span>
+                                        <span class="sg-nav-badge" data-nav-badge="{{ $item->key }}">{{ $item->badge }}</span>
                                     @endif
                                 </a>
                             </li>

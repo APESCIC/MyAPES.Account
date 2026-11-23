@@ -3,6 +3,7 @@
 namespace App\Support\Navigation;
 
 use App\Contracts\ModuleRegistry;
+use App\Core\Access\GroupAccessMatrix;
 use App\Core\Accounts\User;
 use App\Core\Extensions\Modules\ModulePackageRegistry;
 use App\Core\Extensions\Plugins\PluginManifest;
@@ -11,6 +12,8 @@ use App\Core\Extensions\Plugins\PluginRegistry;
 use App\Modules\SubCoreDefinition;
 use App\Modules\SubCoreNavigation;
 use App\Services\ModuleCatalogueProjection;
+use App\Services\ServiceEntitlement;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -28,6 +31,9 @@ final class ModuleMegaMenuBuilder
         private readonly ModulePackageRegistry $modulePackages,
         private readonly ModuleCatalogueProjection $projection,
         private readonly NavigationPermissionCache $permissions,
+        private readonly ServiceEntitlement $entitlement,
+        private readonly GroupAccessMatrix $groupAccess,
+        private readonly Request $request,
     ) {}
 
     /**
@@ -93,6 +99,10 @@ final class ModuleMegaMenuBuilder
         array $enabled,
     ): ?MegaMenuTopItem {
         if (! Route::has($subCore->routeName)) {
+            return null;
+        }
+
+        if (! $this->entitlement->allows($user, $subCore->key, $this->request)) {
             return null;
         }
 
@@ -232,6 +242,10 @@ final class ModuleMegaMenuBuilder
     private function canUse(User $user, string $instanceKey, ?string $requiredAbility): bool
     {
         [$subCore, $module] = explode(':', $instanceKey, 2);
+
+        if ($this->groupAccess->denies($user, $subCore, $module)) {
+            return false;
+        }
 
         if ($requiredAbility !== null) {
             return $this->permissions->can($user, "{$subCore}.{$module}.{$requiredAbility}");

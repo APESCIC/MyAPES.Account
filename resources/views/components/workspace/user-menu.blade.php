@@ -100,13 +100,15 @@
                 </li>
             </ul>
 
-            <form method="post" action="{{ route('auth.logout') }}" class="sg-user-menu__signout">
-                @csrf
-                <button type="submit" class="sg-btn sg-btn-ghost sg-btn-sm sg-user-menu__signout-btn">
-                    <i data-lucide="log-out" aria-hidden="true"></i>
-                    {{ __('workspace.dock.sign_out') }}
-                </button>
-            </form>
+            @if($user->qaProfile === null)
+                <form method="post" action="{{ route('auth.logout') }}" class="sg-user-menu__signout">
+                    @csrf
+                    <button type="submit" class="sg-btn sg-btn-ghost sg-btn-sm sg-user-menu__signout-btn">
+                        <i data-lucide="log-out" aria-hidden="true"></i>
+                        {{ __('workspace.dock.sign_out') }}
+                    </button>
+                </form>
+            @endif
 
             <div class="sg-user-menu__footer">
                 <x-locale-switcher />

@@ -67,6 +67,9 @@
                                         >
                                             <i data-lucide="{{ $item->icon }}" aria-hidden="true"></i>
                                             <span>{{ $item->label }}</span>
+                                            @if(($item->badge ?? null) !== null && $item->badge > 0)
+                                                <span class="sg-nav-badge" data-nav-badge="{{ $item->key }}">{{ $item->badge }}</span>
+                                            @endif
                                         </a>
                                     </li>
                                 @endforeach
@@ -104,6 +107,9 @@
                                     >
                                         <i data-lucide="{{ $item->icon }}" aria-hidden="true"></i>
                                         <span>{{ $item->label }}</span>
+                                        @if(($item->badge ?? null) !== null && $item->badge > 0)
+                                            <span class="sg-nav-badge" data-nav-badge="{{ $item->key }}">{{ $item->badge }}</span>
+                                        @endif
                                     </a>
                                 </li>
                             @endforeach
