@@ -185,6 +185,21 @@ final readonly class WorkspaceMenu
             }
         }
 
+        foreach ($this->topItems as $top) {
+            foreach ($top->groups as $group) {
+                foreach ($group->items as $item) {
+                    $commands[] = [
+                        'id' => 'top:'.$item->key,
+                        'label' => $item->label,
+                        'section' => $top->label.' · '.$group->heading,
+                        'url' => $item->url,
+                        'icon' => $item->icon,
+                        'keywords' => implode(' ', [$top->label, $group->heading, ...$item->keywords]),
+                    ];
+                }
+            }
+        }
+
         return [...$commands, ...$this->extraCommands];
     }
 }

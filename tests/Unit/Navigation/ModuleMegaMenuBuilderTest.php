@@ -25,19 +25,24 @@ class ModuleMegaMenuBuilderTest extends TestCase
         $menu = app(WorkspaceNavigation::class)->forRequest($admin, request());
 
         $keys = array_map(static fn ($item) => $item->key, $menu->topItems);
+        $moduleKeys = array_values(array_filter(
+            $keys,
+            static fn (string $key): bool => str_starts_with($key, 'module.'),
+        ));
         $this->assertSame(
             ['module.apes-cic', 'module.shelter-rescue', 'module.pet-care-clinic'],
-            $keys,
+            $moduleKeys,
             'Modules appear in sortOrder as top items',
         );
+        $this->assertContains('staff.clients', $keys);
+        $this->assertContains('staff.admin', $keys);
 
-        $labels = array_map(static fn ($item) => $item->label, $menu->topItems);
-        $this->assertSame(
-            ['APES CIC', 'APES Shelter and Rescue', 'APES Pet Care Clinic'],
-            $labels,
-        );
+        $moduleLabels = ['APES CIC', 'APES Shelter and Rescue', 'APES Pet Care Clinic'];
+        foreach (array_slice($menu->topItems, 0, 3) as $index => $top) {
+            $this->assertSame($moduleLabels[$index], $top->label);
+        }
 
-        foreach ($menu->topItems as $top) {
+        foreach (array_slice($menu->topItems, 0, 3) as $top) {
             $this->assertNotEmpty($top->groups);
             $this->assertSame('overview', $top->groups[0]->key);
             $this->assertSame('Overview', $top->groups[0]->items[0]->label);

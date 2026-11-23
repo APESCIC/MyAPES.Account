@@ -38,12 +38,23 @@ return [
         'top_bar' => 'App menu',
         'user_menu' => 'User menu',
         'mega_menu' => ':module menu',
+        'forms' => 'Forms',
+    ],
+
+    'clients' => [
+        'find' => 'Find a client',
+        'directory' => 'Client directory',
+        'add' => 'Add a client',
+        'find_caller' => 'Find a caller',
+        'tools' => 'Tools',
+        'mega_description' => 'Search public accounts, callers and staff tools',
     ],
 
     'mega' => [
         'view' => 'View :plugin',
         'create' => 'Create a :plugin',
         'open' => 'Open :label',
+        'book_appointment' => 'Book an appointment',
     ],
 
     'mobile' => [

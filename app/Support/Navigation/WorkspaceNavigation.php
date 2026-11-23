@@ -45,6 +45,7 @@ final class WorkspaceNavigation
         private readonly GeneralSettings $general,
         private readonly ImportQueue $importQueue,
         private readonly ModuleMegaMenuBuilder $megaMenus,
+        private readonly StaffTopMenuBuilder $staffTopMenus,
     ) {}
 
     public function forRequest(?User $user, Request $request): WorkspaceMenu
@@ -61,15 +62,15 @@ final class WorkspaceNavigation
 
         $panels = array_filter($panels, static fn (NavPanel $panel): bool => $panel->groups !== []);
 
-        [$currentPanelKey, $activeItemKey] = $this->resolveActive($panels, $request, $user);
-
         $audience = $user !== null && $this->accounts->hasStaffSideRole($user)
             ? \App\Core\Extensions\Plugins\PluginMenuAction::AUDIENCE_STAFF
             : \App\Core\Extensions\Plugins\PluginMenuAction::AUDIENCE_PUBLIC;
 
         $topItems = $user === null
             ? []
-            : $this->megaMenus->forAudience($user, $moduleNavigation, $audience);
+            : $this->buildTopItems($user, $moduleNavigation, $audience, $request, $panels);
+
+        [$currentPanelKey, $activeItemKey] = $this->resolveActive($panels, $request, $user, $topItems);
 
         return new WorkspaceMenu(
             $panels,
@@ -79,7 +80,7 @@ final class WorkspaceNavigation
             $this->settingsCommands($adminCatalogue),
             $user === null ? null : $this->dockUser($user),
             $topItems,
-            $user === null ? [] : $this->userMenuItems($user),
+            $user === null ? [] : $this->userMenuItems($user, isset($panels[NavPanel::ADMIN])),
             $user === null ? $this->simpleLinks() : [],
         );
     }
@@ -148,7 +149,51 @@ final class WorkspaceNavigation
     /**
      * @return list<NavItem>
      */
-    private function userMenuItems(User $user): array
+    /**
+     * @param  array<string, NavPanel>  $panels
+     * @return list<MegaMenuTopItem>
+     */
+    private function buildTopItems(
+        User $user,
+        array $moduleNavigation,
+        string $audience,
+        Request $request,
+        array $panels,
+    ): array {
+        $hasAdminPanel = isset($panels[NavPanel::ADMIN]);
+        $routeName = $request->route()?->getName() ?? '';
+        $onAdminPanel = $hasAdminPanel
+            && (is_string($routeName) && str_starts_with($routeName, 'admin.'));
+
+        if ($onAdminPanel && $hasAdminPanel) {
+            return $this->staffTopMenus->adminPanelTopItems($panels[NavPanel::ADMIN]);
+        }
+
+        $items = $this->megaMenus->forAudience($user, $moduleNavigation, $audience);
+
+        if ($audience === \App\Core\Extensions\Plugins\PluginMenuAction::AUDIENCE_STAFF) {
+            $clients = $this->staffTopMenus->clientsMegaMenu($user);
+            if ($clients !== null) {
+                $items[] = $clients;
+            }
+
+            $forms = $this->staffTopMenus->formsMegaMenu($user, $hasAdminPanel);
+            if ($forms !== null) {
+                $items[] = $forms;
+            }
+
+            if ($hasAdminPanel) {
+                $admin = $this->staffTopMenus->staffAdminMegaMenu($user, $panels[NavPanel::ADMIN]);
+                if ($admin !== null) {
+                    $items[] = $admin;
+                }
+            }
+        }
+
+        return $items;
+    }
+
+    private function userMenuItems(User $user, bool $hasAdminPanel): array
     {
         $items = [
             new NavItem(
@@ -203,6 +248,11 @@ final class WorkspaceNavigation
                 ['staff.report-problem.*'],
                 ['report', 'problem', 'bug', 'help'],
             );
+        }
+
+        $forms = $this->staffTopMenus->formsUserMenuItem($user, $hasAdminPanel);
+        if ($forms !== null) {
+            $items[] = $forms;
         }
 
         return $items;
@@ -520,7 +570,12 @@ final class WorkspaceNavigation
      * @param  array<string, NavPanel>  $panels
      * @return array{0: string, 1: ?string}
      */
-    private function resolveActive(array $panels, Request $request, ?User $user): array
+    /**
+     * @param  array<string, NavPanel>  $panels
+     * @param  list<MegaMenuTopItem>  $topItems
+     * @return array{0: string, 1: ?string}
+     */
+    private function resolveActive(array $panels, Request $request, ?User $user, array $topItems = []): array
     {
         $route = $request->route();
         $routeName = $route?->getName();
@@ -534,6 +589,22 @@ final class WorkspaceNavigation
                     $score = $this->matchScore($item, $routeName, $query);
                     if ($score !== null && ($best === null || $score > $best[2])) {
                         $best = [$panelKey, $item->key, $score];
+                    }
+                }
+            }
+
+            $panelForTop = match (true) {
+                $best !== null => $best[0],
+                $user === null => NavPanel::PUBLIC,
+                str_starts_with($routeName, 'admin.') => NavPanel::ADMIN,
+                default => NavPanel::STAFF,
+            };
+
+            foreach ($topItems as $top) {
+                foreach ($top->items() as $item) {
+                    $score = $this->matchScore($item, $routeName, $query);
+                    if ($score !== null && ($best === null || $score > $best[2])) {
+                        $best = [$panelForTop, $item->key, $score];
                     }
                 }
             }

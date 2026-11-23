@@ -68,6 +68,13 @@ class WorkspaceNavigationTest extends TestCase
                     $this->actingAs($user)->get($item->url)->assertOk();
                 }
             }
+
+            foreach ($menu->topItems as $top) {
+                foreach ($top->items() as $item) {
+                    $url = strtok($item->url, '#');
+                    $this->actingAs($user)->get($url)->assertOk();
+                }
+            }
         }
     }
 
