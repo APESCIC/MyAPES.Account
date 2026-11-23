@@ -86,6 +86,15 @@ class RecruitmentServiceProvider extends PluginServiceProvider
             menuActions: [
                 new PluginMenuAction('Open roles', 'recruitment.index', 'briefcase-business', 10, PluginMenuAction::AUDIENCE_PUBLIC, 'apes-cic'),
                 new PluginMenuAction('My applications', 'recruitment.applications.index', 'clipboard-list', 20, PluginMenuAction::AUDIENCE_PUBLIC, 'apes-cic', 'view-own'),
+                new PluginMenuAction(
+                    'Applications',
+                    'apes-cic.recruitment.applications.index',
+                    'clipboard-list',
+                    25,
+                    PluginMenuAction::AUDIENCE_STAFF,
+                    'apes-cic',
+                    'review-applications',
+                ),
             ],
             settingsByModule: [
                 'apes-cic' => new PluginSettingsSchema(

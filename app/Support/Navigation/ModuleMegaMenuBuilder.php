@@ -119,6 +119,12 @@ final class ModuleMegaMenuBuilder
 
             $plugin = $this->plugins->plugin($instance->module->key);
             $actions = $this->visibleActions($user, $plugin, $subCore->key, $audience, $instance->key());
+            if ($audience === PluginMenuAction::AUDIENCE_STAFF) {
+                $actions = $this->mergeMenuActions(
+                    $actions,
+                    $this->visibleActions($user, $plugin, $subCore->key, PluginMenuAction::AUDIENCE_PUBLIC, $instance->key()),
+                );
+            }
             if ($actions === []) {
                 continue;
             }
@@ -268,6 +274,38 @@ final class ModuleMegaMenuBuilder
         $keywords = __('bookings.keywords');
 
         return is_array($keywords) ? array_values(array_filter($keywords, 'is_string')) : [];
+    }
+
+    /**
+     * @param  list<PluginMenuAction>  $primary
+     * @param  list<PluginMenuAction>  $secondary
+     * @return list<PluginMenuAction>
+     */
+    private function mergeMenuActions(array $primary, array $secondary): array
+    {
+        if ($secondary === []) {
+            return $primary;
+        }
+
+        $merged = $primary;
+        $seen = [];
+        foreach ($merged as $action) {
+            $seen[$action->routeName.'|'.($action->anchor ?? '')] = true;
+        }
+
+        foreach ($secondary as $action) {
+            $key = $action->routeName.'|'.($action->anchor ?? '');
+            if (isset($seen[$key])) {
+                continue;
+            }
+
+            $seen[$key] = true;
+            $merged[] = $action;
+        }
+
+        usort($merged, static fn (PluginMenuAction $a, PluginMenuAction $b): int => $a->order <=> $b->order);
+
+        return $merged;
     }
 
     private function actionLabel(PluginMenuAction $action, PluginManifest $plugin): string

@@ -7,6 +7,7 @@
     <button
         type="button"
         class="sg-mega__trigger"
+        data-nav-key="{{ $top->key }}"
         data-workspace-mega-trigger
         aria-expanded="false"
         aria-haspopup="true"

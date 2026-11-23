@@ -20,6 +20,7 @@ use App\Modules\ModuleNavigationItem;
 use App\Modules\SubCoreNavigation;
 use App\Services\AdminSearchCatalogue;
 use App\Services\AuthorizationProfile;
+use App\Services\ModuleSettingsService;
 use App\Support\Tour\GuidedTour;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Http\Request;
@@ -103,7 +104,7 @@ final class WorkspaceNavigation
             );
         }
 
-        if (Route::has('recruitment.index')) {
+        if (Route::has('recruitment.index') && app(ModuleSettingsService::class)->recruitmentPublicBoardEnabled()) {
             $links[] = new NavItem(
                 'guest.recruitment',
                 __('recruitment::plugin.name'),

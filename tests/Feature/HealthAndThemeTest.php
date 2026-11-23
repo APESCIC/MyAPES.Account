@@ -168,7 +168,7 @@ class HealthAndThemeTest extends TestCase
             ->assertSee('href="'.route('petcare.pets.index').'"', false)
             ->assertDontSee('href="'.route('admin.index').'"', false);
 
-        $admin = User::factory()->accessLevel(User::ROLE_ADMIN)->create();
+        $admin = User::factory()->protectedRole('administrator')->create();
 
         $this->actingAs($admin)
             ->get(route('dashboard'))
