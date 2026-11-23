@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Workspace shell chrome (#382): rail, panel switch, user dock, page header
+ * Workspace shell chrome (#382): top app bar, mega menus, user menu, panel switch, page header
  * and command palette.
  */
 return [

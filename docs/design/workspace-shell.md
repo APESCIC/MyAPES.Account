@@ -1,6 +1,6 @@
 # Workspace shell
 
-The workspace shell (0.44.0, epic #382) is the frame around every page: a floating frosted-glass rail on the left, a content header with a breadcrumb and search, and a Ctrl K command palette. It copies the APES Newsroom admin menu (`/admin/moderation`, `APESCIC/APES.Newsroom` main @2e5693c) in MyAPES logo colours. It replaced the old `aside#site-sidebar` and the planned option-5 mega menu.
+The workspace shell (0.44.0 epic #382, top app menu in 0.74.0 epic #885) is the frame around every page: a glass **top app bar** with module mega menus, a content header with a breadcrumb and search, and a Ctrl K command palette. It copies the APES Newsroom admin menu (`/admin/moderation`, `APESCIC/APES.Newsroom` main @2e5693c) in MyAPES logo colours. The old left rail and `aside#site-sidebar` are retired; small screens use an off-canvas **menu drawer** cloned from the same navigation tree.
 
 Built in Blade, Tailwind v4, plain JavaScript and Lucide. Newsroom is React; we copied the approach, not the code.
 
@@ -11,10 +11,10 @@ Built in Blade, Tailwind v4, plain JavaScript and Lucide. Newsroom is React; we 
 | Tokens and shell styles | `resources/css/workspace.css` (imported by `app.css`) |
 | Page-level variables mapped onto the tokens | `:root` block at the top of `resources/css/app.css` |
 | Layout | `resources/views/layouts/app.blade.php` |
-| Shell components | `resources/views/components/workspace/` (`rail`, `brand`, `panel-switch`, `nav`, `user-dock`, `topbar`, `drawer`, `page-header`, `command-palette`) |
+| Shell components | `resources/views/components/workspace/` (`app-bar`, `mega-menu`, `panel-switch`, `user-menu`, `drawer`, `drawer-nav`, `page-header`, `command-palette`; legacy `rail`/`nav` for drawer markup only) |
 | Shared components | `resources/views/components/` (`card`, `button`, `field`, `badge`, `alert`) |
-| Navigation builder | `app/Support/Navigation/` (`WorkspaceNavigation`, `WorkspaceMenu`, `NavPanel`, `NavGroup`, `NavItem`, `QuickAction`) |
-| Scripts | `resources/js/workspace/` (`dialog-focus.js`, `drawer.js`, `command-palette.js`) |
+| Navigation builder | `app/Support/Navigation/` (`WorkspaceNavigation`, `WorkspaceMenu`, `NavPanel`, `NavGroup`, `NavItem`, `QuickAction`, `MegaMenuTopItem`) |
+| Scripts | `resources/js/workspace/` (`dialog-focus.js`, `drawer.js`, `mega-menu.js`, `command-palette.js`, `guided-tour.js`) |
 | Strings | `lang/en/workspace.php`, `lang/en_GB/workspace.php` |
 
 ## Tokens
@@ -45,15 +45,11 @@ The older page variables (`--ink`, `--surface`, `--brand-teal`, `--clay` and so 
 
 ## Layout
 
-- **Desktop (64rem and up):** the rail is fixed 1rem from the top, bottom and left, 14.75rem wide, and scrolls internally. The content column is offset by `calc(14.75rem + 1rem)`.
-- **Rail, top to bottom:**
-  - Brand: a 40px mark (`public/logos/myapes-mark-{40,80,120}…png`), "MyAPES Account" and the current panel.
-  - The Staff | Admin switch.
-  - Flat groups under 11px uppercase headings.
-  - The user dock, pinned to the bottom.
-- **There are no submenus, collapsing groups or badges.**
-- **Content header:** the breadcrumb, then the search pill and "View site". An H1 and subtitle appear only when a page sets `@section('page_title')` / `@section('page_subtitle')`. Pages that render their own H1 keep it.
-- **Below 64rem:** a glass top card with Menu, the brand and Search. Menu opens a left drawer, `min(20rem, 88vw)` wide. The drawer is a copy of the desktop rail, made when it opens, so the rail markup exists once.
+- **All breakpoints:** a full-width glass **app bar** (`data-workspace-app-bar`) sits above the content column. It carries the brand, optional Staff | Admin switch, navigation, Ctrl K search, notifications and the signed-in **user menu** (avatar).
+- **Signed out:** plain text links in the app bar (Open a ticket, Bookings, Help, Public Login, Register) plus Log in / Register buttons at the right.
+- **Signed in:** each enabled module is a **mega menu** trigger (`data-workspace-mega`) opening a panel of grouped links. Staff also see Clients and Admin mega menus when permitted; the Admin panel reuses Admin section mega menus instead of module rows.
+- **Below 64rem:** the same tree is copied into a left drawer (`data-workspace-drawer`) opened from the menu button (`data-workspace-menu-open`). Drawer markup reuses the rail styles for density and accordion grouping.
+- **Content header:** breadcrumb, optional H1 from `@section('page_title')`, and tools such as View site. Search / Ctrl K stays in the app bar.
 - **Auth pages:** `public.login`, `public.register`, `staff.login`, password and two-factor pages add `is-auth-page` to the body. The page card is centred under the horizontal logo.
 
 ## Panels and the builder
@@ -69,14 +65,14 @@ The older page variables (`--ink`, `--surface`, `--brand-teal`, `--clay` and so 
 Rules:
 
 - **Gating:** items are filtered by ability, keeping the plugin `homeAbility` and the `.view-all` to `.view-own` fallback. Empty groups are dropped, and a panel with no groups is not offered. Hiding a link is not the security boundary: routes keep their middleware.
-- **Panel switch:** it appears only when the user has both Staff and Admin. Each tab links to that panel's first item.
+- **Panel switch:** it appears in the app bar only when the user has both Staff and Admin. Each tab links to that panel's first item.
 - **Active item:** resolved from the route name. The most specific matching pattern wins, so `shelter.tickets.*` beats `shelter.*`.
   - `account_type` (or the user being viewed) separates Public users from Staff.
   - Pages never pass an active key.
 
-### Adding a plugin to the rail
+### Adding a plugin to the menus
 
-1. Declare a `PluginNavigationItem` in the plugin manifest, giving the label, the `{module}.{plugin}.index` route, a Lucide icon, the order, the optional `requiredAbility` and the `moduleSlug`. The item appears under each enabled module, with its routes (`{module}.{plugin}.*`) marked as current.
+1. Declare a `PluginNavigationItem` in the plugin manifest, giving the label, the `{module}.{plugin}.index` route, a Lucide icon, the order, the optional `requiredAbility` and the `moduleSlug`. The item appears under each enabled module mega menu, with its routes (`{module}.{plugin}.*`) marked as current.
 2. To give staff a destination that depends on the user (as Recruitment does), contribute a `StaffPluginNavigationItem` to `StaffPluginNavigationRegistry`. It joins the module group its route patterns live under, replacing the manifest item if they overlap.
 3. Add search synonyms through the manifest `searchKeywordsKey`. The palette matches on them.
 4. If the plugin has a create form at `index#create`, the palette offers a "Create …" quick action to users who hold `{module}.{plugin}.create`. Put the label in `workspace.quick.create.{plugin}`.
@@ -84,14 +80,14 @@ Rules:
 
 ## Command palette
 
-Ctrl K (⌘K on Apple devices), the header search pill or the top card's search button opens it. It is a dialog with a combobox (`aria-activedescendant`) over a listbox:
+Ctrl K (⌘K on Apple devices), the app bar search pill or the drawer search button opens it. It is a dialog with a combobox (`aria-activedescendant`) over a listbox:
 - Arrow Up and Down wrap, Home and End jump, Enter opens the selected option, and Escape closes.
 - Every search term must appear in the option's label, section or keywords.
 
 The options are rendered as JSON (`data-workspace-palette-index`) from `WorkspaceMenu::paletteCommands()`, in this order:
 1. Quick actions: create forms, the panel switch, View site and Your account.
-2. Every permitted nav item.
-3. Plugin and plugin settings entries from the Admin search catalogue.
+2. Every permitted nav item (panel, top mega menu and palette index rows prefix the label with the module or group name when needed, e.g. `APES CIC — Tickets`).
+3. Plugin and plugin settings entries from the Admin search catalogue (settings rows already read `Plugin — Plugin settings`).
 
 ## Shared components
 
@@ -109,7 +105,7 @@ Other classes: `.sg-card`, `.sg-icon-btn`, `.sg-tabs` / `.sg-tab` (or `.admin-na
 
 - **Structure:**
   - A skip link comes first and targets `<main id="main-content" tabindex="-1">`.
-  - The rail is an `<aside>` with `<nav aria-label="Workspace navigation">`, and its headings are tied to their lists with `aria-labelledby`.
+  - The app bar exposes `aria-label="App menu"` for top navigation; each mega menu panel is labelled with the module name.
 - **Current state:** exactly one nav link has `aria-current="page"`, and so does the last breadcrumb.
 - **Icons:** all have `aria-hidden="true"`, and icon-only buttons have names.
 - **Drawer and palette:** focus moves in, Tab is trapped, Escape closes, the page behind is `inert` with `aria-hidden` and scrolling is locked, and focus returns on close.
@@ -121,8 +117,8 @@ Other classes: `.sg-card`, `.sg-icon-btn`, `.sg-tabs` / `.sg-tab` (or `.admin-na
 
 ## Dark theme and print
 
-The theme toggle in the dock sets `data-theme="dark"`, and the choice persists in `localStorage` (`myapes-theme`). The dark theme sets every token to its dark value and retints the gradient from `#12262C` and `#107481`. Print hides the rail, top card, drawer, palette, header tools and mascot, and prints the content full width with no filters or gradients.
+The theme toggle in the user menu sets `data-theme="dark"`, and the choice persists in `localStorage` (`myapes-theme`). The dark theme sets every token to its dark value and retints the gradient from `#12262C` and `#107481`. Print hides the app bar, drawer, palette, header tools and mascot, and prints the content full width with no filters or gradients.
 
 ## Visual QA
 
-Screenshots for 0.44.0 are in `docs/design-qa/workspace-shell-*.png`. They cover 1440×900, 1024×768, 768×1024 and 375×812, in light, dark and reduced-transparency modes.
+Screenshots for 0.44.0 are in `docs/design-qa/workspace-shell-*.png` (left-rail era). For 0.74.0 top app menu mock-ups, see epic #885 and related issues on GitHub; refresh this folder when new captures land in the repo.

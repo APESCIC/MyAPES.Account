@@ -5,6 +5,13 @@
 **Audience:** everyone  
 **Purpose:** point each group to the right guide.
 
+## Moving around the app
+
+- **Signed out:** use the links across the top of the page (Open a ticket, Bookings, Help, Public Login).
+- **Signed in:** each APES module has a **mega menu** in the top app bar; open your **avatar** for profile, theme and Sign out. Staff and administrators with both areas see a **Staff | Admin** switch in the bar.
+- **Search:** press **Ctrl K** (⌘K on Mac) or use **Search** in the top bar to jump anywhere or run quick actions.
+- **Phone or narrow window:** use the **menu** button for the same links in a drawer.
+
 ## Public Accounts
 Guides for pet owners, clients and job applicants live in the app, so you never need a GitHub account:
 - Help: [https://myaccount.myapes.me.uk/help](https://myaccount.myapes.me.uk/help)

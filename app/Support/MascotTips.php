@@ -78,7 +78,7 @@ final class MascotTips
             ],
             default => [
                 'title' => 'Need a pointer?',
-                'body' => 'Use the sidebar to move between Dashboard, Profile, and your services.',
+                'body' => 'Use the top app menu to move between Dashboard, Profile, and your services.',
             ],
         };
     }
