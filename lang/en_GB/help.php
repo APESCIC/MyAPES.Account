@@ -19,6 +19,19 @@ return [
         'staff_link' => 'read the staff guide',
     ],
 
+    'appearance' => [
+        'heading' => 'Appearance and themes',
+        'intro' => 'MyAPES Account has two visual styles — Glassy (the default soft glass look) and Jungle — each in light or dark colour mode. The same friendly critter illustrations appear in both styles.',
+        'persist_signed_in' => 'When you are signed in, your choices are saved to your account and follow you on other devices.',
+        'persist_guest' => 'When you are not signed in, your choices are remembered on this browser only.',
+        'user_menu' => 'Open your avatar in the top app bar and use the Theme controls at the bottom of the menu.',
+        'profile' => 'Signed in? Open Profile and scroll to Appearance for the same controls with more space.',
+        'guest_footer' => 'On pages with a site footer, guests can change theme from the Theme section in the footer.',
+        'glassy' => 'Glassy uses frosted cards, teal links and soft gradient washes.',
+        'jungle' => 'Jungle adds leafy corners and jungle colour while keeping the same layout.',
+        'calm' => 'Calm mode hides decorative critters in the menu and footer and turns off Jungle leaf decorations for a quieter screen. Help tips on pages may still show a critter where it explains the page.',
+    ],
+
     'staff' => [
         'title' => 'Staff guide',
         'eyebrow' => 'Staff guide',

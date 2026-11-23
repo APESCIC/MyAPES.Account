@@ -82,6 +82,18 @@
             <p>{{ __('help.staff.account.body') }}</p>
         </section>
 
+        <section id="appearance">
+            <h2>{{ __('help.appearance.heading') }}</h2>
+            <p>{{ __('help.appearance.intro') }}</p>
+            <p>{{ __('help.appearance.persist_signed_in') }}</p>
+            <ul>
+                <li>{{ __('help.appearance.user_menu') }}</li>
+                <li>{{ __('help.appearance.profile') }}</li>
+            </ul>
+            <p>{{ __('help.appearance.glassy') }} {{ __('help.appearance.jungle') }}</p>
+            <p>{{ __('help.appearance.calm') }}</p>
+        </section>
+
         <section id="support">
             <h2>{{ __('help.staff.support.heading') }}</h2>
             <p>{{ __('help.staff.support.body') }}</p>

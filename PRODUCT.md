@@ -35,5 +35,7 @@ Friendly, reassuring, practical. The product voice should feel welcoming and com
 4. Design for mixed audiences: public users need guidance; staff users need speed and consistency.
 5. Make quality repeatable: shared styles and components should keep behavior and visual language consistent across Plugins.
 
+Glassy (default Soft glass) and Jungle share one workspace shell, critter cast and theme switcher; Calm mode trims decoration without changing tasks. See [docs/design/brand-guide-themes.md](docs/design/brand-guide-themes.md).
+
 ## Accessibility & Inclusion
 Target WCAG 2.2 AA contrast and interaction standards across all core flows. Preserve keyboard accessibility for forms, navigation, and actions. Respect reduced-motion preferences, avoid color-only status communication, and keep copy plain enough for broad community audiences with varied digital confidence.

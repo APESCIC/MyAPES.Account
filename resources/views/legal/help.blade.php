@@ -78,6 +78,19 @@
             @endregistrationOpen
         </section>
 
+        <section id="appearance">
+            <h2>{{ __('help.appearance.heading') }}</h2>
+            <p>{{ __('help.appearance.intro') }}</p>
+            <p>{{ __('help.appearance.persist_signed_in') }} {{ __('help.appearance.persist_guest') }}</p>
+            <ul>
+                <li>{{ __('help.appearance.user_menu') }}</li>
+                <li>{{ __('help.appearance.profile') }}</li>
+                <li>{{ __('help.appearance.guest_footer') }}</li>
+            </ul>
+            <p>{{ __('help.appearance.glassy') }} {{ __('help.appearance.jungle') }}</p>
+            <p>{{ __('help.appearance.calm') }}</p>
+        </section>
+
         <section id="staff-and-personal-accounts" data-help-staff-accounts>
             <h2>{{ __('public.legal.help.staff_accounts.heading') }}</h2>
             <p>{{ __('public.legal.help.staff_accounts.why') }}</p>

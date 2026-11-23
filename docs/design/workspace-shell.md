@@ -1,5 +1,7 @@
 # Workspace shell
 
+Theme skins (Glassy and Jungle), light and dark mode, Calm mode and critter cast usage: [brand-guide-themes.md](brand-guide-themes.md).
+
 The workspace shell (0.44.0 epic #382, top app menu in 0.74.0 epic #885) is the frame around every page: a glass **top app bar** with module mega menus, a content header with a breadcrumb and search, and a Ctrl K command palette. It copies the APES Newsroom admin menu (`/admin/moderation`, `APESCIC/APES.Newsroom` main @2e5693c) in MyAPES logo colours. The old left rail and `aside#site-sidebar` are retired; small screens use an off-canvas **menu drawer** cloned from the same navigation tree.
 
 Built in Blade, Tailwind v4, plain JavaScript and Lucide. Newsroom is React; we copied the approach, not the code.
@@ -115,9 +117,11 @@ Other classes: `.sg-card`, `.sg-icon-btn`, `.sg-tabs` / `.sg-tab` (or `.admin-na
   - Browsers without `backdrop-filter` get opaque surfaces.
 - **Hit targets:** at least 2.25rem for the switch, 2.5rem for links and 2.75rem for buttons.
 
-## Dark theme and print
+## Appearance, dark mode and print
 
-The theme toggle in the user menu sets `data-theme="dark"`, and the choice persists in `localStorage` (`myapes-theme`). The dark theme sets every token to its dark value and retints the gradient from `#12262C` and `#107481`. Print hides the app bar, drawer, palette, header tools and mascot, and prints the content full width with no filters or gradients.
+The **theme switcher** in the user menu, Profile → Appearance and the guest footer sets `data-skin` (`glassy` | `jungle`), `data-theme` (`light` | `dark`) and optional `data-calm`. Signed-in choices persist on the account; guests use `localStorage` (`myapes-appearance`). Dark mode sets every token to its dark value and retints the gradient from `#12262C` and `#107481` in Glassy. See [brand-guide-themes.md](brand-guide-themes.md).
+
+Print hides the app bar, drawer, palette, header tools and mascot, and prints the content full width with no filters or gradients.
 
 ## Visual QA
 
