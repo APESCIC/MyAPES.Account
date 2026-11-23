@@ -778,14 +778,26 @@
 }
 
 .sg-app-bar__search {
+    display: inline-flex;
+    width: auto;
+    max-width: none;
+    padding-inline: 0.55rem;
+}
+
+.sg-app-bar__search .sg-search-pill__label,
+.sg-app-bar__search .sg-kbd {
     display: none;
 }
 
 @media (min-width: 40rem) {
     .sg-app-bar__search {
-        display: inline-flex;
-        width: auto;
         max-width: 14rem;
+        padding-inline: 0.75rem;
+    }
+
+    .sg-app-bar__search .sg-search-pill__label,
+    .sg-app-bar__search .sg-kbd {
+        display: inline;
     }
 }
 
@@ -846,8 +858,11 @@
     position: absolute;
     top: calc(100% + 0.35rem);
     left: 0;
+    right: auto;
     z-index: 50;
-    min-width: min(48rem, 92vw);
+    width: max-content;
+    min-width: min(18rem, 92vw);
+    max-width: min(48rem, calc(100vw - 1.5rem));
     max-height: min(70vh, 28rem);
     overflow: auto;
     border: 1px solid var(--sg-edge);
@@ -857,6 +872,11 @@
     -webkit-backdrop-filter: blur(var(--sg-blur-card)) saturate(140%);
     box-shadow: var(--shadow-sg-dialog);
     padding: 1rem;
+}
+
+.sg-mega__panel[data-align='end'] {
+    left: auto;
+    right: 0;
 }
 
 .sg-mega__columns {

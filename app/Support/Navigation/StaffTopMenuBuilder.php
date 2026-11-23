@@ -229,7 +229,8 @@ final class StaffTopMenuBuilder
 
     private function canManageForms(User $user): bool
     {
-        return $this->permissions->can($user, 'forms.manage')
+        // Embed-form routes authorize admin.settings.manage today; forms.manage lands with #998.
+        return $this->permissions->can($user, 'admin.settings.manage')
             && ! $this->profile->isAdministrator($user);
     }
 }

@@ -16,12 +16,22 @@ const openMega = (root, instance) => {
     }
 
     panel.removeAttribute('hidden');
+    panel.removeAttribute('data-align');
     trigger.setAttribute('aria-expanded', 'true');
     instance.container.classList.add('is-open');
+
+    const triggerRect = trigger.getBoundingClientRect();
+    const panelRect = panel.getBoundingClientRect();
+    const overflowRight = panelRect.right > window.innerWidth - 12;
+    const fitsLeftAligned = triggerRect.left + panelRect.width <= window.innerWidth - 12;
+    if (overflowRight && !fitsLeftAligned) {
+        panel.setAttribute('data-align', 'end');
+    }
 };
 
 const closeMega = (instance) => {
     instance.panel.setAttribute('hidden', '');
+    instance.panel.removeAttribute('data-align');
     instance.trigger.setAttribute('aria-expanded', 'false');
     instance.container.classList.remove('is-open');
 };
@@ -35,6 +45,7 @@ const closeAllMega = (root) => {
         }
 
         panel.setAttribute('hidden', '');
+        panel.removeAttribute('data-align');
         trigger.setAttribute('aria-expanded', 'false');
         container.classList.remove('is-open');
     }

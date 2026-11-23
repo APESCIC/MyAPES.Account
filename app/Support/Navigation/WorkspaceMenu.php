@@ -34,6 +34,10 @@ final readonly class WorkspaceMenu
             return null;
         }
 
+        $active = $this->activeItem();
+        $activeUrl = $active?->url;
+        $activePatterns = $active?->activePatterns ?? [];
+
         foreach ($this->topItems as $top) {
             if ($top->key === $this->activeItemKey) {
                 return $top;
@@ -41,6 +45,16 @@ final readonly class WorkspaceMenu
 
             foreach ($top->items() as $item) {
                 if ($item->key === $this->activeItemKey) {
+                    return $top;
+                }
+
+                // Panel and mega items can share a route with different keys; light the
+                // trigger when the URL or active patterns match (#1018 review).
+                if ($activeUrl !== null && $item->url === $activeUrl) {
+                    return $top;
+                }
+
+                if ($activePatterns !== [] && array_intersect($item->activePatterns, $activePatterns) !== []) {
                     return $top;
                 }
             }
@@ -109,7 +123,17 @@ final readonly class WorkspaceMenu
 
     public function isActive(NavItem $item): bool
     {
-        return $this->activeItemKey !== null && $item->key === $this->activeItemKey;
+        if ($this->activeItemKey === null) {
+            return false;
+        }
+
+        if ($item->key === $this->activeItemKey) {
+            return true;
+        }
+
+        $active = $this->activeItem();
+
+        return $active !== null && $item->url === $active->url;
     }
 
     /**

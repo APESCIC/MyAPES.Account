@@ -82,7 +82,14 @@
 
         @php
             $panel = $menu->currentPanel();
-            $extraGroups = collect($panel?->groups ?? [])->filter(function ($group) use ($menu) {
+            $topGroupKeys = collect($menu->topItems)
+                ->flatMap(static fn ($top) => collect($top->groups)->map(static fn ($group) => $group->key))
+                ->all();
+            $extraGroups = collect($panel?->groups ?? [])->filter(function ($group) use ($menu, $topGroupKeys) {
+                if (in_array($group->key, $topGroupKeys, true)) {
+                    return false;
+                }
+
                 if (in_array($group->key, ['overview', 'support', 'tools'], true)) {
                     return true;
                 }
