@@ -8,6 +8,7 @@ use App\Core\Extensions\Navigation\PublicNavigationItem;
 use App\Core\Extensions\Navigation\PublicNavigationRegistry;
 use App\Core\Extensions\Plugins\PluginAbilityFactory;
 use App\Core\Extensions\Plugins\PluginManifest;
+use App\Core\Extensions\Plugins\PluginMenuAction;
 use App\Core\Extensions\Plugins\PluginNavigationItem;
 use App\Core\Extensions\Plugins\PluginServiceProvider;
 use App\Core\Extensions\Plugins\PluginSettingsSchema;
@@ -142,6 +143,14 @@ class TicketsServiceProvider extends PluginServiceProvider
                 new PluginNavigationItem('Tickets', 'apes-cic.tickets.index', 'ticket', 10, moduleSlug: 'apes-cic'),
                 new PluginNavigationItem('Tickets', 'shelter.tickets.index', 'ticket', 20, moduleSlug: 'shelter-rescue'),
                 new PluginNavigationItem('Tickets', 'petcare.tickets.index', 'ticket', 20, moduleSlug: 'pet-care-clinic'),
+            ],
+            menuActions: [
+                new PluginMenuAction('Open a ticket', 'apes-cic.tickets.index', 'circle-plus', 10, PluginMenuAction::AUDIENCE_PUBLIC, 'apes-cic', 'create', '#create'),
+                new PluginMenuAction('View my tickets', 'apes-cic.tickets.index', 'ticket', 20, PluginMenuAction::AUDIENCE_PUBLIC, 'apes-cic', 'view-own'),
+                new PluginMenuAction('Open a ticket', 'shelter.tickets.index', 'circle-plus', 10, PluginMenuAction::AUDIENCE_PUBLIC, 'shelter-rescue', 'create', '#create'),
+                new PluginMenuAction('View my tickets', 'shelter.tickets.index', 'ticket', 20, PluginMenuAction::AUDIENCE_PUBLIC, 'shelter-rescue', 'view-own'),
+                new PluginMenuAction('Open a ticket', 'petcare.tickets.index', 'circle-plus', 10, PluginMenuAction::AUDIENCE_PUBLIC, 'pet-care-clinic', 'create', '#create'),
+                new PluginMenuAction('View my tickets', 'petcare.tickets.index', 'ticket', 20, PluginMenuAction::AUDIENCE_PUBLIC, 'pet-care-clinic', 'view-own'),
             ],
             settingsByModule: [
                 'apes-cic' => new PluginSettingsSchema(
