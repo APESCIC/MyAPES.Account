@@ -1,4 +1,5 @@
-const bellFor = (flyout) => flyout.closest('[data-workspace-dock]')?.querySelector('[data-notification-bell]')
+const bellFor = (flyout) => flyout.closest('[data-workspace-app-bar]')?.querySelector('[data-notification-bell]')
+    ?? flyout.closest('[data-workspace-dock]')?.querySelector('[data-notification-bell]')
     ?? document.querySelector('[data-notification-bell]');
 
 /**
