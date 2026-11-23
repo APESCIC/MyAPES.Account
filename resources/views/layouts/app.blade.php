@@ -12,6 +12,13 @@
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicons/favicon-32x32.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('icons/apple-touch-icon.png') }}">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+    <link
+        rel="preload"
+        as="image"
+        type="image/png"
+        href="{{ asset('logos/myapes-mark-40x40.png') }}"
+        imagesrcset="{{ asset('logos/myapes-mark-40x40.png') }} 1x, {{ asset('logos/myapes-mark-80x80.png') }} 2x, {{ asset('logos/myapes-mark-120x120.png') }} 3x"
+    >
     <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         (() => {
             const root = document.documentElement;
@@ -129,6 +136,8 @@
                             class="mascot-dock__avatar"
                             width="512"
                             height="512"
+                            loading="eager"
+                            decoding="async"
                         >
                     </button>
                     <div

@@ -114,6 +114,7 @@ Every Cloudron app is production. Read-only status/logs are fine; mutating or de
 
 ## Decisions and gotchas
 
+- Theme decorative assets (critter cast SVGs plus Jungle `public/decor/jungle/*` only when Jungle is active) stay at or below 150 KB per representative workspace page; CI enforces this in `ThemeAssetBudgetTest`. Only the app-bar brand mark is preloaded.
 - 2026-11-12: email import uses the Cloudron `communications@myapes.me.uk` mailbox over IMAP on `mail.cloudron.apes.org.uk:993` SSL/TLS (Cloudron has no IMAP on 143), polled every minute with backoff, and imported mail moves to `Processed` or `Failed` folders emptied after 30 days. Decided by Bambie (epic #770).
 - 2026-11-14: inbound connection is built in (no Import form); on live the mailbox password is set primarily in Admin → Settings → Keys and secrets; `INBOUND_MAIL_IMAP_PASSWORD` in `/app/data/shared/.env` is emergency/fallback only. Local reply testing uses `INBOUND_MAIL_DRIVER=herd` with Mailpit as fallback; `tickets:inbound-loop-check` proves the loop. Decided by Bambie (epic #807; clarified Keys-primary on live in epic #826).
 - 2026-11-14: Laravel Herd Pro is the only local development and testing stack (v0.63.1). Local mail goes to Herd's mail catcher; the Mailpit inbound driver stays for an optional standalone Mailpit when testing the reply loop. Decided by Bambie (epic #789).

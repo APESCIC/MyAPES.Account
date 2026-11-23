@@ -2,6 +2,7 @@
     'name',
     'pose' => 'welcome',
     'decorative' => false,
+    'imageLoading' => 'lazy',
 ])
 
 @php
@@ -19,7 +20,7 @@
         @if ($decorative) aria-hidden="true" @endif
         width="128"
         height="128"
-        loading="lazy"
+        loading="{{ $imageLoading }}"
         decoding="async"
     >
 </picture>

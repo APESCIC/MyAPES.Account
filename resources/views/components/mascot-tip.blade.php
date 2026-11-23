@@ -41,6 +41,7 @@
                 class="{{ $imageClass }}"
                 width="512"
                 height="512"
+                @if ($variant === 'empty') loading="lazy" decoding="async" @endif
             >
         @endif
         <div>

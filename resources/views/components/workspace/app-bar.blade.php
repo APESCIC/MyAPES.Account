@@ -23,6 +23,9 @@
                 height="40"
                 alt=""
                 class="sg-brand__mark"
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
             >
             <span class="sg-brand__text">
                 <span class="sg-brand__name">{{ __('workspace.app_name') }}</span>
