@@ -8,6 +8,7 @@
         $useFriendlyDenial = $denialMessage === '' || $denialMessage === 'This action is unauthorized.';
     @endphp
     <div class="panel">
+        <x-critter name="cleo" pose="thinking" class="brand-mascot" decorative />
         <h1>{{ __('public.403.blade.access_denied') }}</h1>
         <p class="muted">
             {{ $useFriendlyDenial

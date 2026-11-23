@@ -6,6 +6,7 @@ MyAPES Account is the APES CIC Public Account and staff portal built on Laravel 
 
 - Project wiki: https://github.com/APESCIC/MyAPES.Account/wiki (source in [`docs/wiki`](docs/wiki); edit through pull requests)
 - Developer docs: [`docs/`](docs)
+- Design (workspace shell, theme brand guide, art register): [`docs/design/`](docs/design) — see [`brand-guide-themes.md`](docs/design/brand-guide-themes.md)
 - Agent instructions (Cursor): [`AGENTS.md`](AGENTS.md)
 - Contributing and how work ships: [`CONTRIBUTING.md`](CONTRIBUTING.md)
 

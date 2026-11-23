@@ -203,6 +203,21 @@ return [
             'pattern' => '/^Select .+ in your preferences to continue\.$/',
             'reason' => 'Interpolated service name flash — extract with placeholder in #271',
         ],
+        [
+            'path' => 'resources/views/components/critter.blade.php',
+            'pattern' => "#class\\('critter'\\)#",
+            'reason' => 'Blade @php CritterCast class merge; not user-facing copy (#863).',
+        ],
+        [
+            'path' => 'resources/views/components/theme-switcher.blade.php',
+            'pattern' => "#config\\('themes\\.#",
+            'reason' => 'Theme switcher @php defaults from config (#863).',
+        ],
+        [
+            'path' => 'resources/views/layouts/app.blade.php',
+            'pattern' => '#false\]\)#',
+            'reason' => 'Layout @php appearance defaults from config (#863).',
+        ],
     ],
 
     /*

@@ -40,6 +40,11 @@
     --text-panel-title--line-height: 2.125rem;
 }
 
+@import './themes/glassy.css';
+@import './themes/jungle.css';
+@import './themes/menu-decor.css';
+@import './themes/critter-motion.css';
+
 /*
  * Frosted surfaces live on the shell wrapper rather than in @theme so the
  * dark theme and the transparency fallbacks can swap them in one place.
@@ -1038,6 +1043,114 @@
 
 .sg-user-menu__footer {
     margin-top: 0.5rem;
+}
+
+.sg-user-menu__theme {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--sg-line);
+}
+
+.theme-switcher {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.theme-switcher__heading {
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--sg-muted);
+}
+
+.theme-switcher__heading--footer {
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: 0.85rem;
+}
+
+.theme-switcher__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.theme-switcher__label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--sg-text);
+}
+
+.theme-switcher__options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.theme-switcher__option {
+    flex: 1 1 auto;
+    min-width: 4.5rem;
+    padding: 0.35rem 0.65rem;
+    border: 1px solid var(--sg-line);
+    border-radius: 999px;
+    background: var(--sg-surface);
+    color: var(--sg-text);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.theme-switcher__option:hover,
+.theme-switcher__option:focus-visible {
+    border-color: var(--sg-accent);
+    outline: none;
+}
+
+.theme-switcher__option[aria-checked='true'] {
+    border-color: var(--sg-accent);
+    background: color-mix(in srgb, var(--sg-accent) 18%, var(--sg-surface));
+}
+
+.theme-switcher__calm {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.45rem 0.65rem;
+    border: 1px solid var(--sg-line);
+    border-radius: 0.65rem;
+    background: var(--sg-surface);
+    cursor: pointer;
+    text-align: left;
+}
+
+.theme-switcher__calm:hover,
+.theme-switcher__calm:focus-visible {
+    border-color: var(--sg-accent);
+    outline: none;
+}
+
+.theme-switcher__calm[aria-checked='true'] {
+    border-color: var(--sg-accent);
+    background: color-mix(in srgb, var(--sg-accent) 12%, var(--sg-surface));
+}
+
+.theme-switcher--footer {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--line);
+    width: 100%;
+}
+
+.theme-switcher--profile .theme-switcher__group {
+    max-width: 24rem;
+}
+
+.site-footer__theme {
+    grid-column: 1 / -1;
 }
 
 .sg-drawer-accordion {

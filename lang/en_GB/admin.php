@@ -645,6 +645,8 @@ return [
             'intro' => 'Everyday options for the whole app. Changes take effect straight away and are recorded in the audit log.',
             'contact_heading' => 'Support contact',
             'contact_help' => 'The email address and phone number people can use to reach the APES support team. Leave a box blank if you do not want to give one.',
+            'theme_heading' => 'Default workspace theme',
+            'theme_help' => 'New and existing accounts with no saved theme use this skin. Accounts that have already chosen a theme are not changed.',
             'registration_heading' => 'Public registration',
             'registration_help' => 'When this is off, nobody can create a new public account: the Register links are hidden and the Register page sends people to Public Login. People who already have an account can still sign in, and staff still sign in through Cloudron.',
             'banner_heading' => 'Site banner',
@@ -655,6 +657,7 @@ return [
                 'registration_enabled' => 'Allow people to register for a public account',
                 'banner_enabled' => 'Show the banner on public pages',
                 'banner_text' => 'Banner text',
+                'default_theme_skin' => 'Default workspace theme',
             ],
             'attributes' => [
                 'support_email' => 'support email address',
@@ -662,6 +665,7 @@ return [
                 'registration_enabled' => 'public registration',
                 'banner_enabled' => 'site banner',
                 'banner_text' => 'banner text',
+                'default_theme_skin' => 'default workspace theme',
             ],
             'validation' => [
                 'support_email' => 'Enter the support email address in the correct format, like support@example.org.',

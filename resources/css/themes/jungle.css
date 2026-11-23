@@ -1,0 +1,92 @@
+/*
+ * Jungle — WCAG AA greenery palette (#975).
+ * Overrides Glassy tokens when html has data-skin="jungle".
+ */
+
+@import './jungle-decor.css';
+
+[data-skin='jungle'] {
+    --color-sg-ink: #142218;
+    --color-sg-muted: #4a6350;
+    --color-sg-teal: #1f6b3c;
+    --color-sg-teal-dark: #165230;
+    --color-sg-accent: #d4a017;
+    --color-sg-base: #eaf5e6;
+    --color-sg-ok: #165230;
+    --color-sg-ok-mist: #d4edd9;
+    --color-sg-warn: #7a4a0a;
+    --color-sg-warn-mist: #f8ebd0;
+    --color-sg-error: #9b2424;
+    --color-sg-error-mist: #fde0e0;
+    --color-sg-info: #1a5c38;
+    --color-sg-info-mist: #d0e8da;
+    --color-sg-channel-cic: #165230;
+    --color-sg-channel-shelter: #8a4b12;
+    --color-sg-channel-clinic: #2f617d;
+    --color-sg-channel-pet: #1f6b3c;
+    --color-sg-glow-cyan: rgba(125, 203, 150, 0.55);
+    --color-sg-glow-lavender: rgba(166, 224, 184, 0.5);
+    --color-sg-glow-mint: rgba(31, 107, 60, 0.35);
+    --color-focus: #1f6b3c;
+    --shadow-sg-card: 0 8px 30px rgba(20, 82, 48, 0.1);
+    --shadow-sg-rail: 0 12px 40px rgba(22, 82, 48, 0.16);
+    --shadow-sg-primary: 0 6px 18px rgba(31, 107, 60, 0.28);
+    --shadow-sg-active: 0 4px 14px rgba(20, 82, 48, 0.14);
+    --shadow-sg-dialog: 0 24px 60px rgba(20, 34, 24, 0.28);
+}
+
+[data-skin='jungle'] .workspace-shell {
+    --sg-line: rgba(31, 107, 60, 0.18);
+    --sg-line-strong: rgba(31, 107, 60, 0.32);
+    --sg-overlay: rgba(20, 34, 24, 0.38);
+    --sg-primary: var(--color-sg-teal);
+    --sg-primary-hover: var(--color-sg-teal-dark);
+    --sg-on-primary: var(--color-sg-white);
+    --sg-link: var(--color-sg-teal);
+}
+
+[data-skin='jungle'][data-theme='dark'] {
+    --color-sg-ink: #eaf5e6;
+    --color-sg-muted: #a8c4b0;
+    --color-sg-teal: #7dcb96;
+    --color-sg-teal-dark: #a6e0b8;
+    --color-sg-accent: #e8c04a;
+    --color-sg-base: #0c1610;
+    --color-sg-ok: #a6e0b8;
+    --color-sg-ok-mist: rgba(22, 82, 48, 0.5);
+    --color-sg-warn: #f6c98a;
+    --color-sg-warn-mist: rgba(122, 74, 10, 0.45);
+    --color-sg-error: #ffb0a8;
+    --color-sg-error-mist: rgba(155, 36, 36, 0.45);
+    --color-sg-info: #9ed4b4;
+    --color-sg-info-mist: rgba(31, 107, 60, 0.42);
+    --color-sg-glow-cyan: rgba(31, 107, 60, 0.42);
+    --color-sg-glow-lavender: rgba(125, 203, 150, 0.35);
+    --color-sg-glow-mint: rgba(12, 60, 36, 0.45);
+    --color-focus: #a6e0b8;
+    --shadow-sg-card: 0 8px 30px rgba(0, 0, 0, 0.35);
+    --shadow-sg-rail: 0 12px 40px rgba(0, 0, 0, 0.42);
+    --shadow-sg-primary: 0 6px 18px rgba(125, 203, 150, 0.22);
+    --shadow-sg-active: 0 4px 14px rgba(0, 0, 0, 0.28);
+    --shadow-sg-dialog: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+[data-skin='jungle'][data-theme='dark'] .workspace-shell {
+    --sg-surface: rgba(12, 22, 16, 0.58);
+    --sg-surface-strong: rgba(12, 22, 16, 0.8);
+    --sg-rail-surface: rgba(12, 22, 16, 0.52);
+    --sg-drawer-surface: rgba(8, 16, 12, 0.98);
+    --sg-dialog-surface: rgba(8, 16, 12, 0.94);
+    --sg-dock-surface: rgba(255, 255, 255, 0.06);
+    --sg-field-surface: rgba(8, 18, 12, 0.72);
+    --sg-hover: rgba(255, 255, 255, 0.08);
+    --sg-switch-surface: rgba(255, 255, 255, 0.06);
+    --sg-active-surface: rgba(255, 255, 255, 0.12);
+    --sg-edge: rgba(255, 255, 255, 0.12);
+    --sg-line: rgba(125, 203, 150, 0.2);
+    --sg-line-strong: rgba(125, 203, 150, 0.34);
+    --sg-overlay: rgba(2, 6, 4, 0.62);
+    --sg-primary: var(--color-sg-accent);
+    --sg-primary-hover: var(--color-sg-teal-dark);
+    --sg-on-primary: var(--color-sg-base);
+}

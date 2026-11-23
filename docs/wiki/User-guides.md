@@ -12,6 +12,13 @@
 - **Search:** press **Ctrl K** (⌘K on Mac) or use **Search** in the top bar to jump anywhere or run quick actions.
 - **Phone or narrow window:** use the **menu** button for the same links in a drawer.
 
+## Appearance
+
+- **Glassy** (default) and **Jungle** skins, each in **light** or **dark** colour mode.
+- **Signed in:** open your **avatar** → Theme at the bottom of the menu, or **Profile → Appearance**. Choices save to your account.
+- **Guests:** use **Theme** in the site footer; choices stay on this browser until you sign in.
+- **Calm mode** (in the same control): hides menu and footer critters and turns off Jungle leaf decoration for a quieter screen.
+
 ## Public Accounts
 Guides for pet owners, clients and job applicants live in the app, so you never need a GitHub account:
 - Help: [https://myaccount.myapes.me.uk/help](https://myaccount.myapes.me.uk/help)

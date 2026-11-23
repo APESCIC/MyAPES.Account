@@ -33,6 +33,7 @@ use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\BookingsController;
 use App\Http\Controllers\ChangeLogController;
 use App\Http\Controllers\ClientRecordsNoticeController;
+use App\Http\Controllers\ThemePreferenceController;
 use App\Http\Controllers\CspReportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GuidedTourController;
@@ -245,6 +246,9 @@ Route::middleware([
     Route::post('/account/client-records-notice/dismiss', [ClientRecordsNoticeController::class, 'dismiss'])
         ->middleware('throttle:20,1')
         ->name('client-records-notice.dismiss');
+    Route::post('/account/theme-preference', [ThemePreferenceController::class, 'store'])
+        ->middleware('throttle:30,1')
+        ->name('account.theme-preference.store');
     Route::prefix('staff/callers')->name('callers.')->group(function (): void {
         Route::get('/', [CallerController::class, 'index'])->name('index');
         Route::get('/{caller}', [CallerController::class, 'show'])->whereNumber('caller')->name('show');

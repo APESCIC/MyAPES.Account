@@ -36,9 +36,9 @@ Machine JSON (gitignored under storage): `storage/app/lang-inventory.json`.
 | [Plugin: Pet Profiles](#plugin-pet-profiles) | 0 |
 | [Other / unclassified](#other-unclassified) | 0 |
 | **All (inventory)** | **0** |
-| Allow-listed (omitted below) | 109 |
+| Allow-listed (omitted below) | 114 |
 
-_Generated at 2026-11-22T20:56:44+00:00_
+_Generated at 2026-11-23T18:18:24+00:00_
 
 <a id="public-268"></a>
 

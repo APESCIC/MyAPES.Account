@@ -16,7 +16,7 @@ class HealthAndThemeTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'status' => 'ok',
-                'version' => '0.74.0',
+                'version' => '0.75.0',
                 'release' => 'development',
                 'maintenance' => false,
                 'checks' => [
@@ -52,7 +52,7 @@ class HealthAndThemeTest extends TestCase
             ->assertServiceUnavailable()
             ->assertExactJson([
                 'status' => 'unavailable',
-                'version' => '0.74.0',
+                'version' => '0.75.0',
                 'release' => 'development',
                 'maintenance' => false,
                 'checks' => [
@@ -99,8 +99,10 @@ class HealthAndThemeTest extends TestCase
         $response = $this->get(route('home'));
 
         $response->assertOk();
+        $response->assertSee('data-skin="glassy"', false);
         $response->assertSee('data-theme="light"', false);
-        $response->assertSee("localStorage.getItem('myapes-theme')", false);
+        $response->assertSee("appearanceKey = 'myapes-appearance'", false);
+        $response->assertSee("themeKey = 'myapes-theme'", false);
         $response->assertSee('data-workspace-app-bar', false);
         $response->assertSee('data-workspace-app-nav', false);
         $response->assertSee('data-workspace-menu-open', false);

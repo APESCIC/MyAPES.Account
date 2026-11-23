@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light">
+@php($appearance ??= ['skin' => 'glassy', 'mode' => 'light', 'calm' => false])
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-skin="{{ $appearance['skin'] }}" data-theme="{{ $appearance['mode'] }}" @auth data-appearance-source="server" @endauth @if($appearance['calm']) data-calm="true" @endif>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,16 +12,55 @@
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicons/favicon-32x32.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('icons/apple-touch-icon.png') }}">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+    <link
+        rel="preload"
+        as="image"
+        type="image/png"
+        href="{{ asset('logos/myapes-mark-40x40.png') }}"
+        imagesrcset="{{ asset('logos/myapes-mark-40x40.png') }} 1x, {{ asset('logos/myapes-mark-80x80.png') }} 2x, {{ asset('logos/myapes-mark-120x120.png') }} 3x"
+    >
     <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         (() => {
+            const root = document.documentElement;
             try {
-                const savedTheme = localStorage.getItem('myapes-theme');
-                const theme = savedTheme === 'dark' ? 'dark' : 'light';
-                document.documentElement.dataset.theme = theme;
-                document.documentElement.style.colorScheme = theme;
+                if (root.dataset.appearanceSource === 'server') {
+                    root.style.colorScheme = root.dataset.theme === 'dark' ? 'dark' : 'light';
+
+                    return;
+                }
+
+                const appearanceKey = 'myapes-appearance';
+                const themeKey = 'myapes-theme';
+                let appearance = { skin: 'glassy', mode: 'light', calm: false };
+                try {
+                    const savedAppearance = localStorage.getItem(appearanceKey);
+                    if (savedAppearance) {
+                        const parsed = JSON.parse(savedAppearance);
+                        if (parsed && typeof parsed === 'object') {
+                            appearance.skin = parsed.skin === 'jungle' ? 'jungle' : 'glassy';
+                            appearance.mode = parsed.mode === 'dark' ? 'dark' : 'light';
+                            appearance.calm = Boolean(parsed.calm);
+                        }
+                    } else {
+                        const savedTheme = localStorage.getItem(themeKey);
+                        appearance.mode = savedTheme === 'dark' ? 'dark' : 'light';
+                    }
+                } catch {
+                    appearance.mode = 'light';
+                }
+                root.dataset.skin = appearance.skin;
+                root.dataset.theme = appearance.mode;
+                root.style.colorScheme = appearance.mode;
+                if (appearance.calm) {
+                    root.setAttribute('data-calm', 'true');
+                } else {
+                    root.removeAttribute('data-calm');
+                }
             } catch {
-                document.documentElement.dataset.theme = 'light';
-                document.documentElement.style.colorScheme = 'light';
+                if (root.dataset.appearanceSource !== 'server') {
+                    root.dataset.theme = 'light';
+                }
+                root.style.colorScheme = 'light';
             }
         })();
     </script>
@@ -96,6 +136,8 @@
                             class="mascot-dock__avatar"
                             width="512"
                             height="512"
+                            loading="eager"
+                            decoding="async"
                         >
                     </button>
                     <div
@@ -139,6 +181,17 @@
                     href="{{ route('change-log.index') }}"
                     aria-label="View the MyAPES Account change log for version v{{ $appVersion }}"
                 >v{{ $appVersion }}</a>
+                @guest
+                    <div class="critter-chrome site-footer__critter" aria-hidden="true">
+                        <x-critter name="spike" pose="welcome" decorative class="critter--chrome" />
+                    </div>
+                    <x-theme-switcher
+                        variant="footer"
+                        id-prefix="footer-theme"
+                        class="site-footer__theme"
+                        :appearance="$appearance ?? ['skin' => 'glassy', 'mode' => 'light', 'calm' => false]"
+                    />
+                @endguest
             </footer>
         </div>
     </div>

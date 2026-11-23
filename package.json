@@ -10,18 +10,21 @@
         "test:push-smoke": "node scripts/test/push-smoke.mjs",
         "test:frontend": "npm run test:local-dev && npm run test:change-log && npm run test:workspace",
         "test:local-dev": "node --test scripts/local/dev-runner.test.mjs",
-        "test:release-backfill": "node --test scripts/local/release-backfill.test.mjs"
+        "test:release-backfill": "node --test scripts/local/release-backfill.test.mjs",
+        "test:e2e": "playwright test",
+        "test:e2e:update": "playwright test --update-snapshots"
     },
     "devDependencies": {
         "@fontsource-variable/fraunces": "^5.3.0",
         "@fontsource-variable/nunito-sans": "^5.3.0",
+        "@playwright/test": "^1.65.1",
         "@tailwindcss/vite": "^4.0.0",
         "chart.js": "^4.5.1",
         "concurrently": "^9.0.1",
-        "playwright": "^1.56.1",
         "driver.js": "^1.10.2",
         "laravel-vite-plugin": "^3.1",
         "lucide": "^0.468.0",
+        "playwright": "^1.56.1",
         "tailwindcss": "^4.0.0",
         "vite": "^8.0.0"
     },

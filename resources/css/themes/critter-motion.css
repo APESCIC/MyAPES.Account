@@ -1,0 +1,104 @@
+/*
+ * Gentle critter and jungle decor motion (#903). Disabled on auth/form pages,
+ * in Calm mode, and when the user prefers reduced motion.
+ */
+
+@keyframes critter-blink {
+    0%,
+    92%,
+    100% {
+        opacity: 1;
+    }
+
+    94% {
+        opacity: 0.35;
+    }
+
+    96% {
+        opacity: 1;
+    }
+}
+
+@keyframes critter-tail-flick {
+    0%,
+    88%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    91% {
+        transform: rotate(3deg);
+    }
+
+    94% {
+        transform: rotate(-2deg);
+    }
+
+    97% {
+        transform: rotate(1deg);
+    }
+}
+
+@keyframes jungle-leaf-sway {
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    50% {
+        transform: rotate(4deg);
+    }
+}
+
+@keyframes jungle-leaf-sway-flipped {
+    0%,
+    100% {
+        transform: rotate(180deg);
+    }
+
+    50% {
+        transform: rotate(184deg);
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-calm='true']) .critter img {
+      animation:
+          critter-blink 1.75s ease-in-out infinite,
+          critter-tail-flick 1.9s ease-in-out infinite;
+  }
+
+  :root:not([data-calm='true']) body.is-auth-page .critter img,
+  :root:not([data-calm='true']) form .critter img {
+      animation: none;
+  }
+
+  :root:not([data-calm='true'])[data-skin='jungle'] .sg-card::before,
+  :root:not([data-calm='true'])[data-skin='jungle'] .panel::before,
+  :root:not([data-calm='true'])[data-skin='jungle'] .sg-mega__heading::before,
+  :root:not([data-calm='true'])[data-skin='jungle'] .jungle-decor,
+  :root:not([data-calm='true'])[data-skin='jungle'] .jungle-vine {
+      animation: jungle-leaf-sway 1.85s ease-in-out infinite;
+  }
+
+  :root:not([data-calm='true'])[data-skin='jungle'] .sg-card::after,
+  :root:not([data-calm='true'])[data-skin='jungle'] .panel::after {
+      animation: jungle-leaf-sway-flipped 1.85s ease-in-out infinite;
+      transform-origin: bottom right;
+  }
+}
+
+[data-calm='true'] .critter img {
+    animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .critter img,
+    [data-skin='jungle'] .sg-card::before,
+    [data-skin='jungle'] .sg-card::after,
+    [data-skin='jungle'] .panel::before,
+    [data-skin='jungle'] .panel::after,
+    [data-skin='jungle'] .sg-mega__heading::before {
+        animation: none !important;
+    }
+}

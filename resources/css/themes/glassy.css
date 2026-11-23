@@ -1,0 +1,7 @@
+/*
+ * Glassy — default Soft glass skin (#975).
+ *
+ * Light and dark --color-sg-* tokens are defined in workspace.css @theme and
+ * [data-theme='dark'] so existing pages stay pixel-identical when data-skin="glassy".
+ * Jungle overrides live in jungle.css; this file documents the named skin only.
+ */

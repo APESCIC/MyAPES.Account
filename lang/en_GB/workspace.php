@@ -70,6 +70,20 @@ return [
         'view_site_hint' => 'Opens the MyAPES Account home page',
     ],
 
+    'theme' => [
+        'section' => 'Theme',
+        'footer_label' => 'Theme',
+        'appearance_heading' => 'Appearance',
+        'appearance_intro' => 'Choose how MyAPES Account looks on this device. Signed-in choices are saved to your account.',
+        'skin' => 'Style',
+        'skin_glassy' => 'Glassy',
+        'skin_jungle' => 'Jungle',
+        'mode' => 'Colour mode',
+        'mode_light' => 'Light',
+        'mode_dark' => 'Dark',
+        'calm' => 'Calm mode',
+    ],
+
     'dock' => [
         'account' => 'Account',
         'sign_out' => 'Sign out',

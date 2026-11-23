@@ -53,6 +53,7 @@ return [
     'landing' => [
         'title' => 'Welcome | MyAPES Account',
         'heading' => 'Welcome to MyAPES Account',
+        'mascot_alt' => 'Spike, the cartoon MyAPES bearded dragon mascot',
         'public_access' => 'Public access',
         'public_access_blurb' => 'For clients managing support, profiles, and pets.',
         'staff_access' => 'Staff access',

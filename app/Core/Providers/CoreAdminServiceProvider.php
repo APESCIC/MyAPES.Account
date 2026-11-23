@@ -7,6 +7,7 @@ use App\Core\Extensions\Navigation\PublicNavigationRegistry;
 use App\Core\Settings\GeneralSettings;
 use App\Services\LaravelMaintenanceModeGateway;
 use App\Support\MascotTips;
+use App\Support\Theme\ThemePreference;
 use App\Support\Navigation\WorkspaceNavigation;
 use App\Support\ReleaseHistoryRepository;
 use Illuminate\Support\Facades\Blade;
@@ -47,6 +48,7 @@ class CoreAdminServiceProvider extends ServiceProvider
                 app(WorkspaceNavigation::class)->forRequest($user, $request),
             );
             $view->with('siteBanner', $request->routeIs('admin.*') ? null : app(GeneralSettings::class)->banner());
+            $view->with('appearance', app(ThemePreference::class)->resolve($user));
         });
 
         Blade::if('registrationOpen', static fn (): bool => app(GeneralSettings::class)->registrationOpen());

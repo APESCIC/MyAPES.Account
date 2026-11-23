@@ -1,0 +1,59 @@
+{
+    "version": "0.75.0",
+    "date": "2026-11-23",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Jungle theme, theme switcher and critter cast",
+    "summary": "Adds the Jungle theme beside Glassy (today's Soft glass look, still the default), a theme switcher with Calm mode, and the Spike-plus-six critter cast in both themes.",
+    "changes": [
+        "Theme registry lists Glassy and Jungle, each with light and dark tokens; Glassy keeps the Soft glass look unchanged.",
+        "People choose Glassy or Jungle, Light or Dark, and Calm mode from the user menu, Profile Appearance, or the guest footer picker.",
+        "Signed-in choices are stored on the account; guests keep them in the browser; Admin can set the default skin for people who have not chosen.",
+        "Pages open in the chosen theme without a flash; Calm mode turns off decorations and motion while keeping empty-state critters.",
+        "Spike plus six new critters (Cleo, Dot, Speck, Moss, Noodle, Rio) appear in empty states, errors, tips, menus and footers in both themes.",
+        "Jungle-only canopy, leaf and vine decorations; emails stay on fixed Glassy branding; public pages follow the visitor's theme.",
+        "Contrast checks, decorative asset budget and CI Playwright visual snapshots guard the look."
+    ],
+    "affected_areas": [
+        "Workspace shell and theme CSS",
+        "User menu, profile Appearance and guest footer",
+        "Mascot tips, empty states and error pages",
+        "Outbound email brand shell",
+        "Admin General default theme setting",
+        "Help, brand guide and art register"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "MINOR: new Jungle theme and switcher alongside Glassy; nothing removed.",
+    "validation": [
+        "PHPUnit theme registry, contrast, preference, switcher, decor, cast, budget and email/public theme tests.",
+        "CI Playwright theme snapshot job (40 snapshots) and ThemeSnapshotManifestTest.",
+        "Herd preview at https://myapes-account.test for Glassy and Jungle with the switcher.",
+        "composer milestone:bump -- v0.75.0 --check and myapes:changelog-validate against origin/main."
+    ],
+    "known_limitations": [
+        "Embeddable form theme per form stays in a later milestone (#1007 / v0.84.0).",
+        "Account Appearance page beyond /profile lands with v0.77.0; switcher is already in the user menu and on Profile.",
+        "Cast WebP fallbacks are optional; SVG is the primary format."
+    ],
+    "rollback": "Redeploy the previous release tag (v0.74.0). Theme preference columns on users are additive and safe to leave in place.",
+    "provenance": "Milestone v0.75.0 Beta: Jungle theme, theme switcher and critter cast, Epic #863, pull request #1043.",
+    "references": [
+        {
+            "label": "Issue #863",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/863"
+        },
+        {
+            "label": "Pull request #1043",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/1043"
+        }
+    ],
+    "slug": "release-v0-75-0",
+    "previous_version": "0.74.0"
+}
