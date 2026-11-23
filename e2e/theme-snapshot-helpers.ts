@@ -1,5 +1,4 @@
 import { readFileSync } from 'node:fs';
-import https from 'node:https';
 import path from 'node:path';
 import type { BrowserContext, Page } from '@playwright/test';
 
@@ -44,29 +43,6 @@ export function snapshotName(
 export async function assertAppReachable(baseURL: string): Promise<boolean> {
     try {
         const url = new URL('/healthz', baseURL);
-
-        if (url.protocol === 'https:') {
-            return await new Promise((resolve) => {
-                const request = https.get(
-                    url,
-                    {
-                        rejectUnauthorized: false,
-                        timeout: 10_000,
-                    },
-                    (response) => {
-                        resolve(response.statusCode === 200);
-                        response.resume();
-                    },
-                );
-
-                request.on('error', () => resolve(false));
-                request.on('timeout', () => {
-                    request.destroy();
-                    resolve(false);
-                });
-            });
-        }
-
         const response = await fetch(url, {
             signal: AbortSignal.timeout(10_000),
         });
@@ -121,7 +97,7 @@ export async function applyAppearance(
     mode: string,
     calm: boolean,
 ): Promise<void> {
-    await page.goto('/dashboard', { waitUntil: 'networkidle' });
+    await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });
     const switcher = page.locator('[data-theme-switcher]').first();
     await switcher.waitFor({ state: 'attached' });
 

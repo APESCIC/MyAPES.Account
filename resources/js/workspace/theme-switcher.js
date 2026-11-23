@@ -94,7 +94,7 @@ export const applyAppearance = (partial, { persist = false, sourceRoot = null } 
     document.documentElement.style.colorScheme = appearance.mode;
 
     if (appearance.calm) {
-        document.documentElement.setAttribute('data-calm', '');
+        document.documentElement.setAttribute('data-calm', 'true');
     } else {
         document.documentElement.removeAttribute('data-calm');
     }

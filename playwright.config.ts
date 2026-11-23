@@ -17,8 +17,8 @@ export default defineConfig({
     reporter: process.env.CI ? 'github' : 'list',
     use: {
         baseURL,
-        ignoreHTTPSErrors: true,
         viewport: { width: 1280, height: 800 },
+        reducedMotion: 'reduce',
         actionTimeout: 15_000,
         navigationTimeout: 30_000,
     },

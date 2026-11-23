@@ -59,7 +59,7 @@ test.describe('Theme visual snapshots (#908)', () => {
                         }
 
                         const response = await page.goto(pageDef.path, {
-                            waitUntil: 'networkidle',
+                            waitUntil: 'domcontentloaded',
                         });
 
                         if (pageDef.expectStatus === 404) {
@@ -82,6 +82,7 @@ test.describe('Theme visual snapshots (#908)', () => {
                         }
 
                         await expect(page).toHaveScreenshot(shot, {
+                            animations: 'disabled',
                             fullPage: false,
                         });
                     });
