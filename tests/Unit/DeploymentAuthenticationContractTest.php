@@ -1277,8 +1277,8 @@ class DeploymentAuthenticationContractTest extends TestCase
         $workflow = $this->combinedWorkflows();
 
         foreach ([
-            'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1' => 5,
-            'actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0' => 2,
+            'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1' => 6,
+            'actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0' => 3,
         ] as $reference => $expectedOccurrences) {
             $this->assertSame(
                 $expectedOccurrences,
@@ -1303,24 +1303,7 @@ class DeploymentAuthenticationContractTest extends TestCase
     public function test_database_compatibility_job_allows_forward_only_contract_to_finish(): void
     {
         $workflow = $this->test_workflow();
-        $databaseCompatibilityStart = $this->position(
-            $workflow,
-            '  database-compatibility:',
-        );
-        $nextJob = preg_match(
-            '/\n  [a-z0-9-]+:\s*\n/',
-            $workflow,
-            $nextJobMatch,
-            PREG_OFFSET_CAPTURE,
-            $databaseCompatibilityStart + 1,
-        ) === 1
-            ? (int) $nextJobMatch[0][1]
-            : strlen($workflow);
-        $databaseCompatibilityJob = substr(
-            $workflow,
-            $databaseCompatibilityStart,
-            $nextJob - $databaseCompatibilityStart,
-        );
+        $databaseCompatibilityJob = $this->jobSection($workflow, '  database-compatibility:');
 
         preg_match_all(
             '/^\s*timeout-minutes:\s*\d+\s*$/m',
@@ -1338,10 +1321,7 @@ class DeploymentAuthenticationContractTest extends TestCase
     public function test_workflow_runs_the_phase_b_contract_on_mysql(): void
     {
         $workflow = $this->test_workflow();
-        $databaseCompatibilityJob = substr(
-            $workflow,
-            $this->position($workflow, '  database-compatibility:'),
-        );
+        $databaseCompatibilityJob = $this->jobSection($workflow, '  database-compatibility:');
         $deployWorkflow = $this->deployWorkflow();
 
         $this->assertStringContainsString('database-compatibility:', $workflow);
@@ -1434,10 +1414,7 @@ class DeploymentAuthenticationContractTest extends TestCase
     public function test_workflow_isolates_the_destructive_foundation_migration_contract(): void
     {
         $workflow = $this->test_workflow();
-        $databaseCompatibilityJob = substr(
-            $workflow,
-            $this->position($workflow, '  database-compatibility:'),
-        );
+        $databaseCompatibilityJob = $this->jobSection($workflow, '  database-compatibility:');
         $foundationMigrationTest = 'tests/Feature/ApesCicFoundationMigrationTest.php';
         $standaloneFoundationCommand = "php artisan test {$foundationMigrationTest}";
         $destructiveTestWipeCommand = 'php artisan db:wipe --force --no-interaction';
@@ -2610,6 +2587,22 @@ class DeploymentAuthenticationContractTest extends TestCase
         $this->assertNotFalse($position, "Expected deployment source to contain [{$needle}].");
 
         return $position;
+    }
+
+    private function jobSection(string $workflow, string $jobKey): string
+    {
+        $start = $this->position($workflow, $jobKey);
+        $nextJob = preg_match(
+            '/\n  [a-z0-9-]+:\s*\n/',
+            $workflow,
+            $nextJobMatch,
+            PREG_OFFSET_CAPTURE,
+            $start + 1,
+        ) === 1
+            ? (int) $nextJobMatch[0][1]
+            : strlen($workflow);
+
+        return substr($workflow, $start, $nextJob - $start);
     }
 
     private function lineContaining(string $content, string $needle): string

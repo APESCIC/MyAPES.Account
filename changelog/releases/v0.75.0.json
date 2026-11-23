@@ -53,5 +53,7 @@
             "label": "Pull request #1043",
             "url": "https://github.com/APESCIC/MyAPES-Account/pull/1043"
         }
-    ]
+    ],
+    "slug": "release-v0-75-0",
+    "previous_version": "0.74.0"
 }

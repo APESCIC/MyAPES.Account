@@ -21,6 +21,10 @@ return [
         'optional' => 'Optional',
     ],
 
+    'vendor' => [
+        'laravel_logo_alt' => 'Laravel Logo',
+    ],
+
     'templates' => [
         'auth' => [
             'verify_email' => [
