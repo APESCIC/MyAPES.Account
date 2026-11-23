@@ -1,0 +1,55 @@
+{
+    "version": "0.73.0",
+    "date": "2026-11-22",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Wording and content clean-up",
+    "summary": "Standardises Public Account and Staff Account wording, removes Cloudron from public pages, moves technical Admin content out of Staff, and keeps Staff Login in the footer only.",
+    "changes": [
+        "Glossary and UI copy use Public Account(s), Staff Account(s), Public Profile(s), Client and Caller.",
+        "Admin People lists use /admin/public-accounts and /admin/staff-accounts, with 301 redirects from the old /admin/users filters.",
+        "Public pages no longer mention Cloudron; Staff Login remains available in the site footer for guests.",
+        "GitHub, Open an issue and Discussions links are Admin-only; staff get Report a problem for an internal APES CIC ticket.",
+        "Staff guide rewritten for non-technical users; Admin guide keeps plugins, modules, directory, API and webhook topics.",
+        "Automated glossary drift and public Cloudron content checks added to the test suite."
+    ],
+    "affected_areas": [
+        "Public chrome and legal pages",
+        "Admin People and navigation",
+        "Staff help and user dock",
+        "Auth landing and Staff Login footer",
+        "Docs and wiki glossary wording"
+    ],
+    "categories": [
+        "changed",
+        "added"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "MINOR: visible labels, menu names, Admin URLs and public/staff page content change across the app (old URLs keep 301 redirects).",
+    "validation": [
+        "Feature tests for glossary terms, Admin account URLs, Staff Login footer placement, Report a problem, glossary drift and public Cloudron absence.",
+        "Herd preview at https://myapes-account.test for public landing, help and footer Staff Login.",
+        "composer milestone:bump -- v0.73.0 --check and myapes:changelog-validate against origin/main."
+    ],
+    "known_limitations": [
+        "Historic change-log entries and release notes may still mention older terms such as Public users or Cloudron.",
+        "Staff Login itself still names Cloudron, which is intentional."
+    ],
+    "rollback": "Redeploy the previous release tag (v0.72.0). Old /admin/users bookmarks continue to work via 301s after this release; rolling back restores the previous labels and routes.",
+    "provenance": "Milestone v0.73.0 Beta: Wording and content clean-up, Epic #861, pull request #986.",
+    "references": [
+        {
+            "label": "Issue #861",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/861"
+        },
+        {
+            "label": "Pull request #986",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/986"
+        }
+    ],
+    "slug": "release-v0-73-0",
+    "previous_version": "0.72.0"
+}

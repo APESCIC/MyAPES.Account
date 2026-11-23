@@ -53,6 +53,7 @@ use App\Http\Controllers\Staff\ClientController;
 use App\Http\Controllers\Staff\ClientNoteController;
 use App\Http\Controllers\Staff\StaffClientRecordController;
 use App\Http\Controllers\Staff\StaffMessageController;
+use App\Http\Controllers\Staff\StaffReportProblemController;
 use App\Http\Controllers\SubCoreController;
 use App\Http\Controllers\SupportAttachmentController;
 use App\Http\Controllers\Workspace\WorkspaceRecordSearchController;
@@ -232,6 +233,11 @@ Route::middleware([
         ->name('workspace.search.records');
     Route::get('/help/staff', [HelpController::class, 'staff'])->name('help.staff');
     Route::get('/help/admin', [HelpController::class, 'admin'])->name('help.admin');
+    Route::get('/staff/report-problem', [StaffReportProblemController::class, 'create'])
+        ->name('staff.report-problem.create');
+    Route::post('/staff/report-problem', [StaffReportProblemController::class, 'store'])
+        ->middleware('throttle:20,1')
+        ->name('staff.report-problem.store');
     Route::post('/tour/{audience}/complete', [GuidedTourController::class, 'complete'])
         ->whereIn('audience', GuidedTour::AUDIENCES)
         ->middleware('throttle:20,1')
@@ -439,10 +445,23 @@ Route::middleware([
                 ->middleware('can:admin.analytics.view')
                 ->name('index');
 
-            Route::get('/users', [AdminUserController::class, 'index'])
+            Route::get('/public-accounts', [AdminUserController::class, 'publicAccountsIndex'])
+                ->middleware('can:admin.users.view')
+                ->name('public-accounts.index');
+            Route::get('/staff-accounts', [AdminUserController::class, 'staffAccountsIndex'])
+                ->middleware('can:admin.users.view')
+                ->name('staff-accounts.index');
+            Route::get('/public-accounts/{user}', [AdminUserController::class, 'publicAccountShow'])
+                ->middleware('can:admin.users.view')
+                ->name('public-accounts.show');
+            Route::get('/staff-accounts/{user}', [AdminUserController::class, 'staffAccountShow'])
+                ->middleware('can:admin.users.view')
+                ->name('staff-accounts.show');
+
+            Route::get('/users', [AdminUserController::class, 'redirectLegacyUsersIndex'])
                 ->middleware('can:admin.users.view')
                 ->name('users.index');
-            Route::get('/users/{user}', [AdminUserController::class, 'show'])
+            Route::get('/users/{user}', [AdminUserController::class, 'redirectLegacyUsersShow'])
                 ->middleware('can:admin.users.view')
                 ->name('users.show');
             Route::put('/users/{user}/profile', [AdminUserController::class, 'updateProfile'])

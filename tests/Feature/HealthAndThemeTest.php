@@ -16,7 +16,7 @@ class HealthAndThemeTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'status' => 'ok',
-                'version' => '0.72.0',
+                'version' => '0.73.0',
                 'release' => 'development',
                 'maintenance' => false,
                 'checks' => [
@@ -52,7 +52,7 @@ class HealthAndThemeTest extends TestCase
             ->assertServiceUnavailable()
             ->assertExactJson([
                 'status' => 'unavailable',
-                'version' => '0.72.0',
+                'version' => '0.73.0',
                 'release' => 'development',
                 'maintenance' => false,
                 'checks' => [
@@ -118,7 +118,7 @@ class HealthAndThemeTest extends TestCase
         $response->assertSee('href="'.route('staff.login').'"', false);
         $response->assertSee('data-workspace-dock', false);
         $response->assertSeeText(__('workspace.groups.support'));
-        $response->assertSee('https://github.com/APESCIC/MyAPES-Account"', false);
+        $response->assertDontSee('https://github.com/APESCIC/MyAPES-Account"', false);
         $response->assertSee('site-footer__links', false);
         $response->assertSee('href="'.route('privacy').'"', false);
         $response->assertSee('href="'.route('cookies').'"', false);
@@ -139,8 +139,8 @@ class HealthAndThemeTest extends TestCase
             $this->assertStringNotContainsString('and APES Pet Care.</p>', $content);
         }
 
-        $this->view('auth.login')
-            ->assertSeeText('APES Pet Care Clinic')
+        $this->view('auth.staff-login')
+            ->assertSeeText(__('auth.staff_login.heading'))
             ->assertDontSee('>APES Pet Care<', false)
             ->assertDontSee('and APES Pet Care.</p>', false);
 

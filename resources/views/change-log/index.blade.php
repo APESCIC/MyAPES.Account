@@ -11,11 +11,20 @@
         <h1 id="change-log-title">{{ __('public.change_log.change_log_hub') }}</h1>
         <p>{{ __('public.change_log.track_myapes_core_releases_fixes_compliance_work_access') }}</p>
 
-        <section class="change-log__community" aria-labelledby="change-log-community-title">
-            <h2 id="change-log-community-title">Feedback &amp; source</h2>
-            <p>{{ __('public.change_log.report_bugs_suggest_improvements_or_follow_project_disc') }}</p>
-            @include('partials._github-links', ['variant' => 'change-log'])
-        </section>
+        @php
+            $changeLogUser = auth()->user();
+            $showChangeLogFeedback = $changeLogUser !== null && (
+                app(\App\Services\AuthorizationProfile::class)->isAdministrator($changeLogUser)
+                || app(\App\Core\Accounts\AccountClassifier::class)->isStaffSide($changeLogUser)
+            );
+        @endphp
+        @if ($showChangeLogFeedback)
+            <section class="change-log__community" aria-labelledby="change-log-community-title">
+                <h2 id="change-log-community-title">{{ __('public.change_log.feedback_source') }}</h2>
+                <p>{{ __('public.change_log.report_bugs_suggest_improvements_or_follow_project_disc') }}</p>
+                @include('partials._github-links', ['variant' => 'change-log'])
+            </section>
+        @endif
 
         <div class="change-log__current">
             <div>

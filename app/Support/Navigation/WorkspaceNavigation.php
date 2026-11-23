@@ -288,8 +288,8 @@ final class WorkspaceNavigation
                 ['admin.overview', __('admin.nav.overview'), route('admin.index'), 'layout-dashboard', ['admin.analytics.view'], ['admin.index']],
             ],
             'people' => [
-                ['admin.users', __('terms.public_users'), route('admin.users.index', ['account_type' => 'public']), 'user-round', ['admin.users.view'], ['admin.users.*'], ['account_type' => 'public']],
-                ['admin.staff', __('terms.staff_users'), route('admin.users.index', ['account_type' => 'staff']), 'badge-check', ['admin.users.view'], ['admin.users.*'], ['account_type' => 'staff']],
+                ['admin.users', __('terms.public_accounts'), route('admin.public-accounts.index'), 'user-round', ['admin.users.view'], ['admin.public-accounts.*', 'admin.users.*']],
+                ['admin.staff', __('terms.staff_accounts'), route('admin.staff-accounts.index'), 'badge-check', ['admin.users.view'], ['admin.staff-accounts.*', 'admin.users.*']],
                 ['admin.access', __('admin.nav.access'), route('admin.access.index'), 'shield-check', ['admin.groups.view', 'admin.roles.view', 'admin.permissions.view'], ['admin.access.*', 'admin.groups.*', 'admin.roles.*', 'admin.permissions.*']],
             ],
             'modules' => [
@@ -352,7 +352,6 @@ final class WorkspaceNavigation
                 $this->general->registrationOpen()
                     ? new NavItem('public.register', __('public.chrome.app.blade.register'), route('public.register'), 'user-plus', ['public.register'], $this->words('workspace.keywords.register'))
                     : null,
-                new NavItem('staff.login', __('public.chrome.app.blade.staff_login'), route('staff.login'), 'badge-check', ['staff.*'], $this->words('workspace.keywords.staff_login')),
             ]))),
             new NavGroup('support', __('workspace.groups.support'), [
                 new NavItem('help', __('public.chrome.app.blade.help'), route('help'), 'circle-help', ['help'], $this->words('workspace.keywords.help')),

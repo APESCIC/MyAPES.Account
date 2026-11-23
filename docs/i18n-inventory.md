@@ -38,7 +38,7 @@ Machine JSON (gitignored under storage): `storage/app/lang-inventory.json`.
 | **All (inventory)** | **0** |
 | Allow-listed (omitted below) | 109 |
 
-_Generated at 2026-11-22T15:22:31+00:00_
+_Generated at 2026-11-22T20:56:44+00:00_
 
 <a id="public-268"></a>
 

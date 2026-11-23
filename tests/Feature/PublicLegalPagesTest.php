@@ -33,7 +33,7 @@ class PublicLegalPagesTest extends TestCase
                 '/help',
                 'help',
                 'Help',
-                'Public Login is for service users',
+                'Public Login is for clients',
             ],
             'terms' => [
                 '/terms',

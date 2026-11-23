@@ -16,7 +16,7 @@ class AdminUserDetailUxTest extends TestCase
         $staff = $this->userWithAccess(User::ROLE_STAFF);
 
         $response = $this->actingAs($administrator)
-            ->get(route('admin.users.show', ['user' => $staff, 'tab' => 'access']))
+            ->get(route('admin.staff-accounts.show', ['user' => $staff, 'tab' => 'access']))
             ->assertOk()
             ->assertSee('Effective access')
             ->assertSee('Job roles')
@@ -44,7 +44,7 @@ class AdminUserDetailUxTest extends TestCase
         $staff = $this->userWithAccess(User::ROLE_STAFF);
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.show', ['user' => $staff, 'tab' => 'access']))
+            ->get(route('admin.staff-accounts.show', ['user' => $staff, 'tab' => 'access']))
             ->assertOk()
             ->assertSee('id="suspend-user"', false)
             ->assertSee('I confirm I want to suspend this account')
@@ -52,11 +52,11 @@ class AdminUserDetailUxTest extends TestCase
             ->assertSee('#suspend-user', false);
 
         $this->actingAs($administrator)
-            ->from(route('admin.users.show', $staff))
+            ->from(route('admin.staff-accounts.show', $staff))
             ->post(route('admin.users.suspension.store', $staff), [
                 'reason' => 'Temporary access review',
             ])
-            ->assertRedirect(route('admin.users.show', $staff))
+            ->assertRedirect(route('admin.staff-accounts.show', $staff))
             ->assertSessionHasErrors('confirm_suspend');
         $this->assertNull($staff->fresh()->suspended_at);
 
@@ -65,7 +65,7 @@ class AdminUserDetailUxTest extends TestCase
                 'reason' => 'Temporary access review',
                 'confirm_suspend' => '1',
             ])
-            ->assertRedirect(route('admin.users.show', $staff));
+            ->assertRedirect(route('admin.staff-accounts.show', $staff));
         $this->assertNotNull($staff->fresh()->suspended_at);
     }
 

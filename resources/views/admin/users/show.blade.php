@@ -5,7 +5,7 @@
 @section('content')
     <div class="panel-stack">
         <section class="panel" aria-labelledby="managed-user-title">
-            <p><a href="{{ route('admin.users.index') }}">{{ __('admin.users.back_to_users') }}</a></p>
+            <p><a href="{{ route($accountIndexRoute ?? 'admin.users.index') }}">{{ __('admin.users.back_to_users') }}</a></p>
             <h1 id="managed-user-title">{{ $managedUser->name }}</h1>
             <p class="muted">{{ $managedUser->email }}</p>
             <dl class="admin-definition-list">
@@ -23,7 +23,7 @@
                     {{ $managedUser->suspended_at === null ? __('admin.users.active') : __('admin.overview.suspended') }}
                     @can('admin.users.manage')
                         @if($canManageTarget && $managedUser->suspended_at === null)
-                            · <a href="{{ route('admin.users.show', ['user' => $managedUser, 'tab' => 'access']) }}#suspend-user">{{ __('admin.users.suspend') }}</a>
+                            · <a href="{{ route($accountShowRoute ?? 'admin.users.show', ['user' => $managedUser, 'tab' => 'access']) }}#suspend-user">{{ __('admin.users.suspend') }}</a>
                         @endif
                     @endcan
                 </dd></div>
@@ -159,7 +159,7 @@
                                     <button type="submit">{{ __('admin.users.send_staff_login_reminder') }}</button>
                                 </div>
                             </form>
-                            <p class="muted"><a href="{{ route('staff.login') }}">{{ __('admin.users.staff_login') }}</a> {{ __('admin.users.only_sign_in_path') }}</p>
+                            <p class="muted">{{ __('admin.users.staff_login') }} {{ __('admin.users.only_sign_in_path') }}</p>
                         @endif
                     </section>
                 @elseif(! $isStaffAccount && ! $managedUser->isLocalPasswordIdentity())

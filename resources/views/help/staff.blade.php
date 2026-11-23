@@ -24,7 +24,9 @@
             <ul>
                 <li>{{ __('help.staff.areas.public') }}</li>
                 <li>{{ __('help.staff.areas.staff') }}</li>
-                <li>{{ __('help.staff.areas.admin') }}</li>
+                @can('admin.access')
+                    <li>{{ __('help.staff.areas.admin') }}</li>
+                @endcan
             </ul>
         </section>
 

@@ -36,8 +36,8 @@ class AdminSearchKeywordsTest extends TestCase
             'under review' => 'Recruitment',
             'neutering' => 'Pet Profiles',
             'check-up' => 'Consultations',
-            'reactivate' => __('terms.public_users'),
-            'employees' => __('terms.staff_users'),
+            'reactivate' => __('terms.public_accounts'),
+            'employees' => __('terms.staff_accounts'),
             'group mappings' => __('admin.nav.access'),
             'code not shipped' => __('admin.nav.plugins'),
             'mail log' => __('admin.nav.emails'),
@@ -78,7 +78,7 @@ class AdminSearchKeywordsTest extends TestCase
 
         $labels = array_column($catalogue, 'label');
         $this->assertContains(__('admin.nav.overview'), $labels);
-        $this->assertContains(__('terms.public_users'), $labels);
+        $this->assertContains(__('terms.public_accounts'), $labels);
         $this->assertContains(__('admin.nav.access'), $labels);
         $this->assertContains(__('admin.nav.plugins'), $labels);
         $this->assertTrue($this->catalogueContains($catalogue, 'jobs', 'Recruitment'));

@@ -22,7 +22,7 @@ final class MascotTips
             ],
             'home' => [
                 'title' => 'Pick the door that matches you.',
-                'body' => 'Public Login is for service users. Staff and administrators should use Staff Login.',
+                'body' => 'Public Login is for clients. Staff and administrators use Staff Login at the bottom of the page.',
             ],
             'recruitment.index' => [
                 'title' => 'Browse open roles.',
@@ -42,7 +42,7 @@ final class MascotTips
             ],
             'password.request' => [
                 'title' => 'Local public accounts only.',
-                'body' => 'Use the email for your public account. Staff and Cloudron directory passwords stay on Cloudron.',
+                'body' => 'Use the email for your public account. Staff directory passwords are managed through Staff Login.',
             ],
             'password.reset' => [
                 'title' => 'Choose a new password.',

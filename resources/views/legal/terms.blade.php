@@ -18,7 +18,7 @@
 
         <section>
             <h2>{{ __('public.legal.terms.blade.accounts') }}</h2>
-            <p>Public accounts are for service users. Keep your password to yourself, use accurate details, and tell us if you think someone else has used your account. Staff and administrators must use Staff Login through APES Cloudron and follow the access they are given.</p>
+            <p>Public accounts are for clients. Keep your password to yourself, use accurate details, and tell us if you think someone else has used your account. Staff and administrators must use Staff Login through Staff Login and follow the access they are given.</p>
             <p>{{ __('public.legal.terms.blade.we_may_suspend_or_close_an_account_if_these_terms_are_b') }}</p>
         </section>
 

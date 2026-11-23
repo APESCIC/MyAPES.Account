@@ -2,6 +2,7 @@
 
 namespace App\Core\Search\Providers;
 
+use App\Core\Accounts\AccountClassifier;
 use App\Core\Accounts\User;
 use App\Core\Search\RecordHit;
 use App\Core\Search\RecordRanker;
@@ -81,7 +82,12 @@ final class UsersRecordSearchProvider implements RecordSearchProvider
             }
 
             $url = $canAdmin
-                ? route('admin.users.show', $user)
+                ? route(
+                    app(AccountClassifier::class)->isStaffSide($user)
+                        ? 'admin.staff-accounts.show'
+                        : 'admin.public-accounts.show',
+                    $user,
+                )
                 : route('clients.show', $user);
 
             $hits[] = new RecordHit(

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Core\Accounts\AccountClassifier;
 use App\Core\Accounts\User;
 use App\Core\Mail\MailCopyOverrides;
 use App\Core\Mail\MailTemplate;
@@ -146,16 +147,20 @@ class AdminEmailController extends Controller
     {
         $managedUser = User::query()->findOrFail($user);
 
+        $showRoute = app(AccountClassifier::class)->isStaffSide($managedUser)
+            ? 'admin.staff-accounts.show'
+            : 'admin.public-accounts.show';
+
         try {
             $resends->resend($request->user(), $managedUser);
         } catch (DomainException $exception) {
             return redirect()
-                ->route('admin.users.show', $managedUser)
+                ->route($showRoute, $managedUser)
                 ->withErrors(['resend_verification' => $exception->getMessage()]);
         }
 
         return redirect()
-            ->route('admin.users.show', $managedUser)
+            ->route($showRoute, $managedUser)
             ->with('status', __('admin.flash.verification_resent'));
     }
 

@@ -87,7 +87,7 @@ final class QaLogin
     {
         return [
             'service_user' => [
-                'label' => 'Service user',
+                'label' => 'Public Account',
                 'email' => LocalQaSeeder::SERVICE_USER_EMAIL,
                 'access_level' => User::ROLE_SERVICE_USER,
                 'job_roles' => [],

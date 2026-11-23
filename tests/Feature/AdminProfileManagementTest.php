@@ -27,15 +27,15 @@ class AdminProfileManagementTest extends TestCase
             ]);
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.index', ['account_type' => 'public']))
+            ->get(route('admin.public-accounts.index'))
             ->assertOk()
             ->assertSeeText('Public Listed User')
             ->assertDontSeeText('Staff Listed User')
-            ->assertSee('Public users')
+            ->assertSee('Public Accounts')
             ->assertSee('Staff');
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.index', ['account_type' => 'staff']))
+            ->get(route('admin.staff-accounts.index'))
             ->assertOk()
             ->assertSeeText('Staff Listed User')
             ->assertDontSeeText('Public Listed User');
@@ -49,7 +49,7 @@ class AdminProfileManagementTest extends TestCase
         ]);
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.show', ['user' => $public, 'tab' => 'details']))
+            ->get(route('admin.public-accounts.show', ['user' => $public, 'tab' => 'details']))
             ->assertOk()
             ->assertSee('name="address_line_1"', false)
             ->assertDontSee('name="job_title"', false);
@@ -64,7 +64,7 @@ class AdminProfileManagementTest extends TestCase
                 'services' => ['apes-cic'],
                 'contact_preferences_confirmed' => '1',
             ])
-            ->assertRedirect(route('admin.users.show', $public));
+            ->assertRedirect(route('admin.public-accounts.show', $public));
 
         $public->refresh();
         $this->assertSame('Managed Public', $public->profile->preferred_name);
@@ -88,7 +88,7 @@ class AdminProfileManagementTest extends TestCase
             ]);
 
         $this->actingAs($administrator)
-            ->get(route('admin.users.show', ['user' => $staff, 'tab' => 'details']))
+            ->get(route('admin.staff-accounts.show', ['user' => $staff, 'tab' => 'details']))
             ->assertOk()
             ->assertSeeText('Directory Staff')
             ->assertSeeText('myapesaccount.staff')
@@ -103,7 +103,7 @@ class AdminProfileManagementTest extends TestCase
                 'team' => StaffProfile::TEAM_PET_CARE_CLINIC,
                 'work_phone' => '+447400333444',
             ])
-            ->assertRedirect(route('admin.users.show', $staff));
+            ->assertRedirect(route('admin.staff-accounts.show', $staff));
 
         $staff->refresh();
         $this->assertSame('Directory Staff', $staff->name);

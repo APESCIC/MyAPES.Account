@@ -41,7 +41,7 @@ class AdminRoleAndUserManagementTest extends TestCase
             ->put("/admin/users/{$serviceUser->id}/roles", [
                 'roles' => [$customRole->id],
             ])
-            ->assertRedirect("/admin/users/{$serviceUser->id}");
+            ->assertRedirect("/admin/public-accounts/{$serviceUser->id}");
         $this->assertDatabaseHas('role_sources', [
             'user_id' => $serviceUser->id,
             'role_id' => $customRole->id,
@@ -54,12 +54,12 @@ class AdminRoleAndUserManagementTest extends TestCase
                 'reason' => 'Temporary access review',
                 'confirm_suspend' => '1',
             ])
-            ->assertRedirect("/admin/users/{$staff->id}");
+            ->assertRedirect("/admin/staff-accounts/{$staff->id}");
         $this->assertNotNull($staff->fresh()->suspended_at);
 
         $this->actingAs($administrator)
             ->delete("/admin/users/{$staff->id}/suspension")
-            ->assertRedirect("/admin/users/{$staff->id}");
+            ->assertRedirect("/admin/staff-accounts/{$staff->id}");
         $this->assertNull($staff->fresh()->suspended_at);
 
         $this->actingAs($administrator)
@@ -67,16 +67,16 @@ class AdminRoleAndUserManagementTest extends TestCase
                 'reason' => 'Temporary access review',
                 'confirm_suspend' => '1',
             ])
-            ->assertRedirect("/admin/users/{$otherAdministrator->id}");
+            ->assertRedirect("/admin/staff-accounts/{$otherAdministrator->id}");
         $this->assertNotNull($otherAdministrator->fresh()->suspended_at);
 
         $this->actingAs($administrator)
-            ->from("/admin/users/{$administrator->id}")
+            ->from("/admin/staff-accounts/{$administrator->id}")
             ->post("/admin/users/{$administrator->id}/suspension", [
                 'reason' => 'Not permitted',
                 'confirm_suspend' => '1',
             ])
-            ->assertRedirect("/admin/users/{$administrator->id}")
+            ->assertRedirect("/admin/staff-accounts/{$administrator->id}")
             ->assertSessionHasErrors('authorization');
         $this->assertNull($administrator->fresh()->suspended_at);
 

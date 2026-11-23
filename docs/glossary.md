@@ -26,8 +26,12 @@ Locale and key conventions: [localisation.md](localisation.md). Canonical labels
 
 | Canonical | Meaning / audience | Use in UI | Avoid | Lang key |
 | --- | --- | --- | --- | --- |
-| Public user | Local public account (service user). | Admin → **Public users**; filters `account_type=public`. | Service user (as the main label); citizen; customer. | `terms.public_user` / `terms.public_users` |
-| Staff | Directory-backed staff, volunteer, or student accounts. | Admin → **Staff**; staff sign-in copy. | Employee-only wording that excludes volunteers/students when the screen covers all staff accounts. | `terms.staff` |
+| Public Account | Local public account (service user). | Admin → **Public Accounts**; filters `account_type=public`. | Public user(s); service-user; citizen; customer. | `terms.public_account` / `terms.public_accounts` |
+| Staff Account | Directory-backed staff, volunteer, or student account. | Admin → **Staff Accounts**; staff sign-in copy. | Staff user(s); employee-only wording that excludes volunteers/students when the screen covers all staff accounts. | `terms.staff_account` / `terms.staff_accounts` |
+| Public Profile | The public-facing profile record belonging to a Public Account. | Profile chrome for Public Accounts. | Bare **Profiles** or **Accounts** when the screen means Public Profiles. | `terms.public_profile` / `terms.public_profiles` |
+| Client | Umbrella for Public Accounts and Public Profiles (decided 17 Nov 2026). | Callers matching, casework and phone-desk copy when the person may be an account or a profile. | Using Client for Staff Accounts. | `terms.client` / `terms.clients` |
+| Caller | A client on the phone (not a separate account type). | Callers screens and matching copy. | Treating Caller as a third account type. | `terms.caller` / `terms.callers` |
+| Staff | Short label for Staff Accounts in tight chrome. | Staff sign-in and some badges. | Staff user(s) as the main label. | `terms.staff` |
 
 ## Access (RBAC) vs Recruitment
 

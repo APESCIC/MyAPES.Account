@@ -113,9 +113,14 @@
                     <td>{{ $user->suspended_at === null ? __('admin.users.active') : __('admin.overview.suspended') }}</td>
                     <td>{{ $authorizationProfile->effectiveProtectedRole($user) ?? __('admin.access.none') }}</td>
                     <td>
-                        <a href="{{ route('admin.users.show', $user) }}">{{ __('admin.users.view_user') }}</a>
+                        @php
+                            $rowShowRoute = app(\App\Core\Accounts\AccountClassifier::class)->isStaffSide($user)
+                                ? 'admin.staff-accounts.show'
+                                : 'admin.public-accounts.show';
+                        @endphp
+                        <a href="{{ route($rowShowRoute, $user) }}">{{ __('admin.users.view_user') }}</a>
                         @if(in_array($user->id, $resettableUserIds, true))
-                            · <a href="{{ route('admin.users.show', ['user' => $user, 'tab' => 'details']) }}#local-password">{{ __('admin.users.reset_password') }}</a>
+                            · <a href="{{ route($rowShowRoute, ['user' => $user, 'tab' => 'details']) }}#local-password">{{ __('admin.users.reset_password') }}</a>
                         @endif
                     </td>
                 </tr>

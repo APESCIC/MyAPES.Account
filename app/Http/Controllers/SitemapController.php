@@ -25,7 +25,6 @@ class SitemapController extends Controller
                 route('change-log.index'),
                 route('public.login'),
                 $general->registrationOpen() ? route('public.register') : null,
-                route('staff.login'),
             ]) as $loc) {
                 $urls[] = ['loc' => $loc, 'lastmod' => null];
             }

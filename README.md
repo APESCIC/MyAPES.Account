@@ -1,6 +1,6 @@
 # MyAPES Account
 
-MyAPES Account is the APES CIC service-user and staff portal built on Laravel for Cloudron LAMP deployments. The GitHub repository is `APESCIC/MyAPES-Account`.
+MyAPES Account is the APES CIC Public Account and staff portal built on Laravel for Cloudron LAMP deployments. The GitHub repository is `APESCIC/MyAPES-Account`.
 
 ## Documentation
 
@@ -43,7 +43,7 @@ Do not disclose suspected security vulnerabilities in a public issue. Follow the
   - One Laravel `web` guard carries explicit `password`, `cloudron_oidc`, or local/testing-only `qa` session provenance.
   - Durable authorization epochs, recent directory-validation timestamps, suspension checks, remember-token rotation, and the Phase B session-cutover marker force reauthentication whenever authorization changes.
 - **Protected authorization**:
-  - The exact protected roles are `service-user`, `student`, `volunteer`, `staff`, and `administrator`. The former `super-admin` role was merged into `administrator` in 0.46.0 (#459).
+  - The exact protected roles are `Public Account`, `student`, `volunteer`, `staff`, and `administrator`. The former `super-admin` role was merged into `administrator` in 0.46.0 (#459).
   - Students and volunteers receive staff-class service and plugin access for all enabled modules, but do not receive module `*.delete` abilities. Staff and administrators retain delete where the registry grants it.
   - The core code-owned permission catalogue contains `staff.access`, `admin.access`, `admin.users.view`, `admin.users.manage`, `admin.groups.view`, `admin.group-mappings.manage`, `admin.roles.view`, `admin.roles.manage`, `admin.permissions.view`, `admin.modules.view`, `admin.modules.manage`, `admin.analytics.view`, and `admin.maintenance.manage`.
   - The first-party registry contributes 65 namespaced permissions for shipped instances. All 82 permissions are synchronized from immutable code definitions and enforced by the application-owned Gate and policies.
@@ -86,7 +86,7 @@ Do not disclose suspected security vulnerabilities in a public issue. Follow the
 - `/change-log` - public, searchable MyAPES Account release history for guests, public users, and staff
 - local/testing only: QA role switcher (Public/Student/Volunteer/Staff/Admin) available in the app layout for one-click identity switching
 
-Public service-user accounts stay separate from Cloudron staff accounts: directory sync creates `identity_type=cloudron_oidc` users only, never `identity_type=local` public users, and does not convert an existing local public account. Public users receive own-record module abilities plus selected services; they cannot open Staff or Admin routes. Volunteers and students share staff-class service access without delete. Admins can open every Admin page, including Users, Access, Plugins, Emails, and Maintenance.
+Public Public Account accounts stay separate from Cloudron staff accounts: directory sync creates `identity_type=cloudron_oidc` users only, never `identity_type=local` public users, and does not convert an existing local public account. Public Accounts receive own-record module abilities plus selected services; they cannot open Staff or Admin routes. Volunteers and students share staff-class service access without delete. Admins can open every Admin page, including Users, Access, Plugins, Emails, and Maintenance.
 
 ### APES CIC route and permission contract
 
@@ -311,7 +311,7 @@ Production walkthroughs and public-surface QA should use the dedicated local pub
 | Email | `developer@apes.org.uk` |
 | Username | `walkthrough-public` |
 | Sign-in route | `/login` (public local password auth) |
-| Protected role | `service-user` only (`identity_type=local`, no OIDC subject) |
+| Protected role | `Public Account` only (`identity_type=local`, no OIDC subject) |
 | Services | APES CIC, APES Shelter and Rescue, and APES Pet Care Clinic |
 
 Separation rules:
@@ -319,7 +319,7 @@ Separation rules:
 - Use `/login` only. Staff Login, Cloudron OIDC, and directory sync must never own or convert this account.
 - The account can reach public modules and owner-scoped records only; Admin and staff-only routes remain forbidden.
 - Local QA seeds such as `qa.service.user@myapes.local` stay local/testing-only fixtures and do not substitute for this live account.
-- An Admin can issue a one-time temporary password from Admin → Public users for this local account. Guest forgot-password remains tracked in issue #121. Directory / Cloudron / pending first-login accounts stay on Cloudron.
+- An Admin can issue a one-time temporary password from Admin → Public Accounts for this local account. Guest forgot-password remains tracked in issue #121. Directory / Cloudron / pending first-login accounts stay on Cloudron.
 
 ### Feature test matrix by seeded role
 

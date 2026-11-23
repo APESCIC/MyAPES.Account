@@ -78,7 +78,8 @@ class WorkspaceNavigationTest extends TestCase
 
         $this->assertContains('public.login', $keys);
         $this->assertContains('public.register', $keys);
-        $this->assertContains('staff.login', $keys);
+        // Staff Login lives in the footer only (#884).
+        $this->assertNotContains('staff.login', $keys);
         $this->assertNotContains('dashboard', $keys);
         $this->assertSame([], $menu->quickActions);
     }
@@ -108,7 +109,7 @@ class WorkspaceNavigationTest extends TestCase
         $admin = $this->menuFor($actor, 'dashboard')->panels[NavPanel::ADMIN];
 
         $this->assertSame(['people', 'support'], array_map(static fn (NavGroup $group): string => $group->key, $admin->groups));
-        $this->assertSame(route('admin.users.index', ['account_type' => 'public']), $admin->home()?->url);
+        $this->assertSame(route('admin.public-accounts.index'), $admin->home()?->url);
     }
 
     /**
@@ -123,8 +124,8 @@ class WorkspaceNavigationTest extends TestCase
             'plugin beats module prefix' => ['apes-cic.tickets.index', [], NavPanel::STAFF, 'module.apes-cic.tickets'],
             'pet profiles' => ['petcare.pets.index', [], NavPanel::STAFF, 'module.pet-care-clinic.pet-profiles'],
             'admin overview' => ['admin.index', [], NavPanel::ADMIN, 'admin.overview'],
-            'public users' => ['admin.users.index', ['account_type' => 'public'], NavPanel::ADMIN, 'admin.users'],
-            'staff users' => ['admin.users.index', ['account_type' => 'staff'], NavPanel::ADMIN, 'admin.staff'],
+            'public accounts' => ['admin.public-accounts.index', [], NavPanel::ADMIN, 'admin.users'],
+            'staff accounts' => ['admin.staff-accounts.index', [], NavPanel::ADMIN, 'admin.staff'],
             'access child page' => ['admin.roles.index', [], NavPanel::ADMIN, 'admin.access'],
             'plugin settings' => ['admin.modules.index', [], NavPanel::ADMIN, 'admin.plugins'],
             'email import beats emails' => ['admin.emails.import.index', [], NavPanel::ADMIN, 'admin.emails.import'],
@@ -153,8 +154,8 @@ class WorkspaceNavigationTest extends TestCase
         $staffMember = User::factory()->protectedRole('staff')->create();
         $publicMember = User::factory()->protectedRole('service-user')->create();
 
-        $this->assertSame('admin.staff', $this->menuFor($superAdmin, 'admin.users.show', ['user' => (string) $staffMember->id])->activeItemKey);
-        $this->assertSame('admin.users', $this->menuFor($superAdmin, 'admin.users.show', ['user' => (string) $publicMember->id])->activeItemKey);
+        $this->assertSame('admin.staff', $this->menuFor($superAdmin, 'admin.staff-accounts.show', ['user' => (string) $staffMember->id])->activeItemKey);
+        $this->assertSame('admin.users', $this->menuFor($superAdmin, 'admin.public-accounts.show', ['user' => (string) $publicMember->id])->activeItemKey);
     }
 
     public function test_an_unmapped_cloudron_user_page_activates_staff_users(): void
@@ -162,7 +163,7 @@ class WorkspaceNavigationTest extends TestCase
         $superAdmin = User::factory()->protectedRole('administrator')->create();
         $unmapped = User::factory()->directoryIdentity('nav-unmapped')->create();
 
-        $this->assertSame('admin.staff', $this->menuFor($superAdmin, 'admin.users.show', ['user' => (string) $unmapped->id])->activeItemKey);
+        $this->assertSame('admin.staff', $this->menuFor($superAdmin, 'admin.staff-accounts.show', ['user' => (string) $unmapped->id])->activeItemKey);
     }
 
     public function test_an_unmapped_account_does_not_get_staff_only_links(): void

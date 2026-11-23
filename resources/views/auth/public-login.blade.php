@@ -29,7 +29,6 @@
                 @registrationOpen
                     <a href="{{ route('public.register') }}">{{ __('auth.common.create_account') }}</a>
                 @endregistrationOpen
-                <a href="{{ route('staff.login') }}">{{ __('auth.common.staff_login') }}</a>
             </div>
             <p class="error" role="alert" hidden data-passkey-error></p>
             <p class="muted">{{ __('auth.passkeys.login_fallback') }}</p>

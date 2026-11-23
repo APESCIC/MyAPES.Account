@@ -40,10 +40,7 @@
         </div>
         <div class="panel">
             <h2>{{ __('auth.landing.staff_access') }}</h2>
-            <p class="muted">{{ __('auth.landing.staff_access_blurb') }}</p>
-            <div class="actions">
-                <a href="{{ route('staff.login') }}">{{ __('auth.common.staff_login') }}</a>
-            </div>
+            <p class="muted">{{ __('auth.landing.staff_access_blurb') }} {{ __('auth.landing.staff_login_footer_hint') }}</p>
         </div>
         @foreach($publicPluginNavigation ?? [] as $publicPluginNav)
             <div class="panel">
