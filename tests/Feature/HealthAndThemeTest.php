@@ -101,7 +101,8 @@ class HealthAndThemeTest extends TestCase
         $response->assertOk();
         $response->assertSee('data-skin="glassy"', false);
         $response->assertSee('data-theme="light"', false);
-        $response->assertSee("localStorage.getItem('myapes-theme')", false);
+        $response->assertSee("appearanceKey = 'myapes-appearance'", false);
+        $response->assertSee("themeKey = 'myapes-theme'", false);
         $response->assertSee('data-workspace-app-bar', false);
         $response->assertSee('data-workspace-app-nav', false);
         $response->assertSee('data-workspace-menu-open', false);

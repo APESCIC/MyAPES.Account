@@ -83,7 +83,8 @@ class ThemePreferenceTest extends TestCase
             ->assertOk()
             ->assertSee('data-skin="glassy"', false)
             ->assertSee('data-theme="light"', false)
-            ->assertSee("localStorage.getItem('myapes-theme')", false);
+            ->assertSee("appearanceKey = 'myapes-appearance'", false)
+            ->assertSee("themeKey = 'myapes-theme'", false);
 
         app(AppSettings::class)->set(GeneralSettings::GROUP, ['default_theme_skin' => 'jungle']);
 

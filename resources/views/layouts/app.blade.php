@@ -18,14 +18,39 @@
                 @auth
                 const skin = @json($appearance['skin']);
                 const theme = @json($appearance['mode']);
+                const calm = @json($appearance['calm']);
                 document.documentElement.dataset.skin = skin;
                 document.documentElement.dataset.theme = theme;
                 document.documentElement.style.colorScheme = theme;
+                if (calm) {
+                    document.documentElement.setAttribute('data-calm', '');
+                }
                 @else
-                const savedTheme = localStorage.getItem('myapes-theme');
-                const theme = savedTheme === 'dark' ? 'dark' : 'light';
-                document.documentElement.dataset.theme = theme;
-                document.documentElement.style.colorScheme = theme;
+                const appearanceKey = 'myapes-appearance';
+                const themeKey = 'myapes-theme';
+                let appearance = { skin: @json($appearance['skin']), mode: 'light', calm: false };
+                try {
+                    const savedAppearance = localStorage.getItem(appearanceKey);
+                    if (savedAppearance) {
+                        const parsed = JSON.parse(savedAppearance);
+                        if (parsed && typeof parsed === 'object') {
+                            appearance.skin = parsed.skin === 'jungle' ? 'jungle' : 'glassy';
+                            appearance.mode = parsed.mode === 'dark' ? 'dark' : 'light';
+                            appearance.calm = Boolean(parsed.calm);
+                        }
+                    } else {
+                        const savedTheme = localStorage.getItem(themeKey);
+                        appearance.mode = savedTheme === 'dark' ? 'dark' : 'light';
+                    }
+                } catch {
+                    appearance.mode = 'light';
+                }
+                document.documentElement.dataset.skin = appearance.skin;
+                document.documentElement.dataset.theme = appearance.mode;
+                document.documentElement.style.colorScheme = appearance.mode;
+                if (appearance.calm) {
+                    document.documentElement.setAttribute('data-calm', '');
+                }
                 @endauth
             } catch {
                 document.documentElement.dataset.theme = 'light';
@@ -148,6 +173,14 @@
                     href="{{ route('change-log.index') }}"
                     aria-label="View the MyAPES Account change log for version v{{ $appVersion }}"
                 >v{{ $appVersion }}</a>
+                @guest
+                    <x-theme-switcher
+                        variant="footer"
+                        id-prefix="footer-theme"
+                        class="site-footer__theme"
+                        :appearance="$appearance ?? ['skin' => 'glassy', 'mode' => 'light', 'calm' => false]"
+                    />
+                @endguest
             </footer>
         </div>
     </div>

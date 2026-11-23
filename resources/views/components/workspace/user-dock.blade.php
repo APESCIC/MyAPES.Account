@@ -74,18 +74,6 @@
         @auth
             <x-notifications.bell />
         @endauth
-        <button
-            type="button"
-            class="sg-icon-btn sg-icon-btn--sm theme-toggle"
-            data-theme-toggle
-            aria-pressed="false"
-            aria-label="{{ __('workspace.dock.theme_dark') }}"
-            data-label-dark="{{ __('workspace.dock.theme_dark') }}"
-            data-label-light="{{ __('workspace.dock.theme_light') }}"
-        >
-            <i data-lucide="moon" class="theme-toggle__icon theme-toggle__icon--light" aria-hidden="true"></i>
-            <i data-lucide="sun" class="theme-toggle__icon theme-toggle__icon--dark" aria-hidden="true"></i>
-        </button>
         <a
             href="{{ route('help') }}"
             class="sg-icon-btn sg-icon-btn--sm"

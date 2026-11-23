@@ -82,23 +82,15 @@
                         </a>
                     </li>
                 @endforeach
-                <li role="none">
-                    <button
-                        type="button"
-                        class="sg-user-menu__item"
-                        role="menuitem"
-                        data-theme-toggle
-                        aria-pressed="false"
-                        aria-label="{{ __('workspace.dock.theme_dark') }}"
-                        data-label-dark="{{ __('workspace.dock.theme_dark') }}"
-                        data-label-light="{{ __('workspace.dock.theme_light') }}"
-                    >
-                        <i data-lucide="moon" class="theme-toggle__icon theme-toggle__icon--light" aria-hidden="true"></i>
-                        <i data-lucide="sun" class="theme-toggle__icon theme-toggle__icon--dark" aria-hidden="true"></i>
-                        <span>{{ __('workspace.dock.theme_dark') }}</span>
-                    </button>
-                </li>
             </ul>
+
+            <div class="sg-user-menu__theme" role="none">
+                <x-theme-switcher
+                    variant="menu"
+                    id-prefix="user-menu-theme"
+                    :appearance="$appearance ?? ['skin' => 'glassy', 'mode' => 'light', 'calm' => false]"
+                />
+            </div>
 
             @if($user->qaProfile === null)
                 <form method="post" action="{{ route('auth.logout') }}" class="sg-user-menu__signout">

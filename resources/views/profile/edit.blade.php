@@ -36,6 +36,8 @@
             <x-locale-switcher />
         </div>
 
+        @include('profile._appearance')
+
         <div class="panel" id="account-email">
             <h2>{{ __('public.profile.edit.blade.account_email') }}</h2>
             @if($canChangeLocalEmail)

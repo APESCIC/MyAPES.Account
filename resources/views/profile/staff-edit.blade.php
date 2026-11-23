@@ -44,6 +44,8 @@
         <x-locale-switcher />
     </div>
 
+    @include('profile._appearance')
+
     <div class="panel" id="notifications">
         <x-push.profile-notifications
             :types="$notificationTypes"

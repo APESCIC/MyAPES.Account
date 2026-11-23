@@ -71,6 +71,7 @@ import { initGuidedTour } from './workspace/guided-tour.js';
 import { initNotificationBell } from './workspace/notification-bell.js';
 import { initQaSwitcher } from './workspace/qa-switcher.js';
 import { initRichTextEditors } from './workspace/rich-text-editor.js';
+import { applyAppearance, initThemeSwitcher, readAppearanceFromDocument } from './workspace/theme-switcher.js';
 import { initToasts } from './workspace/toasts.js';
 
 const icons = {
@@ -129,38 +130,10 @@ const icons = {
     X,
 };
 
-const themeStorageKey = 'myapes-theme';
-const themeColor = document.querySelector('meta[name="theme-color"]');
-
-const applyTheme = (theme, persist = false) => {
-    const normalizedTheme = theme === 'dark' ? 'dark' : 'light';
-    const isDark = normalizedTheme === 'dark';
-
-    document.documentElement.dataset.theme = normalizedTheme;
-    document.documentElement.style.colorScheme = normalizedTheme;
-    themeColor?.setAttribute('content', isDark ? '#0b1a1f' : '#d2f4fa');
-
-    for (const toggle of document.querySelectorAll('[data-theme-toggle]')) {
-        toggle.setAttribute('aria-pressed', String(isDark));
-        const label = isDark ? toggle.dataset.labelLight : toggle.dataset.labelDark;
-        if (label) {
-            toggle.setAttribute('aria-label', label);
-            toggle.setAttribute('title', label);
-        }
-    }
-
-    if (persist) {
-        try {
-            localStorage.setItem(themeStorageKey, normalizedTheme);
-        } catch {
-            // The selected theme still applies for the current page when storage is unavailable.
-        }
-    }
-};
-
 createIcons({ icons });
 
-applyTheme(document.documentElement.dataset.theme);
+applyAppearance(readAppearanceFromDocument());
+initThemeSwitcher();
 initChangeLog();
 initBotProtection();
 initPasskeys();
@@ -173,14 +146,8 @@ initFormActions();
 initFileUploads();
 initRichTextEditors();
 
-document.addEventListener('click', (event) => {
-    if (event.target instanceof Element && event.target.closest('[data-theme-toggle]')) {
-        applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark', true);
-    }
-});
-
 const drawer = initWorkspaceDrawer({
-    onOpen: () => applyTheme(document.documentElement.dataset.theme),
+    onOpen: () => applyAppearance(readAppearanceFromDocument()),
 });
 initWorkspaceMegaMenu();
 initWorkspaceUserMenu();
