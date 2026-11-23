@@ -3,6 +3,8 @@
  * Overrides Glassy tokens when html has data-skin="jungle".
  */
 
+@import './jungle-decor.css';
+
 [data-skin='jungle'] {
     --color-sg-ink: #142218;
     --color-sg-muted: #4a6350;

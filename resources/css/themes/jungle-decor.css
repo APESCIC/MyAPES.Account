@@ -1,0 +1,101 @@
+/*
+ * Jungle decorative layer (#899). Loaded via jungle.css only; selectors are
+ * gated so Glassy never paints these assets.
+ */
+
+[data-skin='jungle']:not([data-calm='true']) .workspace-shell::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        url('/decor/jungle/canopy.svg') center top / cover no-repeat,
+        transparent;
+    opacity: 1;
+}
+
+[data-skin='jungle'][data-theme='dark']:not([data-calm='true']) .workspace-shell::after {
+    opacity: 0.85;
+}
+
+[data-skin='jungle']:not([data-calm='true']) .sg-card,
+[data-skin='jungle']:not([data-calm='true']) .panel {
+    position: relative;
+    isolation: isolate;
+}
+
+[data-skin='jungle']:not([data-calm='true']) .sg-card::before,
+[data-skin='jungle']:not([data-calm='true']) .panel::before,
+[data-skin='jungle']:not([data-calm='true']) .sg-card::after,
+[data-skin='jungle']:not([data-calm='true']) .panel::after {
+    content: '';
+    position: absolute;
+    width: 2.75rem;
+    height: 2.75rem;
+    pointer-events: none;
+    background: url('/decor/jungle/leaf-corner.svg') no-repeat center / contain;
+    opacity: 0.85;
+}
+
+[data-skin='jungle']:not([data-calm='true']) .sg-card::before,
+[data-skin='jungle']:not([data-calm='true']) .panel::before {
+    top: 0;
+    left: 0;
+}
+
+[data-skin='jungle']:not([data-calm='true']) .sg-card::after,
+[data-skin='jungle']:not([data-calm='true']) .panel::after {
+    right: 0;
+    bottom: 0;
+    transform: rotate(180deg);
+}
+
+[data-skin='jungle']:not([data-calm='true']) .jungle-vine,
+[data-skin='jungle']:not([data-calm='true']) .section-divider {
+    display: block;
+    height: 2rem;
+    margin: 1.25rem 0;
+    border: 0;
+    background: url('/decor/jungle/vine-divider.svg') center / auto 100% no-repeat;
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+[data-skin='jungle'][data-calm='true'] .workspace-shell::after,
+[data-skin='jungle'][data-calm='true'] .sg-card::before,
+[data-skin='jungle'][data-calm='true'] .sg-card::after,
+[data-skin='jungle'][data-calm='true'] .panel::before,
+[data-skin='jungle'][data-calm='true'] .panel::after {
+    content: none;
+    background: none;
+}
+
+[data-skin='jungle'][data-calm='true'] .jungle-vine,
+[data-skin='jungle'][data-calm='true'] .section-divider {
+    height: auto;
+    margin: 1.2rem 0;
+    border-top: 1px solid var(--line);
+    background: none;
+    opacity: 1;
+}
+
+@media print {
+    [data-skin='jungle'] .workspace-shell::after,
+    [data-skin='jungle'] .sg-card::before,
+    [data-skin='jungle'] .sg-card::after,
+    [data-skin='jungle'] .panel::before,
+    [data-skin='jungle'] .panel::after {
+        content: none !important;
+        background: none !important;
+    }
+
+    [data-skin='jungle'] .jungle-vine,
+    [data-skin='jungle'] .section-divider {
+        height: auto;
+        margin: 1.2rem 0;
+        border-top: 1px solid #ccc;
+        background: none !important;
+        opacity: 1;
+    }
+}
