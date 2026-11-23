@@ -31,8 +31,19 @@ return [
         'label' => 'Workspace navigation',
         'panel_switch' => 'Panel',
         'service_home' => 'Service home',
+        'overview' => 'Overview',
+        'overview_description' => 'Home for :module',
         'change_log' => 'Change log',
         'brand_home' => 'MyAPES Account home',
+        'top_bar' => 'App menu',
+        'user_menu' => 'User menu',
+        'mega_menu' => ':module menu',
+    ],
+
+    'mega' => [
+        'view' => 'View :plugin',
+        'create' => 'Create a :plugin',
+        'open' => 'Open :label',
     ],
 
     'mobile' => [

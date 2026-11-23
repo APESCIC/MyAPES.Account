@@ -20,6 +20,7 @@ final readonly class PluginManifest
      * @param  list<PluginAbility>  $permissions
      * @param  list<PluginDependency>  $dependencies
      * @param  list<PluginNavigationItem>  $navigation
+     * @param  list<PluginMenuAction>  $menuActions  mega-menu actions (#885); when empty, derived from $navigation
      * @param  array<string, PluginSettingsSchema>  $settingsByModule  keyed by module slug
      * @param  class-string|null  $activeRecordDetector
      * @param  class-string|null  $summaryProvider
@@ -53,6 +54,7 @@ final readonly class PluginManifest
         public array $staffRouteFiles = [],
         public ?string $nameKey = null,
         public ?string $descriptionKey = null,
+        public array $menuActions = [],
     ) {}
 
     public static function make(
@@ -79,6 +81,7 @@ final readonly class PluginManifest
         array $staffRouteFiles = [],
         ?string $nameKey = null,
         ?string $descriptionKey = null,
+        array $menuActions = [],
     ): self {
         $namespace = $translationNamespace ?? str_replace('-', '_', $slug);
 
@@ -106,7 +109,72 @@ final readonly class PluginManifest
             staffRouteFiles: $staffRouteFiles,
             nameKey: $nameKey ?? $namespace.'::plugin.name',
             descriptionKey: $descriptionKey ?? $namespace.'::plugin.description',
+            menuActions: $menuActions,
         );
+    }
+
+    /**
+     * Mega-menu actions for a module (#885). Explicit {@see $menuActions} win;
+     * otherwise each {@see $navigation} entry for the module becomes a staff
+     * "view" action (and a create action when the route ends in `.index`).
+     *
+     * @return list<PluginMenuAction>
+     */
+    public function menuActionsFor(string $moduleSlug, string $audience): array
+    {
+        $actions = array_values(array_filter(
+            $this->menuActions,
+            static fn (PluginMenuAction $action): bool => $action->moduleSlug === $moduleSlug
+                && $action->audience === $audience,
+        ));
+
+        if ($actions !== []) {
+            usort($actions, static fn (PluginMenuAction $a, PluginMenuAction $b): int => $a->order <=> $b->order);
+
+            return $actions;
+        }
+
+        if ($audience !== PluginMenuAction::AUDIENCE_STAFF) {
+            return [];
+        }
+
+        $derived = [];
+        foreach ($this->navigation as $item) {
+            if ($item->moduleSlug !== $moduleSlug) {
+                continue;
+            }
+
+            $derived[] = new PluginMenuAction(
+                label: $item->label,
+                routeName: $item->routeName,
+                icon: $item->icon,
+                order: $item->order * 10,
+                audience: PluginMenuAction::AUDIENCE_STAFF,
+                moduleSlug: $moduleSlug,
+                requiredAbility: $item->requiredAbility,
+                description: null,
+                labelKey: $item->labelKey,
+            );
+
+            if (str_ends_with($item->routeName, '.index')) {
+                $derived[] = new PluginMenuAction(
+                    label: $item->label,
+                    routeName: $item->routeName,
+                    icon: 'circle-plus',
+                    order: $item->order * 10 + 1,
+                    audience: PluginMenuAction::AUDIENCE_STAFF,
+                    moduleSlug: $moduleSlug,
+                    requiredAbility: 'create',
+                    anchor: '#create',
+                    description: null,
+                    labelKey: $item->labelKey,
+                );
+            }
+        }
+
+        usort($derived, static fn (PluginMenuAction $a, PluginMenuAction $b): int => $a->order <=> $b->order);
+
+        return $derived;
     }
 
     /**

@@ -44,6 +44,7 @@ final class WorkspaceNavigation
         private readonly AccountClassifier $accounts,
         private readonly GeneralSettings $general,
         private readonly ImportQueue $importQueue,
+        private readonly ModuleMegaMenuBuilder $megaMenus,
     ) {}
 
     public function forRequest(?User $user, Request $request): WorkspaceMenu
@@ -62,6 +63,14 @@ final class WorkspaceNavigation
 
         [$currentPanelKey, $activeItemKey] = $this->resolveActive($panels, $request, $user);
 
+        $audience = $user !== null && $this->accounts->hasStaffSideRole($user)
+            ? \App\Core\Extensions\Plugins\PluginMenuAction::AUDIENCE_STAFF
+            : \App\Core\Extensions\Plugins\PluginMenuAction::AUDIENCE_PUBLIC;
+
+        $topItems = $user === null
+            ? []
+            : $this->megaMenus->forAudience($user, $moduleNavigation, $audience);
+
         return new WorkspaceMenu(
             $panels,
             $currentPanelKey,
@@ -69,6 +78,7 @@ final class WorkspaceNavigation
             $user === null ? [] : $this->quickActions($user, $moduleNavigation, $panels, $currentPanelKey),
             $this->settingsCommands($adminCatalogue),
             $user === null ? null : $this->dockUser($user),
+            $topItems,
         );
     }
 

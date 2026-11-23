@@ -12,6 +12,9 @@ final readonly class WorkspaceMenu
      * @param  array<string, NavPanel>  $panels  keyed by NavPanel::STAFF / ADMIN / PUBLIC
      * @param  list<QuickAction>  $quickActions
      * @param  list<array{id: string, label: string, section: string, url: string, icon: string, keywords: string}>  $extraCommands
+     * @param  list<MegaMenuTopItem>  $topItems  module mega menus for the top bar (#885)
+     * @param  list<NavItem>  $userMenuItems  avatar menu links (#888)
+     * @param  list<NavItem>  $simpleLinks  signed-out plain links (#889)
      */
     public function __construct(
         public array $panels,
@@ -20,7 +23,31 @@ final readonly class WorkspaceMenu
         public array $quickActions = [],
         public array $extraCommands = [],
         public ?DockUser $user = null,
+        public array $topItems = [],
+        public array $userMenuItems = [],
+        public array $simpleLinks = [],
     ) {}
+
+    public function activeTopItem(): ?MegaMenuTopItem
+    {
+        if ($this->activeItemKey === null) {
+            return null;
+        }
+
+        foreach ($this->topItems as $top) {
+            if ($top->key === $this->activeItemKey) {
+                return $top;
+            }
+
+            foreach ($top->items() as $item) {
+                if ($item->key === $this->activeItemKey) {
+                    return $top;
+                }
+            }
+        }
+
+        return null;
+    }
 
     public function panel(string $key): ?NavPanel
     {
