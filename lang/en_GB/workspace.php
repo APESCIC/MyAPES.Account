@@ -137,6 +137,7 @@ return [
         'login' => ['sign in', 'log in'],
         'register' => ['sign up', 'create account', 'join'],
         'staff_login' => ['staff', 'employee', 'sign in'],
+        'open_ticket' => ['ticket', 'support', 'open a ticket', 'help'],
         'switch_panel' => ['panel', 'workspace', 'switch'],
         'view_site' => ['home', 'public', 'site', 'landing'],
     ],

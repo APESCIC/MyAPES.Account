@@ -75,6 +75,7 @@ class WorkspaceNavigationTest extends TestCase
     {
         $menu = $this->menuFor(null, 'home');
         $keys = $this->itemKeys($menu->panels[NavPanel::PUBLIC]);
+        $simpleKeys = array_map(static fn (NavItem $item): string => $item->key, $menu->simpleLinks);
 
         $this->assertContains('public.login', $keys);
         $this->assertContains('public.register', $keys);
@@ -82,6 +83,11 @@ class WorkspaceNavigationTest extends TestCase
         $this->assertNotContains('staff.login', $keys);
         $this->assertNotContains('dashboard', $keys);
         $this->assertSame([], $menu->quickActions);
+        $this->assertContains('guest.ticket', $simpleKeys);
+        $this->assertContains('bookings', $simpleKeys);
+        $this->assertContains('help', $simpleKeys);
+        $this->assertContains('public.login', $simpleKeys);
+        $this->assertNotContains('staff.login', $simpleKeys);
     }
 
     public function test_administrator_admin_panel_shows_every_admin_group(): void

@@ -79,7 +79,133 @@ final class WorkspaceNavigation
             $this->settingsCommands($adminCatalogue),
             $user === null ? null : $this->dockUser($user),
             $topItems,
+            $user === null ? [] : $this->userMenuItems($user),
+            $user === null ? $this->simpleLinks() : [],
         );
+    }
+
+    /**
+     * @return list<NavItem>
+     */
+    private function simpleLinks(): array
+    {
+        $links = [];
+
+        if (Route::has('tickets.public.index')) {
+            $links[] = new NavItem(
+                'guest.ticket',
+                __('tickets::public.nav'),
+                route('tickets.public.index'),
+                'ticket',
+                ['tickets.public.*'],
+                $this->words('workspace.keywords.open_ticket'),
+            );
+        }
+
+        if (Route::has('recruitment.index')) {
+            $links[] = new NavItem(
+                'guest.recruitment',
+                __('recruitment::plugin.name'),
+                route('recruitment.index'),
+                'briefcase-business',
+                ['recruitment.*'],
+                $this->pluginKeywords('recruitment'),
+            );
+        }
+
+        $links[] = $this->bookingsItem();
+        $links[] = new NavItem(
+            'help',
+            __('public.chrome.app.blade.help'),
+            route('help'),
+            'circle-help',
+            ['help'],
+            $this->words('workspace.keywords.help'),
+        );
+        $links[] = new NavItem(
+            'public.login',
+            __('public.chrome.app.blade.public_login'),
+            route('public.login'),
+            'log-in',
+            ['public.login', 'password.*', 'two-factor.login'],
+            $this->words('workspace.keywords.login'),
+        );
+
+        if ($this->general->registrationOpen()) {
+            $links[] = new NavItem(
+                'public.register',
+                __('public.chrome.app.blade.register'),
+                route('public.register'),
+                'user-plus',
+                ['public.register'],
+                $this->words('workspace.keywords.register'),
+            );
+        }
+
+        return $links;
+    }
+
+    /**
+     * @return list<NavItem>
+     */
+    private function userMenuItems(User $user): array
+    {
+        $items = [
+            new NavItem(
+                'user.profile',
+                __('public.chrome.app.blade.profile'),
+                route('profile.edit'),
+                'circle-user-round',
+                ['profile.*', 'two-factor.setup'],
+                $this->words('workspace.keywords.profile'),
+            ),
+            new NavItem(
+                'user.help',
+                __('public.chrome.app.blade.help'),
+                route('help'),
+                'circle-help',
+                ['help'],
+                $this->words('workspace.keywords.help'),
+            ),
+        ];
+
+        if ($this->profile->isAdministrator($user)) {
+            $items[] = new NavItem(
+                'user.github',
+                __('workspace.dock.github'),
+                config('myapes.github.repository_url'),
+                'github',
+                [],
+                ['github', 'repository', 'source'],
+            );
+            $items[] = new NavItem(
+                'user.issue',
+                __('workspace.dock.open_an_issue'),
+                config('myapes.github.new_issue_url'),
+                'circle-plus',
+                [],
+                ['issue', 'bug', 'github'],
+            );
+            $items[] = new NavItem(
+                'user.discussions',
+                __('workspace.dock.discussions'),
+                config('myapes.github.discussions_url'),
+                'messages-square',
+                [],
+                ['discussions', 'community', 'github'],
+            );
+        } elseif ($this->accounts->isStaffSide($user)) {
+            $items[] = new NavItem(
+                'user.report_problem',
+                __('workspace.dock.report_problem'),
+                route('staff.report-problem.create'),
+                'life-buoy',
+                ['staff.report-problem.*'],
+                ['report', 'problem', 'bug', 'help'],
+            );
+        }
+
+        return $items;
     }
 
     private function dockUser(User $user): DockUser
