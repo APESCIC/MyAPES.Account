@@ -4,6 +4,7 @@
 
 @section('content')
     <div class="panel">
+        <x-critter name="dot" pose="oops" class="brand-mascot" decorative />
         <h1>{{ __('public.404.blade.page_not_found') }}</h1>
         <p class="muted">{{ __('public.404.blade.that_address_is_not_available_in_myapes_core_check_the_') }}</p>
         <div class="actions">

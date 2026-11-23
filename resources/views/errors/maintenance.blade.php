@@ -17,6 +17,8 @@
 </head>
 <body>
 <main>
+    @php($maintenanceCritter = \App\Support\Theme\CritterCast::resolve('moss', 'oops'))
+    <p><img src="{{ asset($maintenanceCritter['svg']) }}" alt="" width="128" height="128" decoding="async" style="display:block;margin:0 auto 1rem;"></p>
     <p>{{ __('public.maintenance.blade.myapes_core') }}</p>
     <h1>{{ __('public.maintenance.blade.temporarily_unavailable') }}</h1>
     <p class="message">{{ $message }}</p>

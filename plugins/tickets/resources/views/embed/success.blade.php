@@ -1,4 +1,5 @@
 <x-tickets::embed.layout :parent-origin="$parentOrigin">
+    <x-critter name="rio" pose="welcome" class="brand-mascot" decorative />
     <h1>{{ __('tickets::embed.success_heading') }}</h1>
     <p>{{ __('tickets::embed.success_body', ['reference' => '#'.$ticket->id]) }}</p>
     @if ($form->confirmation_text)
