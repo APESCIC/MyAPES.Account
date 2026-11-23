@@ -1,6 +1,6 @@
 <!doctype html>
 @php($appearance ??= ['skin' => 'glassy', 'mode' => 'light', 'calm' => false])
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-skin="{{ $appearance['skin'] }}" data-theme="{{ $appearance['mode'] }}" @if($appearance['calm']) data-calm @endif>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-skin="{{ $appearance['skin'] }}" data-theme="{{ $appearance['mode'] }}" @auth data-appearance-source="server" @endauth @if($appearance['calm']) data-calm="true" @endif>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,21 +14,17 @@
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
     <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         (() => {
+            const root = document.documentElement;
             try {
-                @auth
-                const skin = @json($appearance['skin']);
-                const theme = @json($appearance['mode']);
-                const calm = @json($appearance['calm']);
-                document.documentElement.dataset.skin = skin;
-                document.documentElement.dataset.theme = theme;
-                document.documentElement.style.colorScheme = theme;
-                if (calm) {
-                    document.documentElement.setAttribute('data-calm', '');
+                if (root.dataset.appearanceSource === 'server') {
+                    root.style.colorScheme = root.dataset.theme === 'dark' ? 'dark' : 'light';
+
+                    return;
                 }
-                @else
+
                 const appearanceKey = 'myapes-appearance';
                 const themeKey = 'myapes-theme';
-                let appearance = { skin: @json($appearance['skin']), mode: 'light', calm: false };
+                let appearance = { skin: 'glassy', mode: 'light', calm: false };
                 try {
                     const savedAppearance = localStorage.getItem(appearanceKey);
                     if (savedAppearance) {
@@ -45,16 +41,19 @@
                 } catch {
                     appearance.mode = 'light';
                 }
-                document.documentElement.dataset.skin = appearance.skin;
-                document.documentElement.dataset.theme = appearance.mode;
-                document.documentElement.style.colorScheme = appearance.mode;
+                root.dataset.skin = appearance.skin;
+                root.dataset.theme = appearance.mode;
+                root.style.colorScheme = appearance.mode;
                 if (appearance.calm) {
-                    document.documentElement.setAttribute('data-calm', '');
+                    root.setAttribute('data-calm', 'true');
+                } else {
+                    root.removeAttribute('data-calm');
                 }
-                @endauth
             } catch {
-                document.documentElement.dataset.theme = 'light';
-                document.documentElement.style.colorScheme = 'light';
+                if (root.dataset.appearanceSource !== 'server') {
+                    root.dataset.theme = 'light';
+                }
+                root.style.colorScheme = 'light';
             }
         })();
     </script>

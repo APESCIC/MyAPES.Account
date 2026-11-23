@@ -55,9 +55,11 @@ class ThemePreferenceTest extends TestCase
         $this->actingAs($user)
             ->get(route('dashboard'))
             ->assertOk()
+            ->assertSee('data-appearance-source="server"', false)
             ->assertSee('data-skin="jungle"', false)
             ->assertSee('data-theme="dark"', false)
-            ->assertSee('data-calm', false);
+            ->assertSee('data-calm="true"', false)
+            ->assertSee("root.dataset.appearanceSource === 'server'", false);
     }
 
     public function test_changing_the_admin_default_only_affects_users_with_null_skin(): void
@@ -83,6 +85,7 @@ class ThemePreferenceTest extends TestCase
             ->assertOk()
             ->assertSee('data-skin="glassy"', false)
             ->assertSee('data-theme="light"', false)
+            ->assertDontSee('data-appearance-source="server"', false)
             ->assertSee("appearanceKey = 'myapes-appearance'", false)
             ->assertSee("themeKey = 'myapes-theme'", false);
 
@@ -90,7 +93,16 @@ class ThemePreferenceTest extends TestCase
 
         $this->get(route('home'))
             ->assertOk()
-            ->assertSee('data-skin="glassy"', false);
+            ->assertSee('data-skin="glassy"', false)
+            ->assertDontSee('data-appearance-source="server"', false);
+    }
+
+    /**
+     * Browser slow-network FOUC verification is tracked in #908 (Playwright).
+     */
+    public function test_playwright_slow_network_fouc_deferred_to_issue_908(): void
+    {
+        $this->markTestIncomplete('Playwright slowed-network first-paint check deferred to #908.');
     }
 
     public function test_guest_cookie_is_merged_once_on_login(): void
