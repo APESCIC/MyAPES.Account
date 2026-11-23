@@ -33,13 +33,9 @@
 <a class="skip-link" href="#main-content">{{ __('public.chrome.app.blade.skip_to_main_content') }}</a>
 
 <div class="sg-page" data-workspace-page>
-    <aside class="sg-rail-dock" aria-label="{{ __('workspace.nav.label') }}" data-workspace-rail-dock>
-        <x-workspace.rail :menu="$workspaceMenu" />
-    </aside>
-
     <div class="sg-main-column">
+        <x-workspace.app-bar :menu="$workspaceMenu" />
         <div class="sg-content">
-            <x-workspace.topbar :menu="$workspaceMenu" />
             <x-workspace.page-header
                 :menu="$workspaceMenu"
                 :title="trim($__env->yieldContent('page_title')) ?: null"
