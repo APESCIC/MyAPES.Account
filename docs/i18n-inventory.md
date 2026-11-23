@@ -25,7 +25,7 @@ Machine JSON (gitignored under storage): `storage/app/lang-inventory.json`.
 
 | Area | Count |
 | --- | ---: |
-| [Public](#public-268) | 4 |
+| [Public](#public-268) | 0 |
 | [APES CIC staff](#apes-cic-staff-269) | 0 |
 | [Admin shell](#admin-shell-270) | 0 |
 | [Auth / emails / notifications / flash / validation](#auth-emails-flash-validation-271) | 0 |
@@ -35,10 +35,10 @@ Machine JSON (gitignored under storage): `storage/app/lang-inventory.json`.
 | [Plugin: Consultations](#plugin-consultations) | 0 |
 | [Plugin: Pet Profiles](#plugin-pet-profiles) | 0 |
 | [Other / unclassified](#other-unclassified) | 0 |
-| **All (inventory)** | **4** |
-| Allow-listed (omitted below) | 111 |
+| **All (inventory)** | **0** |
+| Allow-listed (omitted below) | 114 |
 
-_Generated at 2026-11-23T18:03:32+00:00_
+_Generated at 2026-11-23T18:18:24+00:00_
 
 <a id="public-268"></a>
 
@@ -46,14 +46,7 @@ _Generated at 2026-11-23T18:03:32+00:00_
 
 Path anchor for children: `docs/i18n-inventory.md#public-268` — extraction [#268](https://github.com/APESCIC/MyAPES-Account/issues/268).
 
-| File | Line | Kind | Snippet | Suggested key | Target |
-| --- | ---: | --- | --- | --- | --- |
-| `resources/views/components/critter.blade.php` | 10 | `blade.text` | class('critter'); | `nav.critter.class_critter` | `lang/en_GB/nav.php` |
-| `resources/views/components/theme-switcher.blade.php` | 3 | `blade.text` | false]; $skins = config('themes.skins', []); $modes = config('themes.modes', ['light', 'dark']); $currentSkin = $appearance['skin'] ?? 'glassy'; $currentMode =… | `nav.theme-switcher.false_skins_config_themes_skins_modes_co` | `lang/en_GB/nav.php` |
-| `resources/views/layouts/app.blade.php` | 2 | `blade.text` | false]) | `seo.app.false` | `lang/en_GB/seo.php` |
-| `resources/views/vendor/mail/html/header.blade.php` | 6 | `blade.attribute.alt` | Laravel Logo | `nav.header.laravel_logo` | `lang/en_GB/nav.php` |
-
-**Section total:** 4
+_No hard-coded findings in this area (or all allow-listed)._
 
 <a id="apes-cic-staff-269"></a>
 
