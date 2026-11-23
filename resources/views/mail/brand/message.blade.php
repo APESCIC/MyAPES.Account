@@ -35,14 +35,14 @@
 @else
 {{ __('mail.brand.footer.no_reply') }}
 @endif
-<a href="{{ route('dashboard') }}" style="color: #6b7280; text-decoration: underline;">{{ __('mail.brand.footer.log_in_to_reply') }}</a>
+<a href="{{ route('dashboard') }}" style="color: #107481; text-decoration: underline;">{{ __('mail.brand.footer.log_in_to_reply') }}</a>
 <br>
 {!! __('mail.brand.footer.copyright', [
     'year' => date('Y'),
     'app' => __('terms.app_name'),
 ]) !!}
 <br>
-<a href="{{ route('help') }}" style="color: #6b7280; text-decoration: underline;">
+<a href="{{ route('help') }}" style="color: #107481; text-decoration: underline;">
     {{ __('mail.brand.footer.help') }}
 </a>
 <br>

@@ -8,7 +8,7 @@
     <div class="panel">
         <h1 class="welcome-heading">
             {{ __('auth.landing.heading') }}
-            <img src="{{ asset('mascot/spike-welcome.png') }}" alt="" class="welcome-heading__mascot" width="1024" height="1024">
+            <img src="{{ asset('mascot/spike-welcome.png') }}" alt="{{ __('auth.landing.mascot_alt') }}" class="welcome-heading__mascot" width="1024" height="1024">
         </h1>
         <p class="muted">{{ __('auth.common.support_tools_intro') }}</p>
         <x-mascot-tip />
