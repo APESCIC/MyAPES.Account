@@ -212,6 +212,9 @@ jobs:
       - name: Run test suite
         run: composer test
 
+      - name: Theme contrast and snapshot manifest (#908)
+        run: php artisan test tests/Unit/Theme/ThemeContrastTest.php tests/Unit/Theme/ThemeSnapshotManifestTest.php tests/Feature/Theme/ThemePreferenceTest.php
+
       - name: Install production PHP dependencies
         run: composer install --no-dev --no-interaction --prefer-dist --classmap-authoritative
 
@@ -377,4 +380,70 @@ jobs:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
         run: php artisan test --group=greenmail
+
+  theme-visual-playwright:
+    name: Theme Playwright snapshots (#908)
+    needs: deployment-control-authentication
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && 'main' || github.sha }}
+          fetch-depth: 1
+
+      - name: Set up PHP 8.4
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo_mysql, sqlite3
+          coverage: none
+          tools: composer:v2
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install npm 11.10+ for min-release-age
+        run: |
+          npm install --global npm@11.21.1
+          npm --version
+
+      - name: Install application dependencies
+        run: |
+          composer install --no-interaction --prefer-dist
+          npm ci --no-audit --no-fund
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Prepare theme E2E database
+        run: bash scripts/test/theme-e2e-prepare.sh
+
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium --with-deps
+
+      - name: Run theme Playwright snapshots
+        env:
+          APP_URL: http://127.0.0.1:8000
+          CI: 'true'
+        run: |
+          php artisan serve --host=127.0.0.1 --port=8000 --no-reload > storage/logs/theme-e2e-serve.log 2>&1 &
+          server_pid=$!
+          trap 'kill $server_pid 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8000/healthz >/dev/null; then
+              echo "Theme E2E server ready after ${attempt} attempt(s)."
+              break
+            fi
+            if [[ "$attempt" -eq 60 ]]; then
+              echo "Theme E2E server did not become ready." >&2
+              exit 1
+            fi
+            sleep 1
+          done
+          npm run test:e2e
 

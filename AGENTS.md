@@ -63,6 +63,9 @@ Live preview gate slots and Herd day-to-day detail: [`.cursor/rules/herd-local-d
 | Release record | `php artisan myapes:changelog-validate --base-ref=origin/main` |
 | Full pre-PR check | `composer pre-pr-verify` (PowerShell) or `bash scripts/local/pre-pr-verify.sh` (agent-only) |
 | Frontend | `npm run test:frontend`, `npm run build` |
+| Theme contrast | `php artisan test --filter ThemeContrastTest` (WCAG AA token pairs; fails CI on regression) |
+| Theme snapshot manifest | `php artisan test --filter ThemeSnapshotManifestTest` (40 committed PNGs under `tests/Browser/snapshots/theme/`) |
+| Theme visual (Playwright, CI / optional local) | `npm run test:e2e` when `APP_URL` or `BASE_URL` points at a running app (`scripts/test/theme-e2e-prepare.sh` + `php artisan serve` for GitHub Actions). **Agents must not run Playwright for Herd or Cursor preview gates** — use PHPUnit contrast/manifest checks and the built-in browser preview only. Refresh snapshots with `npm run test:e2e:update` on a developer machine when theme pixels change. |
 | CI workflows | `.github/workflows/test-cloudron.yml`, `milestone-version-check.yml`, `codeql.yml`, `dependency-review.yml` |
 
 ## Workflow slots

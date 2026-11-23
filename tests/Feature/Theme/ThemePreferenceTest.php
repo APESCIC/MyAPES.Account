@@ -97,12 +97,35 @@ class ThemePreferenceTest extends TestCase
             ->assertDontSee('data-appearance-source="server"', false);
     }
 
-    /**
-     * Browser slow-network FOUC verification is tracked in #908 (Playwright).
-     */
-    public function test_playwright_slow_network_fouc_deferred_to_issue_908(): void
+    public function test_server_sourced_layout_skips_guest_storage_rewrite(): void
     {
-        $this->markTestIncomplete('Playwright slowed-network first-paint check deferred to #908.');
+        $user = User::factory()->protectedRole(AuthorizationProfile::ROLE_SERVICE_USER)->create([
+            'theme_skin' => 'jungle',
+            'theme_mode' => 'dark',
+            'theme_calm' => true,
+        ]);
+
+        $html = $this->actingAs($user)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('data-appearance-source="server"', $html);
+        $this->assertStringContainsString("if (root.dataset.appearanceSource === 'server')", $html);
+        $this->assertMatchesRegularExpression(
+            "/if \(root\.dataset\.appearanceSource === 'server'\)[\s\S]*?return;/",
+            $html,
+        );
+    }
+
+    public function test_guest_home_initialises_appearance_from_client_storage_only(): void
+    {
+        $html = $this->get(route('home'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringNotContainsString('data-appearance-source="server"', $html);
+        $this->assertStringContainsString("localStorage.getItem(appearanceKey)", $html);
     }
 
     public function test_guest_cookie_is_merged_once_on_login(): void
