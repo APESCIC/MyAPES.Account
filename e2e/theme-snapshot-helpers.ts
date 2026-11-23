@@ -71,6 +71,7 @@ export async function ensureLoggedIn(
         timeout: 30_000,
     });
     await page.waitForLoadState('domcontentloaded');
+    await page.waitForLoadState('networkidle').catch(() => undefined);
 }
 
 function baseURLFromPage(page: Page): string {
@@ -191,6 +192,13 @@ export async function settleChrome(page: Page): Promise<void> {
         .catch(() => undefined);
 
     await page.evaluate(async () => {
+        const mascot = document.querySelector('[data-mascot-dock]');
+
+        if (mascot instanceof HTMLElement) {
+            mascot.hidden = true;
+            document.body.classList.remove('has-mascot-dock');
+        }
+
         if (document.fonts?.ready) {
             await document.fonts.ready;
         }
