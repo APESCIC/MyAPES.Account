@@ -1,0 +1,58 @@
+{
+    "version": "0.74.0",
+    "date": "2026-11-23",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Top app menu, user menu and mega menus",
+    "summary": "Replaces the left glass sidebar with a top app menu: one mega menu per module, a simple signed-out menu, and a separate user menu.",
+    "changes": [
+        "Desktop chrome is a sticky top app bar; the left frosted rail is no longer the primary navigation.",
+        "Each enabled module opens a mega menu of plugin actions; staff also get Clients and Admin menus.",
+        "Guests see a simple top link list (Open a ticket, Recruitment, Bookings, Help, Login, Register).",
+        "Personal links (profile, theme, help, sign out, QA pill) live in a separate avatar user menu.",
+        "Small screens use a hamburger drawer with accordion module menus and focus trapping.",
+        "Ctrl K search and the notification bell sit in the top bar; palette labels name their module.",
+        "Menu items are filtered by ability and plugin enablement; empty modules and staff Bookings stay hidden."
+    ],
+    "affected_areas": [
+        "Workspace shell and navigation",
+        "Command palette and guided tour",
+        "Public, staff and admin chrome",
+        "Mobile drawer",
+        "Docs, wiki and help"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "MINOR: new top navigation and mega menus replace the sidebar layout across the app.",
+    "validation": [
+        "Feature and unit navigation tests (signed-out, public, staff, admin, filtering, palette labels, shell).",
+        "Frontend Vitest for guided tour and workspace scripts.",
+        "Herd preview at https://myapes-account.test for the top bar without the left rail.",
+        "composer milestone:bump -- v0.74.0 --check and myapes:changelog-validate against origin/main."
+    ],
+    "known_limitations": [
+        "Legacy rail and user-dock Blade components remain in the tree but are not used as primary chrome.",
+        "Full Theme section (Glassy/Jungle) lands in a later milestone; this release keeps the light/dark toggle slot.",
+        "Admin Security regrouping stays in v0.80.0."
+    ],
+    "rollback": "Redeploy the previous release tag (v0.73.0). No database migrations ship with this release.",
+    "provenance": "Milestone v0.74.0 Top app menu, user menu and mega menus, Epic #862, pull request #1018.",
+    "references": [
+        {
+            "label": "Issue #862",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/862"
+        },
+        {
+            "label": "Pull request #1018",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/1018"
+        }
+    ],
+    "slug": "release-v0-74-0",
+    "previous_version": "0.73.0"
+}
