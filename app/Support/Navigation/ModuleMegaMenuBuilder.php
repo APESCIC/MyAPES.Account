@@ -27,6 +27,7 @@ final class ModuleMegaMenuBuilder
         private readonly PluginRegistry $plugins,
         private readonly ModulePackageRegistry $modulePackages,
         private readonly ModuleCatalogueProjection $projection,
+        private readonly NavigationPermissionCache $permissions,
     ) {}
 
     /**
@@ -178,7 +179,14 @@ final class ModuleMegaMenuBuilder
         );
         array_unshift($groups, $overviewGroup);
 
-        return new MegaMenuTopItem(
+        if ($audience === PluginMenuAction::AUDIENCE_PUBLIC) {
+            $booking = $this->publicBookingGroup($subCore->key);
+            if ($booking !== null) {
+                $groups[] = $booking;
+            }
+        }
+
+        $top = new MegaMenuTopItem(
             'module.'.$subCore->key,
             $subCore->name,
             $subCore->icon,
@@ -187,6 +195,8 @@ final class ModuleMegaMenuBuilder
             [$subCore->routeName, $prefix.'.*'],
             $subCore->description,
         );
+
+        return $top->isEmpty() ? null : $top;
     }
 
     /**
@@ -218,11 +228,46 @@ final class ModuleMegaMenuBuilder
         [$subCore, $module] = explode(':', $instanceKey, 2);
 
         if ($requiredAbility !== null) {
-            return $user->can("{$subCore}.{$module}.{$requiredAbility}");
+            return $this->permissions->can($user, "{$subCore}.{$module}.{$requiredAbility}");
         }
 
-        return $user->can("{$subCore}.{$module}.view-all")
-            || $user->can("{$subCore}.{$module}.view-own");
+        return $this->permissions->can($user, "{$subCore}.{$module}.view-all")
+            || $this->permissions->can($user, "{$subCore}.{$module}.view-own");
+    }
+
+    private function publicBookingGroup(string $moduleSlug): ?NavGroup
+    {
+        $page = match ($moduleSlug) {
+            'apes-cic' => 'apes',
+            'shelter-rescue' => 'shelter-and-rescue',
+            'pet-care-clinic' => 'pet-care-clinic',
+            default => null,
+        };
+
+        if ($page === null || ! Route::has('bookings.show')) {
+            return null;
+        }
+
+        return new NavGroup('bookings', __('bookings.nav'), [
+            new NavItem(
+                'module.'.$moduleSlug.'.bookings',
+                __('workspace.mega.book_appointment'),
+                route('bookings.show', $page),
+                'calendar',
+                ['bookings.show', 'bookings.*'],
+                $this->bookingKeywords($page),
+            ),
+        ]);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function bookingKeywords(string $page): array
+    {
+        $keywords = __('bookings.keywords');
+
+        return is_array($keywords) ? array_values(array_filter($keywords, 'is_string')) : [];
     }
 
     private function actionLabel(PluginMenuAction $action, PluginManifest $plugin): string
@@ -234,12 +279,12 @@ final class ModuleMegaMenuBuilder
             }
         }
 
-        if ($action->anchor === '#create') {
-            return __('workspace.mega.create', ['plugin' => $plugin->label()]);
-        }
-
         if ($action->audience === PluginMenuAction::AUDIENCE_PUBLIC) {
             return $action->label;
+        }
+
+        if ($action->anchor === '#create') {
+            return __('workspace.mega.create', ['plugin' => $plugin->label()]);
         }
 
         if (str_ends_with($action->routeName, '.index') && ($action->anchor === null || $action->anchor === '')) {

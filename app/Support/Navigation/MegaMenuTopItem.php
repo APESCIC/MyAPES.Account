@@ -39,6 +39,10 @@ final readonly class MegaMenuTopItem
     public function isEmpty(): bool
     {
         foreach ($this->groups as $group) {
+            if ($group->key === 'overview') {
+                continue;
+            }
+
             if (! $group->isEmpty()) {
                 return false;
             }
