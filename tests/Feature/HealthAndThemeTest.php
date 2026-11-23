@@ -99,6 +99,7 @@ class HealthAndThemeTest extends TestCase
         $response = $this->get(route('home'));
 
         $response->assertOk();
+        $response->assertSee('data-skin="glassy"', false);
         $response->assertSee('data-theme="light"', false);
         $response->assertSee("localStorage.getItem('myapes-theme')", false);
         $response->assertSee('data-workspace-app-bar', false);

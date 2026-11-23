@@ -40,6 +40,9 @@
     --text-panel-title--line-height: 2.125rem;
 }
 
+@import './themes/glassy.css';
+@import './themes/jungle.css';
+
 /*
  * Frosted surfaces live on the shell wrapper rather than in @theme so the
  * dark theme and the transparency fallbacks can swap them in one place.
