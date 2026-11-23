@@ -6,11 +6,10 @@
 
 @php
     $art = \App\Support\Theme\CritterCast::resolve($name, $pose);
-    $imgClass = $attributes->get('class');
-    $pictureClass = $attributes->except('class');
+    $pictureClass = $attributes->class('critter');
 @endphp
 
-<picture {{ $pictureClass->class($imgClass) }}>
+<picture {{ $pictureClass }}>
     @if ($art['webp'])
         <source type="image/webp" srcset="{{ asset($art['webp']) }}">
     @endif

@@ -51,8 +51,32 @@
     transform: rotate(180deg);
 }
 
+/* Mega menu headings and module icons (#902). */
+[data-skin='jungle']:not([data-calm='true']) .sg-mega__heading {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+[data-skin='jungle']:not([data-calm='true']) .sg-mega__heading::before {
+    content: '';
+    flex-shrink: 0;
+    width: 0.85rem;
+    height: 0.85rem;
+    background: url('/decor/jungle/leaf-corner.svg') center / contain no-repeat;
+    opacity: 0.75;
+    pointer-events: none;
+    transform: rotate(-35deg);
+}
+
+[data-skin='jungle']:not([data-calm='true']) .sg-mega__trigger > i:first-of-type,
+[data-skin='jungle']:not([data-calm='true']) .sg-mega__link-icon i {
+    filter: hue-rotate(-8deg) saturate(1.15);
+}
+
 [data-skin='jungle']:not([data-calm='true']) .jungle-vine,
-[data-skin='jungle']:not([data-calm='true']) .section-divider {
+[data-skin='jungle']:not([data-calm='true']) .section-divider,
+[data-skin='jungle']:not([data-calm='true']) .jungle-decor {
     display: block;
     height: 2rem;
     margin: 1.25rem 0;

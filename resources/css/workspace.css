@@ -42,6 +42,7 @@
 
 @import './themes/glassy.css';
 @import './themes/jungle.css';
+@import './themes/menu-decor.css';
 
 /*
  * Frosted surfaces live on the shell wrapper rather than in @theme so the

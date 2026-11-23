@@ -84,6 +84,10 @@
                 @endforeach
             </ul>
 
+            <div class="critter-chrome sg-user-menu__critter" aria-hidden="true">
+                <x-critter name="spike" pose="welcome" decorative class="critter--chrome" />
+            </div>
+
             <div class="sg-user-menu__theme" role="none">
                 <x-theme-switcher
                     variant="menu"

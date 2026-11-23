@@ -173,6 +173,9 @@
                     aria-label="View the MyAPES Account change log for version v{{ $appVersion }}"
                 >v{{ $appVersion }}</a>
                 @guest
+                    <div class="critter-chrome site-footer__critter" aria-hidden="true">
+                        <x-critter name="spike" pose="welcome" decorative class="critter--chrome" />
+                    </div>
                     <x-theme-switcher
                         variant="footer"
                         id-prefix="footer-theme"
