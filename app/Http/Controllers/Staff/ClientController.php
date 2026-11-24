@@ -36,9 +36,30 @@ class ClientController extends Controller
         Gate::authorize(AuthorizationProfile::PERMISSION_CLIENT_SEARCH);
 
         $q = trim((string) $request->query('q', ''));
+        $nameReview = $request->boolean('name_review');
         $clients = collect();
+        $filterHeading = null;
 
-        if (strlen($q) >= 2) {
+        if ($nameReview) {
+            $clients = User::query()
+                ->tap(fn ($query) => $accounts->scopePublic($query))
+                ->with(['profile', 'roles'])
+                ->where(function ($query): void {
+                    $query->whereDoesntHave('profile')
+                        ->orWhereHas('profile', function ($profile): void {
+                            $profile->where(function ($names): void {
+                                $names->whereNull('first_name')
+                                    ->orWhere('first_name', '')
+                                    ->orWhereNull('last_name')
+                                    ->orWhere('last_name', '');
+                            });
+                        });
+                })
+                ->orderBy('name')
+                ->limit(100)
+                ->get();
+            $filterHeading = __('clients.name_review_heading');
+        } elseif (strlen($q) >= 2) {
             $results = $search->search($request->user(), $q, perType: 25);
             $hits = collect($results['groups'])->firstWhere('type', 'users')['hits'] ?? [];
 
@@ -50,6 +71,8 @@ class ClientController extends Controller
 
         return view('clients.index', [
             'q' => $q,
+            'nameReview' => $nameReview,
+            'filterHeading' => $filterHeading,
             'clients' => $clients,
             'pinMin' => PhoneVerificationPinService::MIN_LENGTH,
             'pinMax' => PhoneVerificationPinService::MAX_LENGTH,

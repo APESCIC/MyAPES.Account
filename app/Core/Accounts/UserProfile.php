@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable([
     'user_id',
     'preferred_name',
+    'first_name',
+    'last_name',
+    'date_of_birth',
     'phone',
     'organization',
     'support_needs',
@@ -26,9 +29,27 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class UserProfile extends Model
 {
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'date_of_birth' => 'date',
+        ];
+    }
+
     public function effectiveWhatsappNumber(): ?string
     {
         return $this->whatsapp_number ?: $this->mobile_number;
+    }
+
+    public function hasAmbiguousNameSplit(): bool
+    {
+        $first = is_string($this->first_name) ? trim($this->first_name) : '';
+        $last = is_string($this->last_name) ? trim($this->last_name) : '';
+
+        return $first === '' || $last === '';
     }
 
     public function user(): BelongsTo
