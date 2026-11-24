@@ -11,15 +11,25 @@
             <label for="q">{{ __('clients.search') }}</label>
             <input id="q" name="q" value="{{ $q ?? '' }}" placeholder="{{ __('clients.search_placeholder') }}" autocomplete="off" autofocus>
             <button type="submit">{{ __('clients.search_submit') }}</button>
-            @if($q ?? '')
+            @if(($q ?? '') !== '' || ($nameReview ?? false) || ($missingDetails ?? false))
                 <a href="{{ route('clients.index') }}">{{ __('clients.clear') }}</a>
             @endif
         </form>
+        <p>
+            <a href="{{ route('clients.index', ['missing_details' => 1]) }}">{{ __('clients.missing_details_link') }}</a>
+            ·
+            <a href="{{ route('clients.index', ['name_review' => 1]) }}">{{ __('clients.name_review_link') }}</a>
+        </p>
     </div>
 
-    @if(($q ?? '') !== '')
+    @if(($missingDetails ?? false) || ($nameReview ?? false) || ($q ?? '') !== '')
         <div class="panel">
-            <h2>{{ __('clients.search_results') }}</h2>
+            <h2>{{ $filterHeading ?? __('clients.search_results') }}</h2>
+            @if($missingDetails ?? false)
+                <p class="muted">{{ __('clients.missing_details_intro') }}</p>
+            @elseif($nameReview ?? false)
+                <p class="muted">{{ __('clients.name_review_intro') }}</p>
+            @endif
             @if($clients->isNotEmpty())
                 @foreach($clients as $client)
                     <p>
@@ -27,6 +37,10 @@
                         <span class="muted">· {{ $client->email ?: $client->username }}</span>
                     </p>
                 @endforeach
+            @elseif($missingDetails ?? false)
+                <p class="muted">{{ __('clients.missing_details_empty') }}</p>
+            @elseif($nameReview ?? false)
+                <p class="muted">{{ __('clients.name_review_empty') }}</p>
             @else
                 <p class="muted">{{ __('clients.no_results', ['query' => $q]) }}</p>
             @endif
@@ -38,8 +52,18 @@
         <p class="muted">{{ __('clients.create_intro') }}</p>
         <form method="post" action="{{ route('clients.store') }}" data-client-create-form>
             @csrf
-            <label for="name">{{ __('clients.fields.name') }}</label>
-            <input id="name" name="name" value="{{ old('name') }}" required autocomplete="name">
+            <label for="first_name">{{ __('clients.fields.first_name') }}</label>
+            <input id="first_name" name="first_name" value="{{ old('first_name') }}" required autocomplete="given-name">
+            @error('first_name')<p class="error">{{ $message }}</p>@enderror
+
+            <label for="last_name">{{ __('clients.fields.last_name') }}</label>
+            <input id="last_name" name="last_name" value="{{ old('last_name') }}" required autocomplete="family-name">
+            @error('last_name')<p class="error">{{ $message }}</p>@enderror
+
+            <label for="date_of_birth">{{ __('clients.fields.date_of_birth') }}</label>
+            <input id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth') }}" required placeholder="{{ __('clients.fields.date_of_birth_placeholder') }}" inputmode="numeric" autocomplete="bday">
+            <p class="muted">{{ __('clients.fields.date_of_birth_hint') }}</p>
+            @error('date_of_birth')<p class="error">{{ $message }}</p>@enderror
 
             <label for="email">{{ __('clients.fields.email') }}</label>
             <input id="email" name="email" type="email" value="{{ old('email') }}" autocomplete="email" data-client-email>

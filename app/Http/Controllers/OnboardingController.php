@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Services\ContactPreferenceUpdater;
 use App\Services\UkPhoneNumber;
+use App\Support\ClientIdentityRules;
+use App\Support\PersonName;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,7 +45,10 @@ class OnboardingController extends Controller
             }
 
             $preferences->update($user, $user, $this->contactChoices($request), 'onboarding');
-            $user->forceFill(['onboarding_completed_at' => now()])->save();
+            $user->forceFill([
+                'name' => PersonName::display($validated['first_name'], $validated['last_name'], $user->name),
+                'onboarding_completed_at' => now(),
+            ])->save();
         });
 
         return redirect()->intended(route('dashboard'))->with('status', __('public.onboarding.your_account_setup_is_complete'));
@@ -52,26 +57,33 @@ class OnboardingController extends Controller
     /** @return array<string, mixed> */
     public function validateAccountPreferences(Request $request): array
     {
-        return $request->validate([
-            'address_line_1' => ['required', 'string', 'max:255'],
-            'address_line_2' => ['nullable', 'string', 'max:255'],
-            'town_city' => ['required', 'string', 'max:255'],
-            'county' => ['nullable', 'string', 'max:255'],
-            'postcode' => ['required', 'string', 'max:16', 'regex:/^[A-Za-z]{1,2}\d[A-Za-z\d]?\s*\d[A-Za-z]{2}$/'],
-            'mobile_number' => ['required', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
-            'landline_number' => ['nullable', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
-            'whatsapp_number' => ['nullable', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
-            'telegram_username' => ['nullable', 'string', 'max:32', 'regex:/^[A-Za-z0-9_]{5,32}$/'],
-            'services' => ['required', 'array', 'min:1'],
-            'services.*' => ['string', Rule::in(['apes-cic', 'shelter-rescue', 'pet-care-clinic'])],
-            'contact_preferences_confirmed' => ['accepted'],
-        ]);
+        $validated = $request->validate(array_merge(
+            ClientIdentityRules::nameAndDobRules(),
+            [
+                'address_line_1' => ['required', 'string', 'max:255'],
+                'address_line_2' => ['nullable', 'string', 'max:255'],
+                'town_city' => ['required', 'string', 'max:255'],
+                'county' => ['nullable', 'string', 'max:255'],
+                'postcode' => ['required', 'string', 'max:16', 'regex:/^[A-Za-z]{1,2}\d[A-Za-z\d]?\s*\d[A-Za-z]{2}$/'],
+                'mobile_number' => ['required', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
+                'landline_number' => ['nullable', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
+                'whatsapp_number' => ['nullable', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
+                'telegram_username' => ['nullable', 'string', 'max:32', 'regex:/^[A-Za-z0-9_]{5,32}$/'],
+                'services' => ['required', 'array', 'min:1'],
+                'services.*' => ['string', Rule::in(['apes-cic', 'shelter-rescue', 'pet-care-clinic'])],
+                'contact_preferences_confirmed' => ['accepted'],
+            ],
+        ), ClientIdentityRules::messages());
+
+        $validated['date_of_birth'] = ClientIdentityRules::normaliseDateOfBirth($validated['date_of_birth']);
+
+        return $validated;
     }
 
     /** @param array<string, mixed> $validated @return array<string, mixed> */
     public function profilePayload(array $validated): array
     {
-        return [
+        $payload = [
             'address_line_1' => $validated['address_line_1'],
             'address_line_2' => $validated['address_line_2'] ?? null,
             'town_city' => $validated['town_city'],
@@ -86,6 +98,19 @@ class OnboardingController extends Controller
                 ? ltrim($validated['telegram_username'], '@')
                 : null,
         ];
+
+        // Profile edit reuses this helper without identity fields; onboarding supplies them.
+        if (array_key_exists('first_name', $validated)) {
+            $payload['first_name'] = $validated['first_name'];
+        }
+        if (array_key_exists('last_name', $validated)) {
+            $payload['last_name'] = $validated['last_name'];
+        }
+        if (array_key_exists('date_of_birth', $validated)) {
+            $payload['date_of_birth'] = $validated['date_of_birth'];
+        }
+
+        return $payload;
     }
 
     /** @return array<string, bool> */

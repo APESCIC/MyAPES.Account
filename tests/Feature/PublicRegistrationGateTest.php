@@ -48,7 +48,9 @@ class PublicRegistrationGateTest extends TestCase
             ->assertSessionHas('status', __('auth.common.registration_closed'));
 
         $this->post(route('public.register.submit'), [
-            'name' => 'Public Person',
+            'first_name' => 'Public',
+            'last_name' => 'Person',
+            'date_of_birth' => '14/03/1990',
             'username' => 'public.person',
             'email' => 'public@example.com',
             'password' => 'Correct-horse-42',

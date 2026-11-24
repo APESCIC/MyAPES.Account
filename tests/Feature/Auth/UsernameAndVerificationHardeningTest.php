@@ -255,7 +255,9 @@ class UsernameAndVerificationHardeningTest extends TestCase
     private function registerPayload(array $overrides = []): array
     {
         return array_merge([
-            'name' => 'Public Person',
+            'first_name' => 'Public',
+            'last_name' => 'Person',
+            'date_of_birth' => '14/03/1990',
             'username' => 'public.person',
             'email' => 'public.person@example.com',
             'password' => self::STRONG_PASSWORD,

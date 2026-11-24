@@ -26,7 +26,9 @@ class RolelessApplicationCompatibilityTest extends TestCase
         $this->dropRoleColumn();
 
         $response = $this->post(route('public.register.submit'), [
-            'name' => 'Public User',
+            'first_name' => 'Public',
+            'last_name' => 'User',
+            'date_of_birth' => '14/03/1990',
             'username' => 'public.user',
             'email' => 'public@example.com',
             'password' => 'MyAPES-Test-Password-2026!',

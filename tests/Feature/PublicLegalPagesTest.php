@@ -137,4 +137,18 @@ class PublicLegalPagesTest extends TestCase
             ->assertSee('href="'.route('public.register').'"', false)
             ->assertSee('href="https://www.apes.org.uk"', false);
     }
+
+    public function test_privacy_notice_names_date_of_birth_purpose_retention_and_version(): void
+    {
+        config(['myapes.consent.policy_version' => '2026-11']);
+
+        $this->get(route('privacy'))
+            ->assertOk()
+            ->assertSee('data-privacy-date-of-birth', false)
+            ->assertSee('data-privacy-notice-version', false)
+            ->assertSeeText('date of birth')
+            ->assertSeeText('Notice version 2026-11')
+            ->assertSeeText('identity when staff create or match a client record')
+            ->assertSeeText('safeguarding, animal-welfare or legal duties');
+    }
 }

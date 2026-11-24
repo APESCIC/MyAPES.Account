@@ -22,7 +22,9 @@ class PublicAccountLifecycleTest extends TestCase
         $this->travelTo('2026-09-12 17:00:00');
 
         $response = $this->post(route('public.register.submit'), [
-            'name' => 'Public Person',
+            'first_name' => 'Public',
+            'last_name' => 'Person',
+            'date_of_birth' => '14/03/1990',
             'username' => 'Public.Person',
             'email' => 'PUBLIC@EXAMPLE.COM',
             'password' => 'Correct-horse-42',
@@ -79,7 +81,9 @@ class PublicAccountLifecycleTest extends TestCase
     public function test_registration_without_consent_does_not_create_an_account(): void
     {
         $response = $this->from(route('public.register'))->post(route('public.register.submit'), [
-            'name' => 'Public Person',
+            'first_name' => 'Public',
+            'last_name' => 'Person',
+            'date_of_birth' => '14/03/1990',
             'username' => 'public.person',
             'email' => 'public@example.com',
             'password' => 'Correct-horse-42',
@@ -160,6 +164,9 @@ class PublicAccountLifecycleTest extends TestCase
         $user = User::factory()->create(['onboarding_completed_at' => null]);
 
         $this->actingAs($user)->put(route('onboarding.update'), [
+            'first_name' => 'Public',
+            'last_name' => 'Person',
+            'date_of_birth' => '14/03/1990',
             'address_line_1' => '1 Test Street',
             'town_city' => 'London',
             'postcode' => 'SW1A 1AA',
@@ -214,7 +221,7 @@ class PublicAccountLifecycleTest extends TestCase
         $this->assertCount(2, $events);
         $this->assertTrue($events[0]->granted);
         $this->assertFalse($events[1]->granted);
-        $this->assertSame('2026-08', $events[0]->policy_version);
+        $this->assertSame(config('myapes.consent.policy_version'), $events[0]->policy_version);
         $this->assertSame('preferences', $events[0]->source);
     }
 

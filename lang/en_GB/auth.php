@@ -11,6 +11,7 @@ return [
     'failed' => 'These credentials do not match our records.',
     'password' => 'The provided password is incorrect.',
     'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
+    'profile_only' => 'This is a profile-only record and cannot sign in. Ask staff to send a set-password link if you need an account.',
 
     'oidc' => [
         'unavailable' => 'Cloudron sign-in is temporarily unavailable.',
@@ -79,6 +80,11 @@ return [
         'heading' => 'Create public account',
         'intro' => 'Register to access services, your profile, and your pets. You will need to verify your email before using the account.',
         'full_name' => 'Full name',
+        'first_name' => 'First name',
+        'last_name' => 'Last name',
+        'date_of_birth' => 'Date of birth',
+        'date_of_birth_placeholder' => 'DD/MM/YYYY',
+        'date_of_birth_hint' => 'Enter as day/month/year, for example 14/03/1990.',
         'confirm_password' => 'Confirm password',
         'username_guidance' => '3–30 characters. Letters, numbers, dots, underscores, and hyphens only; must start and end with a letter or number.',
         'password_guidance' => 'At least 12 characters. Avoid passwords that have appeared in known data breaches.',
@@ -231,6 +237,7 @@ return [
         'confirm_button' => 'Confirm with passkey',
         'local_only' => 'Passkeys are only available for local password accounts.',
         'suspended' => 'This account is suspended.',
+        'profile_only' => 'This is a profile-only record and cannot sign in with a passkey.',
         'staff_use_oidc' => 'Staff and directory accounts must sign in using Staff Login.',
     ],
 

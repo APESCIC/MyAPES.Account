@@ -15,6 +15,9 @@ use App\Services\AuthorizationProfile;
 use App\Services\StaffClientAccountCreator;
 use App\Services\TotpTwoFactorService;
 use App\Services\UkPhoneNumber;
+use App\Support\ClientIdentityRules;
+use App\Support\ClientMandatoryFields;
+use App\Support\PersonName;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -36,9 +39,40 @@ class ClientController extends Controller
         Gate::authorize(AuthorizationProfile::PERMISSION_CLIENT_SEARCH);
 
         $q = trim((string) $request->query('q', ''));
+        $nameReview = $request->boolean('name_review');
+        $missingDetails = $request->boolean('missing_details');
         $clients = collect();
+        $filterHeading = null;
 
-        if (strlen($q) >= 2) {
+        if ($missingDetails) {
+            $clients = User::query()
+                ->tap(fn ($query) => $accounts->scopePublic($query))
+                ->with(['profile', 'roles'])
+                ->tap(fn ($query) => ClientMandatoryFields::scopeMissingDetails($query))
+                ->orderBy('name')
+                ->limit(100)
+                ->get();
+            $filterHeading = __('clients.missing_details_heading');
+        } elseif ($nameReview) {
+            $clients = User::query()
+                ->tap(fn ($query) => $accounts->scopePublic($query))
+                ->with(['profile', 'roles'])
+                ->where(function ($query): void {
+                    $query->whereDoesntHave('profile')
+                        ->orWhereHas('profile', function ($profile): void {
+                            $profile->where(function ($names): void {
+                                $names->whereNull('first_name')
+                                    ->orWhere('first_name', '')
+                                    ->orWhereNull('last_name')
+                                    ->orWhere('last_name', '');
+                            });
+                        });
+                })
+                ->orderBy('name')
+                ->limit(100)
+                ->get();
+            $filterHeading = __('clients.name_review_heading');
+        } elseif (strlen($q) >= 2) {
             $results = $search->search($request->user(), $q, perType: 25);
             $hits = collect($results['groups'])->firstWhere('type', 'users')['hits'] ?? [];
 
@@ -50,6 +84,9 @@ class ClientController extends Controller
 
         return view('clients.index', [
             'q' => $q,
+            'nameReview' => $nameReview,
+            'missingDetails' => $missingDetails,
+            'filterHeading' => $filterHeading,
             'clients' => $clients,
             'pinMin' => PhoneVerificationPinService::MIN_LENGTH,
             'pinMax' => PhoneVerificationPinService::MAX_LENGTH,
@@ -72,28 +109,27 @@ class ClientController extends Controller
         ]);
 
         $length = PhoneVerificationPinService::MIN_LENGTH.','.PhoneVerificationPinService::MAX_LENGTH;
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['nullable', 'string', 'email', 'max:255'],
-            'mobile_number' => ['required', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
-            'landline_number' => ['nullable', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
-            'address_line_1' => ['required', 'string', 'max:255'],
-            'address_line_2' => ['nullable', 'string', 'max:255'],
-            'town_city' => ['required', 'string', 'max:255'],
-            'county' => ['nullable', 'string', 'max:255'],
-            'postcode' => ['required', 'string', 'max:16', 'regex:/^[A-Za-z]{1,2}\d[A-Za-z\d]?\s*\d[A-Za-z]{2}$/'],
-            'pin' => ['required', 'string', 'regex:/^\d{'.$length.'}$/', 'confirmed'],
-            'send_set_password_email' => ['sometimes', 'boolean'],
-            'staff_assisted_consent' => ['accepted'],
-        ], [
+        $validated = $request->validate(array_merge(
+            ClientIdentityRules::nameAndDobRules(),
+            ClientIdentityRules::addressAndMobileRules(),
+            [
+                'email' => ['nullable', 'string', 'email', 'max:255'],
+                'landline_number' => ['nullable', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
+                'pin' => ['required', 'string', 'regex:/^\d{'.$length.'}$/', 'confirmed'],
+                'send_set_password_email' => ['sometimes', 'boolean'],
+                'staff_assisted_consent' => ['accepted'],
+            ],
+        ), array_merge(ClientIdentityRules::messages(), [
             'pin.regex' => __('clients.validation.pin_invalid', [
                 'min' => PhoneVerificationPinService::MIN_LENGTH,
                 'max' => PhoneVerificationPinService::MAX_LENGTH,
             ]),
             'staff_assisted_consent.accepted' => __('clients.validation.consent_required'),
-        ]);
+        ]));
 
         $validated['postcode'] = strtoupper((string) preg_replace('/\s+/', ' ', trim($validated['postcode'])));
+        $validated['date_of_birth'] = ClientIdentityRules::normaliseDateOfBirth($validated['date_of_birth']);
+        $validated['name'] = PersonName::display($validated['first_name'], $validated['last_name']);
         $validated['send_set_password_email'] = $request->boolean('send_set_password_email');
 
         if ($validated['email'] === null) {
@@ -129,10 +165,12 @@ class ClientController extends Controller
 
         $client->load('profile', 'contactPreference');
         $plainPin = $request->session()->pull('client_created_pin');
+        $missingMandatory = ClientMandatoryFields::missingFor($client->profile);
 
         return view('clients.show', [
             'client' => $client,
             'managedUser' => $client,
+            'missingMandatory' => $missingMandatory,
             'plainPin' => is_string($plainPin) ? $plainPin : null,
             'preference' => $client->contactPreference,
             'profile' => $client->profile,

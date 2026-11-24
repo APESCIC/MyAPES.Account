@@ -119,7 +119,7 @@ class LocalPublicPasswordResetService
 
     private function isLocalPublicPasswordAccount(?User $user): bool
     {
-        if ($user === null || $user->suspended_at !== null) {
+        if ($user === null || $user->suspended_at !== null || $user->isProfileOnly()) {
             return false;
         }
 
@@ -141,6 +141,7 @@ class LocalPublicPasswordResetService
             $user->forceFill([
                 'password' => $password,
                 'authorization_epoch' => (int) $user->authorization_epoch + 1,
+                'account_state' => User::ACCOUNT_STATE_ACTIVE,
             ]);
             $user->setRememberToken(Str::random(60));
             $user->save();

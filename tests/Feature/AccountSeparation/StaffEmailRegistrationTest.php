@@ -173,7 +173,9 @@ class StaffEmailRegistrationTest extends TestCase
     private function registerPayload(string $email): array
     {
         return [
-            'name' => 'Jo Bloggs',
+            'first_name' => 'Jo',
+            'last_name' => 'Bloggs',
+            'date_of_birth' => '14/03/1990',
             'username' => 'jo.bloggs.'.substr(md5($email), 0, 6),
             'email' => $email,
             'password' => self::STRONG_PASSWORD,

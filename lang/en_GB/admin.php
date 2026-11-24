@@ -245,6 +245,12 @@ return [
         'reset_local_password' => 'Reset local password',
         'all_protected_roles' => 'All protected roles',
         'pending_first_login' => 'Pending first login',
+        'account_state' => 'Account state',
+        'account_states' => [
+            'profile_only' => 'Profile only',
+            'invited' => 'Invited',
+            'active' => 'Active',
+        ],
         'authorization_epoch' => 'Authorization epoch',
         'current_staff_photo' => 'Current staff photo',
         'save_public_profile' => 'Save public profile',

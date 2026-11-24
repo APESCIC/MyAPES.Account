@@ -12,8 +12,18 @@
         <form method="post" action="{{ route('public.register.submit') }}">
             @csrf
             <x-bot-protection form="register" />
-            <label for="name">{{ __('auth.register.full_name') }}</label>
-            <input id="name" type="text" name="name" value="{{ old('name') }}" autocomplete="name" required>
+            <label for="first_name">{{ __('auth.register.first_name') }}</label>
+            <input id="first_name" type="text" name="first_name" value="{{ old('first_name') }}" autocomplete="given-name" required>
+            @error('first_name')<p class="error">{{ $message }}</p>@enderror
+
+            <label for="last_name">{{ __('auth.register.last_name') }}</label>
+            <input id="last_name" type="text" name="last_name" value="{{ old('last_name') }}" autocomplete="family-name" required>
+            @error('last_name')<p class="error">{{ $message }}</p>@enderror
+
+            <label for="date_of_birth">{{ __('auth.register.date_of_birth') }}</label>
+            <input id="date_of_birth" type="text" name="date_of_birth" value="{{ old('date_of_birth') }}" placeholder="{{ __('auth.register.date_of_birth_placeholder') }}" inputmode="numeric" autocomplete="bday" required>
+            <p class="muted">{{ __('auth.register.date_of_birth_hint') }}</p>
+            @error('date_of_birth')<p class="error">{{ $message }}</p>@enderror
 
             <label for="email">{{ __('auth.common.email') }}</label>
             <input id="email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" required>

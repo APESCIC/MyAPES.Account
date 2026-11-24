@@ -9,6 +9,7 @@
         <p class="eyebrow">{{ __('public.legal.cookies.blade.public_notice') }}</p>
         <h1>{{ __('public.legal.privacy.blade.privacy_notice') }}</h1>
         <p class="muted">{{ __('public.legal.privacy.blade.how_association_of_protecting_exotic_species_cic_uses_p') }}</p>
+        <p class="muted" data-privacy-notice-version>{{ __('public.legal.privacy.blade.notice_version', ['version' => config('myapes.consent.policy_version')]) }}</p>
         @include('legal._nav')
 
         <section>
@@ -27,6 +28,12 @@
                 <li>{{ __('public.legal.privacy.blade.technical_records_needed_to_keep_the_service_secure_suc') }}</li>
             </ul>
             <p>Staff accounts are created through Staff Login. Those accounts follow the same service records once a person is signed in, and directory groups decide what they can open.</p>
+        </section>
+
+        <section data-privacy-date-of-birth>
+            <h2>{{ __('clients.fields.date_of_birth') }}</h2>
+            <p>{{ __('public.legal.privacy.blade.date_of_birth_purpose') }}</p>
+            <p>{{ __('public.legal.privacy.blade.date_of_birth_retention') }}</p>
         </section>
 
         <section>
