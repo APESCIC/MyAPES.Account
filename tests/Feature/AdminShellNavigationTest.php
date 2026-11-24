@@ -54,7 +54,8 @@ class AdminShellNavigationTest extends TestCase
         $this->actingAs($superAdmin)
             ->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('>Admin</a>', false)
+            ->assertSee('data-nav-key="user.admin"', false)
+            ->assertDontSee('data-nav-key="staff.admin"', false)
             ->assertDontSee('<span>Super Admin</span>', false)
             ->assertSee('href="'.route('admin.index').'"', false)
             ->assertDontSee('href="'.route('superadmin.index').'"', false);
@@ -182,7 +183,7 @@ class AdminShellNavigationTest extends TestCase
         $this->actingAs($actor)
             ->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('>Admin</a>', false)
+            ->assertSee('data-nav-key="user.admin"', false)
             ->assertSee('href="'.route('admin.public-accounts.index').'"', false)
             ->assertDontSee('href="'.route('admin.index').'"', false);
     }

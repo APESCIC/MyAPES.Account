@@ -81,7 +81,7 @@ final class WorkspaceNavigation
             $this->settingsCommands($adminCatalogue),
             $user === null ? null : $this->dockUser($user),
             $topItems,
-            $user === null ? [] : $this->userMenuItems($user, isset($panels[NavPanel::ADMIN])),
+            $user === null ? [] : $this->userMenuItems($user, $panels[NavPanel::ADMIN] ?? null),
             $user === null ? $this->simpleLinks() : [],
         );
     }
@@ -189,7 +189,7 @@ final class WorkspaceNavigation
         return $items;
     }
 
-    private function userMenuItems(User $user, bool $hasAdminPanel): array
+    private function userMenuItems(User $user, ?NavPanel $adminPanel): array
     {
         $items = [
             new NavItem(
@@ -202,11 +202,11 @@ final class WorkspaceNavigation
             ),
         ];
 
-        if ($hasAdminPanel) {
+        if ($adminPanel !== null) {
             $items[] = new NavItem(
                 'user.admin',
                 __('workspace.panels.admin'),
-                route('admin.index'),
+                $adminPanel->home()?->url ?? route('admin.index'),
                 'shield-check',
                 ['admin.index', 'admin.*'],
                 ['admin', 'settings', 'workspace'],
@@ -258,7 +258,7 @@ final class WorkspaceNavigation
             );
         }
 
-        $forms = $this->staffTopMenus->formsUserMenuItem($user, $hasAdminPanel);
+        $forms = $this->staffTopMenus->formsUserMenuItem($user, $adminPanel !== null);
         if ($forms !== null) {
             $items[] = $forms;
         }
