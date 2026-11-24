@@ -153,12 +153,18 @@ trait BuildsUserProfileHub
 
     protected function hubViewerCanManageAccess(User $viewer, User $managedUser): bool
     {
-        if ($viewer->is($managedUser) || $viewer->suspended_at !== null) {
+        if ($viewer->suspended_at !== null) {
             return false;
         }
 
+        // Administrators reach AuthorizationMutationService so self-change and
+        // other privileged denials stay audited redirects, not a bare 403.
         if ($viewer->can('admin.users.manage')) {
             return true;
+        }
+
+        if ($viewer->is($managedUser)) {
+            return false;
         }
 
         return $viewer->can(AuthorizationProfile::PERMISSION_CLIENT_MANAGE)

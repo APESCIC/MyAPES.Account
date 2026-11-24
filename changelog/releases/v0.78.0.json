@@ -26,6 +26,7 @@
         "changed"
     ],
     "audiences": [
+        "public-facing",
         "internal-only"
     ],
     "version_rationale": "MINOR: brings the Public Account workspace into Staff with directory tabs and global people search without removing existing accounts.",
