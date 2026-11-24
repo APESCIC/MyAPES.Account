@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Staff;
 use App\Core\Accounts\AccountClassifier;
 use App\Core\Accounts\PhoneVerificationPinService;
 use App\Core\Accounts\User;
+use App\Core\Search\Providers\UsersRecordSearchProvider;
 use App\Core\Search\RecordSearch;
 use App\Services\UserActivityTimeline;
 use App\Services\UserProfileHubActions;
@@ -76,9 +77,8 @@ class ClientController extends Controller
             $results = $search->search($request->user(), $q, perType: 25);
             $hits = collect($results['groups'])->firstWhere('type', 'users')['hits'] ?? [];
 
-            $clients = collect($hits)
-                ->map(fn (array $hit): ?User => User::query()->with('roles')->find($hit['id']))
-                ->filter(fn (?User $user): bool => $user instanceof User && ! $accounts->isStaffSide($user))
+            $clients = UsersRecordSearchProvider::usersForHits($hits)
+                ->reject(fn (User $user): bool => $accounts->isStaffSide($user))
                 ->values();
         }
 
