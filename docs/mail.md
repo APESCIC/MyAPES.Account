@@ -46,7 +46,7 @@ Adding a template also means adding its key to `tests/Feature/Mail/MailTemplateM
 | Service | Always | Staff Login reminder, ticket, case and consultation updates, Recruitment application received |
 | Optional | Only when the person's Email contact preference is on | Recruitment decisions (shortlisted, rejected, accepted, closed) |
 
-Optional notifications use `App\Core\Mail\Concerns\RespectsMailPreference` and return `$this->optionalMailChannels($notifiable)` from `via()`. The preference is `user_contact_preferences.email`; it is off until the person turns it on in their profile.
+Optional notifications use `App\Core\Mail\Concerns\RespectsMailPreference` and return `$this->optionalMailChannels($notifiable)` from `via()`. Staff optional mail respects `user_contact_preferences.email`; recruitment optional mail respects `user_contact_preferences.marketing_email`. People manage both on Account → Privacy.
 
 ## Admin Emails
 

@@ -14,10 +14,14 @@ trait RespectsMailPreference
      * @param  list<string>  $channels
      * @return list<string>
      */
-    protected function optionalMailChannels(object $notifiable, array $channels = ['mail']): array
-    {
+    protected function optionalMailChannels(
+        object $notifiable,
+        array $channels = ['mail'],
+        string $preferenceColumn = 'email',
+    ): array {
         $allowsEmail = $notifiable instanceof User
-            && (bool) $notifiable->contactPreference?->email;
+            && in_array($preferenceColumn, ['email', 'marketing_email'], true)
+            && (bool) $notifiable->contactPreference?->{$preferenceColumn};
 
         return $allowsEmail
             ? $channels

@@ -49,7 +49,13 @@ class AccountSettingsController extends Controller
 
     public function privacy(Request $request): View
     {
-        return $this->page($request, 'privacy', 'account.privacy');
+        $user = $request->user();
+
+        return view('account.privacy', [
+            'activeAccountTab' => 'privacy',
+            'user' => $user,
+            ...$this->viewData->privacyTab($user),
+        ]);
     }
 
     public function legacyProfileRedirect(): View

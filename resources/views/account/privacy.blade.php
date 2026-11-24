@@ -13,12 +13,19 @@
         </section>
 
         <section class="panel" id="privacy-overview">
-            <p class="muted">{{ __('account.settings.privacy_body') }}</p>
+            <p class="muted">{{ __('account.settings.privacy.overview') }}</p>
             <p>
                 <a href="{{ route('privacy') }}">{{ __('account.settings.privacy_notice_link') }}</a>
                 ·
                 <a href="{{ route('cookies') }}">{{ __('account.settings.cookies_notice_link') }}</a>
             </p>
         </section>
+
+        @include('account._privacy-contact-preferences')
+        @include('account._privacy-email-opt-in')
+        @include('account._privacy-notifications')
+        @include('account._privacy-cookies')
+        @include('account._privacy-data-export')
+        @include('account._privacy-deletion')
     </div>
 @endsection

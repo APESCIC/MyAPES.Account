@@ -43,6 +43,7 @@ use App\Http\Controllers\MailReplyLinkController;
 use App\Http\Controllers\MailUnsubscribeController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PhoneVerificationPinController;
+use App\Http\Controllers\AccountPrivacyController;
 use App\Http\Controllers\AccountSecurityController;
 use App\Http\Controllers\AccountSettingsController;
 use App\Http\Controllers\ProfileController;
@@ -310,6 +311,15 @@ Route::middleware([
         ->middleware(['account.step-up', 'throttle:6,1'])
         ->name('account.security.sessions.destroy-others');
     Route::get('/account/privacy', [AccountSettingsController::class, 'privacy'])->name('account.privacy');
+    Route::put('/account/privacy/contact-preferences', [AccountPrivacyController::class, 'updateContactPreference'])
+        ->middleware('throttle:60,1')
+        ->name('account.privacy.contact-preferences.update');
+    Route::get('/account/privacy/data-export', [AccountPrivacyController::class, 'download'])
+        ->middleware('throttle:6,1')
+        ->name('account.privacy.data-export');
+    Route::post('/account/privacy/deletion-request', [AccountPrivacyController::class, 'requestDeletion'])
+        ->middleware('throttle:6,1')
+        ->name('account.privacy.deletion-request');
 
     Route::get('/profile', [AccountSettingsController::class, 'legacyProfileRedirect'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');

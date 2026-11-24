@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
-use App\Core\Accounts\ContactPreference;
 use App\Core\Accounts\PhoneVerificationPinService;
 use App\Core\Accounts\User;
+use App\Core\Accounts\UserContactPreference;
 use App\Core\Accounts\UserProfile;
+use App\Core\Push\ProfileNotificationTypeCatalogue;
 use Illuminate\Http\Request;
 
 final class AccountSettingsViewData
@@ -17,6 +18,7 @@ final class AccountSettingsViewData
         private readonly PhoneVerificationPinService $phonePins,
         private readonly AccountSignedInDevices $signedInDevices,
         private readonly AccountSecurityActivity $securityActivity,
+        private readonly ProfileNotificationTypeCatalogue $notificationCatalogue,
     ) {}
 
     /**
@@ -50,7 +52,7 @@ final class AccountSettingsViewData
      *
      * @return array{
      *     profile: UserProfile|null,
-     *     preference: ContactPreference|null,
+     *     preference: UserContactPreference|null,
      *     selectedServices: list<string>,
      * }
      */
@@ -101,6 +103,24 @@ final class AccountSettingsViewData
             'signedInDevices' => $this->signedInDevices->forUser($user, $request),
             'canListMultipleSignedInDevices' => $this->signedInDevices->canListMultipleDevices(),
             'securityActivity' => $this->securityActivity->recentFor($user),
+        ];
+    }
+
+    /**
+     * View data for Account → Privacy.
+     *
+     * @return array{
+     *     preference: UserContactPreference|null,
+     *     policyVersion: string,
+     *     notificationsManageUrl: string,
+     * }
+     */
+    public function privacyTab(User $user): array
+    {
+        return [
+            'preference' => $user->contactPreference,
+            'policyVersion' => (string) config('myapes.consent.policy_version'),
+            'notificationsManageUrl' => route('profile.edit').'#notifications',
         ];
     }
 }

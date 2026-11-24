@@ -102,7 +102,6 @@ class OnboardingController extends Controller
                 'telegram_username' => ['nullable', 'string', 'max:32', 'regex:/^[A-Za-z0-9_]{5,32}$/'],
                 'services' => ['required', 'array', 'min:1'],
                 'services.*' => ['string', Rule::in(['apes-cic', 'shelter-rescue', 'pet-care-clinic'])],
-                'contact_preferences_confirmed' => ['accepted'],
                 'locale' => ['sometimes', 'string', Rule::in(array_keys(config('app.supported_locales', ['en_GB' => 'English (UK)'])))],
             ],
         ), ClientIdentityRules::messages());

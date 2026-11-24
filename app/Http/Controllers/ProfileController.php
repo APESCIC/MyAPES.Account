@@ -11,7 +11,6 @@ use App\Http\Middleware\EnsureRecentStepUp;
 use App\Rules\Username;
 use App\Services\AuditLogger;
 use App\Services\AuthorizationProfile;
-use App\Services\ContactPreferenceUpdater;
 use App\Services\LocalPublicPasswordResetService;
 use App\Services\SecureUploadService;
 use App\Services\SessionAuthorizationContext;
@@ -137,7 +136,6 @@ class ProfileController extends Controller
         Request $request,
         SecureUploadService $secureUploadService,
         AuditLogger $auditLogger,
-        ContactPreferenceUpdater $preferences,
         OnboardingController $onboarding,
         UkPhoneNumber $phones,
     ): RedirectResponse {
@@ -205,13 +203,6 @@ class ProfileController extends Controller
         foreach ($validated['services'] as $service) {
             $user->serviceSelections()->firstOrCreate(['sub_core_key' => $service]);
         }
-        $preferences->update(
-            $user,
-            $user,
-            $onboarding->contactChoices($request),
-            'preferences',
-        );
-
         if ($request->hasFile('avatar') && is_string($previousAvatarPath) && $previousAvatarPath !== '' && $previousAvatarPath !== $profile->avatar_path) {
             $secureUploadService->deleteIfPresent($previousAvatarPath);
         }

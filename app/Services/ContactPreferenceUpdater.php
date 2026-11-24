@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class ContactPreferenceUpdater
 {
-    public const CHANNELS = ['calls', 'sms', 'whatsapp', 'telegram', 'email'];
+    public const CHANNELS = ['calls', 'sms', 'whatsapp', 'telegram', 'email', 'marketing_email'];
 
     /** @param array<string, bool> $choices */
     public function update(

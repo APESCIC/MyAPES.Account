@@ -36,7 +36,6 @@ class AccountProfilePersonalDetailsTest extends TestCase
                 'postcode' => 'SW1A 1AA',
                 'mobile_number' => '+447400123456',
                 'services' => ['apes-cic'],
-                'contact_preferences_confirmed' => '1',
             ])
             ->assertRedirect(route('account.profile'))
             ->assertSessionHasErrors(['first_name', 'last_name', 'date_of_birth']);
@@ -136,7 +135,6 @@ class AccountProfilePersonalDetailsTest extends TestCase
             'postcode' => 'SW1A 1AA',
             'mobile_number' => '+447400123456',
             'services' => ['apes-cic'],
-            'contact_preferences_confirmed' => '1',
         ], $overrides);
     }
 }

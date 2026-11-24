@@ -205,39 +205,22 @@ class PublicAccountLifecycleTest extends TestCase
             'mobile_number' => '+447400123456',
         ]);
 
-        $this->actingAs($user)->withSession(['auth.password_confirmed_at' => now()->unix()])->put(route('profile.update'), [
-            'first_name' => 'Public',
-            'last_name' => 'Person',
-            'date_of_birth' => '14/03/1990',
-            'preferred_name' => 'Public',
-            'address_line_1' => '1 Test Street',
-            'town_city' => 'London',
-            'postcode' => 'SW1A 1AA',
-            'mobile_number' => '+447400123456',
-            'services' => ['apes-cic'],
-            'contact_preferences_confirmed' => '1',
-            'contact_email' => '1',
-        ])->assertRedirect(route('account.profile'));
+        $this->actingAs($user)->put(route('account.privacy.contact-preferences.update'), [
+            'channel' => 'email',
+            'granted' => '1',
+        ])->assertRedirect(route('account.privacy').'#email-opt-in');
 
-        $this->actingAs($user)->put(route('profile.update'), [
-            'first_name' => 'Public',
-            'last_name' => 'Person',
-            'date_of_birth' => '14/03/1990',
-            'preferred_name' => 'Public',
-            'address_line_1' => '1 Test Street',
-            'town_city' => 'London',
-            'postcode' => 'SW1A 1AA',
-            'mobile_number' => '+447400123456',
-            'services' => ['apes-cic'],
-            'contact_preferences_confirmed' => '1',
-        ])->assertRedirect(route('account.profile'));
+        $this->actingAs($user)->put(route('account.privacy.contact-preferences.update'), [
+            'channel' => 'email',
+            'granted' => '0',
+        ])->assertRedirect(route('account.privacy').'#email-opt-in');
 
         $events = $user->contactConsentEvents()->orderBy('id')->get();
         $this->assertCount(2, $events);
         $this->assertTrue($events[0]->granted);
         $this->assertFalse($events[1]->granted);
         $this->assertSame(config('myapes.consent.policy_version'), $events[0]->policy_version);
-        $this->assertSame('preferences', $events[0]->source);
+        $this->assertSame('account_privacy', $events[0]->source);
     }
 
     public function test_profile_links_to_the_configured_privacy_notice(): void

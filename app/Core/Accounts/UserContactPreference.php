@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['user_id', 'calls', 'sms', 'whatsapp', 'telegram', 'email', 'policy_version', 'confirmed_at'])]
+#[Fillable(['user_id', 'calls', 'sms', 'whatsapp', 'telegram', 'email', 'marketing_email', 'policy_version', 'confirmed_at'])]
 class UserContactPreference extends Model
 {
     protected $attributes = [
@@ -16,6 +16,7 @@ class UserContactPreference extends Model
         'whatsapp' => false,
         'telegram' => false,
         'email' => false,
+        'marketing_email' => false,
     ];
 
     #[Cast]
@@ -27,6 +28,7 @@ class UserContactPreference extends Model
             'whatsapp' => 'boolean',
             'telegram' => 'boolean',
             'email' => 'boolean',
+            'marketing_email' => 'boolean',
             'confirmed_at' => 'datetime',
         ];
     }
