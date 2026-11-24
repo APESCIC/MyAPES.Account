@@ -61,7 +61,6 @@ final class UserRecordsSummary
      */
     public function modulesInUse(User $subject, User $viewer): array
     {
-        $records = $this->forViewer($subject, $viewer, 1);
         $links = [];
 
         foreach ([
@@ -71,20 +70,36 @@ final class UserRecordsSummary
             'consultations' => __('admin.users.hub.records.consultations'),
             'applications' => __('admin.users.hub.records.applications'),
         ] as $key => $label) {
-            $page = $records[$key] ?? null;
-            if ($page instanceof LengthAwarePaginator && $page->total() > 0) {
-                $links[] = [
-                    'key' => $key,
-                    'label' => $label,
-                    'url' => '#hub-records-'.$key,
-                ];
+            if (! $this->hasRecordsOfType($key, $subject, $viewer)) {
+                continue;
             }
+
+            $links[] = [
+                'key' => $key,
+                'label' => $label,
+                'url' => '?tab=records#hub-records-'.$key,
+            ];
         }
 
         return $links;
     }
 
-    private function tickets(User $subject, User $viewer, int $page): ?LengthAwarePaginator
+    private function hasRecordsOfType(string $type, User $subject, User $viewer): bool
+    {
+        return match ($type) {
+            'tickets' => $this->ticketQuery($subject, $viewer)?->exists() ?? false,
+            'pets' => $this->petQuery($subject, $viewer)?->exists() ?? false,
+            'cases' => $this->caseQuery($subject, $viewer)?->exists() ?? false,
+            'consultations' => $this->consultationQuery($subject, $viewer)?->exists() ?? false,
+            'applications' => $this->applicationQuery($subject, $viewer)?->exists() ?? false,
+            default => false,
+        };
+    }
+
+    /**
+     * @return Builder<SupportTicket>|null
+     */
+    private function ticketQuery(User $subject, User $viewer): ?Builder
     {
         $modules = $this->enabledModulesForViewer(
             self::TICKET_MODULES,
@@ -97,29 +112,15 @@ final class UserRecordsSummary
             return null;
         }
 
-        return $this->paginateMapped(
-            SupportTicket::query()
-                ->where('user_id', $subject->id)
-                ->whereIn('sub_core_key', $modules)
-                ->latest('id'),
-            $page,
-            static function (SupportTicket $ticket): array {
-                $area = TicketsArea::forModule((string) $ticket->sub_core_key);
-
-                return [
-                    'type' => 'ticket',
-                    'reference' => '#'.$ticket->id,
-                    'status' => (string) $ticket->status,
-                    'date' => $ticket->created_at,
-                    'label' => (string) $ticket->subject,
-                    'url' => route($area->showRouteName(), $ticket),
-                    'module' => (string) $ticket->sub_core_key,
-                ];
-            },
-        );
+        return SupportTicket::query()
+            ->where('user_id', $subject->id)
+            ->whereIn('sub_core_key', $modules);
     }
 
-    private function pets(User $subject, User $viewer, int $page): ?LengthAwarePaginator
+    /**
+     * @return Builder<PetProfile>|null
+     */
+    private function petQuery(User $subject, User $viewer): ?Builder
     {
         $domains = [];
 
@@ -142,11 +143,100 @@ final class UserRecordsSummary
             return null;
         }
 
+        return PetProfile::query()
+            ->where('user_id', $subject->id)
+            ->whereIn('service_domain', $domains);
+    }
+
+    /**
+     * @return Builder<ShelterCase>|null
+     */
+    private function caseQuery(User $subject, User $viewer): ?Builder
+    {
+        $modules = $this->enabledModulesForViewer(
+            self::CASE_MODULES,
+            'cases',
+            $viewer,
+            static fn (string $module): string => CasesArea::forModule($module)->permission('view-all'),
+        );
+
+        if ($modules === []) {
+            return null;
+        }
+
+        return ShelterCase::query()
+            ->where('user_id', $subject->id)
+            ->whereIn('sub_core_key', $modules);
+    }
+
+    /**
+     * @return Builder<PetCareConsultation>|null
+     */
+    private function consultationQuery(User $subject, User $viewer): ?Builder
+    {
+        if (! $this->plugins->isEnabled('pet-care-clinic', 'consultations')) {
+            return null;
+        }
+
+        if (! $viewer->can('pet-care-clinic.consultations.view-all')) {
+            return null;
+        }
+
+        return PetCareConsultation::query()->where('user_id', $subject->id);
+    }
+
+    /**
+     * @return Builder<RecruitmentApplication>|null
+     */
+    private function applicationQuery(User $subject, User $viewer): ?Builder
+    {
+        if (! $this->plugins->isEnabled('apes-cic', 'recruitment')) {
+            return null;
+        }
+
+        if (! $viewer->can(RecruitmentApplication::PERMISSION_PREFIX.'view-all')
+            && ! $viewer->can(RecruitmentApplication::PERMISSION_PREFIX.'review-applications')) {
+            return null;
+        }
+
+        return RecruitmentApplication::query()->where('user_id', $subject->id);
+    }
+
+    private function tickets(User $subject, User $viewer, int $page): ?LengthAwarePaginator
+    {
+        $query = $this->ticketQuery($subject, $viewer);
+        if ($query === null) {
+            return null;
+        }
+
         return $this->paginateMapped(
-            PetProfile::query()
-                ->where('user_id', $subject->id)
-                ->whereIn('service_domain', $domains)
-                ->latest('id'),
+            $query->latest('id'),
+            $page,
+            static function (SupportTicket $ticket): array {
+                $area = TicketsArea::forModule((string) $ticket->sub_core_key);
+
+                return [
+                    'type' => 'ticket',
+                    'reference' => '#'.$ticket->id,
+                    'status' => (string) $ticket->status,
+                    'date' => $ticket->created_at,
+                    'label' => (string) $ticket->subject,
+                    'url' => route($area->showRouteName(), $ticket),
+                    'module' => (string) $ticket->sub_core_key,
+                ];
+            },
+        );
+    }
+
+    private function pets(User $subject, User $viewer, int $page): ?LengthAwarePaginator
+    {
+        $query = $this->petQuery($subject, $viewer);
+        if ($query === null) {
+            return null;
+        }
+
+        return $this->paginateMapped(
+            $query->latest('id'),
             $page,
             static function (PetProfile $pet): array {
                 $module = $pet->service_domain === PetProfile::DOMAIN_SHELTER
@@ -169,22 +259,13 @@ final class UserRecordsSummary
 
     private function cases(User $subject, User $viewer, int $page): ?LengthAwarePaginator
     {
-        $modules = $this->enabledModulesForViewer(
-            self::CASE_MODULES,
-            'cases',
-            $viewer,
-            static fn (string $module): string => CasesArea::forModule($module)->permission('view-all'),
-        );
-
-        if ($modules === []) {
+        $query = $this->caseQuery($subject, $viewer);
+        if ($query === null) {
             return null;
         }
 
         return $this->paginateMapped(
-            ShelterCase::query()
-                ->where('user_id', $subject->id)
-                ->whereIn('sub_core_key', $modules)
-                ->latest('id'),
+            $query->latest('id'),
             $page,
             static function (ShelterCase $case): array {
                 $area = CasesArea::forModule((string) $case->sub_core_key);
@@ -204,18 +285,13 @@ final class UserRecordsSummary
 
     private function consultations(User $subject, User $viewer, int $page): ?LengthAwarePaginator
     {
-        if (! $this->plugins->isEnabled('pet-care-clinic', 'consultations')) {
-            return null;
-        }
-
-        if (! $viewer->can('pet-care-clinic.consultations.view-all')) {
+        $query = $this->consultationQuery($subject, $viewer);
+        if ($query === null) {
             return null;
         }
 
         return $this->paginateMapped(
-            PetCareConsultation::query()
-                ->where('user_id', $subject->id)
-                ->latest('id'),
+            $query->latest('id'),
             $page,
             static function (PetCareConsultation $consultation): array {
                 return [
@@ -233,20 +309,13 @@ final class UserRecordsSummary
 
     private function applications(User $subject, User $viewer, int $page): ?LengthAwarePaginator
     {
-        if (! $this->plugins->isEnabled('apes-cic', 'recruitment')) {
-            return null;
-        }
-
-        if (! $viewer->can(RecruitmentApplication::PERMISSION_PREFIX.'view-all')
-            && ! $viewer->can(RecruitmentApplication::PERMISSION_PREFIX.'review-applications')) {
+        $query = $this->applicationQuery($subject, $viewer);
+        if ($query === null) {
             return null;
         }
 
         return $this->paginateMapped(
-            RecruitmentApplication::query()
-                ->with('recruitmentRole')
-                ->where('user_id', $subject->id)
-                ->latest('id'),
+            $query->with('recruitmentRole')->latest('id'),
             $page,
             static function (RecruitmentApplication $application): array {
                 return [

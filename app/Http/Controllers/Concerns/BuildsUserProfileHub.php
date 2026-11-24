@@ -51,28 +51,42 @@ trait BuildsUserProfileHub
         TotpTwoFactorService $twoFactor,
     ): array {
         $tab = $this->resolveHubTab($request);
+        $isOverview = $tab === 'overview';
+        $isRecords = $tab === 'records';
+        $isActivity = $tab === 'activity';
 
         return [
             'hubTab' => $tab,
             'hubTabs' => self::HUB_TABS,
             'hubIsProfileOnly' => $managedUser->isProfileOnly(),
-            'hubRecords' => $records->forViewer(
-                $managedUser,
-                $viewer,
-                (int) $request->query('records_page', 1),
-            ),
-            'hubModulesInUse' => $records->modulesInUse($managedUser, $viewer),
-            'hubActions' => $actions->forClient($managedUser, $viewer),
-            'hubActivity' => $timeline->paginate(
-                $managedUser,
-                (int) $request->query('activity_page', 1),
-            ),
-            'hubNotes' => $managedUser->clientNotes()
-                ->with('author')
-                ->limit(50)
-                ->get(),
-            'twoFactorEnabled' => $twoFactor->hasEnabledTwoFactor($managedUser)
-                || $twoFactor->hasPendingEnrolment($managedUser),
+            'hubRecords' => $isRecords
+                ? $records->forViewer(
+                    $managedUser,
+                    $viewer,
+                    (int) $request->query('records_page', 1),
+                )
+                : null,
+            'hubModulesInUse' => $isOverview
+                ? $records->modulesInUse($managedUser, $viewer)
+                : [],
+            'hubActions' => $isOverview
+                ? $actions->forClient($managedUser, $viewer)
+                : [],
+            'hubActivity' => $isActivity
+                ? $timeline->paginate(
+                    $managedUser,
+                    (int) $request->query('activity_page', 1),
+                )
+                : null,
+            'hubNotes' => $isOverview
+                ? $managedUser->clientNotes()
+                    ->with('author')
+                    ->limit(50)
+                    ->get()
+                : collect(),
+            'twoFactorEnabled' => $isOverview
+                && ($twoFactor->hasEnabledTwoFactor($managedUser)
+                    || $twoFactor->hasPendingEnrolment($managedUser)),
         ];
     }
 }

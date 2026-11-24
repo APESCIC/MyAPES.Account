@@ -10,42 +10,7 @@
         <a href="{{ route('callers.index') }}">{{ __('callers.back') }}</a>
     </div>
 
-    <div class="panel" id="verify" data-caller-verification>
-        <h2>{{ __('callers.verify_heading') }}</h2>
-        @if($verified)
-            <x-alert tone="ok">{{ __('callers.unlocked_until', ['time' => \Illuminate\Support\Carbon::createFromTimestamp($unlockedUntil, config('app.timezone'))->format('H:i')]) }}</x-alert>
-            <form method="post" action="{{ route('callers.end-call', $caller) }}" data-end-call>
-                @csrf
-                <div class="actions">
-                    <button type="submit">{{ __('callers.end_call') }}</button>
-                </div>
-            </form>
-        @elseif($lockedForSeconds > 0)
-            <x-alert tone="warning">{{ __('callers.locked', ['minutes' => (int) ceil($lockedForSeconds / 60)]) }}</x-alert>
-        @elseif($positions === null)
-            <x-alert tone="warning">{{ __('callers.no_pin') }}</x-alert>
-        @else
-            <p>{{ __('callers.ask_for_digits', ['first' => $positions[0], 'second' => $positions[1]]) }}</p>
-            <form method="post" action="{{ route('callers.verify', $caller) }}" autocomplete="off">
-                @csrf
-                <div class="row">
-                    @foreach($positions as $position)
-                        <div>
-                            <label for="pin-digit-{{ $position }}">{{ __('callers.digit_label', ['position' => $position]) }}</label>
-                            <input id="pin-digit-{{ $position }}" type="password" name="pin_digits[{{ $position }}]" inputmode="numeric" pattern="[0-9]" maxlength="1" autocomplete="off" required>
-                        </div>
-                    @endforeach
-                </div>
-                @error('pin_digits')
-                    <p class="sg-field__error">{{ $message }}</p>
-                @enderror
-                <div class="actions">
-                    <button type="submit">{{ __('callers.check') }}</button>
-                </div>
-            </form>
-            <p class="muted">{{ __('callers.digits_hint') }}</p>
-        @endif
-    </div>
+    @include('callers.partials.verify')
 
     <div class="panel" id="details" data-caller-details data-locked="{{ $verified ? 'false' : 'true' }}">
         <h2>{{ __('callers.details_heading') }}</h2>
@@ -78,37 +43,5 @@
         </form>
     </div>
 
-    <div class="panel" id="call-logs" data-call-logs>
-        <h2>{{ __('callers.call_logs_heading') }}</h2>
-        <p class="muted">{{ __('callers.call_logs_intro') }}</p>
-        <form method="post" action="{{ route('callers.call-logs.store', $caller) }}">
-            @csrf
-            <fieldset @disabled(! $verified)>
-                <legend class="visually-hidden">{{ __('callers.add_call_log') }}</legend>
-                <label for="call-direction">{{ __('callers.direction') }}</label>
-                <select id="call-direction" name="direction" required>
-                    <option value="inbound" @selected(old('direction', 'inbound') === 'inbound')>{{ __('callers.directions.inbound') }}</option>
-                    <option value="outbound" @selected(old('direction') === 'outbound')>{{ __('callers.directions.outbound') }}</option>
-                </select>
-                <label for="call-summary">{{ __('callers.summary') }}</label>
-                <textarea id="call-summary" name="summary" maxlength="2000" required>{{ old('summary') }}</textarea>
-                <div class="actions">
-                    <button type="submit">{{ __('callers.add_call_log') }}</button>
-                </div>
-            </fieldset>
-        </form>
-
-        @forelse($callLogs as $log)
-            <article class="panel panel-flat" data-call-log="{{ $log->id }}">
-                <p class="muted">
-                    {{ $log->called_at->format('d/m/Y H:i') }}
-                    · {{ $log->direction === 'outbound' ? __('callers.directions.outbound') : __('callers.directions.inbound') }}
-                    · {{ $log->staff?->name ?? __('callers.unknown_staff') }}
-                </p>
-                <p>{!! nl2br(e($log->summary)) !!}</p>
-            </article>
-        @empty
-            <p class="muted">{{ __('callers.no_call_logs') }}</p>
-        @endforelse
-    </div>
+    @include('callers.partials.call-logs')
 @endsection

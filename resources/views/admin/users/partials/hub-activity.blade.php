@@ -1,3 +1,4 @@
+@if($hubActivity)
 <section class="panel" aria-labelledby="hub-activity-title" data-hub-activity>
     <h2 id="hub-activity-title">{{ __('admin.users.hub.activity.heading') }}</h2>
     <p class="muted">{{ __('admin.users.hub.activity.intro') }}</p>
@@ -34,3 +35,4 @@
     </table>
     {{ $hubActivity->appends(request()->except('activity_page'))->links() }}
 </section>
+@endif

@@ -84,7 +84,7 @@ class CallerController extends Controller
         ]);
         $audit->record('caller.call_logged', $request->user(), $caller, ['call_log_id' => $log->id]);
 
-        return redirect()->to(route('callers.show', $caller).'#call-logs')->with('status', __('callers.call_log_saved'));
+        return redirect()->to($this->callerReturnUrl($request, $caller, 'call-logs'))->with('status', __('callers.call_log_saved'));
     }
 
     public function verify(Request $request, User $caller): RedirectResponse
@@ -100,7 +100,7 @@ class CallerController extends Controller
         $result = $this->verification->attempt($request->session(), $request->user(), $caller, $digits);
 
         return redirect()
-            ->route('callers.show', $caller)
+            ->to($this->callerReturnUrl($request, $caller, 'verify'))
             ->with('status', match ($result) {
                 CallerVerificationService::RESULT_VERIFIED => __('callers.result.verified'),
                 CallerVerificationService::RESULT_LOCKED => __('callers.result.locked'),
@@ -115,7 +115,7 @@ class CallerController extends Controller
 
         $this->verification->endCall($request->session(), $request->user(), $caller);
 
-        return redirect()->route('callers.show', $caller)->with('status', __('callers.call_ended'));
+        return redirect()->to($this->callerReturnUrl($request, $caller, 'verify'))->with('status', __('callers.call_ended'));
     }
 
     public function updateDetails(Request $request, User $caller, UkPhoneNumber $phones, AuditLogger $audit): RedirectResponse
@@ -148,6 +148,19 @@ class CallerController extends Controller
         $audit->record('caller.details_updated', $request->user(), $caller, ['fields' => $changed]);
 
         return redirect()->route('callers.show', $caller)->with('status', __('callers.details_saved'));
+    }
+
+    private function callerReturnUrl(Request $request, User $caller, string $fragment = ''): string
+    {
+        if ($request->boolean('hub')) {
+            $url = route('clients.show', ['client' => $caller, 'tab' => 'overview']);
+
+            return $fragment === '' ? $url : $url.'#'.$fragment;
+        }
+
+        $url = route('callers.show', $caller);
+
+        return $fragment === 'call-logs' ? $url.'#call-logs' : $url;
     }
 
     private function authorizeStaff(Request $request): void

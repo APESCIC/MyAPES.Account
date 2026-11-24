@@ -41,12 +41,16 @@
         @endif
 
         @if($hubTab === 'overview')
-            @include('admin.users.partials.hub-actions')
-            @include('admin.users.partials.hub-notes', [
-                'noteStoreRoute' => 'clients.notes.store',
-                'noteSubject' => $client,
-                'isAdminHub' => false,
-            ])
+            <div data-hub-overview>
+                @include('callers.partials.verify')
+                @include('callers.partials.call-logs')
+                @include('admin.users.partials.hub-actions')
+                @include('admin.users.partials.hub-notes', [
+                    'noteStoreRoute' => 'clients.notes.store',
+                    'noteSubject' => $client,
+                    'isAdminHub' => false,
+                ])
+            </div>
         @endif
 
         @if($hubTab === 'account_profile')

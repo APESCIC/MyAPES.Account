@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Core\Accounts\AccountClassifier;
+use App\Core\Accounts\CallLog;
+use App\Core\Accounts\CallerVerificationService;
 use App\Core\Accounts\PhoneVerificationPinService;
 use App\Core\Accounts\User;
 use App\Core\Search\Providers\UsersRecordSearchProvider;
@@ -33,6 +35,7 @@ class ClientController extends Controller
 
     public function __construct(
         private readonly AuthorizationProfile $profile,
+        private readonly CallerVerificationService $verification,
     ) {}
 
     public function index(Request $request, RecordSearch $search, AccountClassifier $accounts): View
@@ -251,6 +254,35 @@ class ClientController extends Controller
         $client->load('profile', 'contactPreference');
         $plainPin = $request->session()->pull('client_created_pin');
         $missingMandatory = ClientMandatoryFields::missingFor($client->profile);
+        $hub = $this->profileHubData(
+            $request,
+            $client,
+            $actor,
+            $records,
+            $actions,
+            $timeline,
+            $twoFactor,
+        );
+
+        $callerOverview = [];
+        if (($hub['hubTab'] ?? '') === 'overview') {
+            $unlocked = $this->verification->isUnlocked($request->session(), $actor, $client);
+            $callerOverview = [
+                'caller' => $client,
+                'verified' => $unlocked,
+                'positions' => $unlocked ? null : $this->verification->positions($request->session(), $client),
+                'lockedForSeconds' => $this->verification->lockedForSeconds($client),
+                'unlockedUntil' => $unlocked ? $this->verification->unlockedUntil($request->session(), $client) : null,
+                'callLogs' => CallLog::query()
+                    ->where('caller_id', $client->id)
+                    ->with('staff:id,name')
+                    ->latest('called_at')
+                    ->latest('id')
+                    ->limit(10)
+                    ->get(),
+                'callerHubReturn' => true,
+            ];
+        }
 
         return view('clients.show', [
             'client' => $client,
@@ -268,15 +300,8 @@ class ClientController extends Controller
             'tabParam' => 'client',
             'tabSubject' => $client,
             'noteStoreRoute' => 'clients.notes.store',
-            ...$this->profileHubData(
-                $request,
-                $client,
-                $actor,
-                $records,
-                $actions,
-                $timeline,
-                $twoFactor,
-            ),
+            ...$hub,
+            ...$callerOverview,
         ]);
     }
 }

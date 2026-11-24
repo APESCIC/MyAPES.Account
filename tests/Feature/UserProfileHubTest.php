@@ -3,11 +3,14 @@
 namespace Tests\Feature;
 
 use App\Core\Accounts\ClientNote;
+use App\Core\Accounts\PhoneVerificationPinService;
 use App\Core\Accounts\User;
 use App\Services\AuthorizationProfile;
 use App\Services\ModuleInstallationSynchronizer;
 use App\Services\TotpTwoFactorService;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Plugins\Tickets\Models\SupportTicket;
 use Tests\TestCase;
 
@@ -225,6 +228,72 @@ class UserProfileHubTest extends TestCase
             ->assertOk()
             ->assertSee('data-hub-create-account-soon', false)
             ->assertDontSee('id="suspend-user"', false);
+    }
+
+    public function test_staff_overview_folds_caller_checks_and_stays_within_query_budget(): void
+    {
+        $staff = $this->userWithAccess(User::ROLE_STAFF);
+        $client = User::factory()->create([
+            'identity_type' => User::IDENTITY_LOCAL,
+        ]);
+        app(PhoneVerificationPinService::class)->set($client, '482917');
+
+        SupportTicket::query()->create([
+            'sub_core_key' => 'apes-cic',
+            'user_id' => $client->id,
+            'service_area' => 'web_development',
+            'sub_category' => 'website_issue',
+            'subject' => 'Overview ticket',
+            'priority' => 'medium',
+            'status' => 'open',
+            'description' => 'For the overview budget',
+        ]);
+
+        $overview = route('clients.show', ['client' => $client, 'tab' => 'overview']);
+
+        $this->actingAs($staff)
+            ->get($overview)
+            ->assertOk()
+            ->assertSee('data-hub-overview', false)
+            ->assertSee('data-caller-verification', false)
+            ->assertSee('data-call-logs', false)
+            ->assertSee(__('admin.users.hub.quick_actions'))
+            ->assertDontSee('Overview ticket');
+
+        $this->actingAs($staff)
+            ->get(route('clients.show', ['client' => $client, 'tab' => 'records']))
+            ->assertOk()
+            ->assertSee('Overview ticket');
+
+        $this->actingAs($staff)->get($overview)->assertOk();
+
+        $queries = 0;
+        DB::listen(static function (QueryExecuted $query) use (&$queries): void {
+            foreach ([
+                'client_notes',
+                'call_logs',
+                'phone_verification',
+                'support_tickets',
+                'pet_profiles',
+                'shelter_cases',
+                'pet_care_consultations',
+                'recruitment_applications',
+                'user_profiles',
+                'contact_preferences',
+            ] as $table) {
+                if (stripos($query->sql, $table) !== false) {
+                    $queries++;
+
+                    return;
+                }
+            }
+        });
+
+        $this->actingAs($staff)
+            ->get($overview)
+            ->assertOk();
+
+        $this->assertLessThanOrEqual(40, $queries, "Expected a lean overview query count, got {$queries}");
     }
 
     public function test_staff_clients_view_permission_is_named_for_core(): void
