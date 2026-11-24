@@ -48,7 +48,7 @@ class WorkspaceNavigationTest extends TestCase
 
         $this->assertSame($expectedPanels, array_keys($menu->panels));
         $this->assertSame($firstPanelLabel, $menu->panels[$expectedPanels[0]]->label);
-        $this->assertSame(count($expectedPanels) === 2, $menu->showsPanelSwitch());
+        $this->assertFalse($menu->showsPanelSwitch());
 
         foreach ($menu->panels as $panel) {
             foreach ($panel->groups as $group) {
@@ -209,7 +209,7 @@ class WorkspaceNavigationTest extends TestCase
 
             $this->assertContains('view-site', $keys);
             $this->assertContains('account', $keys);
-            $this->assertSame($menu->showsPanelSwitch(), in_array('switch.admin', $keys, true), $persona);
+            $this->assertNotContains('switch.admin', $keys, $persona);
             $this->assertNotContains('switch.staff', $keys, 'The current panel is never offered as a switch.');
         }
     }

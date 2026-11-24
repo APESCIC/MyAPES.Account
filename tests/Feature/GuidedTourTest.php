@@ -25,7 +25,7 @@ class GuidedTourTest extends TestCase
             'public account' => ['service-user', GuidedTour::AUDIENCE_PUBLIC, 'bookings'],
             'staff' => ['staff', GuidedTour::AUDIENCE_STAFF, 'callers'],
             'volunteer' => ['volunteer', GuidedTour::AUDIENCE_STAFF, 'callers'],
-            'administrator' => ['administrator', GuidedTour::AUDIENCE_ADMIN, 'data-workspace-panel-switch'],
+            'administrator' => ['administrator', GuidedTour::AUDIENCE_ADMIN, 'data-workspace-user-menu'],
         ];
     }
 

@@ -35,11 +35,13 @@ class ModuleMegaMenuBuilderTest extends TestCase
             'Modules appear in sortOrder as top items',
         );
         $this->assertContains('staff.clients', $keys);
-        $this->assertContains('staff.admin', $keys);
+        $this->assertNotContains('staff.admin', $keys);
 
-        $moduleLabels = ['APES CIC', 'APES Shelter and Rescue', 'APES Pet Care Clinic'];
+        $moduleLabels = ['CIC', 'Shelter', 'Clinic'];
+        $fullLabels = ['APES CIC', 'APES Shelter and Rescue', 'APES Pet Care Clinic'];
         foreach (array_slice($menu->topItems, 0, 3) as $index => $top) {
             $this->assertSame($moduleLabels[$index], $top->label);
+            $this->assertSame($fullLabels[$index], $top->title());
         }
 
         foreach (array_slice($menu->topItems, 0, 3) as $top) {

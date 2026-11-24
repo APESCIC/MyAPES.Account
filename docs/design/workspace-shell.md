@@ -47,9 +47,9 @@ The older page variables (`--ink`, `--surface`, `--brand-teal`, `--clay` and so 
 
 ## Layout
 
-- **All breakpoints:** a full-width glass **app bar** (`data-workspace-app-bar`) sits above the content column. It carries the brand, optional Staff | Admin switch, navigation, Ctrl K search, notifications and the signed-in **user menu** (avatar).
+- **All breakpoints:** a full-width glass **app bar** (`data-workspace-app-bar`) sits above the content column. It carries the brand, navigation, Ctrl K search, notifications and the signed-in **user menu** (avatar). There is no Staff | Admin switch in the bar (#1045).
 - **Signed out:** plain text links in the app bar (Open a ticket, Bookings, Help, Public Login, Register) plus Log in / Register buttons at the right.
-- **Signed in:** each enabled module is a **mega menu** trigger (`data-workspace-mega`) opening a panel of grouped links. Staff also see Clients and Admin mega menus when permitted; the Admin panel reuses Admin section mega menus instead of module rows.
+- **Signed in (staff):** each enabled module is a **mega menu** trigger (`data-workspace-mega`) with a short label (CIC / Shelter / Clinic); full names stay in tooltips and aria-labels. Staff also see a Clients mega when permitted. **Admin is entered only from the user menu.** On `admin.*` routes the bar switches to Admin section megas (People, Modules, System).
 - **Below 64rem:** the same tree is copied into a left drawer (`data-workspace-drawer`) opened from the menu button (`data-workspace-menu-open`). Drawer markup reuses the rail styles for density and accordion grouping.
 - **Content header:** breadcrumb, optional H1 from `@section('page_title')`, and tools such as View site. Search / Ctrl K stays in the app bar.
 - **Auth pages:** `public.login`, `public.register`, `staff.login`, password and two-factor pages add `is-auth-page` to the body. The page card is centred under the horizontal logo.
@@ -67,7 +67,7 @@ The older page variables (`--ink`, `--surface`, `--brand-teal`, `--clay` and so 
 Rules:
 
 - **Gating:** items are filtered by ability, keeping the plugin `homeAbility` and the `.view-all` to `.view-own` fallback. Empty groups are dropped, and a panel with no groups is not offered. Hiding a link is not the security boundary: routes keep their middleware.
-- **Panel switch:** it appears in the app bar only when the user has both Staff and Admin. Each tab links to that panel's first item.
+- **Admin entry:** administrators open Admin from the avatar **user menu** (not a top mega or panel switch). Once on `admin.*`, section megas provide in-Admin navigation.
 - **Active item:** resolved from the route name. The most specific matching pattern wins, so `shelter.tickets.*` beats `shelter.*`.
   - `account_type` (or the user being viewed) separates Public users from Staff.
   - Pages never pass an active key.

@@ -22,8 +22,8 @@ return [
             'admin' => 'Let me show you around the Staff and Admin areas. It only takes a minute, and you can skip at any time.',
         ],
         'panel_switch' => [
-            'title' => 'Staff and Admin',
-            'body' => 'Switch between the Staff area and the Admin area here. Admin holds people, access, modules, plugins, emails and maintenance.',
+            'title' => 'Open Admin',
+            'body' => 'Open your avatar menu to enter Admin. Admin holds people, access, modules, plugins, emails and maintenance.',
         ],
         'menu' => [
             'title' => 'Your menu',

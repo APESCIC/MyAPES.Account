@@ -175,8 +175,10 @@ class HealthAndThemeTest extends TestCase
         $this->actingAs($admin)
             ->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('data-workspace-panel-switch', false)
-            ->assertSee('data-nav-key="staff.admin"', false);
+            ->assertDontSee('data-workspace-panel-switch', false)
+            ->assertDontSee('data-nav-key="staff.admin"', false)
+            ->assertSee('data-nav-key="user.admin"', false)
+            ->assertSee('href="'.route('admin.index').'"', false);
     }
 
     public function test_generated_brand_assets_have_expected_dimensions(): void

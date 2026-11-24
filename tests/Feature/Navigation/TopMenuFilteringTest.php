@@ -92,23 +92,30 @@ class TopMenuFilteringTest extends TestCase
         $this->assertNotContains('plugin.consultations', $pluginKeys);
     }
 
-    public function test_staff_sees_clients_and_admin_mega_after_modules(): void
+    public function test_staff_sees_clients_mega_after_modules_without_admin_mega(): void
     {
         $admin = User::factory()->protectedRole('administrator')->create();
-        $keys = array_map(static fn ($top) => $top->key, $this->menuFor($admin, 'dashboard')->topItems);
+        $menu = $this->menuFor($admin, 'dashboard');
+        $keys = array_map(static fn ($top) => $top->key, $menu->topItems);
 
         $this->assertContains('module.apes-cic', $keys);
         $this->assertContains('staff.clients', $keys);
-        $this->assertContains('staff.admin', $keys);
+        $this->assertNotContains('staff.admin', $keys);
         $this->assertTrue(array_search('staff.clients', $keys, true) > array_search('module.pet-care-clinic', $keys, true));
+
+        $userKeys = array_map(static fn (NavItem $item): string => $item->key, $menu->userMenuItems);
+        $this->assertContains('user.admin', $userKeys);
     }
 
-    public function test_non_admin_staff_never_sees_admin_top_item(): void
+    public function test_non_admin_staff_never_sees_admin_top_or_user_item(): void
     {
         $staff = User::factory()->protectedRole('staff')->create();
-        $keys = array_map(static fn ($top) => $top->key, $this->menuFor($staff, 'dashboard')->topItems);
+        $menu = $this->menuFor($staff, 'dashboard');
+        $keys = array_map(static fn ($top) => $top->key, $menu->topItems);
+        $userKeys = array_map(static fn (NavItem $item): string => $item->key, $menu->userMenuItems);
 
         $this->assertNotContains('staff.admin', $keys);
+        $this->assertNotContains('user.admin', $userKeys);
     }
 
     public function test_admin_panel_uses_section_top_items(): void
