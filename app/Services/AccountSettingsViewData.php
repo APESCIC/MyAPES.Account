@@ -8,6 +8,7 @@ use App\Core\Accounts\User;
 use App\Core\Accounts\UserContactPreference;
 use App\Core\Accounts\UserProfile;
 use App\Core\Push\ProfileNotificationTypeCatalogue;
+use App\Core\Push\UserNotificationSetting;
 use Illuminate\Http\Request;
 
 final class AccountSettingsViewData
@@ -141,7 +142,10 @@ final class AccountSettingsViewData
      * @return array{
      *     preference: UserContactPreference|null,
      *     policyVersion: string,
-     *     notificationsManageUrl: string,
+     *     notificationTypes: list<array<string, mixed>>,
+     *     notificationDivisions: list<array<string, mixed>>,
+     *     notificationDevices: list<array<string, mixed>>,
+     *     notificationSettings: UserNotificationSetting|null,
      * }
      */
     public function privacyTab(User $user): array
@@ -149,7 +153,25 @@ final class AccountSettingsViewData
         return [
             'preference' => $user->contactPreference,
             'policyVersion' => (string) config('myapes.consent.policy_version'),
-            'notificationsManageUrl' => route('account.privacy').'#notifications',
+            ...$this->notificationViewData($user),
+        ];
+    }
+
+    /**
+     * @return array{
+     *     notificationTypes: list<array<string, mixed>>,
+     *     notificationDivisions: list<array<string, mixed>>,
+     *     notificationDevices: list<array<string, mixed>>,
+     *     notificationSettings: UserNotificationSetting|null,
+     * }
+     */
+    private function notificationViewData(User $user): array
+    {
+        return [
+            'notificationTypes' => $this->notificationCatalogue->typesFor($user),
+            'notificationDivisions' => $this->notificationCatalogue->divisionsFor($user),
+            'notificationDevices' => $this->notificationCatalogue->devicesFor($user),
+            'notificationSettings' => $user->notificationSetting,
         ];
     }
 

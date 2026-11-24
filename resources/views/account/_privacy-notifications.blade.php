@@ -1,7 +1,9 @@
 <section class="panel" id="notifications" aria-labelledby="privacy-notifications-title">
-    <h2 id="privacy-notifications-title">{{ __('account.settings.privacy.notifications.heading') }}</h2>
-    <p class="muted">{{ __('account.settings.privacy.notifications.intro') }}</p>
-    <p>
-        <a href="{{ $notificationsManageUrl }}">{{ __('account.settings.privacy.notifications.manage_link') }}</a>
-    </p>
+    <h2 id="privacy-notifications-title" class="visually-hidden">{{ __('account.settings.privacy.notifications.heading') }}</h2>
+    <x-push.profile-notifications
+        :types="$notificationTypes"
+        :divisions="$notificationDivisions"
+        :devices="$notificationDevices"
+        :settings="$notificationSettings"
+    />
 </section>

@@ -95,9 +95,7 @@ return [
                 'marketing_email_help' => 'Covers optional recruitment decisions and similar updates. Applications you submit still receive necessary service email.',
             ],
             'notifications' => [
-                'heading' => 'Notification types',
-                'intro' => 'Push, email per notification type, and quiet hours move here in a later update.',
-                'manage_link' => 'Manage notification types (current location)',
+                'heading' => 'Push and email notifications',
             ],
             'cookies' => [
                 'heading' => 'Cookies',
