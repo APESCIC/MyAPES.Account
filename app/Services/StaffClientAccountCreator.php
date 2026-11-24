@@ -81,6 +81,9 @@ final class StaffClientAccountCreator
                 'email' => $email,
                 'password' => Str::password(32),
                 'identity_type' => User::IDENTITY_LOCAL,
+                'account_state' => $sendEmail
+                    ? User::ACCOUNT_STATE_INVITED
+                    : User::ACCOUNT_STATE_PROFILE_ONLY,
                 'email_verified_at' => $email !== null ? now() : null,
             ]);
             $user->registration_consented_at = now();

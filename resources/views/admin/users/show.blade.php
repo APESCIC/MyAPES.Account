@@ -19,6 +19,7 @@
                         @endif
                     </dd>
                 </div>
+                <div><dt>{{ __('admin.users.account_state') }}</dt><dd>{{ __('admin.users.account_states.'.$managedUser->accountState()) }}</dd></div>
                 <div><dt>{{ __('admin.users.suspension_state') }}</dt><dd>
                     {{ $managedUser->suspended_at === null ? __('admin.users.active') : __('admin.overview.suspended') }}
                     @can('admin.users.manage')

@@ -37,6 +37,7 @@ use Spatie\Permission\Traits\HasRoles;
     'oidc_sub',
     'username',
     'identity_type',
+    'account_state',
     'name',
     'email',
     'locale',
@@ -55,6 +56,12 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     public const IDENTITY_CLOUDRON_OIDC = 'cloudron_oidc';
 
     public const IDENTITY_HYBRID = 'hybrid';
+
+    public const ACCOUNT_STATE_PROFILE_ONLY = 'profile_only';
+
+    public const ACCOUNT_STATE_INVITED = 'invited';
+
+    public const ACCOUNT_STATE_ACTIVE = 'active';
 
     public const ROLE_SERVICE_USER = 'service_user';
 
@@ -528,6 +535,26 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
         return $this->identity_type === self::IDENTITY_LOCAL
             && ! $this->hasDirectoryIdentity()
             && ! $this->isPendingFirstLogin();
+    }
+
+    public function accountState(): string
+    {
+        $state = $this->account_state;
+
+        return is_string($state) && $state !== ''
+            ? $state
+            : self::ACCOUNT_STATE_ACTIVE;
+    }
+
+    public function isProfileOnly(): bool
+    {
+        return $this->accountState() === self::ACCOUNT_STATE_PROFILE_ONLY;
+    }
+
+    public function canAuthenticateLocally(): bool
+    {
+        return ! $this->isProfileOnly()
+            && $this->suspended_at === null;
     }
 
     public function hasDirectoryIdentity(): bool

@@ -20,6 +20,12 @@ return [
     'recent_heading' => 'Recently created',
     'none' => 'No staff-created clients yet.',
     'show_intro' => 'Public client account created with staff-assisted consent.',
+    'account_state' => 'Account state',
+    'account_states' => [
+        'profile_only' => 'Profile only',
+        'invited' => 'Invited',
+        'active' => 'Active',
+    ],
     'back' => 'Back to Clients',
     'open_in_callers' => 'Open in Callers',
     'no_email' => 'No email',

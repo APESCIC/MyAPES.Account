@@ -11,6 +11,7 @@ return [
     'failed' => 'These credentials do not match our records.',
     'password' => 'The provided password is incorrect.',
     'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
+    'profile_only' => 'This is a profile-only record and cannot sign in. Ask staff to send a set-password link if you need an account.',
 
     'oidc' => [
         'unavailable' => 'Cloudron sign-in is temporarily unavailable.',
@@ -231,6 +232,7 @@ return [
         'confirm_button' => 'Confirm with passkey',
         'local_only' => 'Passkeys are only available for local password accounts.',
         'suspended' => 'This account is suspended.',
+        'profile_only' => 'This is a profile-only record and cannot sign in with a passkey.',
         'staff_use_oidc' => 'Staff and directory accounts must sign in using Staff Login.',
     ],
 

@@ -58,6 +58,12 @@ class CoreAuthServiceProvider extends ServiceProvider
                 ]);
             }
 
+            if ($user->isProfileOnly()) {
+                throw ValidationException::withMessages([
+                    'credential' => [__('auth.passkeys.profile_only')],
+                ]);
+            }
+
             if (! $user->isLocalPasswordIdentity()) {
                 throw ValidationException::withMessages([
                     'credential' => [__('auth.passkeys.local_only')],

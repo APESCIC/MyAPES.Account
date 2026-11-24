@@ -83,6 +83,23 @@ class PublicAuthController extends Controller
                 ->withErrors([$credentialField => 'This account is suspended.']);
         }
 
+        if ($user->isProfileOnly()) {
+            $auditLogger->record(
+                'auth.profile_only_login_denied',
+                $user,
+                $user,
+                [
+                    'method' => SessionAuthorizationContext::METHOD_PASSWORD,
+                    'redirect' => route('public.login'),
+                    'reason' => 'profile_only',
+                ],
+            );
+
+            return redirect()
+                ->route('public.login')
+                ->withErrors([$credentialField => __('auth.profile_only')]);
+        }
+
         if ($user->identity_type !== User::IDENTITY_LOCAL
             || $this->authorizationProfile->hasDirectoryProtectedEligibility($user)) {
             $auditLogger->record('auth.public_login_blocked_for_staff', $user, $user);
@@ -146,6 +163,7 @@ class PublicAuthController extends Controller
                 'email' => $validated['email'],
                 'password' => $validated['password'],
                 'identity_type' => User::IDENTITY_LOCAL,
+                'account_state' => User::ACCOUNT_STATE_ACTIVE,
                 'email_verified_at' => null,
             ]);
             $user->registration_consented_at = now();

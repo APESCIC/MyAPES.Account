@@ -10,6 +10,7 @@
             <p><strong>{{ __('clients.fields.username') }}:</strong> {{ $client->username }}</p>
             <p><strong>{{ __('clients.fields.email') }}:</strong> {{ $client->email ?: __('clients.no_email') }}</p>
             <p><strong>{{ __('clients.fields.mobile') }}:</strong> {{ $client->profile?->mobile_number }}</p>
+            <p><strong>{{ __('clients.account_state') }}:</strong> {{ __('clients.account_states.'.$client->accountState()) }}</p>
             <p class="muted">{{ __('admin.users.hub.staff_read_only') }}</p>
             <p>
                 <a href="{{ route('callers.show', $client) }}">{{ __('clients.open_in_callers') }}</a>
