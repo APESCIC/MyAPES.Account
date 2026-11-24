@@ -134,7 +134,7 @@
                                     </td>
                                     <td data-label="{{ __('clients.account_state') }}">
                                         <span class="clients-state-badge clients-state-badge--{{ $badge }}">
-                                            {{ __('clients.account_states.'.$badge) }}
+                                            {{ __("clients.account_states.{$badge}") }}
                                         </span>
                                     </td>
                                     <td data-label="{{ __('clients.directory_actions') }}">
