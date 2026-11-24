@@ -1,0 +1,51 @@
+{
+    "version": "0.75.1",
+    "date": "2026-11-24",
+    "channel": "stable",
+    "type": "patch",
+    "title": "Menu declutter and user menu fix",
+    "summary": "Moves Admin into the signed-in user menu, shortens service menu triggers, and fixes the user menu panel so same-origin links and scrolling work reliably.",
+    "changes": [
+        "Admin is opened from the avatar user menu only; the staff chrome no longer shows an Admin mega-menu or panel switch.",
+        "Service mega-menu triggers use shorter labels so the top app bar stays on one line on typical desktop widths.",
+        "Same-origin workspace links in the user menu stay in-app instead of being treated as external.",
+        "The user menu panel is opaque and scrollable, and keyboard focus lands on the first menu item when it opens."
+    ],
+    "affected_areas": [
+        "Workspace shell and top app bar",
+        "Staff mega menus and navigation builder",
+        "Signed-in user menu",
+        "Workspace shell help and design notes"
+    ],
+    "categories": [
+        "fixed",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "PATCH: navigation declutter and user-menu reliability; no new product surface and nothing removed from Admin itself.",
+    "validation": [
+        "PHPUnit navigation, shell, WorkspaceUrl and related coverage.",
+        "Herd preview at https://myapes-account.test for CIC, Shelter, Clinic and Clients with Admin via the user menu.",
+        "composer milestone:bump -- v0.75.1 --check and myapes:changelog-validate against origin/main."
+    ],
+    "known_limitations": [
+        "None for this release."
+    ],
+    "rollback": "Redeploy the previous release tag (v0.75.0). No database migrations in this release.",
+    "provenance": "Milestone v0.75.1 Menu declutter and user menu fix, Epic #1044, pull request #1048.",
+    "references": [
+        {
+            "label": "Issue #1044",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/1044"
+        },
+        {
+            "label": "Pull request #1048",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/1048"
+        }
+    ],
+    "slug": "release-v0-75-1",
+    "previous_version": "0.75.0"
+}
