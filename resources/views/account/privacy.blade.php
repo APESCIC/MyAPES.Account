@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', __('account.settings.tabs.privacy').__('seo.title.title_suffix'))
+@section('title', __('account.settings.tabs.privacy').__('seo.default.title_suffix'))
 @section('page_title', __('account.settings.tabs.privacy'))
 @section('page_subtitle', __('account.settings.privacy_intro'))
 
