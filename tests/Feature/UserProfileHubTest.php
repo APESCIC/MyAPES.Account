@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Core\Accounts\ClientNote;
 use App\Core\Accounts\PhoneVerificationPinService;
 use App\Core\Accounts\User;
+use App\Services\AuditLogger;
 use App\Services\AuthorizationProfile;
 use App\Services\ModuleInstallationSynchronizer;
 use App\Services\TotpTwoFactorService;
@@ -70,8 +71,12 @@ class UserProfileHubTest extends TestCase
         $this->actingAs($staff)
             ->get(route('clients.show', $client))
             ->assertOk()
-            ->assertSee(__('admin.users.hub.staff_read_only'))
             ->assertDontSee(__('admin.users.hub.admin_tools.heading'));
+
+        $this->actingAs($staff)
+            ->get(route('clients.show', ['client' => $client, 'tab' => 'account_profile']))
+            ->assertOk()
+            ->assertSee(__('admin.users.hub.staff_read_only'));
 
         $this->actingAs($staff)
             ->get(route('clients.show', $otherStaff))
@@ -116,6 +121,62 @@ class UserProfileHubTest extends TestCase
             ->assertDontSee('Admin updated note.');
     }
 
+    public function test_staff_account_management_surfaces_identity_and_access_actions(): void
+    {
+        $staff = $this->userWithAccess(User::ROLE_STAFF);
+        $volunteer = $this->userWithAccess(User::ROLE_VOLUNTEER);
+        $client = User::factory()->create([
+            'identity_type' => User::IDENTITY_LOCAL,
+            'email' => 'workspace.client@example.com',
+            'password' => 'password',
+        ]);
+        app(AuditLogger::class)->record('auth.public_login_success', $client, $client, [
+            'channel' => 'test',
+        ]);
+
+        $staffView = $this->actingAs($staff)
+            ->get(route('clients.show', ['client' => $client, 'tab' => 'account_management']));
+        $staffView->assertOk()
+            ->assertSee('data-hub-account-summary', false)
+            ->assertSee($client->username)
+            ->assertSee('workspace.client@example.com')
+            ->assertSee(__('admin.users.hub.account_management.last_sign_in'))
+            ->assertSee('data-hub-password-reset', false)
+            ->assertSee('name="reason"', false)
+            ->assertSee('id="suspend-user"', false);
+
+        $this->actingAs($volunteer)
+            ->get(route('clients.show', ['client' => $client, 'tab' => 'account_management']))
+            ->assertOk()
+            ->assertSee('data-hub-account-summary', false)
+            ->assertDontSee('data-hub-password-reset', false)
+            ->assertDontSee('id="suspend-user"', false);
+    }
+
+    public function test_staff_can_reset_two_factor_for_a_local_client(): void
+    {
+        $staff = $this->userWithAccess(User::ROLE_STAFF);
+        $client = User::factory()->create([
+            'identity_type' => User::IDENTITY_LOCAL,
+            'password' => 'Password123!',
+        ]);
+
+        $twoFactor = app(TotpTwoFactorService::class);
+        $twoFactor->beginEnrolment($client);
+        $client->forceFill(['two_factor_confirmed_at' => now()])->save();
+        $this->assertTrue($twoFactor->hasEnabledTwoFactor($client->fresh()));
+
+        $this->actingAs($staff)
+            ->post(route('clients.two-factor.reset', $client), [
+                'confirm_two_factor_reset' => '1',
+                'reason' => 'Caller could not complete sign-in.',
+            ])
+            ->assertRedirect(route('clients.show', ['client' => $client, 'tab' => 'account_management']))
+            ->assertSessionHas('status');
+
+        $this->assertFalse($twoFactor->hasEnabledTwoFactor($client->fresh()));
+    }
+
     public function test_admin_can_reset_two_factor_for_local_client(): void
     {
         $administrator = $this->userWithAccess(User::ROLE_ADMIN);
@@ -132,8 +193,9 @@ class UserProfileHubTest extends TestCase
         $this->actingAs($administrator)
             ->post(route('admin.users.two-factor.reset', $client), [
                 'confirm_two_factor_reset' => '1',
+                'reason' => 'Caller could not complete sign-in.',
             ])
-            ->assertRedirect(route('admin.public-accounts.show', ['user' => $client, 'tab' => 'overview']))
+            ->assertRedirect(route('admin.public-accounts.show', ['user' => $client, 'tab' => 'account_management']))
             ->assertSessionHas('status');
 
         $this->assertFalse($twoFactor->hasEnabledTwoFactor($client->fresh()));

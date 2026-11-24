@@ -30,7 +30,7 @@ class AdminPendingFirstLoginChaseTest extends TestCase
         ]);
 
         $detail = $this->actingAs($administrator)
-            ->get(route('admin.staff-accounts.show', ['user' => $pending, 'tab' => 'details']));
+            ->get(route('admin.staff-accounts.show', ['user' => $pending, 'tab' => 'account_management']));
         $detail->assertOk()
             ->assertSee('Pending first login')
             ->assertSee('Send Staff Login reminder')
@@ -90,7 +90,7 @@ class AdminPendingFirstLoginChaseTest extends TestCase
         ]);
 
         $this->actingAs($administrator)
-            ->get(route('admin.public-accounts.show', ['user' => $public, 'tab' => 'details']))
+            ->get(route('admin.public-accounts.show', ['user' => $public, 'tab' => 'account_management']))
             ->assertOk()
             ->assertSee('Reset local password')
             ->assertDontSee('Send Staff Login reminder')
@@ -126,7 +126,7 @@ class AdminPendingFirstLoginChaseTest extends TestCase
             ]);
 
         $this->actingAs($administrator)
-            ->get(route('admin.staff-accounts.show', ['user' => $directory, 'tab' => 'details']))
+            ->get(route('admin.staff-accounts.show', ['user' => $directory, 'tab' => 'account_management']))
             ->assertOk()
             ->assertDontSee('Send Staff Login reminder');
 
@@ -196,6 +196,7 @@ class AdminPendingFirstLoginChaseTest extends TestCase
         $this->actingAs($administrator)
             ->post(route('admin.users.password-reset', $pending), [
                 'confirm' => '1',
+                'reason' => 'Should stay on Cloudron.',
             ])
             ->assertForbidden();
 

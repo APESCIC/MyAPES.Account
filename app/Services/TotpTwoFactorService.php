@@ -109,7 +109,7 @@ class TotpTwoFactorService
     /**
      * Admin/staff-assisted 2FA reset (#522). Audits the actor separately from the subject.
      */
-    public function disableForSubject(User $subject, User $actor): void
+    public function disableForSubject(User $subject, User $actor, ?string $reason = null): void
     {
         $this->assertLocalIdentity($subject);
 
@@ -129,11 +129,12 @@ class TotpTwoFactorService
             $subject->notify(new TwoFactorDisabledNotification);
         }
 
-        $this->auditLogger->record('auth.two_factor_disabled', $actor, $subject, [
+        $this->auditLogger->record('auth.two_factor_disabled', $actor, $subject, array_filter([
             'was_confirmed' => $wasEnabled,
             'target_user_id' => $subject->id,
             'actor_id' => $actor->id,
-        ]);
+            'reason_length' => is_string($reason) && $reason !== '' ? mb_strlen($reason) : null,
+        ], static fn (mixed $value): bool => $value !== null));
     }
 
     /**

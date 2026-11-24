@@ -14,17 +14,21 @@ use App\Services\UserProfileHubActions;
 use App\Services\UserRecordsSummary;
 use App\Http\Controllers\Concerns\BuildsUserProfileHub;
 use App\Http\Controllers\Controller;
+use App\Services\AuthorizationMutationService;
 use App\Services\AuthorizationProfile;
+use App\Services\LocalPublicPasswordResetService;
 use App\Services\StaffClientAccountCreator;
 use App\Services\TotpTwoFactorService;
 use App\Services\UkPhoneNumber;
 use App\Support\ClientIdentityRules;
 use App\Support\ClientMandatoryFields;
 use App\Support\PersonName;
+use DomainException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use InvalidArgumentException;
 
 /**
  * Staff › Clients: create public client accounts (#669–#673) and profile hub (#521).
@@ -244,6 +248,7 @@ class ClientController extends Controller
         UserProfileHubActions $actions,
         UserActivityTimeline $timeline,
         TotpTwoFactorService $twoFactor,
+        LocalPublicPasswordResetService $passwordResets,
     ): View {
         Gate::authorize(AuthorizationProfile::PERMISSION_CLIENT_VIEW);
         abort_if($this->profile->hasDirectoryProtectedEligibility($client), 404);
@@ -294,6 +299,7 @@ class ClientController extends Controller
             'isAdminHub' => false,
             'canEditHub' => false,
             'canManageTarget' => false,
+            'canResetLocalPassword' => $passwordResets->canReset($actor, $client),
             'canResendVerification' => false,
             'isStaffAccount' => false,
             'tabRoute' => 'clients.show',
@@ -303,5 +309,113 @@ class ClientController extends Controller
             ...$hub,
             ...$callerOverview,
         ]);
+    }
+
+    public function resetLocalPassword(
+        Request $request,
+        User $client,
+        LocalPublicPasswordResetService $passwordResets,
+    ): RedirectResponse {
+        $actor = $this->actorWhoMayManageClient($request, $client);
+        $validated = $request->validate([
+            'confirm' => ['accepted'],
+            'reason' => ['required', 'string', 'max:500'],
+        ]);
+
+        try {
+            $temporaryPassword = $passwordResets->reset(
+                $actor,
+                $client,
+                $validated['reason'],
+            );
+        } catch (DomainException $exception) {
+            abort(403, $exception->getMessage());
+        }
+
+        return redirect()
+            ->route('clients.show', ['client' => $client, 'tab' => 'account_management'])
+            ->with('status', __('admin.flash.temporary_password_generated'))
+            ->with('temporary_password', $temporaryPassword);
+    }
+
+    public function resetTwoFactor(
+        Request $request,
+        User $client,
+        TotpTwoFactorService $twoFactor,
+    ): RedirectResponse {
+        $actor = $this->actorWhoMayManageClient($request, $client);
+        $validated = $request->validate([
+            'confirm_two_factor_reset' => ['accepted'],
+            'reason' => ['required', 'string', 'max:500'],
+        ]);
+
+        try {
+            $twoFactor->disableForSubject($client, $actor, $validated['reason']);
+        } catch (DomainException $exception) {
+            return back()->withErrors([
+                'two_factor' => $exception->getMessage(),
+            ]);
+        }
+
+        return redirect()
+            ->route('clients.show', ['client' => $client, 'tab' => 'account_management'])
+            ->with('status', __('admin.flash.two_factor_reset'));
+    }
+
+    public function suspend(
+        Request $request,
+        User $client,
+        AuthorizationMutationService $mutations,
+    ): RedirectResponse {
+        $actor = $this->actorWhoMayManageClient($request, $client);
+        $validated = $request->validate([
+            'reason' => ['required', 'string', 'max:500'],
+            'confirm_suspend' => ['accepted'],
+        ]);
+
+        try {
+            $mutations->suspend($client, $actor, $validated['reason']);
+        } catch (DomainException|InvalidArgumentException $exception) {
+            return back()->withErrors([
+                'authorization' => $exception->getMessage(),
+            ]);
+        }
+
+        return redirect()
+            ->route('clients.show', ['client' => $client, 'tab' => 'account_management'])
+            ->with('status', __('admin.flash.user_suspended'));
+    }
+
+    public function reactivate(
+        Request $request,
+        User $client,
+        AuthorizationMutationService $mutations,
+    ): RedirectResponse {
+        $actor = $this->actorWhoMayManageClient($request, $client);
+        $validated = $request->validate([
+            'reason' => ['required', 'string', 'max:500'],
+        ]);
+
+        try {
+            $mutations->reactivate($client, $actor, $validated['reason']);
+        } catch (DomainException $exception) {
+            return back()->withErrors([
+                'authorization' => $exception->getMessage(),
+            ]);
+        }
+
+        return redirect()
+            ->route('clients.show', ['client' => $client, 'tab' => 'account_management'])
+            ->with('status', __('admin.flash.user_reactivated'));
+    }
+
+    private function actorWhoMayManageClient(Request $request, User $client): User
+    {
+        $actor = $request->user();
+        abort_unless($actor instanceof User, 403);
+        abort_if($this->profile->hasDirectoryProtectedEligibility($client), 404);
+        abort_unless($this->hubViewerCanManageAccess($actor, $client), 403);
+
+        return $actor;
     }
 }

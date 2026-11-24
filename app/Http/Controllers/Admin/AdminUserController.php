@@ -443,15 +443,17 @@ class AdminUserController extends Controller
         AuthorizationMutationService $mutations,
         TotpTwoFactorService $twoFactor,
     ): RedirectResponse {
-        Gate::authorize('admin.users.manage');
         $managedUser = User::query()->findOrFail($user);
-        abort_unless($mutations->canManageTarget($request->user(), $managedUser), 403);
-        $request->validate([
+        $actor = $request->user();
+        abort_unless($actor instanceof User, 403);
+        abort_unless($this->hubViewerCanManageAccess($actor, $managedUser), 403);
+        $validated = $request->validate([
             'confirm_two_factor_reset' => ['accepted'],
+            'reason' => ['required', 'string', 'max:500'],
         ]);
 
         try {
-            $twoFactor->disableForSubject($managedUser, $request->user());
+            $twoFactor->disableForSubject($managedUser, $actor, $validated['reason']);
         } catch (DomainException $exception) {
             return back()->withErrors([
                 'two_factor' => $exception->getMessage(),
@@ -459,7 +461,7 @@ class AdminUserController extends Controller
         }
 
         return redirect()
-            ->route($this->accountShowRouteName($managedUser), ['user' => $managedUser, 'tab' => 'overview'])
+            ->route($this->accountShowRouteName($managedUser), ['user' => $managedUser, 'tab' => 'account_management'])
             ->with('status', __('admin.flash.two_factor_reset'));
     }
 
@@ -506,8 +508,10 @@ class AdminUserController extends Controller
         string $user,
         AuthorizationMutationService $mutations,
     ): RedirectResponse {
-        Gate::authorize('admin.users.manage');
         $managedUser = User::query()->findOrFail($user);
+        $actor = $request->user();
+        abort_unless($actor instanceof User, 403);
+        abort_unless($this->hubViewerCanManageAccess($actor, $managedUser), 403);
         $validated = $request->validate([
             'reason' => ['required', 'string', 'max:500'],
             'confirm_suspend' => ['accepted'],
@@ -535,11 +539,16 @@ class AdminUserController extends Controller
         string $user,
         AuthorizationMutationService $mutations,
     ): RedirectResponse {
-        Gate::authorize('admin.users.manage');
         $managedUser = User::query()->findOrFail($user);
+        $actor = $request->user();
+        abort_unless($actor instanceof User, 403);
+        abort_unless($this->hubViewerCanManageAccess($actor, $managedUser), 403);
+        $validated = $request->validate([
+            'reason' => ['required', 'string', 'max:500'],
+        ]);
 
         try {
-            $mutations->reactivate($managedUser, $request->user());
+            $mutations->reactivate($managedUser, $actor, $validated['reason']);
         } catch (DomainException $exception) {
             return back()->withErrors([
                 'authorization' => $exception->getMessage(),
@@ -713,16 +722,20 @@ class AdminUserController extends Controller
         string $user,
         LocalPublicPasswordResetService $passwordResets,
     ): RedirectResponse {
-        Gate::authorize('admin.users.manage');
         $managedUser = User::query()->findOrFail($user);
-        $request->validate([
+        $actor = $request->user();
+        abort_unless($actor instanceof User, 403);
+        abort_unless($this->hubViewerCanManageAccess($actor, $managedUser), 403);
+        $validated = $request->validate([
             'confirm' => ['accepted'],
+            'reason' => ['required', 'string', 'max:500'],
         ]);
 
         try {
             $temporaryPassword = $passwordResets->reset(
-                $request->user(),
+                $actor,
                 $managedUser,
+                $validated['reason'],
             );
         } catch (DomainException $exception) {
             abort(403, $exception->getMessage());

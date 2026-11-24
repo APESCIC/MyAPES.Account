@@ -298,6 +298,22 @@ Route::middleware([
             ->whereNumber('client')
             ->middleware('throttle:30,1')
             ->name('cases.store');
+        Route::post('/{client}/password-reset', [ClientController::class, 'resetLocalPassword'])
+            ->whereNumber('client')
+            ->middleware(['can:staff.clients.manage', 'throttle:20,1'])
+            ->name('password-reset');
+        Route::post('/{client}/two-factor-reset', [ClientController::class, 'resetTwoFactor'])
+            ->whereNumber('client')
+            ->middleware(['can:staff.clients.manage', 'throttle:20,1'])
+            ->name('two-factor.reset');
+        Route::post('/{client}/suspension', [ClientController::class, 'suspend'])
+            ->whereNumber('client')
+            ->middleware(['can:staff.clients.manage', 'throttle:20,1'])
+            ->name('suspension.store');
+        Route::delete('/{client}/suspension', [ClientController::class, 'reactivate'])
+            ->whereNumber('client')
+            ->middleware(['can:staff.clients.manage', 'throttle:20,1'])
+            ->name('suspension.destroy');
     });
     Route::get('/support/attachments/{attachment}', [SupportAttachmentController::class, 'download'])
         ->name('support.attachments.download');

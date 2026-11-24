@@ -18,7 +18,9 @@
                     {{ __('clients.missing_details_prompt_no_block') }}
                 </p>
             @endif
-            <p class="muted">{{ __('admin.users.hub.staff_read_only') }}</p>
+            @unless($hubCanManageAccess ?? false)
+                <p class="muted">{{ __('admin.users.hub.staff_read_only') }}</p>
+            @endunless
             <p>
                 <a href="{{ route('callers.show', $client) }}">{{ __('clients.open_in_callers') }}</a>
                 ·
@@ -30,6 +32,8 @@
                 'tabSubject' => $client,
             ])
         </div>
+
+        @include('admin.users.partials.hub-temporary-password')
 
         @if($plainPin)
             <div class="panel" data-client-pin-once>
@@ -69,10 +73,11 @@
             @if($hubIsProfileOnly)
                 @include('admin.users.partials.hub-create-account-soon')
             @else
-                <section class="panel">
-                    <h2>{{ __('admin.users.effective_access') }}</h2>
+                @include('admin.users.partials.hub-account-summary')
+                @include('admin.users.partials.hub-account-actions')
+                @unless($hubCanManageAccess)
                     <p class="muted">{{ __('admin.users.hub.staff_read_only') }}</p>
-                </section>
+                @endunless
             @endif
         @endif
 

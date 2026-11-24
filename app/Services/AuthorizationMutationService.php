@@ -72,10 +72,10 @@ class AuthorizationMutationService
         }
     }
 
-    public function reactivate(User $target, User $actor): void
+    public function reactivate(User $target, User $actor, ?string $reason = null): void
     {
         try {
-            DB::transaction(function () use ($target, $actor): void {
+            DB::transaction(function () use ($target, $actor, $reason): void {
                 [$target, $actor] = $this->lockUsers($target, $actor);
                 $this->assertMayAffectTarget($target, $actor);
 
@@ -94,7 +94,10 @@ class AuthorizationMutationService
                     'authorization.user_reactivated',
                     $actor,
                     $target,
-                    ['target_user_id' => $target->id],
+                    array_filter([
+                        'target_user_id' => $target->id,
+                        'reason_length' => is_string($reason) && $reason !== '' ? mb_strlen($reason) : null,
+                    ], static fn (mixed $value): bool => $value !== null),
                 );
             });
         } catch (AuthorizationMutationDenied $exception) {
@@ -325,6 +328,16 @@ class AuthorizationMutationService
             && $targetRole !== null;
     }
 
+    public function canManagePublicClient(User $actor, User $target): bool
+    {
+        if ($actor->suspended_at !== null || $target->is($actor) || $target->isProfileOnly()) {
+            return false;
+        }
+
+        return $actor->can(AuthorizationProfile::PERMISSION_CLIENT_MANAGE)
+            && ! $this->profile->hasDirectoryProtectedEligibility($target);
+    }
+
     private function assertMayAffectTarget(User $target, User $actor): void
     {
         if ($target->is($actor)) {
@@ -332,6 +345,10 @@ class AuthorizationMutationService
                 'self_change',
                 'Actors cannot change their own authorization state.',
             );
+        }
+
+        if ($this->canManagePublicClient($actor, $target)) {
+            return;
         }
 
         $actorRole = $this->profile->effectiveProtectedRole($actor);
