@@ -83,10 +83,7 @@ class OnboardingController extends Controller
     /** @param array<string, mixed> $validated @return array<string, mixed> */
     public function profilePayload(array $validated): array
     {
-        return [
-            'first_name' => $validated['first_name'],
-            'last_name' => $validated['last_name'],
-            'date_of_birth' => $validated['date_of_birth'],
+        $payload = [
             'address_line_1' => $validated['address_line_1'],
             'address_line_2' => $validated['address_line_2'] ?? null,
             'town_city' => $validated['town_city'],
@@ -101,6 +98,19 @@ class OnboardingController extends Controller
                 ? ltrim($validated['telegram_username'], '@')
                 : null,
         ];
+
+        // Profile edit reuses this helper without identity fields; onboarding supplies them.
+        if (array_key_exists('first_name', $validated)) {
+            $payload['first_name'] = $validated['first_name'];
+        }
+        if (array_key_exists('last_name', $validated)) {
+            $payload['last_name'] = $validated['last_name'];
+        }
+        if (array_key_exists('date_of_birth', $validated)) {
+            $payload['date_of_birth'] = $validated['date_of_birth'];
+        }
+
+        return $payload;
     }
 
     /** @return array<string, bool> */
