@@ -37,8 +37,6 @@ final class GuidedTour
 
     private const USER_MENU = [self::APP_BAR.' [data-workspace-user-menu]', '[data-workspace-rail] .sg-dock__card', self::MENU_BUTTON];
 
-    private const PANEL_SWITCH = [self::APP_BAR.' [data-workspace-panel-switch]', '[data-workspace-rail] [data-workspace-panel-switch]', self::MENU_BUTTON];
-
     private const SEARCH = ['[data-workspace-page-header] [data-workspace-palette-open]', self::APP_BAR.' [data-workspace-palette-open]', '[data-workspace-topbar] [data-workspace-palette-open]'];
 
     private const FOOTER_HELP = '[data-tour-target="footer-help"]';
@@ -114,7 +112,7 @@ final class GuidedTour
         return match ($audience) {
             self::AUDIENCE_ADMIN => [
                 $welcome,
-                $this->step(self::PANEL_SWITCH, __('tour.steps.panel_switch.title'), __('tour.steps.panel_switch.body')),
+                $this->step(self::USER_MENU, __('tour.steps.panel_switch.title'), __('tour.steps.panel_switch.body')),
                 $menu,
                 $this->step($this->navTarget('callers'), __('tour.steps.callers.title'), __('tour.steps.callers.body')),
                 $search,

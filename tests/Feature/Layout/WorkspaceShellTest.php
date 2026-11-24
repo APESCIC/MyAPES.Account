@@ -50,18 +50,21 @@ class WorkspaceShellTest extends TestCase
         $this->assertStringNotContainsString('data-sidebar', $html);
     }
 
-    public function test_panel_switch_is_hidden_for_staff_only_users_and_shown_for_super_admin(): void
+    public function test_panel_switch_is_hidden_and_admin_is_in_the_user_menu(): void
     {
         $this->actingAs(User::factory()->protectedRole('staff')->create())
             ->get('/dashboard')
             ->assertOk()
-            ->assertDontSee('data-workspace-panel-switch', false);
+            ->assertDontSee('data-workspace-panel-switch', false)
+            ->assertDontSee('data-nav-key="user.admin"', false);
 
         $this->actingAs(User::factory()->protectedRole('administrator')->create())
-            ->get('/admin')
+            ->get('/dashboard')
             ->assertOk()
-            ->assertSee('data-workspace-panel-switch', false)
-            ->assertSee('aria-current="true" >'.__('workspace.panels.admin').'</a>', false);
+            ->assertDontSee('data-workspace-panel-switch', false)
+            ->assertDontSee('data-nav-key="staff.admin"', false)
+            ->assertSee('data-nav-key="user.admin"', false)
+            ->assertSee('href="'.route('admin.index').'"', false);
     }
 
     public function test_user_menu_shows_name_role_profile_and_sign_out(): void

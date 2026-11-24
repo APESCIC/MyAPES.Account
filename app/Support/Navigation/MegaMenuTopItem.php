@@ -23,7 +23,14 @@ final readonly class MegaMenuTopItem
         public array $groups,
         public array $activePatterns = [],
         public ?string $description = null,
+        /** Full service name for aria-labels when {@see $label} is a short trigger (#1045). */
+        public ?string $fullLabel = null,
     ) {}
+
+    public function title(): string
+    {
+        return $this->fullLabel ?? $this->label;
+    }
 
     /**
      * @return list<NavItem>

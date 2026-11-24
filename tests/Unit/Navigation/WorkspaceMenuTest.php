@@ -11,14 +11,14 @@ use Tests\TestCase;
 
 class WorkspaceMenuTest extends TestCase
 {
-    public function test_panel_switch_needs_both_staff_and_admin_panels(): void
+    public function test_panel_switch_is_retired_even_when_both_panels_exist(): void
     {
         $this->assertFalse($this->menu([NavPanel::STAFF => $this->staffPanel()])->showsPanelSwitch());
         $this->assertFalse($this->menu([NavPanel::ADMIN => $this->adminPanel()], NavPanel::ADMIN)->showsPanelSwitch());
 
         $both = $this->menu([NavPanel::STAFF => $this->staffPanel(), NavPanel::ADMIN => $this->adminPanel()]);
-        $this->assertTrue($both->showsPanelSwitch());
-        $this->assertSame([NavPanel::STAFF, NavPanel::ADMIN], array_map(static fn (NavPanel $panel): string => $panel->key, $both->switchablePanels()));
+        $this->assertFalse($both->showsPanelSwitch());
+        $this->assertSame([], $both->switchablePanels());
     }
 
     public function test_panel_home_is_its_first_item(): void

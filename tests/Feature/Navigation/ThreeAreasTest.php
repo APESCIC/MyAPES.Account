@@ -86,17 +86,20 @@ class ThreeAreasTest extends TestCase
             ->assertSee('href="'.route('help.staff').'"', false);
     }
 
-    public function test_only_administrators_can_switch_to_the_admin_area(): void
+    public function test_only_administrators_reach_admin_from_the_user_menu(): void
     {
         $admin = User::factory()->protectedRole('administrator')->create();
         $staff = User::factory()->protectedRole('staff')->create();
 
         $adminMenu = $this->menuFor($admin, 'dashboard');
-        $this->assertTrue($adminMenu->showsPanelSwitch());
+        $this->assertFalse($adminMenu->showsPanelSwitch());
         $this->assertSame(route('admin.index'), $adminMenu->panels[NavPanel::ADMIN]->home()?->url);
+        $this->assertContains('user.admin', array_map(static fn ($item) => $item->key, $adminMenu->userMenuItems));
         $this->actingAs($admin)->get(route('admin.index'))->assertOk();
 
-        $this->assertFalse($this->menuFor($staff, 'dashboard')->showsPanelSwitch());
+        $staffMenu = $this->menuFor($staff, 'dashboard');
+        $this->assertFalse($staffMenu->showsPanelSwitch());
+        $this->assertNotContains('user.admin', array_map(static fn ($item) => $item->key, $staffMenu->userMenuItems));
         $this->actingAs($staff)->get(route('admin.index'))->assertForbidden();
     }
 

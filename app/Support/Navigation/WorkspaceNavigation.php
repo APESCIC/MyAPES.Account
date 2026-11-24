@@ -81,7 +81,7 @@ final class WorkspaceNavigation
             $this->settingsCommands($adminCatalogue),
             $user === null ? null : $this->dockUser($user),
             $topItems,
-            $user === null ? [] : $this->userMenuItems($user, isset($panels[NavPanel::ADMIN])),
+            $user === null ? [] : $this->userMenuItems($user, $panels[NavPanel::ADMIN] ?? null),
             $user === null ? $this->simpleLinks() : [],
         );
     }
@@ -183,18 +183,13 @@ final class WorkspaceNavigation
                 $items[] = $forms;
             }
 
-            if ($hasAdminPanel) {
-                $admin = $this->staffTopMenus->staffAdminMegaMenu($user, $panels[NavPanel::ADMIN]);
-                if ($admin !== null) {
-                    $items[] = $admin;
-                }
-            }
+            // Admin mega stays out of the staff top bar (#1045); enter Admin from the user menu.
         }
 
         return $items;
     }
 
-    private function userMenuItems(User $user, bool $hasAdminPanel): array
+    private function userMenuItems(User $user, ?NavPanel $adminPanel): array
     {
         $items = [
             new NavItem(
@@ -205,15 +200,27 @@ final class WorkspaceNavigation
                 ['profile.*', 'two-factor.setup'],
                 $this->words('workspace.keywords.profile'),
             ),
-            new NavItem(
-                'user.help',
-                __('public.chrome.app.blade.help'),
-                route('help'),
-                'circle-help',
-                ['help'],
-                $this->words('workspace.keywords.help'),
-            ),
         ];
+
+        if ($adminPanel !== null) {
+            $items[] = new NavItem(
+                'user.admin',
+                __('workspace.panels.admin'),
+                $adminPanel->home()?->url ?? route('admin.index'),
+                'shield-check',
+                ['admin.index', 'admin.*'],
+                ['admin', 'settings', 'workspace'],
+            );
+        }
+
+        $items[] = new NavItem(
+            'user.help',
+            __('public.chrome.app.blade.help'),
+            route('help'),
+            'circle-help',
+            ['help'],
+            $this->words('workspace.keywords.help'),
+        );
 
         if ($this->profile->isAdministrator($user)) {
             $items[] = new NavItem(
@@ -251,7 +258,7 @@ final class WorkspaceNavigation
             );
         }
 
-        $forms = $this->staffTopMenus->formsUserMenuItem($user, $hasAdminPanel);
+        $forms = $this->staffTopMenus->formsUserMenuItem($user, $adminPanel !== null);
         if ($forms !== null) {
             $items[] = $forms;
         }
@@ -703,23 +710,7 @@ final class WorkspaceNavigation
             }
         }
 
-        if (isset($panels[NavPanel::STAFF], $panels[NavPanel::ADMIN])) {
-            foreach ([NavPanel::STAFF, NavPanel::ADMIN] as $panelKey) {
-                $home = $panels[$panelKey]->home();
-                if ($panelKey === $currentPanelKey || $home === null) {
-                    continue;
-                }
-
-                $actions[] = new QuickAction(
-                    'switch.'.$panelKey,
-                    __('workspace.quick.switch_panel', ['panel' => $panels[$panelKey]->label]),
-                    $home->url,
-                    $panelKey === NavPanel::ADMIN ? 'shield-check' : 'layout-dashboard',
-                    '',
-                    $this->words('workspace.keywords.switch_panel'),
-                );
-            }
-        }
+        // Panel-switch quick actions retired with the Staff|Admin chrome (#1045).
 
         $actions[] = new QuickAction('view-site', __('workspace.header.view_site'), route('home'), 'external-link', '', $this->words('workspace.keywords.view_site'));
         $actions[] = new QuickAction('account', __('workspace.quick.your_account'), route('profile.edit'), 'circle-user-round', '', $this->words('workspace.keywords.profile'));

@@ -74,11 +74,11 @@ final readonly class WorkspaceMenu
     }
 
     /**
-     * The Staff | Admin switch only appears when the user can use both.
+     * Staff | Admin panel switch is retired (#1045): Admin is entered from the user menu only.
      */
     public function showsPanelSwitch(): bool
     {
-        return isset($this->panels[NavPanel::STAFF], $this->panels[NavPanel::ADMIN]);
+        return false;
     }
 
     /**

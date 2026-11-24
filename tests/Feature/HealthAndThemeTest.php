@@ -16,7 +16,7 @@ class HealthAndThemeTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'status' => 'ok',
-                'version' => '0.75.0',
+                'version' => '0.75.1',
                 'release' => 'development',
                 'maintenance' => false,
                 'checks' => [
@@ -52,7 +52,7 @@ class HealthAndThemeTest extends TestCase
             ->assertServiceUnavailable()
             ->assertExactJson([
                 'status' => 'unavailable',
-                'version' => '0.75.0',
+                'version' => '0.75.1',
                 'release' => 'development',
                 'maintenance' => false,
                 'checks' => [
@@ -175,8 +175,10 @@ class HealthAndThemeTest extends TestCase
         $this->actingAs($admin)
             ->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('data-workspace-panel-switch', false)
-            ->assertSee('data-nav-key="staff.admin"', false);
+            ->assertDontSee('data-workspace-panel-switch', false)
+            ->assertDontSee('data-nav-key="staff.admin"', false)
+            ->assertSee('data-nav-key="user.admin"', false)
+            ->assertSee('href="'.route('admin.index').'"', false);
     }
 
     public function test_generated_brand_assets_have_expected_dimensions(): void

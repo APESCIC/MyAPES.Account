@@ -67,16 +67,18 @@
 
             <ul class="sg-user-menu__list" role="none">
                 @foreach($menu->userMenuItems as $item)
+                    @php($isExternal = \App\Support\Navigation\WorkspaceUrl::isExternal($item->url))
                     <li role="none">
                         <a
                             href="{{ $item->url }}"
                             class="sg-user-menu__item"
                             role="menuitem"
-                            @if(str_starts_with($item->url, 'http')) target="_blank" rel="noopener noreferrer" @endif
+                            data-nav-key="{{ $item->key }}"
+                            @if($isExternal) target="_blank" rel="noopener noreferrer" @endif
                         >
                             <i data-lucide="{{ $item->icon }}" aria-hidden="true"></i>
                             <span>{{ $item->label }}</span>
-                            @if(str_starts_with($item->url, 'http'))
+                            @if($isExternal)
                                 <span class="sg-visually-hidden">{{ __('workspace.dock.opens_in_new_tab') }}</span>
                             @endif
                         </a>

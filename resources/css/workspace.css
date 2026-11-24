@@ -679,6 +679,9 @@
 
 @media (min-width: 64rem) {
     .sg-app-bar {
+        /* Keep search / bell / user menu on the first row; mega triggers wrap inside nav. */
+        flex-wrap: nowrap;
+        align-items: flex-start;
         padding: 0.625rem 1rem;
     }
 }
@@ -726,6 +729,7 @@
     .sg-app-bar__nav {
         order: initial;
         flex: 1 1 auto;
+        min-width: 0;
     }
 }
 
@@ -780,6 +784,13 @@
     align-items: center;
     gap: 0.35rem;
     margin-left: auto;
+    flex-shrink: 0;
+}
+
+@media (min-width: 64rem) {
+    .sg-app-bar__end {
+        align-self: center;
+    }
 }
 
 .sg-app-bar__search {
@@ -964,15 +975,21 @@
     position: absolute;
     top: calc(100% + 0.35rem);
     right: 0;
-    z-index: 55;
+    z-index: 80;
     width: min(18rem, 92vw);
+    max-height: min(70vh, 32rem);
+    overflow-x: hidden;
+    overflow-y: auto;
     border: 1px solid var(--sg-edge);
     border-radius: var(--radius-sg-card);
-    background: var(--sg-dialog-surface);
-    backdrop-filter: blur(var(--sg-blur-card)) saturate(140%);
-    -webkit-backdrop-filter: blur(var(--sg-blur-card)) saturate(140%);
+    /* Opaque enough that dashboard content does not bleed through (#1046). */
+    background: var(--color-sg-white, #ffffff);
     box-shadow: var(--shadow-sg-dialog);
     padding: 0.75rem;
+}
+
+[data-theme='dark'] .sg-user-menu__panel {
+    background: #0e1e23;
 }
 
 .sg-user-menu__identity {

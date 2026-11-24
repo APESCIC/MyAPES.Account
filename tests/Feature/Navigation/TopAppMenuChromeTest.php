@@ -40,10 +40,13 @@ class TopAppMenuChromeTest extends TestCase
             ->assertSee('data-workspace-user-menu', false)
             ->assertSee('data-workspace-palette-open', false);
 
+        $response->assertDontSee('data-workspace-panel-switch', false);
+
         if ($persona === 'administrator') {
-            $response->assertSee('data-workspace-panel-switch', false);
-        } else {
-            $response->assertDontSee('data-workspace-panel-switch', false);
+            $response
+                ->assertSee('data-nav-key="user.admin"', false)
+                ->assertDontSee('data-nav-key="staff.admin"', false)
+                ->assertSee('href="'.route('admin.index').'"', false);
         }
     }
 
@@ -97,5 +100,24 @@ class TopAppMenuChromeTest extends TestCase
             ->assertSee(config('myapes.github.repository_url'), false)
             ->assertSee(config('myapes.github.new_issue_url'), false)
             ->assertSeeText(__('workspace.dock.github'));
+    }
+
+    public function test_user_menu_keeps_same_origin_profile_in_the_same_tab(): void
+    {
+        $user = User::factory()->protectedRole('staff')->create();
+
+        $html = $this->actingAs($user)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/data-nav-key="user\.profile"[^>]*(?!target="_blank")[^>]*>/',
+            $html,
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '/data-nav-key="user\.profile"[^>]*target="_blank"/',
+            $html,
+        );
     }
 }
