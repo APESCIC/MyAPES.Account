@@ -47,21 +47,13 @@ class CallerController extends Controller
         return view('callers.index', ['term' => $term, 'callers' => $callers]);
     }
 
-    public function show(Request $request, User $caller): View
+    public function show(Request $request, User $caller): RedirectResponse
     {
         $this->authorizeStaff($request);
         $this->assertCaller($caller);
-        $unlocked = $this->verification->isUnlocked($request->session(), $request->user(), $caller);
 
-        return view('callers.show', [
-            'caller' => $caller,
-            'details' => $caller->profile,
-            'positions' => $unlocked ? null : $this->verification->positions($request->session(), $caller),
-            'lockedForSeconds' => $this->verification->lockedForSeconds($caller),
-            'verified' => $unlocked,
-            'unlockedUntil' => $unlocked ? $this->verification->unlockedUntil($request->session(), $caller) : null,
-            'callLogs' => CallLog::query()->where('caller_id', $caller->id)->with('staff:id,name')->latest('called_at')->latest('id')->limit(50)->get(),
-        ]);
+        // Caller workspace lives on Staff › Clients (#934).
+        return redirect()->route('clients.show', ['client' => $caller, 'tab' => 'overview']);
     }
 
     public function storeCallLog(Request $request, User $caller, AuditLogger $audit): RedirectResponse
@@ -147,20 +139,21 @@ class CallerController extends Controller
 
         $audit->record('caller.details_updated', $request->user(), $caller, ['fields' => $changed]);
 
-        return redirect()->route('callers.show', $caller)->with('status', __('callers.details_saved'));
+        return redirect()
+            ->to($this->callerReturnUrl($request, $caller, 'details'))
+            ->with('status', __('callers.details_saved'));
     }
 
     private function callerReturnUrl(Request $request, User $caller, string $fragment = ''): string
     {
-        if ($request->boolean('hub')) {
-            $url = route('clients.show', ['client' => $caller, 'tab' => 'overview']);
+        $url = route('clients.show', ['client' => $caller, 'tab' => 'overview']);
 
-            return $fragment === '' ? $url : $url.'#'.$fragment;
-        }
-
-        $url = route('callers.show', $caller);
-
-        return $fragment === 'call-logs' ? $url.'#call-logs' : $url;
+        return match ($fragment) {
+            'call-logs' => $url.'#call-logs',
+            'verify' => $url.'#verify',
+            'details' => $url.'#details',
+            default => $url,
+        };
     }
 
     private function authorizeStaff(Request $request): void

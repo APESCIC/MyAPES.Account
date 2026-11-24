@@ -22,8 +22,6 @@
                 <p class="muted">{{ __('admin.users.hub.staff_read_only') }}</p>
             @endunless
             <p>
-                <a href="{{ route('callers.show', $client) }}">{{ __('clients.open_in_callers') }}</a>
-                ·
                 <a href="{{ route('clients.index') }}">{{ __('clients.back') }}</a>
             </p>
             @include('admin.users.partials.hub-tabs', [
@@ -47,6 +45,7 @@
         @if($hubTab === 'overview')
             <div data-hub-overview>
                 @include('callers.partials.verify')
+                @include('callers.partials.details')
                 @include('callers.partials.call-logs')
                 @include('admin.users.partials.hub-actions')
                 @include('admin.users.partials.hub-notes', [

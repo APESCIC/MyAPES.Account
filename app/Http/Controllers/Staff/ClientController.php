@@ -274,6 +274,7 @@ class ClientController extends Controller
             $unlocked = $this->verification->isUnlocked($request->session(), $actor, $client);
             $callerOverview = [
                 'caller' => $client,
+                'details' => $client->profile,
                 'verified' => $unlocked,
                 'positions' => $unlocked ? null : $this->verification->positions($request->session(), $client),
                 'lockedForSeconds' => $this->verification->lockedForSeconds($client),

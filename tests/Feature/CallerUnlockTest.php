@@ -33,7 +33,7 @@ class CallerUnlockTest extends TestCase
     public function test_unverified_edits_are_refused_and_controls_disabled(): void
     {
         $this->actingAs($this->staff)
-            ->get(route('callers.show', $this->caller))
+            ->get(route('clients.show', ['client' => $this->caller, 'tab' => 'overview']))
             ->assertOk()
             ->assertSee('data-locked="true"', false)
             ->assertSee('<fieldset disabled', false)
@@ -50,14 +50,14 @@ class CallerUnlockTest extends TestCase
         $this->verify();
 
         $this->actingAs($this->staff)
-            ->get(route('callers.show', $this->caller))
+            ->get(route('clients.show', ['client' => $this->caller, 'tab' => 'overview']))
             ->assertSee('data-locked="false"', false)
             ->assertDontSee('<fieldset disabled', false)
             ->assertSee('data-end-call', false);
 
         $this->actingAs($this->staff)
             ->put(route('callers.details.update', $this->caller), $this->details())
-            ->assertRedirect(route('callers.show', $this->caller))
+            ->assertRedirect(route('clients.show', ['client' => $this->caller, 'tab' => 'overview']).'#details')
             ->assertSessionHas('status', 'Contact details saved.');
         $this->assertSame('+447400123456', $this->caller->fresh()->profile->mobile_number);
         $this->assertSame('SW1A 1AA', $this->caller->fresh()->profile->postcode);
@@ -86,7 +86,7 @@ class CallerUnlockTest extends TestCase
         $this->actingAs($this->staff)->put(route('callers.details.update', $this->caller), $this->details())->assertForbidden();
 
         $this->assertSame(1, AuditLog::query()->where('event', 'caller.unlock_timed_out')->count());
-        $this->actingAs($this->staff)->get(route('callers.show', $this->caller))->assertSee('data-locked="true"', false);
+        $this->actingAs($this->staff)->get(route('clients.show', ['client' => $this->caller, 'tab' => 'overview']))->assertSee('data-locked="true"', false);
     }
 
     public function test_an_unlock_belongs_to_the_staff_session_that_verified(): void
@@ -102,7 +102,7 @@ class CallerUnlockTest extends TestCase
 
     private function verify(): void
     {
-        $this->actingAs($this->staff)->get(route('callers.show', $this->caller));
+        $this->actingAs($this->staff)->get(route('clients.show', ['client' => $this->caller, 'tab' => 'overview']));
         $positions = session(app(CallerVerificationService::class)->sessionKey($this->caller, 'positions'));
         $digits = [];
         foreach ($positions as $position) {
