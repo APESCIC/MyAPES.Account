@@ -32,13 +32,13 @@ class AdminLocalPublicPasswordResetTest extends TestCase
         $list->assertOk()
             ->assertSee('Reset password')
             ->assertSee(
-                route('admin.public-accounts.show', ['user' => $public, 'tab' => 'details']).'#local-password',
+                route('admin.public-accounts.show', ['user' => $public, 'tab' => 'account_profile']).'#local-password',
                 false,
             );
         $this->assertDoesNotOfferImpersonation($list->getContent());
 
         $detail = $this->actingAs($administrator)
-            ->get(route('admin.public-accounts.show', ['user' => $public, 'tab' => 'details']));
+            ->get(route('admin.public-accounts.show', ['user' => $public, 'tab' => 'account_profile']));
         $detail->assertOk()
             ->assertSee('Reset local password')
             ->assertSee('name="confirm"', false)
@@ -46,7 +46,7 @@ class AdminLocalPublicPasswordResetTest extends TestCase
         $this->assertDoesNotOfferImpersonation($detail->getContent());
 
         $response = $this->actingAs($administrator)
-            ->from(route('admin.public-accounts.show', ['user' => $public, 'tab' => 'details']))
+            ->from(route('admin.public-accounts.show', ['user' => $public, 'tab' => 'account_profile']))
             ->post(route('admin.users.password-reset', $public), [
                 'confirm' => '1',
             ]);
@@ -179,24 +179,24 @@ class AdminLocalPublicPasswordResetTest extends TestCase
             ->assertSeeText('Directory Public')
             ->assertSeeText('Pending Directory')
             ->assertDontSee(
-                route('admin.public-accounts.show', ['user' => $directoryPublic, 'tab' => 'details']).'#local-password',
+                route('admin.public-accounts.show', ['user' => $directoryPublic, 'tab' => 'account_profile']).'#local-password',
                 false,
             )
             ->assertDontSee(
-                route('admin.staff-accounts.show', ['user' => $pendingFirstLogin, 'tab' => 'details']).'#local-password',
+                route('admin.staff-accounts.show', ['user' => $pendingFirstLogin, 'tab' => 'account_profile']).'#local-password',
                 false,
             );
         $this->assertDoesNotOfferImpersonation($staffList->getContent());
 
         $this->actingAs($administrator)
-            ->get(route('admin.public-accounts.show', ['user' => $directoryPublic, 'tab' => 'details']))
+            ->get(route('admin.public-accounts.show', ['user' => $directoryPublic, 'tab' => 'account_profile']))
             ->assertOk()
             ->assertSeeText('This account uses Cloudron directory sign-in.')
             ->assertDontSee('Reset local password')
             ->assertDontSee('name="confirm"', false);
 
         $this->actingAs($administrator)
-            ->get(route('admin.staff-accounts.show', ['user' => $pendingFirstLogin, 'tab' => 'details']))
+            ->get(route('admin.staff-accounts.show', ['user' => $pendingFirstLogin, 'tab' => 'account_profile']))
             ->assertOk()
             ->assertSeeText('This directory account has not completed Staff Login yet.')
             ->assertSeeText('Pending first login')
@@ -204,7 +204,7 @@ class AdminLocalPublicPasswordResetTest extends TestCase
             ->assertDontSee('Reset local password');
 
         $this->actingAs($administrator)
-            ->get(route('admin.staff-accounts.show', ['user' => $directoryStaff, 'tab' => 'details']))
+            ->get(route('admin.staff-accounts.show', ['user' => $directoryStaff, 'tab' => 'account_profile']))
             ->assertOk()
             ->assertDontSee('Reset local password')
             ->assertDontSee('name="confirm"', false);

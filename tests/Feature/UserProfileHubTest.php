@@ -44,7 +44,10 @@ class UserProfileHubTest extends TestCase
             ->assertOk()
             ->assertSee('data-profile-hub-tabs', false)
             ->assertSee(__('admin.users.hub.tabs.overview'))
+            ->assertSee(__('admin.users.hub.tabs.account_management'))
+            ->assertSee(__('admin.users.hub.tabs.account_profile'))
             ->assertSee(__('admin.users.hub.tabs.records'))
+            ->assertSee(__('admin.users.hub.tabs.activity'))
             ->assertSee(__('admin.users.hub.admin_tools.heading'));
 
         $this->actingAs($administrator)
@@ -179,6 +182,49 @@ class UserProfileHubTest extends TestCase
             ->get(route('clients.show', ['client' => $client, 'tab' => 'records']))
             ->assertOk()
             ->assertSee(__('admin.users.hub.records.heading'));
+    }
+
+    public function test_legacy_hub_tabs_map_to_account_profile_and_account_management(): void
+    {
+        $administrator = $this->userWithAccess(User::ROLE_ADMIN);
+        $client = User::factory()->create([
+            'identity_type' => User::IDENTITY_LOCAL,
+        ]);
+
+        $this->actingAs($administrator)
+            ->get(route('admin.public-accounts.show', ['user' => $client, 'tab' => 'details']))
+            ->assertOk()
+            ->assertSee(__('admin.users.hub.tabs.account_profile'))
+            ->assertSee('name="address_line_1"', false);
+
+        $this->actingAs($administrator)
+            ->get(route('admin.public-accounts.show', ['user' => $client, 'tab' => 'access']))
+            ->assertOk()
+            ->assertSee(__('admin.users.hub.tabs.account_management'))
+            ->assertSee(__('admin.users.effective_access'));
+    }
+
+    public function test_profile_only_account_management_shows_create_account_panel(): void
+    {
+        $staff = $this->userWithAccess(User::ROLE_STAFF);
+        $client = User::factory()->create([
+            'identity_type' => User::IDENTITY_LOCAL,
+            'account_state' => User::ACCOUNT_STATE_PROFILE_ONLY,
+        ]);
+
+        $this->actingAs($staff)
+            ->get(route('clients.show', ['client' => $client, 'tab' => 'account_management']))
+            ->assertOk()
+            ->assertSee('data-hub-create-account-soon', false)
+            ->assertSee(__('admin.users.hub.create_account_soon.heading'))
+            ->assertDontSee(__('admin.users.effective_access'));
+
+        $administrator = $this->userWithAccess(User::ROLE_ADMIN);
+        $this->actingAs($administrator)
+            ->get(route('admin.public-accounts.show', ['user' => $client, 'tab' => 'account_management']))
+            ->assertOk()
+            ->assertSee('data-hub-create-account-soon', false)
+            ->assertDontSee('id="suspend-user"', false);
     }
 
     public function test_staff_clients_view_permission_is_named_for_core(): void

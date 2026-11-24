@@ -120,7 +120,7 @@
                         @endphp
                         <a href="{{ route($rowShowRoute, $user) }}">{{ __('admin.users.view_user') }}</a>
                         @if(in_array($user->id, $resettableUserIds, true))
-                            · <a href="{{ route($rowShowRoute, ['user' => $user, 'tab' => 'details']) }}#local-password">{{ __('admin.users.reset_password') }}</a>
+                            · <a href="{{ route($rowShowRoute, ['user' => $user, 'tab' => 'account_profile']) }}#local-password">{{ __('admin.users.reset_password') }}</a>
                         @endif
                     </td>
                 </tr>

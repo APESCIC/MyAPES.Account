@@ -49,7 +49,7 @@
             ])
         @endif
 
-        @if($hubTab === 'details')
+        @if($hubTab === 'account_profile')
             <section class="panel" aria-labelledby="client-details-title">
                 <h2 id="client-details-title">{{ __('admin.users.public_profile') }}</h2>
                 <dl class="admin-definition-list">
@@ -61,11 +61,15 @@
             </section>
         @endif
 
-        @if($hubTab === 'access')
-            <section class="panel">
-                <h2>{{ __('admin.users.effective_access') }}</h2>
-                <p class="muted">{{ __('admin.users.hub.staff_read_only') }}</p>
-            </section>
+        @if($hubTab === 'account_management')
+            @if($hubIsProfileOnly)
+                @include('admin.users.partials.hub-create-account-soon')
+            @else
+                <section class="panel">
+                    <h2>{{ __('admin.users.effective_access') }}</h2>
+                    <p class="muted">{{ __('admin.users.hub.staff_read_only') }}</p>
+                </section>
+            @endif
         @endif
 
         @if($hubTab === 'records')

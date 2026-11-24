@@ -24,7 +24,7 @@
                     {{ $managedUser->suspended_at === null ? __('admin.users.active') : __('admin.overview.suspended') }}
                     @can('admin.users.manage')
                         @if($canManageTarget && $managedUser->suspended_at === null)
-                            · <a href="{{ route($accountShowRoute ?? 'admin.users.show', ['user' => $managedUser, 'tab' => 'access']) }}#suspend-user">{{ __('admin.users.suspend') }}</a>
+                            · <a href="{{ route($accountShowRoute ?? 'admin.users.show', ['user' => $managedUser, 'tab' => 'account_management']) }}#suspend-user">{{ __('admin.users.suspend') }}</a>
                         @endif
                     @endcan
                 </dd></div>
@@ -62,7 +62,7 @@
             @include('admin.users.partials.hub-admin-tools')
         @endif
 
-        @if($hubTab === 'details')
+        @if($hubTab === 'account_profile')
             @if($isStaffAccount)
                 <section class="panel" aria-labelledby="staff-profile-title">
                     <h2 id="staff-profile-title">{{ __('admin.users.staff_profile') }}</h2>
@@ -172,7 +172,10 @@
             @endcan
         @endif
 
-        @if($hubTab === 'access')
+        @if($hubTab === 'account_management')
+            @if($hubIsProfileOnly)
+                @include('admin.users.partials.hub-create-account-soon')
+            @else
             <section class="panel" aria-labelledby="role-provenance-title">
                 <h2 id="role-provenance-title">{{ __('admin.users.provenanced_roles') }}</h2>
                 <table>
@@ -344,6 +347,7 @@
                     </section>
                 @endif
             @endcan
+            @endif
         @endif
 
         @if($hubTab === 'records')

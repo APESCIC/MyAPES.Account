@@ -312,10 +312,16 @@ return [
             'tabs_label' => 'Profile sections',
             'tabs' => [
                 'overview' => 'Overview',
-                'details' => 'Details',
-                'access' => 'Access',
+                'account_management' => 'Account Management',
+                'account_profile' => 'Account Profile Management',
                 'records' => 'Records',
                 'activity' => 'Activity',
+                'details' => 'Account Profile Management',
+                'access' => 'Account Management',
+            ],
+            'create_account_soon' => [
+                'heading' => 'Create an account',
+                'intro' => 'This person has a profile only and cannot sign in. Creating an account from a profile arrives in a later release.',
             ],
             'quick_actions' => 'Quick actions',
             'modules_in_use' => 'Modules and plugins in use',
