@@ -16,6 +16,7 @@ use App\Services\StaffClientAccountCreator;
 use App\Services\TotpTwoFactorService;
 use App\Services\UkPhoneNumber;
 use App\Support\ClientIdentityRules;
+use App\Support\ClientMandatoryFields;
 use App\Support\PersonName;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -39,10 +40,20 @@ class ClientController extends Controller
 
         $q = trim((string) $request->query('q', ''));
         $nameReview = $request->boolean('name_review');
+        $missingDetails = $request->boolean('missing_details');
         $clients = collect();
         $filterHeading = null;
 
-        if ($nameReview) {
+        if ($missingDetails) {
+            $clients = User::query()
+                ->tap(fn ($query) => $accounts->scopePublic($query))
+                ->with(['profile', 'roles'])
+                ->tap(fn ($query) => ClientMandatoryFields::scopeMissingDetails($query))
+                ->orderBy('name')
+                ->limit(100)
+                ->get();
+            $filterHeading = __('clients.missing_details_heading');
+        } elseif ($nameReview) {
             $clients = User::query()
                 ->tap(fn ($query) => $accounts->scopePublic($query))
                 ->with(['profile', 'roles'])
@@ -74,6 +85,7 @@ class ClientController extends Controller
         return view('clients.index', [
             'q' => $q,
             'nameReview' => $nameReview,
+            'missingDetails' => $missingDetails,
             'filterHeading' => $filterHeading,
             'clients' => $clients,
             'pinMin' => PhoneVerificationPinService::MIN_LENGTH,
@@ -153,10 +165,12 @@ class ClientController extends Controller
 
         $client->load('profile', 'contactPreference');
         $plainPin = $request->session()->pull('client_created_pin');
+        $missingMandatory = ClientMandatoryFields::missingFor($client->profile);
 
         return view('clients.show', [
             'client' => $client,
             'managedUser' => $client,
+            'missingMandatory' => $missingMandatory,
             'plainPin' => is_string($plainPin) ? $plainPin : null,
             'preference' => $client->contactPreference,
             'profile' => $client->profile,

@@ -11,6 +11,13 @@
             <p><strong>{{ __('clients.fields.email') }}:</strong> {{ $client->email ?: __('clients.no_email') }}</p>
             <p><strong>{{ __('clients.fields.mobile') }}:</strong> {{ $client->profile?->mobile_number }}</p>
             <p><strong>{{ __('clients.account_state') }}:</strong> {{ __('clients.account_states.'.$client->accountState()) }}</p>
+            @if(($missingMandatory ?? []) !== [])
+                <p class="status" data-client-missing-details>
+                    {{ __('clients.missing_details_prompt') }}
+                    {{ collect($missingMandatory)->map(fn (string $key) => __('clients.fields.'.$key))->implode(', ') }}.
+                    {{ __('clients.missing_details_prompt_no_block') }}
+                </p>
+            @endif
             <p class="muted">{{ __('admin.users.hub.staff_read_only') }}</p>
             <p>
                 <a href="{{ route('callers.show', $client) }}">{{ __('clients.open_in_callers') }}</a>

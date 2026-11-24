@@ -11,19 +11,23 @@
             <label for="q">{{ __('clients.search') }}</label>
             <input id="q" name="q" value="{{ $q ?? '' }}" placeholder="{{ __('clients.search_placeholder') }}" autocomplete="off" autofocus>
             <button type="submit">{{ __('clients.search_submit') }}</button>
-            @if(($q ?? '') !== '' || ($nameReview ?? false))
+            @if(($q ?? '') !== '' || ($nameReview ?? false) || ($missingDetails ?? false))
                 <a href="{{ route('clients.index') }}">{{ __('clients.clear') }}</a>
             @endif
         </form>
         <p>
+            <a href="{{ route('clients.index', ['missing_details' => 1]) }}">{{ __('clients.missing_details_link') }}</a>
+            ·
             <a href="{{ route('clients.index', ['name_review' => 1]) }}">{{ __('clients.name_review_link') }}</a>
         </p>
     </div>
 
-    @if(($nameReview ?? false) || ($q ?? '') !== '')
+    @if(($missingDetails ?? false) || ($nameReview ?? false) || ($q ?? '') !== '')
         <div class="panel">
             <h2>{{ $filterHeading ?? __('clients.search_results') }}</h2>
-            @if($nameReview ?? false)
+            @if($missingDetails ?? false)
+                <p class="muted">{{ __('clients.missing_details_intro') }}</p>
+            @elseif($nameReview ?? false)
                 <p class="muted">{{ __('clients.name_review_intro') }}</p>
             @endif
             @if($clients->isNotEmpty())
@@ -33,6 +37,8 @@
                         <span class="muted">· {{ $client->email ?: $client->username }}</span>
                     </p>
                 @endforeach
+            @elseif($missingDetails ?? false)
+                <p class="muted">{{ __('clients.missing_details_empty') }}</p>
             @elseif($nameReview ?? false)
                 <p class="muted">{{ __('clients.name_review_empty') }}</p>
             @else
