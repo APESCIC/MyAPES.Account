@@ -39,6 +39,11 @@ return [
         'user_menu' => 'User menu',
         'mega_menu' => ':module menu',
         'forms' => 'Forms',
+        'short' => [
+            'apes-cic' => 'CIC',
+            'shelter-rescue' => 'Shelter',
+            'pet-care-clinic' => 'Clinic',
+        ],
     ],
 
     'clients' => [

@@ -15,14 +15,14 @@
         @if($isCurrent) aria-current="page" @endif
     >
         <i data-lucide="{{ $top->icon }}" aria-hidden="true"></i>
-        <span>{{ $top->label }}</span>
+        <span title="{{ $top->title() }}">{{ $top->label }}</span>
         <i data-lucide="chevron-down" class="sg-mega__chevron" aria-hidden="true"></i>
     </button>
     <div
         id="{{ $panelId }}"
         class="sg-mega__panel"
         role="region"
-        aria-label="{{ __('workspace.nav.mega_menu', ['module' => $top->label]) }}"
+        aria-label="{{ __('workspace.nav.mega_menu', ['module' => $top->title()]) }}"
         data-workspace-mega-panel
         hidden
     >

@@ -202,14 +202,19 @@ final class ModuleMegaMenuBuilder
             }
         }
 
+        $shortKey = 'workspace.nav.short.'.$subCore->key;
+        $shortLabel = __($shortKey);
+        $triggerLabel = $shortLabel !== $shortKey ? $shortLabel : $subCore->name;
+
         $top = new MegaMenuTopItem(
             'module.'.$subCore->key,
-            $subCore->name,
+            $triggerLabel,
             $subCore->icon,
             route($subCore->routeName),
             $groups,
             [$subCore->routeName, $prefix.'.*'],
             $subCore->description,
+            $subCore->name,
         );
 
         return $top->isEmpty() ? null : $top;
