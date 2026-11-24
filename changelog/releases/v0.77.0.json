@@ -1,0 +1,57 @@
+{
+    "version": "0.77.0",
+    "date": "2026-11-24",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Account, Profile, Security and Privacy pages",
+    "summary": "Self-service settings split into Account, Profile, Security and Privacy for public and staff accounts, with old /profile URLs redirecting.",
+    "changes": [
+        "Authenticated settings use /account, /account/profile, /account/security and /account/privacy with shared sub-navigation; /profile and its hash anchors redirect to the matching page.",
+        "Account holds username, email change, sign-in summary and appearance; Profile holds personal and contact details (including date of birth with step-up when it changes).",
+        "Security holds password, passkeys, two-factor authentication, telephone PIN, signed-in devices with sign-out of other sessions, and recent security activity.",
+        "Privacy holds contact and email preferences (with policy-version audits), cookie choices, push notification settings (moved from Profile), download of your own data, and a deletion request that opens an APES CIC case.",
+        "Staff use the same four pages: directory identity is read-only on Account, workplace fields stay on Profile, and Security offers passkeys and PIN with Cloudron links where the directory owns password and 2FA.",
+        "Help, wiki and in-app guides describe the four pages; user menu and quick actions point at Account."
+    ],
+    "affected_areas": [
+        "Account settings routes and user menu",
+        "Profile personal and contact details",
+        "Security (password, passkeys, 2FA, PIN, sessions)",
+        "Privacy preferences, notifications, data export and deletion",
+        "Staff Account settings",
+        "Help and wiki"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "MINOR: splits the single profile page into four self-service areas and adds sessions, export and deletion request without removing existing accounts.",
+    "validation": [
+        "PHPUnit AccountSettingsRoutesTest, AccountProfilePersonalDetailsTest, AccountSecurityPageTest, AccountPrivacyPageTest, StaffProfileWorkflowTest and a 491-test account/security/privacy filter.",
+        "Herd preview at https://myapes-account.test for Account settings pages.",
+        "composer milestone:bump -- v0.77.0 --check and myapes:changelog-validate against origin/main."
+    ],
+    "known_limitations": [
+        "Staff managing other people's accounts remains out of scope (later version).",
+        "Admin security policy remains out of scope (later version).",
+        "Design-QA profile screenshots still show the pre-split single page and are labelled as historical."
+    ],
+    "rollback": "Redeploy the previous release tag (v0.76.0). Roll back the marketing_email contact-preference migration if the database must match that tag.",
+    "provenance": "Milestone v0.77.0 Account, Profile, Security and Privacy pages, Epic #865, pull request #1070.",
+    "references": [
+        {
+            "label": "Issue #865",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/865"
+        },
+        {
+            "label": "Pull request #1070",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/1070"
+        }
+    ],
+    "slug": "release-v0-77-0",
+    "previous_version": "0.76.0"
+}
