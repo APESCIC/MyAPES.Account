@@ -19,7 +19,7 @@
                 <input type="hidden" name="return_to" value="{{ \App\Core\Qa\QaLogin::safeReturnPath(session('url.intended')) ?? '' }}">
                 <div class="actions">
                     <button type="submit" data-qa-autoopen>{{ __('qa.confirm.submit') }}</button>
-                    <a href="{{ route('profile.edit') }}">{{ __('auth.confirm_password.cancel') }}</a>
+                    <a href="{{ route('account.show') }}">{{ __('auth.confirm_password.cancel') }}</a>
                 </div>
             </form>
         @else
@@ -33,7 +33,7 @@
 
                 <div class="actions">
                     <button type="submit">{{ __('auth.confirm_password.submit') }}</button>
-                    <a href="{{ route('profile.edit') }}">{{ __('auth.confirm_password.cancel') }}</a>
+                    <a href="{{ route('account.show') }}">{{ __('auth.confirm_password.cancel') }}</a>
                 </div>
             </form>
 

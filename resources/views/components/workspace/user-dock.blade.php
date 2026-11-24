@@ -42,7 +42,7 @@
             </div>
         @else
             <div class="sg-dock__actions">
-                <a href="{{ route('profile.edit') }}" class="sg-btn sg-btn-ghost sg-btn-sm">
+                <a href="{{ route('account.show') }}" class="sg-btn sg-btn-ghost sg-btn-sm">
                     <i data-lucide="circle-user-round" aria-hidden="true"></i>
                     {{ __('workspace.dock.account') }}
                 </a>

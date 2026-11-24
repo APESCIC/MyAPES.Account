@@ -43,6 +43,7 @@ use App\Http\Controllers\MailReplyLinkController;
 use App\Http\Controllers\MailUnsubscribeController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PhoneVerificationPinController;
+use App\Http\Controllers\AccountSettingsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfileNotificationController;
 use App\Http\Controllers\PushServiceWorkerController;
@@ -301,7 +302,12 @@ Route::middleware([
     Route::delete('/support/attachments/{attachment}', [SupportAttachmentController::class, 'destroy'])
         ->name('support.attachments.destroy');
 
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/account', [AccountSettingsController::class, 'show'])->name('account.show');
+    Route::get('/account/profile', [AccountSettingsController::class, 'profile'])->name('account.profile');
+    Route::get('/account/security', [AccountSettingsController::class, 'security'])->name('account.security');
+    Route::get('/account/privacy', [AccountSettingsController::class, 'privacy'])->name('account.privacy');
+
+    Route::get('/profile', [AccountSettingsController::class, 'legacyProfileRedirect'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     // Step-up (#233): password.confirm via account.step-up. Wire later children
     // (MFA #231/#232) with the same middleware alias. Username #227 / email #228 use it here.
