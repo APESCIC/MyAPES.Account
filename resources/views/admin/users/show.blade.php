@@ -81,10 +81,10 @@
                     @endcan
                 </section>
             @else
-                <section class="panel" aria-labelledby="public-profile-title">
-                    <h2 id="public-profile-title">{{ __('admin.users.public_profile') }}</h2>
-                    @can('admin.users.manage')
-                        @if($canManageTarget)
+                @can('admin.users.manage')
+                    @if($canManageTarget)
+                        <section class="panel" aria-labelledby="public-profile-title">
+                            <h2 id="public-profile-title">{{ __('admin.users.public_profile') }}</h2>
                             <form method="post" action="{{ route('admin.users.profile.update', $managedUser) }}" enctype="multipart/form-data">
                                 @csrf
                                 @method('put')
@@ -105,13 +105,27 @@
                                 <label for="support_needs">{{ __('admin.users.support_needs_or_access_notes') }}</label>
                                 <textarea id="support_needs" name="support_needs">{{ old('support_needs', $profile?->support_needs) }}</textarea>
                                 @include('profile._account-fields')
+                                <fieldset>
+                                    <legend>{{ __('admin.users.hub.admin_tools.contact_preferences') }}</legend>
+                                    @foreach (['calls' => 'Calls', 'sms' => 'SMS', 'whatsapp' => 'WhatsApp', 'telegram' => 'Telegram', 'email' => 'Email'] as $channel => $label)
+                                        <label class="inline-check">
+                                            <input type="checkbox" name="contact_{{ $channel }}" value="1" @checked(old('contact_'.$channel, $preference?->{$channel} ?? false))>
+                                            <span>{{ $label }}</span>
+                                        </label>
+                                    @endforeach
+                                    <input type="hidden" name="contact_preferences_confirmed" value="1">
+                                </fieldset>
                                 <label for="avatar">{{ __('admin.users.avatar_photo') }}</label>
                                 <input id="avatar" type="file" name="avatar" accept="image/*">
                                 <div class="actions"><button type="submit">{{ __('admin.users.save_public_profile') }}</button></div>
                             </form>
-                        @endif
-                    @endcan
-                </section>
+                        </section>
+                    @else
+                        @include('admin.users.partials.hub-account-profile-readonly')
+                    @endif
+                @else
+                    @include('admin.users.partials.hub-account-profile-readonly')
+                @endcan
             @endif
 
         @endif

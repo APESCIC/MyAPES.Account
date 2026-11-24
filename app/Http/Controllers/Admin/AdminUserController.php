@@ -25,8 +25,10 @@ use App\Services\StaffProfilePhotoResponder;
 use App\Services\TotpTwoFactorService;
 use App\Services\UkPhoneNumber;
 use App\Services\VerificationResendService;
+use App\Support\ClientIdentityRules;
 use App\Support\DefaultJobRoles;
 use App\Support\JobRoleCapabilityPacks;
+use App\Support\PersonName;
 use DomainException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -577,25 +579,29 @@ class AdminUserController extends Controller
         abort_if($profile->hasDirectoryProtectedEligibility($managedUser), 403);
 
         $onboarding->normalizePhones($request, $phones);
-        $validated = $request->validate([
-            'preferred_name' => ['nullable', 'string', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:32'],
-            'organization' => ['nullable', 'string', 'max:255'],
-            'support_needs' => ['nullable', 'string'],
-            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
-            'address_line_1' => ['required', 'string', 'max:255'],
-            'address_line_2' => ['nullable', 'string', 'max:255'],
-            'town_city' => ['required', 'string', 'max:255'],
-            'county' => ['nullable', 'string', 'max:255'],
-            'postcode' => ['required', 'string', 'max:16', 'regex:/^[A-Za-z]{1,2}\d[A-Za-z\d]?\s*\d[A-Za-z]{2}$/'],
-            'mobile_number' => ['required', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
-            'landline_number' => ['nullable', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
-            'whatsapp_number' => ['nullable', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
-            'telegram_username' => ['nullable', 'string', 'max:32', 'regex:/^[A-Za-z0-9_]{5,32}$/'],
-            'services' => ['required', 'array', 'min:1'],
-            'services.*' => ['string', Rule::in(['apes-cic', 'shelter-rescue', 'pet-care-clinic'])],
-            'contact_preferences_confirmed' => ['accepted'],
-        ]);
+        $validated = $request->validate(array_merge(
+            ClientIdentityRules::nameAndDobRules(),
+            [
+                'preferred_name' => ['nullable', 'string', 'max:255'],
+                'phone' => ['nullable', 'string', 'max:32'],
+                'organization' => ['nullable', 'string', 'max:255'],
+                'support_needs' => ['nullable', 'string'],
+                'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
+                'address_line_1' => ['required', 'string', 'max:255'],
+                'address_line_2' => ['nullable', 'string', 'max:255'],
+                'town_city' => ['required', 'string', 'max:255'],
+                'county' => ['nullable', 'string', 'max:255'],
+                'postcode' => ['required', 'string', 'max:16', 'regex:/^[A-Za-z]{1,2}\d[A-Za-z\d]?\s*\d[A-Za-z]{2}$/'],
+                'mobile_number' => ['required', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
+                'landline_number' => ['nullable', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
+                'whatsapp_number' => ['nullable', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
+                'telegram_username' => ['nullable', 'string', 'max:32', 'regex:/^[A-Za-z0-9_]{5,32}$/'],
+                'services' => ['required', 'array', 'min:1'],
+                'services.*' => ['string', Rule::in(['apes-cic', 'shelter-rescue', 'pet-care-clinic'])],
+                'contact_preferences_confirmed' => ['accepted'],
+            ],
+        ), ClientIdentityRules::messages());
+        $validated['date_of_birth'] = ClientIdentityRules::normaliseDateOfBirth($validated['date_of_birth']);
 
         $existingProfile = $managedUser->profile;
         $previousAvatarPath = $existingProfile?->avatar_path;
@@ -614,10 +620,17 @@ class AdminUserController extends Controller
             );
         }
 
-        $userProfile = $managedUser->profile()->updateOrCreate(
-            ['user_id' => $managedUser->id],
-            $payload,
-        );
+        $userProfile = $managedUser->profile()->firstOrNew(['user_id' => $managedUser->id]);
+        $userProfile->fill($payload);
+        $changedFields = array_values(array_diff(array_keys($userProfile->getDirty()), ['user_id']));
+        $userProfile->save();
+        $managedUser->forceFill([
+            'name' => PersonName::display(
+                $validated['first_name'],
+                $validated['last_name'],
+                $managedUser->name,
+            ),
+        ])->save();
         $managedUser->serviceSelections()->whereNotIn('sub_core_key', $validated['services'])->delete();
         foreach ($validated['services'] as $service) {
             $managedUser->serviceSelections()->firstOrCreate(['sub_core_key' => $service]);
@@ -635,6 +648,7 @@ class AdminUserController extends Controller
 
         $auditLogger->record('profile.updated', $request->user(), $userProfile, [
             'target_user_id' => $managedUser->id,
+            'changed' => $changedFields,
             'avatar_updated' => $request->hasFile('avatar'),
         ]);
 

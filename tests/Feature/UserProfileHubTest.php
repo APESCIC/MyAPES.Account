@@ -358,6 +358,62 @@ class UserProfileHubTest extends TestCase
         $this->assertLessThanOrEqual(40, $queries, "Expected a lean overview query count, got {$queries}");
     }
 
+    public function test_staff_account_profile_is_read_only_and_masks_date_of_birth(): void
+    {
+        $staff = $this->userWithAccess(User::ROLE_STAFF);
+        $administrator = $this->userWithAccess(User::ROLE_ADMIN);
+        $client = User::factory()->create([
+            'identity_type' => User::IDENTITY_LOCAL,
+        ]);
+        $client->profile()->create([
+            'first_name' => 'Jordan',
+            'last_name' => 'Patel',
+            'date_of_birth' => '1990-03-14',
+            'address_line_1' => '12 High Street',
+            'town_city' => 'Leeds',
+            'postcode' => 'LS1 1AA',
+            'mobile_number' => '+447400111222',
+        ]);
+        $client->contactPreference()->update([
+            'email' => true,
+            'calls' => false,
+        ]);
+
+        $staffView = $this->actingAs($staff)
+            ->get(route('clients.show', ['client' => $client, 'tab' => 'account_profile']));
+        $staffView->assertOk()
+            ->assertSee('data-hub-account-profile', false)
+            ->assertSee('Jordan')
+            ->assertSee('12 High Street')
+            ->assertSee('data-hub-contact-preferences', false)
+            ->assertSee(__('admin.users.hub.profile.date_of_birth_hidden'))
+            ->assertDontSee('14/03/1990')
+            ->assertDontSee('1990-03-14')
+            ->assertDontSee('name="address_line_1"', false)
+            ->assertSee(__('admin.users.hub.staff_read_only'));
+
+        $this->actingAs($staff)
+            ->put(route('admin.users.profile.update', $client), [
+                'first_name' => 'Changed',
+                'last_name' => 'Name',
+                'date_of_birth' => '15/03/1990',
+                'address_line_1' => '1 Test Street',
+                'town_city' => 'London',
+                'postcode' => 'SW1A 1AA',
+                'mobile_number' => '+447400123456',
+                'services' => ['apes-cic'],
+                'contact_preferences_confirmed' => '1',
+            ])
+            ->assertForbidden();
+
+        $this->actingAs($administrator)
+            ->get(route('admin.public-accounts.show', ['user' => $client, 'tab' => 'account_profile']))
+            ->assertOk()
+            ->assertSee('name="date_of_birth"', false)
+            ->assertSee('14/03/1990')
+            ->assertSee('name="contact_email"', false);
+    }
+
     public function test_staff_clients_view_permission_is_named_for_core(): void
     {
         $this->assertTrue(

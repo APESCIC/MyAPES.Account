@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Core\Accounts\AuditLog;
 use App\Core\Accounts\StaffProfile;
 use App\Core\Accounts\User;
 use App\Services\AuthorizationProfile;
@@ -57,23 +58,34 @@ class AdminProfileManagementTest extends TestCase
         $this->actingAs($administrator)
             ->put(route('admin.users.profile.update', $public), [
                 'preferred_name' => 'Managed Public',
+                'first_name' => 'Managed',
+                'last_name' => 'Public',
+                'date_of_birth' => '14/03/1990',
                 'address_line_1' => '10 Admin Street',
                 'town_city' => 'London',
                 'postcode' => 'SW1A 1AA',
                 'mobile_number' => '+447400111222',
                 'services' => ['apes-cic'],
                 'contact_preferences_confirmed' => '1',
+                'contact_email' => '1',
             ])
             ->assertRedirect(route('admin.public-accounts.show', $public));
 
         $public->refresh();
         $this->assertSame('Managed Public', $public->profile->preferred_name);
+        $this->assertSame('Managed', $public->profile->first_name);
         $this->assertSame('10 Admin Street', $public->profile->address_line_1);
+        $this->assertSame('1990-03-14', $public->profile->date_of_birth?->format('Y-m-d'));
         $this->assertSame(['apes-cic'], $public->serviceSelections()->pluck('sub_core_key')->all());
-        $this->assertDatabaseHas('audit_logs', [
-            'event' => 'profile.updated',
-            'user_id' => $administrator->id,
-        ]);
+        $audit = AuditLog::query()
+            ->where('event', 'profile.updated')
+            ->where('user_id', $administrator->id)
+            ->sole();
+        $this->assertContains('first_name', $audit->context['changed']);
+        $this->assertContains('date_of_birth', $audit->context['changed']);
+        $this->assertArrayNotHasKey('previous_date_of_birth', $audit->context);
+        $this->assertStringNotContainsString('1990-03-14', json_encode($audit->context));
+        $this->assertStringNotContainsString('Managed Public', json_encode($audit->context));
     }
 
     public function test_admin_can_update_a_staff_profile_without_changing_directory_identity(): void

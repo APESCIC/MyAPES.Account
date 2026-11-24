@@ -99,6 +99,7 @@ trait BuildsUserProfileHub
                 ? $this->hubRoleLabels($managedUser)
                 : [],
             'hubCanManageAccess' => $this->hubViewerCanManageAccess($viewer, $managedUser),
+            'hubCanViewDateOfBirth' => $viewer->can(AuthorizationProfile::PERMISSION_CLIENT_SENSITIVE),
         ];
     }
 

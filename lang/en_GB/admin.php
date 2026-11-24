@@ -392,6 +392,11 @@ return [
                 'source' => 'Source',
             ],
             'staff_read_only' => 'Staff can view this profile and add notes. Only administrators can edit profile details.',
+            'profile' => [
+                'date_of_birth_hidden' => 'Hidden',
+                'yes' => 'Yes',
+                'no' => 'No',
+            ],
         ],
     ],
     'plugins' => [

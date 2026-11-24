@@ -58,15 +58,8 @@
         @endif
 
         @if($hubTab === 'account_profile')
-            <section class="panel" aria-labelledby="client-details-title">
-                <h2 id="client-details-title">{{ __('admin.users.public_profile') }}</h2>
-                <dl class="admin-definition-list">
-                    <div><dt>{{ __('admin.users.preferred_name') }}</dt><dd>{{ $profile?->preferred_name ?: '—' }}</dd></div>
-                    <div><dt>{{ __('admin.users.organisation') }}</dt><dd>{{ $profile?->organization ?: '—' }}</dd></div>
-                    <div><dt>{{ __('admin.users.phone') }}</dt><dd>{{ $profile?->phone ?: '—' }}</dd></div>
-                </dl>
-                <p class="muted">{{ __('admin.users.hub.staff_read_only') }}</p>
-            </section>
+            @include('admin.users.partials.hub-account-profile-readonly')
+            <p class="muted">{{ __('admin.users.hub.staff_read_only') }}</p>
         @endif
 
         @if($hubTab === 'account_management')
