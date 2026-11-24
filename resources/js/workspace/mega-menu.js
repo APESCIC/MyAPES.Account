@@ -169,7 +169,13 @@ export const initWorkspaceUserMenu = () => {
             panel.removeAttribute('hidden');
             trigger.setAttribute('aria-expanded', 'true');
             menu.classList.add('is-open');
-            focusableWithin(panel)[0]?.focus();
+            // Prefer the first menuitem so QA / theme controls do not steal focus (#1046).
+            const firstItem = panel.querySelector('[role="menuitem"]');
+            if (firstItem instanceof HTMLElement) {
+                firstItem.focus();
+            } else {
+                focusableWithin(panel)[0]?.focus();
+            }
         };
 
         trigger.addEventListener('click', () => {
