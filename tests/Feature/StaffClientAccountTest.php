@@ -185,7 +185,8 @@ class StaffClientAccountTest extends TestCase
     {
         $staff = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
         $this->actingAs($staff)->post(route('clients.store'), $this->payload([
-            'name' => 'Alex Caller',
+            'first_name' => 'Alex',
+            'last_name' => 'Caller',
             'email' => 'alex.caller@example.com',
             'mobile_number' => '07000900777',
             'pin' => '9876',
@@ -206,7 +207,9 @@ class StaffClientAccountTest extends TestCase
     private function payload(array $overrides = []): array
     {
         return array_merge([
-            'name' => 'Sam Client',
+            'first_name' => 'Sam',
+            'last_name' => 'Client',
+            'date_of_birth' => '14/03/1990',
             'email' => 'sam.client@example.com',
             'mobile_number' => '07000900123',
             'landline_number' => null,

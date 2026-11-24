@@ -26,6 +26,9 @@ final class StaffClientAccountCreator
     /**
      * @param  array{
      *     name: string,
+     *     first_name: string,
+     *     last_name: string,
+     *     date_of_birth: string,
      *     email?: ?string,
      *     mobile_number: string,
      *     landline_number?: ?string,
@@ -93,6 +96,9 @@ final class StaffClientAccountCreator
             $this->accounts->grantPublicBaseline($user);
             $user->contactPreference()->create([]);
             $user->profile()->create([
+                'first_name' => $input['first_name'],
+                'last_name' => $input['last_name'],
+                'date_of_birth' => $input['date_of_birth'],
                 'address_line_1' => $input['address_line_1'],
                 'address_line_2' => $input['address_line_2'] ?? null,
                 'town_city' => $input['town_city'],

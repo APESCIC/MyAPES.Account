@@ -46,8 +46,18 @@
         <p class="muted">{{ __('clients.create_intro') }}</p>
         <form method="post" action="{{ route('clients.store') }}" data-client-create-form>
             @csrf
-            <label for="name">{{ __('clients.fields.name') }}</label>
-            <input id="name" name="name" value="{{ old('name') }}" required autocomplete="name">
+            <label for="first_name">{{ __('clients.fields.first_name') }}</label>
+            <input id="first_name" name="first_name" value="{{ old('first_name') }}" required autocomplete="given-name">
+            @error('first_name')<p class="error">{{ $message }}</p>@enderror
+
+            <label for="last_name">{{ __('clients.fields.last_name') }}</label>
+            <input id="last_name" name="last_name" value="{{ old('last_name') }}" required autocomplete="family-name">
+            @error('last_name')<p class="error">{{ $message }}</p>@enderror
+
+            <label for="date_of_birth">{{ __('clients.fields.date_of_birth') }}</label>
+            <input id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth') }}" required placeholder="{{ __('clients.fields.date_of_birth_placeholder') }}" inputmode="numeric" autocomplete="bday">
+            <p class="muted">{{ __('clients.fields.date_of_birth_hint') }}</p>
+            @error('date_of_birth')<p class="error">{{ $message }}</p>@enderror
 
             <label for="email">{{ __('clients.fields.email') }}</label>
             <input id="email" name="email" type="email" value="{{ old('email') }}" autocomplete="email" data-client-email>

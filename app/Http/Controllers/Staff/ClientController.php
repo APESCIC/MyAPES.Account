@@ -15,6 +15,8 @@ use App\Services\AuthorizationProfile;
 use App\Services\StaffClientAccountCreator;
 use App\Services\TotpTwoFactorService;
 use App\Services\UkPhoneNumber;
+use App\Support\ClientIdentityRules;
+use App\Support\PersonName;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -95,28 +97,27 @@ class ClientController extends Controller
         ]);
 
         $length = PhoneVerificationPinService::MIN_LENGTH.','.PhoneVerificationPinService::MAX_LENGTH;
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['nullable', 'string', 'email', 'max:255'],
-            'mobile_number' => ['required', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
-            'landline_number' => ['nullable', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
-            'address_line_1' => ['required', 'string', 'max:255'],
-            'address_line_2' => ['nullable', 'string', 'max:255'],
-            'town_city' => ['required', 'string', 'max:255'],
-            'county' => ['nullable', 'string', 'max:255'],
-            'postcode' => ['required', 'string', 'max:16', 'regex:/^[A-Za-z]{1,2}\d[A-Za-z\d]?\s*\d[A-Za-z]{2}$/'],
-            'pin' => ['required', 'string', 'regex:/^\d{'.$length.'}$/', 'confirmed'],
-            'send_set_password_email' => ['sometimes', 'boolean'],
-            'staff_assisted_consent' => ['accepted'],
-        ], [
+        $validated = $request->validate(array_merge(
+            ClientIdentityRules::nameAndDobRules(),
+            ClientIdentityRules::addressAndMobileRules(),
+            [
+                'email' => ['nullable', 'string', 'email', 'max:255'],
+                'landline_number' => ['nullable', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
+                'pin' => ['required', 'string', 'regex:/^\d{'.$length.'}$/', 'confirmed'],
+                'send_set_password_email' => ['sometimes', 'boolean'],
+                'staff_assisted_consent' => ['accepted'],
+            ],
+        ), array_merge(ClientIdentityRules::messages(), [
             'pin.regex' => __('clients.validation.pin_invalid', [
                 'min' => PhoneVerificationPinService::MIN_LENGTH,
                 'max' => PhoneVerificationPinService::MAX_LENGTH,
             ]),
             'staff_assisted_consent.accepted' => __('clients.validation.consent_required'),
-        ]);
+        ]));
 
         $validated['postcode'] = strtoupper((string) preg_replace('/\s+/', ' ', trim($validated['postcode'])));
+        $validated['date_of_birth'] = ClientIdentityRules::normaliseDateOfBirth($validated['date_of_birth']);
+        $validated['name'] = PersonName::display($validated['first_name'], $validated['last_name']);
         $validated['send_set_password_email'] = $request->boolean('send_set_password_email');
 
         if ($validated['email'] === null) {
