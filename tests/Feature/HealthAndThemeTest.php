@@ -16,7 +16,7 @@ class HealthAndThemeTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'status' => 'ok',
-                'version' => '0.76.0',
+                'version' => '0.77.0',
                 'release' => 'development',
                 'maintenance' => false,
                 'checks' => [
@@ -52,7 +52,7 @@ class HealthAndThemeTest extends TestCase
             ->assertServiceUnavailable()
             ->assertExactJson([
                 'status' => 'unavailable',
-                'version' => '0.76.0',
+                'version' => '0.77.0',
                 'release' => 'development',
                 'maintenance' => false,
                 'checks' => [
@@ -164,7 +164,7 @@ class HealthAndThemeTest extends TestCase
             ->assertOk()
             ->assertSee('data-workspace-mega-root', false)
             ->assertSee('data-workspace-user-menu', false)
-            ->assertSee('href="'.route('profile.edit').'"', false)
+            ->assertSee('href="'.route('account.show').'"', false)
             ->assertSee('href="'.route('apes-cic.tickets.index').'"', false)
             ->assertSee('href="'.route('shelter.pets.index').'"', false)
             ->assertSee('href="'.route('petcare.pets.index').'"', false)

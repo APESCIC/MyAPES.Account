@@ -21,7 +21,7 @@ class StepUpAuthTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->from(route('profile.edit'))
+            ->from(route('account.security'))
             ->put(route('profile.password.update'), [
                 'current_password' => 'password',
                 'password' => self::NEW_PASSWORD,
@@ -43,13 +43,13 @@ class StepUpAuthTest extends TestCase
 
         $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
-            ->from(route('profile.edit'))
+            ->from(route('account.security'))
             ->put(route('profile.password.update'), [
                 'current_password' => 'password',
                 'password' => self::NEW_PASSWORD,
                 'password_confirmation' => self::NEW_PASSWORD,
             ])
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.security').'#password')
             ->assertSessionHas('status', __('flash.password_updated'));
 
         $user->refresh();
@@ -76,7 +76,7 @@ class StepUpAuthTest extends TestCase
             ->post(route('password.confirm.store'), [
                 'password' => 'password',
             ])
-            ->assertRedirect(route('profile.edit').'#change-password');
+            ->assertRedirect(route('account.security').'#password');
 
         $this->assertAuthenticatedAs($user);
         $this->assertSame('password', session('myapes.authentication_method'));
@@ -115,7 +115,7 @@ class StepUpAuthTest extends TestCase
             ->withSession([
                 'auth.password_confirmed_at' => now()->unix() - $timeout - 1,
             ])
-            ->from(route('profile.edit'))
+            ->from(route('account.security'))
             ->put(route('profile.password.update'), [
                 'current_password' => 'password',
                 'password' => self::NEW_PASSWORD,

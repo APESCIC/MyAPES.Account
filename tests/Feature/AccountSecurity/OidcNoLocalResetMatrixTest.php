@@ -121,19 +121,29 @@ class OidcNoLocalResetMatrixTest extends TestCase
         $this->assertDatabaseMissing('password_reset_tokens', ['email' => $oidc->email]);
     }
 
-    public function test_oidc_users_cannot_enrol_totp_or_open_passkey_registration(): void
+    public function test_oidc_public_users_cannot_enrol_totp(): void
     {
         $oidc = User::factory()
             ->cloudronIdentity('matrix-oidc-mfa-denied')
             ->create();
 
         $this->actingAs($oidc)
+            ->withSession(['auth.password_confirmed_at' => now()->unix()])
             ->post(route('two-factor.enable'))
             ->assertForbidden();
+    }
 
-        $this->actingAs($oidc)
+    public function test_directory_staff_oidc_can_open_passkey_registration_after_step_up(): void
+    {
+        $staff = User::factory()
+            ->protectedRole('staff')
+            ->directoryIdentity('matrix-oidc-staff-passkey')
+            ->create();
+
+        $this->actingAs($staff)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
             ->getJson(route('passkey.registration-options'))
-            ->assertForbidden();
+            ->assertOk()
+            ->assertJsonStructure(['options' => ['challenge']]);
     }
 }

@@ -3,6 +3,7 @@
 **Start**
 - [[Getting started|Getting-started]]
 - [[User guides|User-guides]]
+- [[Account settings|Account-settings]]
 - [[Staff, volunteers and students|Guide-Staff-volunteers-and-students]]
 - [[Admins|Guide-Admins]]
 - [[Roles and access|Roles-and-access]]

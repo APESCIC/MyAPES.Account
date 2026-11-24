@@ -42,7 +42,7 @@
 
             <div class="actions">
                 <button type="submit">{{ __('auth.two_factor.confirm') }}</button>
-                <a href="{{ route('profile.edit') }}">{{ __('auth.two_factor.back_to_profile') }}</a>
+                <a href="{{ route('account.security') }}">{{ __('auth.two_factor.back_to_profile') }}</a>
             </div>
         </form>
     </div>

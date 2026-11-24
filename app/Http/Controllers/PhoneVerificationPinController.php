@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Core\Accounts\PhoneVerificationPinService;
 use App\Services\AuditLogger;
 use App\Services\AuthorizationProfile;
+use App\Support\AccountSecurityRedirect;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -17,7 +18,14 @@ class PhoneVerificationPinController extends Controller
     public function update(Request $request, PhoneVerificationPinService $pins, AuditLogger $audit, AuthorizationProfile $profile): RedirectResponse
     {
         $user = $request->user();
-        abort_unless($user->isLocalPasswordIdentity() && ! $profile->hasDirectoryProtectedEligibility($user), 403);
+        abort_unless(
+            $user->isLocalPasswordIdentity()
+            || (
+                $profile->hasDirectoryProtectedEligibility($user)
+                && ($user->hasDirectoryIdentity() || $user->isCloudronIdentity())
+            ),
+            403,
+        );
 
         $length = PhoneVerificationPinService::MIN_LENGTH.','.PhoneVerificationPinService::MAX_LENGTH;
         $validated = $request->validate([
@@ -31,7 +39,7 @@ class PhoneVerificationPinController extends Controller
         $audit->record($changing ? 'profile.phone_pin_changed' : 'profile.phone_pin_set', $user, $user);
 
         return redirect()
-            ->to(route('profile.edit').'#phone-pin')
+            ->to(AccountSecurityRedirect::security('phone-pin'))
             ->with('status', __($changing ? 'public.phone_pin.changed' : 'public.phone_pin.saved'));
     }
 }

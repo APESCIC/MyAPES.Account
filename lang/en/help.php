@@ -25,11 +25,22 @@ return [
         'persist_signed_in' => 'When you are signed in, your choices are saved to your account and follow you on other devices.',
         'persist_guest' => 'When you are not signed in, your choices are remembered on this browser only.',
         'user_menu' => 'Open your avatar in the top app bar and use the Theme controls at the bottom of the menu.',
-        'profile' => 'Signed in? Open Profile and scroll to Appearance for the same controls with more space.',
+        'profile' => 'Signed in? Open Account and scroll to Appearance for the same controls with more space.',
         'guest_footer' => 'On pages with a site footer, guests can change theme from the Theme section in the footer.',
         'glassy' => 'Glassy uses frosted cards, teal links and soft gradient washes.',
         'jungle' => 'Jungle adds leafy corners and jungle colour while keeping the same layout.',
         'calm' => 'Calm mode hides decorative critters in the menu and footer and turns off Jungle leaf decorations for a quieter screen. Help tips on pages may still show a critter where it explains the page.',
+    ],
+
+    'account_settings' => [
+        'heading' => 'Account settings',
+        'intro' => 'Your own account is split into four pages with tabs at the top. Open Account from your avatar in the app bar, or choose Your account from Search (Ctrl K).',
+        'screenshots' => 'Design captures named ui-review-profile-*.png in docs/design-qa/ show the old single profile screen. The live app now uses the four tabs below instead.',
+        'account' => 'Account: sign-in email, username (public accounts), a summary of sign-in methods, and Appearance (skin, light or dark, calm mode).',
+        'profile' => 'Profile: personal and contact details, photo, and staff workplace details for directory-backed staff.',
+        'security' => 'Security: password, passkeys, authenticator app, telephone verification PIN, signed-in devices, and recent security activity.',
+        'privacy' => 'Privacy: contact preferences, optional email, push and email notification types, cookies summary, download my data, and deletion requests.',
+        'legacy' => 'Old /profile links and bookmarks redirect to the matching tab.',
     ],
 
     'staff' => [
@@ -84,7 +95,7 @@ return [
         ],
         'account' => [
             'heading' => 'Your account',
-            'body' => 'Staff Accounts sign in through Staff Login. Use Profile to check your details, two-factor authentication and passkeys.',
+            'body' => 'Staff Accounts sign in through Staff Login. Open Account from your avatar for four tabs: Account (sign-in and appearance), Profile (workplace details), Security (password, passkeys, two-factor authentication, telephone PIN and devices), and Privacy (notifications, contact preferences and data requests).',
         ],
         'support' => [
             'heading' => 'When something goes wrong',

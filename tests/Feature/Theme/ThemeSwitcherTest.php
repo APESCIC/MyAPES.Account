@@ -36,7 +36,7 @@ class ThemeSwitcherTest extends TestCase
             ->assertDontSee('data-theme-toggle', false);
 
         $this->actingAs($user)
-            ->get(route('profile.edit'))
+            ->get(route('account.show'))
             ->assertOk()
             ->assertSee('id="appearance"', false)
             ->assertSee(__('workspace.theme.appearance_heading'), false)

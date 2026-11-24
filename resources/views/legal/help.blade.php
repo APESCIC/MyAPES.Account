@@ -45,6 +45,19 @@
             </ul>
         </section>
 
+        <section id="account-settings">
+            <h2>{{ __('help.account_settings.heading') }}</h2>
+            <p>{{ __('help.account_settings.intro') }}</p>
+            <p class="muted">{{ __('help.account_settings.screenshots') }}</p>
+            <ul>
+                <li>{{ __('help.account_settings.account') }}</li>
+                <li>{{ __('help.account_settings.profile') }}</li>
+                <li>{{ __('help.account_settings.security') }}</li>
+                <li>{{ __('help.account_settings.privacy') }}</li>
+            </ul>
+            <p>{{ __('help.account_settings.legacy') }}</p>
+        </section>
+
         <section id="open-a-ticket">
             <h2>{{ __('public.legal.help.blade.open_a_ticket') }}</h2>
             <p>{{ __('public.legal.help.blade.open_a_ticket_intro') }}</p>

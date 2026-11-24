@@ -57,7 +57,7 @@ class ProfileNotificationController extends Controller
         ]);
 
         return redirect()
-            ->to(route('profile.edit').'#notifications')
+            ->to(route('account.privacy').'#notifications')
             ->with('status', __('flash.notifications_updated'));
     }
 
@@ -83,7 +83,7 @@ class ProfileNotificationController extends Controller
         ]);
 
         return redirect()
-            ->to(route('profile.edit').'#notifications')
+            ->to(route('account.privacy').'#notifications')
             ->with('status', __('flash.notifications_updated'));
     }
 
@@ -124,7 +124,7 @@ class ProfileNotificationController extends Controller
         ]);
 
         return redirect()
-            ->to(route('profile.edit').'#notifications')
+            ->to(route('account.privacy').'#notifications')
             ->with('status', __('flash.notifications_test_sent'));
     }
 }

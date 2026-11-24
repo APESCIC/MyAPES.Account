@@ -57,7 +57,8 @@ class EmailChangeController extends Controller
         }
 
         return redirect()
-            ->route('profile.edit')
+            ->route('account.show')
+            ->withFragment('account-email')
             ->with('status', __('flash.email_change_started'));
     }
 
@@ -73,12 +74,14 @@ class EmailChangeController extends Controller
             $this->emailChanges->cancel($user);
         } catch (DomainException $exception) {
             return redirect()
-                ->route('profile.edit')
+                ->route('account.show')
+                ->withFragment('account-email')
                 ->withErrors(['email' => $exception->getMessage()]);
         }
 
         return redirect()
-            ->route('profile.edit')
+            ->route('account.show')
+            ->withFragment('account-email')
             ->with('status', __('flash.email_change_cancelled'));
     }
 
@@ -87,16 +90,17 @@ class EmailChangeController extends Controller
         try {
             $this->emailChanges->confirm($user, $hash);
         } catch (DomainException $exception) {
-            $fallback = $request->user() ? 'profile.edit' : 'public.login';
+            $redirect = $request->user()
+                ? redirect()->route('account.show')->withFragment('account-email')
+                : redirect()->route('public.login');
 
-            return redirect()
-                ->route($fallback)
-                ->withErrors(['email' => $exception->getMessage()]);
+            return $redirect->withErrors(['email' => $exception->getMessage()]);
         }
 
         if ($request->user()?->is($user)) {
             return redirect()
-                ->route('profile.edit')
+                ->route('account.show')
+                ->withFragment('account-email')
                 ->with('status', __('flash.email_change_completed'));
         }
 

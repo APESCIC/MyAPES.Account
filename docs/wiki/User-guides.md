@@ -8,23 +8,27 @@
 ## Moving around the app
 
 - **Signed out:** use the links across the top of the page (Open a ticket, Bookings, Help, Public Login).
-- **Signed in:** each APES module has a **mega menu** in the top app bar; open your **avatar** for profile, theme and Sign out. Staff and administrators with both areas see a **Staff | Admin** switch in the bar.
+- **Signed in:** each APES module has a **mega menu** in the top app bar; open your **avatar** for **Account**, theme and Sign out. Staff and administrators with both areas see a **Staff | Admin** switch in the bar.
 - **Search:** press **Ctrl K** (⌘K on Mac) or use **Search** in the top bar to jump anywhere or run quick actions.
 - **Phone or narrow window:** use the **menu** button for the same links in a drawer.
 
 ## Appearance
 
 - **Glassy** (default) and **Jungle** skins, each in **light** or **dark** colour mode.
-- **Signed in:** open your **avatar** → Theme at the bottom of the menu, or **Profile → Appearance**. Choices save to your account.
+- **Signed in:** open your **avatar** → Theme at the bottom of the menu, or **Account → Appearance**. Choices save to your account.
 - **Guests:** use **Theme** in the site footer; choices stay on this browser until you sign in.
 - **Calm mode** (in the same control): hides menu and footer critters and turns off Jungle leaf decoration for a quieter screen.
+
+## Account settings (v0.77.0)
+
+Signed-in users manage their own record on four tabs: **Account**, **Profile**, **Security** and **Privacy**. Full detail: [[Account settings|Account-settings]].
 
 ## Public Accounts
 Guides for pet owners, clients and job applicants live in the app, so you never need a GitHub account:
 - Help: [https://myaccount.myapes.me.uk/help](https://myaccount.myapes.me.uk/help)
 - Privacy: [https://myaccount.myapes.me.uk/privacy](https://myaccount.myapes.me.uk/privacy)
 - Terms: [https://myaccount.myapes.me.uk/terms](https://myaccount.myapes.me.uk/terms)
-- Push notifications: [[Push notifications|Push-notifications]] (wiki; also **Profile → Notifications** in the app)
+- Push notifications: [[Push notifications|Push-notifications]] (wiki; also **Account → Privacy → Notifications** in the app)
 
 Questions: [Help for public users](https://github.com/APESCIC/MyAPES.Account/discussions/categories/help-for-public-users) in Discussions. Never post personal data.
 

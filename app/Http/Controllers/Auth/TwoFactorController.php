@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Services\TotpTwoFactorService;
+use App\Support\AccountSecurityRedirect;
 use DomainException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -25,11 +26,11 @@ class TwoFactorController extends Controller
         }
 
         if ($this->twoFactor->hasEnabledTwoFactor($user)) {
-            return redirect()->route('profile.edit');
+            return redirect()->to(AccountSecurityRedirect::security('two-factor'));
         }
 
         if (! $this->twoFactor->hasPendingEnrolment($user)) {
-            return redirect()->route('profile.edit');
+            return redirect()->to(AccountSecurityRedirect::security('two-factor'));
         }
 
         $plainCodes = $request->session()->get(TotpTwoFactorService::SESSION_PLAIN_RECOVERY_CODES);
@@ -53,7 +54,7 @@ class TwoFactorController extends Controller
             $enrolment = $this->twoFactor->beginEnrolment($user);
         } catch (DomainException $exception) {
             return redirect()
-                ->route('profile.edit')
+                ->to(AccountSecurityRedirect::security('two-factor'))
                 ->withErrors(['two_factor' => $exception->getMessage()]);
         }
 
@@ -88,7 +89,7 @@ class TwoFactorController extends Controller
         $request->session()->forget(TotpTwoFactorService::SESSION_PLAIN_RECOVERY_CODES);
 
         return redirect()
-            ->route('profile.edit')
+            ->to(AccountSecurityRedirect::security('two-factor'))
             ->with('status', __('flash.two_factor_enabled'));
     }
 
@@ -104,14 +105,14 @@ class TwoFactorController extends Controller
             $this->twoFactor->disable($user);
         } catch (DomainException $exception) {
             return redirect()
-                ->route('profile.edit')
+                ->to(AccountSecurityRedirect::security('two-factor'))
                 ->withErrors(['two_factor' => $exception->getMessage()]);
         }
 
         $request->session()->forget(TotpTwoFactorService::SESSION_PLAIN_RECOVERY_CODES);
 
         return redirect()
-            ->route('profile.edit')
+            ->to(AccountSecurityRedirect::security('two-factor'))
             ->with('status', __('flash.two_factor_disabled'));
     }
 
@@ -127,7 +128,7 @@ class TwoFactorController extends Controller
             $codes = $this->twoFactor->regenerateRecoveryCodes($user);
         } catch (DomainException $exception) {
             return redirect()
-                ->route('profile.edit')
+                ->to(AccountSecurityRedirect::security('two-factor'))
                 ->withErrors(['two_factor' => $exception->getMessage()]);
         }
 
@@ -137,7 +138,7 @@ class TwoFactorController extends Controller
         );
 
         return redirect()
-            ->route('profile.edit')
+            ->to(AccountSecurityRedirect::security('two-factor'))
             ->with('status', __('flash.two_factor_recovery_regenerated'));
     }
 }

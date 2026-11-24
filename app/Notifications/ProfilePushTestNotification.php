@@ -15,6 +15,6 @@ class ProfilePushTestNotification extends Notification
         return (new WebPushMessage)
             ->title(__('push.profile.test_title'))
             ->body(__('push.profile.test_body'))
-            ->data(['url' => route('profile.edit').'#notifications']);
+            ->data(['url' => route('account.privacy').'#notifications']);
     }
 }

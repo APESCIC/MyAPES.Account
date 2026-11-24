@@ -195,34 +195,32 @@ class PublicAccountLifecycleTest extends TestCase
     public function test_contact_grants_and_withdrawals_are_append_only_policy_versioned_events(): void
     {
         $user = User::factory()->create(['onboarding_completed_at' => now()]);
-
-        $this->actingAs($user)->put(route('profile.update'), [
-            'preferred_name' => 'Public',
+        $user->profile()->create([
+            'first_name' => 'Public',
+            'last_name' => 'Person',
+            'date_of_birth' => '1990-03-14',
             'address_line_1' => '1 Test Street',
             'town_city' => 'London',
             'postcode' => 'SW1A 1AA',
             'mobile_number' => '+447400123456',
-            'services' => ['apes-cic'],
-            'contact_preferences_confirmed' => '1',
-            'contact_email' => '1',
-        ])->assertRedirect(route('profile.edit'));
+        ]);
 
-        $this->actingAs($user)->put(route('profile.update'), [
-            'preferred_name' => 'Public',
-            'address_line_1' => '1 Test Street',
-            'town_city' => 'London',
-            'postcode' => 'SW1A 1AA',
-            'mobile_number' => '+447400123456',
-            'services' => ['apes-cic'],
-            'contact_preferences_confirmed' => '1',
-        ])->assertRedirect(route('profile.edit'));
+        $this->actingAs($user)->put(route('account.privacy.contact-preferences.update'), [
+            'channel' => 'email',
+            'granted' => '1',
+        ])->assertRedirect(route('account.privacy').'#email-opt-in');
+
+        $this->actingAs($user)->put(route('account.privacy.contact-preferences.update'), [
+            'channel' => 'email',
+            'granted' => '0',
+        ])->assertRedirect(route('account.privacy').'#email-opt-in');
 
         $events = $user->contactConsentEvents()->orderBy('id')->get();
         $this->assertCount(2, $events);
         $this->assertTrue($events[0]->granted);
         $this->assertFalse($events[1]->granted);
         $this->assertSame(config('myapes.consent.policy_version'), $events[0]->policy_version);
-        $this->assertSame('preferences', $events[0]->source);
+        $this->assertSame('account_privacy', $events[0]->source);
     }
 
     public function test_profile_links_to_the_configured_privacy_notice(): void
@@ -231,7 +229,7 @@ class PublicAccountLifecycleTest extends TestCase
         $user = User::factory()->create(['onboarding_completed_at' => now()]);
 
         $this->actingAs($user)
-            ->get(route('profile.edit'))
+            ->get(route('account.profile'))
             ->assertOk()
             ->assertSee('href="https://apes.example/privacy"', false)
             ->assertSeeText('Read the privacy notice');
@@ -243,7 +241,7 @@ class PublicAccountLifecycleTest extends TestCase
         $user = User::factory()->create(['onboarding_completed_at' => now()]);
 
         $this->actingAs($user)
-            ->get(route('profile.edit'))
+            ->get(route('account.profile'))
             ->assertOk()
             ->assertSee('href="'.route('privacy').'"', false)
             ->assertSeeText('Read the privacy notice');

@@ -70,7 +70,7 @@ Locale and key conventions: [localisation.md](localisation.md). Canonical labels
 | Canonical | Meaning / audience | Use in UI | Avoid | Lang key |
 | --- | --- | --- | --- | --- |
 | Dashboard | Signed-in home. | Nav **Dashboard**; title Dashboard. | Home (when the screen is the signed-in dashboard). | `terms.dashboard` |
-| Profile | Account profile / onboarding. | Nav **Profile**. | Account settings (unless a dedicated settings screen exists). | `terms.profile` |
+| Profile | Personal and contact details tab under Account settings. | Tab **Profile** (`/account/profile`); nav label **Account**. | A single combined profile/settings page (removed in v0.77.0). | `terms.profile` |
 | Submitted | Application received, awaiting review. | Application status badges and filters. | Pending (unless a distinct status exists). | `terms.status.submitted` |
 | Shortlisted | Application shortlisted by staff. | Status badges. | Under Review (that is a separate, earlier status). | `terms.status.shortlisted` |
 | Accepted | Application accepted. | Status badges. | Approved (prefer Accepted for recruitment applications). | `terms.status.accepted` |

@@ -43,6 +43,9 @@ use App\Http\Controllers\MailReplyLinkController;
 use App\Http\Controllers\MailUnsubscribeController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PhoneVerificationPinController;
+use App\Http\Controllers\AccountPrivacyController;
+use App\Http\Controllers\AccountSecurityController;
+use App\Http\Controllers\AccountSettingsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfileNotificationController;
 use App\Http\Controllers\PushServiceWorkerController;
@@ -301,7 +304,24 @@ Route::middleware([
     Route::delete('/support/attachments/{attachment}', [SupportAttachmentController::class, 'destroy'])
         ->name('support.attachments.destroy');
 
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/account', [AccountSettingsController::class, 'show'])->name('account.show');
+    Route::get('/account/profile', [AccountSettingsController::class, 'profile'])->name('account.profile');
+    Route::get('/account/security', [AccountSettingsController::class, 'security'])->name('account.security');
+    Route::delete('/account/security/sessions/others', [AccountSecurityController::class, 'destroyOtherSessions'])
+        ->middleware(['account.step-up', 'throttle:6,1'])
+        ->name('account.security.sessions.destroy-others');
+    Route::get('/account/privacy', [AccountSettingsController::class, 'privacy'])->name('account.privacy');
+    Route::put('/account/privacy/contact-preferences', [AccountPrivacyController::class, 'updateContactPreference'])
+        ->middleware('throttle:60,1')
+        ->name('account.privacy.contact-preferences.update');
+    Route::get('/account/privacy/data-export', [AccountPrivacyController::class, 'download'])
+        ->middleware('throttle:6,1')
+        ->name('account.privacy.data-export');
+    Route::post('/account/privacy/deletion-request', [AccountPrivacyController::class, 'requestDeletion'])
+        ->middleware('throttle:6,1')
+        ->name('account.privacy.deletion-request');
+
+    Route::get('/profile', [AccountSettingsController::class, 'legacyProfileRedirect'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     // Step-up (#233): password.confirm via account.step-up. Wire later children
     // (MFA #231/#232) with the same middleware alias. Username #227 / email #228 use it here.
@@ -323,7 +343,7 @@ Route::middleware([
     Route::get('/profile/two-factor', [TwoFactorController::class, 'show'])
         ->name('two-factor.setup');
     Route::post('/profile/two-factor', [TwoFactorController::class, 'store'])
-        ->middleware(['throttle:two-factor-manage'])
+        ->middleware(['account.step-up', 'throttle:two-factor-manage'])
         ->name('two-factor.enable');
     Route::post('/profile/two-factor/confirm', [TwoFactorController::class, 'confirm'])
         ->middleware(['throttle:two-factor-manage'])

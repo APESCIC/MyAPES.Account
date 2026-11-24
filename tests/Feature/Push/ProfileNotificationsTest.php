@@ -41,15 +41,25 @@ class ProfileNotificationsTest extends TestCase
         ]);
     }
 
+    public function test_legacy_profile_notifications_hash_maps_to_privacy(): void
+    {
+        $user = User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create();
+
+        $this->actingAs($user)
+            ->get(route('profile.edit'))
+            ->assertOk()
+            ->assertSee('account\\/privacy#notifications', false);
+    }
+
     #[DataProvider('roleTypeExpectations')]
-    public function test_profile_lists_only_types_available_to_each_role(string $role, array $mustSeeKeys, array $mustNotSeeKeys): void
+    public function test_privacy_lists_only_types_available_to_each_role(string $role, array $mustSeeKeys, array $mustNotSeeKeys): void
     {
         $user = User::factory()->protectedRole($role)->create([
             'email_verified_at' => now(),
             'onboarding_completed_at' => now(),
         ]);
 
-        $response = $this->actingAs($user)->get(route('profile.edit'));
+        $response = $this->actingAs($user)->get(route('account.privacy'));
         $response->assertOk();
 
         foreach ($mustSeeKeys as $labelKey) {
@@ -101,7 +111,7 @@ class ProfileNotificationsTest extends TestCase
         app(PushPreferenceInitializer::class)->seedDefaultsForUser($staff);
 
         $response = $this->actingAs($staff)
-            ->from(route('profile.edit'))
+            ->from(route('account.privacy'))
             ->put(route('profile.notifications.update'), [
                 'push' => [PushNotificationTypeKeys::TICKET_CLIENT_REPLY => '1'],
                 'email' => [PushNotificationTypeKeys::TICKET_CLIENT_REPLY => '1'],
@@ -110,7 +120,7 @@ class ProfileNotificationsTest extends TestCase
                 'quiet_hours_end' => '07:00',
             ]);
 
-        $response->assertRedirect(route('profile.edit').'#notifications');
+        $response->assertRedirect(route('account.privacy').'#notifications');
         $response->assertSessionHas('status', __('flash.notifications_updated'));
 
         $log = AuditLog::query()->where('event', 'profile.notifications.updated')->latest('id')->first();
@@ -225,9 +235,9 @@ class ProfileNotificationsTest extends TestCase
         }
 
         $this->actingAs($user)
-            ->from(route('profile.edit'))
+            ->from(route('account.privacy'))
             ->post(route('profile.notifications.devices.test', $device->id))
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.privacy'))
             ->assertSessionHasErrors('test');
     }
 
@@ -283,7 +293,7 @@ class ProfileNotificationsTest extends TestCase
         $user = User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create();
 
         $this->actingAs($user)
-            ->get(route('profile.edit'))
+            ->get(route('account.privacy'))
             ->assertOk()
             ->assertSee('push-pref-switch__input', false)
             ->assertSee('visually-hidden', false)

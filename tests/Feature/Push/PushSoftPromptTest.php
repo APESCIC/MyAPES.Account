@@ -46,7 +46,7 @@ class PushSoftPromptTest extends TestCase
     public function test_profile_includes_the_device_control_without_dismiss(): void
     {
         $this->actingAs($this->user)
-            ->get(route('profile.edit'))
+            ->get(route('account.privacy'))
             ->assertOk()
             ->assertSee('id="notifications"', false)
             ->assertSee(__('push.device.heading'), false)
@@ -57,7 +57,7 @@ class PushSoftPromptTest extends TestCase
     public function test_blocked_copy_lists_unblock_steps_for_each_browser(): void
     {
         $this->actingAs($this->user)
-            ->get(route('profile.edit'))
+            ->get(route('account.privacy'))
             ->assertOk()
             ->assertSee(__('push.device.unblock_chrome_label'), false)
             ->assertSee(__('push.device.unblock_edge_label'), false)

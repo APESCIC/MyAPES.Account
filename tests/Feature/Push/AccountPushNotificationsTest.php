@@ -132,6 +132,7 @@ class AccountPushNotificationsTest extends TestCase
         $applicant = $this->userReadyForPush(AuthorizationProfile::ROLE_STUDENT);
         $applicant->contactPreference()->updateOrCreate([], [
             'email' => true,
+            'marketing_email' => true,
             'policy_version' => 'test',
             'confirmed_at' => now(),
         ]);

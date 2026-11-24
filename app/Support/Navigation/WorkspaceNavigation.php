@@ -194,10 +194,10 @@ final class WorkspaceNavigation
         $items = [
             new NavItem(
                 'user.profile',
-                __('public.chrome.app.blade.profile'),
-                route('profile.edit'),
+                __('account.settings.menu_label'),
+                route('account.show'),
                 'circle-user-round',
-                ['profile.*', 'two-factor.setup'],
+                ['account.*', 'profile.*', 'two-factor.setup'],
                 $this->words('workspace.keywords.profile'),
             ),
         ];
@@ -295,7 +295,7 @@ final class WorkspaceNavigation
     {
         $overview = [
             new NavItem('dashboard', __('public.chrome.app.blade.dashboard'), route('dashboard'), 'layout-dashboard', ['dashboard'], $this->words('workspace.keywords.dashboard')),
-            new NavItem('profile', __('public.chrome.app.blade.profile'), route('profile.edit'), 'user-round', ['profile.*', 'two-factor.setup'], $this->words('workspace.keywords.profile')),
+            new NavItem('profile', __('account.settings.menu_label'), route('account.show'), 'user-round', ['account.*', 'profile.*', 'two-factor.setup'], $this->words('workspace.keywords.profile')),
         ];
 
         if ($this->accounts->hasStaffSideRole($user)) {
@@ -713,7 +713,7 @@ final class WorkspaceNavigation
         // Panel-switch quick actions retired with the Staff|Admin chrome (#1045).
 
         $actions[] = new QuickAction('view-site', __('workspace.header.view_site'), route('home'), 'external-link', '', $this->words('workspace.keywords.view_site'));
-        $actions[] = new QuickAction('account', __('workspace.quick.your_account'), route('profile.edit'), 'circle-user-round', '', $this->words('workspace.keywords.profile'));
+        $actions[] = new QuickAction('account', __('workspace.quick.your_account'), route('account.show'), 'circle-user-round', '', $this->words('workspace.keywords.profile'));
         $actions[] = new QuickAction('tour.restart', __('tour.restart'), route('dashboard', [GuidedTour::RESTART_QUERY => 1]), 'compass', '', $this->words('tour.keywords'));
 
         return $actions;

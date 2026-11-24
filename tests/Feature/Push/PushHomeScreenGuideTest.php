@@ -36,7 +36,7 @@ class PushHomeScreenGuideTest extends TestCase
     public function test_profile_renders_home_screen_guide_with_accessible_steps(): void
     {
         $response = $this->actingAs($this->user)
-            ->get(route('profile.edit'))
+            ->get(route('account.privacy'))
             ->assertOk()
             ->assertSee('push-home-screen-guide', false)
             ->assertSee(__('push.home_screen.heading'), false)

@@ -21,7 +21,7 @@ class FlashToastTest extends TestCase
     {
         $html = $this->actingAs(User::factory()->create())
             ->withSession(['status' => 'Profile updated.'])
-            ->get(route('profile.edit'))
+            ->get(route('account.profile'))
             ->assertOk()
             ->getContent();
 
@@ -52,7 +52,7 @@ class FlashToastTest extends TestCase
     public function test_pages_without_feedback_render_an_empty_region(): void
     {
         $this->actingAs(User::factory()->create())
-            ->get(route('profile.edit'))
+            ->get(route('account.show'))
             ->assertOk()
             ->assertSee('data-toast-region', false)
             ->assertDontSee('data-toast-tone', false);

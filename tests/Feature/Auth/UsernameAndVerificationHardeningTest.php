@@ -118,7 +118,7 @@ class UsernameAndVerificationHardeningTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->from(route('profile.edit'))
+            ->from(route('account.show'))
             ->put(route('profile.username.update'), [
                 'username' => 'fresh.username',
             ])
@@ -128,20 +128,20 @@ class UsernameAndVerificationHardeningTest extends TestCase
 
         $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
-            ->from(route('profile.edit'))
+            ->from(route('account.show'))
             ->put(route('profile.username.update'), [
                 'username' => 'admin',
             ])
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.show'))
             ->assertSessionHasErrors('username');
 
         $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
-            ->from(route('profile.edit'))
+            ->from(route('account.show'))
             ->put(route('profile.username.update'), [
                 'username' => 'Fresh.Username',
             ])
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.show', [], false).'#username')
             ->assertSessionHas('status', __('flash.username_updated'));
 
         $this->assertSame('fresh.username', $user->refresh()->username);
@@ -218,7 +218,7 @@ class UsernameAndVerificationHardeningTest extends TestCase
             ->assertRedirect(route('verification.notice'));
 
         $this->actingAs($unverified)
-            ->get(route('profile.edit'))
+            ->get(route('account.show'))
             ->assertRedirect(route('verification.notice'));
 
         $this->actingAs($unverified)

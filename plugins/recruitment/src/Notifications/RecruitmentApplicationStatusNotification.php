@@ -57,7 +57,7 @@ class RecruitmentApplicationStatusNotification extends Notification implements S
     {
         return $this->optionalWebPushChannels(
             $notifiable,
-            $this->optionalMailChannels($notifiable),
+            $this->optionalMailChannels($notifiable, ['mail'], 'marketing_email'),
             $this->pushRecipientContext(),
         );
     }

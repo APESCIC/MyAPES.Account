@@ -73,6 +73,9 @@
         <section>
             <h2>{{ __('public.legal.privacy.blade.your_rights') }}</h2>
             <p>You can ask APES CIC for a copy of the personal information we hold, and you can ask us to correct it or, where the law allows, delete it or limit how we use it. You can also complain to the Information Commissioner's Office if you are unhappy with how we handle your information.</p>
+            @auth
+                <p><a href="{{ route('account.privacy') }}">{{ __('account.settings.tabs.privacy') }}</a> — {{ __('account.settings.privacy_intro') }}</p>
+            @endauth
             @registrationOpen
                 <p>Signed-in public accounts can start a privacy request through APES CIC cases. If you cannot sign in, create a <a href="{{ route('public.register') }}">{{ __('public.legal.privacy.blade.public_account') }}</a> and open a case, or contact APES CIC through the <a href="https://www.apes.org.uk" rel="noopener noreferrer">{{ __('public.legal.help.blade.apes_website') }}</a>.</p>
             @else

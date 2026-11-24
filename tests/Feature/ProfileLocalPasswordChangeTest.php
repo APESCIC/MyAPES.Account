@@ -22,7 +22,7 @@ class ProfileLocalPasswordChangeTest extends TestCase
             'password' => 'password',
         ]);
 
-        $profile = $this->actingAs($public)->get(route('profile.edit'));
+        $profile = $this->actingAs($public)->get(route('account.security'));
         $profileHtml = $profile->getContent();
         $profile->assertOk()
             ->assertSeeText('Change password')
@@ -55,13 +55,13 @@ class ProfileLocalPasswordChangeTest extends TestCase
 
         $this->actingAs($public)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
-            ->from(route('profile.edit'))
+            ->from(route('account.security'))
             ->put(route('profile.password.update'), [
                 'current_password' => 'password',
                 'password' => self::NEW_PASSWORD,
                 'password_confirmation' => self::NEW_PASSWORD,
             ])
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.security').'#password')
             ->assertSessionHas('status', __('flash.password_updated'));
 
         $this->assertAuthenticatedAs($public);
@@ -111,13 +111,13 @@ class ProfileLocalPasswordChangeTest extends TestCase
 
         $this->actingAs($public)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
-            ->from(route('profile.edit'))
+            ->from(route('account.security'))
             ->put(route('profile.password.update'), [
                 'current_password' => 'wrong-password',
                 'password' => self::NEW_PASSWORD,
                 'password_confirmation' => self::NEW_PASSWORD,
             ])
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.security'))
             ->assertSessionHasErrors('current_password');
 
         $public->refresh();
@@ -126,13 +126,13 @@ class ProfileLocalPasswordChangeTest extends TestCase
 
         $this->actingAs($public)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
-            ->from(route('profile.edit'))
+            ->from(route('account.security'))
             ->put(route('profile.password.update'), [
                 'current_password' => 'password',
                 'password' => self::NEW_PASSWORD,
                 'password_confirmation' => 'Different-horse-42-change!',
             ])
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.security'))
             ->assertSessionHasErrors('password');
 
         $public->refresh();
@@ -178,7 +178,7 @@ class ProfileLocalPasswordChangeTest extends TestCase
 
         foreach ([$directoryPublic, $hybrid] as $directoryOnPublicProfile) {
             $page = $this->actingAs($directoryOnPublicProfile)
-                ->get(route('profile.edit'));
+                ->get(route('account.security'));
             $page->assertOk()
                 ->assertDontSee('name="current_password"', false)
                 ->assertDontSee('name="password_confirmation"', false)
@@ -187,17 +187,21 @@ class ProfileLocalPasswordChangeTest extends TestCase
             $this->assertDoesNotOfferImpersonation($page->getContent());
         }
 
-        foreach ([$directoryStaff, $localStaff] as $staff) {
-            $page = $this->actingAs($staff)->get(route('profile.edit'));
-            $page->assertOk()
-                ->assertDontSee('name="current_password"', false)
-                ->assertDontSee('name="password_confirmation"', false)
-                ->assertDontSee('Change password');
-            $this->assertDoesNotOfferImpersonation($page->getContent());
-        }
+        $directoryStaffPage = $this->actingAs($directoryStaff)->get(route('account.security'));
+        $directoryStaffPage->assertOk()
+            ->assertDontSee('name="current_password"', false)
+            ->assertDontSee('name="password_confirmation"', false)
+            ->assertDontSee('Change password');
+        $this->assertDoesNotOfferImpersonation($directoryStaffPage->getContent());
+
+        $localStaffPage = $this->actingAs($localStaff)->get(route('account.security'));
+        $localStaffPage->assertOk()
+            ->assertSee('name="current_password"', false)
+            ->assertSee('Change password', false);
+        $this->assertDoesNotOfferImpersonation($localStaffPage->getContent());
 
         $pendingPage = $this->actingAs($pendingFirstLogin)
-            ->get(route('profile.edit'));
+            ->get(route('account.security'));
         $pendingPage->assertOk()
             ->assertDontSee('name="current_password"', false)
             ->assertDontSee('Change password');
@@ -207,11 +211,10 @@ class ProfileLocalPasswordChangeTest extends TestCase
             $pendingFirstLogin,
             $directoryStaff,
             $hybrid,
-            $localStaff,
         ] as $refused) {
             $this->actingAs($refused)
                 ->withSession(['auth.password_confirmed_at' => now()->unix()])
-                ->from(route('profile.edit'))
+                ->from(route('account.security'))
                 ->put(route('profile.password.update'), [
                     'current_password' => 'password',
                     'password' => self::NEW_PASSWORD,

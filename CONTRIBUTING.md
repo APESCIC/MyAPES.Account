@@ -4,11 +4,11 @@ Thank you for helping. Please write in UK English, follow the [Code of Conduct](
 
 ## Before you start
 
-Run `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1` before any work. It stops if you have uncommitted changes, pulls the latest code, merges `origin/main` into your branch (never a rebase), installs changed dependencies, and checks the Herd preview at <https://myapes-account.test> serves that code on PHP 8.4 through FastCGI. If the pull or the merge fails, stop and ask for help. Don't force-push, `reset --hard` or rebase shared branches to get round it.
+Pull latest with Cursor's `repo-sync` skill before work (and before each issue): it fetches, merges `origin/main` into the milestone branch (never a rebase) and pushes. Then run `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1` for the Herd preview at <https://myapes-account.test>. The preview script may merge `main` locally without pushing — that does not replace `repo-sync`. If the pull or the merge fails, stop and ask for help. Don't force-push, `reset --hard` or rebase shared branches to get round it. Commit and push as and when needed on the milestone branch so the draft PR's CI stays current.
 
 ## How work ships
 
-Each milestone is named by the version at the start of its GitHub milestone title (for example `v0.60.0 Beta: Repository standards and Cloudron mailbox`), never by GitHub's milestone number, and ships once: all its issues are committed on one `milestone/vX-Y-Z-<slug>` branch behind one draft pull request, which is merged once with a merge commit, tagged and released as `vX.Y.Z`, and deployed. A hotfix can ship earlier only with Bambie's written approval on its issue.
+Each milestone is named by the version at the start of its GitHub milestone title (for example `v0.60.0 Beta: Repository standards and Cloudron mailbox`), never by GitHub's milestone number, and ships once: all its issues are committed and pushed as and when needed on one `milestone/vX-Y-Z-<slug>` branch behind one draft pull request, which is merged once with a merge commit, tagged and released as `vX.Y.Z`, and deployed. A hotfix can ship earlier only with Bambie's written approval on its issue.
 
 The rule, with the names, the version fields, the flow and the hotfix route, is [`.cursor/rules/version-shipping.mdc`](.cursor/rules/version-shipping.mdc). The decisions behind it are in [AGENTS.md](AGENTS.md#shipping-and-versioning).
 

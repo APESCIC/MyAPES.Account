@@ -206,7 +206,12 @@ class MailTemplateMatrixTest extends TestCase
     private function recipient(bool $emailPreference, ?string $email = null): User
     {
         $user = User::factory()->create($email === null ? [] : ['email' => $email]);
-        $user->contactPreference()->updateOrCreate([], ['email' => $emailPreference, 'policy_version' => 'test', 'confirmed_at' => now()]);
+        $user->contactPreference()->updateOrCreate([], [
+            'email' => $emailPreference,
+            'marketing_email' => $emailPreference,
+            'policy_version' => 'test',
+            'confirmed_at' => now(),
+        ]);
 
         return $user->fresh();
     }

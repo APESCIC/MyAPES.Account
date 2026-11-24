@@ -18,18 +18,18 @@ class OptionalMailPreferenceTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_optional_mail_sends_when_email_preference_is_on(): void
+    public function test_optional_mail_sends_when_marketing_email_preference_is_on(): void
     {
-        $user = $this->userWithEmailPreference(true);
+        $user = $this->userWithMarketingPreference(true);
 
         $user->notify($this->decision($user));
 
         $this->assertSame(1, $this->logged('recruitment.application_status'));
     }
 
-    public function test_optional_mail_is_skipped_when_email_preference_is_off_or_never_set(): void
+    public function test_optional_mail_is_skipped_when_marketing_email_preference_is_off_or_never_set(): void
     {
-        $off = $this->userWithEmailPreference(false);
+        $off = $this->userWithMarketingPreference(false);
         $unset = User::factory()->create();
 
         $off->notify($this->decision($off));
@@ -84,21 +84,38 @@ class OptionalMailPreferenceTest extends TestCase
         $this->assertSame(1, $this->logged('recruitment.application_status'));
     }
 
-    public function test_profile_explains_optional_and_mandatory_email(): void
+    public function test_privacy_page_explains_optional_email_opt_in(): void
     {
         $user = User::factory()->protectedRole(AuthorizationProfile::ROLE_SERVICE_USER)->create();
 
         $this->actingAs($user)
-            ->get(route('profile.edit'))
+            ->get(route('account.privacy'))
             ->assertOk()
-            ->assertSee('data-email-preference-help', false)
-            ->assertSeeText(__('public.profile._account-fields.blade.email_preference_help'));
+            ->assertSeeText(__('account.settings.privacy.email_opt_in.staff_email_help'))
+            ->assertSeeText(__('account.settings.privacy.email_opt_in.marketing_email_help'));
     }
 
     private function userWithEmailPreference(bool $email): User
     {
         $user = User::factory()->create();
-        $user->contactPreference()->updateOrCreate([], ['email' => $email, 'policy_version' => 'test', 'confirmed_at' => now()]);
+        $user->contactPreference()->updateOrCreate([], [
+            'email' => $email,
+            'marketing_email' => $email,
+            'policy_version' => 'test',
+            'confirmed_at' => now(),
+        ]);
+
+        return $user->fresh();
+    }
+
+    private function userWithMarketingPreference(bool $marketingEmail): User
+    {
+        $user = User::factory()->create();
+        $user->contactPreference()->updateOrCreate([], [
+            'marketing_email' => $marketingEmail,
+            'policy_version' => 'test',
+            'confirmed_at' => now(),
+        ]);
 
         return $user->fresh();
     }

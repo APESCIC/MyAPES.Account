@@ -153,14 +153,14 @@ class AccountSecurityMatrixTest extends TestCase
         $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
             ->put(route('profile.username.update'), ['username' => 'matrix.renamed'])
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.show', [], false).'#username')
             ->assertSessionHas('status', __('flash.username_updated'));
         $this->assertSame('matrix.renamed', $user->refresh()->username);
 
         $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
             ->post(route('profile.email.change'), ['email' => 'matrix.new@example.com'])
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.show', [], false).'#account-email')
             ->assertSessionHas('status', __('flash.email_change_started'));
 
         Notification::assertSentTo($user, EmailChangeStartedNotification::class);
@@ -175,7 +175,7 @@ class AccountSecurityMatrixTest extends TestCase
 
         $this->actingAs($user)
             ->get($url)
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.show', [], false).'#account-email')
             ->assertSessionHas('status', __('flash.email_change_completed'));
 
         $this->assertSame('matrix.new@example.com', $user->refresh()->email);
@@ -188,7 +188,7 @@ class AccountSecurityMatrixTest extends TestCase
                 'password' => self::STRONG_PASSWORD,
                 'password_confirmation' => self::STRONG_PASSWORD,
             ])
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.security').'#password')
             ->assertSessionHas('status', __('flash.password_updated'));
 
         $this->assertTrue(Hash::check(self::STRONG_PASSWORD, $user->refresh()->password));
@@ -205,6 +205,7 @@ class AccountSecurityMatrixTest extends TestCase
         ]);
 
         $this->actingAs($user)
+            ->withSession(['auth.password_confirmed_at' => now()->unix()])
             ->post(route('two-factor.enable'))
             ->assertRedirect(route('two-factor.setup'));
 
@@ -216,7 +217,7 @@ class AccountSecurityMatrixTest extends TestCase
 
         $this->actingAs($user)
             ->post(route('two-factor.confirm'), ['code' => $code])
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.security').'#two-factor')
             ->assertSessionHas('status', __('flash.two_factor_enabled'));
 
         $this->assertTrue($user->refresh()->hasEnabledTwoFactor());
@@ -242,7 +243,9 @@ class AccountSecurityMatrixTest extends TestCase
             ->assertRedirect(route('dashboard'));
         $this->assertAuthenticatedAs($enrolled);
 
+        $timeout = (int) config('auth.password_timeout');
         $this->actingAs($enrolled)
+            ->withSession(['auth.password_confirmed_at' => now()->unix() - $timeout - 1])
             ->delete(route('two-factor.disable'))
             ->assertRedirect(route('password.confirm'));
         $this->assertTrue($enrolled->refresh()->hasEnabledTwoFactor());
@@ -250,7 +253,7 @@ class AccountSecurityMatrixTest extends TestCase
         $this->actingAs($enrolled)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
             ->delete(route('two-factor.disable'))
-            ->assertRedirect(route('profile.edit'));
+            ->assertRedirect(route('account.security').'#two-factor');
 
         $this->assertFalse($enrolled->refresh()->hasEnabledTwoFactor());
         Notification::assertSentTo($enrolled, TwoFactorDisabledNotification::class);
@@ -264,7 +267,7 @@ class AccountSecurityMatrixTest extends TestCase
         $passkey = $user->passkeys()->firstOrFail();
 
         $this->actingAs($user)
-            ->get(route('profile.edit'))
+            ->get(route('account.security'))
             ->assertOk()
             ->assertSeeText(__('auth.passkeys.heading'))
             ->assertSeeText('Matrix Key');
@@ -274,7 +277,7 @@ class AccountSecurityMatrixTest extends TestCase
             ->assertStatus(423);
 
         $this->actingAs($user)
-            ->from(route('profile.edit'))
+            ->from(route('account.security'))
             ->delete(route('passkey.destroy', $passkey))
             ->assertRedirect(route('password.confirm'));
         $this->assertDatabaseHas('passkeys', ['id' => $passkey->id]);
@@ -290,7 +293,7 @@ class AccountSecurityMatrixTest extends TestCase
 
         $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
-            ->from(route('profile.edit'))
+            ->from(route('account.security'))
             ->delete(route('passkey.destroy', $passkey))
             ->assertRedirect();
         $this->assertDatabaseMissing('passkeys', ['id' => $passkey->id]);
@@ -316,7 +319,7 @@ class AccountSecurityMatrixTest extends TestCase
         $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
             ->post(route('two-factor.recovery.regenerate'))
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.security').'#two-factor')
             ->assertSessionHas(TotpTwoFactorService::SESSION_PLAIN_RECOVERY_CODES);
 
         $codes = session(TotpTwoFactorService::SESSION_PLAIN_RECOVERY_CODES);

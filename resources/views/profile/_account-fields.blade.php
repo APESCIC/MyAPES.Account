@@ -36,11 +36,7 @@
         <label class="inline-check"><input type="checkbox" name="services[]" value="{{ $key }}" @checked(in_array($key, old('services', $selectedServices), true))> {{ $label }}</label>
     @endforeach
 </fieldset>
-<fieldset>
-    <legend>{{ __('public.profile._account-fields.blade.optional_contact_preferences') }}</legend>
-    @foreach (['calls' => 'Calls', 'sms' => 'SMS', 'whatsapp' => 'WhatsApp', 'telegram' => 'Telegram', 'email' => 'Email'] as $channel => $label)
-        <label class="inline-check"><input type="checkbox" name="contact_{{ $channel }}" value="1" @checked(old('contact_'.$channel, $preference?->{$channel} ?? false))> {{ $label }}</label>
-    @endforeach
-    <small data-email-preference-help>{{ __('public.profile._account-fields.blade.email_preference_help') }}</small>
-    <input type="hidden" name="contact_preferences_confirmed" value="1">
-</fieldset>
+<p class="muted">
+    {{ __('public.profile._account-fields.blade.contact_preferences_on_privacy') }}
+    <a href="{{ route('account.privacy') }}#contact-preferences">{{ __('account.settings.tabs.privacy') }}</a>.
+</p>
