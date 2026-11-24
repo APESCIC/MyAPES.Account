@@ -156,7 +156,7 @@ return [
     ],
 
     'consent' => [
-        'policy_version' => env('CONTACT_CONSENT_POLICY_VERSION', '2026-08'),
+        'policy_version' => env('CONTACT_CONSENT_POLICY_VERSION', '2026-11'),
         'privacy_notice_url' => env('PRIVACY_NOTICE_URL'),
     ],
 

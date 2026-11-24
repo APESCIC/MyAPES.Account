@@ -221,7 +221,7 @@ class PublicAccountLifecycleTest extends TestCase
         $this->assertCount(2, $events);
         $this->assertTrue($events[0]->granted);
         $this->assertFalse($events[1]->granted);
-        $this->assertSame('2026-08', $events[0]->policy_version);
+        $this->assertSame('2026-11', $events[0]->policy_version);
         $this->assertSame('preferences', $events[0]->source);
     }
 
