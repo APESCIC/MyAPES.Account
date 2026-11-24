@@ -119,10 +119,10 @@ Other classes: `.sg-card`, `.sg-icon-btn`, `.sg-tabs` / `.sg-tab` (or `.admin-na
 
 ## Appearance, dark mode and print
 
-The **theme switcher** in the user menu, Profile → Appearance and the guest footer sets `data-skin` (`glassy` | `jungle`), `data-theme` (`light` | `dark`) and optional `data-calm`. Signed-in choices persist on the account; guests use `localStorage` (`myapes-appearance`). Dark mode sets every token to its dark value and retints the gradient from `#12262C` and `#107481` in Glassy. See [brand-guide-themes.md](brand-guide-themes.md).
+The **theme switcher** in the user menu, **Account → Appearance** and the guest footer sets `data-skin` (`glassy` | `jungle`), `data-theme` (`light` | `dark`) and optional `data-calm`. Signed-in choices persist on the account; guests use `localStorage` (`myapes-appearance`). Dark mode sets every token to its dark value and retints the gradient from `#12262C` and `#107481` in Glassy. See [brand-guide-themes.md](brand-guide-themes.md).
 
 Print hides the app bar, drawer, palette, header tools and mascot, and prints the content full width with no filters or gradients.
 
 ## Visual QA
 
-Screenshots for 0.44.0 are in `docs/design-qa/workspace-shell-*.png` (left-rail era). For 0.74.0 top app menu mock-ups, see epic #885 and related issues on GitHub; refresh this folder when new captures land in the repo.
+Screenshots for 0.44.0 are in `docs/design-qa/workspace-shell-*.png` (left-rail era). For 0.74.0 top app menu mock-ups, see epic #885 and related issues on GitHub; refresh this folder when new captures land in the repo. `docs/design-qa/ui-review-profile-*.png` shows the pre-v0.77.0 single profile page; account settings after v0.77.0 are four tabs at `/account`, `/account/profile`, `/account/security` and `/account/privacy`.

@@ -9,11 +9,11 @@
 
 Web push lets MyAPES Account show a short alert on your device when something needs attention — for example a ticket reply, a case update, or an account security change. It is **optional**. Email and in-app notices still work when push is off.
 
-**Where to manage it:** open **Profile** → **Notifications** (the **Notifications** section on your profile page).
+**Where to manage it:** open **Account** → **Privacy** and scroll to **Notifications**.
 
 ### Turn on push on this device
 
-1. Open **Profile** → **Notifications** and scroll to **Notifications on this device**.
+1. Open **Account** → **Privacy** → **Notifications** and scroll to **Notifications on this device**.
 2. Choose **Turn on**. The browser asks for permission only after you tap — the app does not request it on its own when you open the dashboard.
 3. When the browser allows it, this device appears under **Your devices**.
 
@@ -25,17 +25,17 @@ To stop push on this device, choose **Turn off**. To remove a device from your a
 
 Apple only supports web push when you open MyAPES Account from a **Home Screen icon**, not from a normal Safari tab. You need **iOS or iPadOS 16.4 or later**.
 
-On **Profile** → **Notifications**, when the app detects Safari without a Home Screen install, it shows **Add MyAPES Account to your Home Screen** with step-by-step instructions:
+On **Account** → **Privacy** → **Notifications**, when the app detects Safari without a Home Screen install, it shows **Add MyAPES Account to your Home Screen** with step-by-step instructions:
 
 1. In Safari, tap **Share** (square with an arrow).
 2. Tap **Add to Home Screen**.
 3. Keep **Open as Web App** switched on, then tap **Add**.
 4. Open MyAPES Account from the new Home Screen icon.
-5. Return to **Profile** → **Notifications** and choose **Turn on**, then allow notifications when asked.
+5. Return to **Account** → **Privacy** → **Notifications** and choose **Turn on**, then allow notifications when asked.
 
 ### Unblock notifications
 
-If you previously blocked notifications for this site, the profile page shows browser-specific steps under **Notifications are blocked for this site**. In short:
+If you previously blocked notifications for this site, the Privacy page shows browser-specific steps under **Notifications are blocked for this site**. In short:
 
 | Browser | What to do |
 | --- | --- |
@@ -44,7 +44,7 @@ If you previously blocked notifications for this site, the profile page shows br
 | Firefox | Shield or padlock → Connection security → More information → Notifications → Allow |
 | Safari | Safari → Settings for This Website → Notifications → Allow |
 
-Then choose **Turn on** again on **Profile** → **Notifications**.
+Then choose **Turn on** again on **Account** → **Privacy** → **Notifications**.
 
 ### Quiet hours
 
@@ -60,7 +60,7 @@ The [privacy notice](https://myaccount.myapes.me.uk/privacy) explains what MyAPE
 
 ## For staff, volunteers and students
 
-- Use **Profile** → **Notifications** the same way. Available types depend on your role (tickets, cases, consultations, recruitment, staff messages, and similar).
+- Use **Account** → **Privacy** → **Notifications** the same way. Available types depend on your role (tickets, cases, consultations, recruitment, staff messages, and similar).
 - **New ticket divisions** (staff and volunteers): choose which divisions may send you a **new ticket** push.
 - Reply to tickets and cases by email or in the app as usual; push is an extra channel, not a replacement.
 - Turn on push on each browser or Home Screen app you use for work.
@@ -84,7 +84,7 @@ Deploy and worker notes: [[Release and Cloudron deploy|Dev-Release-and-Cloudron-
 
 ## For developers
 
-- Core push code: `app/Core/Push`, service worker under `resources/push`, profile UI under `resources/views/components/push`.
+- Core push code: `app/Core/Push`, service worker under `resources/push`, notification UI under `resources/views/components/push` (Account → Privacy).
 - Queue: `push` (with `default` in `cloudron-run.sh`).
 - Delivery metadata: `push_deliveries` — type, status and hashed subscription id only; pruned after the retention period. No payloads or keys in the table.
 - Local HTTPS is required for subscribe flows on Herd: [[Local setup (Herd)|Dev-Local-setup-Herd#https-and-web-push]].

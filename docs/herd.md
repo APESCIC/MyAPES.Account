@@ -98,7 +98,7 @@ composer pre-pr-verify # pre-merge, then the Herd setup; -Fresh also runs demo:r
 
 ### Web push browser smoke (local Herd only)
 
-`npm run test:push-smoke` uses Playwright against `https://myapes-account.test`. It checks that the dashboard does not call `Notification.requestPermission` on load, then subscribes and unsubscribes on Profile → Notifications. CI skips it unless you opt in.
+`npm run test:push-smoke` uses Playwright against `https://myapes-account.test`. It checks that the dashboard does not call `Notification.requestPermission` on load, then subscribes and unsubscribes on Account → Privacy → Notifications. CI skips it unless you opt in.
 
 1. Install Chromium for Playwright once: `npx playwright install chromium`
 2. Configure VAPID keys locally (`.env` or Admin → Keys and secrets) and run the live preview gate so the site is up.
