@@ -67,7 +67,12 @@ class RecruitmentLifecycleMailTest extends TestCase
 
         $staff = $this->hrStaff();
         $applicant = User::factory()->protectedRole(AuthorizationProfile::ROLE_SERVICE_USER)->create();
-        $applicant->contactPreference()->updateOrCreate([], ['email' => true, 'policy_version' => 'test', 'confirmed_at' => now()]);
+        $applicant->contactPreference()->updateOrCreate([], [
+            'email' => true,
+            'marketing_email' => true,
+            'policy_version' => 'test',
+            'confirmed_at' => now(),
+        ]);
         $application = RecruitmentApplication::factory()
             ->forRole(RecruitmentRole::factory()->open()->create(['title' => 'Education officer']))
             ->forUser($applicant)

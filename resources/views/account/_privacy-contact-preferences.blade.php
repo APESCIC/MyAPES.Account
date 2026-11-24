@@ -13,9 +13,6 @@
 
     <div class="privacy-toggle-stack">
         @foreach ($channels as $channel => $label)
-            @php
-                $granted = (bool) ($preference?->{$channel} ?? false);
-            @endphp
             <form method="post" action="{{ route('account.privacy.contact-preferences.update') }}" class="privacy-toggle-row">
                 @csrf
                 @method('put')
@@ -26,7 +23,7 @@
                         type="checkbox"
                         name="granted"
                         value="1"
-                        @checked($granted)
+                        @checked($channelGranted[$channel] ?? false)
                         data-auto-submit
                     >
                     {{ $label }}

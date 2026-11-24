@@ -150,9 +150,21 @@ final class AccountSettingsViewData
      */
     public function privacyTab(User $user): array
     {
+        $preference = $user->contactPreference;
+
         return [
-            'preference' => $user->contactPreference,
+            'preference' => $preference,
             'policyVersion' => (string) config('myapes.consent.policy_version'),
+            'channelGranted' => [
+                'calls' => (bool) ($preference?->calls ?? false),
+                'sms' => (bool) ($preference?->sms ?? false),
+                'whatsapp' => (bool) ($preference?->whatsapp ?? false),
+                'telegram' => (bool) ($preference?->telegram ?? false),
+            ],
+            'emailGranted' => [
+                'email' => (bool) ($preference?->email ?? false),
+                'marketing_email' => (bool) ($preference?->marketing_email ?? false),
+            ],
             ...$this->notificationViewData($user),
         ];
     }

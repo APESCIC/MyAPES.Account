@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ __('account.settings.redirect_title') }} | MyAPES Account</title>
+    <title>{{ __('account.settings.redirect_title') }}{{ __('seo.title.title_suffix') }}</title>
     <meta http-equiv="refresh" content="0;url={{ route('account.show') }}">
     <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         (() => {

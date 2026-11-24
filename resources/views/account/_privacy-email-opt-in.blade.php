@@ -1,14 +1,14 @@
+@php
+    $emailChannels = [
+        'email' => __('account.settings.privacy.email_opt_in.staff_email'),
+        'marketing_email' => __('account.settings.privacy.email_opt_in.marketing_email'),
+    ];
+@endphp
 <section class="panel" id="email-opt-in" aria-labelledby="privacy-email-opt-in-title">
     <h2 id="privacy-email-opt-in-title">{{ __('account.settings.privacy.email_opt_in.heading') }}</h2>
     <p class="muted">{{ __('account.settings.privacy.email_opt_in.intro') }}</p>
 
-    @foreach ([
-        'email' => __('account.settings.privacy.email_opt_in.staff_email'),
-        'marketing_email' => __('account.settings.privacy.email_opt_in.marketing_email'),
-    ] as $channel => $label)
-        @php
-            $granted = (bool) ($preference?->{$channel} ?? false);
-        @endphp
+    @foreach ($emailChannels as $channel => $label)
         <form method="post" action="{{ route('account.privacy.contact-preferences.update') }}" class="privacy-toggle-row">
             @csrf
             @method('put')
@@ -19,7 +19,7 @@
                     type="checkbox"
                     name="granted"
                     value="1"
-                    @checked($granted)
+                    @checked($emailGranted[$channel] ?? false)
                     data-auto-submit
                 >
                 {{ $label }}
