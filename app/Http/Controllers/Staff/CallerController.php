@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Staff;
 
+use App\Core\Accounts\AccountClassifier;
 use App\Core\Accounts\CallerVerificationService;
 use App\Core\Accounts\CallLog;
 use App\Core\Accounts\User;
+use App\Core\Search\Providers\UsersRecordSearchProvider;
+use App\Core\Search\RecordSearch;
 use App\Http\Controllers\Controller;
 use App\Services\AuditLogger;
 use App\Services\AuthorizationProfile;
@@ -26,23 +29,18 @@ class CallerController extends Controller
         private readonly CallerVerificationService $verification,
     ) {}
 
-    public function index(Request $request): View
+    public function index(Request $request, RecordSearch $search, AccountClassifier $accounts): View
     {
         $this->authorizeStaff($request);
         $term = trim((string) $request->query('q', ''));
-        $callers = [];
+        $callers = collect();
 
         if (mb_strlen($term) >= 2) {
-            $like = '%'.str_replace(['%', '_'], ['\%', '\_'], $term).'%';
-            $callers = User::query()
-                ->where(static fn ($query) => $query
-                    ->where('name', 'like', $like)
-                    ->orWhere('email', 'like', $like)
-                    ->orWhere('username', 'like', $like))
-                ->orderBy('name')
-                ->limit(25)
-                ->get()
-                ->reject(fn (User $user): bool => $this->profile->hasDirectoryProtectedEligibility($user))
+            $results = $search->search($request->user(), $term, perType: 25);
+            $hits = collect($results['groups'])->firstWhere('type', 'users')['hits'] ?? [];
+            $callers = UsersRecordSearchProvider::usersForHits($hits)
+                ->reject(fn (User $user): bool => $accounts->isStaffSide($user)
+                    || $this->profile->hasDirectoryProtectedEligibility($user))
                 ->values();
         }
 
