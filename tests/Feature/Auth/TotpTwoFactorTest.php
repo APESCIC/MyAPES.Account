@@ -23,7 +23,7 @@ class TotpTwoFactorTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->get(route('profile.edit'))
+            ->get(route('account.security'))
             ->assertOk()
             ->assertSeeText(__('auth.two_factor.heading'))
             ->assertSee('id="two-factor"', false)
@@ -39,7 +39,8 @@ class TotpTwoFactorTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->from(route('profile.edit'))
+            ->withSession(['auth.password_confirmed_at' => now()->unix()])
+            ->from(route('account.security'))
             ->post(route('two-factor.enable'))
             ->assertRedirect(route('two-factor.setup'));
 
@@ -53,7 +54,7 @@ class TotpTwoFactorTest extends TestCase
         $this->actingAs($user)
             ->from(route('two-factor.setup'))
             ->post(route('two-factor.confirm'), ['code' => $code])
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.security').'#two-factor')
             ->assertSessionHas('status', __('flash.two_factor_enabled'));
 
         $user->refresh();
@@ -62,7 +63,7 @@ class TotpTwoFactorTest extends TestCase
         Notification::assertSentTo($user, TwoFactorEnabledNotification::class);
 
         $this->actingAs($user)
-            ->get(route('profile.edit'))
+            ->get(route('account.security'))
             ->assertOk()
             ->assertSeeText(__('auth.two_factor.enabled_status'))
             ->assertDontSee('otpauth://', false);
@@ -139,7 +140,7 @@ class TotpTwoFactorTest extends TestCase
         $user = $this->enrolledUser();
 
         $this->actingAs($user)
-            ->from(route('profile.edit'))
+            ->from(route('account.security'))
             ->delete(route('two-factor.disable'))
             ->assertRedirect(route('password.confirm'));
 
@@ -148,9 +149,9 @@ class TotpTwoFactorTest extends TestCase
 
         $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
-            ->from(route('profile.edit'))
+            ->from(route('account.security'))
             ->delete(route('two-factor.disable'))
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.security').'#two-factor')
             ->assertSessionHas('status', __('flash.two_factor_disabled'));
 
         $this->assertFalse($user->refresh()->hasEnabledTwoFactor());
@@ -164,7 +165,7 @@ class TotpTwoFactorTest extends TestCase
         $before = $user->two_factor_recovery_codes;
 
         $this->actingAs($user)
-            ->from(route('profile.edit'))
+            ->from(route('account.security'))
             ->post(route('two-factor.recovery.regenerate'))
             ->assertRedirect(route('password.confirm'));
 
@@ -172,9 +173,9 @@ class TotpTwoFactorTest extends TestCase
 
         $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
-            ->from(route('profile.edit'))
+            ->from(route('account.security'))
             ->post(route('two-factor.recovery.regenerate'))
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.security').'#two-factor')
             ->assertSessionHas('status', __('flash.two_factor_recovery_regenerated'))
             ->assertSessionHas(TotpTwoFactorService::SESSION_PLAIN_RECOVERY_CODES);
 
@@ -189,7 +190,7 @@ class TotpTwoFactorTest extends TestCase
 
         $this->actingAs($user)
             ->post(route('two-factor.enable'))
-            ->assertForbidden();
+            ->assertRedirect(route('staff.auth.step-up'));
     }
 
     public function test_invalid_totp_does_not_complete_login(): void

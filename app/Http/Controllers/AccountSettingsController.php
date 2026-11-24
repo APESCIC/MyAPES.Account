@@ -38,7 +38,13 @@ class AccountSettingsController extends Controller
 
     public function security(Request $request): View
     {
-        return $this->page($request, 'security', 'account.security');
+        $user = $request->user();
+
+        return view('account.security', [
+            'activeAccountTab' => 'security',
+            'user' => $user,
+            ...$this->viewData->securityTab($user, $request),
+        ]);
     }
 
     public function privacy(Request $request): View

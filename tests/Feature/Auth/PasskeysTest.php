@@ -110,7 +110,7 @@ class PasskeysTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->get(route('profile.edit'))
+            ->get(route('account.security'))
             ->assertOk()
             ->assertSeeText(__('auth.passkeys.heading'))
             ->assertSeeText('Laptop')
@@ -185,7 +185,7 @@ class PasskeysTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->from(route('profile.edit'))
+            ->from(route('account.security'))
             ->delete(route('passkey.destroy', $passkey))
             ->assertRedirect(route('password.confirm'));
 
@@ -193,7 +193,7 @@ class PasskeysTest extends TestCase
 
         $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
-            ->from(route('profile.edit'))
+            ->from(route('account.security'))
             ->delete(route('passkey.destroy', $passkey))
             ->assertRedirect();
 

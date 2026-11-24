@@ -12,8 +12,11 @@
             @include('account._subnav')
         </section>
 
-        <section class="panel" id="passkeys">
-            <p class="muted">{{ __('account.settings.security_body') }}</p>
-        </section>
+        @include('account._security-password')
+        @include('account._security-passkeys')
+        @include('account._security-two-factor')
+        @include('account._security-phone-pin')
+        @include('account._security-devices')
+        @include('account._security-activity')
     </div>
 @endsection

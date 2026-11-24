@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Core\Accounts\PhoneVerificationPinService;
 use App\Services\AuditLogger;
 use App\Services\AuthorizationProfile;
+use App\Support\AccountSecurityRedirect;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -31,7 +32,7 @@ class PhoneVerificationPinController extends Controller
         $audit->record($changing ? 'profile.phone_pin_changed' : 'profile.phone_pin_set', $user, $user);
 
         return redirect()
-            ->to(route('profile.edit').'#phone-pin')
+            ->to(AccountSecurityRedirect::security('phone-pin'))
             ->with('status', __($changing ? 'public.phone_pin.changed' : 'public.phone_pin.saved'));
     }
 }

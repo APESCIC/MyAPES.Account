@@ -24,7 +24,7 @@ class PhoneVerificationPinTest extends TestCase
         $user = User::factory()->accessLevel(User::ROLE_SERVICE_USER)->create();
 
         $this->actingAs($user)
-            ->get(route('profile.edit'))
+            ->get(route('account.security'))
             ->assertOk()
             ->assertSee('data-phone-pin', false)
             ->assertSeeText('You have not set a PIN yet.');
@@ -37,7 +37,7 @@ class PhoneVerificationPinTest extends TestCase
         $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => time()])
             ->put(route('profile.phone-pin.update'), ['pin' => self::PIN, 'pin_confirmation' => self::PIN])
-            ->assertRedirect(route('profile.edit').'#phone-pin')
+            ->assertRedirect(route('account.security').'#phone-pin')
             ->assertSessionHas('status', 'Your phone verification PIN is set.');
 
         $pins = app(PhoneVerificationPinService::class);
@@ -69,7 +69,7 @@ class PhoneVerificationPinTest extends TestCase
         $this->assertArrayNotHasKey('salt', PhoneVerificationPin::query()->first()->toArray());
 
         $this->actingAs($user)
-            ->get(route('profile.edit'))
+            ->get(route('account.security'))
             ->assertOk()
             ->assertSeeText('Your PIN is set.')
             ->assertDontSee(self::PIN);
@@ -85,7 +85,7 @@ class PhoneVerificationPinTest extends TestCase
         foreach ([['12a4', '12a4'], ['123', '123'], ['123456789', '123456789'], ['123456', '654321']] as [$pin, $confirmation]) {
             $this->actingAs($user)
                 ->withSession(['auth.password_confirmed_at' => time()])
-                ->from(route('profile.edit'))
+                ->from(route('account.security'))
                 ->put(route('profile.phone-pin.update'), ['pin' => $pin, 'pin_confirmation' => $confirmation])
                 ->assertSessionHasErrors('pin')
                 ->assertSessionMissing('_old_input.pin')

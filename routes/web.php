@@ -43,6 +43,7 @@ use App\Http\Controllers\MailReplyLinkController;
 use App\Http\Controllers\MailUnsubscribeController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PhoneVerificationPinController;
+use App\Http\Controllers\AccountSecurityController;
 use App\Http\Controllers\AccountSettingsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfileNotificationController;
@@ -305,6 +306,9 @@ Route::middleware([
     Route::get('/account', [AccountSettingsController::class, 'show'])->name('account.show');
     Route::get('/account/profile', [AccountSettingsController::class, 'profile'])->name('account.profile');
     Route::get('/account/security', [AccountSettingsController::class, 'security'])->name('account.security');
+    Route::delete('/account/security/sessions/others', [AccountSecurityController::class, 'destroyOtherSessions'])
+        ->middleware(['account.step-up', 'throttle:6,1'])
+        ->name('account.security.sessions.destroy-others');
     Route::get('/account/privacy', [AccountSettingsController::class, 'privacy'])->name('account.privacy');
 
     Route::get('/profile', [AccountSettingsController::class, 'legacyProfileRedirect'])->name('profile.edit');
@@ -329,7 +333,7 @@ Route::middleware([
     Route::get('/profile/two-factor', [TwoFactorController::class, 'show'])
         ->name('two-factor.setup');
     Route::post('/profile/two-factor', [TwoFactorController::class, 'store'])
-        ->middleware(['throttle:two-factor-manage'])
+        ->middleware(['account.step-up', 'throttle:two-factor-manage'])
         ->name('two-factor.enable');
     Route::post('/profile/two-factor/confirm', [TwoFactorController::class, 'confirm'])
         ->middleware(['throttle:two-factor-manage'])

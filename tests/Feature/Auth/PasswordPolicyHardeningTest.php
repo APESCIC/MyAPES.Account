@@ -72,26 +72,26 @@ class PasswordPolicyHardeningTest extends TestCase
 
         $this->actingAs($public)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
-            ->from(route('profile.edit'))
+            ->from(route('account.security'))
             ->put(route('profile.password.update'), [
                 'current_password' => 'password',
                 'password' => 'Short-horse',
                 'password_confirmation' => 'Short-horse',
             ])
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.security'))
             ->assertSessionHasErrors('password');
 
         $this->stubUncompromisedPasswords(false);
 
         $this->actingAs($public)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
-            ->from(route('profile.edit'))
+            ->from(route('account.security'))
             ->put(route('profile.password.update'), [
                 'current_password' => 'password',
                 'password' => self::STRONG_PASSWORD,
                 'password_confirmation' => self::STRONG_PASSWORD,
             ])
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.security'))
             ->assertSessionHasErrors('password');
 
         $public->refresh();
@@ -150,13 +150,13 @@ class PasswordPolicyHardeningTest extends TestCase
 
         $this->actingAs($public)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
-            ->from(route('profile.edit'))
+            ->from(route('account.security'))
             ->put(route('profile.password.update'), [
                 'current_password' => 'password',
                 'password' => self::STRONG_PASSWORD,
                 'password_confirmation' => self::STRONG_PASSWORD,
             ])
-            ->assertRedirect(route('profile.edit'));
+            ->assertRedirect(route('account.security').'#password');
 
         Notification::assertSentTo($public, PasswordChangedNotification::class);
     }

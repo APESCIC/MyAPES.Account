@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Core\Accounts\PhoneVerificationPinService;
 use App\Core\Accounts\StaffProfile;
 use App\Core\Accounts\User;
 use App\Core\Push\ProfileNotificationTypeCatalogue;
@@ -14,12 +13,11 @@ use App\Services\AuditLogger;
 use App\Services\AuthorizationProfile;
 use App\Services\ContactPreferenceUpdater;
 use App\Services\LocalPublicPasswordResetService;
-use App\Services\SecureEmailChangeService;
 use App\Services\SecureUploadService;
 use App\Services\SessionAuthorizationContext;
 use App\Services\StaffProfilePhotoResponder;
-use App\Services\TotpTwoFactorService;
 use App\Services\UkPhoneNumber;
+use App\Support\AccountSecurityRedirect;
 use App\Support\PersonName;
 use DomainException;
 use Illuminate\Contracts\View\View;
@@ -40,9 +38,6 @@ class ProfileController extends Controller
 
     public function edit(
         Request $request,
-        LocalPublicPasswordResetService $passwordResets,
-        SecureEmailChangeService $emailChanges,
-        TotpTwoFactorService $twoFactor,
         ProfileNotificationTypeCatalogue $notifications,
     ): View {
         $user = $request->user();
@@ -57,28 +52,7 @@ class ProfileController extends Controller
             ]);
         }
 
-        $canChangeLocalEmail = $user->isLocalPasswordIdentity();
-        $canManageTwoFactor = $user->isLocalPasswordIdentity();
-        $canManagePasskeys = $user->isLocalPasswordIdentity();
-        $plainRecoveryCodes = $request->session()->get(TotpTwoFactorService::SESSION_PLAIN_RECOVERY_CODES);
-
-        return view('profile.edit', [
-            'profile' => $user->profile,
-            'preference' => $user->contactPreference,
-            'selectedServices' => $user->serviceSelections()->pluck('sub_core_key')->all(),
-            'canChangeLocalPassword' => $passwordResets->canChangeOwnPassword($user),
-            'canChangeLocalUsername' => $user->isLocalPasswordIdentity(),
-            'phonePin' => app(PhoneVerificationPinService::class)->for($user),
-            'canChangeLocalEmail' => $canChangeLocalEmail,
-            'pendingEmailChange' => $canChangeLocalEmail ? $emailChanges->pendingFor($user) : null,
-            'canManageTwoFactor' => $canManageTwoFactor,
-            'twoFactorEnabled' => $canManageTwoFactor && $twoFactor->hasEnabledTwoFactor($user),
-            'twoFactorPending' => $canManageTwoFactor && $twoFactor->hasPendingEnrolment($user),
-            'plainRecoveryCodes' => is_array($plainRecoveryCodes) ? $plainRecoveryCodes : [],
-            'canManagePasskeys' => $canManagePasskeys,
-            'passkeys' => $canManagePasskeys ? $user->passkeys()->orderByDesc('created_at')->get() : collect(),
-            ...$notificationView,
-        ]);
+        return view('profile.edit', $notificationView);
     }
 
     /**
@@ -154,7 +128,9 @@ class ProfileController extends Controller
         $request->session()->regenerate();
         $authorizationContext->recordPassword($request, $user);
 
-        return redirect()->route('profile.edit')->with('status', __('flash.password_updated'));
+        return redirect()
+            ->to(AccountSecurityRedirect::security('password'))
+            ->with('status', __('flash.password_updated'));
     }
 
     public function update(
