@@ -76,6 +76,8 @@ Shipping follows Cursor's `github-milestone-completion` and `ship-gate` skills a
 | --- | --- |
 | Milestone branch pattern | `milestone/vX-Y-Z-<slug>` (`composer milestone:next` / `milestone:branch`) |
 | Milestone PR title | `v<version>: <milestone name>` |
+| Commit / push cadence | Commit and push as and when needed on the milestone branch (small Conventional Commits with `Refs #<n>`); never batch pushes until the end |
+| Mid-milestone sync | Cursor's `repo-sync` before each issue and before the ship gate (merge `origin/main`, push). `scripts\preview.ps1` may merge `main` locally without pushing — not a substitute |
 | Version files | `VERSION`, `resources/data/module-runtime-contract.json` (`application_version`); canonical release history in `changelog/releases/vX.Y.Z.json` (author with `php artisan myapes:changelog-prepare`, which also regenerates the compatibility aggregate `resources/data/releases.json` — never hand-edit the aggregate); then `composer milestone:bump -- vX.Y.Z --check` |
 | Release tooling | Push tag `vX.Y.Z`; `release.yml` publishes the GitHub Release |
 | Area labels | only `area:admin`, `area:public`, `area:auth`, `area:tests`, `area:cloudron` |
@@ -88,7 +90,7 @@ Development is tracked only in GitHub issues, sub-issues and `vMAJOR.MINOR.PATCH
 - Live milestones: https://github.com/APESCIC/MyAPES.Account/milestones. Read the live titles before assigning work.
 - Epic body keeps a checklist of sub-issues (`- [ ] #123 Short title`); each child is linked as a sub-issue.
 - Assignee: `apescic-director`.
-- An issue is done when its acceptance criteria are committed on the milestone branch; it closes when the milestone pull request merges (`Closes #<n>`), and the epic closes after the deploy.
+- An issue is done when its acceptance criteria are committed and pushed on the milestone branch; it closes when the milestone pull request merges (`Closes #<n>`), and the epic closes after the deploy.
 - Milestones close automatically via `.github/workflows/milestone-close.yml` / `composer milestone:close-ready` after a successful Cloudron deploy (or when nothing shipped). Agents who find a milestone still open with all its issues closed run `composer milestone:close-ready` themselves, with no question; empty and unversioned milestones stay open.
 - Before an issue is closed, tick every acceptance-criteria box in its body and the issue's line in the epic checklist.
 
@@ -122,6 +124,7 @@ Every Cloudron app is production. Read-only status/logs are fine; mutating or de
 - 2026-11-14: inbound connection is built in (no Import form); on live the mailbox password is set primarily in Admin → Settings → Keys and secrets; `INBOUND_MAIL_IMAP_PASSWORD` in `/app/data/shared/.env` is emergency/fallback only. Local reply testing uses `INBOUND_MAIL_DRIVER=herd` with Mailpit as fallback; `tickets:inbound-loop-check` proves the loop. Decided by Bambie (epic #807; clarified Keys-primary on live in epic #826).
 - 2026-11-14: Laravel Herd Pro is the only local development and testing stack (v0.63.1). Local mail goes to Herd's mail catcher; the Mailpit inbound driver stays for an optional standalone Mailpit when testing the reply loop. Decided by Bambie (epic #789).
 - The milestone branch is always the one `composer milestone:next` prints, even when an issue body names a slightly different slug.
+- 2026-11-24: mid-milestone sync and push cadence — run Cursor's `repo-sync` (merge `origin/main` and push) before each issue; commit and push as and when needed. `preview.ps1` merges `main` locally without pushing and is not a substitute. Decided by Bambie (epic #865 / plan for v0.77.0).
 - With Herd's PHP, `composer install` regenerating the optimised autoloader can take several minutes; it is slow, not stuck. Right after it, the first `/healthz` can exceed `scripts\preview.ps1`'s 60 s timeout; run the gate again.
 - Herd's own Vite process (`herd processes:start vite --site=myapes-account`) stopped with no output on 14 November 2026, so `scripts\preview.ps1` starts Vite itself with Herd's Node 22.
 - With `core.autocrlf=true` on Windows, `vendor/bin/pint --test` reports `line_ending` for every file in the CRLF working tree. Check changed files from their committed LF content or rely on CI; never commit Pint's CRLF "fixes".

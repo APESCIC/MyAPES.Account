@@ -9,7 +9,7 @@ Follows `.cursor/rules/version-shipping.mdc` and the `ship-gate` skill.
 
 ## Steps
 
-1. **Sync.** Run `scripts\preview.ps1` (it merges `origin/main` into the milestone branch).
+1. **Sync.** Run Cursor's `repo-sync` on the milestone branch (merge `origin/main` and push). Then run `scripts\preview.ps1` if you need the Herd preview; its local-only merge of `main` is not a substitute for `repo-sync`.
 2. **Set the version once.** `php artisan myapes:changelog-prepare --type=<patch|minor|major> --title="..." --issue=<n> --pr=<n>`, after checking with `--dry-run` that it names vX.Y.Z. It bumps from the current `VERSION` and sets `VERSION` and the runtime contract itself, so do not run `composer milestone:bump` first. Fill every TODO in the new record, update the version-pinned tests it names and the `array_slice` offset in `ReleaseHistoryCommandTest`, then `php artisan myapes:changelog-validate --base-ref=origin/main` and `composer milestone:bump -- vX.Y.Z --check`.
 3. **Last commit.** `chore: release vX.Y.Z`. Push.
 4. **Ready.** `gh pr ready <pr>`, then `gh pr checks <pr> --watch`. Fix failures on the same branch.
