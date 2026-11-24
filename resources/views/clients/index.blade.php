@@ -4,14 +4,34 @@
 
 @section('content')
     <div class="panel">
-        <h1>{{ __('clients.title') }}</h1>
-        <p class="muted">{{ __('clients.intro') }}</p>
+        <div class="clients-directory-header">
+            <div>
+                <h1>{{ __('clients.title') }}</h1>
+                <p class="muted">{{ __('clients.intro') }}</p>
+            </div>
+            <p>
+                <a class="button" href="#create">{{ __('clients.create_heading') }}</a>
+            </p>
+        </div>
 
-        <form method="get" action="{{ route('clients.index') }}">
+        <form method="get" action="{{ route('clients.index') }}" class="clients-directory-filters">
+            @if(($directoryTab ?? 'all') !== 'all')
+                <input type="hidden" name="directory_tab" value="{{ $directoryTab }}">
+            @endif
+            @if(($accountState ?? null) !== null)
+                <input type="hidden" name="account_state" value="{{ $accountState }}">
+            @endif
             <label for="q">{{ __('clients.search') }}</label>
             <input id="q" name="q" value="{{ $q ?? '' }}" placeholder="{{ __('clients.search_placeholder') }}" autocomplete="off" autofocus>
+            <label for="account_state_filter">{{ __('clients.account_state') }}</label>
+            <select id="account_state_filter" name="account_state" data-clients-state-filter>
+                <option value="">{{ __('clients.directory_tabs.all') }}</option>
+                <option value="{{ \App\Core\Accounts\User::ACCOUNT_STATE_ACTIVE }}" @selected(($accountState ?? null) === \App\Core\Accounts\User::ACCOUNT_STATE_ACTIVE)>{{ __('clients.account_states.active') }}</option>
+                <option value="{{ \App\Core\Accounts\User::ACCOUNT_STATE_PROFILE_ONLY }}" @selected(($accountState ?? null) === \App\Core\Accounts\User::ACCOUNT_STATE_PROFILE_ONLY)>{{ __('clients.account_states.profile_only') }}</option>
+                <option value="{{ \App\Core\Accounts\User::ACCOUNT_STATE_INVITED }}" @selected(($accountState ?? null) === \App\Core\Accounts\User::ACCOUNT_STATE_INVITED)>{{ __('clients.account_states.invited') }}</option>
+            </select>
             <button type="submit">{{ __('clients.search_submit') }}</button>
-            @if(($q ?? '') !== '' || ($nameReview ?? false) || ($missingDetails ?? false))
+            @if(($q ?? '') !== '' || ($nameReview ?? false) || ($missingDetails ?? false) || ($directoryTab ?? 'all') !== 'all')
                 <a href="{{ route('clients.index') }}">{{ __('clients.clear') }}</a>
             @endif
         </form>
@@ -22,9 +42,121 @@
         </p>
     </div>
 
-    @if(($missingDetails ?? false) || ($nameReview ?? false) || ($q ?? '') !== '')
+    @if($showDirectory ?? false)
+        <div class="panel clients-directory" data-clients-directory>
+            <h2>{{ $filterHeading ?? __('clients.directory_heading') }}</h2>
+
+            @php
+                $tabQuery = array_filter([
+                    'q' => ($q ?? '') !== '' ? $q : null,
+                ]);
+                $tabs = [
+                    'all' => __('clients.directory_tabs.all'),
+                    'with_account' => __('clients.directory_tabs.with_account'),
+                    'profile_only' => __('clients.directory_tabs.profile_only'),
+                    'invited' => __('clients.directory_tabs.invited'),
+                ];
+            @endphp
+
+            <div class="clients-directory-tabs" role="tablist" aria-label="{{ __('clients.directory_tabs_label') }}" data-clients-tablist>
+                @foreach($tabs as $tabKey => $tabLabel)
+                    @php
+                        $href = route('clients.index', array_filter([
+                            ...$tabQuery,
+                            'directory_tab' => $tabKey === 'all' ? null : $tabKey,
+                            'account_state' => match ($tabKey) {
+                                'with_account' => \App\Core\Accounts\User::ACCOUNT_STATE_ACTIVE,
+                                'profile_only' => \App\Core\Accounts\User::ACCOUNT_STATE_PROFILE_ONLY,
+                                'invited' => \App\Core\Accounts\User::ACCOUNT_STATE_INVITED,
+                                default => null,
+                            },
+                        ]));
+                        $selected = ($directoryTab ?? 'all') === $tabKey;
+                    @endphp
+                    <a
+                        id="clients-tab-{{ $tabKey }}"
+                        role="tab"
+                        href="{{ $href }}"
+                        class="clients-directory-tab"
+                        aria-selected="{{ $selected ? 'true' : 'false' }}"
+                        tabindex="{{ $selected ? '0' : '-1' }}"
+                        data-clients-tab="{{ $tabKey }}"
+                    >
+                        {{ $tabLabel }}
+                        <span class="clients-directory-tab-count">({{ $tabCounts[$tabKey] ?? 0 }})</span>
+                    </a>
+                @endforeach
+            </div>
+
+            @if(($directoryTab ?? 'all') === 'profile_only')
+                <p class="muted">{{ __('clients.profile_only_helper') }}</p>
+            @endif
+
+            @if($clients->isNotEmpty())
+                <div class="clients-directory-table-wrap" role="region" aria-label="{{ __('clients.directory_heading') }}">
+                    <table class="clients-directory-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">{{ __('clients.fields.name') }}</th>
+                                <th scope="col">{{ __('clients.fields.date_of_birth') }}</th>
+                                <th scope="col">{{ __('clients.fields.email') }}</th>
+                                <th scope="col">{{ __('clients.fields.mobile') }}</th>
+                                <th scope="col">{{ __('clients.fields.postcode') }}</th>
+                                <th scope="col">{{ __('clients.account_state') }}</th>
+                                <th scope="col">{{ __('clients.directory_actions') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($clients as $client)
+                                @php
+                                    $state = $client->accountState();
+                                    $badge = match ($state) {
+                                        \App\Core\Accounts\User::ACCOUNT_STATE_INVITED => 'invited',
+                                        \App\Core\Accounts\User::ACCOUNT_STATE_PROFILE_ONLY => 'profile_only',
+                                        default => 'active',
+                                    };
+                                @endphp
+                                <tr class="clients-directory-row" data-client-id="{{ $client->id }}" data-account-state="{{ $state }}">
+                                    <td data-label="{{ __('clients.fields.name') }}">
+                                        <a href="{{ route('clients.show', $client) }}">{{ $client->name }}</a>
+                                    </td>
+                                    <td data-label="{{ __('clients.fields.date_of_birth') }}">
+                                        {{ $client->profile?->date_of_birth?->format('d/m/Y') ?: '—' }}
+                                    </td>
+                                    <td data-label="{{ __('clients.fields.email') }}">
+                                        {{ $client->email ?: __('clients.no_email') }}
+                                    </td>
+                                    <td data-label="{{ __('clients.fields.mobile') }}">
+                                        {{ $client->profile?->mobile_number ?: '—' }}
+                                    </td>
+                                    <td data-label="{{ __('clients.fields.postcode') }}">
+                                        {{ $client->profile?->postcode ?: '—' }}
+                                    </td>
+                                    <td data-label="{{ __('clients.account_state') }}">
+                                        <span class="clients-state-badge clients-state-badge--{{ $badge }}">
+                                            {{ __('clients.account_states.'.$badge) }}
+                                        </span>
+                                    </td>
+                                    <td data-label="{{ __('clients.directory_actions') }}">
+                                        <a href="{{ route('clients.show', $client) }}">{{ __('clients.directory_view') }}</a>
+                                        @if($state === \App\Core\Accounts\User::ACCOUNT_STATE_INVITED)
+                                            <span class="muted">· {{ __('clients.directory_resend_invite_soon') }}</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @elseif(($q ?? '') !== '')
+                <p class="muted">{{ __('clients.no_results', ['query' => $q]) }}</p>
+            @else
+                <p class="muted">{{ __('clients.directory_empty') }}</p>
+            @endif
+        </div>
+    @elseif(($missingDetails ?? false) || ($nameReview ?? false))
         <div class="panel">
-            <h2>{{ $filterHeading ?? __('clients.search_results') }}</h2>
+            <h2>{{ $filterHeading }}</h2>
             @if($missingDetails ?? false)
                 <p class="muted">{{ __('clients.missing_details_intro') }}</p>
             @elseif($nameReview ?? false)
@@ -39,10 +171,8 @@
                 @endforeach
             @elseif($missingDetails ?? false)
                 <p class="muted">{{ __('clients.missing_details_empty') }}</p>
-            @elseif($nameReview ?? false)
-                <p class="muted">{{ __('clients.name_review_empty') }}</p>
             @else
-                <p class="muted">{{ __('clients.no_results', ['query' => $q]) }}</p>
+                <p class="muted">{{ __('clients.name_review_empty') }}</p>
             @endif
         </div>
     @endif

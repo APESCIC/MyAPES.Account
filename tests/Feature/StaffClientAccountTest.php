@@ -172,6 +172,52 @@ class StaffClientAccountTest extends TestCase
             ->assertSee(route('clients.show', $client), false);
     }
 
+    public function test_client_directory_tabs_badges_and_filters(): void
+    {
+        $staff = User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create();
+        $active = User::factory()->create([
+            'name' => 'Directory Active Person',
+            'account_state' => User::ACCOUNT_STATE_ACTIVE,
+        ]);
+        $invited = User::factory()->create([
+            'name' => 'Directory Invited Person',
+            'account_state' => User::ACCOUNT_STATE_INVITED,
+        ]);
+        $profileOnly = User::factory()->create([
+            'name' => 'Directory Profile Only',
+            'account_state' => User::ACCOUNT_STATE_PROFILE_ONLY,
+        ]);
+
+        $this->actingAs($staff)
+            ->get(route('clients.index'))
+            ->assertOk()
+            ->assertSee('role="tablist"', false)
+            ->assertSee('Active account')
+            ->assertSee('Invited')
+            ->assertSee('Profile only')
+            ->assertSee($active->name)
+            ->assertSee($invited->name)
+            ->assertSee($profileOnly->name);
+
+        $this->actingAs($staff)
+            ->get(route('clients.index', [
+                'directory_tab' => 'invited',
+                'account_state' => User::ACCOUNT_STATE_INVITED,
+            ]))
+            ->assertOk()
+            ->assertSee($invited->name)
+            ->assertDontSee($active->name)
+            ->assertDontSee($profileOnly->name)
+            ->assertSee('directory_tab=invited', false);
+
+        $this->actingAs($staff)
+            ->get(route('clients.index', ['account_state' => User::ACCOUNT_STATE_PROFILE_ONLY]))
+            ->assertOk()
+            ->assertSee($profileOnly->name)
+            ->assertDontSee($active->name)
+            ->assertSee(__('clients.profile_only_helper'));
+    }
+
     public function test_client_search_query_count_stays_constant_for_twenty_five_hits(): void
     {
         $staff = User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create();

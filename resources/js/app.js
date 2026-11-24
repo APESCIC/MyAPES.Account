@@ -62,6 +62,7 @@ import { initPushServiceWorker } from './push/register.js';
 import { initPushSoftPrompt } from './push/soft-prompt.js';
 import { initStaffMessageFilter } from './staff/message-filter.js';
 import { initOwnerPicker } from './tickets/owner-picker.js';
+import { initClientsDirectory } from './workspace/clients-directory.js';
 import { initCommandPalette } from './workspace/command-palette.js';
 import { initWorkspaceDrawer } from './workspace/drawer.js';
 import { initWorkspaceMegaMenu, initWorkspaceUserMenu } from './workspace/mega-menu.js';
@@ -156,6 +157,7 @@ initCommandPalette({
     createElement,
     beforeOpen: () => drawer.close({ restoreFocus: false }),
 });
+initClientsDirectory();
 initGuidedTour();
 initNotificationBell();
 initQaSwitcher();

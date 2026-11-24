@@ -3311,3 +3311,23 @@ caption {
         animation-iteration-count: 1 !important;
     }
 }
+
+/* Staff client directory (#927) */
+.clients-directory-header { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; align-items: flex-start; }
+.clients-directory-tabs { display: flex; gap: 0.35rem; overflow-x: auto; padding-bottom: 0.5rem; margin: 0.75rem 0 1rem; scrollbar-width: thin; }
+.clients-directory-tab { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.85rem; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent); text-decoration: none; color: var(--ink); background: color-mix(in srgb, var(--surface-raised) 80%, transparent); white-space: nowrap; }
+.clients-directory-tab[aria-selected="true"] { background: var(--brand-teal); color: #fff; border-color: transparent; }
+.clients-directory-tab-count { font-variant-numeric: tabular-nums; opacity: 0.85; }
+.clients-state-badge { display: inline-block; padding: 0.15rem 0.55rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600; border: 1px solid transparent; }
+.clients-state-badge--active { background: color-mix(in srgb, var(--sage) 22%, white); color: color-mix(in srgb, var(--sage) 70%, black); border-color: color-mix(in srgb, var(--sage) 40%, transparent); }
+.clients-state-badge--invited { background: color-mix(in srgb, var(--brand-cyan) 22%, white); color: color-mix(in srgb, var(--brand-deep-teal) 80%, black); border-color: color-mix(in srgb, var(--brand-cyan) 45%, transparent); }
+.clients-state-badge--profile_only { background: color-mix(in srgb, var(--muted) 18%, white); color: var(--ink); border-color: color-mix(in srgb, var(--muted) 40%, transparent); }
+.clients-directory-table { width: 100%; border-collapse: collapse; }
+.clients-directory-table th, .clients-directory-table td { text-align: left; padding: 0.55rem 0.4rem; border-bottom: 1px solid color-mix(in srgb, var(--ink) 12%, transparent); vertical-align: top; }
+@media (max-width: 720px) {
+  .clients-directory-table thead { display: none; }
+  .clients-directory-table, .clients-directory-table tbody, .clients-directory-table tr, .clients-directory-table td { display: block; width: 100%; }
+  .clients-directory-row { margin-bottom: 0.85rem; padding: 0.75rem; border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent); border-radius: 0.75rem; background: var(--surface-raised); }
+  .clients-directory-table td { border: 0; padding: 0.2rem 0; }
+  .clients-directory-table td::before { content: attr(data-label); display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 0.1rem; }
+}

@@ -42,8 +42,16 @@ class ClientController extends Controller
         $q = trim((string) $request->query('q', ''));
         $nameReview = $request->boolean('name_review');
         $missingDetails = $request->boolean('missing_details');
+        $directoryTab = $this->resolveDirectoryTab($request);
+        $accountState = $this->accountStateForTab($directoryTab);
         $clients = collect();
         $filterHeading = null;
+        $tabCounts = [
+            'all' => 0,
+            'with_account' => 0,
+            'profile_only' => 0,
+            'invited' => 0,
+        ];
 
         if ($missingDetails) {
             $clients = User::query()
@@ -73,13 +81,29 @@ class ClientController extends Controller
                 ->limit(100)
                 ->get();
             $filterHeading = __('clients.name_review_heading');
-        } elseif (strlen($q) >= 2) {
-            $results = $search->search($request->user(), $q, perType: 25);
-            $hits = collect($results['groups'])->firstWhere('type', 'users')['hits'] ?? [];
+        } else {
+            if (strlen($q) >= 2) {
+                $results = $search->search($request->user(), $q, perType: 25);
+                $hits = collect($results['groups'])->firstWhere('type', 'users')['hits'] ?? [];
+                $clients = UsersRecordSearchProvider::usersForHits($hits)
+                    ->reject(fn (User $user): bool => $accounts->isStaffSide($user))
+                    ->values();
+            } else {
+                $clients = User::query()
+                    ->tap(fn ($query) => $accounts->scopePublic($query))
+                    ->with(['profile', 'roles'])
+                    ->orderByDesc('updated_at')
+                    ->limit(100)
+                    ->get();
+            }
 
-            $clients = UsersRecordSearchProvider::usersForHits($hits)
-                ->reject(fn (User $user): bool => $accounts->isStaffSide($user))
-                ->values();
+            $tabCounts = $this->directoryTabCounts($clients);
+            if ($accountState !== null) {
+                $clients = $clients
+                    ->filter(static fn (User $user): bool => $user->accountState() === $accountState)
+                    ->values();
+            }
+            $filterHeading = __('clients.directory_heading');
         }
 
         return view('clients.index', [
@@ -88,9 +112,70 @@ class ClientController extends Controller
             'missingDetails' => $missingDetails,
             'filterHeading' => $filterHeading,
             'clients' => $clients,
+            'directoryTab' => $directoryTab,
+            'accountState' => $accountState,
+            'tabCounts' => $tabCounts,
+            'showDirectory' => ! $missingDetails && ! $nameReview,
             'pinMin' => PhoneVerificationPinService::MIN_LENGTH,
             'pinMax' => PhoneVerificationPinService::MAX_LENGTH,
         ]);
+    }
+
+    /**
+     * @return 'all'|'with_account'|'profile_only'|'invited'
+     */
+    private function resolveDirectoryTab(Request $request): string
+    {
+        $tab = (string) $request->query('directory_tab', '');
+        $state = (string) $request->query('account_state', '');
+
+        $fromState = match ($state) {
+            User::ACCOUNT_STATE_ACTIVE => 'with_account',
+            User::ACCOUNT_STATE_PROFILE_ONLY => 'profile_only',
+            User::ACCOUNT_STATE_INVITED => 'invited',
+            default => null,
+        };
+
+        if (in_array($tab, ['all', 'with_account', 'profile_only', 'invited'], true)) {
+            return $tab;
+        }
+
+        return $fromState ?? 'all';
+    }
+
+    private function accountStateForTab(string $tab): ?string
+    {
+        return match ($tab) {
+            'with_account' => User::ACCOUNT_STATE_ACTIVE,
+            'profile_only' => User::ACCOUNT_STATE_PROFILE_ONLY,
+            'invited' => User::ACCOUNT_STATE_INVITED,
+            default => null,
+        };
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, User>  $clients
+     * @return array{all: int, with_account: int, profile_only: int, invited: int}
+     */
+    private function directoryTabCounts($clients): array
+    {
+        $counts = [
+            'all' => $clients->count(),
+            'with_account' => 0,
+            'profile_only' => 0,
+            'invited' => 0,
+        ];
+
+        foreach ($clients as $client) {
+            match ($client->accountState()) {
+                User::ACCOUNT_STATE_ACTIVE => $counts['with_account']++,
+                User::ACCOUNT_STATE_PROFILE_ONLY => $counts['profile_only']++,
+                User::ACCOUNT_STATE_INVITED => $counts['invited']++,
+                default => null,
+            };
+        }
+
+        return $counts;
     }
 
     public function store(
