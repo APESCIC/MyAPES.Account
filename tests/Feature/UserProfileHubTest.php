@@ -3,11 +3,15 @@
 namespace Tests\Feature;
 
 use App\Core\Accounts\ClientNote;
+use App\Core\Accounts\PhoneVerificationPinService;
 use App\Core\Accounts\User;
+use App\Services\AuditLogger;
 use App\Services\AuthorizationProfile;
 use App\Services\ModuleInstallationSynchronizer;
 use App\Services\TotpTwoFactorService;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Plugins\Tickets\Models\SupportTicket;
 use Tests\TestCase;
 
@@ -44,7 +48,10 @@ class UserProfileHubTest extends TestCase
             ->assertOk()
             ->assertSee('data-profile-hub-tabs', false)
             ->assertSee(__('admin.users.hub.tabs.overview'))
+            ->assertSee(__('admin.users.hub.tabs.account_management'))
+            ->assertSee(__('admin.users.hub.tabs.account_profile'))
             ->assertSee(__('admin.users.hub.tabs.records'))
+            ->assertSee(__('admin.users.hub.tabs.activity'))
             ->assertSee(__('admin.users.hub.admin_tools.heading'));
 
         $this->actingAs($administrator)
@@ -64,8 +71,12 @@ class UserProfileHubTest extends TestCase
         $this->actingAs($staff)
             ->get(route('clients.show', $client))
             ->assertOk()
-            ->assertSee(__('admin.users.hub.staff_read_only'))
             ->assertDontSee(__('admin.users.hub.admin_tools.heading'));
+
+        $this->actingAs($staff)
+            ->get(route('clients.show', ['client' => $client, 'tab' => 'account_profile']))
+            ->assertOk()
+            ->assertSee(__('admin.users.hub.staff_read_only'));
 
         $this->actingAs($staff)
             ->get(route('clients.show', $otherStaff))
@@ -110,6 +121,62 @@ class UserProfileHubTest extends TestCase
             ->assertDontSee('Admin updated note.');
     }
 
+    public function test_staff_account_management_surfaces_identity_and_access_actions(): void
+    {
+        $staff = $this->userWithAccess(User::ROLE_STAFF);
+        $volunteer = $this->userWithAccess(User::ROLE_VOLUNTEER);
+        $client = User::factory()->create([
+            'identity_type' => User::IDENTITY_LOCAL,
+            'email' => 'workspace.client@example.com',
+            'password' => 'password',
+        ]);
+        app(AuditLogger::class)->record('auth.public_login_success', $client, $client, [
+            'channel' => 'test',
+        ]);
+
+        $staffView = $this->actingAs($staff)
+            ->get(route('clients.show', ['client' => $client, 'tab' => 'account_management']));
+        $staffView->assertOk()
+            ->assertSee('data-hub-account-summary', false)
+            ->assertSee($client->username)
+            ->assertSee('workspace.client@example.com')
+            ->assertSee(__('admin.users.hub.account_management.last_sign_in'))
+            ->assertSee('data-hub-password-reset', false)
+            ->assertSee('name="reason"', false)
+            ->assertSee('id="suspend-user"', false);
+
+        $this->actingAs($volunteer)
+            ->get(route('clients.show', ['client' => $client, 'tab' => 'account_management']))
+            ->assertOk()
+            ->assertSee('data-hub-account-summary', false)
+            ->assertDontSee('data-hub-password-reset', false)
+            ->assertDontSee('id="suspend-user"', false);
+    }
+
+    public function test_staff_can_reset_two_factor_for_a_local_client(): void
+    {
+        $staff = $this->userWithAccess(User::ROLE_STAFF);
+        $client = User::factory()->create([
+            'identity_type' => User::IDENTITY_LOCAL,
+            'password' => 'Password123!',
+        ]);
+
+        $twoFactor = app(TotpTwoFactorService::class);
+        $twoFactor->beginEnrolment($client);
+        $client->forceFill(['two_factor_confirmed_at' => now()])->save();
+        $this->assertTrue($twoFactor->hasEnabledTwoFactor($client->fresh()));
+
+        $this->actingAs($staff)
+            ->post(route('clients.two-factor.reset', $client), [
+                'confirm_two_factor_reset' => '1',
+                'reason' => 'Caller could not complete sign-in.',
+            ])
+            ->assertRedirect(route('clients.show', ['client' => $client, 'tab' => 'account_management']))
+            ->assertSessionHas('status');
+
+        $this->assertFalse($twoFactor->hasEnabledTwoFactor($client->fresh()));
+    }
+
     public function test_admin_can_reset_two_factor_for_local_client(): void
     {
         $administrator = $this->userWithAccess(User::ROLE_ADMIN);
@@ -126,8 +193,9 @@ class UserProfileHubTest extends TestCase
         $this->actingAs($administrator)
             ->post(route('admin.users.two-factor.reset', $client), [
                 'confirm_two_factor_reset' => '1',
+                'reason' => 'Caller could not complete sign-in.',
             ])
-            ->assertRedirect(route('admin.public-accounts.show', ['user' => $client, 'tab' => 'overview']))
+            ->assertRedirect(route('admin.public-accounts.show', ['user' => $client, 'tab' => 'account_management']))
             ->assertSessionHas('status');
 
         $this->assertFalse($twoFactor->hasEnabledTwoFactor($client->fresh()));
@@ -179,6 +247,242 @@ class UserProfileHubTest extends TestCase
             ->get(route('clients.show', ['client' => $client, 'tab' => 'records']))
             ->assertOk()
             ->assertSee(__('admin.users.hub.records.heading'));
+    }
+
+    public function test_records_and_activity_filters_persist_in_the_url_and_lazy_load(): void
+    {
+        $staff = $this->userWithAccess(User::ROLE_STAFF);
+        $client = User::factory()->create([
+            'identity_type' => User::IDENTITY_LOCAL,
+        ]);
+
+        SupportTicket::query()->create([
+            'sub_core_key' => 'apes-cic',
+            'user_id' => $client->id,
+            'service_area' => 'web_development',
+            'sub_category' => 'website_issue',
+            'subject' => 'CIC hub ticket',
+            'priority' => 'medium',
+            'status' => 'open',
+            'description' => 'Visible for APES CIC.',
+        ]);
+        $oldShelter = SupportTicket::query()->create([
+            'sub_core_key' => 'shelter-rescue',
+            'user_id' => $client->id,
+            'service_area' => 'operations_facilities',
+            'sub_category' => 'premises',
+            'subject' => 'Old shelter hub ticket',
+            'priority' => 'medium',
+            'status' => 'open',
+            'description' => 'Older shelter ticket.',
+        ]);
+        $oldShelter->forceFill(['created_at' => now()->subDays(40)])->save();
+
+        $this->actingAs($staff)
+            ->get(route('clients.show', ['client' => $client, 'tab' => 'overview']))
+            ->assertOk()
+            ->assertDontSee('data-hub-records', false)
+            ->assertDontSee('data-hub-activity', false)
+            ->assertDontSee('CIC hub ticket')
+            ->assertDontSee('data-hub-list-filters', false);
+
+        $today = now()->toDateString();
+        $filteredRecords = $this->actingAs($staff)
+            ->get(route('clients.show', [
+                'client' => $client,
+                'tab' => 'records',
+                'module' => 'apes-cic',
+                'from' => $today,
+            ]));
+        $filteredRecords->assertOk()
+            ->assertSee('data-hub-records', false)
+            ->assertSee('data-hub-list-filters', false)
+            ->assertDontSee('data-hub-activity', false)
+            ->assertSee('CIC hub ticket')
+            ->assertDontSee('Old shelter hub ticket')
+            ->assertSee('name="module"', false)
+            ->assertSee('value="apes-cic"', false)
+            ->assertSee('value="'.$today.'"', false);
+
+        $filteredActivity = $this->actingAs($staff)
+            ->get(route('clients.show', [
+                'client' => $client,
+                'tab' => 'activity',
+                'module' => 'apes-cic',
+                'from' => $today,
+            ]));
+        $filteredActivity->assertOk()
+            ->assertSee('data-hub-activity', false)
+            ->assertSee('data-hub-list-filters', false)
+            ->assertDontSee('data-hub-records', false)
+            ->assertSee('ticket.created')
+            ->assertSee('CIC hub ticket')
+            ->assertDontSee('Old shelter hub ticket');
+    }
+
+    public function test_legacy_hub_tabs_map_to_account_profile_and_account_management(): void
+    {
+        $administrator = $this->userWithAccess(User::ROLE_ADMIN);
+        $client = User::factory()->create([
+            'identity_type' => User::IDENTITY_LOCAL,
+        ]);
+
+        $this->actingAs($administrator)
+            ->get(route('admin.public-accounts.show', ['user' => $client, 'tab' => 'details']))
+            ->assertOk()
+            ->assertSee(__('admin.users.hub.tabs.account_profile'))
+            ->assertSee('name="address_line_1"', false);
+
+        $this->actingAs($administrator)
+            ->get(route('admin.public-accounts.show', ['user' => $client, 'tab' => 'access']))
+            ->assertOk()
+            ->assertSee(__('admin.users.hub.tabs.account_management'))
+            ->assertSee(__('admin.users.effective_access'));
+    }
+
+    public function test_profile_only_account_management_shows_create_account_panel(): void
+    {
+        $staff = $this->userWithAccess(User::ROLE_STAFF);
+        $client = User::factory()->create([
+            'identity_type' => User::IDENTITY_LOCAL,
+            'account_state' => User::ACCOUNT_STATE_PROFILE_ONLY,
+        ]);
+
+        $this->actingAs($staff)
+            ->get(route('clients.show', ['client' => $client, 'tab' => 'account_management']))
+            ->assertOk()
+            ->assertSee('data-hub-create-account-soon', false)
+            ->assertSee(__('admin.users.hub.create_account_soon.heading'))
+            ->assertDontSee(__('admin.users.effective_access'));
+
+        $administrator = $this->userWithAccess(User::ROLE_ADMIN);
+        $this->actingAs($administrator)
+            ->get(route('admin.public-accounts.show', ['user' => $client, 'tab' => 'account_management']))
+            ->assertOk()
+            ->assertSee('data-hub-create-account-soon', false)
+            ->assertDontSee('id="suspend-user"', false);
+    }
+
+    public function test_staff_overview_folds_caller_checks_and_stays_within_query_budget(): void
+    {
+        $staff = $this->userWithAccess(User::ROLE_STAFF);
+        $client = User::factory()->create([
+            'identity_type' => User::IDENTITY_LOCAL,
+        ]);
+        app(PhoneVerificationPinService::class)->set($client, '482917');
+
+        SupportTicket::query()->create([
+            'sub_core_key' => 'apes-cic',
+            'user_id' => $client->id,
+            'service_area' => 'web_development',
+            'sub_category' => 'website_issue',
+            'subject' => 'Overview ticket',
+            'priority' => 'medium',
+            'status' => 'open',
+            'description' => 'For the overview budget',
+        ]);
+
+        $overview = route('clients.show', ['client' => $client, 'tab' => 'overview']);
+
+        $this->actingAs($staff)
+            ->get($overview)
+            ->assertOk()
+            ->assertSee('data-hub-overview', false)
+            ->assertSee('data-caller-verification', false)
+            ->assertSee('data-call-logs', false)
+            ->assertSee(__('admin.users.hub.quick_actions'))
+            ->assertDontSee('Overview ticket');
+
+        $this->actingAs($staff)
+            ->get(route('clients.show', ['client' => $client, 'tab' => 'records']))
+            ->assertOk()
+            ->assertSee('Overview ticket');
+
+        $this->actingAs($staff)->get($overview)->assertOk();
+
+        $queries = 0;
+        DB::listen(static function (QueryExecuted $query) use (&$queries): void {
+            foreach ([
+                'client_notes',
+                'call_logs',
+                'phone_verification',
+                'support_tickets',
+                'pet_profiles',
+                'shelter_cases',
+                'pet_care_consultations',
+                'recruitment_applications',
+                'user_profiles',
+                'contact_preferences',
+            ] as $table) {
+                if (stripos($query->sql, $table) !== false) {
+                    $queries++;
+
+                    return;
+                }
+            }
+        });
+
+        $this->actingAs($staff)
+            ->get($overview)
+            ->assertOk();
+
+        $this->assertLessThanOrEqual(40, $queries, "Expected a lean overview query count, got {$queries}");
+    }
+
+    public function test_staff_account_profile_is_read_only_and_masks_date_of_birth(): void
+    {
+        $staff = $this->userWithAccess(User::ROLE_STAFF);
+        $administrator = $this->userWithAccess(User::ROLE_ADMIN);
+        $client = User::factory()->create([
+            'identity_type' => User::IDENTITY_LOCAL,
+        ]);
+        $client->profile()->create([
+            'first_name' => 'Jordan',
+            'last_name' => 'Patel',
+            'date_of_birth' => '1990-03-14',
+            'address_line_1' => '12 High Street',
+            'town_city' => 'Leeds',
+            'postcode' => 'LS1 1AA',
+            'mobile_number' => '+447400111222',
+        ]);
+        $client->contactPreference()->update([
+            'email' => true,
+            'calls' => false,
+        ]);
+
+        $staffView = $this->actingAs($staff)
+            ->get(route('clients.show', ['client' => $client, 'tab' => 'account_profile']));
+        $staffView->assertOk()
+            ->assertSee('data-hub-account-profile', false)
+            ->assertSee('Jordan')
+            ->assertSee('12 High Street')
+            ->assertSee('data-hub-contact-preferences', false)
+            ->assertSee(__('admin.users.hub.profile.date_of_birth_hidden'))
+            ->assertDontSee('14/03/1990')
+            ->assertDontSee('1990-03-14')
+            ->assertDontSee('name="address_line_1"', false)
+            ->assertSee(__('admin.users.hub.staff_read_only'));
+
+        $this->actingAs($staff)
+            ->put(route('admin.users.profile.update', $client), [
+                'first_name' => 'Changed',
+                'last_name' => 'Name',
+                'date_of_birth' => '15/03/1990',
+                'address_line_1' => '1 Test Street',
+                'town_city' => 'London',
+                'postcode' => 'SW1A 1AA',
+                'mobile_number' => '+447400123456',
+                'services' => ['apes-cic'],
+                'contact_preferences_confirmed' => '1',
+            ])
+            ->assertForbidden();
+
+        $this->actingAs($administrator)
+            ->get(route('admin.public-accounts.show', ['user' => $client, 'tab' => 'account_profile']))
+            ->assertOk()
+            ->assertSee('name="date_of_birth"', false)
+            ->assertSee('14/03/1990')
+            ->assertSee('name="contact_email"', false);
     }
 
     public function test_staff_clients_view_permission_is_named_for_core(): void

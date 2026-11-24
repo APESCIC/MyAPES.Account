@@ -156,6 +156,26 @@ return [
             'pattern' => '#^(sortKeys\(\);|member_count \?\? .*|\\$state = .*|\\$layerOrder\\[.*|enabled; \\$plugins = .*|, None)$#',
             'reason' => 'Blade PHP fragments / partial interpolations mis-read as UI copy during Admin extraction (#270).',
         ],
+        [
+            'path' => 'resources/views/admin/users/partials/hub-account-profile-readonly.blade.php',
+            'pattern' => "#format\\('d/m/Y'\\).*#",
+            'reason' => 'Hub profile DOB display expression with empty-value em dash; labels use __() (#931).',
+        ],
+        [
+            'path' => 'resources/views/admin/users/partials/hub-list-filters.blade.php',
+            'pattern' => '#null\\];#',
+            'reason' => 'Hub list filter defaults @php assignment false positive (#932).',
+        ],
+        [
+            'path' => 'resources/views/callers/partials/details.blade.php',
+            'pattern' => '#^profile;$#',
+            'reason' => 'Caller details @php profile alias false positive (#934).',
+        ],
+        [
+            'path' => 'resources/views/clients/index.blade.php',
+            'pattern' => "#'active', \\};#",
+            'reason' => 'Directory badge match() CSS key false positive (#927).',
+        ],
 
         [
             'pattern' => '/^(csrf|GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)$/i',

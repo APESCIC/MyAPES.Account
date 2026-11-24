@@ -124,7 +124,7 @@ return [
             'tickets' => 'Tickets',
             'cases' => 'Cases',
             'consultations' => 'Consultations',
-            'users' => 'Users',
+            'users' => 'People',
             'applications' => 'Applications',
             'heading' => 'Records',
             'searching' => 'Searching records…',

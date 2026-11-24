@@ -18,10 +18,10 @@
                     {{ __('clients.missing_details_prompt_no_block') }}
                 </p>
             @endif
-            <p class="muted">{{ __('admin.users.hub.staff_read_only') }}</p>
+            @unless($hubCanManageAccess ?? false)
+                <p class="muted">{{ __('admin.users.hub.staff_read_only') }}</p>
+            @endunless
             <p>
-                <a href="{{ route('callers.show', $client) }}">{{ __('clients.open_in_callers') }}</a>
-                ·
                 <a href="{{ route('clients.index') }}">{{ __('clients.back') }}</a>
             </p>
             @include('admin.users.partials.hub-tabs', [
@@ -30,6 +30,8 @@
                 'tabSubject' => $client,
             ])
         </div>
+
+        @include('admin.users.partials.hub-temporary-password')
 
         @if($plainPin)
             <div class="panel" data-client-pin-once>
@@ -41,31 +43,34 @@
         @endif
 
         @if($hubTab === 'overview')
-            @include('admin.users.partials.hub-actions')
-            @include('admin.users.partials.hub-notes', [
-                'noteStoreRoute' => 'clients.notes.store',
-                'noteSubject' => $client,
-                'isAdminHub' => false,
-            ])
+            <div data-hub-overview>
+                @include('callers.partials.verify')
+                @include('callers.partials.details')
+                @include('callers.partials.call-logs')
+                @include('admin.users.partials.hub-actions')
+                @include('admin.users.partials.hub-notes', [
+                    'noteStoreRoute' => 'clients.notes.store',
+                    'noteSubject' => $client,
+                    'isAdminHub' => false,
+                ])
+            </div>
         @endif
 
-        @if($hubTab === 'details')
-            <section class="panel" aria-labelledby="client-details-title">
-                <h2 id="client-details-title">{{ __('admin.users.public_profile') }}</h2>
-                <dl class="admin-definition-list">
-                    <div><dt>{{ __('admin.users.preferred_name') }}</dt><dd>{{ $profile?->preferred_name ?: '—' }}</dd></div>
-                    <div><dt>{{ __('admin.users.organisation') }}</dt><dd>{{ $profile?->organization ?: '—' }}</dd></div>
-                    <div><dt>{{ __('admin.users.phone') }}</dt><dd>{{ $profile?->phone ?: '—' }}</dd></div>
-                </dl>
-                <p class="muted">{{ __('admin.users.hub.staff_read_only') }}</p>
-            </section>
+        @if($hubTab === 'account_profile')
+            @include('admin.users.partials.hub-account-profile-readonly')
+            <p class="muted">{{ __('admin.users.hub.staff_read_only') }}</p>
         @endif
 
-        @if($hubTab === 'access')
-            <section class="panel">
-                <h2>{{ __('admin.users.effective_access') }}</h2>
-                <p class="muted">{{ __('admin.users.hub.staff_read_only') }}</p>
-            </section>
+        @if($hubTab === 'account_management')
+            @if($hubIsProfileOnly)
+                @include('admin.users.partials.hub-create-account-soon')
+            @else
+                @include('admin.users.partials.hub-account-summary')
+                @include('admin.users.partials.hub-account-actions')
+                @unless($hubCanManageAccess)
+                    <p class="muted">{{ __('admin.users.hub.staff_read_only') }}</p>
+                @endunless
+            @endif
         @endif
 
         @if($hubTab === 'records')

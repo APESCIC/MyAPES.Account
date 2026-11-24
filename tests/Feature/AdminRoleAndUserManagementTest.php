@@ -58,7 +58,10 @@ class AdminRoleAndUserManagementTest extends TestCase
         $this->assertNotNull($staff->fresh()->suspended_at);
 
         $this->actingAs($administrator)
-            ->delete("/admin/users/{$staff->id}/suspension")
+            ->from("/admin/staff-accounts/{$staff->id}")
+            ->call('DELETE', "/admin/users/{$staff->id}/suspension", [
+                'reason' => 'Access review complete',
+            ])
             ->assertRedirect("/admin/staff-accounts/{$staff->id}");
         $this->assertNull($staff->fresh()->suspended_at);
 

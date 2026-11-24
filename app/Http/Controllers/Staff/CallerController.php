@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Staff;
 
+use App\Core\Accounts\AccountClassifier;
 use App\Core\Accounts\CallerVerificationService;
 use App\Core\Accounts\CallLog;
 use App\Core\Accounts\User;
+use App\Core\Search\Providers\UsersRecordSearchProvider;
+use App\Core\Search\RecordSearch;
 use App\Http\Controllers\Controller;
 use App\Services\AuditLogger;
 use App\Services\AuthorizationProfile;
@@ -26,44 +29,31 @@ class CallerController extends Controller
         private readonly CallerVerificationService $verification,
     ) {}
 
-    public function index(Request $request): View
+    public function index(Request $request, RecordSearch $search, AccountClassifier $accounts): View
     {
         $this->authorizeStaff($request);
         $term = trim((string) $request->query('q', ''));
-        $callers = [];
+        $callers = collect();
 
         if (mb_strlen($term) >= 2) {
-            $like = '%'.str_replace(['%', '_'], ['\%', '\_'], $term).'%';
-            $callers = User::query()
-                ->where(static fn ($query) => $query
-                    ->where('name', 'like', $like)
-                    ->orWhere('email', 'like', $like)
-                    ->orWhere('username', 'like', $like))
-                ->orderBy('name')
-                ->limit(25)
-                ->get()
-                ->reject(fn (User $user): bool => $this->profile->hasDirectoryProtectedEligibility($user))
+            $results = $search->search($request->user(), $term, perType: 25);
+            $hits = collect($results['groups'])->firstWhere('type', 'users')['hits'] ?? [];
+            $callers = UsersRecordSearchProvider::usersForHits($hits)
+                ->reject(fn (User $user): bool => $accounts->isStaffSide($user)
+                    || $this->profile->hasDirectoryProtectedEligibility($user))
                 ->values();
         }
 
         return view('callers.index', ['term' => $term, 'callers' => $callers]);
     }
 
-    public function show(Request $request, User $caller): View
+    public function show(Request $request, User $caller): RedirectResponse
     {
         $this->authorizeStaff($request);
         $this->assertCaller($caller);
-        $unlocked = $this->verification->isUnlocked($request->session(), $request->user(), $caller);
 
-        return view('callers.show', [
-            'caller' => $caller,
-            'details' => $caller->profile,
-            'positions' => $unlocked ? null : $this->verification->positions($request->session(), $caller),
-            'lockedForSeconds' => $this->verification->lockedForSeconds($caller),
-            'verified' => $unlocked,
-            'unlockedUntil' => $unlocked ? $this->verification->unlockedUntil($request->session(), $caller) : null,
-            'callLogs' => CallLog::query()->where('caller_id', $caller->id)->with('staff:id,name')->latest('called_at')->latest('id')->limit(50)->get(),
-        ]);
+        // Caller workspace lives on Staff › Clients (#934).
+        return redirect()->route('clients.show', ['client' => $caller, 'tab' => 'overview']);
     }
 
     public function storeCallLog(Request $request, User $caller, AuditLogger $audit): RedirectResponse
@@ -86,7 +76,7 @@ class CallerController extends Controller
         ]);
         $audit->record('caller.call_logged', $request->user(), $caller, ['call_log_id' => $log->id]);
 
-        return redirect()->to(route('callers.show', $caller).'#call-logs')->with('status', __('callers.call_log_saved'));
+        return redirect()->to($this->callerReturnUrl($request, $caller, 'call-logs'))->with('status', __('callers.call_log_saved'));
     }
 
     public function verify(Request $request, User $caller): RedirectResponse
@@ -102,7 +92,7 @@ class CallerController extends Controller
         $result = $this->verification->attempt($request->session(), $request->user(), $caller, $digits);
 
         return redirect()
-            ->route('callers.show', $caller)
+            ->to($this->callerReturnUrl($request, $caller, 'verify'))
             ->with('status', match ($result) {
                 CallerVerificationService::RESULT_VERIFIED => __('callers.result.verified'),
                 CallerVerificationService::RESULT_LOCKED => __('callers.result.locked'),
@@ -117,7 +107,7 @@ class CallerController extends Controller
 
         $this->verification->endCall($request->session(), $request->user(), $caller);
 
-        return redirect()->route('callers.show', $caller)->with('status', __('callers.call_ended'));
+        return redirect()->to($this->callerReturnUrl($request, $caller, 'verify'))->with('status', __('callers.call_ended'));
     }
 
     public function updateDetails(Request $request, User $caller, UkPhoneNumber $phones, AuditLogger $audit): RedirectResponse
@@ -149,7 +139,21 @@ class CallerController extends Controller
 
         $audit->record('caller.details_updated', $request->user(), $caller, ['fields' => $changed]);
 
-        return redirect()->route('callers.show', $caller)->with('status', __('callers.details_saved'));
+        return redirect()
+            ->to($this->callerReturnUrl($request, $caller, 'details'))
+            ->with('status', __('callers.details_saved'));
+    }
+
+    private function callerReturnUrl(Request $request, User $caller, string $fragment = ''): string
+    {
+        $url = route('clients.show', ['client' => $caller, 'tab' => 'overview']);
+
+        return match ($fragment) {
+            'call-logs' => $url.'#call-logs',
+            'verify' => $url.'#verify',
+            'details' => $url.'#details',
+            default => $url,
+        };
     }
 
     private function authorizeStaff(Request $request): void

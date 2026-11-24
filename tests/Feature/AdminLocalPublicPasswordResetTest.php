@@ -32,23 +32,25 @@ class AdminLocalPublicPasswordResetTest extends TestCase
         $list->assertOk()
             ->assertSee('Reset password')
             ->assertSee(
-                route('admin.public-accounts.show', ['user' => $public, 'tab' => 'details']).'#local-password',
+                route('admin.public-accounts.show', ['user' => $public, 'tab' => 'account_management']).'#local-password',
                 false,
             );
         $this->assertDoesNotOfferImpersonation($list->getContent());
 
         $detail = $this->actingAs($administrator)
-            ->get(route('admin.public-accounts.show', ['user' => $public, 'tab' => 'details']));
+            ->get(route('admin.public-accounts.show', ['user' => $public, 'tab' => 'account_management']));
         $detail->assertOk()
             ->assertSee('Reset local password')
             ->assertSee('name="confirm"', false)
+            ->assertSee('name="reason"', false)
             ->assertDontSee('One-time temporary password');
         $this->assertDoesNotOfferImpersonation($detail->getContent());
 
         $response = $this->actingAs($administrator)
-            ->from(route('admin.public-accounts.show', ['user' => $public, 'tab' => 'details']))
+            ->from(route('admin.public-accounts.show', ['user' => $public, 'tab' => 'account_management']))
             ->post(route('admin.users.password-reset', $public), [
                 'confirm' => '1',
+                'reason' => 'Caller locked out of their account.',
             ]);
 
         $response->assertRedirect(route('admin.public-accounts.show', $public));
@@ -119,6 +121,7 @@ class AdminLocalPublicPasswordResetTest extends TestCase
         $this->actingAs($superAdmin)
             ->post(route('admin.users.password-reset', $public), [
                 'confirm' => '1',
+                'reason' => 'Support reset.',
             ])
             ->assertRedirect(route('admin.public-accounts.show', $public))
             ->assertSessionHas('temporary_password');
@@ -179,24 +182,24 @@ class AdminLocalPublicPasswordResetTest extends TestCase
             ->assertSeeText('Directory Public')
             ->assertSeeText('Pending Directory')
             ->assertDontSee(
-                route('admin.public-accounts.show', ['user' => $directoryPublic, 'tab' => 'details']).'#local-password',
+                route('admin.public-accounts.show', ['user' => $directoryPublic, 'tab' => 'account_management']).'#local-password',
                 false,
             )
             ->assertDontSee(
-                route('admin.staff-accounts.show', ['user' => $pendingFirstLogin, 'tab' => 'details']).'#local-password',
+                route('admin.staff-accounts.show', ['user' => $pendingFirstLogin, 'tab' => 'account_management']).'#local-password',
                 false,
             );
         $this->assertDoesNotOfferImpersonation($staffList->getContent());
 
         $this->actingAs($administrator)
-            ->get(route('admin.public-accounts.show', ['user' => $directoryPublic, 'tab' => 'details']))
+            ->get(route('admin.public-accounts.show', ['user' => $directoryPublic, 'tab' => 'account_management']))
             ->assertOk()
             ->assertSeeText('This account uses Cloudron directory sign-in.')
             ->assertDontSee('Reset local password')
             ->assertDontSee('name="confirm"', false);
 
         $this->actingAs($administrator)
-            ->get(route('admin.staff-accounts.show', ['user' => $pendingFirstLogin, 'tab' => 'details']))
+            ->get(route('admin.staff-accounts.show', ['user' => $pendingFirstLogin, 'tab' => 'account_management']))
             ->assertOk()
             ->assertSeeText('This directory account has not completed Staff Login yet.')
             ->assertSeeText('Pending first login')
@@ -204,7 +207,7 @@ class AdminLocalPublicPasswordResetTest extends TestCase
             ->assertDontSee('Reset local password');
 
         $this->actingAs($administrator)
-            ->get(route('admin.staff-accounts.show', ['user' => $directoryStaff, 'tab' => 'details']))
+            ->get(route('admin.staff-accounts.show', ['user' => $directoryStaff, 'tab' => 'account_management']))
             ->assertOk()
             ->assertDontSee('Reset local password')
             ->assertDontSee('name="confirm"', false);
@@ -220,6 +223,7 @@ class AdminLocalPublicPasswordResetTest extends TestCase
                 ->from(route('admin.public-accounts.show', $refused))
                 ->post(route('admin.users.password-reset', $refused), [
                     'confirm' => '1',
+                    'reason' => 'Should be refused.',
                 ])
                 ->assertForbidden();
 
@@ -232,7 +236,7 @@ class AdminLocalPublicPasswordResetTest extends TestCase
         ]);
     }
 
-    public function test_staff_cannot_reset_a_local_public_password(): void
+    public function test_staff_with_manage_can_reset_a_local_public_password(): void
     {
         $staff = User::factory()
             ->accessLevel(User::ROLE_STAFF)
@@ -243,8 +247,31 @@ class AdminLocalPublicPasswordResetTest extends TestCase
         ]);
 
         $this->actingAs($staff)
-            ->post(route('admin.users.password-reset', $public), [
+            ->post(route('clients.password-reset', $public), [
                 'confirm' => '1',
+                'reason' => 'Front desk reset after PIN check.',
+            ])
+            ->assertRedirect(route('clients.show', ['client' => $public, 'tab' => 'account_management']))
+            ->assertSessionHas('temporary_password');
+
+        $public->refresh();
+        $this->assertFalse(Hash::check('password', $public->password));
+    }
+
+    public function test_volunteer_cannot_reset_a_local_public_password(): void
+    {
+        $volunteer = User::factory()
+            ->accessLevel(User::ROLE_VOLUNTEER)
+            ->create()
+            ->refresh();
+        $public = User::factory()->create([
+            'password' => 'password',
+        ]);
+
+        $this->actingAs($volunteer)
+            ->post(route('clients.password-reset', $public), [
+                'confirm' => '1',
+                'reason' => 'Should be refused.',
             ])
             ->assertForbidden();
 

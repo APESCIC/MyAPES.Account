@@ -69,7 +69,7 @@ class LocalPublicPasswordResetService
         );
     }
 
-    public function reset(User $actor, User $target): string
+    public function reset(User $actor, User $target, ?string $reason = null): string
     {
         $refusal = $this->refusalMessage($actor, $target);
 
@@ -79,7 +79,7 @@ class LocalPublicPasswordResetService
 
         $temporaryPassword = Str::password(20);
 
-        DB::transaction(function () use ($actor, $target, $temporaryPassword): void {
+        DB::transaction(function () use ($actor, $target, $temporaryPassword, $reason): void {
             $target->forceFill([
                 'password' => $temporaryPassword,
                 'authorization_epoch' => (int) $target->authorization_epoch + 1,
@@ -91,10 +91,11 @@ class LocalPublicPasswordResetService
                 'auth.local_public_password_reset',
                 $actor,
                 $target,
-                [
+                array_filter([
                     'target_user_id' => $target->id,
                     'action' => 'reset_local_public_password',
-                ],
+                    'reason_length' => is_string($reason) && $reason !== '' ? mb_strlen($reason) : null,
+                ], static fn (mixed $value): bool => $value !== null),
             );
         });
 
@@ -105,7 +106,8 @@ class LocalPublicPasswordResetService
 
     public function refusalMessage(User $actor, User $target): ?string
     {
-        if (! $this->mutations->canManageTarget($actor, $target)) {
+        if (! $this->mutations->canManageTarget($actor, $target)
+            && ! $this->mutations->canManagePublicClient($actor, $target)) {
             return 'You cannot reset the password for this account.';
         }
 

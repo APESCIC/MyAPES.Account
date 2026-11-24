@@ -42,7 +42,7 @@ class CallLogsTest extends TestCase
 
         $this->actingAs($this->staff)
             ->post(route('callers.call-logs.store', $this->caller), ['direction' => 'inbound', 'summary' => 'Asked about adoption.'])
-            ->assertRedirect(route('callers.show', $this->caller).'#call-logs')
+            ->assertRedirect(route('clients.show', ['client' => $this->caller, 'tab' => 'overview']).'#call-logs')
             ->assertSessionHas('status', 'Call logged.');
 
         $log = CallLog::query()->sole();
@@ -52,7 +52,7 @@ class CallLogsTest extends TestCase
         $this->assertTrue(AuditLog::query()->where('event', 'caller.call_logged')->exists());
 
         $this->actingAs($this->staff)
-            ->get(route('callers.show', $this->caller))
+            ->get(route('clients.show', ['client' => $this->caller, 'tab' => 'overview']))
             ->assertSee('data-call-log="'.$log->id.'"', false)
             ->assertSeeText('Asked about adoption.')
             ->assertSeeText('Vera Volunteer')
@@ -87,12 +87,12 @@ class CallLogsTest extends TestCase
             ->assertForbidden();
 
         $admin = User::factory()->protectedRole('administrator')->create();
-        $this->actingAs($admin)->get(route('callers.show', $this->caller))->assertOk()->assertSeeText('Private staff note about the caller.');
+        $this->actingAs($admin)->get(route('clients.show', ['client' => $this->caller, 'tab' => 'overview']))->assertOk()->assertSeeText('Private staff note about the caller.');
     }
 
     private function verify(): void
     {
-        $this->actingAs($this->staff)->get(route('callers.show', $this->caller));
+        $this->actingAs($this->staff)->get(route('clients.show', ['client' => $this->caller, 'tab' => 'overview']));
         $positions = session(app(CallerVerificationService::class)->sessionKey($this->caller, 'positions'));
         $digits = [];
         foreach ($positions as $position) {

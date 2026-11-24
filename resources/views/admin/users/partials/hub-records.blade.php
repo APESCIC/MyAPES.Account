@@ -1,5 +1,7 @@
+@if($hubRecords)
 <section class="panel" aria-labelledby="hub-records-title" data-hub-records>
     <h2 id="hub-records-title">{{ __('admin.users.hub.records.heading') }}</h2>
+    @include('admin.users.partials.hub-list-filters')
 
     @foreach([
         'tickets' => __('admin.users.hub.records.tickets'),
@@ -41,3 +43,4 @@
         </div>
     @endforeach
 </section>
+@endif

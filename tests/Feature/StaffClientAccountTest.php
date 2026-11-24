@@ -9,6 +9,7 @@ use App\Core\Accounts\AuditLog;
 use App\Services\AuthorizationProfile;
 use App\Services\ModuleInstallationSynchronizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
@@ -169,6 +170,82 @@ class StaffClientAccountTest extends TestCase
             ->assertSee('Ziggy Public Client')
             ->assertDontSee('Ziggy Staff Only')
             ->assertSee(route('clients.show', $client), false);
+    }
+
+    public function test_client_directory_tabs_badges_and_filters(): void
+    {
+        $staff = User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create();
+        $active = User::factory()->create([
+            'name' => 'Directory Active Person',
+            'account_state' => User::ACCOUNT_STATE_ACTIVE,
+        ]);
+        $invited = User::factory()->create([
+            'name' => 'Directory Invited Person',
+            'account_state' => User::ACCOUNT_STATE_INVITED,
+        ]);
+        $profileOnly = User::factory()->create([
+            'name' => 'Directory Profile Only',
+            'account_state' => User::ACCOUNT_STATE_PROFILE_ONLY,
+        ]);
+
+        $this->actingAs($staff)
+            ->get(route('clients.index'))
+            ->assertOk()
+            ->assertSee('role="tablist"', false)
+            ->assertSee('Active account')
+            ->assertSee('Invited')
+            ->assertSee('Profile only')
+            ->assertSee($active->name)
+            ->assertSee($invited->name)
+            ->assertSee($profileOnly->name);
+
+        $this->actingAs($staff)
+            ->get(route('clients.index', [
+                'directory_tab' => 'invited',
+                'account_state' => User::ACCOUNT_STATE_INVITED,
+            ]))
+            ->assertOk()
+            ->assertSee($invited->name)
+            ->assertDontSee($active->name)
+            ->assertDontSee($profileOnly->name)
+            ->assertSee('directory_tab=invited', false);
+
+        $this->actingAs($staff)
+            ->get(route('clients.index', ['account_state' => User::ACCOUNT_STATE_PROFILE_ONLY]))
+            ->assertOk()
+            ->assertSee($profileOnly->name)
+            ->assertDontSee($active->name)
+            ->assertSee(__('clients.profile_only_helper'));
+    }
+
+    public function test_client_search_query_count_stays_constant_for_twenty_five_hits(): void
+    {
+        $staff = User::factory()->protectedRole(AuthorizationProfile::ROLE_STAFF)->create();
+
+        for ($i = 1; $i <= 25; $i++) {
+            User::factory()->create(['name' => sprintf('Bulk Search Client %02d', $i)]);
+        }
+
+        $this->actingAs($staff);
+
+        $perIdFinds = 0;
+        DB::listen(static function (QueryExecuted $query) use (&$perIdFinds): void {
+            $sql = strtolower($query->sql);
+            if (preg_match('/from\s+[`"]?users[`"]?\s+where\s+[`"]?id[`"]?\s*=\s*\?/i', $sql) === 1) {
+                $perIdFinds++;
+            }
+        });
+
+        $this->get(route('clients.index', ['q' => 'Bulk Search Client']))
+            ->assertOk()
+            ->assertSee('Bulk Search Client 01')
+            ->assertSee('Bulk Search Client 25');
+
+        $this->assertSame(
+            0,
+            $perIdFinds,
+            "Expected no per-id User::find loops for 25 hits, got {$perIdFinds}",
+        );
     }
 
     public function test_public_users_and_guests_cannot_create_clients(): void

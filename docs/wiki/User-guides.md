@@ -9,7 +9,7 @@
 
 - **Signed out:** use the links across the top of the page (Open a ticket, Bookings, Help, Public Login).
 - **Signed in:** each APES module has a **mega menu** in the top app bar; open your **avatar** for **Account**, theme and Sign out. Staff and administrators with both areas see a **Staff | Admin** switch in the bar.
-- **Search:** press **Ctrl K** (⌘K on Mac) or use **Search** in the top bar to jump anywhere or run quick actions.
+- **Search:** press **Ctrl K** (⌘K on Mac) or use **Search** in the top bar to jump anywhere, run quick actions, or (for staff with permission) find **People**.
 - **Phone or narrow window:** use the **menu** button for the same links in a drawer.
 
 ## Appearance

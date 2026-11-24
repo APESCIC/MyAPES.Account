@@ -30,7 +30,7 @@ class StaffHelpPagesTest extends TestCase
 
         $response
             ->assertSeeText('Verifying a caller')
-            ->assertSeeText('Creating a public client account')
+            ->assertSeeText('Clients and the Public Account workspace')
             ->assertSeeText('shown once after you save')
             ->assertSeeText('deleted automatically after 24 months')
             ->assertDontSee('href="'.route('help.admin').'"', false);

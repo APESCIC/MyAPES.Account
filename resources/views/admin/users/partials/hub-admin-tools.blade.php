@@ -32,23 +32,6 @@
                     </div>
                 </form>
             @endif
-
-            <h3>{{ __('admin.users.hub.admin_tools.two_factor') }}</h3>
-            @if($twoFactorEnabled)
-                <p class="muted">{{ __('admin.users.hub.admin_tools.two_factor_help') }}</p>
-                <form method="post" action="{{ route('admin.users.two-factor.reset', $managedUser) }}">
-                    @csrf
-                    <label class="inline-check">
-                        <input type="checkbox" name="confirm_two_factor_reset" value="1" required>
-                        <span>{{ __('admin.users.hub.admin_tools.two_factor_confirm') }}</span>
-                    </label>
-                    <div class="actions">
-                        <button class="danger-btn" type="submit">{{ __('admin.users.hub.admin_tools.two_factor_reset') }}</button>
-                    </div>
-                </form>
-            @else
-                <p class="muted">{{ __('admin.users.hub.admin_tools.two_factor_not_enabled') }}</p>
-            @endif
         </section>
     @endif
 @endcan

@@ -157,4 +157,65 @@ class RecordSearchTest extends TestCase
             ->assertOk()
             ->assertJsonStructure(['groups']);
     }
+
+    public function test_people_group_matches_postcode_and_date_of_birth(): void
+    {
+        $staff = User::factory()
+            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
+            ->create();
+        $client = User::factory()->create(['name' => 'Postcode Person']);
+        $client->profile()->create([
+            'first_name' => 'Postcode',
+            'last_name' => 'Person',
+            'date_of_birth' => '1990-03-14',
+            'postcode' => 'B1 1AA',
+            'address_line_1' => '10 High Street',
+            'town_city' => 'Birmingham',
+            'mobile_number' => '+447700900999',
+        ]);
+
+        $this->actingAs($staff);
+
+        $this->assertTrue(
+            $staff->fresh()->can(AuthorizationProfile::PERMISSION_CLIENT_SEARCH),
+            'staff must have staff.clients.search for people search',
+        );
+
+        $byPostcode = app(RecordSearch::class)->search($staff->fresh(), 'B11AA', perType: 25);
+        $people = collect($byPostcode['groups'])->firstWhere('type', 'users');
+        $this->assertNotNull($people, 'expected people hits for postcode: '.json_encode($byPostcode));
+        $this->assertSame('People', $people['label']);
+        $this->assertTrue(collect($people['hits'])->contains(fn (array $hit): bool => $hit['id'] === (string) $client->id));
+
+        $byDob = app(RecordSearch::class)->search($staff->fresh(), '14/03/1990', perType: 25);
+        $peopleByDob = collect($byDob['groups'])->firstWhere('type', 'users');
+        $this->assertNotNull($peopleByDob);
+        $this->assertTrue(collect($peopleByDob['hits'])->contains(fn (array $hit): bool => $hit['id'] === (string) $client->id));
+
+        $this->getJson(route('workspace.search.records', ['q' => 'B11AA']))
+            ->assertOk()
+            ->assertJsonFragment(['type' => 'users', 'label' => 'People']);
+    }
+
+    public function test_people_search_requires_client_search_permission(): void
+    {
+        $public = User::factory()
+            ->protectedRole(AuthorizationProfile::ROLE_SERVICE_USER)
+            ->create();
+        $client = User::factory()->create(['name' => 'Hidden From Public']);
+        $client->profile()->create([
+            'first_name' => 'Hidden',
+            'last_name' => 'From Public',
+            'postcode' => 'E1 6AN',
+        ]);
+
+        $this->actingAs($public);
+
+        $groups = app(RecordSearch::class)->search($public->fresh(), 'Hidden From');
+        $this->assertNull(collect($groups['groups'])->firstWhere('type', 'users'));
+
+        $this->getJson(route('workspace.search.records', ['q' => 'Hidden From']))
+            ->assertOk()
+            ->assertJsonMissing(['type' => 'users']);
+    }
 }

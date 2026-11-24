@@ -19,7 +19,15 @@
             @forelse($callers as $caller)
                 <p data-caller-result="{{ $caller->id }}">
                     <a href="{{ route('callers.show', $caller) }}">{{ $caller->name }}</a>
-                    <span class="muted">· {{ $caller->username }}</span>
+                    <span class="muted">
+                        · {{ $caller->email ?: __('callers.no_email') }}
+                        @if($caller->profile?->postcode)
+                            · {{ $caller->profile->postcode }}
+                        @endif
+                        @if($caller->profile?->date_of_birth)
+                            · {{ $caller->profile->date_of_birth->format('d/m/Y') }}
+                        @endif
+                    </span>
                 </p>
             @empty
                 <p class="muted">{{ __('callers.no_results') }}</p>

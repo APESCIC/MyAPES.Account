@@ -1,0 +1,57 @@
+{
+    "version": "0.78.0",
+    "date": "2026-11-24",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Staff Public Account workspace and client search",
+    "summary": "Staff can find Public Accounts and Public Profiles from Ctrl K and the Clients directory, then open a shared workspace with Overview, Account Management, Account Profile Management, Records and Activity.",
+    "changes": [
+        "Ctrl K includes a People group that finds clients by name, email, username, phone, postcode, date of birth or reference, gated by staff.clients.search.",
+        "Clients is a directory with All, With account, Profile only and Invited tabs, text badges, and URL-synced search and Account state filters.",
+        "Opening a person shows five workspace tabs shared by Staff Clients and Admin Public Accounts; old details and access tab URLs redirect.",
+        "Overview folds PIN check, call log, notes and quick actions; Account Management and Account Profile Management surface access and personal details (date of birth needs staff.clients.sensitive).",
+        "Records and Activity load only on their tabs and keep module and date filters in the URL.",
+        "Caller show URLs redirect into the Clients workspace; Find a caller uses the same people search.",
+        "Staff guide and Help describe the directory, badges and workspace tabs."
+    ],
+    "affected_areas": [
+        "Ctrl K / workspace People search",
+        "Staff Clients directory",
+        "Staff and Admin Public Account workspace tabs",
+        "Caller find and PIN verification on Overview",
+        "Help and wiki"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "MINOR: brings the Public Account workspace into Staff with directory tabs and global people search without removing existing accounts.",
+    "validation": [
+        "PHPUnit StaffPublicAccountWorkspaceTest, UserProfileHubTest, StaffClientAccountTest, RecordSearchTest, CallerVerificationTest and related filters.",
+        "Herd preview at https://myapes-account.test for Clients directory and workspace tabs.",
+        "composer milestone:bump -- v0.78.0 --check and myapes:changelog-validate against origin/main."
+    ],
+    "known_limitations": [
+        "Creating a MyAPES account from a Profile only row remains out of scope (v0.79.0).",
+        "Profile matching and account linking remain out of scope (v0.81.0).",
+        "Resend invite on Invited rows is reserved for a later release."
+    ],
+    "rollback": "Redeploy the previous release tag (v0.77.0). No schema migrations ship in this release.",
+    "provenance": "Milestone v0.78.0 Staff Public Account workspace and client search, Epic #866, pull request #1071.",
+    "references": [
+        {
+            "label": "Issue #866",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/866"
+        },
+        {
+            "label": "Pull request #1071",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/1071"
+        }
+    ],
+    "slug": "release-v0-78-0",
+    "previous_version": "0.77.0"
+}

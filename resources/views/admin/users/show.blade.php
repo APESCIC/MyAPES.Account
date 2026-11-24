@@ -24,7 +24,7 @@
                     {{ $managedUser->suspended_at === null ? __('admin.users.active') : __('admin.overview.suspended') }}
                     @can('admin.users.manage')
                         @if($canManageTarget && $managedUser->suspended_at === null)
-                            · <a href="{{ route($accountShowRoute ?? 'admin.users.show', ['user' => $managedUser, 'tab' => 'access']) }}#suspend-user">{{ __('admin.users.suspend') }}</a>
+                            · <a href="{{ route($accountShowRoute ?? 'admin.users.show', ['user' => $managedUser, 'tab' => 'account_management']) }}#suspend-user">{{ __('admin.users.suspend') }}</a>
                         @endif
                     @endcan
                 </dd></div>
@@ -39,22 +39,7 @@
             @include('admin.users.partials.hub-tabs')
         </section>
 
-        @if(session('temporary_password'))
-            <section class="panel" aria-labelledby="temporary-password-title">
-                <h2 id="temporary-password-title">{{ __('admin.users.one_time_temporary_password') }}</h2>
-                <p>{{ __('admin.users.copy_this_password_now_and_share_it_with_the_account_holder_') }}</p>
-                <label for="temporary-password">{{ __('admin.users.temporary_password') }}</label>
-                <input
-                    id="temporary-password"
-                    class="temporary-password"
-                    type="text"
-                    readonly
-                    value="{{ session('temporary_password') }}"
-                    autocomplete="off"
-                    spellcheck="false"
-                >
-            </section>
-        @endif
+        @include('admin.users.partials.hub-temporary-password')
 
         @if($hubTab === 'overview')
             @include('admin.users.partials.hub-actions')
@@ -62,7 +47,7 @@
             @include('admin.users.partials.hub-admin-tools')
         @endif
 
-        @if($hubTab === 'details')
+        @if($hubTab === 'account_profile')
             @if($isStaffAccount)
                 <section class="panel" aria-labelledby="staff-profile-title">
                     <h2 id="staff-profile-title">{{ __('admin.users.staff_profile') }}</h2>
@@ -96,10 +81,10 @@
                     @endcan
                 </section>
             @else
-                <section class="panel" aria-labelledby="public-profile-title">
-                    <h2 id="public-profile-title">{{ __('admin.users.public_profile') }}</h2>
-                    @can('admin.users.manage')
-                        @if($canManageTarget)
+                @can('admin.users.manage')
+                    @if($canManageTarget)
+                        <section class="panel" aria-labelledby="public-profile-title">
+                            <h2 id="public-profile-title">{{ __('admin.users.public_profile') }}</h2>
                             <form method="post" action="{{ route('admin.users.profile.update', $managedUser) }}" enctype="multipart/form-data">
                                 @csrf
                                 @method('put')
@@ -120,32 +105,39 @@
                                 <label for="support_needs">{{ __('admin.users.support_needs_or_access_notes') }}</label>
                                 <textarea id="support_needs" name="support_needs">{{ old('support_needs', $profile?->support_needs) }}</textarea>
                                 @include('profile._account-fields')
+                                <fieldset>
+                                    <legend>{{ __('admin.users.hub.admin_tools.contact_preferences') }}</legend>
+                                    @foreach (['calls' => 'Calls', 'sms' => 'SMS', 'whatsapp' => 'WhatsApp', 'telegram' => 'Telegram', 'email' => 'Email'] as $channel => $label)
+                                        <label class="inline-check">
+                                            <input type="checkbox" name="contact_{{ $channel }}" value="1" @checked(old('contact_'.$channel, $preference?->{$channel} ?? false))>
+                                            <span>{{ $label }}</span>
+                                        </label>
+                                    @endforeach
+                                    <input type="hidden" name="contact_preferences_confirmed" value="1">
+                                </fieldset>
                                 <label for="avatar">{{ __('admin.users.avatar_photo') }}</label>
                                 <input id="avatar" type="file" name="avatar" accept="image/*">
                                 <div class="actions"><button type="submit">{{ __('admin.users.save_public_profile') }}</button></div>
                             </form>
-                        @endif
-                    @endcan
-                </section>
+                        </section>
+                    @else
+                        @include('admin.users.partials.hub-account-profile-readonly')
+                    @endif
+                @else
+                    @include('admin.users.partials.hub-account-profile-readonly')
+                @endcan
             @endif
 
+        @endif
+
+        @if($hubTab === 'account_management')
+            @if($hubIsProfileOnly)
+                @include('admin.users.partials.hub-create-account-soon')
+            @else
+            @include('admin.users.partials.hub-account-summary')
+            @include('admin.users.partials.hub-account-actions')
             @can('admin.users.manage')
-                @if($canResetLocalPassword)
-                    <section class="panel" id="local-password" aria-labelledby="local-password-title">
-                        <h2 id="local-password-title">{{ __('admin.users.local_password') }}</h2>
-                        <p class="muted">{{ __('admin.users.temporary_password_help') }}</p>
-                        <form method="post" action="{{ route('admin.users.password-reset', $managedUser) }}">
-                            @csrf
-                            <label class="inline-check">
-                                <input type="checkbox" name="confirm" value="1" required>
-                                <span>{{ __('admin.users.replace_the_current_password_with_a_one_time_temporary_passw') }}</span>
-                            </label>
-                            <div class="actions">
-                                <button type="submit">{{ __('admin.users.reset_local_password') }}</button>
-                            </div>
-                        </form>
-                    </section>
-                @elseif($managedUser->isPendingFirstLogin())
+                @if($managedUser->isPendingFirstLogin())
                     <section class="panel" id="pending-first-login" aria-labelledby="pending-first-login-title">
                         <h2 id="pending-first-login-title">{{ __('admin.users.pending_first_login') }}</h2>
                         <p class="muted">{{ __('admin.users.this_directory_account_has_not_completed_staff_login_yet_pas') }}</p>
@@ -163,16 +155,13 @@
                             <p class="muted">{{ __('admin.users.staff_login') }} {{ __('admin.users.only_sign_in_path') }}</p>
                         @endif
                     </section>
-                @elseif(! $isStaffAccount && ! $managedUser->isLocalPasswordIdentity())
+                @elseif(! $isStaffAccount && ! $managedUser->isLocalPasswordIdentity() && ! ($canResetLocalPassword ?? false))
                     <section class="panel" id="local-password" aria-labelledby="local-password-title">
                         <h2 id="local-password-title">{{ __('admin.users.local_password') }}</h2>
                         <p class="muted">{{ __('admin.users.this_account_uses_cloudron_directory_sign_in_reset_the_passw') }}</p>
                     </section>
                 @endif
             @endcan
-        @endif
-
-        @if($hubTab === 'access')
             <section class="panel" aria-labelledby="role-provenance-title">
                 <h2 id="role-provenance-title">{{ __('admin.users.provenanced_roles') }}</h2>
                 <table>
@@ -316,34 +305,10 @@
                             </fieldset>
                             <div class="actions"><button type="submit">{{ __('admin.users.update_local_roles') }}</button></div>
                         </form>
-
-                        <hr class="section-divider">
-
-                        @if($managedUser->suspended_at === null)
-                            <form
-                                id="suspend-user"
-                                method="post"
-                                action="{{ route('admin.users.suspension.store', $managedUser) }}"
-                            >
-                                @csrf
-                                <label for="suspension-reason">{{ __('admin.users.suspension_reason') }}</label>
-                                <textarea id="suspension-reason" name="reason" required maxlength="500">{{ old('reason') }}</textarea>
-                                <label class="inline-check">
-                                    <input type="checkbox" name="confirm_suspend" value="1" required>
-                                    <span>{{ __('admin.users.i_confirm_i_want_to_suspend_this_account') }}</span>
-                                </label>
-                                <div class="actions"><button class="danger-btn" type="submit">{{ __('admin.users.suspend_user') }}</button></div>
-                            </form>
-                        @else
-                            <form method="post" action="{{ route('admin.users.suspension.destroy', $managedUser) }}">
-                                @csrf
-                                @method('delete')
-                                <button type="submit">{{ __('admin.users.reactivate_user') }}</button>
-                            </form>
-                        @endif
                     </section>
                 @endif
             @endcan
+            @endif
         @endif
 
         @if($hubTab === 'records')
