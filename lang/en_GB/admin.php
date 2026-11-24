@@ -339,6 +339,13 @@ return [
             'quick_actions' => 'Quick actions',
             'modules_in_use' => 'Modules and plugins in use',
             'no_modules_in_use' => 'No module records are visible for this account yet.',
+            'filters' => [
+                'module' => 'Module',
+                'all_modules' => 'All modules',
+                'from' => 'From',
+                'to' => 'To',
+                'apply' => 'Apply filters',
+            ],
             'records' => [
                 'heading' => 'Records',
                 'tickets' => 'Tickets',

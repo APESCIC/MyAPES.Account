@@ -72,10 +72,13 @@ final class UserActivityTimeline
         'code',
     ];
 
-    public function paginate(User $subject, int $page = 1): LengthAwarePaginator
+    /**
+     * @param  array{module?: string, from?: ?Carbon, to?: ?Carbon}  $filters
+     */
+    public function paginate(User $subject, int $page = 1, array $filters = []): LengthAwarePaginator
     {
-        $entries = collect($this->auditEntries($subject)->all())
-            ->merge($this->recordEntries($subject))
+        $entries = collect($this->auditEntries($subject, $filters)->all())
+            ->merge($this->recordEntries($subject, $filters))
             ->sortByDesc(static fn (array $entry): int => $entry['sort_at'])
             ->values();
 
@@ -96,13 +99,17 @@ final class UserActivityTimeline
     }
 
     /**
+     * @param  array{module?: string, from?: ?Carbon, to?: ?Carbon}  $filters
      * @return Collection<int, array{event: string, actor_id: ?int, created_at: mixed, context: array<string, mixed>, sort_at: int, source: string}>
      */
-    private function auditEntries(User $subject): Collection
+    private function auditEntries(User $subject, array $filters): Collection
     {
-        return AuditLog::query()
+        $query = AuditLog::query()
             ->where('auditable_type', $subject->getMorphClass())
-            ->where('auditable_id', $subject->id)
+            ->where('auditable_id', $subject->id);
+        $this->constrainDates($query, $filters);
+
+        return $query
             ->latest('id')
             ->limit(200)
             ->get()
@@ -122,11 +129,13 @@ final class UserActivityTimeline
     }
 
     /**
+     * @param  array{module?: string, from?: ?Carbon, to?: ?Carbon}  $filters
      * @return Collection<int, array{event: string, actor_id: ?int, created_at: mixed, context: array<string, mixed>, sort_at: int, source: string}>
      */
-    private function recordEntries(User $subject): Collection
+    private function recordEntries(User $subject, array $filters): Collection
     {
         $entries = collect();
+        $module = (string) ($filters['module'] ?? '');
 
         foreach (
             [
@@ -137,13 +146,16 @@ final class UserActivityTimeline
                 [RecruitmentApplication::class, 'application.created', 'status'],
             ] as [$model, $event, $labelField]
         ) {
-            $rows = $model::query()
-                ->where('user_id', $subject->id)
-                ->latest('id')
-                ->limit(50)
-                ->get();
+            $query = $model::query()->where('user_id', $subject->id);
+            $this->constrainDates($query, $filters);
+            $rows = $query->latest('id')->limit(50)->get();
 
             foreach ($rows as $row) {
+                $rowModule = $this->recordModule($row);
+                if ($module !== '' && $rowModule !== $module) {
+                    continue;
+                }
+
                 $createdAt = $row->created_at ?? $row->submitted_at ?? null;
                 $entries->push([
                     'event' => $event,
@@ -161,6 +173,47 @@ final class UserActivityTimeline
         }
 
         return $entries;
+    }
+
+    /**
+     * @param  Builder<\Illuminate\Database\Eloquent\Model>  $query
+     * @param  array{from?: ?Carbon, to?: ?Carbon}  $filters
+     */
+    private function constrainDates($query, array $filters): void
+    {
+        $from = $filters['from'] ?? null;
+        $to = $filters['to'] ?? null;
+
+        if ($from instanceof Carbon) {
+            $query->whereDate('created_at', '>=', $from->toDateString());
+        }
+
+        if ($to instanceof Carbon) {
+            $query->whereDate('created_at', '<=', $to->toDateString());
+        }
+    }
+
+    private function recordModule(object $row): string
+    {
+        if ($row instanceof SupportTicket || $row instanceof ShelterCase) {
+            return (string) $row->sub_core_key;
+        }
+
+        if ($row instanceof PetProfile) {
+            return $row->service_domain === PetProfile::DOMAIN_SHELTER
+                ? 'shelter-rescue'
+                : 'pet-care-clinic';
+        }
+
+        if ($row instanceof PetCareConsultation) {
+            return 'pet-care-clinic';
+        }
+
+        if ($row instanceof RecruitmentApplication) {
+            return 'apes-cic';
+        }
+
+        return '';
     }
 
     /**

@@ -249,6 +249,77 @@ class UserProfileHubTest extends TestCase
             ->assertSee(__('admin.users.hub.records.heading'));
     }
 
+    public function test_records_and_activity_filters_persist_in_the_url_and_lazy_load(): void
+    {
+        $staff = $this->userWithAccess(User::ROLE_STAFF);
+        $client = User::factory()->create([
+            'identity_type' => User::IDENTITY_LOCAL,
+        ]);
+
+        SupportTicket::query()->create([
+            'sub_core_key' => 'apes-cic',
+            'user_id' => $client->id,
+            'service_area' => 'web_development',
+            'sub_category' => 'website_issue',
+            'subject' => 'CIC hub ticket',
+            'priority' => 'medium',
+            'status' => 'open',
+            'description' => 'Visible for APES CIC.',
+        ]);
+        $oldShelter = SupportTicket::query()->create([
+            'sub_core_key' => 'shelter-rescue',
+            'user_id' => $client->id,
+            'service_area' => 'operations_facilities',
+            'sub_category' => 'premises',
+            'subject' => 'Old shelter hub ticket',
+            'priority' => 'medium',
+            'status' => 'open',
+            'description' => 'Older shelter ticket.',
+        ]);
+        $oldShelter->forceFill(['created_at' => now()->subDays(40)])->save();
+
+        $this->actingAs($staff)
+            ->get(route('clients.show', ['client' => $client, 'tab' => 'overview']))
+            ->assertOk()
+            ->assertDontSee('data-hub-records', false)
+            ->assertDontSee('data-hub-activity', false)
+            ->assertDontSee('CIC hub ticket')
+            ->assertDontSee('data-hub-list-filters', false);
+
+        $today = now()->toDateString();
+        $filteredRecords = $this->actingAs($staff)
+            ->get(route('clients.show', [
+                'client' => $client,
+                'tab' => 'records',
+                'module' => 'apes-cic',
+                'from' => $today,
+            ]));
+        $filteredRecords->assertOk()
+            ->assertSee('data-hub-records', false)
+            ->assertSee('data-hub-list-filters', false)
+            ->assertDontSee('data-hub-activity', false)
+            ->assertSee('CIC hub ticket')
+            ->assertDontSee('Old shelter hub ticket')
+            ->assertSee('name="module"', false)
+            ->assertSee('value="apes-cic"', false)
+            ->assertSee('value="'.$today.'"', false);
+
+        $filteredActivity = $this->actingAs($staff)
+            ->get(route('clients.show', [
+                'client' => $client,
+                'tab' => 'activity',
+                'module' => 'apes-cic',
+                'from' => $today,
+            ]));
+        $filteredActivity->assertOk()
+            ->assertSee('data-hub-activity', false)
+            ->assertSee('data-hub-list-filters', false)
+            ->assertDontSee('data-hub-records', false)
+            ->assertSee('ticket.created')
+            ->assertSee('CIC hub ticket')
+            ->assertDontSee('Old shelter hub ticket');
+    }
+
     public function test_legacy_hub_tabs_map_to_account_profile_and_account_management(): void
     {
         $administrator = $this->userWithAccess(User::ROLE_ADMIN);

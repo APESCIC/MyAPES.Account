@@ -59,16 +59,21 @@ trait BuildsUserProfileHub
         $isAccountManagement = $tab === 'account_management';
         $isRecords = $tab === 'records';
         $isActivity = $tab === 'activity';
+        $listFilters = ($isRecords || $isActivity)
+            ? $this->hubListFilters($request)
+            : $this->emptyHubListFilters();
 
         return [
             'hubTab' => $tab,
             'hubTabs' => self::HUB_TABS,
             'hubIsProfileOnly' => $managedUser->isProfileOnly(),
+            'hubListFilters' => $listFilters,
             'hubRecords' => $isRecords
                 ? $records->forViewer(
                     $managedUser,
                     $viewer,
                     (int) $request->query('records_page', 1),
+                    $listFilters,
                 )
                 : null,
             'hubModulesInUse' => $isOverview
@@ -81,6 +86,7 @@ trait BuildsUserProfileHub
                 ? $timeline->paginate(
                     $managedUser,
                     (int) $request->query('activity_page', 1),
+                    $listFilters,
                 )
                 : null,
             'hubNotes' => $isOverview
@@ -101,6 +107,48 @@ trait BuildsUserProfileHub
             'hubCanManageAccess' => $this->hubViewerCanManageAccess($viewer, $managedUser),
             'hubCanViewDateOfBirth' => $viewer->can(AuthorizationProfile::PERMISSION_CLIENT_SENSITIVE),
         ];
+    }
+
+    /**
+     * @return array{module: string, from: ?Carbon, to: ?Carbon}
+     */
+    private function hubListFilters(Request $request): array
+    {
+        $module = (string) $request->query('module', '');
+        if (! in_array($module, ['apes-cic', 'shelter-rescue', 'pet-care-clinic'], true)) {
+            $module = '';
+        }
+
+        return [
+            'module' => $module,
+            'from' => $this->hubFilterDate($request->query('from')),
+            'to' => $this->hubFilterDate($request->query('to')),
+        ];
+    }
+
+    /**
+     * @return array{module: string, from: ?Carbon, to: ?Carbon}
+     */
+    private function emptyHubListFilters(): array
+    {
+        return [
+            'module' => '',
+            'from' => null,
+            'to' => null,
+        ];
+    }
+
+    private function hubFilterDate(mixed $value): ?Carbon
+    {
+        if (! is_string($value) || ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+            return null;
+        }
+
+        try {
+            return Carbon::createFromFormat('Y-m-d', $value)?->startOfDay();
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     protected function hubViewerCanManageAccess(User $viewer, User $managedUser): bool

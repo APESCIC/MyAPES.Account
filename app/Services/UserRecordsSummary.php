@@ -7,6 +7,7 @@ use App\Core\Extensions\Plugins\PluginEnablement;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Plugins\Cases\CasesArea;
 use Plugins\Cases\Models\ShelterCase;
 use Plugins\Consultations\Models\PetCareConsultation;
@@ -37,6 +38,7 @@ final class UserRecordsSummary
     ) {}
 
     /**
+     * @param  array{module?: string, from?: ?Carbon, to?: ?Carbon}  $filters
      * @return array{
      *     tickets: ?LengthAwarePaginator,
      *     pets: ?LengthAwarePaginator,
@@ -45,14 +47,14 @@ final class UserRecordsSummary
      *     applications: ?LengthAwarePaginator,
      * }
      */
-    public function forViewer(User $subject, User $viewer, int $page = 1): array
+    public function forViewer(User $subject, User $viewer, int $page = 1, array $filters = []): array
     {
         return [
-            'tickets' => $this->tickets($subject, $viewer, $page),
-            'pets' => $this->pets($subject, $viewer, $page),
-            'cases' => $this->cases($subject, $viewer, $page),
-            'consultations' => $this->consultations($subject, $viewer, $page),
-            'applications' => $this->applications($subject, $viewer, $page),
+            'tickets' => $this->tickets($subject, $viewer, $page, $filters),
+            'pets' => $this->pets($subject, $viewer, $page, $filters),
+            'cases' => $this->cases($subject, $viewer, $page, $filters),
+            'consultations' => $this->consultations($subject, $viewer, $page, $filters),
+            'applications' => $this->applications($subject, $viewer, $page, $filters),
         ];
     }
 
@@ -202,12 +204,17 @@ final class UserRecordsSummary
         return RecruitmentApplication::query()->where('user_id', $subject->id);
     }
 
-    private function tickets(User $subject, User $viewer, int $page): ?LengthAwarePaginator
+    /**
+     * @param  array{module?: string, from?: ?Carbon, to?: ?Carbon}  $filters
+     */
+    private function tickets(User $subject, User $viewer, int $page, array $filters): ?LengthAwarePaginator
     {
         $query = $this->ticketQuery($subject, $viewer);
         if ($query === null) {
             return null;
         }
+
+        $this->applyListFilters($query, $filters, 'sub_core_key');
 
         return $this->paginateMapped(
             $query->latest('id'),
@@ -228,12 +235,25 @@ final class UserRecordsSummary
         );
     }
 
-    private function pets(User $subject, User $viewer, int $page): ?LengthAwarePaginator
+    /**
+     * @param  array{module?: string, from?: ?Carbon, to?: ?Carbon}  $filters
+     */
+    private function pets(User $subject, User $viewer, int $page, array $filters): ?LengthAwarePaginator
     {
         $query = $this->petQuery($subject, $viewer);
         if ($query === null) {
             return null;
         }
+
+        $module = (string) ($filters['module'] ?? '');
+        if ($module === 'apes-cic') {
+            $query->whereRaw('0 = 1');
+        } elseif ($module === 'shelter-rescue') {
+            $query->where('service_domain', PetProfile::DOMAIN_SHELTER);
+        } elseif ($module === 'pet-care-clinic') {
+            $query->where('service_domain', PetProfile::DOMAIN_PETCARE);
+        }
+        $this->applyDateFilters($query, $filters);
 
         return $this->paginateMapped(
             $query->latest('id'),
@@ -257,12 +277,17 @@ final class UserRecordsSummary
         );
     }
 
-    private function cases(User $subject, User $viewer, int $page): ?LengthAwarePaginator
+    /**
+     * @param  array{module?: string, from?: ?Carbon, to?: ?Carbon}  $filters
+     */
+    private function cases(User $subject, User $viewer, int $page, array $filters): ?LengthAwarePaginator
     {
         $query = $this->caseQuery($subject, $viewer);
         if ($query === null) {
             return null;
         }
+
+        $this->applyListFilters($query, $filters, 'sub_core_key');
 
         return $this->paginateMapped(
             $query->latest('id'),
@@ -283,12 +308,17 @@ final class UserRecordsSummary
         );
     }
 
-    private function consultations(User $subject, User $viewer, int $page): ?LengthAwarePaginator
+    /**
+     * @param  array{module?: string, from?: ?Carbon, to?: ?Carbon}  $filters
+     */
+    private function consultations(User $subject, User $viewer, int $page, array $filters): ?LengthAwarePaginator
     {
         $query = $this->consultationQuery($subject, $viewer);
         if ($query === null) {
             return null;
         }
+
+        $this->applyListFilters($query, $filters, null, 'pet-care-clinic');
 
         return $this->paginateMapped(
             $query->latest('id'),
@@ -307,12 +337,17 @@ final class UserRecordsSummary
         );
     }
 
-    private function applications(User $subject, User $viewer, int $page): ?LengthAwarePaginator
+    /**
+     * @param  array{module?: string, from?: ?Carbon, to?: ?Carbon}  $filters
+     */
+    private function applications(User $subject, User $viewer, int $page, array $filters): ?LengthAwarePaginator
     {
         $query = $this->applicationQuery($subject, $viewer);
         if ($query === null) {
             return null;
         }
+
+        $this->applyListFilters($query, $filters, null, 'apes-cic');
 
         return $this->paginateMapped(
             $query->with('recruitmentRole')->latest('id'),
@@ -358,6 +393,47 @@ final class UserRecordsSummary
         }
 
         return $enabled;
+    }
+
+    /**
+     * @param  Builder<Model>  $query
+     * @param  array{module?: string, from?: ?Carbon, to?: ?Carbon}  $filters
+     */
+    private function applyListFilters(
+        Builder $query,
+        array $filters,
+        ?string $moduleColumn,
+        ?string $fixedModule = null,
+    ): void {
+        $module = (string) ($filters['module'] ?? '');
+
+        if ($module !== '') {
+            if ($fixedModule !== null && $fixedModule !== $module) {
+                $query->whereRaw('0 = 1');
+            } elseif ($moduleColumn !== null) {
+                $query->where($moduleColumn, $module);
+            }
+        }
+
+        $this->applyDateFilters($query, $filters);
+    }
+
+    /**
+     * @param  Builder<Model>  $query
+     * @param  array{from?: ?Carbon, to?: ?Carbon}  $filters
+     */
+    private function applyDateFilters(Builder $query, array $filters): void
+    {
+        $from = $filters['from'] ?? null;
+        $to = $filters['to'] ?? null;
+
+        if ($from instanceof Carbon) {
+            $query->whereDate('created_at', '>=', $from->toDateString());
+        }
+
+        if ($to instanceof Carbon) {
+            $query->whereDate('created_at', '<=', $to->toDateString());
+        }
     }
 
     /**
