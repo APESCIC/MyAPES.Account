@@ -187,14 +187,18 @@ class ProfileLocalPasswordChangeTest extends TestCase
             $this->assertDoesNotOfferImpersonation($page->getContent());
         }
 
-        foreach ([$directoryStaff, $localStaff] as $staff) {
-            $page = $this->actingAs($staff)->get(route('account.security'));
-            $page->assertOk()
-                ->assertDontSee('name="current_password"', false)
-                ->assertDontSee('name="password_confirmation"', false)
-                ->assertDontSee('Change password');
-            $this->assertDoesNotOfferImpersonation($page->getContent());
-        }
+        $directoryStaffPage = $this->actingAs($directoryStaff)->get(route('account.security'));
+        $directoryStaffPage->assertOk()
+            ->assertDontSee('name="current_password"', false)
+            ->assertDontSee('name="password_confirmation"', false)
+            ->assertDontSee('Change password');
+        $this->assertDoesNotOfferImpersonation($directoryStaffPage->getContent());
+
+        $localStaffPage = $this->actingAs($localStaff)->get(route('account.security'));
+        $localStaffPage->assertOk()
+            ->assertSee('name="current_password"', false)
+            ->assertSee('Change password', false);
+        $this->assertDoesNotOfferImpersonation($localStaffPage->getContent());
 
         $pendingPage = $this->actingAs($pendingFirstLogin)
             ->get(route('account.security'));
@@ -207,7 +211,6 @@ class ProfileLocalPasswordChangeTest extends TestCase
             $pendingFirstLogin,
             $directoryStaff,
             $hybrid,
-            $localStaff,
         ] as $refused) {
             $this->actingAs($refused)
                 ->withSession(['auth.password_confirmed_at' => now()->unix()])

@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Core\Accounts\StaffProfile;
 use App\Core\Accounts\User;
-use App\Core\Push\ProfileNotificationTypeCatalogue;
-use App\Core\Push\UserNotificationSetting;
 use App\Core\Qa\QaLogin;
 use App\Http\Middleware\EnsureRecentStepUp;
 use App\Rules\Username;
@@ -19,7 +17,6 @@ use App\Services\UkPhoneNumber;
 use App\Support\AccountSecurityRedirect;
 use App\Support\PersonName;
 use DomainException;
-use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
@@ -34,43 +31,6 @@ class ProfileController extends Controller
         private readonly AuthorizationProfile $authorization,
         private readonly StaffProfilePhotoResponder $staffPhotos,
     ) {}
-
-    public function edit(
-        Request $request,
-        ProfileNotificationTypeCatalogue $notifications,
-    ): View {
-        $user = $request->user();
-
-        $notificationView = $this->notificationViewData($user, $notifications);
-
-        if ($this->authorization->hasDirectoryProtectedEligibility($user)) {
-            return view('profile.staff-edit', [
-                'staffProfile' => $user->staffProfile,
-                'teams' => $this->teamOptions(),
-                ...$notificationView,
-            ]);
-        }
-
-        return view('profile.edit', $notificationView);
-    }
-
-    /**
-     * @return array{
-     *     notificationTypes: list<array<string, mixed>>,
-     *     notificationDivisions: list<array<string, mixed>>,
-     *     notificationDevices: list<array<string, mixed>>,
-     *     notificationSettings: UserNotificationSetting|null,
-     * }
-     */
-    private function notificationViewData(User $user, ProfileNotificationTypeCatalogue $catalogue): array
-    {
-        return [
-            'notificationTypes' => $catalogue->typesFor($user),
-            'notificationDivisions' => $catalogue->divisionsFor($user),
-            'notificationDevices' => $catalogue->devicesFor($user),
-            'notificationSettings' => $user->notificationSetting,
-        ];
-    }
 
     public function updateUsername(Request $request, AuditLogger $auditLogger): RedirectResponse
     {
@@ -289,20 +249,7 @@ class ProfileController extends Controller
             'photo_updated' => $request->hasFile('photo'),
         ]);
 
-        return redirect()->route('profile.edit')->with('status', __('flash.staff_profile_updated'));
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    private function teamOptions(): array
-    {
-        return [
-            StaffProfile::TEAM_APES_CIC => 'APES CIC',
-            StaffProfile::TEAM_SHELTER_RESCUE => 'APES Shelter and Rescue',
-            StaffProfile::TEAM_PET_CARE_CLINIC => 'APES Pet Care Clinic',
-            StaffProfile::TEAM_OPERATIONS => 'Operations',
-        ];
+        return redirect()->route('account.profile')->with('status', __('flash.staff_profile_updated'));
     }
 
     private function stepUpConfirmationRequired(Request $request, User $user): bool

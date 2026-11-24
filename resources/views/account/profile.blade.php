@@ -13,9 +13,7 @@
         </section>
 
         @if ($usesStaffDirectoryProfile ?? false)
-            <section class="panel" id="profile-directory-staff">
-                <p class="muted">{{ __('account.settings.profile_staff_directory') }}</p>
-            </section>
+            @include('account._profile-staff-workplace')
         @else
             @include('account._profile-personal')
         @endif

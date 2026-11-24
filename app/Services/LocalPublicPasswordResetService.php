@@ -28,7 +28,13 @@ class LocalPublicPasswordResetService
 
     public function canChangeOwnPassword(?User $user): bool
     {
-        return $this->isLocalPublicPasswordAccount($user);
+        if ($this->isLocalPublicPasswordAccount($user)) {
+            return true;
+        }
+
+        return $user !== null
+            && $user->isLocalPasswordIdentity()
+            && $this->profile->hasDirectoryProtectedEligibility($user);
     }
 
     public function completeGuestReset(User $user, string $password): void

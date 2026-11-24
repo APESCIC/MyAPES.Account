@@ -4,6 +4,20 @@
 
     @if($signInUsesDirectory)
         <p>{{ __('public.profile.edit.blade.this_account_uses_cloudron_directory_sign_in_change_you') }}</p>
+        @if($directoryStaffSecuritySummary ?? false)
+            <ul>
+                <li>
+                    @if(($passkeyCount ?? 0) > 0)
+                        {{ trans_choice('account.settings.sign_in_methods.passkeys', $passkeyCount, ['count' => $passkeyCount]) }}
+                    @else
+                        {{ __('account.settings.sign_in_methods.passkeys_none') }}
+                    @endif
+                </li>
+            </ul>
+            <p class="actions">
+                <a href="{{ route('account.security') }}">{{ __('account.settings.sign_in_methods.manage_security') }}</a>
+            </p>
+        @endif
     @else
         <ul>
             <li>{{ __('account.settings.sign_in_methods.password') }}</li>

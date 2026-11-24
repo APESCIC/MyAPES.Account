@@ -95,15 +95,30 @@ class PhoneVerificationPinTest extends TestCase
         $this->assertNull(app(PhoneVerificationPinService::class)->for($user));
     }
 
-    public function test_staff_directory_accounts_cannot_set_a_pin_here(): void
+    public function test_directory_staff_accounts_can_set_a_pin_here(): void
+    {
+        $staff = User::factory()
+            ->protectedRole('staff')
+            ->directoryIdentity('directory-staff-pin-subject')
+            ->create();
+
+        $this->actingAs($staff)
+            ->withSession(['auth.password_confirmed_at' => time()])
+            ->put(route('profile.phone-pin.update'), ['pin' => self::PIN, 'pin_confirmation' => self::PIN])
+            ->assertRedirect(route('account.security').'#phone-pin');
+
+        $this->assertNotNull(app(PhoneVerificationPinService::class)->for($staff));
+    }
+
+    public function test_local_staff_accounts_can_set_a_pin_here(): void
     {
         $staff = User::factory()->protectedRole('staff')->create();
 
         $this->actingAs($staff)
             ->withSession(['auth.password_confirmed_at' => time()])
             ->put(route('profile.phone-pin.update'), ['pin' => self::PIN, 'pin_confirmation' => self::PIN])
-            ->assertForbidden();
+            ->assertRedirect(route('account.security').'#phone-pin');
 
-        $this->assertNull(app(PhoneVerificationPinService::class)->for($staff));
+        $this->assertNotNull(app(PhoneVerificationPinService::class)->for($staff));
     }
 }

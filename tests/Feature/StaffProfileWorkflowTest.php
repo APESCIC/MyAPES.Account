@@ -19,7 +19,7 @@ class StaffProfileWorkflowTest extends TestCase
         $user = User::factory()->create(['onboarding_completed_at' => now()]);
 
         $this->actingAs($user)
-            ->get(route('profile.edit'))
+            ->get(route('account.profile'))
             ->assertOk()
             ->assertSee('name="address_line_1"', false)
             ->assertSee('name="services[]"', false)
@@ -42,19 +42,24 @@ class StaffProfileWorkflowTest extends TestCase
         ]);
 
         $this->actingAs($staff)
-            ->get(route('profile.edit'))
+            ->get(route('account.profile'))
             ->assertOk()
-            ->assertSeeText('Directory Staff')
-            ->assertSeeText('staff.directory@example.com')
-            ->assertSeeText('myapesaccount.staff')
-            ->assertSee('directory-group-list__chip', false)
-            ->assertDontSee('myapesaccount.staff</code>,', false)
+            ->assertSee('id="profile-staff-workplace"', false)
             ->assertSee('name="job_title"', false)
             ->assertSee('name="team"', false)
             ->assertSee('name="work_phone"', false)
             ->assertDontSee('name="address_line_1"', false)
             ->assertDontSee('name="services[]"', false)
             ->assertDontSee('name="support_needs"', false);
+
+        $this->actingAs($staff)
+            ->get(route('account.show'))
+            ->assertOk()
+            ->assertSeeText('Directory Staff')
+            ->assertSeeText('staff.directory@example.com')
+            ->assertSeeText('myapesaccount.staff')
+            ->assertSee('directory-group-list__chip', false)
+            ->assertDontSee('myapesaccount.staff</code>,', false);
     }
 
     public function test_staff_profile_renders_many_directory_groups_as_chips(): void
@@ -74,7 +79,7 @@ class StaffProfileWorkflowTest extends TestCase
             ]);
 
         $response = $this->actingAs($staff)
-            ->get(route('profile.edit'))
+            ->get(route('account.show'))
             ->assertOk()
             ->assertSee('directory-group-list', false)
             ->assertDontSeeText('None recorded');
@@ -113,7 +118,7 @@ class StaffProfileWorkflowTest extends TestCase
                 'address_line_1' => 'Should be ignored',
                 'services' => ['apes-cic'],
             ])
-            ->assertRedirect(route('profile.edit'));
+            ->assertRedirect(route('account.profile'));
 
         $staff->refresh();
         $this->assertSame('Directory Staff', $staff->name);
@@ -136,12 +141,12 @@ class StaffProfileWorkflowTest extends TestCase
             ->create();
 
         $this->actingAs($staff)
-            ->from(route('profile.edit'))
+            ->from(route('account.profile'))
             ->put(route('profile.update'), [
                 'job_title' => 'Volunteer',
                 'team' => 'unknown-team',
             ])
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.profile'))
             ->assertSessionHasErrors('team');
     }
 }

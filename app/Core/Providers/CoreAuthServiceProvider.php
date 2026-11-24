@@ -10,7 +10,7 @@ use App\Listeners\MergeGuestThemeOnLogin;
 use App\Listeners\SendPasskeyDeletedNotification;
 use App\Listeners\SendPasskeyRegisteredNotification;
 use Illuminate\Auth\Events\Login;
-use App\Services\AuthorizationProfile;
+use App\Services\AccountSettingsViewData;
 use App\Services\JumbojettOidcIdentityProvider;
 use App\Services\TotpTwoFactorService;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -64,19 +64,17 @@ class CoreAuthServiceProvider extends ServiceProvider
                 ]);
             }
 
-            if (! $user->isLocalPasswordIdentity()) {
-                throw ValidationException::withMessages([
-                    'credential' => [__('auth.passkeys.local_only')],
-                ]);
+            if ($user->isLocalPasswordIdentity()) {
+                return true;
             }
 
-            if (app(AuthorizationProfile::class)->hasDirectoryProtectedEligibility($user)) {
-                throw ValidationException::withMessages([
-                    'credential' => [__('auth.passkeys.staff_use_oidc')],
-                ]);
+            if (app(AccountSettingsViewData::class)->canManageDirectoryStaffCredentials($user)) {
+                return true;
             }
 
-            return true;
+            throw ValidationException::withMessages([
+                'credential' => [__('auth.passkeys.local_only')],
+            ]);
         });
 
         RateLimiter::for('public-login', function (Request $request): array {

@@ -22,7 +22,7 @@ return [
         ],
         'profile_intro' => 'Your personal and contact details.',
         'profile_body' => 'Names, contact details and photo will appear here.',
-        'profile_staff_directory' => 'Your workplace profile is managed through your organisation sign-in. Personal and contact details on this page apply to public service accounts.',
+        'profile_staff_directory' => 'Directory name, email, and groups stay read-only. Add the workplace details colleagues need.',
         'security_intro' => 'Password, passkeys, two-factor authentication, telephone PIN and signed-in devices.',
         'security_devices' => [
             'heading' => 'Signed-in devices',

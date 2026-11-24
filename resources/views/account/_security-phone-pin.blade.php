@@ -1,4 +1,4 @@
-@if($canChangeLocalUsername ?? false)
+@if($canManagePhonePin ?? false)
     <section class="panel" id="phone-pin" data-phone-pin>
         <h2>{{ __('public.phone_pin.heading') }}</h2>
         <p class="muted">{{ __('public.phone_pin.intro') }}</p>

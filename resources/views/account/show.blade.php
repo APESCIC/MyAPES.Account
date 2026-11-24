@@ -13,8 +13,12 @@
         </section>
 
         @include('account._sign-in-methods')
-        @include('account._email')
-        @include('account._username')
+        @if ($usesStaffDirectoryProfile ?? false)
+            @include('account._account-staff-directory')
+        @else
+            @include('account._email')
+            @include('account._username')
+        @endif
         @include('profile._appearance')
     </div>
 @endsection

@@ -83,4 +83,33 @@ class AccountSettingsRoutesTest extends TestCase
             ->assertSee('id="profile-personal"', false)
             ->assertSee(__('account.settings.tabs.profile'), false);
     }
+
+    public function test_profile_tab_renders_staff_workplace_form_for_directory_staff(): void
+    {
+        $user = User::factory()->protectedRole('staff')->create();
+
+        $this->actingAs($user)
+            ->get(route('account.profile'))
+            ->assertOk()
+            ->assertSee('id="profile-staff-workplace"', false)
+            ->assertSee('name="job_title"', false);
+    }
+
+    public function test_account_tab_renders_read_only_directory_fields_for_staff(): void
+    {
+        $user = User::factory()
+            ->protectedRole('staff')
+            ->create([
+                'name' => 'Staff Reader',
+                'ldap_groups' => ['myapesaccount.staff'],
+            ]);
+
+        $this->actingAs($user)
+            ->get(route('account.show'))
+            ->assertOk()
+            ->assertSee('id="account-directory"', false)
+            ->assertSeeText('Staff Reader')
+            ->assertSee('myapesaccount.staff', false)
+            ->assertDontSee('id="account-email"', false);
+    }
 }

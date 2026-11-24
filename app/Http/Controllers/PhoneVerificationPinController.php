@@ -18,7 +18,14 @@ class PhoneVerificationPinController extends Controller
     public function update(Request $request, PhoneVerificationPinService $pins, AuditLogger $audit, AuthorizationProfile $profile): RedirectResponse
     {
         $user = $request->user();
-        abort_unless($user->isLocalPasswordIdentity() && ! $profile->hasDirectoryProtectedEligibility($user), 403);
+        abort_unless(
+            $user->isLocalPasswordIdentity()
+            || (
+                $profile->hasDirectoryProtectedEligibility($user)
+                && ($user->hasDirectoryIdentity() || $user->isCloudronIdentity())
+            ),
+            403,
+        );
 
         $length = PhoneVerificationPinService::MIN_LENGTH.','.PhoneVerificationPinService::MAX_LENGTH;
         $validated = $request->validate([
