@@ -36,4 +36,22 @@ final class AccountSettingsViewData
             'twoFactorEnabled' => $localIdentity && $this->twoFactor->hasEnabledTwoFactor($user),
         ];
     }
+
+    /**
+     * View data for Account → Profile (personal and contact details).
+     *
+     * @return array{
+     *     profile: \App\Core\Accounts\UserProfile|null,
+     *     preference: \App\Core\Accounts\ContactPreference|null,
+     *     selectedServices: list<string>,
+     * }
+     */
+    public function profileTab(User $user): array
+    {
+        return [
+            'profile' => $user->profile,
+            'preference' => $user->contactPreference,
+            'selectedServices' => $user->serviceSelections()->pluck('sub_core_key')->all(),
+        ];
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\AccountSettingsViewData;
+use App\Services\AuthorizationProfile;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
@@ -23,9 +24,16 @@ class AccountSettingsController extends Controller
         ]);
     }
 
-    public function profile(Request $request): View
+    public function profile(Request $request, AuthorizationProfile $authorization): View
     {
-        return $this->page($request, 'profile', 'account.profile');
+        $user = $request->user();
+
+        return view('account.profile', [
+            'activeAccountTab' => 'profile',
+            'user' => $user,
+            'usesStaffDirectoryProfile' => $authorization->hasDirectoryProtectedEligibility($user),
+            ...$this->viewData->profileTab($user),
+        ]);
     }
 
     public function security(Request $request): View

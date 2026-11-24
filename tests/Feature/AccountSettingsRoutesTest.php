@@ -72,4 +72,15 @@ class AccountSettingsRoutesTest extends TestCase
             ->assertSee(__('account.settings.tabs.security'), false)
             ->assertSee('id="passkeys"', false);
     }
+
+    public function test_profile_tab_renders_personal_details_form_for_public_accounts(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('account.profile'))
+            ->assertOk()
+            ->assertSee('id="profile-personal"', false)
+            ->assertSee(__('account.settings.tabs.profile'), false);
+    }
 }

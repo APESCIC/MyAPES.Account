@@ -12,8 +12,12 @@
             @include('account._subnav')
         </section>
 
-        <section class="panel" id="profile-overview">
-            <p class="muted">{{ __('account.settings.profile_body') }}</p>
-        </section>
+        @if ($usesStaffDirectoryProfile ?? false)
+            <section class="panel" id="profile-directory-staff">
+                <p class="muted">{{ __('account.settings.profile_staff_directory') }}</p>
+            </section>
+        @else
+            @include('account._profile-personal')
+        @endif
     </div>
 @endsection

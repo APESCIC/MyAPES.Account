@@ -7,6 +7,8 @@ use App\Core\Accounts\StaffProfile;
 use App\Core\Accounts\User;
 use App\Core\Push\ProfileNotificationTypeCatalogue;
 use App\Core\Push\UserNotificationSetting;
+use App\Core\Qa\QaLogin;
+use App\Http\Middleware\EnsureRecentStepUp;
 use App\Rules\Username;
 use App\Services\AuditLogger;
 use App\Services\AuthorizationProfile;
@@ -18,10 +20,12 @@ use App\Services\SessionAuthorizationContext;
 use App\Services\StaffProfilePhotoResponder;
 use App\Services\TotpTwoFactorService;
 use App\Services\UkPhoneNumber;
+use App\Support\PersonName;
 use DomainException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password as PasswordRule;
@@ -170,33 +174,27 @@ class ProfileController extends Controller
             );
         }
 
+        $user = $request->user();
         $onboarding->normalizePhones($request, $phones);
-        $validated = $request->validate([
-            'preferred_name' => ['nullable', 'string', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:32'],
-            'organization' => ['nullable', 'string', 'max:255'],
-            'support_needs' => ['nullable', 'string'],
-            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
-            'address_line_1' => ['required', 'string', 'max:255'],
-            'address_line_2' => ['nullable', 'string', 'max:255'],
-            'town_city' => ['required', 'string', 'max:255'],
-            'county' => ['nullable', 'string', 'max:255'],
-            'postcode' => ['required', 'string', 'max:16', 'regex:/^[A-Za-z]{1,2}\d[A-Za-z\d]?\s*\d[A-Za-z]{2}$/'],
-            'mobile_number' => ['required', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
-            'landline_number' => ['nullable', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
-            'whatsapp_number' => ['nullable', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
-            'telegram_username' => ['nullable', 'string', 'max:32', 'regex:/^[A-Za-z0-9_]{5,32}$/'],
-            'services' => ['required', 'array', 'min:1'],
-            'services.*' => ['string', Rule::in(['apes-cic', 'shelter-rescue', 'pet-care-clinic'])],
-            'contact_preferences_confirmed' => ['accepted'],
-            'locale' => ['sometimes', 'string', Rule::in(array_keys(config('app.supported_locales', ['en_GB' => 'English (UK)'])))],
-        ]);
+        $validated = $onboarding->validatePublicProfileUpdate($request);
 
-        if (array_key_exists('locale', $validated)) {
-            $request->user()->forceFill(['locale' => $validated['locale']])->save();
+        $existingProfile = $user->profile;
+        $existingDob = $existingProfile?->date_of_birth?->format('Y-m-d');
+        $newDob = $validated['date_of_birth'] ?? null;
+        $dobChanged = is_string($newDob)
+            && $newDob !== ''
+            && $newDob !== $existingDob;
+
+        if ($dobChanged && $this->stepUpConfirmationRequired($request, $user)) {
+            $request->session()->put('url.intended', $request->fullUrl());
+
+            return $this->redirectToStepUp($request, $user);
         }
 
-        $existingProfile = $request->user()->profile;
+        if (array_key_exists('locale', $validated)) {
+            $user->forceFill(['locale' => $validated['locale']])->save();
+        }
+
         $previousAvatarPath = $existingProfile?->avatar_path;
 
         $payload = [
@@ -214,18 +212,26 @@ class ProfileController extends Controller
             );
         }
 
-        $profile = $request->user()->profile()->updateOrCreate(
-            ['user_id' => $request->user()->id],
+        $profile = $user->profile()->updateOrCreate(
+            ['user_id' => $user->id],
             $payload
         );
 
-        $request->user()->serviceSelections()->whereNotIn('sub_core_key', $validated['services'])->delete();
+        $user->forceFill([
+            'name' => PersonName::display(
+                $validated['first_name'],
+                $validated['last_name'],
+                $user->name,
+            ),
+        ])->save();
+
+        $user->serviceSelections()->whereNotIn('sub_core_key', $validated['services'])->delete();
         foreach ($validated['services'] as $service) {
-            $request->user()->serviceSelections()->firstOrCreate(['sub_core_key' => $service]);
+            $user->serviceSelections()->firstOrCreate(['sub_core_key' => $service]);
         }
         $preferences->update(
-            $request->user(),
-            $request->user(),
+            $user,
+            $user,
             $onboarding->contactChoices($request),
             'preferences',
         );
@@ -234,11 +240,19 @@ class ProfileController extends Controller
             $secureUploadService->deleteIfPresent($previousAvatarPath);
         }
 
-        $auditLogger->record('profile.updated', $request->user(), $profile, [
+        if ($dobChanged) {
+            $auditLogger->record('profile.date_of_birth_updated', $user, $profile, [
+                'previous_date_of_birth' => $existingDob,
+                'date_of_birth' => $newDob,
+            ]);
+        }
+
+        $auditLogger->record('profile.updated', $user, $profile, [
             'avatar_updated' => $request->hasFile('avatar'),
+            'date_of_birth_changed' => $dobChanged,
         ]);
 
-        return redirect()->route('profile.edit')->with('status', __('flash.profile_updated'));
+        return redirect()->route('account.profile')->with('status', __('flash.profile_updated'));
     }
 
     public function staffPhoto(Request $request): StreamedResponse
@@ -322,5 +336,36 @@ class ProfileController extends Controller
             StaffProfile::TEAM_PET_CARE_CLINIC => 'APES Pet Care Clinic',
             StaffProfile::TEAM_OPERATIONS => 'Operations',
         ];
+    }
+
+    private function stepUpConfirmationRequired(Request $request, User $user): bool
+    {
+        $timeout = (int) config('auth.password_timeout', 10800);
+        $confirmedAt = Date::now()->unix() - $request->session()->get('auth.password_confirmed_at', 0);
+
+        return $confirmedAt > $timeout;
+    }
+
+    private function redirectToStepUp(Request $request, User $user): RedirectResponse
+    {
+        if (
+            QaLogin::enabled()
+            && QaLogin::profileFor($user) !== null
+        ) {
+            $request->session()->flash(QaLogin::CONFIRM, true);
+
+            return redirect()->guest(route('password.confirm'));
+        }
+
+        if ($user->hasDirectoryIdentity()) {
+            $request->session()->put(EnsureRecentStepUp::OIDC_STEP_UP_SESSION_KEY, [
+                'user_id' => $user->getKey(),
+                'oidc_sub' => $user->oidc_sub,
+            ]);
+
+            return redirect()->guest(route('staff.auth.step-up'));
+        }
+
+        return redirect()->guest(route('password.confirm'));
     }
 }

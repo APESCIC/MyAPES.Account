@@ -195,8 +195,20 @@ class PublicAccountLifecycleTest extends TestCase
     public function test_contact_grants_and_withdrawals_are_append_only_policy_versioned_events(): void
     {
         $user = User::factory()->create(['onboarding_completed_at' => now()]);
+        $user->profile()->create([
+            'first_name' => 'Public',
+            'last_name' => 'Person',
+            'date_of_birth' => '1990-03-14',
+            'address_line_1' => '1 Test Street',
+            'town_city' => 'London',
+            'postcode' => 'SW1A 1AA',
+            'mobile_number' => '+447400123456',
+        ]);
 
-        $this->actingAs($user)->put(route('profile.update'), [
+        $this->actingAs($user)->withSession(['auth.password_confirmed_at' => now()->unix()])->put(route('profile.update'), [
+            'first_name' => 'Public',
+            'last_name' => 'Person',
+            'date_of_birth' => '14/03/1990',
             'preferred_name' => 'Public',
             'address_line_1' => '1 Test Street',
             'town_city' => 'London',
@@ -205,9 +217,12 @@ class PublicAccountLifecycleTest extends TestCase
             'services' => ['apes-cic'],
             'contact_preferences_confirmed' => '1',
             'contact_email' => '1',
-        ])->assertRedirect(route('profile.edit'));
+        ])->assertRedirect(route('account.profile'));
 
         $this->actingAs($user)->put(route('profile.update'), [
+            'first_name' => 'Public',
+            'last_name' => 'Person',
+            'date_of_birth' => '14/03/1990',
             'preferred_name' => 'Public',
             'address_line_1' => '1 Test Street',
             'town_city' => 'London',
@@ -215,7 +230,7 @@ class PublicAccountLifecycleTest extends TestCase
             'mobile_number' => '+447400123456',
             'services' => ['apes-cic'],
             'contact_preferences_confirmed' => '1',
-        ])->assertRedirect(route('profile.edit'));
+        ])->assertRedirect(route('account.profile'));
 
         $events = $user->contactConsentEvents()->orderBy('id')->get();
         $this->assertCount(2, $events);
@@ -231,7 +246,7 @@ class PublicAccountLifecycleTest extends TestCase
         $user = User::factory()->create(['onboarding_completed_at' => now()]);
 
         $this->actingAs($user)
-            ->get(route('profile.edit'))
+            ->get(route('account.profile'))
             ->assertOk()
             ->assertSee('href="https://apes.example/privacy"', false)
             ->assertSeeText('Read the privacy notice');
@@ -243,7 +258,7 @@ class PublicAccountLifecycleTest extends TestCase
         $user = User::factory()->create(['onboarding_completed_at' => now()]);
 
         $this->actingAs($user)
-            ->get(route('profile.edit'))
+            ->get(route('account.profile'))
             ->assertOk()
             ->assertSee('href="'.route('privacy').'"', false)
             ->assertSeeText('Read the privacy notice');

@@ -91,10 +91,23 @@ class ProfileAccountEmailTest extends TestCase
             'email' => 'keep.this.email@example.com',
             'password' => 'password',
         ]);
+        $public->profile()->create([
+            'first_name' => 'Public',
+            'last_name' => 'Person',
+            'date_of_birth' => '1990-03-14',
+            'address_line_1' => '1 Test Street',
+            'town_city' => 'London',
+            'postcode' => 'SW1A 1AA',
+            'mobile_number' => '+447400123456',
+        ]);
 
         $this->actingAs($public)
-            ->from(route('profile.edit'))
+            ->withSession(['auth.password_confirmed_at' => now()->unix()])
+            ->from(route('account.profile'))
             ->put(route('profile.update'), [
+                'first_name' => 'Public',
+                'last_name' => 'Person',
+                'date_of_birth' => '14/03/1990',
                 'preferred_name' => 'Public',
                 'email' => 'forged.email@example.com',
                 'address_line_1' => '1 Test Street',
@@ -104,7 +117,7 @@ class ProfileAccountEmailTest extends TestCase
                 'services' => ['apes-cic'],
                 'contact_preferences_confirmed' => '1',
             ])
-            ->assertRedirect(route('profile.edit'));
+            ->assertRedirect(route('account.profile'));
 
         $public->refresh();
         $this->assertSame('keep.this.email@example.com', $public->email);

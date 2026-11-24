@@ -80,6 +80,38 @@ class OnboardingController extends Controller
         return $validated;
     }
 
+    /** @return array<string, mixed> */
+    public function validatePublicProfileUpdate(Request $request): array
+    {
+        $validated = $request->validate(array_merge(
+            ClientIdentityRules::nameAndDobRules(),
+            [
+                'preferred_name' => ['nullable', 'string', 'max:255'],
+                'phone' => ['nullable', 'string', 'max:32'],
+                'organization' => ['nullable', 'string', 'max:255'],
+                'support_needs' => ['nullable', 'string'],
+                'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
+                'address_line_1' => ['required', 'string', 'max:255'],
+                'address_line_2' => ['nullable', 'string', 'max:255'],
+                'town_city' => ['required', 'string', 'max:255'],
+                'county' => ['nullable', 'string', 'max:255'],
+                'postcode' => ['required', 'string', 'max:16', 'regex:/^[A-Za-z]{1,2}\d[A-Za-z\d]?\s*\d[A-Za-z]{2}$/'],
+                'mobile_number' => ['required', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
+                'landline_number' => ['nullable', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
+                'whatsapp_number' => ['nullable', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
+                'telegram_username' => ['nullable', 'string', 'max:32', 'regex:/^[A-Za-z0-9_]{5,32}$/'],
+                'services' => ['required', 'array', 'min:1'],
+                'services.*' => ['string', Rule::in(['apes-cic', 'shelter-rescue', 'pet-care-clinic'])],
+                'contact_preferences_confirmed' => ['accepted'],
+                'locale' => ['sometimes', 'string', Rule::in(array_keys(config('app.supported_locales', ['en_GB' => 'English (UK)'])))],
+            ],
+        ), ClientIdentityRules::messages());
+
+        $validated['date_of_birth'] = ClientIdentityRules::normaliseDateOfBirth($validated['date_of_birth']);
+
+        return $validated;
+    }
+
     /** @param array<string, mixed> $validated @return array<string, mixed> */
     public function profilePayload(array $validated): array
     {

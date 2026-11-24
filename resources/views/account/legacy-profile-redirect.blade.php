@@ -8,6 +8,7 @@
     <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         (() => {
             const map = {
+                profile: @json(route('account.profile')),
                 passkeys: @json(route('account.security').'#passkeys'),
                 'two-factor': @json(route('account.security').'#two-factor'),
                 password: @json(route('account.security').'#password'),
