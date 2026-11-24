@@ -71,6 +71,9 @@ class PublicRolesApplyFlowTest extends TestCase
         $this->actingAs($user)
             ->withSession(['url.intended' => $formUrl])
             ->put(route('onboarding.update'), [
+                'first_name' => 'Public',
+                'last_name' => 'Person',
+                'date_of_birth' => '14/03/1990',
                 'address_line_1' => '1 Test Street',
                 'town_city' => 'London',
                 'postcode' => 'SW1A 1AA',

@@ -13,6 +13,8 @@ use App\Services\AuthorizationAccountSynchronizer;
 use App\Services\AuthorizationProfile;
 use App\Services\SessionAuthorizationContext;
 use App\Services\TotpTwoFactorService;
+use App\Support\ClientIdentityRules;
+use App\Support\PersonName;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -141,24 +143,29 @@ class PublicAuthController extends Controller
             'username' => Str::lower(trim((string) $request->input('username'))),
             'email' => Str::lower(trim((string) $request->input('email'))),
         ]);
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'username' => ['required', 'string', new Username],
-            'email' => ['required', 'string', 'email', 'max:255', new NotStaffEmail, new AvailablePublicEmail],
-            'password' => ['required', 'confirmed', Password::defaults()],
-            'services' => ['required', 'array', 'min:1'],
-            'services.*' => [
-                'string',
-                Rule::in(['apes-cic', 'shelter-rescue', 'pet-care-clinic']),
+        $validated = $request->validate(array_merge(
+            ClientIdentityRules::nameAndDobRules(),
+            [
+                'username' => ['required', 'string', new Username],
+                'email' => ['required', 'string', 'email', 'max:255', new NotStaffEmail, new AvailablePublicEmail],
+                'password' => ['required', 'confirmed', Password::defaults()],
+                'services' => ['required', 'array', 'min:1'],
+                'services.*' => [
+                    'string',
+                    Rule::in(['apes-cic', 'shelter-rescue', 'pet-care-clinic']),
+                ],
+                'registration_consent' => ['accepted'],
             ],
-            'registration_consent' => ['accepted'],
-        ], [
+        ), array_merge(ClientIdentityRules::messages(), [
             'registration_consent.accepted' => __('auth.register.consent_required'),
-        ]);
+        ]));
 
-        $user = DB::transaction(function () use ($validated): User {
+        $validated['date_of_birth'] = ClientIdentityRules::normaliseDateOfBirth($validated['date_of_birth']);
+        $displayName = PersonName::display($validated['first_name'], $validated['last_name']);
+
+        $user = DB::transaction(function () use ($validated, $displayName): User {
             $user = new User([
-                'name' => $validated['name'],
+                'name' => $displayName,
                 'username' => $validated['username'],
                 'email' => $validated['email'],
                 'password' => $validated['password'],
@@ -170,6 +177,11 @@ class PublicAuthController extends Controller
             $user->save();
             $this->accounts->grantPublicBaseline($user);
             $user->contactPreference()->create([]);
+            $user->profile()->create([
+                'first_name' => $validated['first_name'],
+                'last_name' => $validated['last_name'],
+                'date_of_birth' => $validated['date_of_birth'],
+            ]);
 
             foreach ($validated['services'] as $service) {
                 $user->serviceSelections()->create(['sub_core_key' => $service]);

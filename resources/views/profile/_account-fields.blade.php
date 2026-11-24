@@ -1,3 +1,13 @@
+<label for="first_name">{{ __('public.profile._account-fields.blade.first_name') }}</label>
+<input id="first_name" name="first_name" value="{{ old('first_name', $profile?->first_name) }}" required autocomplete="given-name">
+@error('first_name')<p class="error">{{ $message }}</p>@enderror
+<label for="last_name">{{ __('public.profile._account-fields.blade.last_name') }}</label>
+<input id="last_name" name="last_name" value="{{ old('last_name', $profile?->last_name) }}" required autocomplete="family-name">
+@error('last_name')<p class="error">{{ $message }}</p>@enderror
+<label for="date_of_birth">{{ __('public.profile._account-fields.blade.date_of_birth') }}</label>
+<input id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth', optional($profile?->date_of_birth)->format('d/m/Y')) }}" required placeholder="DD/MM/YYYY" inputmode="numeric" autocomplete="bday">
+<p class="muted">{{ __('public.profile._account-fields.blade.date_of_birth_hint') }}</p>
+@error('date_of_birth')<p class="error">{{ $message }}</p>@enderror
 <label for="address_line_1">{{ __('public.profile._account-fields.blade.address_line_1') }}</label>
 <input id="address_line_1" name="address_line_1" value="{{ old('address_line_1', $profile?->address_line_1) }}" required>
 <label for="address_line_2">{{ __('public.profile._account-fields.blade.address_line_2') }}</label>
