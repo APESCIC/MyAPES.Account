@@ -78,7 +78,7 @@ class WorkspaceShellTest extends TestCase
             ->assertSee('>AL</span>', false)
             ->assertSeeText('Ada Lovelace')
             ->assertSeeText('Admin')
-            ->assertSee('href="'.route('profile.edit').'"', false)
+            ->assertSee('href="'.route('account.show').'"', false)
             ->assertSee('action="'.route('auth.logout').'"', false)
             ->assertSeeText(__('workspace.dock.sign_out'));
     }

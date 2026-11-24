@@ -85,7 +85,7 @@ class TopAppMenuChromeTest extends TestCase
             ->get(route('dashboard'))
             ->assertOk()
             ->assertSee('data-workspace-user-menu-trigger', false)
-            ->assertSee('href="'.route('profile.edit').'"', false)
+            ->assertSee('href="'.route('account.show').'"', false)
             ->assertSee('action="'.route('auth.logout').'"', false)
             ->assertSeeText('Case Worker');
     }

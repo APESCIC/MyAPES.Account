@@ -218,12 +218,12 @@ class LayoutSpacingSmokeTest extends TestCase
             ->assertSeeText(__('auth.staff_login.heading'));
     }
 
-    public function test_profile_edit_stacks_its_sections(): void
+    public function test_account_profile_stacks_its_sections(): void
     {
         $user = User::factory()->create();
 
         $this->actingAs($user)
-            ->get(route('profile.edit'))
+            ->get(route('account.profile'))
             ->assertOk()
             ->assertSee('<div class="panel-stack">', false);
     }

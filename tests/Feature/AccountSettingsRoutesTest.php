@@ -3,12 +3,41 @@
 namespace Tests\Feature;
 
 use App\Core\Accounts\User;
+use App\Services\AuthorizationProfile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class AccountSettingsRoutesTest extends TestCase
 {
     use RefreshDatabase;
+
+  /** @return array<string, array{0: string, 1: string}> */
+    public static function legacyProfileHashTargets(): array
+    {
+        return [
+            'default' => ['', 'account.show'],
+            'profile' => ['#profile', 'account.profile'],
+            'passkeys' => ['#passkeys', 'account.security#passkeys'],
+            'two-factor' => ['#two-factor', 'account.security#two-factor'],
+            'password' => ['#password', 'account.security#password'],
+            'phone-pin' => ['#phone-pin', 'account.security#phone-pin'],
+            'signed-in-devices' => ['#signed-in-devices', 'account.security#signed-in-devices'],
+            'security-activity' => ['#security-activity', 'account.security#security-activity'],
+            'account-email' => ['#account-email', 'account.show#account-email'],
+            'username' => ['#username', 'account.show#username'],
+            'appearance' => ['#appearance', 'account.show#appearance'],
+            'notifications' => ['#notifications', 'account.privacy#notifications'],
+        ];
+    }
+
+    public function test_guests_are_redirected_from_account_settings_routes(): void
+    {
+        foreach (['account.show', 'account.profile', 'account.security', 'account.privacy', 'profile.edit'] as $route) {
+            $this->get(route($route))
+                ->assertRedirect(route('public.login'));
+        }
+    }
 
     public function test_public_account_can_open_each_settings_page(): void
     {
@@ -18,7 +47,8 @@ class AccountSettingsRoutesTest extends TestCase
             $this->actingAs($user)
                 ->get(route($route))
                 ->assertOk()
-                ->assertSee(__('account.settings.tabs_label'), false);
+                ->assertSee(__('account.settings.tabs_label'), false)
+                ->assertSee('class="admin-subnav"', false);
         }
     }
 
@@ -29,7 +59,8 @@ class AccountSettingsRoutesTest extends TestCase
         foreach (['account.show', 'account.profile', 'account.security', 'account.privacy'] as $route) {
             $this->actingAs($user)
                 ->get(route($route))
-                ->assertOk();
+                ->assertOk()
+                ->assertSee(__('account.settings.tabs_label'), false);
         }
     }
 
@@ -51,15 +82,23 @@ class AccountSettingsRoutesTest extends TestCase
             ->assertSee('name="email"', false);
     }
 
-    public function test_legacy_profile_route_serves_hash_redirect_page(): void
+    #[DataProvider('legacyProfileHashTargets')]
+    public function test_legacy_profile_route_maps_hashes_to_account_destinations(string $hash, string $routeFragment): void
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user)
-            ->get(route('profile.edit'))
+        $response = $this->actingAs($user)
+            ->get(route('profile.edit').$hash)
             ->assertOk()
-            ->assertSee('#passkeys', false)
-            ->assertSee('Continue to Account settings', false);
+            ->assertSee(__('account.settings.redirect_continue'), false);
+
+        if (str_contains($routeFragment, '#')) {
+            [$routeName, $fragment] = explode('#', $routeFragment, 2);
+            $expectedTarget = route($routeName).'#'.$fragment;
+            $response->assertSee(addcslashes($expectedTarget, '/'), false);
+        } else {
+            $response->assertSee(addcslashes(route($routeFragment), '/'), false);
+        }
     }
 
     public function test_account_pages_set_expected_titles(): void
@@ -111,5 +150,21 @@ class AccountSettingsRoutesTest extends TestCase
             ->assertSeeText('Staff Reader')
             ->assertSee('myapesaccount.staff', false)
             ->assertDontSee('id="account-email"', false);
+    }
+
+    public function test_staff_privacy_tab_lists_notification_preferences(): void
+    {
+        $staff = User::factory()
+            ->protectedRole(AuthorizationProfile::ROLE_STAFF)
+            ->create([
+                'email_verified_at' => now(),
+                'onboarding_completed_at' => now(),
+            ]);
+
+        $this->actingAs($staff)
+            ->get(route('account.privacy'))
+            ->assertOk()
+            ->assertSee('id="notifications"', false)
+            ->assertSee('id="contact-preferences"', false);
     }
 }

@@ -164,7 +164,7 @@ class HealthAndThemeTest extends TestCase
             ->assertOk()
             ->assertSee('data-workspace-mega-root', false)
             ->assertSee('data-workspace-user-menu', false)
-            ->assertSee('href="'.route('profile.edit').'"', false)
+            ->assertSee('href="'.route('account.show').'"', false)
             ->assertSee('href="'.route('apes-cic.tickets.index').'"', false)
             ->assertSee('href="'.route('shelter.pets.index').'"', false)
             ->assertSee('href="'.route('petcare.pets.index').'"', false)

@@ -99,7 +99,7 @@ class PushNotificationsSettingsTest extends TestCase
             ->assertOk()
             ->assertSee(VapidCredentials::STATUS_NOT_CONFIGURED, false);
 
-        $html = $this->actingAs($this->admin)->get(route('profile.edit'))->assertOk()->getContent();
+        $html = $this->actingAs($this->admin)->get(route('account.privacy'))->assertOk()->getContent();
         $this->assertStringContainsString(__('push.device.unavailable'), $html);
         $this->assertMatchesRegularExpression('/data-push-actions[^>]*hidden/', $html);
     }

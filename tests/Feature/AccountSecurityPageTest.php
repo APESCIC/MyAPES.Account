@@ -55,6 +55,24 @@ class AccountSecurityPageTest extends TestCase
             ->assertRedirect(route('password.confirm'));
     }
 
+    public function test_directory_staff_security_page_includes_step_up_gated_forms(): void
+    {
+        $staff = User::factory()
+            ->protectedRole('staff')
+            ->create(['password' => 'password']);
+
+        $this->actingAs($staff)
+            ->get(route('account.security'))
+            ->assertOk()
+            ->assertSee(__('account.settings.tabs.security'), false)
+            ->assertSee('id="signed-in-devices"', false)
+            ->assertSee('id="security-activity"', false);
+
+        $this->actingAs($staff)
+            ->delete(route('account.security.sessions.destroy-others'))
+            ->assertRedirect(route('password.confirm'));
+    }
+
     public function test_security_activity_lists_up_to_twenty_events(): void
     {
         $user = User::factory()->create();

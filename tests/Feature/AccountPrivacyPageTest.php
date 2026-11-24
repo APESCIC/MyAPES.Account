@@ -18,6 +18,7 @@ class AccountPrivacyPageTest extends TestCase
         $this->actingAs($user)
             ->get(route('account.privacy'))
             ->assertOk()
+            ->assertSee(__('account.settings.tabs_label'), false)
             ->assertSee('id="contact-preferences"', false)
             ->assertSee('id="email-opt-in"', false)
             ->assertSee('id="notifications"', false)
@@ -25,6 +26,19 @@ class AccountPrivacyPageTest extends TestCase
             ->assertSee('id="data-export"', false)
             ->assertSee('id="deletion-request"', false)
             ->assertSee(route('account.privacy.data-export'), false);
+    }
+
+    public function test_staff_privacy_page_includes_notifications_without_personal_address_fields(): void
+    {
+        $staff = User::factory()
+            ->protectedRole('staff')
+            ->create(['onboarding_completed_at' => now()]);
+
+        $this->actingAs($staff)
+            ->get(route('account.privacy'))
+            ->assertOk()
+            ->assertSee('id="notifications"', false)
+            ->assertDontSee('name="address_line_1"', false);
     }
 
     public function test_contact_toggle_records_policy_versioned_consent_event(): void

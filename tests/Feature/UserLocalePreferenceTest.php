@@ -66,7 +66,7 @@ class UserLocalePreferenceTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($user)
-            ->get(route('profile.edit'))
+            ->get(route('account.show'))
             ->assertOk()
             ->assertDontSee('locale-switcher', false)
             ->assertDontSee(__('public.locale.switcher_label'));
@@ -82,7 +82,7 @@ class UserLocalePreferenceTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($user)
-            ->get(route('profile.edit'))
+            ->get(route('account.show'))
             ->assertOk()
             ->assertSee('locale-switcher', false)
             ->assertSee(__('public.locale.switcher_label'))
