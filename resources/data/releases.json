@@ -1,5 +1,59 @@
 [
     {
+        "version": "0.78.0",
+        "date": "2026-11-24",
+        "channel": "stable",
+        "type": "minor",
+        "title": "Staff Public Account workspace and client search",
+        "summary": "Staff can find Public Accounts and Public Profiles from Ctrl K and the Clients directory, then open a shared workspace with Overview, Account Management, Account Profile Management, Records and Activity.",
+        "changes": [
+            "Ctrl K includes a People group that finds clients by name, email, username, phone, postcode, date of birth or reference, gated by staff.clients.search.",
+            "Clients is a directory with All, With account, Profile only and Invited tabs, text badges, and URL-synced search and Account state filters.",
+            "Opening a person shows five workspace tabs shared by Staff Clients and Admin Public Accounts; old details and access tab URLs redirect.",
+            "Overview folds PIN check, call log, notes and quick actions; Account Management and Account Profile Management surface access and personal details (date of birth needs staff.clients.sensitive).",
+            "Records and Activity load only on their tabs and keep module and date filters in the URL.",
+            "Caller show URLs redirect into the Clients workspace; Find a caller uses the same people search.",
+            "Staff guide and Help describe the directory, badges and workspace tabs."
+        ],
+        "affected_areas": [
+            "Ctrl K / workspace People search",
+            "Staff Clients directory",
+            "Staff and Admin Public Account workspace tabs",
+            "Caller find and PIN verification on Overview",
+            "Help and wiki"
+        ],
+        "categories": [
+            "added",
+            "changed"
+        ],
+        "audiences": [
+            "internal-only"
+        ],
+        "version_rationale": "MINOR: brings the Public Account workspace into Staff with directory tabs and global people search without removing existing accounts.",
+        "validation": [
+            "PHPUnit StaffPublicAccountWorkspaceTest, UserProfileHubTest, StaffClientAccountTest, RecordSearchTest, CallerVerificationTest and related filters.",
+            "Herd preview at https://myapes-account.test for Clients directory and workspace tabs.",
+            "composer milestone:bump -- v0.78.0 --check and myapes:changelog-validate against origin/main."
+        ],
+        "known_limitations": [
+            "Creating a MyAPES account from a Profile only row remains out of scope (v0.79.0).",
+            "Profile matching and account linking remain out of scope (v0.81.0).",
+            "Resend invite on Invited rows is reserved for a later release."
+        ],
+        "rollback": "Redeploy the previous release tag (v0.77.0). No schema migrations ship in this release.",
+        "provenance": "Milestone v0.78.0 Staff Public Account workspace and client search, Epic #866, pull request #1071.",
+        "references": [
+            {
+                "label": "Issue #866",
+                "url": "https://github.com/APESCIC/MyAPES-Account/issues/866"
+            },
+            {
+                "label": "Pull request #1071",
+                "url": "https://github.com/APESCIC/MyAPES-Account/pull/1071"
+            }
+        ]
+    },
+    {
         "version": "0.77.0",
         "date": "2026-11-24",
         "channel": "stable",
@@ -328,21 +382,21 @@
         "channel": "stable",
         "type": "minor",
         "title": "Web push notifications",
-        "summary": "Staff, volunteers, students and service users can turn on optional browser push alerts for tickets, cases, consultations, recruitment, account security and staff messages. Each person chooses notification types, quiet hours and subscribed devices on Profile \u2192 Notifications; administrators manage VAPID keys, pause all delivery and review anonymous stats in Admin.",
+        "summary": "Staff, volunteers, students and service users can turn on optional browser push alerts for tickets, cases, consultations, recruitment, account security and staff messages. Each person chooses notification types, quiet hours and subscribed devices on Profile → Notifications; administrators manage VAPID keys, pause all delivery and review anonymous stats in Admin.",
         "changes": [
             "Added Core web push: VAPID configuration, device subscriptions, queued delivery on the push queue, and metadata-only push_deliveries records (no message bodies, endpoints or keys in logs).",
             "Registered a service worker, web app manifest and Content Security Policy updates so secure origins can subscribe and receive private type-and-reference payloads with authorised deep links.",
-            "Added a dashboard soft prompt and per-browser subscribe flow; Profile \u2192 Notifications lists devices, notification types, role-aware defaults, quiet hours and an iPhone and iPad Add to Home Screen guide.",
+            "Added a dashboard soft prompt and per-browser subscribe flow; Profile → Notifications lists devices, notification types, role-aware defaults, quiet hours and an iPhone and iPad Add to Home Screen guide.",
             "Wired push for ticket, case, consultation, recruitment and account-security events per the milestone routing table, plus staff Optional messages after v0.71.0.",
             "Added an in-app notification bell and list backed by stored database notifications alongside push.",
-            "Added Admin \u2192 Settings \u2192 Push notifications for VAPID key status (Keys and secrets), pause all web push, count-only stats and operator test push.",
+            "Added Admin → Settings → Push notifications for VAPID key status (Keys and secrets), pause all web push, count-only stats and operator test push.",
             "Documented Cloudron push worker expectations (queue:work including push), privacy notice text and wiki guides."
         ],
         "affected_areas": [
-            "Profile \u2192 Notifications and dashboard soft prompt",
+            "Profile → Notifications and dashboard soft prompt",
             "In-app notification bell",
             "Tickets, cases, consultations and recruitment modules",
-            "Admin \u2192 Settings \u2192 Push notifications and Keys and secrets",
+            "Admin → Settings → Push notifications and Keys and secrets",
             "Service worker, manifest and CSP",
             "push queue, push_deliveries and Cloudron queue worker",
             "Public change log and privacy notice"
@@ -368,7 +422,7 @@
             "Marketing or broadcast push campaigns and third-party push platforms are out of scope."
         ],
         "rollback": "Redeploy the previous release tag (v0.71.0). activate-release syncs that package's changelog files and sets current to its VERSION. Push tables remain additive and unused after rollback.",
-        "provenance": "Epic #791 with children #792\u2013#806; milestone PR #983 on branch milestone/v0-72-0-web-push-notifications.",
+        "provenance": "Epic #791 with children #792–#806; milestone PR #983 on branch milestone/v0-72-0-web-push-notifications.",
         "references": [
             {
                 "label": "Issue #791",
@@ -389,7 +443,7 @@
         "summary": "Staff, volunteers and students can email MyAPES Account users from the workspace: compose Service or Optional messages, pick recipients, preview and confirm, then send through a queued, rate-limited pipeline with no-reply branding, consent-aware Optional mail and campaign history.",
         "changes": [
             "Added staff.messages.send, staff.messages.send.all and staff.messages.history.view permissions with default grants for staff, volunteers and students (own-module send) and administrators (including send.all).",
-            "Added Staff \u203a Messages compose, draft save, recipient picker (all, group, module or individuals), preview with opt-out counts and typed confirmation for large or all-user sends.",
+            "Added Staff › Messages compose, draft save, recipient picker (all, group, module or individuals), preview with opt-out counts and typed confirmation for large or all-user sends.",
             "Queued SendStaffMessageJob with per-sender daily and global per-minute rate limits, campaign delivery totals and OutboundMailLog rows per recipient.",
             "Registered the staff.staff_message mail template with a no-reply From line, login footer and, for Optional mail, RespectsMailPreference plus signed unsubscribe and List-Unsubscribe headers.",
             "Added read-only campaign history (own messages for senders; all for administrators) with flash feedback, status badges and AuditLogger events for queued sends."
@@ -420,7 +474,7 @@
             "Campaign history stores subject and body for staff review; per-recipient OutboundMailLog remains metadata-only."
         ],
         "rollback": "Redeploy the previous release tag (v0.70.0). activate-release syncs that package's changelog files and sets current to its VERSION. Staff message tables remain additive and unused after rollback.",
-        "provenance": "Epic #499 with children #500\u2013#509; milestone PR #982 on branch milestone/v0-71-0-staff-email-users.",
+        "provenance": "Epic #499 with children #500–#509; milestone PR #982 on branch milestone/v0-71-0-staff-email-users.",
         "references": [
             {
                 "label": "Issue #499",
@@ -474,7 +528,7 @@
             "Database projection requires MYAPES_CHANGELOG_USE_DATABASE=true after a successful releases-sync on activate."
         ],
         "rollback": "Redeploy the previous release tag. activate-release syncs that package's changelog files, sets current to its VERSION, and unpublishes newer-only projected rows without deleting them.",
-        "provenance": "Epic #703 with children #704\u2013#715; milestone PR #981 on branch milestone/v0-70-0-newsroom-style-changelog-hub.",
+        "provenance": "Epic #703 with children #704–#715; milestone PR #981 on branch milestone/v0-70-0-newsroom-style-changelog-hub.",
         "references": [
             {
                 "label": "Issue #703",
@@ -494,7 +548,7 @@
         "title": "Embeddable guest open-a-ticket form",
         "summary": "Administrators can publish guest open-a-ticket forms that other APES websites embed in an iframe, with email confirmation before staff are notified.",
         "changes": [
-            "Admin \u2192 Embed forms manages guest ticket forms, allowed parent origins, public keys and the copy-paste loader snippet.",
+            "Admin → Embed forms manages guest ticket forms, allowed parent origins, public keys and the copy-paste loader snippet.",
             "Other websites load /embed/tickets/loader.js; the form page has no workspace chrome and uses signed origin tokens with CSP frame-ancestors limited to the allowlist.",
             "Guests submit name, email, service, area, subject and details with GDPR consent; reCAPTCHA v3 and honeypot reuse the existing bot protection.",
             "Staff are notified only after the guest confirms their email. Matching public accounts own the ticket after verify; staff Cloudron emails cannot become guest owners.",
@@ -778,7 +832,7 @@
             "Old /open-a-ticket/{service}/{area}/start URLs redirect into the combined form with the service and area pre-selected.",
             "Public users see a Tools menu above Support with Bookings under Tools; staff-side roles lose Bookings from the menu and receive 403 on those routes.",
             "Guest chrome renames Register to Public Register.",
-            "Staff, volunteers and students with staff.clients.create can create local public client accounts: duplicate email/phone and staff-domain emails are refused; a 4\u20138 digit PIN is required, shown once, stored hashed, and never emailed or logged; optional email can send a 72-hour set-password link without the PIN; staff-assisted consent and audit record creation without secrets."
+            "Staff, volunteers and students with staff.clients.create can create local public client accounts: duplicate email/phone and staff-domain emails are refused; a 4–8 digit PIN is required, shown once, stored hashed, and never emailed or logged; optional email can send a 72-hour set-password link without the PIN; staff-assisted consent and audit record creation without secrets."
         ],
         "affected_areas": [
             "Open a ticket",
@@ -860,7 +914,7 @@
             "Developer sign-in works only on local Herd with QA_LOGIN_ENABLED=true. Live admin log-in-as-user is out of scope and never planned."
         ],
         "rollback": "Deploy v0.64.2 with deploy-cloudron.yml. Local installs lose the Developer sign-in panel and QA pill until a later release; production is unchanged when the flag was unset.",
-        "provenance": "Milestone v0.64.3 Dev: Developer sign-in and QA role switcher, epic #834 with issues #835\u2013#842; pull request #843.",
+        "provenance": "Milestone v0.64.3 Dev: Developer sign-in and QA role switcher, epic #834 with issues #835–#842; pull request #843.",
         "references": [
             {
                 "label": "Issue #834",
@@ -882,8 +936,8 @@
         "changes": [
             "Admin Settings, Email Templates and Access share one button-style sub-navigation (the same pill style as other Admin section tabs), with the current section marked for screen readers.",
             "The Admin sidebar and page heading for outbound mail templates now read Email Templates; Email import and Inbound stay separate.",
-            "Live operator docs and the wiki treat Admin \u2192 Settings \u2192 Keys and secrets (enter, Test, save) as the primary path for the communications@ mailbox password; the server .env is emergency or fallback only. A names-only inventory lists which secrets have an Admin UI and which stay .env-only.",
-            "Herd local docs describe how to exercise Keys and secrets and Integrations with machine-local values or typed Admin values only \u2014 never commit or paste production secrets."
+            "Live operator docs and the wiki treat Admin → Settings → Keys and secrets (enter, Test, save) as the primary path for the communications@ mailbox password; the server .env is emergency or fallback only. A names-only inventory lists which secrets have an Admin UI and which stay .env-only.",
+            "Herd local docs describe how to exercise Keys and secrets and Integrations with machine-local values or typed Admin values only — never commit or paste production secrets."
         ],
         "affected_areas": [
             "Admin navigation",
@@ -909,7 +963,7 @@
             "None for this patch. OIDC, LDAP, APP_KEY and INBOUND_MAIL_TOKEN_KEY remain .env-only until a later decision."
         ],
         "rollback": "Deploy v0.64.1 with deploy-cloudron.yml. Admin subnav returns to unstyled links and the Emails label returns until a later release; Keys and secrets behaviour is unchanged by this patch.",
-        "provenance": "Milestone v0.64.2 Beta: Admin navigation, keys clarity and local secret testing, epic #826 with issues #827\u2013#832; pull request #833.",
+        "provenance": "Milestone v0.64.2 Beta: Admin navigation, keys clarity and local secret testing, epic #826 with issues #827–#832; pull request #833.",
         "references": [
             {
                 "label": "Issue #826",
@@ -930,7 +984,7 @@
         "summary": "Staff who sign in with APES Cloudron can confirm sensitive actions again through Cloudron sign-in, including saving secrets in Admin settings. Local password and passkey confirmation for public accounts is unchanged.",
         "changes": [
             "When a Cloudron directory staff member needs to re-confirm before a sensitive change, MyAPES Account sends them through Staff Login again (Cloudron asks them to sign in) and then returns them to what they were doing.",
-            "Admin \u2192 Settings \u2192 Keys and secrets and other step-up gated actions work for Cloudron staff after that re-confirmation.",
+            "Admin → Settings → Keys and secrets and other step-up gated actions work for Cloudron staff after that re-confirmation.",
             "People with a local password or passkey still confirm the same way as before."
         ],
         "affected_areas": [
@@ -972,9 +1026,9 @@
         "channel": "stable",
         "type": "minor",
         "title": "Admin general settings",
-        "summary": "Administrators can now change everyday options for the whole app on a new General tab in Admin \u2192 Settings: the support contact, whether people can register for a public account, and a short banner on public pages.",
+        "summary": "Administrators can now change everyday options for the whole app on a new General tab in Admin → Settings: the support contact, whether people can register for a public account, and a short banner on public pages.",
         "changes": [
-            "Admin \u2192 Settings has a new General tab, which is now the first tab and the one Settings opens on. It holds the support email address and phone number, the public registration switch and the site banner, and shows for reference how long records are kept and the upload limits, with links to Maintenance, Integrations, Modules and Emails.",
+            "Admin → Settings has a new General tab, which is now the first tab and the one Settings opens on. It holds the support email address and phone number, the public registration switch and the site banner, and shows for reference how long records are kept and the upload limits, with links to Maintenance, Integrations, Modules and Emails.",
             "When an administrator switches public registration off, the Register links disappear from the public pages, the menu, the sign-in page and the help pages, and anyone who opens the Register page is taken to Public Login with a notice that registration is closed. People with an account can still sign in, and staff sign-in through APES Cloudron is not affected.",
             "An administrator can show a short plain-text banner at the top of public pages, for example to warn about planned maintenance. It is not shown on Admin pages.",
             "Every change on the General tab is recorded in the audit log, naming the settings that changed but never their values."
@@ -1022,11 +1076,11 @@
         "channel": "stable",
         "type": "patch",
         "title": "Built-in email import and Herd reply testing",
-        "summary": "Administrators manage the reply mailbox password from Keys and secrets, see a built-in read-only connection on Admin \u2192 Emails \u2192 Import, and can fetch mail, watch import health and retry held or failed messages. Local developers can test the full replies-by-email loop through Laravel Herd's mail catcher.",
+        "summary": "Administrators manage the reply mailbox password from Keys and secrets, see a built-in read-only connection on Admin → Emails → Import, and can fetch mail, watch import health and retry held or failed messages. Local developers can test the full replies-by-email loop through Laravel Herd's mail catcher.",
         "changes": [
             "The reply mailbox connection is built in: host, port, encryption, username and folders come from the app and the server environment. Administrators no longer type those values on the Import page.",
-            "Admin \u2192 Settings \u2192 Keys and secrets is the only place to set or clear the mailbox password. Saving or clearing it asks for a fresh sign-in check, never shows the value again, and records the change in the audit log. Environment and Vault values still win over a saved secret.",
-            "Admin \u2192 Emails \u2192 Import shows a read-only connection panel with where each value comes from, a Fetch now control with a safe round-trip probe, an import monitor (health, counts, chart and recent imports), and a held and failed queue with retry and a menu badge.",
+            "Admin → Settings → Keys and secrets is the only place to set or clear the mailbox password. Saving or clearing it asks for a fresh sign-in check, never shows the value again, and records the change in the audit log. Environment and Vault values still win over a saved secret.",
+            "Admin → Emails → Import shows a read-only connection panel with where each value comes from, a Fetch now control with a safe round-trip probe, an import monitor (health, counts, chart and recent imports), and a held and failed queue with retry and a menu badge.",
             "On Laravel Herd locally, inbound mail can be polled from Herd's mail catcher, a \"Reply as client\" action posts a test reply into that catcher, and tickets:inbound-loop-check confirms the loop is ready. Continuous integration can run an optional GreenMail IMAPS job when the image is available.",
             "The mail and Herd guides, wiki pages and agent instructions describe the built-in connection, Keys and secrets, Import monitor and local Herd reply testing."
         ],
@@ -1118,9 +1172,9 @@
         "channel": "stable",
         "type": "minor",
         "title": "Email import and stable IMAP connection",
-        "summary": "Administrators can now set up and test the reply mailbox from its own page, Admin \u2192 Emails \u2192 Import, and see in plain words which step of the connection failed and what to try. Importing client replies by email keeps running steadily, with visible mailbox folders, no duplicates, polite retries and alerts when it stops.",
+        "summary": "Administrators can now set up and test the reply mailbox from its own page, Admin → Emails → Import, and see in plain words which step of the connection failed and what to try. Importing client replies by email keeps running steadily, with visible mailbox folders, no duplicates, polite retries and alerts when it stops.",
         "changes": [
-            "Admin \u2192 Emails \u2192 Import is a new page and menu item for administrators. It holds the reply mailbox connection, the import status, a readiness checklist and a recent connection log. The Reply mailbox tab has left Admin \u2192 Settings, which now opens on Integrations, and the old address takes you to the new page.",
+            "Admin → Emails → Import is a new page and menu item for administrators. It holds the reply mailbox connection, the import status, a readiness checklist and a recent connection log. The Reply mailbox tab has left Admin → Settings, which now opens on Integrations, and the old address takes you to the new page.",
             "Test connection now checks the values typed in the form, before saving and before replies are switched on, step by step: server name, connection, encryption, login and folder. Each step shows passed, failed or skipped with its time, and a failure is explained in plain words with what to try. A typed password is used for that one test and never kept.",
             "The form starts with the APES Cloudron mail server values and refuses port and encryption pairs that can never work, such as port 993 with STARTTLS.",
             "The readiness checklist shows what is still missing before replies by email can work, and who fixes each item: an administrator on the page or IT on Cloudron.",
@@ -1146,7 +1200,7 @@
         "version_rationale": "Minor: a new admin page, connection diagnostics and import reliability features with additive migrations; the old settings address redirects and no existing route stops working.",
         "validation": [
             "The full PHPUnit suite, Pint on changed files and the translation key check passed locally; new feature tests use a fake IMAP server for every failure type and cover the Import page and its permissions, readiness, folders, UID tracking, the poll lock and backoff (including a server that never answers), alerts, the health field and a redaction test that finds no password or username in logs, cache, database or audit.",
-            "In the Laragon preview, Admin \u2192 Emails \u2192 Import loaded for an administrator with its connection form, test result, import status, readiness checklist and connection log, and the old Reply mailbox address redirected to it."
+            "In the Laragon preview, Admin → Emails → Import loaded for an administrator with its connection form, test result, import status, readiness checklist and connection log, and the old Reply mailbox address redirected to it."
         ],
         "known_limitations": [
             "Replies by email on the live app need the Cloudron mailbox owner, its Mail Client app password and the reply token key set up after the deploy (issue #754).",
@@ -1171,13 +1225,13 @@
         "channel": "stable",
         "type": "minor",
         "title": "API, webhooks and integrations",
-        "summary": "Other APES apps, starting with APES Newsroom and EASM, can now read from MyAPES Account through a secure API and be told when things change. Administrators manage outside service keys from Admin \u2192 Settings, and public forms get invisible spam protection.",
+        "summary": "Other APES apps, starting with APES Newsroom and EASM, can now read from MyAPES Account through a secure API and be told when things change. Administrators manage outside service keys from Admin → Settings, and public forms get invisible spam protection.",
         "changes": [
-            "Admin \u2192 Settings has a new Integrations tab for the keys of outside services, starting with the TinyMCE editor and Google reCAPTCHA. Saved secret keys are never shown again, values set on the server still win, and every change and connection test is recorded in the audit log.",
+            "Admin → Settings has a new Integrations tab for the keys of outside services, starting with the TinyMCE editor and Google reCAPTCHA. Saved secret keys are never shown again, values set on the server still win, and every change and connection test is recorded in the audit log.",
             "The public register, forgot password, open a ticket and job application forms, and Public Login after repeated failed attempts, are now protected by Google reCAPTCHA v3 with hidden checks that people never see. If Google cannot be reached, the forms still work under stricter limits. The privacy and cookie notices explain the change.",
-            "A new read-only API at /api/v1 lets approved APES apps look up staff, groups, people, contact consent, pets, tickets and cases for their own organisation only, using service tokens that administrators issue, rotate and revoke in Admin \u2192 Settings \u2192 API clients.",
-            "Admin \u2192 Settings \u2192 Webhooks sends signed messages to approved apps when people, consent, staff, pets, tickets or cases change, with automatic retries, a delivery log and a replay button.",
-            "Admin \u2192 Settings \u2192 API docs explains the API and how apps check webhook signatures, and the health check now reports whether queued webhook deliveries are on time."
+            "A new read-only API at /api/v1 lets approved APES apps look up staff, groups, people, contact consent, pets, tickets and cases for their own organisation only, using service tokens that administrators issue, rotate and revoke in Admin → Settings → API clients.",
+            "Admin → Settings → Webhooks sends signed messages to approved apps when people, consent, staff, pets, tickets or cases change, with automatic retries, a delivery log and a replay button.",
+            "Admin → Settings → API docs explains the API and how apps check webhook signatures, and the health check now reports whether queued webhook deliveries are on time."
         ],
         "affected_areas": [
             "Admin settings",
@@ -1201,7 +1255,7 @@
         ],
         "known_limitations": [
             "The API is read-only and webhooks are outgoing only; writing from other apps and incoming webhooks come later.",
-            "Google reCAPTCHA stays off until an administrator saves its keys in Admin \u2192 Settings \u2192 Integrations; until then only the hidden checks run."
+            "Google reCAPTCHA stays off until an administrator saves its keys in Admin → Settings → Integrations; until then only the hidden checks run."
         ],
         "rollback": "Deploy v0.61.1 with deploy-cloudron.yml. The new API client, token and webhook tables are additive and are ignored by v0.61.1; keys saved in Integrations stay stored but unused.",
         "provenance": "Milestone v0.62.0 Beta: API, webhooks and integrations, epic #647 with issues #634, #635, #636, #637, #638, #639, #640, #641, #642, #643, #644, #645, #646 and the Cloudron hand-off #754; pull request #768.",
@@ -1265,12 +1319,12 @@
         "channel": "stable",
         "type": "minor",
         "title": "Admin reply mailbox settings",
-        "summary": "Administrators can now set up the mailbox that receives replies to ticket and case emails from Admin \u2192 Settings, test it, and attach replies that could not be matched, and replies are matched to the right ticket or case more reliably.",
+        "summary": "Administrators can now set up the mailbox that receives replies to ticket and case emails from Admin → Settings, test it, and attach replies that could not be matched, and replies are matched to the right ticket or case more reliably.",
         "changes": [
-            "Admin \u2192 Settings is new, for administrators only, with a Reply mailbox tab for the shared communications mailbox: whether replies by email are on, the mail server details, the folder and whether plus-addressed mail is delivered. The mailbox password can be replaced but is never shown again, and values set on the server still win and are marked as such.",
+            "Admin → Settings is new, for administrators only, with a Reply mailbox tab for the shared communications mailbox: whether replies by email are on, the mail server details, the folder and whether plus-addressed mail is delivered. The mailbox password can be replaced but is never shown again, and values set on the server still win and are marked as such.",
             "The Reply mailbox tab can test the connection, shows when the mailbox was last checked, and can send a test email to a plus-address to show whether it arrives. Every save, test and probe is recorded in the audit log without the password.",
             "Replies are now matched by their reply address first, then by the email they answer, then by the reference in the subject. A reply whose references point to different tickets or cases is held for staff instead of being guessed.",
-            "On Admin \u2192 Emails \u2192 Inbound, staff can attach a held reply to the right ticket or case. Account holders whose reply could not be matched get one email an hour saying so; unknown senders get nothing.",
+            "On Admin → Emails → Inbound, staff can attach a held reply to the right ticket or case. Account holders whose reply could not be matched get one email an hour saying so; unknown senders get nothing.",
             "Settings changed in Admin take effect without a deploy and are stored encrypted where they are secret.",
             "Developers can try the whole reply loop locally: ticket emails and client replies go through the local mail catcher, with a Local test replies panel and a reply-as-client command that exist only on a local install.",
             "Milestones now close by themselves once all their issues are closed and their release is deployed."
@@ -1296,7 +1350,7 @@
             "In the Laragon preview, a staff reply on a demo ticket emailed the client, a reply as that client was fetched and posted on the ticket marked by email, and a plus-address probe was received and ignored."
         ],
         "known_limitations": [
-            "Replies by email stay off in production until an administrator enters the mailbox in Admin \u2192 Settings \u2192 Reply mailbox; the Cloudron mailbox owner and server checks continue in v0.62.0.",
+            "Replies by email stay off in production until an administrator enters the mailbox in Admin → Settings → Reply mailbox; the Cloudron mailbox owner and server checks continue in v0.62.0.",
             "The mailbox token key, the trusted mail server name and the hourly limits are still set only on the server."
         ],
         "rollback": "Deploy the previous release tag with deploy-cloudron.yml. The new app_settings table and Settings permissions are additive and are ignored by v0.60.0; settings saved in Admin are not used after a rollback.",
@@ -3275,7 +3329,7 @@
             "On tablets and phones, Spike's tip now sits at the end of the page instead of floating over tables and forms.",
             "Plugin settings pages leave room below the last row so the Save settings bar never hides it.",
             "Admin overview shows identity types and access classes with their normal names, such as Local, Cloudron OIDC, Volunteer and Student.",
-            "Admin permission groups use real module names, such as APES CIC \u00b7 Cases.",
+            "Admin permission groups use real module names, such as APES CIC · Cases.",
             "The Consultations list shows a friendly message when there is nothing to show yet."
         ],
         "affected_areas": [
@@ -3509,7 +3563,7 @@
             "Replace the sidebar with a floating frosted-glass rail in MyAPES logo colours: flat links grouped by module and plugin, and a user dock pinned to the bottom.",
             "Add a Staff | Admin switch for people who can use both panels, and a Public panel for guests.",
             "Add a page header with a breadcrumb, a Search pill and View site.",
-            "Add a Ctrl K (or \u2318K) command palette that finds every page you can open, plugin settings, and quick actions such as Create ticket.",
+            "Add a Ctrl K (or ⌘K) command palette that finds every page you can open, plugin settings, and quick actions such as Create ticket.",
             "On phones and tablets, a top card opens the same navigation in an accessible slide-in drawer.",
             "Restyle cards, buttons, fields, tables, tabs and alerts, the auth pages and the dark theme to match, and hide the navigation when printing.",
             "Respect reduced-motion and reduced-transparency settings, with a skip link, a clear focus ring and one current link on every page."
@@ -5513,7 +5567,7 @@
         "changes": [
             "Show the Admin primary menu only when at least one Admin page is allowed, and open the first permitted section.",
             "Register Lucide icons used by Recruitment, hub Create actions, and page submenus so labels no longer appear without icons.",
-            "Add icons to Admin and Recruitment page submenus and to hub \u201cWhat you can do\u201d tool links."
+            "Add icons to Admin and Recruitment page submenus and to hub “What you can do” tool links."
         ],
         "affected_areas": [
             "Primary navigation",
@@ -5561,9 +5615,9 @@
         "changes": [
             "Backfill six missing GitHub Releases so release history matches the Change Log Hub (141 tags).",
             "Rename remaining historical release display titles to the {VERSION} Beta convention.",
-            "Extend migrate-beta-milestones.sh to rename product milestones #1\u2013#9 with completed-line descriptions.",
+            "Extend migrate-beta-milestones.sh to rename product milestones #1–#9 with completed-line descriptions.",
             "Document milestone migration in ship-gate and require --pr in the release-metadata skill table.",
-            "Clarify AGENTS.md that v0.31.x\u2013v0.39.x Beta product lines are closed with no open backlog milestone."
+            "Clarify AGENTS.md that v0.31.x–v0.39.x Beta product lines are closed with no open backlog milestone."
         ],
         "affected_areas": [
             "GitHub Releases and milestones",
@@ -6135,7 +6189,7 @@
         "version_rationale": "Patch on the 0.38.x Language line: staff/plugin extraction after public-area extract (0.38.6).",
         "validation": [
             "PHPUnit LocalisationStaffExtractionTest, recruitment manage/dual-frontend, Cases/Tickets/Consultations workflows.",
-            "php artisan lang:inventory \u2014 APES CIC staff and related plugin sections count 0.",
+            "php artisan lang:inventory — APES CIC staff and related plugin sections count 0.",
             "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
         ],
         "known_limitations": [
@@ -6185,7 +6239,7 @@
         "version_rationale": "Patch on the 0.38.x Language line: public-area extraction after Admin shell extract (0.38.5).",
         "validation": [
             "PHPUnit LocalisationPublicExtractionTest, PublicRecruitmentBoardTest, RecruitmentDualFrontendIaMatrixTest, PublicLegalPagesTest.",
-            "php artisan lang:inventory \u2014 public section count 0.",
+            "php artisan lang:inventory — public section count 0.",
             "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
         ],
         "known_limitations": [
@@ -6235,7 +6289,7 @@
         "version_rationale": "Patch on the 0.38.x Language line: Admin shell extraction after auth/mail extract (0.38.4).",
         "validation": [
             "PHPUnit LocalisationAdminExtractionTest and AdminShellNavigationTest.",
-            "php artisan lang:inventory \u2014 Admin section count 0.",
+            "php artisan lang:inventory — Admin section count 0.",
             "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
         ],
         "known_limitations": [
@@ -6283,12 +6337,12 @@
             "public-facing",
             "internal-only"
         ],
-        "version_rationale": "Patch on the 0.38.x Language line: auth/mail/flash extraction only \u2014 Admin, public chrome, and staff hub extracts follow in later patches.",
+        "version_rationale": "Patch on the 0.38.x Language line: auth/mail/flash extraction only — Admin, public chrome, and staff hub extracts follow in later patches.",
         "validation": [
             "PHPUnit LocalisationAuthExtractionTest (HasLocalePreference, auth copy, password-reset status, mail keys).",
             "PublicLocalForgotPasswordTest, ProfileLocalPasswordChangeTest, PublicChromeNamingTest, AdminPendingFirstLoginChaseTest.",
             "Ticket/case/consultation workflow suites covering notification mail paths.",
-            "php artisan lang:inventory \u2014 Auth section count 0; docs/i18n-inventory.md regenerated.",
+            "php artisan lang:inventory — Auth section count 0; docs/i18n-inventory.md regenerated.",
             "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
         ],
         "known_limitations": [
@@ -6318,7 +6372,7 @@
         "summary": "MyAPES Account plugins now load their own UK English translation namespaces, and Admin Plugins shows plugin names and descriptions from those lang files. CI also runs a report-only translation key check.",
         "changes": [
             "Load Cases, Tickets, Recruitment, Consultations, and Pet Profiles translations under cases::, tickets::, recruitment::, consultations::, and pet_profiles:: namespaces.",
-            "Seed each plugin\u2019s en_GB plugin.php with name, short_name, description, and keywords; Admin Plugins labels resolve via nameKey and descriptionKey.",
+            "Seed each plugin’s en_GB plugin.php with name, short_name, description, and keywords; Admin Plugins labels resolve via nameKey and descriptionKey.",
             "Allow app-level overrides in lang/vendor/{namespace}/en_GB without changing plugin packages.",
             "Add php artisan lang:check (report-only) to CI for missing/unused keys and hard-coded string counts; hard-fail remains for a later Language wave."
         ],
@@ -6336,7 +6390,7 @@
             "public-facing",
             "internal-only"
         ],
-        "version_rationale": "Patch on the 0.38.x Language line: plugin namespace wiring and report-only CI scaffolding \u2014 no broad string extraction yet.",
+        "version_rationale": "Patch on the 0.38.x Language line: plugin namespace wiring and report-only CI scaffolding — no broad string extraction yet.",
         "validation": [
             "PHPUnit PluginTranslationNamespacesTest (namespace resolution, Admin Plugins labels, vendor override, disabled-plugin safety, lang:check report-only).",
             "Related Structure / Admin plugins / inventory tests on the PR branch.",
@@ -6387,7 +6441,7 @@
             "public-facing",
             "internal-only"
         ],
-        "version_rationale": "Patch on the 0.38.x Language line: inventory and scanner only \u2014 no broad string extraction or user-visible copy changes.",
+        "version_rationale": "Patch on the 0.38.x Language line: inventory and scanner only — no broad string extraction or user-visible copy changes.",
         "validation": [
             "PHPUnit HardCodedStringInventoryTest (scanner fixture, committed inventory anchors, write path).",
             "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch.",
@@ -6530,7 +6584,7 @@
         "changes": [
             "Architecture dependency tests hard-fail in CI: Core must not import Modules or Plugins; plugins use only declared dependencies via public API; modules must not import other modules.",
             "Added php artisan make:module and make:plugin stubs with a developer guide so new packages register without editing app/Core.",
-            "Documented Structure as shipped in AGENTS.md (ship order 7 \u2192 9 \u2192 8 \u2192 5) and updated architecture docs for the hard-fail suite.",
+            "Documented Structure as shipped in AGENTS.md (ship order 7 → 9 → 8 → 5) and updated architecture docs for the hard-fail suite.",
             "Moved the shared record-owner validation rule into App\\Rules so Cases does not import Tickets rules."
         ],
         "affected_areas": [
@@ -6593,8 +6647,8 @@
             "Preserved live recruitment and consultation URLs and permission strings; morph aliases and a notification stub keep existing records rendering."
         ],
         "affected_areas": [
-            "Recruitment plugin package \u2014 public /recruitment* and staff /apes-cic/recruitment*",
-            "Consultations plugin package \u2014 staff /petcare/consultations*",
+            "Recruitment plugin package — public /recruitment* and staff /apes-cic/recruitment*",
+            "Consultations plugin package — staff /petcare/consultations*",
             "Morph map aliases for recruitment roles, applications, and consultations",
             "Admin Plugins manifests for Recruitment and Consultations"
         ],
@@ -6718,7 +6772,7 @@
             "composer pre-pr-verify / CI before merge; Cloudron workflow_dispatch with app_version from VERSION after merge."
         ],
         "known_limitations": [
-            "Tickets, Cases, Recruitment, and Consultations plugin packages are still stubs; their controllers remain under App until Waves 6\u20137.",
+            "Tickets, Cases, Recruitment, and Consultations plugin packages are still stubs; their controllers remain under App until Waves 6–7.",
             "Historical pet_profiles migration stays in database/migrations for forward-only discoverability."
         ],
         "rollback": "Redeploy the previous application version. No database migration runs in this release; rolling back application code restores the dual App controllers and App\\\\Models\\\\PetProfile namespace.",
@@ -6744,7 +6798,7 @@
         "changes": [
             "Add module.php manifests for apes-cic, pet-care-clinic, and shelter-rescue covering nav, hub route, live prefix, enabled flag, and composed plugins.",
             "Move APES CIC tickets, cases, and recruitment settings defaults into the apes-cic package config so Core no longer special-cases that module.",
-            "Declare Cases \u2192 Pet Profiles for Shelter and Consultations \u2192 Pet Profiles for Pet Care on plugin manifests instead of a hard-coded matrix match.",
+            "Declare Cases → Pet Profiles for Shelter and Consultations → Pet Profiles for Pet Care on plugin manifests instead of a hard-coded matrix match.",
             "Keep the shared Core hub view fed by each module manifest; plugin controllers and models stay under App until later Structure waves."
         ],
         "affected_areas": [
@@ -6770,7 +6824,7 @@
             "composer pre-pr-verify / CI before merge; Cloudron workflow_dispatch with app_version from VERSION after merge."
         ],
         "known_limitations": [
-            "Plugin controllers and models remain under App\\Http and App\\Models until Waves 5\u20137 move them into plugins/<slug>.",
+            "Plugin controllers and models remain under App\\Http and App\\Models until Waves 5–7 move them into plugins/<slug>.",
             "Module hub views still use the shared Core sub-cores.show template; packages may override via hubView later."
         ],
         "rollback": "Redeploy the previous application version. No database migration runs in this release; rolling back application code restores Core-owned settings defaults and the hard-coded matrix dependency match.",
@@ -6862,7 +6916,7 @@
             "Copy plugin enablement and settings rows into module_plugins and module_plugin_settings without changing which plugins are already enabled.",
             "Add a PluginEnablement service and plugin.enabled route middleware, keeping the older module.available alias as a wrapper.",
             "Show organisation Modules and Plugins as separate Admin pages, with per-module toggles, dependency checks, and settings links on Plugins.",
-            "Skip Access and job-role permission offers for a module\u00d7plugin while it is disabled, without deleting existing grants.",
+            "Skip Access and job-role permission offers for a module×plugin while it is disabled, without deleting existing grants.",
             "Publish enablements on the module runtime contract while keeping shipped_instances and legacy_visible_instances for rollback checks."
         ],
         "affected_areas": [
@@ -6943,7 +6997,7 @@
             "composer pre-pr-verify / CI before merge; Cloudron workflow_dispatch with app_version from VERSION after merge."
         ],
         "known_limitations": [
-            "Plugin feature controllers and models remain under App\\Http and App\\Models until Waves 5\u20137 move them into plugins/<slug>.",
+            "Plugin feature controllers and models remain under App\\Http and App\\Models until Waves 5–7 move them into plugins/<slug>.",
             "Per-module plugin enablement storage beyond existing module_installations is Wave 2 (#288)."
         ],
         "rollback": "Redeploy the previous application version. If the organisation_modules migration already ran, the table can remain; restoring a pre-deployment Cloudron backup is only required when rolling back database state.",
@@ -7164,7 +7218,7 @@
         "channel": "stable",
         "type": "patch",
         "title": "Architecture map for Core, Modules, and Plugins",
-        "summary": "Contributor documentation now names three layers \u2014 Core, Modules, and Plugins \u2014 and lists where today's code sits. Sign-in, pages, permissions, and addresses behave the same.",
+        "summary": "Contributor documentation now names three layers — Core, Modules, and Plugins — and lists where today's code sits. Sign-in, pages, permissions, and addresses behave the same.",
         "changes": [
             "Add an architecture decision that names Core, Modules (APES CIC, Pet Care Clinic, Shelter and Rescue), and Plugins (Tickets, Cases, Recruitment, Consultations, Pet Profiles).",
             "Publish an inventory of routes, code, and permissions against those layers, without moving any of them.",
@@ -7288,7 +7342,7 @@
             "Add an Admin-style Recruitment page submenu: Open roles for everyone when the public board is enabled, and My applications for signed-in applicants only.",
             "Align the footer Recruitment label with the new primary; keep /recruitment and /recruitment/applications URLs unchanged.",
             "Keep category filters (All / Staff / Volunteer / Student) on the Open roles board and avoid staff manage bleed into the public submenu.",
-            "Update AGENTS.md for the closed v0.35.x line, the v0.36.x dual-frontend backlog, and ship order 6 \u2192 7 \u2192 8 \u2192 5.",
+            "Update AGENTS.md for the closed v0.35.x line, the v0.36.x dual-frontend backlog, and ship order 6 → 7 → 8 → 5.",
             "Extend PublicRecruitmentBoardTest for Recruitment chrome, guest-safe applications gating, and signed-in submenu visibility."
         ],
         "affected_areas": [
@@ -7349,12 +7403,12 @@
         "channel": "stable",
         "type": "patch",
         "title": "Plugin settings registry",
-        "summary": "Admin \u2192 Plugins settings are driven by a shared registry contract. Recruitment gains public board and apply toggles; plugins without settings show an explicit empty state.",
+        "summary": "Admin → Plugins settings are driven by a shared registry contract. Recruitment gains public board and apply toggles; plugins without settings show an explicit empty state.",
         "changes": [
             "Introduce a ModuleSettingsRegistry contract (supports settings, schema, route, permissions, nav label) as the single source of truth for plugin settings.",
             "Adapt APES CIC tickets and cases settings to consume the registry as the reference websites/categories schema.",
             "Add a Recruitment settings page for public board and public apply toggles, gated by admin.modules view/manage.",
-            "Show \u201cNo configurable settings\u201d on the Plugins index for Consultations and Pet Profiles.",
+            "Show “No configurable settings” on the Plugins index for Consultations and Pet Profiles.",
             "Respect Recruitment board/apply settings on the public roles board and application submit path.",
             "Cover registry discovery, authorization fail-closed behaviour, and public gating with PHPUnit feature tests."
         ],
@@ -7474,7 +7528,7 @@
             "Add apply on the public role detail page (one application per person per role) with a required interest statement.",
             "Add My applications list and detail so signed-in public users can view status and withdraw when the workflow allows.",
             "Add staff applications list with status, category, and role filters, plus review transitions and staff-only notes.",
-            "Prompt guests on open role detail to sign in or register before applying; deny access to other people\u2019s applications and to staff review for public users.",
+            "Prompt guests on open role detail to sign in or register before applying; deny access to other people’s applications and to staff review for public users.",
             "Cover public apply, own-manage, staff review, and denial paths with PHPUnit feature tests."
         ],
         "affected_areas": [
@@ -7794,7 +7848,7 @@
         "channel": "stable",
         "type": "patch",
         "title": "Consistent Incompatible module status copy",
-        "summary": "Super Admin overview plugin warnings now use Incompatible and Code not shipped \u2014 the same labels as the modules registry \u2014 instead of calling those cells Blocked.",
+        "summary": "Super Admin overview plugin warnings now use Incompatible and Code not shipped — the same labels as the modules registry — instead of calling those cells Blocked.",
         "changes": [
             "Label Super Admin module alerts for incompatible and code-not-shipped plugins with the same terms as the modules registry chips.",
             "Keep Disabled and Active records as separate alert kinds with their existing meanings."
@@ -7838,7 +7892,7 @@
         "channel": "stable",
         "type": "patch",
         "title": "Staff Login chase for pending first login",
-        "summary": "Admins can send a Staff Login reminder to directory accounts that have not completed first login. The reminder opens Staff Login / Cloudron only \u2014 not the public password reset.",
+        "summary": "Admins can send a Staff Login reminder to directory accounts that have not completed first login. The reminder opens Staff Login / Cloudron only — not the public password reset.",
         "changes": [
             "Add a Staff Login reminder action on Admin user detail for PENDING FIRST LOGIN directory accounts.",
             "Send chase mail that links to Staff Login / Cloudron and refuse the public-local password reset path for those accounts."
@@ -7906,7 +7960,7 @@
             "php artisan myapes:changelog-validate --base-ref=origin/main on the PR branch."
         ],
         "known_limitations": [
-            "Fine-grained permissions remain available under Advanced for any Admin who can view the account; Super Admin\u2013only hiding was not required for this release."
+            "Fine-grained permissions remain available under Advanced for any Admin who can view the account; Super Admin–only hiding was not required for this release."
         ],
         "rollback": "Redeploy the previous application version to restore the raw effective-permission dump and suspend-without-confirm behaviour.",
         "provenance": "User detail access summary and suspend confirm for issues #137 and #144, pull request #237.",
@@ -7931,7 +7985,7 @@
         "channel": "stable",
         "type": "patch",
         "title": "Super Admin overview drops duplicate Admin KPIs",
-        "summary": "Super Admin overview no longer repeats the Admin day-to-day KPI cards. It shows Super Admin\u2013only metrics for plugins, median closure, and plugin alerts, while Admin overview keeps the existing account and workload KPIs.",
+        "summary": "Super Admin overview no longer repeats the Admin day-to-day KPI cards. It shows Super Admin–only metrics for plugins, median closure, and plugin alerts, while Admin overview keeps the existing account and workload KPIs.",
         "changes": [
             "Remove the duplicated Admin account and workload KPI strip from Super Admin overview.",
             "Keep Super Admin overview KPIs to enabled plugins, median closure, and plugin alert count."
@@ -8634,7 +8688,7 @@
         "channel": "stable",
         "type": "patch",
         "title": "Spike dock stays clear of form fields",
-        "summary": "Spike\u2019s floating tip starts as a small avatar and keeps main content clear of the dock so Priority, Health, and similar form controls stay usable.",
+        "summary": "Spike’s floating tip starts as a small avatar and keeps main content clear of the dock so Priority, Health, and similar form controls stay usable.",
         "changes": [
             "Collapse the Spike tip dock to an avatar-only control by default; expand the tip on demand.",
             "Add bottom clearance on main content when the dock is present so lower form fields can scroll clear of the avatar."
@@ -8744,7 +8798,7 @@
             "public-facing",
             "internal-only"
         ],
-        "version_rationale": "Minor release: first Public UX capability in the v0.32.x line \u2014 branded error pages without changing who can access what. Includes small local-verify fixes needed to clear the pre-PR gate.",
+        "version_rationale": "Minor release: first Public UX capability in the v0.32.x line — branded error pages without changing who can access what. Includes small local-verify fixes needed to clear the pre-PR gate.",
         "validation": [
             "PHPUnit BrandedErrorPagesTest covers unknown-URL 404 branding, service-user Admin/Super Admin 403 branding, and abort(403) message passthrough.",
             "Local Laragon preview confirmed branded 404 chrome at an unknown path.",
@@ -9448,7 +9502,7 @@
         "channel": "stable",
         "type": "minor",
         "title": "Admin reset of local public passwords",
-        "summary": "Admins and Super Admins can issue a one-time temporary password for a local public account from Admin \u2192 Public users. Directory and Cloudron accounts cannot be reset this way.",
+        "summary": "Admins and Super Admins can issue a one-time temporary password for a local public account from Admin → Public users. Directory and Cloudron accounts cannot be reset this way.",
         "changes": [
             "Add a local-password reset action on the Admin public-users list and detail screens for local service-user accounts.",
             "Show the temporary password once after reset; it is not stored in audit history.",
@@ -10222,7 +10276,7 @@
             "Renamed signed-in chrome, Admin, changelog, and APP_NAME branding to MyAPES Core while keeping login and registration as MyAPES Account.",
             "Relabelled Super Admin Modules navigation and registry copy to Plugins, and sub-core wording to Services.",
             "Updated hub empty and summary headings, tips, permission titles, and flash messages to Plugins and Services language.",
-            "Documented the Core \u2192 Services \u2192 Plugins vocabulary in README and PRODUCT.md."
+            "Documented the Core → Services → Plugins vocabulary in README and PRODUCT.md."
         ],
         "affected_areas": [
             "Application branding and layout",
@@ -10522,7 +10576,7 @@
         ],
         "known_limitations": [
             "Custom app-owned groups are not introduced; groups remain Cloudron directory catalogue entries with optional custom role mappings.",
-            "Existing /admin technical URLs remain at the same paths and are now Super Admin\u2013gated rather than relocated under /superadmin except for the new overview."
+            "Existing /admin technical URLs remain at the same paths and are now Super Admin–gated rather than relocated under /superadmin except for the new overview."
         ],
         "rollback": "Revert this release record, VERSION, runtime manifest version, Super Admin views and routes, authorization matrix updates, admin UI Blade/CSS/JS changes, and related feature assertions. Re-run authorization metadata synchronization after rollback so protected role permissions match the restored matrix. No database schema rollback is required beyond restoring permission seed expectations.",
         "provenance": "Defined by the Admin UX cleanup with Super Admin technical panel for MyAPES Account issue #76 and pull request #77.",
@@ -10545,7 +10599,7 @@
         "title": "Polish Spike tip dock dismiss and avatar",
         "summary": "Spike tip dock dismiss control is a clear top-right close control, the dock avatar uses the pointing Spike artwork, and previous page dismissals are reset so the redesigned tip can appear again.",
         "changes": [
-            "Replaced the Hide tip text control with a high-contrast top-right \u00d7 close button on the tip bubble.",
+            "Replaced the Hide tip text control with a high-contrast top-right × close button on the tip bubble.",
             "Swapped the dock avatar to full-body pointing Spike artwork oriented toward the tip bubble.",
             "Rotated the local dismiss storage key so earlier page hide choices do not conceal the redesigned tip dock."
         ],
@@ -10794,7 +10848,7 @@
             "Updated package-lock.json so the development dependency graph resolves nanoid 3.3.18 instead of the affected 3.3.16 release under PostCSS."
         ],
         "affected_areas": [
-            "Frontend development lockfile (Vite \u2192 PostCSS \u2192 nanoid)"
+            "Frontend development lockfile (Vite → PostCSS → nanoid)"
         ],
         "categories": [
             "fixed",
