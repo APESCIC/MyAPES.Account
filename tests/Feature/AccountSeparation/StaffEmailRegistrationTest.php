@@ -106,7 +106,7 @@ class StaffEmailRegistrationTest extends TestCase
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
             ->from(route('profile.edit'))
             ->post(route('profile.email.change'), ['email' => 'public.person@apes.org.uk'])
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.show', [], false).'#account-email')
             ->assertSessionHasErrors(['email' => __('auth.register.staff_email_domain')]);
 
         $this->assertDatabaseMissing('pending_email_changes', ['user_id' => $user->id]);

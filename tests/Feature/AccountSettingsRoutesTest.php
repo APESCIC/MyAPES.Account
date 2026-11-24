@@ -33,6 +33,24 @@ class AccountSettingsRoutesTest extends TestCase
         }
     }
 
+    public function test_account_tab_shows_login_details_and_appearance(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'account.tab@example.com',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('account.show'))
+            ->assertOk()
+            ->assertSee('id="sign-in-methods"', false)
+            ->assertSee('id="account-email"', false)
+            ->assertSee('id="username"', false)
+            ->assertSee('id="appearance"', false)
+            ->assertSee('account.tab@example.com', false)
+            ->assertSee(__('workspace.theme.appearance_heading'), false)
+            ->assertSee('name="email"', false);
+    }
+
     public function test_legacy_profile_route_serves_hash_redirect_page(): void
     {
         $user = User::factory()->create();

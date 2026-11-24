@@ -11,17 +11,17 @@ class ProfileAccountEmailTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_local_public_profile_shows_email_change_next_to_password_block(): void
+    public function test_local_public_account_tab_shows_email_change_form(): void
     {
         $public = User::factory()->create([
             'email' => 'local.public.email@example.com',
             'password' => 'password',
         ]);
 
-        $profile = $this->actingAs($public)->get(route('profile.edit'));
-        $html = $profile->getContent();
+        $account = $this->actingAs($public)->get(route('account.show'));
+        $html = $account->getContent();
 
-        $profile->assertOk()
+        $account->assertOk()
             ->assertSeeText('Account email')
             ->assertSeeText('local.public.email@example.com')
             ->assertSeeText(__('auth.email_change.intro'))
@@ -29,14 +29,8 @@ class ProfileAccountEmailTest extends TestCase
             ->assertSee('id="account-email"', false)
             ->assertSee('id="change-email"', false)
             ->assertSee('name="email"', false)
-            ->assertSeeText('Change password')
-            ->assertSee('id="change-password"', false)
             ->assertDontSeeText('Email cannot be changed here.');
 
-        $this->assertLessThan(
-            strpos($html, 'id="change-password"'),
-            strpos($html, 'id="account-email"'),
-        );
         $this->assertDoesNotOfferImpersonation($html);
     }
 
@@ -49,7 +43,7 @@ class ProfileAccountEmailTest extends TestCase
                 'password' => 'password',
             ]);
 
-        $profile = $this->actingAs($directoryPublic)->get(route('profile.edit'));
+        $profile = $this->actingAs($directoryPublic)->get(route('account.show'));
         $html = $profile->getContent();
 
         $profile->assertOk()
@@ -70,12 +64,13 @@ class ProfileAccountEmailTest extends TestCase
     {
         $staff = User::factory()
             ->protectedRole(AuthorizationProfile::ROLE_STAFF)
+            ->directoryIdentity('staff-directory-email-subject')
             ->create([
                 'email' => 'staff.directory.email@example.com',
                 'password' => 'password',
             ]);
 
-        $profile = $this->actingAs($staff)->get(route('profile.edit'));
+        $profile = $this->actingAs($staff)->get(route('account.show'));
         $html = $profile->getContent();
 
         $profile->assertOk()

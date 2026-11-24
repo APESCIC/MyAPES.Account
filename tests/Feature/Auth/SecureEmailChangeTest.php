@@ -26,14 +26,14 @@ class SecureEmailChangeTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->get(route('profile.edit'))
+            ->get(route('account.show'))
             ->assertOk()
             ->assertSeeText(__('auth.email_change.heading'))
             ->assertSee('id="change-email"', false)
             ->assertDontSeeText('Email cannot be changed here.');
 
         $this->actingAs($user)
-            ->from(route('profile.edit'))
+            ->from(route('account.show'))
             ->post(route('profile.email.change'), [
                 'email' => 'new.user@example.com',
             ])
@@ -56,11 +56,11 @@ class SecureEmailChangeTest extends TestCase
 
         $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
-            ->from(route('profile.edit'))
+            ->from(route('account.show'))
             ->post(route('profile.email.change'), [
                 'email' => 'after.change@example.com',
             ])
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.show', [], false).'#account-email')
             ->assertSessionHas('status', __('flash.email_change_started'));
 
         $user->refresh();
@@ -82,7 +82,7 @@ class SecureEmailChangeTest extends TestCase
 
         $this->actingAs($user)
             ->get($url)
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.show', [], false).'#account-email')
             ->assertSessionHas('status', __('flash.email_change_completed'));
 
         $user->refresh();
@@ -192,14 +192,14 @@ class SecureEmailChangeTest extends TestCase
             ->post(route('profile.email.change'), [
                 'email' => 'first.pending@example.com',
             ])
-            ->assertRedirect(route('profile.edit'));
+            ->assertRedirect(route('account.show', [], false).'#account-email');
 
         $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
             ->post(route('profile.email.change'), [
                 'email' => 'second.pending@example.com',
             ])
-            ->assertRedirect(route('profile.edit'));
+            ->assertRedirect(route('account.show', [], false).'#account-email');
 
         $this->assertDatabaseCount('pending_email_changes', 1);
         $this->assertDatabaseHas('pending_email_changes', [
@@ -208,9 +208,9 @@ class SecureEmailChangeTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->from(route('profile.edit'))
+            ->from(route('account.show'))
             ->delete(route('profile.email.cancel'))
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.show', [], false).'#account-email')
             ->assertSessionHas('status', __('flash.email_change_cancelled'));
 
         $this->assertDatabaseMissing('pending_email_changes', ['user_id' => $user->id]);
@@ -227,7 +227,7 @@ class SecureEmailChangeTest extends TestCase
             ]);
 
         $this->actingAs($directory)
-            ->get(route('profile.edit'))
+            ->get(route('account.show'))
             ->assertOk()
             ->assertSeeText(__('auth.email_change.directory_owned'))
             ->assertDontSee('id="change-email"', false);
@@ -259,11 +259,11 @@ class SecureEmailChangeTest extends TestCase
 
         $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
-            ->from(route('profile.edit'))
+            ->from(route('account.show'))
             ->post(route('profile.email.change'), [
                 'email' => 'taken@example.com',
             ])
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.show'))
             ->assertSessionHasErrors('email');
 
         $this->assertSame('seeker@example.com', $user->refresh()->email);

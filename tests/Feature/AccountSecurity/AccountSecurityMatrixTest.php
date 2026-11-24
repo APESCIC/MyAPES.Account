@@ -153,14 +153,14 @@ class AccountSecurityMatrixTest extends TestCase
         $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
             ->put(route('profile.username.update'), ['username' => 'matrix.renamed'])
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.show', [], false).'#username')
             ->assertSessionHas('status', __('flash.username_updated'));
         $this->assertSame('matrix.renamed', $user->refresh()->username);
 
         $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
             ->post(route('profile.email.change'), ['email' => 'matrix.new@example.com'])
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.show', [], false).'#account-email')
             ->assertSessionHas('status', __('flash.email_change_started'));
 
         Notification::assertSentTo($user, EmailChangeStartedNotification::class);
@@ -175,7 +175,7 @@ class AccountSecurityMatrixTest extends TestCase
 
         $this->actingAs($user)
             ->get($url)
-            ->assertRedirect(route('profile.edit'))
+            ->assertRedirect(route('account.show', [], false).'#account-email')
             ->assertSessionHas('status', __('flash.email_change_completed'));
 
         $this->assertSame('matrix.new@example.com', $user->refresh()->email);

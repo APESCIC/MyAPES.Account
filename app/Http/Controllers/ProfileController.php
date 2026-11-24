@@ -120,7 +120,8 @@ class ProfileController extends Controller
         ]);
 
         return redirect()
-            ->route('profile.edit')
+            ->route('account.show')
+            ->withFragment('username')
             ->with('status', __('flash.username_updated'));
     }
 

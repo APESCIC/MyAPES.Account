@@ -12,8 +12,9 @@
             @include('account._subnav')
         </section>
 
-        <section class="panel" id="account-overview">
-            <p class="muted">{{ __('account.settings.account_body') }}</p>
-        </section>
+        @include('account._sign-in-methods')
+        @include('account._email')
+        @include('account._username')
+        @include('profile._appearance')
     </div>
 @endsection

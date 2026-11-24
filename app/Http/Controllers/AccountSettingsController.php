@@ -2,14 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\AccountSettingsViewData;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
 class AccountSettingsController extends Controller
 {
+    public function __construct(
+        private readonly AccountSettingsViewData $viewData,
+    ) {}
+
     public function show(Request $request): View
     {
-        return $this->page($request, 'account', 'account.show');
+        $user = $request->user();
+
+        return view('account.show', [
+            'activeAccountTab' => 'account',
+            'user' => $user,
+            ...$this->viewData->accountTab($user),
+        ]);
     }
 
     public function profile(Request $request): View
