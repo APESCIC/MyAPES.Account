@@ -15,7 +15,9 @@ class AuthorizationAuthenticationTest extends TestCase
     public function test_public_registration_grants_a_system_baseline_and_password_context(): void
     {
         $response = $this->post(route('public.register.submit'), [
-            'name' => 'Public Registrant',
+            'first_name' => 'Public',
+            'last_name' => 'Registrant',
+            'date_of_birth' => '14/03/1990',
             'username' => 'public.registrant',
             'email' => 'registrant@example.com',
             'password' => 'A-secure-public-password-2026!',

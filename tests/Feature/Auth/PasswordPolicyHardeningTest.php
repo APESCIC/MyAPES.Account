@@ -21,7 +21,9 @@ class PasswordPolicyHardeningTest extends TestCase
     {
         $this->from(route('public.register'))
             ->post(route('public.register.submit'), [
-                'name' => 'Short Password',
+                'first_name' => 'Short',
+                'last_name' => 'Password',
+                'date_of_birth' => '14/03/1990',
                 'username' => 'short.password',
                 'email' => 'short.password@example.com',
                 'password' => 'Short-horse',
@@ -43,7 +45,9 @@ class PasswordPolicyHardeningTest extends TestCase
 
         $this->from(route('public.register'))
             ->post(route('public.register.submit'), [
-                'name' => 'Breached Password',
+                'first_name' => 'Breached',
+                'last_name' => 'Password',
+                'date_of_birth' => '14/03/1990',
                 'username' => 'breached.password',
                 'email' => 'breached.password@example.com',
                 'password' => self::STRONG_PASSWORD,

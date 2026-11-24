@@ -62,7 +62,9 @@ class AccountSecurityMatrixTest extends TestCase
 
         $this->from(route('public.register'))
             ->post(route('public.register.submit'), [
-                'name' => 'Matrix Short',
+                'first_name' => 'Matrix',
+                'last_name' => 'Short',
+                'date_of_birth' => '14/03/1990',
                 'username' => 'admin',
                 'email' => 'matrix.short@example.com',
                 'password' => 'Short-horse',
@@ -77,7 +79,9 @@ class AccountSecurityMatrixTest extends TestCase
 
         $this->from(route('public.register'))
             ->post(route('public.register.submit'), [
-                'name' => 'Matrix Breached',
+                'first_name' => 'Matrix',
+                'last_name' => 'Breached',
+                'date_of_birth' => '14/03/1990',
                 'username' => 'matrix.breached',
                 'email' => 'matrix.breached@example.com',
                 'password' => self::STRONG_PASSWORD,
@@ -92,7 +96,9 @@ class AccountSecurityMatrixTest extends TestCase
 
         $this->from(route('public.register'))
             ->post(route('public.register.submit'), [
-                'name' => 'Matrix Ok',
+                'first_name' => 'Matrix',
+                'last_name' => 'Ok',
+                'date_of_birth' => '14/03/1990',
                 'username' => 'matrix.ok',
                 'email' => 'matrix.ok@example.com',
                 'password' => self::STRONG_PASSWORD,
