@@ -5,9 +5,20 @@
 **Audience:** staff, volunteers and students  
 **Purpose:** day-to-day work: tickets, cases, pet profiles, consultations and search.
 
+## Finding people and the client workspace (v0.78.0)
+
+Staff, volunteers and students with `staff.clients.search` can:
+
+- Press **Ctrl K** (⌘K on Mac) and use the **People** group to find Public Accounts and Public Profiles by name, email, username, phone, postcode, date of birth or reference.
+- Open **Clients** for a directory with tabs **All**, **With account**, **Profile only** and **Invited**. Each row shows a text badge (**Active account**, **Invited** or **Profile only**). Search, the selected tab and the Account state filter stay in the URL.
+- Open a person to the shared workspace tabs: **Overview** (identity, PIN check, call log, notes, quick actions), **Account Management**, **Account Profile Management**, **Records** and **Activity**. Caller `/staff/callers/{id}` URLs redirect here.
+- Date of birth on Account Profile Management is only shown with `staff.clients.sensitive` (administrators).
+
+Creating an account from a Profile only row arrives in a later release; the action stays hidden until then.
+
 ## Creating a public client account (v0.65.0)
 
-Staff, volunteers and students with `staff.clients.create` can open **Clients** and create a local public account for a caller:
+Staff, volunteers and students with `staff.clients.create` can open **Clients** and use **Add a client** for a local public account:
 
 - Rejects duplicate email or phone, and staff-domain emails (for example `@apes.org.uk`).
 - Requires a 4–8 digit phone PIN. It is shown **once** after save — write it down for the caller. It is stored hashed and is never emailed, logged or printed again.
@@ -16,7 +27,7 @@ Staff, volunteers and students with `staff.clients.create` can open **Clients** 
 
 Bookings stays under **Tools** for guests and public users only; staff-side roles get a 403 on `/bookings`.
 
-In-app detail: **Staff guide → Creating a public client account**.
+In-app detail: **Staff guide → Clients and the Public Account workspace**.
 
 ## Account settings (v0.77.0)
 

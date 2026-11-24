@@ -75,10 +75,10 @@ return [
             'end' => 'Once the caller is verified you can update their details and add a call log. Press End call when you finish; the verification also ends on its own after 60 minutes.',
         ],
         'clients' => [
-            'heading' => 'Creating a public client account',
-            'body' => 'Staff, volunteers and students with the Create public client accounts permission can open Clients and create a local public account for someone who phones in. This never creates a Staff Account.',
-            'pin' => 'You must set a 4–8 digit phone verification PIN. It is shown once after you save — write it down for the caller, then it disappears. The PIN is stored hashed and is never emailed, logged or printed again.',
-            'email' => 'Email is optional. If you enter an email and tick the set-password option, the person gets a one-time link that expires after 72 hours. That email never includes the PIN or a password.',
+            'heading' => 'Clients and the Public Account workspace',
+            'body' => 'Open Clients for a directory of Public Accounts and Public Profiles. Tabs filter by All, With account, Profile only and Invited; each row shows a text badge. Open a person for Overview (including PIN check and call log), Account Management, Account Profile Management, Records and Activity. Ctrl K also searches People when you have permission.',
+            'pin' => 'When you Add a client you must set a 4–8 digit phone verification PIN. It is shown once after you save — write it down for the caller, then it disappears. The PIN is stored hashed and is never emailed, logged or printed again.',
+            'email' => 'Email is optional when creating a client. If you enter an email and tick the set-password option, the person gets a one-time link that expires after 72 hours. That email never includes the PIN or a password.',
             'consent' => 'Tick staff-assisted consent to record that you created the account with the person\'s agreement. The audit log stores who created it and whether the email was sent, without the PIN or password.',
         ],
         'call_logs' => [
@@ -91,7 +91,7 @@ return [
         ],
         'search' => [
             'heading' => 'Search and quick actions',
-            'body' => 'Press Ctrl K (or use Search at the top of the page) to jump to any page you can open, or to create a ticket, case or record.',
+            'body' => 'Press Ctrl K (or use Search at the top of the page) to jump to any page you can open, run quick actions, or find People (Public Accounts and Public Profiles) when you have staff.clients.search.',
         ],
         'account' => [
             'heading' => 'Your account',
