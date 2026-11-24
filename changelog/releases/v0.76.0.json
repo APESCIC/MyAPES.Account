@@ -1,0 +1,55 @@
+{
+    "version": "0.76.0",
+    "date": "2026-11-24",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Client details, date of birth and profile-only clients",
+    "summary": "Client records now store first name, last name and date of birth, with profile-only accounts that cannot sign in until invited.",
+    "changes": [
+        "user_profiles gains first_name, last_name and date_of_birth, with a careful name backfill and a staff list for ambiguous splits.",
+        "users.account_state distinguishes profile-only, invited and active clients; profile-only cannot use password, passkey or reset links.",
+        "Staff client create, public register and onboarding require first name, last name, date of birth and the other mandatory contact fields (email stays optional on staff create).",
+        "Clients index adds Missing details and name-review filters; the client page shows a non-blocking missing-details prompt.",
+        "The privacy notice names date of birth purpose and retention, and the consent policy version is 2026-11."
+    ],
+    "affected_areas": [
+        "Staff Clients create, search and show",
+        "Public register and onboarding",
+        "Local public login, passkeys and password reset",
+        "Admin user show",
+        "Privacy notice and consent policy version",
+        "user_profiles and users schema"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "MINOR: new identity fields and account-state behaviour for profile-only clients, without removing existing accounts or changing the display-name contract.",
+    "validation": [
+        "PHPUnit ClientDetailsAndAccountStateTest plus StaffClientAccountTest, PublicAccountLifecycleTest, PublicLegalPagesTest and related suites.",
+        "Herd preview at https://myapes-account.test for Clients and privacy.",
+        "composer milestone:bump -- v0.76.0 --check and myapes:changelog-validate against origin/main."
+    ],
+    "known_limitations": [
+        "Creating a sign-in account from a profile-only record is deferred to a later version.",
+        "Automatic matching of public register to staff-created profiles is deferred to a later version."
+    ],
+    "rollback": "Redeploy the previous release tag (v0.75.1). Roll back the two additive migrations if the database must match that tag.",
+    "provenance": "Milestone v0.76.0 Client details, date of birth and profile-only clients, Epic #864, pull request #1069.",
+    "references": [
+        {
+            "label": "Issue #864",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/864"
+        },
+        {
+            "label": "Pull request #1069",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/1069"
+        }
+    ],
+    "slug": "release-v0-76-0",
+    "previous_version": "0.75.1"
+}
