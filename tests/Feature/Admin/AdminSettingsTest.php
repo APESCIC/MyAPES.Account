@@ -77,14 +77,19 @@ class AdminSettingsTest extends TestCase
     {
         $admin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
 
-        $html = (string) $this->actingAs($admin)->get(route('admin.settings.show', 'keys-and-secrets'))
-            ->assertOk()
-            ->getContent();
+        $response = $this->actingAs($admin)->get(route('admin.settings.show', 'general'))->assertOk();
+        $response->assertSee('data-settings-tabs', false)
+            ->assertSee('aria-current="page"', false)
+            ->assertDontSee('data-settings-tab="keys-and-secrets"', false);
+    }
 
-        $this->assertMatchesRegularExpression(
-            '/<nav class="admin-subnav"[^>]*data-settings-tabs>.*href="'.preg_quote(route('admin.settings.show', 'keys-and-secrets'), '/').'"[^>]*aria-current="page"/s',
-            $html
-        );
+    public function test_keys_and_secrets_settings_url_moves_to_security(): void
+    {
+        $admin = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
+
+        $this->actingAs($admin)->get('/admin/settings/keys-and-secrets')
+            ->assertStatus(301)
+            ->assertRedirect(route('admin.security.keys-and-secrets'));
     }
 
     public function test_the_old_reply_mailbox_address_moves_permanently_to_email_import(): void

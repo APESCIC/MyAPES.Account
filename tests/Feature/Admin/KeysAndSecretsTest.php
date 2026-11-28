@@ -14,7 +14,7 @@ use Tests\Fakes\FakeImapServer;
 use Tests\TestCase;
 
 /**
- * Admin → Settings → Keys and secrets (#810).
+ * Admin → Security → Keys and secrets (#810 / #947).
  */
 class KeysAndSecretsTest extends TestCase
 {
@@ -49,7 +49,7 @@ class KeysAndSecretsTest extends TestCase
     public function test_non_admins_get_403_and_admins_need_step_up_before_changes(): void
     {
         $user = User::factory()->protectedRole(AuthorizationProfile::ROLE_SERVICE_USER)->create();
-        $this->actingAs($user)->get(route('admin.settings.show', 'keys-and-secrets'))->assertForbidden();
+        $this->actingAs($user)->get(route('admin.security.keys-and-secrets'))->assertForbidden();
 
         $this->actingAs($this->admin)
             ->put(route('admin.settings.keys-and-secrets.store'), ['password' => self::PASSWORD])
@@ -58,7 +58,7 @@ class KeysAndSecretsTest extends TestCase
         $this->actingAs($this->admin)
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
             ->put(route('admin.settings.keys-and-secrets.store'), ['password' => self::PASSWORD])
-            ->assertRedirect(route('admin.settings.show', 'keys-and-secrets'))
+            ->assertRedirect(route('admin.security.keys-and-secrets'))
             ->assertSessionHasNoErrors();
     }
 
@@ -89,7 +89,7 @@ class KeysAndSecretsTest extends TestCase
         $this->assertNotSame(self::PASSWORD, $row->value);
         $this->assertSame(self::PASSWORD, Crypt::decryptString($row->value));
 
-        $html = $this->actingAs($this->admin)->get(route('admin.settings.show', 'keys-and-secrets'))->assertOk()->getContent();
+        $html = $this->actingAs($this->admin)->get(route('admin.security.keys-and-secrets'))->assertOk()->getContent();
         $this->assertStringNotContainsString(self::PASSWORD, $html);
         $this->assertStringNotContainsString($row->value, $html);
 
@@ -100,7 +100,7 @@ class KeysAndSecretsTest extends TestCase
 
     public function test_status_shows_date_user_env_fallback_and_not_set(): void
     {
-        $this->actingAs($this->admin)->get(route('admin.settings.show', 'keys-and-secrets'))
+        $this->actingAs($this->admin)->get(route('admin.security.keys-and-secrets'))
             ->assertOk()
             ->assertSee(__('admin.settings.keys_and_secrets.status.not_set'), false);
 
@@ -108,7 +108,7 @@ class KeysAndSecretsTest extends TestCase
             ->withSession(['auth.password_confirmed_at' => now()->unix()])
             ->put(route('admin.settings.keys-and-secrets.store'), ['password' => self::PASSWORD]);
 
-        $this->actingAs($this->admin)->get(route('admin.settings.show', 'keys-and-secrets'))
+        $this->actingAs($this->admin)->get(route('admin.security.keys-and-secrets'))
             ->assertOk()
             ->assertSee(__('admin.settings.keys_and_secrets.status.set', [
                 'date' => now()->timezone(config('app.timezone'))->format('j M Y H:i'),
@@ -120,7 +120,7 @@ class KeysAndSecretsTest extends TestCase
             ->delete(route('admin.settings.keys-and-secrets.destroy'), ['confirm' => '1']);
 
         config(['app-settings.env.INBOUND_MAIL_IMAP_PASSWORD' => 'env-only-password']);
-        $this->actingAs($this->admin)->get(route('admin.settings.show', 'keys-and-secrets'))
+        $this->actingAs($this->admin)->get(route('admin.security.keys-and-secrets'))
             ->assertOk()
             ->assertSee(__('admin.settings.keys_and_secrets.status.env'), false);
     }
@@ -168,7 +168,7 @@ class KeysAndSecretsTest extends TestCase
 
     public function test_there_is_no_field_for_app_key_or_token_key(): void
     {
-        $html = $this->actingAs($this->admin)->get(route('admin.settings.show', 'keys-and-secrets'))->assertOk()->getContent();
+        $html = $this->actingAs($this->admin)->get(route('admin.security.keys-and-secrets'))->assertOk()->getContent();
 
         $this->assertStringContainsString('data-server-secret="APP_KEY"', $html);
         $this->assertStringContainsString('data-server-secret="INBOUND_MAIL_TOKEN_KEY"', $html);

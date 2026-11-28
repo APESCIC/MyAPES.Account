@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Core\Accounts\User;
+use App\Core\Settings\SecuritySettings;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -19,6 +20,7 @@ final class TemporaryPasswordService
 
     public function __construct(
         private readonly AuditLogger $audit,
+        private readonly SecuritySettings $security,
     ) {}
 
     /**
@@ -54,11 +56,13 @@ final class TemporaryPasswordService
     {
         $plain = Str::password(self::MIN_LENGTH);
 
-        DB::transaction(function () use ($user, $actor, $event, $plain): void {
+        $ttlHours = $this->security->temporaryPasswordTtlHours();
+
+        DB::transaction(function () use ($user, $actor, $event, $plain, $ttlHours): void {
             $user->forceFill([
                 'password' => $plain,
                 'must_change_password' => true,
-                'temporary_password_expires_at' => now()->addHours(self::TTL_HOURS),
+                'temporary_password_expires_at' => now()->addHours($ttlHours),
                 'account_state' => User::ACCOUNT_STATE_INVITED,
                 'authorization_epoch' => (int) $user->authorization_epoch + 1,
             ]);
@@ -68,7 +72,7 @@ final class TemporaryPasswordService
             $this->audit->record($event, $actor, $user, [
                 'target_user_id' => $user->id,
                 'expires_at' => $user->temporary_password_expires_at?->toIso8601String(),
-                'ttl_hours' => self::TTL_HOURS,
+                'ttl_hours' => $ttlHours,
             ]);
         });
 

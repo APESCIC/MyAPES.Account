@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\AdminGroupController;
 use App\Http\Controllers\Admin\AdminInboundEmailController;
 use App\Http\Controllers\Admin\AdminIntegrationController;
 use App\Http\Controllers\Admin\AdminKeysAndSecretsController;
+use App\Http\Controllers\Admin\AdminSecurityController;
 use App\Http\Controllers\Admin\AdminLocalRepliesController;
 use App\Http\Controllers\Admin\AdminMaintenanceController;
 use App\Http\Controllers\Admin\AdminManagedListController;
@@ -558,6 +559,28 @@ Route::middleware([
                 ->middleware('can:admin.users.manage')
                 ->name('users.two-factor.reset');
 
+            Route::get('/security', [AdminSecurityController::class, 'index'])
+                ->middleware('can:admin.settings.view')
+                ->name('security.index');
+            Route::get('/security/keys-and-secrets', [AdminSecurityController::class, 'keysAndSecrets'])
+                ->middleware('can:admin.settings.view')
+                ->name('security.keys-and-secrets');
+            Route::put('/security/keys-and-secrets/mailbox-password', [AdminKeysAndSecretsController::class, 'store'])
+                ->middleware(['can:admin.settings.manage', 'account.step-up'])
+                ->name('security.keys-and-secrets.store');
+            Route::delete('/security/keys-and-secrets/mailbox-password', [AdminKeysAndSecretsController::class, 'destroy'])
+                ->middleware(['can:admin.settings.manage', 'account.step-up'])
+                ->name('security.keys-and-secrets.destroy');
+            Route::post('/security/keys-and-secrets/mailbox-password/test', [AdminKeysAndSecretsController::class, 'test'])
+                ->middleware(['can:admin.settings.manage', 'account.step-up', 'throttle:5,1'])
+                ->name('security.keys-and-secrets.test');
+            Route::get('/security/sign-in-policy', [AdminSecurityController::class, 'signInPolicy'])
+                ->middleware('can:admin.settings.view')
+                ->name('security.sign-in-policy');
+            Route::put('/security/sign-in-policy', [AdminSecurityController::class, 'updateSignInPolicy'])
+                ->middleware('can:admin.settings.manage')
+                ->name('security.sign-in-policy.update');
+
             Route::get('/access', [AdminAccessController::class, 'index'])
                 ->name('access.index');
             Route::post('/access/sync', [AdminAccessController::class, 'sync'])
@@ -632,16 +655,14 @@ Route::middleware([
             Route::get('/settings', [AdminSettingsController::class, 'index'])
                 ->middleware('can:admin.settings.view')
                 ->name('settings.index');
-            // The Reply mailbox tab moved to Admin ? Emails ? Import (#774).
+            // The Reply mailbox tab moved to Admin → Emails → Import (#774).
             Route::get('/settings/reply-mailbox', fn () => redirect()->route('admin.emails.import.index', [], 301))
                 ->middleware('can:admin.settings.view')
                 ->name('settings.reply-mailbox');
-            Route::get('/settings/{tab}', [AdminSettingsController::class, 'show'])
+            // Keys and secrets page moved to Admin → Security (#947); mutations keep working on the old paths.
+            Route::get('/settings/keys-and-secrets', fn () => redirect()->route('admin.security.keys-and-secrets', [], 301))
                 ->middleware('can:admin.settings.view')
-                ->name('settings.show');
-            Route::put('/settings/general', [AdminGeneralSettingsController::class, 'update'])
-                ->middleware('can:admin.settings.manage')
-                ->name('settings.general.update');
+                ->name('settings.keys-and-secrets');
             Route::put('/settings/keys-and-secrets/mailbox-password', [AdminKeysAndSecretsController::class, 'store'])
                 ->middleware(['can:admin.settings.manage', 'account.step-up'])
                 ->name('settings.keys-and-secrets.store');
@@ -651,6 +672,12 @@ Route::middleware([
             Route::post('/settings/keys-and-secrets/mailbox-password/test', [AdminKeysAndSecretsController::class, 'test'])
                 ->middleware(['can:admin.settings.manage', 'account.step-up', 'throttle:5,1'])
                 ->name('settings.keys-and-secrets.test');
+            Route::get('/settings/{tab}', [AdminSettingsController::class, 'show'])
+                ->middleware('can:admin.settings.view')
+                ->name('settings.show');
+            Route::put('/settings/general', [AdminGeneralSettingsController::class, 'update'])
+                ->middleware('can:admin.settings.manage')
+                ->name('settings.general.update');
             Route::put('/settings/push-notifications/vapid', [AdminPushNotificationsController::class, 'storeVapid'])
                 ->middleware(['can:admin.settings.manage', 'account.step-up'])
                 ->name('settings.push-notifications.vapid.store');

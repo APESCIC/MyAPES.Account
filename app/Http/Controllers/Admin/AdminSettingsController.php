@@ -6,7 +6,6 @@ use App\Http\Controllers\Admin\Settings\ApiClientsTab;
 use App\Http\Controllers\Admin\Settings\ApiDocsTab;
 use App\Http\Controllers\Admin\Settings\GeneralTab;
 use App\Http\Controllers\Admin\Settings\IntegrationsTab;
-use App\Http\Controllers\Admin\Settings\KeysAndSecretsTab;
 use App\Http\Controllers\Admin\Settings\PushNotificationsTab;
 use App\Http\Controllers\Admin\Settings\WebhooksTab;
 use App\Http\Controllers\Controller;
@@ -30,6 +29,7 @@ class AdminSettingsController extends Controller
 
     public const TAB_API_DOCS = 'api-docs';
 
+    /** @deprecated Keys and secrets live under Admin → Security (#947). Kept for redirect callers. */
     public const TAB_KEYS_AND_SECRETS = 'keys-and-secrets';
 
     public const TAB_PUSH_NOTIFICATIONS = 'push-notifications';
@@ -46,7 +46,6 @@ class AdminSettingsController extends Controller
         ApiClientsTab $apiClients,
         WebhooksTab $webhooks,
         ApiDocsTab $apiDocs,
-        KeysAndSecretsTab $keysAndSecrets,
         PushNotificationsTab $pushNotifications,
     ): Response {
         $tabs = $this->tabs();
@@ -62,7 +61,6 @@ class AdminSettingsController extends Controller
                 self::TAB_API_CLIENTS => $apiClients->viewData(),
                 self::TAB_WEBHOOKS => $webhooks->viewData(),
                 self::TAB_API_DOCS => $apiDocs->viewData(),
-                self::TAB_KEYS_AND_SECRETS => $keysAndSecrets->viewData(),
                 self::TAB_PUSH_NOTIFICATIONS => $pushNotifications->viewData(),
             },
         ])->header('Cache-Control', 'no-store, private');
@@ -80,7 +78,6 @@ class AdminSettingsController extends Controller
             self::TAB_API_CLIENTS => __('admin.settings.tabs.api_clients'),
             self::TAB_WEBHOOKS => __('admin.settings.tabs.webhooks'),
             self::TAB_API_DOCS => __('admin.settings.tabs.api_docs'),
-            self::TAB_KEYS_AND_SECRETS => __('admin.settings.tabs.keys_and_secrets'),
         ];
     }
 }

@@ -352,7 +352,7 @@ class QaLoginTest extends TestCase
         $this->post(route('qa.login'), ['profile' => 'admin']);
         $this->travel(2)->seconds();
 
-        $this->get(route('admin.settings.show', ['tab' => 'keys-and-secrets']))->assertOk();
+        $this->get(route('admin.security.keys-and-secrets'))->assertOk();
         $this->travel(2)->seconds();
 
         $this->put(route('admin.settings.keys-and-secrets.store'), [
@@ -363,7 +363,7 @@ class QaLoginTest extends TestCase
             ->assertSee('data-qa-confirm', false)
             ->assertSee('Confirm QA Administrator');
 
-        $returnTo = route('admin.settings.show', ['tab' => 'keys-and-secrets'], absolute: false);
+        $returnTo = route('admin.security.keys-and-secrets', absolute: false);
         $this->post(route('qa.login'), [
             'profile' => 'admin',
             'return_to' => $returnTo,
