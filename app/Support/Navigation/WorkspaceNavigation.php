@@ -487,6 +487,7 @@ final class WorkspaceNavigation
             ],
             'security' => [
                 ['admin.security', __('admin.nav.security_overview'), route('admin.security.index'), 'shield', ['admin.settings.view', 'admin.groups.view', 'admin.roles.view', 'admin.permissions.view'], ['admin.security.index']],
+                ['admin.audit-log', __('admin.nav.audit_log'), route('admin.security.audit-log'), 'scroll-text', ['admin.settings.view'], ['admin.security.audit-log*']],
                 ['admin.access', __('admin.nav.access'), route('admin.access.index'), 'shield-check', ['admin.groups.view', 'admin.roles.view', 'admin.permissions.view'], ['admin.access.*', 'admin.groups.*', 'admin.roles.*', 'admin.permissions.*']],
                 ['admin.keys', __('admin.nav.keys_and_secrets'), route('admin.security.keys-and-secrets'), 'key-round', ['admin.settings.view'], ['admin.security.keys-and-secrets', 'admin.security.keys-and-secrets.*']],
                 ['admin.sign-in-policy', __('admin.nav.sign_in_policy'), route('admin.security.sign-in-policy'), 'lock', ['admin.settings.view'], ['admin.security.sign-in-policy', 'admin.security.sign-in-policy.*']],

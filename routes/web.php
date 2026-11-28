@@ -562,6 +562,12 @@ Route::middleware([
             Route::get('/security', [AdminSecurityController::class, 'index'])
                 ->middleware('can:admin.settings.view')
                 ->name('security.index');
+            Route::get('/security/audit-log', [AdminSecurityController::class, 'auditLog'])
+                ->middleware('can:admin.settings.view')
+                ->name('security.audit-log');
+            Route::get('/security/audit-log/export', [AdminSecurityController::class, 'exportAuditLog'])
+                ->middleware('can:admin.settings.manage')
+                ->name('security.audit-log.export');
             Route::get('/security/keys-and-secrets', [AdminSecurityController::class, 'keysAndSecrets'])
                 ->middleware('can:admin.settings.view')
                 ->name('security.keys-and-secrets');

@@ -8,10 +8,13 @@ use App\Core\Settings\SettingDefinition;
 use App\Http\Controllers\Admin\Settings\KeysAndSecretsTab;
 use App\Http\Controllers\Controller;
 use App\Services\AuditLogger;
+use App\Services\SecurityAuditLogBrowser;
+use App\Services\SecurityOverviewAggregator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\Validator;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Admin → Security (#947): hub, Keys and secrets, and Sign-in policy.
@@ -19,9 +22,10 @@ use Illuminate\Validation\Validator;
  */
 class AdminSecurityController extends Controller
 {
-    public function index(): Response
+    public function index(SecurityOverviewAggregator $overview): Response
     {
         return response()->view('admin.security.index', [
+            'overview' => $overview->overview(),
             'links' => [
                 [
                     'label' => __('admin.nav.access'),
@@ -50,6 +54,27 @@ class AdminSecurityController extends Controller
                 ],
             ],
         ])->header('Cache-Control', 'no-store, private');
+    }
+
+    public function auditLog(Request $request, SecurityAuditLogBrowser $browser): Response
+    {
+        $filters = $browser->filtersFrom($request);
+
+        return response()->view('admin.security.audit-log', [
+            'filters' => $filters,
+            'eventTypes' => $browser->eventTypes(),
+            'entries' => $browser->paginate($filters),
+        ])->header('Cache-Control', 'no-store, private');
+    }
+
+    public function exportAuditLog(Request $request, SecurityAuditLogBrowser $browser, AuditLogger $audit): StreamedResponse
+    {
+        $filters = $browser->filtersFrom($request);
+        $audit->record('admin.security.audit_log_exported', $request->user(), context: [
+            'filters' => array_filter($filters),
+        ]);
+
+        return $browser->export($filters);
     }
 
     public function keysAndSecrets(KeysAndSecretsTab $keysAndSecrets): Response
