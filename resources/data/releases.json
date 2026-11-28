@@ -1,5 +1,58 @@
 [
     {
+        "version": "0.80.0",
+        "date": "2026-11-28",
+        "channel": "stable",
+        "type": "minor",
+        "title": "Admin clean-up, Security section and Public Profiles",
+        "summary": "Admin menu regrouped into People, Security, Modules, Communication and System; Security adds overview, audit log, Access, Keys and secrets and sign-in policy; Public Profiles lists profile-only people separately.",
+        "changes": [
+            "Regroup the Admin menu: People (Public Accounts, Public Profiles, Staff Accounts), Security, Modules, Communication and System; Access leaves People.",
+            "Add Admin → Security with overview counts, a filterable audit log (audited export, no secrets), Access, Keys and secrets, and Sign-in policy.",
+            "Move Keys and secrets from Settings into Security; Settings keeps General, Integrations, Push, API clients, Webhooks and API docs.",
+            "Add Admin → Public Profiles for profile-only records, with shared hub editing and profile-only accounts kept out of Public Accounts.",
+            "Add admin.security.view/manage and admin.public-profiles.view/manage permissions; old Admin URLs redirect; Ctrl K finds the moved pages.",
+            "Update the Admin guide, wiki and secrets inventory for the new sections."
+        ],
+        "affected_areas": [
+            "Admin navigation and search",
+            "Admin → Security (overview, audit log, Access, Keys and secrets, Sign-in policy)",
+            "Admin → Public Profiles and Public Accounts",
+            "Admin → Settings (Keys tab removed)",
+            "Permissions and authorisation matrix",
+            "Help Admin guide and wiki"
+        ],
+        "categories": [
+            "added",
+            "changed"
+        ],
+        "audiences": [
+            "internal-only"
+        ],
+        "version_rationale": "MINOR: new Security section and Public Profiles Admin area with menu regrouping; no breaking public API.",
+        "validation": [
+            "PHPUnit Admin shell/navigation, Security overview/audit, Public Profiles, permissions, redirects and StaffHelpPagesTest.",
+            "Herd preview at https://myapes-account.test for Admin menu and Security pages.",
+            "composer milestone:bump -- v0.80.0 --check and myapes:changelog-validate against origin/main."
+        ],
+        "known_limitations": [
+            "Embed forms stay under System until the Forms hub (v0.83.0).",
+            "API clients and Webhooks pages remain under Settings; Security links to them only."
+        ],
+        "rollback": "Redeploy the previous release tag (v0.79.0). Permission rows for admin.security.* and admin.public-profiles.* can remain.",
+        "provenance": "Milestone v0.80.0 Admin clean-up, Security section and Public Profiles, Epic #868, pull request #1073.",
+        "references": [
+            {
+                "label": "Issue #868",
+                "url": "https://github.com/APESCIC/MyAPES-Account/issues/868"
+            },
+            {
+                "label": "Pull request #1073",
+                "url": "https://github.com/APESCIC/MyAPES-Account/pull/1073"
+            }
+        ]
+    },
+    {
         "version": "0.79.0",
         "date": "2026-11-28",
         "channel": "stable",
