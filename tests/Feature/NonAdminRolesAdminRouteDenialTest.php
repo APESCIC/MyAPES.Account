@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Core\Accounts\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Routing\Route as RoutingRoute;
 use Illuminate\Support\Facades\Route;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -18,7 +19,7 @@ class NonAdminRolesAdminRouteDenialTest extends TestCase
      * Every /admin and legacy /superadmin route. A new admin route must raise
      * this number so it is covered by the denial matrix below.
      */
-    private const ADMIN_ROUTE_COUNT = 106;
+    private const ADMIN_ROUTE_COUNT = 118;
 
     /**
      * @var array<string, string>
@@ -49,6 +50,7 @@ class NonAdminRolesAdminRouteDenialTest extends TestCase
     public function test_role_is_forbidden_on_every_admin_route(string $accessLevel): void
     {
         $this->assertFalse(app()->isDownForMaintenance());
+        $this->withoutMiddleware(ThrottleRequests::class);
 
         $this->actingAs(User::factory()->accessLevel($accessLevel)->create());
 

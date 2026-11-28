@@ -26,6 +26,7 @@
         "changed"
     ],
     "audiences": [
+        "public-facing",
         "internal-only"
     ],
     "version_rationale": "MINOR: new Security section and Public Profiles Admin area with menu regrouping; no breaking public API.",
