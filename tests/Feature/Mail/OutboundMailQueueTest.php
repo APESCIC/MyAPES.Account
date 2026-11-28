@@ -77,7 +77,18 @@ class OutboundMailQueueTest extends TestCase
 
     public function test_every_registered_mail_template_is_queued(): void
     {
+        $synchronous = ['auth.welcome_sign_in'];
+
         foreach (app(MailTemplateRegistry::class)->all() as $template) {
+            if (in_array($template->key, $synchronous, true)) {
+                $this->assertFalse(
+                    is_subclass_of($template->notification, ShouldQueue::class),
+                    "Template {$template->key} must stay synchronous (one-time secret).",
+                );
+
+                continue;
+            }
+
             $this->assertTrue(
                 is_subclass_of($template->notification, ShouldQueue::class),
                 "Template {$template->key} must queue.",

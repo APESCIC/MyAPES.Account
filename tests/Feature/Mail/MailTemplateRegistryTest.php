@@ -39,6 +39,7 @@ class MailTemplateRegistryTest extends TestCase
             'auth.two_factor_disabled',
             'auth.two_factor_enabled',
             'auth.verify_email',
+            'auth.welcome_sign_in',
             'cases.apes_cic_case_updated',
             'cases.shelter_case_updated',
             'consultations.consultation_updated',
