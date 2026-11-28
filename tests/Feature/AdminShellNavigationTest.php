@@ -86,6 +86,11 @@ class AdminShellNavigationTest extends TestCase
             ->assertSee('>Staff Accounts</span>', false)
             ->assertSee('>'.__('workspace.groups.security').'</span>', false)
             ->assertSee('>Access</span>', false)
+            ->assertSee('>'.__('admin.nav.security_overview').'</span>', false)
+            ->assertSee('>'.__('admin.nav.audit_log').'</span>', false)
+            ->assertSee('>'.__('admin.nav.keys_and_secrets').'</span>', false)
+            ->assertSee('>'.__('admin.nav.sign_in_policy').'</span>', false)
+            ->assertSee('>'.__('terms.public_profiles').'</span>', false)
             ->assertSee('>Plugins</span>', false)
             ->assertSee('>'.__('workspace.groups.communication').'</span>', false)
             ->assertSee('>'.__('admin.nav.emails').'</span>', false)
@@ -99,7 +104,18 @@ class AdminShellNavigationTest extends TestCase
     {
         $staff = User::factory()->accessLevel(User::ROLE_STAFF)->create();
 
-        foreach (['/admin/access', '/admin/modules', '/admin/maintenance', '/admin/emails/import', '/superadmin'] as $path) {
+        foreach ([
+            '/admin/access',
+            '/admin/modules',
+            '/admin/maintenance',
+            '/admin/emails/import',
+            '/admin/security',
+            '/admin/security/audit-log',
+            '/admin/security/keys-and-secrets',
+            '/admin/security/sign-in-policy',
+            '/admin/public-profiles',
+            '/superadmin',
+        ] as $path) {
             $this->actingAs($staff)->get($path)->assertForbidden();
         }
 

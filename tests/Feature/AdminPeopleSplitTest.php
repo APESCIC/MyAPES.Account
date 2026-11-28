@@ -116,6 +116,33 @@ class AdminPeopleSplitTest extends TestCase
         $this->assertSame('Staff', __('workspace.panels.staff'));
     }
 
+    public function test_access_lives_under_security_and_public_profiles_are_separate(): void
+    {
+        $administrator = User::factory()->protectedRole(AuthorizationProfile::ROLE_ADMINISTRATOR)->create();
+        $people = $this->people();
+        $profileOnly = User::factory()->create([
+            'name' => 'Priya Profile',
+            'account_state' => User::ACCOUNT_STATE_PROFILE_ONLY,
+        ]);
+
+        $this->actingAs($administrator)
+            ->get(route('admin.access.index'))
+            ->assertOk()
+            ->assertSeeInOrder(['aria-label="Breadcrumb"', '>'.__('workspace.groups.security').'<', '>Access<'], false);
+
+        $publicList = $this->actingAs($administrator)
+            ->get(route('admin.public-accounts.index'))
+            ->assertOk();
+        $this->assertContains($people['public']->id, $this->listedIds($publicList));
+        $this->assertNotContains($profileOnly->id, $this->listedIds($publicList));
+
+        $profiles = $this->actingAs($administrator)
+            ->get(route('admin.public-profiles.index'))
+            ->assertOk()
+            ->assertSeeInOrder(['aria-label="Breadcrumb"', '>People<', '>'.__('terms.public_profiles').'<'], false);
+        $this->assertSame([$profileOnly->id], $this->listedIds($profiles));
+    }
+
     /**
      * @return list<int>
      */

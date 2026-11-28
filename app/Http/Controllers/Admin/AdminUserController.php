@@ -248,6 +248,11 @@ class AdminUserController extends Controller
             $query->where('account_state', User::ACCOUNT_STATE_PROFILE_ONLY);
         } elseif (($filters['account_type'] ?? null) === 'public') {
             $classifier->scopePublic($query);
+            $query->where(static function ($query): void {
+                $query
+                    ->whereNull('account_state')
+                    ->orWhere('account_state', '!=', User::ACCOUNT_STATE_PROFILE_ONLY);
+            });
         }
 
         if (($filters['status'] ?? null) === 'active') {

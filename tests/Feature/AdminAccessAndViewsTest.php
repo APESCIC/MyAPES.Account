@@ -25,7 +25,14 @@ class AdminAccessAndViewsTest extends TestCase
         $administrator = $this->userWithAccess(User::ROLE_ADMIN);
         $staff = $this->userWithAccess(User::ROLE_STAFF);
 
-        foreach (['/admin/users', '/admin/access', '/admin/modules'] as $path) {
+        foreach ([
+            '/admin/users',
+            '/admin/access',
+            '/admin/modules',
+            '/admin/security',
+            '/admin/security/audit-log',
+            '/admin/public-profiles',
+        ] as $path) {
             $this->actingAs($administrator)->get($path)->assertOk();
         }
 
@@ -33,7 +40,14 @@ class AdminAccessAndViewsTest extends TestCase
             $this->actingAs($administrator)->get($path)->assertStatus(301);
         }
 
-        foreach (['/admin/access', '/admin/modules', '/superadmin', '/superadmin/plugins'] as $path) {
+        foreach ([
+            '/admin/access',
+            '/admin/modules',
+            '/admin/security',
+            '/admin/public-profiles',
+            '/superadmin',
+            '/superadmin/plugins',
+        ] as $path) {
             $this->actingAs($staff)->get($path)->assertForbidden();
         }
 
