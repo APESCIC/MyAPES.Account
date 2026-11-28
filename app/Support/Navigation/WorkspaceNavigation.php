@@ -483,6 +483,7 @@ final class WorkspaceNavigation
             ],
             'people' => [
                 ['admin.users', __('terms.public_accounts'), route('admin.public-accounts.index'), 'user-round', ['admin.users.view'], ['admin.public-accounts.*', 'admin.users.*']],
+                ['admin.public-profiles', __('terms.public_profiles'), route('admin.public-profiles.index'), 'contact', ['admin.users.view'], ['admin.public-profiles.*']],
                 ['admin.staff', __('terms.staff_accounts'), route('admin.staff-accounts.index'), 'badge-check', ['admin.users.view'], ['admin.staff-accounts.*', 'admin.users.*']],
             ],
             'security' => [

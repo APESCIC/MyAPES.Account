@@ -506,12 +506,18 @@ Route::middleware([
             Route::get('/public-accounts', [AdminUserController::class, 'publicAccountsIndex'])
                 ->middleware('can:admin.users.view')
                 ->name('public-accounts.index');
+            Route::get('/public-profiles', [AdminUserController::class, 'publicProfilesIndex'])
+                ->middleware('can:admin.users.view')
+                ->name('public-profiles.index');
             Route::get('/staff-accounts', [AdminUserController::class, 'staffAccountsIndex'])
                 ->middleware('can:admin.users.view')
                 ->name('staff-accounts.index');
             Route::get('/public-accounts/{user}', [AdminUserController::class, 'publicAccountShow'])
                 ->middleware('can:admin.users.view')
                 ->name('public-accounts.show');
+            Route::get('/public-profiles/{user}', [AdminUserController::class, 'publicProfileShow'])
+                ->middleware('can:admin.users.view')
+                ->name('public-profiles.show');
             Route::get('/staff-accounts/{user}', [AdminUserController::class, 'staffAccountShow'])
                 ->middleware('can:admin.users.view')
                 ->name('staff-accounts.show');
