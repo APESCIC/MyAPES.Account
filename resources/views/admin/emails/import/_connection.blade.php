@@ -12,7 +12,7 @@
                             {{ __("admin.emails.import.sources.{$row['source']}") }}
                         </span>
                         @if($row['key'] === 'password')
-                            <a href="{{ route('admin.settings.show', 'keys-and-secrets') }}">{{ __('admin.emails.import.keys_and_secrets_link') }}</a>
+                            <a href="{{ route('admin.security.keys-and-secrets') }}">{{ __('admin.emails.import.keys_and_secrets_link') }}</a>
                         @elseif($row['key'] === 'token_key' && $row['source'] === 'missing')
                             <span class="muted">{{ __('admin.emails.import.token_key_it') }}</span>
                         @endif

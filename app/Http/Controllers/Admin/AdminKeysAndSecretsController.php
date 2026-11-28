@@ -14,8 +14,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 
 /**
- * Admin → Settings → Keys and secrets (#810): write-only set, replace, clear
- * and test for managed secrets. Values are never echoed back.
+ * Admin → Security → Keys and secrets (#810 / #947): write-only set, replace,
+ * clear and test for managed secrets. Values are never echoed back.
  */
 class AdminKeysAndSecretsController extends Controller
 {
@@ -119,6 +119,6 @@ class AdminKeysAndSecretsController extends Controller
 
     private function back(): RedirectResponse
     {
-        return redirect()->route('admin.settings.show', AdminSettingsController::TAB_KEYS_AND_SECRETS);
+        return redirect()->route('admin.security.keys-and-secrets');
     }
 }

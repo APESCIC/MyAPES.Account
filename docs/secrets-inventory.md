@@ -6,7 +6,7 @@ On **live Cloudron**, prefer Admin where a field exists. `/app/data/shared/.env`
 
 | Secret (name only) | Admin UI? | `.env` still required? | Notes |
 | --- | --- | --- | --- |
-| communications@ Mail Client app password (`INBOUND_MAIL_IMAP_PASSWORD`) | **Yes** — Settings → **Keys and secrets** (enter, Test, save) | Fallback only | **Primary path on live is Keys and secrets.** Code still reads `.env` when no Keys value is saved. Vault item name only in docs. |
+| communications@ Mail Client app password (`INBOUND_MAIL_IMAP_PASSWORD`) | **Yes** — Security → **Keys and secrets** (enter, Test, save) | Fallback only | **Primary path on live is Keys and secrets.** Code still reads `.env` when no Keys value is saved. Vault item name only in docs. |
 | TinyMCE API key | **Yes** — Settings → **Integrations** | Optional override | `.env` `TINYMCE_API_KEY` wins if set. |
 | Google reCAPTCHA site key + secret | **Yes** — Settings → **Integrations** (Test available) | Optional override | `.env` wins if set. Use Google’s public test keys locally only. |
 | Webhook signing secrets | **Yes** — Settings → **Webhooks** | No for day-to-day | Created/rotated in Admin; never shown again after save. |

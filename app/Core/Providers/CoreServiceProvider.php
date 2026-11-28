@@ -15,6 +15,7 @@ use App\Core\Search\RecordSearch;
 use App\Core\Search\RecordSearchRegistry;
 use App\Core\Settings\AppSettings;
 use App\Core\Settings\GeneralSettings;
+use App\Core\Settings\SecuritySettings;
 use Illuminate\Support\ServiceProvider;
 
 class CoreServiceProvider extends ServiceProvider
@@ -23,7 +24,10 @@ class CoreServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ClientRecordRegistry::class);
         $this->app->singleton(AppSettings::class);
-        $this->app->afterResolving(AppSettings::class, static fn (AppSettings $settings) => $settings->define(...GeneralSettings::definitions()));
+        $this->app->afterResolving(AppSettings::class, static function (AppSettings $settings): void {
+            $settings->define(...GeneralSettings::definitions());
+            $settings->define(...SecuritySettings::definitions());
+        });
         $this->app->singleton(IntegrationRegistry::class);
         $this->app->afterResolving(IntegrationRegistry::class, static fn (IntegrationRegistry $registry) => $registry->register(...CoreIntegrations::all()));
         $this->app->singleton(RecordSearchRegistry::class);

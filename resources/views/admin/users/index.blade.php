@@ -80,7 +80,12 @@
                 <th scope="col">{{ __('admin.users.account') }}</th>
                 <th scope="col">{{ __('admin.users.identity') }}</th>
                 <th scope="col">{{ __('admin.access.status') }}</th>
-                <th scope="col">{{ __('admin.users.protected_role') }}</th>
+                @if(! empty($showProfileColumns))
+                    <th scope="col">{{ __('clients.fields.date_of_birth') }}</th>
+                    <th scope="col">{{ __('clients.fields.postcode') }}</th>
+                @else
+                    <th scope="col">{{ __('admin.users.protected_role') }}</th>
+                @endif
                 <th scope="col">{{ __('admin.access.action') }}</th>
             </tr>
             </thead>
@@ -111,12 +116,19 @@
                         @endif
                     </td>
                     <td>{{ $user->suspended_at === null ? __('admin.users.active') : __('admin.overview.suspended') }}</td>
-                    <td>{{ $authorizationProfile->effectiveProtectedRole($user) ?? __('admin.access.none') }}</td>
+                    @if(! empty($showProfileColumns))
+                        <td>{{ $user->profile?->date_of_birth?->format('d/m/Y') ?: '—' }}</td>
+                        <td>{{ $user->profile?->postcode ?: '—' }}</td>
+                    @else
+                        <td>{{ $authorizationProfile->effectiveProtectedRole($user) ?? __('admin.access.none') }}</td>
+                    @endif
                     <td>
                         @php
-                            $rowShowRoute = app(\App\Core\Accounts\AccountClassifier::class)->isStaffSide($user)
-                                ? 'admin.staff-accounts.show'
-                                : 'admin.public-accounts.show';
+                            $rowShowRoute = ! empty($showProfileColumns)
+                                ? 'admin.public-profiles.show'
+                                : (app(\App\Core\Accounts\AccountClassifier::class)->isStaffSide($user)
+                                    ? 'admin.staff-accounts.show'
+                                    : 'admin.public-accounts.show');
                         @endphp
                         <a href="{{ route($rowShowRoute, $user) }}">{{ __('admin.users.view_user') }}</a>
                         @if(in_array($user->id, $resettableUserIds, true))
@@ -125,7 +137,7 @@
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="5">{{ __('admin.users.no_users_match_these_filters') }}</td></tr>
+                <tr><td colspan="{{ ! empty($showProfileColumns) ? 6 : 5 }}">{{ __('admin.users.no_users_match_these_filters') }}</td></tr>
             @endforelse
             </tbody>
         </table>

@@ -95,6 +95,10 @@ class AuthorizationProfile
             'admin.emails.manage',
             'admin.settings.view',
             'admin.settings.manage',
+            'admin.security.view',
+            'admin.security.manage',
+            'admin.public-profiles.view',
+            'admin.public-profiles.manage',
         ],
     ];
 
@@ -118,6 +122,10 @@ class AuthorizationProfile
         'admin.emails.manage',
         'admin.settings.view',
         'admin.settings.manage',
+        'admin.security.view',
+        'admin.security.manage',
+        'admin.public-profiles.view',
+        'admin.public-profiles.manage',
         self::PERMISSION_CLIENT_SENSITIVE,
     ];
 

@@ -27,11 +27,12 @@ class PhoneVerificationPinController extends Controller
             403,
         );
 
-        $length = PhoneVerificationPinService::MIN_LENGTH.','.PhoneVerificationPinService::MAX_LENGTH;
+        $min = $pins->minLength();
+        $max = $pins->maxLength();
         $validated = $request->validate([
-            'pin' => ['required', 'string', 'regex:/^\d{'.$length.'}$/', 'confirmed'],
+            'pin' => ['required', 'string', 'regex:/^\d{'.$min.','.$max.'}$/', 'confirmed'],
         ], [
-            'pin.regex' => __('public.phone_pin.invalid', ['min' => PhoneVerificationPinService::MIN_LENGTH, 'max' => PhoneVerificationPinService::MAX_LENGTH]),
+            'pin.regex' => __('public.phone_pin.invalid', ['min' => $min, 'max' => $max]),
         ]);
 
         $changing = $pins->for($user) !== null;

@@ -41,7 +41,7 @@ class ReplyMailboxSettingsTest extends TestCase
             ->assertOk()
             ->assertSee(__('admin.emails.import.connection_built_in'), false)
             ->assertSee(__('admin.emails.import.keys_and_secrets_link'), false)
-            ->assertSee(route('admin.settings.show', 'keys-and-secrets'), false)
+            ->assertSee(route('admin.security.keys-and-secrets'), false)
             ->assertDontSee('data-reply-mailbox-form', false)
             ->assertDontSee('name="host"', false);
     }

@@ -102,13 +102,46 @@ class WorkspaceNavigationTest extends TestCase
         $admin = User::factory()->protectedRole('administrator')->create();
 
         $menu = $this->menuFor($admin, 'admin.index');
-        $adminKeys = $this->itemKeys($menu->panels[NavPanel::ADMIN]);
+        $adminPanel = $menu->panels[NavPanel::ADMIN];
+        $adminKeys = $this->itemKeys($adminPanel);
+        $groupKeys = array_map(static fn (NavGroup $group): string => $group->key, $adminPanel->groups);
 
-        foreach (['admin.overview', 'admin.users', 'admin.staff', 'admin.access', 'admin.modules', 'admin.plugins', 'admin.emails', 'admin.emails.import', 'admin.settings', 'admin.maintenance'] as $key) {
+        $this->assertSame(
+            ['overview', 'people', 'security', 'modules', 'communication', 'system', 'support'],
+            $groupKeys,
+        );
+
+        foreach ([
+            'admin.overview',
+            'admin.users',
+            'admin.public-profiles',
+            'admin.staff',
+            'admin.security',
+            'admin.audit-log',
+            'admin.access',
+            'admin.keys',
+            'admin.sign-in-policy',
+            'admin.modules',
+            'admin.plugins',
+            'admin.emails',
+            'admin.emails.import',
+            'admin.settings',
+            'admin.maintenance',
+        ] as $key) {
             $this->assertContains($key, $adminKeys);
         }
 
-        $emails = collect($menu->panels[NavPanel::ADMIN]->items())->first(
+        $people = collect($adminPanel->groups)->first(static fn (NavGroup $group): bool => $group->key === 'people');
+        $security = collect($adminPanel->groups)->first(static fn (NavGroup $group): bool => $group->key === 'security');
+        $this->assertNotNull($people);
+        $this->assertNotNull($security);
+        $peopleKeys = array_map(static fn (NavItem $item): string => $item->key, $people->items);
+        $securityKeys = array_map(static fn (NavItem $item): string => $item->key, $security->items);
+        $this->assertContains('admin.public-profiles', $peopleKeys);
+        $this->assertNotContains('admin.access', $peopleKeys);
+        $this->assertContains('admin.access', $securityKeys);
+
+        $emails = collect($adminPanel->items())->first(
             static fn (NavItem $item): bool => $item->key === 'admin.emails'
         );
         $this->assertNotNull($emails);
@@ -122,6 +155,7 @@ class WorkspaceNavigationTest extends TestCase
         $admin = $this->menuFor($actor, 'dashboard')->panels[NavPanel::ADMIN];
 
         $this->assertSame(['people', 'support'], array_map(static fn (NavGroup $group): string => $group->key, $admin->groups));
+        $this->assertNotContains('security', array_map(static fn (NavGroup $group): string => $group->key, $admin->groups));
         $this->assertSame(route('admin.public-accounts.index'), $admin->home()?->url);
     }
 
@@ -138,7 +172,12 @@ class WorkspaceNavigationTest extends TestCase
             'pet profiles' => ['petcare.pets.index', [], NavPanel::STAFF, 'module.pet-care-clinic.pet-profiles'],
             'admin overview' => ['admin.index', [], NavPanel::ADMIN, 'admin.overview'],
             'public accounts' => ['admin.public-accounts.index', [], NavPanel::ADMIN, 'admin.users'],
+            'public profiles' => ['admin.public-profiles.index', [], NavPanel::ADMIN, 'admin.public-profiles'],
             'staff accounts' => ['admin.staff-accounts.index', [], NavPanel::ADMIN, 'admin.staff'],
+            'security overview' => ['admin.security.index', [], NavPanel::ADMIN, 'admin.security'],
+            'security audit log' => ['admin.security.audit-log', [], NavPanel::ADMIN, 'admin.audit-log'],
+            'keys and secrets' => ['admin.security.keys-and-secrets', [], NavPanel::ADMIN, 'admin.keys'],
+            'sign-in policy' => ['admin.security.sign-in-policy', [], NavPanel::ADMIN, 'admin.sign-in-policy'],
             'access child page' => ['admin.roles.index', [], NavPanel::ADMIN, 'admin.access'],
             'plugin settings' => ['admin.modules.index', [], NavPanel::ADMIN, 'admin.plugins'],
             'email import beats emails' => ['admin.emails.import.index', [], NavPanel::ADMIN, 'admin.emails.import'],

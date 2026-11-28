@@ -3,7 +3,7 @@
 namespace App\Notifications\Auth;
 
 use App\Core\Mail\Concerns\BuildsBrandedMail;
-use App\Services\TemporaryPasswordService;
+use App\Core\Settings\SecuritySettings;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -44,7 +44,7 @@ class WelcomeSignInDetailsNotification extends Notification
                 'name' => $this->recipientName($notifiable),
                 'username' => $username,
                 'temporaryPassword' => $this->temporaryPassword,
-                'ttlHours' => TemporaryPasswordService::TTL_HOURS,
+                'ttlHours' => app(SecuritySettings::class)->temporaryPasswordTtlHours(),
                 'loginUrl' => route('public.login'),
                 'supportContact' => config('mail.support_address', 'communications@myapes.me.uk'),
                 'privacyUrl' => route('privacy'),

@@ -483,17 +483,26 @@ final class WorkspaceNavigation
             ],
             'people' => [
                 ['admin.users', __('terms.public_accounts'), route('admin.public-accounts.index'), 'user-round', ['admin.users.view'], ['admin.public-accounts.*', 'admin.users.*']],
+                ['admin.public-profiles', __('terms.public_profiles'), route('admin.public-profiles.index'), 'contact', ['admin.public-profiles.view'], ['admin.public-profiles.*']],
                 ['admin.staff', __('terms.staff_accounts'), route('admin.staff-accounts.index'), 'badge-check', ['admin.users.view'], ['admin.staff-accounts.*', 'admin.users.*']],
+            ],
+            'security' => [
+                ['admin.security', __('admin.nav.security_overview'), route('admin.security.index'), 'shield', ['admin.security.view'], ['admin.security.index']],
+                ['admin.audit-log', __('admin.nav.audit_log'), route('admin.security.audit-log'), 'scroll-text', ['admin.security.view'], ['admin.security.audit-log*']],
                 ['admin.access', __('admin.nav.access'), route('admin.access.index'), 'shield-check', ['admin.groups.view', 'admin.roles.view', 'admin.permissions.view'], ['admin.access.*', 'admin.groups.*', 'admin.roles.*', 'admin.permissions.*']],
+                ['admin.keys', __('admin.nav.keys_and_secrets'), route('admin.security.keys-and-secrets'), 'key-round', ['admin.security.view'], ['admin.security.keys-and-secrets', 'admin.security.keys-and-secrets.*']],
+                ['admin.sign-in-policy', __('admin.nav.sign_in_policy'), route('admin.security.sign-in-policy'), 'lock', ['admin.security.view'], ['admin.security.sign-in-policy', 'admin.security.sign-in-policy.*']],
             ],
             'modules' => [
                 ['admin.modules', __('admin.nav.modules'), route('admin.organisation-modules.index'), 'building-2', ['admin.modules.view'], ['admin.organisation-modules.*']],
                 ['admin.plugins', __('admin.nav.plugins'), route('admin.modules.index'), 'puzzle', ['admin.modules.view'], ['admin.modules.*']],
                 ['admin.versions', __('admin.nav.versions'), route('admin.versions.index'), 'scroll-text', ['admin.modules.view'], ['admin.versions.*']],
             ],
-            'system' => [
+            'communication' => [
                 ['admin.emails', __('admin.nav.emails'), route('admin.emails.index'), 'mail', ['admin.emails.view'], ['admin.emails.*']],
                 ['admin.emails.import', __('admin.nav.email_import'), route('admin.emails.import.index'), 'inbox', ['admin.emails.view'], ['admin.emails.import.*']],
+            ],
+            'system' => [
                 ['admin.tickets.embed-forms', __('admin.nav.embed_forms'), route('admin.tickets.embed-forms.index'), 'code-2', ['admin.settings.manage'], ['admin.tickets.embed-forms.*']],
                 ['admin.settings', __('admin.nav.settings'), route('admin.settings.show', AdminSettingsController::TAB_GENERAL), 'settings', ['admin.settings.view'], ['admin.settings.*']],
                 ['admin.maintenance', __('admin.nav.maintenance'), route('admin.maintenance.index'), 'circle-pause', ['admin.maintenance.manage'], ['admin.maintenance.*']],
@@ -506,7 +515,9 @@ final class WorkspaceNavigation
         $headings = [
             'overview' => __('workspace.groups.overview'),
             'people' => __('workspace.groups.people'),
+            'security' => __('workspace.groups.security'),
             'modules' => __('workspace.groups.modules'),
+            'communication' => __('workspace.groups.communication'),
             'system' => __('workspace.groups.system'),
             'support' => __('workspace.groups.support'),
         ];

@@ -65,6 +65,48 @@ class AdminUserController extends Controller
         return $this->index($request, $profile, $classifier, $passwordResets);
     }
 
+    public function publicProfilesIndex(
+        Request $request,
+        AuthorizationProfile $profile,
+        AccountClassifier $classifier,
+        LocalPublicPasswordResetService $passwordResets,
+    ): View {
+        $request->merge(['account_type' => 'public_profiles']);
+
+        return $this->index($request, $profile, $classifier, $passwordResets);
+    }
+
+    public function publicProfileShow(
+        Request $request,
+        string $user,
+        AuthorizationMutationService $mutations,
+        LocalPublicPasswordResetService $passwordResets,
+        PendingFirstLoginChaseService $pendingFirstLoginChase,
+        ModuleRegistry $modules,
+        VerificationResendService $verificationResends,
+        UserRecordsSummary $records,
+        UserProfileHubActions $actions,
+        UserActivityTimeline $timeline,
+        TotpTwoFactorService $twoFactor,
+    ): View {
+        $subject = User::query()->findOrFail($user);
+        abort_unless($subject->isProfileOnly(), 404);
+
+        return $this->show(
+            $request,
+            $user,
+            $mutations,
+            $passwordResets,
+            $pendingFirstLoginChase,
+            $modules,
+            $verificationResends,
+            $records,
+            $actions,
+            $timeline,
+            $twoFactor,
+        );
+    }
+
     public function publicAccountShow(
         Request $request,
         string $user,
@@ -162,7 +204,7 @@ class AdminUserController extends Controller
     ): View {
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:100'],
-            'account_type' => ['nullable', Rule::in(['public', 'staff'])],
+            'account_type' => ['nullable', Rule::in(['public', 'staff', 'public_profiles'])],
             'identity_type' => [
                 'nullable',
                 Rule::in([
@@ -179,6 +221,7 @@ class AdminUserController extends Controller
         ]);
         $query = User::query()->with([
             'roles' => fn ($query) => $query->orderBy('name'),
+            'profile',
         ]);
 
         if (isset($filters['q'])) {
@@ -200,8 +243,16 @@ class AdminUserController extends Controller
             } else {
                 $classifier->scopeStaffSide($query);
             }
+        } elseif (($filters['account_type'] ?? null) === 'public_profiles') {
+            $classifier->scopePublic($query);
+            $query->where('account_state', User::ACCOUNT_STATE_PROFILE_ONLY);
         } elseif (($filters['account_type'] ?? null) === 'public') {
             $classifier->scopePublic($query);
+            $query->where(static function ($query): void {
+                $query
+                    ->whereNull('account_state')
+                    ->orWhere('account_state', '!=', User::ACCOUNT_STATE_PROFILE_ONLY);
+            });
         }
 
         if (($filters['status'] ?? null) === 'active') {
@@ -279,14 +330,17 @@ class AdminUserController extends Controller
             'listTitle' => match ($filters['account_type'] ?? null) {
                 'staff' => __('terms.staff_accounts'),
                 'public' => __('terms.public_accounts'),
+                'public_profiles' => __('terms.public_profiles'),
                 default => __('admin.users.all_accounts'),
             },
             'clearFiltersUrl' => match ($filters['account_type'] ?? null) {
                 'public' => route('admin.public-accounts.index'),
+                'public_profiles' => route('admin.public-profiles.index'),
                 'staff' => route('admin.staff-accounts.index'),
                 default => route('admin.users.index'),
             },
             'resettableUserIds' => $resettableUserIds,
+            'showProfileColumns' => ($filters['account_type'] ?? null) === 'public_profiles',
         ]);
     }
 

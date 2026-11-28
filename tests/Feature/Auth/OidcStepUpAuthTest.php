@@ -104,7 +104,7 @@ class OidcStepUpAuthTest extends TestCase
             $admin->name,
         );
 
-        $intended = route('admin.settings.show', 'keys-and-secrets');
+        $intended = route('admin.security.keys-and-secrets');
 
         $response = $this->actingAs($admin)
             ->withSession([
@@ -185,7 +185,7 @@ class OidcStepUpAuthTest extends TestCase
             ->put(route('admin.settings.keys-and-secrets.store'), [
                 'password' => 'mail-client-app-password-never-echoed',
             ])
-            ->assertRedirect(route('admin.settings.show', 'keys-and-secrets'))
+            ->assertRedirect(route('admin.security.keys-and-secrets'))
             ->assertSessionHasNoErrors();
     }
 

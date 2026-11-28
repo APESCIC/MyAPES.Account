@@ -2,6 +2,7 @@
 
 namespace App\Core\Accounts;
 
+use App\Core\Settings\SecuritySettings;
 use Illuminate\Support\Str;
 
 /**
@@ -17,9 +18,23 @@ final class PhoneVerificationPinService
 
     public const MAX_LENGTH = 8;
 
+    public function __construct(
+        private readonly ?SecuritySettings $security = null,
+    ) {}
+
+    public function minLength(): int
+    {
+        return $this->security?->phonePinMinLength() ?? self::MIN_LENGTH;
+    }
+
+    public function maxLength(): int
+    {
+        return $this->security?->phonePinMaxLength() ?? self::MAX_LENGTH;
+    }
+
     public function set(User $user, string $pin): PhoneVerificationPin
     {
-        if (preg_match('/^\d{'.self::MIN_LENGTH.','.self::MAX_LENGTH.'}$/', $pin) !== 1) {
+        if (preg_match('/^\d{'.$this->minLength().','.$this->maxLength().'}$/', $pin) !== 1) {
             throw new \InvalidArgumentException('A PIN must be numeric and the right length.');
         }
 

@@ -23,8 +23,8 @@
         {{ __("admin.settings.keys_and_secrets.active_source.{$mailboxPassword['active_source']}") }}
     </p>
 
-    @can('admin.settings.manage')
-        <form method="post" action="{{ route('admin.settings.keys-and-secrets.store') }}" class="stacked-form" autocomplete="off" data-secret-form="set">
+    @can('admin.security.manage')
+        <form method="post" action="{{ route('admin.security.keys-and-secrets.store') }}" class="stacked-form" autocomplete="off" data-secret-form="set">
             @csrf
             @method('PUT')
             <label for="secret-mailbox-password">{{ __('admin.settings.keys_and_secrets.mailbox_password.label') }}</label>
@@ -35,7 +35,7 @@
             </div>
         </form>
 
-        <form method="post" action="{{ route('admin.settings.keys-and-secrets.test') }}" class="stacked-form" autocomplete="off" data-secret-form="test">
+        <form method="post" action="{{ route('admin.security.keys-and-secrets.test') }}" class="stacked-form" autocomplete="off" data-secret-form="test">
             @csrf
             <label for="secret-mailbox-password-test">{{ __('admin.settings.keys_and_secrets.test_label') }}</label>
             <input id="secret-mailbox-password-test" name="password" type="password" maxlength="500" autocomplete="new-password">
@@ -46,7 +46,7 @@
         </form>
 
         @if($mailboxPassword['source'] === 'keys_and_secrets')
-            <form method="post" action="{{ route('admin.settings.keys-and-secrets.destroy') }}" class="stacked-form" data-secret-form="clear" data-confirm="{{ __('admin.settings.keys_and_secrets.clear_confirm') }}">
+            <form method="post" action="{{ route('admin.security.keys-and-secrets.destroy') }}" class="stacked-form" data-secret-form="clear" data-confirm="{{ __('admin.settings.keys_and_secrets.clear_confirm') }}">
                 @csrf
                 @method('DELETE')
                 <label class="inline-check">

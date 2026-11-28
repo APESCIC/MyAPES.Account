@@ -36,6 +36,26 @@ final class PermissionDescriptions
             'description' => 'Update profiles, assign custom roles, and suspend or reactivate accounts.',
             'group' => 'Accounts',
         ],
+        'admin.public-profiles.view' => [
+            'title' => 'View Public Profiles',
+            'description' => 'Browse profile-only Public Profiles in Admin → People.',
+            'group' => 'Accounts',
+        ],
+        'admin.public-profiles.manage' => [
+            'title' => 'Manage Public Profiles',
+            'description' => 'Edit profile-only Public Profiles using the shared client form.',
+            'group' => 'Accounts',
+        ],
+        'admin.security.view' => [
+            'title' => 'View Security',
+            'description' => 'Open Admin → Security (overview, audit log, Keys and secrets, sign-in policy).',
+            'group' => 'Security',
+        ],
+        'admin.security.manage' => [
+            'title' => 'Manage Security',
+            'description' => 'Change sign-in policy, export the audit log, and manage Keys and secrets (with step-up).',
+            'group' => 'Security',
+        ],
         'staff.clients.create' => [
             'title' => 'Create public client accounts',
             'description' => 'Create a local public client account with a phone PIN and optional set-password email (staff, volunteers and students).',
@@ -133,12 +153,12 @@ final class PermissionDescriptions
         ],
         'admin.settings.view' => [
             'title' => 'View settings',
-            'description' => 'Open Admin → Settings (General, Integrations, API clients, webhooks and API docs) and Admin → Emails → Import, without seeing any saved secret.',
+            'description' => 'Open Admin → Settings (General, Integrations, Push, API clients, webhooks and API docs) and Admin → Emails → Import, without seeing any saved secret.',
             'group' => 'Platform',
         ],
         'admin.settings.manage' => [
             'title' => 'Manage settings',
-            'description' => 'Change Admin → Settings, including general options such as public registration and the site banner, and the reply mailbox details and password in Admin → Emails → Import.',
+            'description' => 'Change Admin → Settings, including general options such as public registration and the site banner, and the reply mailbox details in Admin → Emails → Import.',
             'group' => 'Platform',
         ],
     ];
