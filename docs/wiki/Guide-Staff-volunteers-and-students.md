@@ -14,16 +14,16 @@ Staff, volunteers and students with `staff.clients.search` can:
 - Open a person to the shared workspace tabs: **Overview** (identity, PIN check, call log, notes, quick actions), **Account Management**, **Account Profile Management**, **Records** and **Activity**. Caller `/staff/callers/{id}` URLs redirect here.
 - Date of birth on Account Profile Management is only shown with `staff.clients.sensitive` (administrators).
 
-Creating an account from a Profile only row arrives in a later release; the action stays hidden until then.
+On **Account Management** for a Profile only person with an email, use **Create MyAPES account** to invite them. For an Invited person, use **Resend sign-in details** if the temporary password expired or was lost (the previous temporary password stops working).
 
-## Creating a public client account (v0.65.0)
+## Creating a public client account (v0.79.0)
 
 Staff, volunteers and students with `staff.clients.create` can open **Clients** and use **Add a client** for a local public account:
 
 - Rejects duplicate email or phone, and staff-domain emails (for example `@apes.org.uk`).
 - Requires a 4–8 digit phone PIN. It is shown **once** after save — write it down for the caller. It is stored hashed and is never emailed, logged or printed again.
-- Email is optional. With an email and the set-password tick, the person gets a 72-hour one-time set-password link (never the PIN or a password). Without an email, no mail is sent.
-- Staff-assisted consent is required; the audit log records who created the account and whether the email was sent, without secrets.
+- Email is optional. Tick **Create MyAPES account** (needs an email) to invite them: they receive a welcome email with username and a temporary password that expires in 72 hours and must be changed on first sign-in. Unticked saves a Profile only client who cannot sign in.
+- Staff-assisted consent is required; the audit log records who created the account and temporary-password events, without secrets.
 
 Bookings stays under **Tools** for guests and public users only; staff-side roles get a 403 on `/bookings`.
 
