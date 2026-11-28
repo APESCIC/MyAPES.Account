@@ -16,7 +16,8 @@ class WelcomeSignInDetailsNotification extends Notification
 {
     use BuildsBrandedMail;
 
-    public const PREVIEW_PASSWORD = '[preview-temporary-password]';
+    /** Placeholder shown in Admin email preview only (not a real credential). */
+    public const PREVIEW_PASSWORD = 'preview';
 
     public function __construct(
         #[\SensitiveParameter]
