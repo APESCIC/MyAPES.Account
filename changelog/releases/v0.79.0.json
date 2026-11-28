@@ -1,0 +1,59 @@
+{
+    "version": "0.79.0",
+    "date": "2026-11-28",
+    "channel": "stable",
+    "type": "minor",
+    "title": "Create a MyAPES account from a client profile",
+    "summary": "Staff can create a MyAPES account from a client form or Account Management with a temporary password that expires in 72 hours; the person must choose a permanent password on first sign-in.",
+    "changes": [
+        "Add a Create MyAPES account tick box on the new-client form; unticked still saves a profile-only client.",
+        "Account Management on a profile-only client with an email can create the account later; Invited accounts can resend sign-in details.",
+        "Usernames use firstname.lastname (with a number when taken); temporary passwords are hashed, single-use and expire after 72 hours.",
+        "Welcome email includes username and temporary password once; Admin email preview uses a placeholder and the mail log stores the template name only.",
+        "First sign-in redirects to a forced permanent password screen with a live strength meter and personal-identifier checks.",
+        "Expired or used temporary passwords show a helpful message without revealing whether the account exists.",
+        "Audit events cover account creation from a profile and temporary-password issued, used, expired and resent, without secrets.",
+        "Staff guide and privacy notice describe staff-created accounts and emailed sign-in details."
+    ],
+    "affected_areas": [
+        "Staff Clients create form",
+        "Account Management create/resend",
+        "Public Login and forced password change",
+        "Welcome sign-in email template",
+        "Audit log",
+        "Help and privacy notice"
+    ],
+    "categories": [
+        "added",
+        "changed"
+    ],
+    "audiences": [
+        "public-facing",
+        "internal-only"
+    ],
+    "version_rationale": "MINOR: new account-creation flow with temporary password and forced first-sign-in change, replacing the set-password link option for new creates.",
+    "validation": [
+        "PHPUnit StaffClientAccountTest, ClientDetailsAndAccountStateTest, CreateMyApesAccountFromProfileTest, UserProfileHubTest and MailTemplateMatrixTest.",
+        "Herd preview at https://myapes-account.test for the Clients form and Account Management create panel.",
+        "composer milestone:bump -- v0.79.0 --check and myapes:changelog-validate against origin/main."
+    ],
+    "known_limitations": [
+        "Matching self-registered accounts remains out of scope (v0.81.0).",
+        "SMS delivery of temporary passwords is not supported.",
+        "Outstanding set-password tokens from earlier releases still work until they expire."
+    ],
+    "rollback": "Redeploy the previous release tag (v0.78.0). The additive users.must_change_password and users.temporary_password_expires_at columns can remain.",
+    "provenance": "Milestone v0.79.0 Create a MyAPES account from a client profile, Epic #867, pull request #1072.",
+    "references": [
+        {
+            "label": "Issue #867",
+            "url": "https://github.com/APESCIC/MyAPES-Account/issues/867"
+        },
+        {
+            "label": "Pull request #1072",
+            "url": "https://github.com/APESCIC/MyAPES-Account/pull/1072"
+        }
+    ],
+    "slug": "release-v0-79-0",
+    "previous_version": "0.78.0"
+}
