@@ -16,7 +16,7 @@ class WelcomeSignInDetailsNotification extends Notification
 {
     use BuildsBrandedMail;
 
-    public const PREVIEW_PASSWORD = '••••••••••••••';
+    public const PREVIEW_PASSWORD = '[preview-temporary-password]';
 
     public function __construct(
         #[\SensitiveParameter]
