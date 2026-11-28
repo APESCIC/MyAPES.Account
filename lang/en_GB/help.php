@@ -113,14 +113,31 @@ return [
             'alerts' => 'The Plugin alerts count only includes plugins that need action, such as one whose code is not in this release. Plugin notes list states that need nothing doing. Each row says why and links to the fix in Plugins.',
         ],
         'people' => [
-            'heading' => 'People and access',
-            'body' => 'Public Accounts and Staff Accounts list every account by type. Open an account to check its profile and roles.',
+            'heading' => 'People',
+            'body' => 'Public Accounts lists signed-in public accounts. Public Profiles lists profile-only people (no login yet). Staff Accounts lists staff-side accounts. Open a person to check their profile and roles.',
+        ],
+        'security' => [
+            'heading' => 'Security',
+            'body' => 'Security Overview shows two-factor, passkey, suspension and recent security event counts. The audit log lets you filter and export security events (secrets are never shown).',
             'access' => 'Access holds groups, roles and permissions. Give access to a group rather than one person, so that everyone doing the same job sees the same things. The access matrix and directory / OIDC group mappings are managed here.',
+            'keys' => 'Keys and secrets is where operators enter live secrets such as the communications mailbox password. Changing a key may clear related subscriptions. Sign-in policy sets temporary-password lifetime, telephone PIN length bounds and whether staff must use two-factor authentication.',
+            'headers' => 'The app also sends security headers and enforces a Content Security Policy, so the browser blocks scripts and frames from sites the app does not trust. Every blocked item is logged.',
         ],
         'modules' => [
             'heading' => 'Modules, plugins and versions',
-            'body' => 'Modules are the services (APES CIC, APES Shelter and Rescue, APES Pet Care Clinic). Plugins add features to a module. Turning a plugin off hides it without deleting its records. API clients and webhooks are also managed from Admin.',
+            'body' => 'Modules are the services (APES CIC, APES Shelter and Rescue, APES Pet Care Clinic). Plugins add features to a module. Turning a plugin off hides it without deleting its records.',
             'versions' => 'Versions shows the installed version of each module and plugin and its history of changes.',
+        ],
+        'communication' => [
+            'heading' => 'Communication',
+            'body' => 'Email Templates lists every message the app sends. You can change the subject and body, use the merge fields shown on the page, preview the result and reset to the standard text at any time.',
+            'import' => 'Email import shows the reply mailbox connection, its step-by-step test, import status and readiness checklist.',
+            'replies' => 'System emails come from a no-reply address. Ticket and case emails include a Log in to reply link, so replies stay in the app.',
+        ],
+        'system' => [
+            'heading' => 'System',
+            'body' => 'Settings holds General, Integrations, Push notifications, API clients, Webhooks and API docs. Embed forms and Maintenance stay under System. API clients and webhooks are also linked from Security for convenience.',
+            'maintenance' => 'Maintenance mode blocks public accounts and ordinary staff and pauses queued jobs. Health checks, staff sign-in and the Maintenance page stay available, so you can end it again once you have checked the app.',
         ],
         'lists' => [
             'heading' => 'Managed lists and ticket settings',
@@ -129,20 +146,6 @@ return [
         'recruitment' => [
             'heading' => 'Recruitment forms',
             'body' => 'Each role in Recruitment has its own application questions. Add short or long answer questions on the role page and move them into the order applicants should see.',
-        ],
-        'emails' => [
-            'heading' => 'Email Templates',
-            'body' => 'Email Templates lists every message the app sends. You can change the subject and body, use the merge fields shown on the page, preview the result and reset to the standard text at any time.',
-            'replies' => 'System emails come from a no-reply address. Ticket and case emails include a Log in to reply link, so replies stay in the app.',
-        ],
-        'maintenance' => [
-            'heading' => 'Maintenance',
-            'body' => 'Maintenance mode blocks public accounts and ordinary staff and pauses queued jobs. Health checks, staff sign-in and the Maintenance page stay available, so you can end it again once you have checked the app.',
-        ],
-        'security' => [
-            'heading' => 'Security settings',
-            'body' => 'The app sends security headers and enforces a Content Security Policy, so the browser blocks scripts and frames from sites the app does not trust. Every blocked item is logged. Setting CSP_ENFORCE=false switches back to report-only while you investigate.',
-            'editor' => 'The description editor needs its API key in the app environment. Without the key, description fields fall back to a plain text box.',
         ],
     ],
 ];

@@ -25,13 +25,33 @@
         <section id="people">
             <h2>{{ __('help.admin.people.heading') }}</h2>
             <p>{{ __('help.admin.people.body') }}</p>
-            <p>{{ __('help.admin.people.access') }}</p>
+        </section>
+
+        <section id="security">
+            <h2>{{ __('help.admin.security.heading') }}</h2>
+            <p>{{ __('help.admin.security.body') }}</p>
+            <p>{{ __('help.admin.security.access') }}</p>
+            <p>{{ __('help.admin.security.keys') }}</p>
+            <p>{{ __('help.admin.security.headers') }}</p>
         </section>
 
         <section id="modules">
             <h2>{{ __('help.admin.modules.heading') }}</h2>
             <p>{{ __('help.admin.modules.body') }}</p>
             <p>{{ __('help.admin.modules.versions') }}</p>
+        </section>
+
+        <section id="communication">
+            <h2>{{ __('help.admin.communication.heading') }}</h2>
+            <p>{{ __('help.admin.communication.body') }}</p>
+            <p>{{ __('help.admin.communication.import') }}</p>
+            <p>{{ __('help.admin.communication.replies') }}</p>
+        </section>
+
+        <section id="system">
+            <h2>{{ __('help.admin.system.heading') }}</h2>
+            <p>{{ __('help.admin.system.body') }}</p>
+            <p>{{ __('help.admin.system.maintenance') }}</p>
         </section>
 
         <section id="lists">
@@ -42,23 +62,6 @@
         <section id="recruitment">
             <h2>{{ __('help.admin.recruitment.heading') }}</h2>
             <p>{{ __('help.admin.recruitment.body') }}</p>
-        </section>
-
-        <section id="emails">
-            <h2>{{ __('help.admin.emails.heading') }}</h2>
-            <p>{{ __('help.admin.emails.body') }}</p>
-            <p>{{ __('help.admin.emails.replies') }}</p>
-        </section>
-
-        <section id="maintenance">
-            <h2>{{ __('help.admin.maintenance.heading') }}</h2>
-            <p>{{ __('help.admin.maintenance.body') }}</p>
-        </section>
-
-        <section id="security">
-            <h2>{{ __('help.admin.security.heading') }}</h2>
-            <p>{{ __('help.admin.security.body') }}</p>
-            <p>{{ __('help.admin.security.editor') }}</p>
         </section>
     </article>
 @endsection
