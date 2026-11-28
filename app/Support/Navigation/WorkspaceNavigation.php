@@ -483,15 +483,15 @@ final class WorkspaceNavigation
             ],
             'people' => [
                 ['admin.users', __('terms.public_accounts'), route('admin.public-accounts.index'), 'user-round', ['admin.users.view'], ['admin.public-accounts.*', 'admin.users.*']],
-                ['admin.public-profiles', __('terms.public_profiles'), route('admin.public-profiles.index'), 'contact', ['admin.users.view'], ['admin.public-profiles.*']],
+                ['admin.public-profiles', __('terms.public_profiles'), route('admin.public-profiles.index'), 'contact', ['admin.public-profiles.view'], ['admin.public-profiles.*']],
                 ['admin.staff', __('terms.staff_accounts'), route('admin.staff-accounts.index'), 'badge-check', ['admin.users.view'], ['admin.staff-accounts.*', 'admin.users.*']],
             ],
             'security' => [
-                ['admin.security', __('admin.nav.security_overview'), route('admin.security.index'), 'shield', ['admin.settings.view', 'admin.groups.view', 'admin.roles.view', 'admin.permissions.view'], ['admin.security.index']],
-                ['admin.audit-log', __('admin.nav.audit_log'), route('admin.security.audit-log'), 'scroll-text', ['admin.settings.view'], ['admin.security.audit-log*']],
+                ['admin.security', __('admin.nav.security_overview'), route('admin.security.index'), 'shield', ['admin.security.view'], ['admin.security.index']],
+                ['admin.audit-log', __('admin.nav.audit_log'), route('admin.security.audit-log'), 'scroll-text', ['admin.security.view'], ['admin.security.audit-log*']],
                 ['admin.access', __('admin.nav.access'), route('admin.access.index'), 'shield-check', ['admin.groups.view', 'admin.roles.view', 'admin.permissions.view'], ['admin.access.*', 'admin.groups.*', 'admin.roles.*', 'admin.permissions.*']],
-                ['admin.keys', __('admin.nav.keys_and_secrets'), route('admin.security.keys-and-secrets'), 'key-round', ['admin.settings.view'], ['admin.security.keys-and-secrets', 'admin.security.keys-and-secrets.*']],
-                ['admin.sign-in-policy', __('admin.nav.sign_in_policy'), route('admin.security.sign-in-policy'), 'lock', ['admin.settings.view'], ['admin.security.sign-in-policy', 'admin.security.sign-in-policy.*']],
+                ['admin.keys', __('admin.nav.keys_and_secrets'), route('admin.security.keys-and-secrets'), 'key-round', ['admin.security.view'], ['admin.security.keys-and-secrets', 'admin.security.keys-and-secrets.*']],
+                ['admin.sign-in-policy', __('admin.nav.sign_in_policy'), route('admin.security.sign-in-policy'), 'lock', ['admin.security.view'], ['admin.security.sign-in-policy', 'admin.security.sign-in-policy.*']],
             ],
             'modules' => [
                 ['admin.modules', __('admin.nav.modules'), route('admin.organisation-modules.index'), 'building-2', ['admin.modules.view'], ['admin.organisation-modules.*']],

@@ -14,7 +14,7 @@
     <section class="panel" aria-labelledby="sign-in-policy-heading" data-security-tab="sign-in-policy">
         <h2 id="sign-in-policy-heading" class="sr-only">{{ __('admin.security.sign_in_policy.heading') }}</h2>
 
-        @can('admin.settings.manage')
+        @can('admin.security.manage')
             <form method="post" action="{{ route('admin.security.sign-in-policy.update') }}" class="stacked-form">
                 @csrf
                 @method('PUT')

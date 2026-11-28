@@ -145,7 +145,7 @@ final class AdminSearchCatalogue
                 'description' => __('admin.search.sections.public_profiles'),
                 'url' => route('admin.public-profiles.index'),
                 'keywords_key' => 'admin.search.keywords.public_profiles',
-                'abilities' => ['admin.users.view'],
+                'abilities' => ['admin.public-profiles.view'],
             ],
             [
                 'id' => 'admin.staff',
@@ -161,7 +161,7 @@ final class AdminSearchCatalogue
                 'description' => __('admin.search.sections.security'),
                 'url' => route('admin.security.index'),
                 'keywords_key' => 'admin.search.keywords.security',
-                'abilities' => ['admin.settings.view', 'admin.groups.view', 'admin.roles.view', 'admin.permissions.view'],
+                'abilities' => ['admin.security.view'],
             ],
             [
                 'id' => 'admin.audit-log',
@@ -169,7 +169,7 @@ final class AdminSearchCatalogue
                 'description' => __('admin.search.sections.audit_log'),
                 'url' => route('admin.security.audit-log'),
                 'keywords_key' => 'admin.search.keywords.audit_log',
-                'abilities' => ['admin.settings.view'],
+                'abilities' => ['admin.security.view'],
             ],
             [
                 'id' => 'admin.access',
@@ -185,7 +185,7 @@ final class AdminSearchCatalogue
                 'description' => __('admin.search.sections.keys_and_secrets'),
                 'url' => route('admin.security.keys-and-secrets'),
                 'keywords_key' => 'admin.search.keywords.keys_and_secrets',
-                'abilities' => ['admin.settings.view'],
+                'abilities' => ['admin.security.view'],
             ],
             [
                 'id' => 'admin.sign-in-policy',
@@ -193,7 +193,7 @@ final class AdminSearchCatalogue
                 'description' => __('admin.search.sections.sign_in_policy'),
                 'url' => route('admin.security.sign-in-policy'),
                 'keywords_key' => 'admin.search.keywords.sign_in_policy',
-                'abilities' => ['admin.settings.view'],
+                'abilities' => ['admin.security.view'],
             ],
             [
                 'id' => 'admin.modules',

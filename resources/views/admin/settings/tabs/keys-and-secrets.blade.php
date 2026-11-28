@@ -23,7 +23,7 @@
         {{ __("admin.settings.keys_and_secrets.active_source.{$mailboxPassword['active_source']}") }}
     </p>
 
-    @can('admin.settings.manage')
+    @can('admin.security.manage')
         <form method="post" action="{{ route('admin.security.keys-and-secrets.store') }}" class="stacked-form" autocomplete="off" data-secret-form="set">
             @csrf
             @method('PUT')

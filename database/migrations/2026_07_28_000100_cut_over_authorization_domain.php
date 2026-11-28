@@ -60,6 +60,10 @@ return new class extends Migration
         'admin.emails.manage',
         'admin.settings.view',
         'admin.settings.manage',
+        'admin.security.view',
+        'admin.security.manage',
+        'admin.public-profiles.view',
+        'admin.public-profiles.manage',
     ];
 
     private const DIRECTORY_MAPPINGS = [
