@@ -227,18 +227,18 @@
             <label for="pin_confirmation">{{ __('clients.fields.pin_confirmation') }}</label>
             <input id="pin_confirmation" name="pin_confirmation" type="password" inputmode="numeric" autocomplete="new-password" required minlength="{{ $pinMin }}" maxlength="{{ $pinMax }}">
 
-            <label class="inline-check" for="send_set_password_email">
+            <label class="inline-check" for="create_myapes_account">
                 <input
-                    id="send_set_password_email"
+                    id="create_myapes_account"
                     type="checkbox"
-                    name="send_set_password_email"
+                    name="create_myapes_account"
                     value="1"
-                    @checked((bool) old('send_set_password_email'))
-                    data-client-send-email
+                    @checked((bool) old('create_myapes_account'))
+                    data-client-create-account
                 >
-                {{ __('clients.fields.send_set_password_email') }}
+                {{ __('clients.fields.create_myapes_account') }}
             </label>
-            <p class="muted">{{ __('clients.fields.send_set_password_email_hint') }}</p>
+            <p class="muted">{{ __('clients.fields.create_myapes_account_hint') }}</p>
 
             <fieldset>
                 <legend>{{ __('clients.fields.consent_legend') }}</legend>

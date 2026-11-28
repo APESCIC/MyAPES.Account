@@ -38,6 +38,8 @@ use Spatie\Permission\Traits\HasRoles;
     'username',
     'identity_type',
     'account_state',
+    'must_change_password',
+    'temporary_password_expires_at',
     'name',
     'email',
     'locale',
@@ -148,6 +150,8 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
             'registration_consented_at' => 'datetime',
             'registration_consent_staff_id' => 'integer',
             'password' => 'hashed',
+            'must_change_password' => 'boolean',
+            'temporary_password_expires_at' => 'datetime',
             'two_factor_secret' => 'encrypted',
             'two_factor_recovery_codes' => 'encrypted:array',
             'two_factor_confirmed_at' => 'datetime',
@@ -549,6 +553,11 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     public function isProfileOnly(): bool
     {
         return $this->accountState() === self::ACCOUNT_STATE_PROFILE_ONLY;
+    }
+
+    public function mustChangePassword(): bool
+    {
+        return (bool) $this->must_change_password;
     }
 
     public function canAuthenticateLocally(): bool

@@ -3,7 +3,6 @@
 namespace App\Core\Mail;
 
 use App\Core\Accounts\User;
-use App\Core\Mail\StaffMessage;
 use App\Core\Mail\Inbound\Diagnostics\FailureType;
 use App\Notifications\Auth\EmailChangeCompletedNotification;
 use App\Notifications\Auth\EmailChangeConfirmNotification;
@@ -16,6 +15,7 @@ use App\Notifications\Auth\StaffAssistedSetPasswordNotification;
 use App\Notifications\Auth\TwoFactorDisabledNotification;
 use App\Notifications\Auth\TwoFactorEnabledNotification;
 use App\Notifications\Auth\VerifyEmailNotification;
+use App\Notifications\Auth\WelcomeSignInDetailsNotification;
 use App\Notifications\EmailReplyNotPostedNotification;
 use App\Notifications\InboundImportFailingNotification;
 use App\Notifications\InboundImportRecoveredNotification;
@@ -39,6 +39,10 @@ final class CoreMailTemplates
                 static fn (): ResetPasswordNotification => new ResetPasswordNotification('sample-preview-token')),
             self::auth('set_password', 'set_password', StaffAssistedSetPasswordNotification::class,
                 static fn (): StaffAssistedSetPasswordNotification => new StaffAssistedSetPasswordNotification('sample-preview-token')),
+            self::auth('welcome_sign_in', 'welcome_sign_in', WelcomeSignInDetailsNotification::class,
+                static fn (): WelcomeSignInDetailsNotification => new WelcomeSignInDetailsNotification(
+                    WelcomeSignInDetailsNotification::PREVIEW_PASSWORD,
+                )),
             self::auth('password_changed', 'password_changed', PasswordChangedNotification::class,
                 static fn (): PasswordChangedNotification => new PasswordChangedNotification),
             self::auth('two_factor_enabled', 'two_factor_enabled', TwoFactorEnabledNotification::class,

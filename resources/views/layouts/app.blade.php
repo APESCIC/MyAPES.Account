@@ -67,7 +67,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
 </head>
-@php($isAuthPage = request()->routeIs('public.login', 'public.register', 'staff.login', 'password.request', 'password.reset', 'password.confirm', 'two-factor.login', 'verification.notice', 'qa.index'))
+@php($isAuthPage = request()->routeIs('public.login', 'public.register', 'staff.login', 'password.request', 'password.reset', 'password.confirm', 'password.forced-change.*', 'two-factor.login', 'verification.notice', 'qa.index'))
 @php($showPushSoftPrompt = auth()->check() && (request()->routeIs('dashboard') || request()->routeIs('*.tickets.show')))
 <body @class(['workspace-shell', 'is-auth-page' => $isAuthPage, 'has-mascot-dock' => $mascotTip]) @auth data-push-register data-push-sw-url="{{ route('push.service-worker') }}" data-push-destroy-url="{{ route('push.subscriptions.destroy') }}" @endauth>
 <a class="skip-link" href="#main-content">{{ __('public.chrome.app.blade.skip_to_main_content') }}</a>
@@ -204,5 +204,6 @@
         <x-workspace.guided-tour />
     @endif
 @endauth
+@stack('scripts')
 </body>
 </html>

@@ -3,6 +3,9 @@
 use App\Core\Qa\Http\Controllers\QaLoginController;
 use App\Core\Qa\Http\Middleware\EnsureQaLoginEnabled;
 use App\Http\Controllers\AccountNotificationController;
+use App\Http\Controllers\AccountPrivacyController;
+use App\Http\Controllers\AccountSecurityController;
+use App\Http\Controllers\AccountSettingsController;
 use App\Http\Controllers\Admin\AdminAccessController;
 use App\Http\Controllers\Admin\AdminApiClientController;
 use App\Http\Controllers\Admin\AdminEmailController;
@@ -12,12 +15,12 @@ use App\Http\Controllers\Admin\AdminGroupController;
 use App\Http\Controllers\Admin\AdminInboundEmailController;
 use App\Http\Controllers\Admin\AdminIntegrationController;
 use App\Http\Controllers\Admin\AdminKeysAndSecretsController;
-use App\Http\Controllers\Admin\AdminPushNotificationsController;
 use App\Http\Controllers\Admin\AdminLocalRepliesController;
 use App\Http\Controllers\Admin\AdminMaintenanceController;
 use App\Http\Controllers\Admin\AdminManagedListController;
 use App\Http\Controllers\Admin\AdminModuleController;
 use App\Http\Controllers\Admin\AdminOrganisationModuleController;
+use App\Http\Controllers\Admin\AdminPushNotificationsController;
 use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminVersionController;
@@ -25,6 +28,7 @@ use App\Http\Controllers\Admin\AdminWebhookController;
 use App\Http\Controllers\Admin\StaffAdminController;
 use App\Http\Controllers\Auth\ConfirmPasswordController;
 use App\Http\Controllers\Auth\EmailChangeController;
+use App\Http\Controllers\Auth\ForcedPasswordChangeController;
 use App\Http\Controllers\Auth\OidcAuthController;
 use App\Http\Controllers\Auth\PublicAuthController;
 use App\Http\Controllers\Auth\PublicPasswordResetController;
@@ -33,7 +37,6 @@ use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\BookingsController;
 use App\Http\Controllers\ChangeLogController;
 use App\Http\Controllers\ClientRecordsNoticeController;
-use App\Http\Controllers\ThemePreferenceController;
 use App\Http\Controllers\CspReportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GuidedTourController;
@@ -43,9 +46,6 @@ use App\Http\Controllers\MailReplyLinkController;
 use App\Http\Controllers\MailUnsubscribeController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PhoneVerificationPinController;
-use App\Http\Controllers\AccountPrivacyController;
-use App\Http\Controllers\AccountSecurityController;
-use App\Http\Controllers\AccountSettingsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfileNotificationController;
 use App\Http\Controllers\PushServiceWorkerController;
@@ -60,6 +60,7 @@ use App\Http\Controllers\Staff\StaffMessageController;
 use App\Http\Controllers\Staff\StaffReportProblemController;
 use App\Http\Controllers\SubCoreController;
 use App\Http\Controllers\SupportAttachmentController;
+use App\Http\Controllers\ThemePreferenceController;
 use App\Http\Controllers\Workspace\WorkspaceRecordSearchController;
 use App\Http\Middleware\EnsureLocalReplyLoop;
 use App\Support\Tour\GuidedTour;
@@ -180,7 +181,14 @@ Route::middleware([
     'auth',
     'authorization.context',
     'directory.current',
+    'account.password-changed',
 ])->group(function (): void {
+    Route::get('/password/change-required', [ForcedPasswordChangeController::class, 'edit'])
+        ->name('password.forced-change.edit');
+    Route::post('/password/change-required', [ForcedPasswordChangeController::class, 'update'])
+        ->middleware('throttle:public-password-change')
+        ->name('password.forced-change.update');
+
     Route::prefix('admin/maintenance')
         ->name('admin.maintenance.')
         ->middleware([
@@ -223,6 +231,7 @@ Route::middleware([
     'auth',
     'authorization.context',
     'directory.current',
+    'account.password-changed',
     'account.ready',
 ])->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
@@ -302,6 +311,14 @@ Route::middleware([
             ->whereNumber('client')
             ->middleware(['can:staff.clients.manage', 'throttle:20,1'])
             ->name('password-reset');
+        Route::post('/{client}/create-account', [ClientController::class, 'createAccount'])
+            ->whereNumber('client')
+            ->middleware(['can:staff.clients.manage', 'throttle:20,1'])
+            ->name('create-account');
+        Route::post('/{client}/resend-sign-in', [ClientController::class, 'resendSignInDetails'])
+            ->whereNumber('client')
+            ->middleware(['can:staff.clients.manage', 'throttle:20,1'])
+            ->name('resend-sign-in');
         Route::post('/{client}/two-factor-reset', [ClientController::class, 'resetTwoFactor'])
             ->whereNumber('client')
             ->middleware(['can:staff.clients.manage', 'throttle:20,1'])
@@ -525,6 +542,12 @@ Route::middleware([
             Route::post('/users/{user}/password-reset', [AdminUserController::class, 'resetLocalPassword'])
                 ->middleware('can:admin.users.manage')
                 ->name('users.password-reset');
+            Route::post('/users/{user}/create-account', [AdminUserController::class, 'createAccountFromProfile'])
+                ->middleware('can:admin.users.manage')
+                ->name('users.create-account');
+            Route::post('/users/{user}/resend-sign-in', [AdminUserController::class, 'resendSignInDetails'])
+                ->middleware('can:admin.users.manage')
+                ->name('users.resend-sign-in');
             Route::post('/users/{user}/pending-first-login-chase', [AdminUserController::class, 'chasePendingFirstLogin'])
                 ->middleware('can:admin.users.manage')
                 ->name('users.pending-first-login-chase');

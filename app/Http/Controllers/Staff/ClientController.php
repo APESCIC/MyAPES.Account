@@ -3,15 +3,12 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Core\Accounts\AccountClassifier;
-use App\Core\Accounts\CallLog;
 use App\Core\Accounts\CallerVerificationService;
+use App\Core\Accounts\CallLog;
 use App\Core\Accounts\PhoneVerificationPinService;
 use App\Core\Accounts\User;
 use App\Core\Search\Providers\UsersRecordSearchProvider;
 use App\Core\Search\RecordSearch;
-use App\Services\UserActivityTimeline;
-use App\Services\UserProfileHubActions;
-use App\Services\UserRecordsSummary;
 use App\Http\Controllers\Concerns\BuildsUserProfileHub;
 use App\Http\Controllers\Controller;
 use App\Services\AuthorizationMutationService;
@@ -20,6 +17,9 @@ use App\Services\LocalPublicPasswordResetService;
 use App\Services\StaffClientAccountCreator;
 use App\Services\TotpTwoFactorService;
 use App\Services\UkPhoneNumber;
+use App\Services\UserActivityTimeline;
+use App\Services\UserProfileHubActions;
+use App\Services\UserRecordsSummary;
 use App\Support\ClientIdentityRules;
 use App\Support\ClientMandatoryFields;
 use App\Support\PersonName;
@@ -27,7 +27,9 @@ use DomainException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 
 /**
@@ -161,7 +163,7 @@ class ClientController extends Controller
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, User>  $clients
+     * @param  Collection<int, User>  $clients
      * @return array{all: int, with_account: int, profile_only: int, invited: int}
      */
     private function directoryTabCounts($clients): array
@@ -208,7 +210,7 @@ class ClientController extends Controller
                 'email' => ['nullable', 'string', 'email', 'max:255'],
                 'landline_number' => ['nullable', 'string', 'max:32', 'regex:/^\+44\d{9,10}$/'],
                 'pin' => ['required', 'string', 'regex:/^\d{'.$length.'}$/', 'confirmed'],
-                'send_set_password_email' => ['sometimes', 'boolean'],
+                'create_myapes_account' => ['sometimes', 'boolean'],
                 'staff_assisted_consent' => ['accepted'],
             ],
         ), array_merge(ClientIdentityRules::messages(), [
@@ -222,10 +224,12 @@ class ClientController extends Controller
         $validated['postcode'] = strtoupper((string) preg_replace('/\s+/', ' ', trim($validated['postcode'])));
         $validated['date_of_birth'] = ClientIdentityRules::normaliseDateOfBirth($validated['date_of_birth']);
         $validated['name'] = PersonName::display($validated['first_name'], $validated['last_name']);
-        $validated['send_set_password_email'] = $request->boolean('send_set_password_email');
+        $validated['create_myapes_account'] = $request->boolean('create_myapes_account');
 
-        if ($validated['email'] === null) {
-            $validated['send_set_password_email'] = false;
+        if ($validated['create_myapes_account'] && $validated['email'] === null) {
+            throw ValidationException::withMessages([
+                'email' => __('clients.validation.create_account_email_required'),
+            ]);
         }
 
         $result = $creator->create($request->user(), $validated);
@@ -233,12 +237,42 @@ class ClientController extends Controller
         $request->session()->flash('client_created_pin', $result['plain_pin']);
         $request->session()->flash(
             'status',
-            $result['set_password_email_sent']
-                ? __('clients.flash.created_with_email')
+            $result['account_created']
+                ? __('clients.flash.created_with_account')
                 : __('clients.flash.created'),
         );
 
         return redirect()->route('clients.show', $result['user']);
+    }
+
+    public function createAccount(
+        Request $request,
+        User $client,
+        StaffClientAccountCreator $creator,
+    ): RedirectResponse {
+        Gate::authorize(AuthorizationProfile::PERMISSION_CLIENT_MANAGE);
+        abort_if($this->profile->hasDirectoryProtectedEligibility($client), 404);
+
+        $creator->createAccountFromProfile($request->user(), $client);
+
+        return redirect()
+            ->route('clients.show', ['client' => $client, 'tab' => 'account_management'])
+            ->with('status', __('clients.flash.account_created'));
+    }
+
+    public function resendSignInDetails(
+        Request $request,
+        User $client,
+        StaffClientAccountCreator $creator,
+    ): RedirectResponse {
+        Gate::authorize(AuthorizationProfile::PERMISSION_CLIENT_MANAGE);
+        abort_if($this->profile->hasDirectoryProtectedEligibility($client), 404);
+
+        $creator->resendSignInDetails($request->user(), $client);
+
+        return redirect()
+            ->route('clients.show', ['client' => $client, 'tab' => 'account_management'])
+            ->with('status', __('clients.flash.sign_in_resent'));
     }
 
     public function show(

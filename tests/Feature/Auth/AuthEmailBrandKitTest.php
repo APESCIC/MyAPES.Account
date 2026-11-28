@@ -143,7 +143,11 @@ class AuthEmailBrandKitTest extends TestCase
             }
 
             $notification = $template->sampleNotification($user);
-            $this->assertInstanceOf(ShouldQueue::class, $notification, $template->key);
+            if ($template->key === 'auth.welcome_sign_in') {
+                $this->assertNotInstanceOf(ShouldQueue::class, $notification, $template->key);
+            } else {
+                $this->assertInstanceOf(ShouldQueue::class, $notification, $template->key);
+            }
 
             $mail = $notification->toMail($user);
             $subject = strtolower((string) $mail->subject);

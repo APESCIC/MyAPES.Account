@@ -351,15 +351,15 @@ class UserProfileHubTest extends TestCase
         $this->actingAs($staff)
             ->get(route('clients.show', ['client' => $client, 'tab' => 'account_management']))
             ->assertOk()
-            ->assertSee('data-hub-create-account-soon', false)
-            ->assertSee(__('admin.users.hub.create_account_soon.heading'))
+            ->assertSee('data-hub-create-account', false)
+            ->assertSee(__('admin.users.hub.create_account.heading'))
             ->assertDontSee(__('admin.users.effective_access'));
 
         $administrator = $this->userWithAccess(User::ROLE_ADMIN);
         $this->actingAs($administrator)
             ->get(route('admin.public-accounts.show', ['user' => $client, 'tab' => 'account_management']))
             ->assertOk()
-            ->assertSee('data-hub-create-account-soon', false)
+            ->assertSee('data-hub-create-account', false)
             ->assertDontSee('id="suspend-user"', false);
     }
 

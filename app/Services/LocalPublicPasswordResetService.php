@@ -145,11 +145,15 @@ class LocalPublicPasswordResetService
         string $event,
         string $action,
     ): void {
-        DB::transaction(function () use ($user, $password, $event, $action): void {
+        $wasTemporary = (bool) $user->must_change_password;
+
+        DB::transaction(function () use ($user, $password, $event, $action, $wasTemporary): void {
             $user->forceFill([
                 'password' => $password,
                 'authorization_epoch' => (int) $user->authorization_epoch + 1,
                 'account_state' => User::ACCOUNT_STATE_ACTIVE,
+                'must_change_password' => false,
+                'temporary_password_expires_at' => null,
             ]);
             $user->setRememberToken(Str::random(60));
             $user->save();
@@ -163,6 +167,17 @@ class LocalPublicPasswordResetService
                     'action' => $action,
                 ],
             );
+
+            if ($wasTemporary) {
+                $this->auditLogger->record(
+                    'temporary_password.used',
+                    $user,
+                    $user,
+                    [
+                        'target_user_id' => $user->id,
+                    ],
+                );
+            }
         });
 
         $user->notify(new PasswordChangedNotification);
