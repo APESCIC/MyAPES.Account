@@ -52,6 +52,7 @@ class MailTemplateMatrixTest extends TestCase
         'auth.two_factor_disabled',
         'auth.two_factor_enabled',
         'auth.verify_email',
+        'auth.welcome_sign_in',
         'cases.apes_cic_case_updated',
         'cases.shelter_case_updated',
         'consultations.consultation_updated',
@@ -74,6 +75,11 @@ class MailTemplateMatrixTest extends TestCase
         'cases.apes_cic_case_updated',
         'cases.shelter_case_updated',
         'tickets.ticket_updated',
+    ];
+
+    /** Templates that must not be queued because they carry a one-time secret (#940). */
+    private const SYNCHRONOUS_KEYS = [
+        'auth.welcome_sign_in',
     ];
 
     /**
@@ -100,7 +106,11 @@ class MailTemplateMatrixTest extends TestCase
         $subject = strtolower((string) $mail->subject);
 
         $this->assertNotSame($template->labelKey, $template->label());
-        $this->assertInstanceOf(ShouldQueue::class, $notification);
+        if (in_array($key, self::SYNCHRONOUS_KEYS, true)) {
+            $this->assertNotInstanceOf(ShouldQueue::class, $notification);
+        } else {
+            $this->assertInstanceOf(ShouldQueue::class, $notification);
+        }
         if (in_array($key, self::STAFF_SENDER_FROM_KEYS, true)) {
             $this->assertNotSame('', (string) ($mail->from[1] ?? ''));
         } else {

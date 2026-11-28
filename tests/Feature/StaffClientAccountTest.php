@@ -2,17 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Core\Accounts\AuditLog;
 use App\Core\Accounts\PhoneVerificationPinService;
 use App\Core\Accounts\User;
-use App\Notifications\Auth\StaffAssistedSetPasswordNotification;
-use App\Core\Accounts\AuditLog;
+use App\Notifications\Auth\WelcomeSignInDetailsNotification;
 use App\Services\AuthorizationProfile;
 use App\Services\ModuleInstallationSynchronizer;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Password;
 use Tests\TestCase;
 
 /**
@@ -87,73 +86,68 @@ class StaffClientAccountTest extends TestCase
         ]))->assertRedirect(route('clients.index'))->assertSessionHasErrors('email');
     }
 
-    public function test_optional_set_password_email_is_sent_without_pin_or_password(): void
+    public function test_create_myapes_account_emails_welcome_without_pin_in_audit(): void
     {
         Notification::fake();
         $staff = User::factory()->protectedRole(AuthorizationProfile::ROLE_VOLUNTEER)->create();
 
         $this->actingAs($staff)->post(route('clients.store'), $this->payload([
             'email' => 'new.client@example.com',
-            'send_set_password_email' => '1',
+            'first_name' => 'New',
+            'last_name' => 'Client',
+            'create_myapes_account' => '1',
             'pin' => '1357',
             'pin_confirmation' => '1357',
         ]))->assertRedirect();
 
         $client = User::query()->where('email', 'new.client@example.com')->firstOrFail();
-        Notification::assertSentTo($client, StaffAssistedSetPasswordNotification::class, function (StaffAssistedSetPasswordNotification $mail) use ($client): bool {
-            $message = $mail->toMail($client);
-            $html = $message->render();
+        $this->assertSame(User::ACCOUNT_STATE_INVITED, $client->account_state);
+        $this->assertTrue($client->must_change_password);
+        $this->assertSame('new.client', $client->username);
+        Notification::assertSentTo($client, WelcomeSignInDetailsNotification::class, function (WelcomeSignInDetailsNotification $mail) use ($client): bool {
+            $this->assertNotSame('', $mail->temporaryPassword);
+            $this->assertGreaterThanOrEqual(14, strlen($mail->temporaryPassword));
+            $html = $mail->toMail($client)->render();
+            $this->assertStringNotContainsString('1357', $html);
+            $this->assertStringContainsString('new.client', $html);
 
-            return ! str_contains($html, '1357')
-                && ! str_contains($html, 'password is')
-                && str_contains($html, '/set-password/');
+            return true;
         });
 
         $audit = AuditLog::query()->where('event', 'client.created')->latest('id')->first();
         $this->assertNotNull($audit);
         $context = $audit->context ?? [];
-        $this->assertTrue($context['set_password_email_sent'] ?? false);
+        $this->assertTrue($context['create_myapes_account'] ?? false);
         $this->assertTrue($context['pin_set'] ?? false);
         $this->assertArrayNotHasKey('pin', $context);
         $this->assertStringNotContainsString('1357', json_encode($context) ?: '');
+        $this->assertNotNull(AuditLog::query()->where('event', 'temporary_password.issued')->latest('id')->first());
     }
 
-    public function test_phone_only_account_skips_email_and_set_password_link_expires(): void
+    public function test_create_account_without_email_is_rejected_and_phone_only_stays_profile_only(): void
     {
         Notification::fake();
         $staff = User::factory()->protectedRole(AuthorizationProfile::ROLE_STUDENT)->create();
 
+        $this->actingAs($staff)->from(route('clients.index'))->post(route('clients.store'), $this->payload([
+            'email' => null,
+            'create_myapes_account' => '1',
+            'mobile_number' => '07000900888',
+            'pin' => '2468',
+            'pin_confirmation' => '2468',
+        ]))->assertRedirect(route('clients.index'))->assertSessionHasErrors('email');
+
         $this->actingAs($staff)->post(route('clients.store'), $this->payload([
             'email' => null,
-            'send_set_password_email' => '1',
+            'create_myapes_account' => '0',
             'mobile_number' => '07000900888',
             'pin' => '2468',
             'pin_confirmation' => '2468',
         ]))->assertRedirect();
 
         $client = User::query()->whereNull('email')->whereNotNull('registration_consent_staff_id')->latest('id')->firstOrFail();
+        $this->assertSame(User::ACCOUNT_STATE_PROFILE_ONLY, $client->account_state);
         Notification::assertNothingSent();
-
-        auth()->logout();
-
-        $token = Password::broker('staff_assisted')->createToken(
-            User::factory()->protectedRole(AuthorizationProfile::ROLE_SERVICE_USER)->create([
-                'email' => 'expire@example.com',
-            ]),
-        );
-        DB::table('staff_assisted_password_reset_tokens')
-            ->where('email', 'expire@example.com')
-            ->update(['created_at' => now()->subHours(80)]);
-
-        $this->from(route('password.set', [
-            'token' => $token,
-            'email' => 'expire@example.com',
-        ]))->post(route('password.set.update'), [
-            'token' => $token,
-            'email' => 'expire@example.com',
-            'password' => 'Correct-Horse-Battery-1',
-            'password_confirmation' => 'Correct-Horse-Battery-1',
-        ])->assertSessionHasErrors('email');
     }
 
     public function test_client_search_returns_public_clients_and_hides_staff_accounts(): void
@@ -298,7 +292,7 @@ class StaffClientAccountTest extends TestCase
             'pin' => '1234',
             'pin_confirmation' => '1234',
             'staff_assisted_consent' => '1',
-            'send_set_password_email' => '0',
+            'create_myapes_account' => '0',
         ], $overrides);
     }
 

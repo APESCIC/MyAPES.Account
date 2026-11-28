@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Core\Accounts\User;
 use App\Services\AuthorizationProfile;
+use App\Services\LocalPublicPasswordResetService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
@@ -104,17 +105,20 @@ class ClientDetailsAndAccountStateTest extends TestCase
 
         $this->actingAs($staff)
             ->post(route('clients.store'), $this->clientPayload([
-                'send_set_password_email' => '1',
+                'create_myapes_account' => '1',
             ]))
             ->assertRedirect();
 
         $client = User::query()->where('email', 'sam.client@example.com')->firstOrFail();
         $this->assertSame(User::ACCOUNT_STATE_INVITED, $client->account_state);
+        $this->assertTrue($client->must_change_password);
 
-        app(\App\Services\LocalPublicPasswordResetService::class)
-            ->completeGuestReset($client, 'Correct-horse-99');
+        app(LocalPublicPasswordResetService::class)
+            ->changeOwnPassword($client, 'Correct-horse-99x!');
 
-        $this->assertSame(User::ACCOUNT_STATE_ACTIVE, $client->refresh()->account_state);
+        $client->refresh();
+        $this->assertSame(User::ACCOUNT_STATE_ACTIVE, $client->account_state);
+        $this->assertFalse($client->must_change_password);
     }
 
     public function test_register_saves_identity_fields_to_the_profile(): void
@@ -222,7 +226,7 @@ class ClientDetailsAndAccountStateTest extends TestCase
             'pin' => '1234',
             'pin_confirmation' => '1234',
             'staff_assisted_consent' => '1',
-            'send_set_password_email' => '0',
+            'create_myapes_account' => '0',
         ], $overrides);
     }
 }
