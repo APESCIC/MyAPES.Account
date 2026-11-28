@@ -50,7 +50,7 @@ class StaffHelpPagesTest extends TestCase
             ->assertSeeText('Admin guide')
             ->assertSee('href="'.route('help.staff').'"', false);
 
-        foreach (['overview', 'people', 'modules', 'lists', 'recruitment', 'emails', 'maintenance', 'security'] as $section) {
+        foreach (['overview', 'people', 'security', 'modules', 'communication', 'system', 'lists', 'recruitment'] as $section) {
             $response->assertSee('id="'.$section.'"', false);
         }
 
