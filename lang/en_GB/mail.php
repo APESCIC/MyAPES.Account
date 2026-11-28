@@ -39,6 +39,10 @@ return [
                 'name' => 'Set password',
                 'description' => 'Optional 72-hour link when staff create a public client account with an email address.',
             ],
+            'welcome_sign_in' => [
+                'name' => 'Welcome with sign-in details',
+                'description' => 'Emails username and a temporary password when staff create a MyAPES account for a client.',
+            ],
             'password_changed' => [
                 'name' => 'Password changed',
                 'description' => 'Confirms a Public Login password change.',
@@ -229,6 +233,19 @@ return [
             'action' => 'Set password',
             'expiry' => 'This link expires in :count minutes and can only be used once.',
             'outro' => 'If you were not expecting this, contact APES support. Your phone PIN still works for caller verification.',
+            'subcopy' => 'If the button does not work, open this address in your browser: :url',
+        ],
+        'welcome_sign_in' => [
+            'subject' => 'Your MyAPES Account sign-in details',
+            'greeting' => 'Hello :name,',
+            'intro' => 'An APES staff member created a MyAPES Account for you. Use the details below to sign in. You must choose a new permanent password on first sign-in.',
+            'username_label' => 'Username',
+            'password_label' => 'Temporary password',
+            'expiry' => 'This temporary password expires in :hours hours and can only be used to sign in once before you change it.',
+            'forced_change' => 'After you sign in you will be asked to choose a permanent password before you can use the rest of MyAPES Account.',
+            'action' => 'Open Public Login',
+            'support' => 'If you need help, contact :contact.',
+            'privacy' => 'We process this contact under our privacy notice: :url',
             'subcopy' => 'If the button does not work, open this address in your browser: :url',
         ],
         'password_changed' => [

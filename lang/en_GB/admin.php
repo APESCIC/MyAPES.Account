@@ -323,6 +323,19 @@ return [
                 'heading' => 'Create an account',
                 'intro' => 'This person has a profile only and cannot sign in. Creating an account from a profile arrives in a later release.',
             ],
+            'create_account' => [
+                'heading' => 'Create MyAPES account',
+                'intro' => 'This person has a profile only and cannot sign in. Creating an account emails a temporary password that expires in 72 hours and must be changed on first sign-in.',
+                'confirm' => 'I confirm I should create a MyAPES account and email sign-in details to this person.',
+                'submit' => 'Create MyAPES account',
+                'email_required' => 'Add an email address on Account Profile Management before creating an account.',
+            ],
+            'resend_sign_in' => [
+                'heading' => 'Resend sign-in details',
+                'intro' => 'Generate a new temporary password and email it. The previous temporary password stops working immediately.',
+                'confirm' => 'I confirm I should resend sign-in details to this person.',
+                'submit' => 'Resend sign-in details',
+            ],
             'account_management' => [
                 'heading' => 'Account details',
                 'username' => 'Username',
@@ -470,6 +483,8 @@ return [
     ],
     'flash' => [
         'temporary_password_generated' => 'A one-time temporary password was generated. Copy it now; it will not be shown again.',
+        'myapes_account_created' => 'MyAPES account created. Sign-in details were emailed.',
+        'sign_in_details_resent' => 'New sign-in details were emailed. The previous temporary password no longer works.',
         'staff_login_reminder_sent' => 'A Staff Login reminder was sent. It points at Staff Login / Cloudron, not the public password reset.',
         'local_role_assignments_updated' => 'Local role assignments updated.',
         'user_suspended' => 'User suspended.',

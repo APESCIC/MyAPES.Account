@@ -8,9 +8,6 @@ use App\Core\Accounts\Role;
 use App\Core\Accounts\RoleSource;
 use App\Core\Accounts\StaffProfile;
 use App\Core\Accounts\User;
-use App\Services\UserActivityTimeline;
-use App\Services\UserProfileHubActions;
-use App\Services\UserRecordsSummary;
 use App\Http\Controllers\Concerns\BuildsUserProfileHub;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\OnboardingController;
@@ -21,9 +18,13 @@ use App\Services\ContactPreferenceUpdater;
 use App\Services\LocalPublicPasswordResetService;
 use App\Services\PendingFirstLoginChaseService;
 use App\Services\SecureUploadService;
+use App\Services\StaffClientAccountCreator;
 use App\Services\StaffProfilePhotoResponder;
 use App\Services\TotpTwoFactorService;
 use App\Services\UkPhoneNumber;
+use App\Services\UserActivityTimeline;
+use App\Services\UserProfileHubActions;
+use App\Services\UserRecordsSummary;
 use App\Services\VerificationResendService;
 use App\Support\ClientIdentityRules;
 use App\Support\DefaultJobRoles;
@@ -762,6 +763,56 @@ class AdminUserController extends Controller
                 __('admin.flash.temporary_password_generated'),
             )
             ->with('temporary_password', $temporaryPassword);
+    }
+
+    public function createAccountFromProfile(
+        Request $request,
+        string $user,
+        StaffClientAccountCreator $creator,
+    ): RedirectResponse {
+        Gate::authorize('admin.users.manage');
+        $managedUser = User::query()->findOrFail($user);
+        $actor = $request->user();
+        abort_unless($actor instanceof User, 403);
+        abort_unless($this->hubViewerCanManageAccess($actor, $managedUser), 403);
+
+        $request->validate([
+            'confirm_create_account' => ['accepted'],
+        ]);
+
+        $creator->createAccountFromProfile($actor, $managedUser);
+
+        return redirect()
+            ->route($this->accountShowRouteName($managedUser), [
+                'user' => $managedUser,
+                'tab' => 'account_management',
+            ])
+            ->with('status', __('admin.flash.myapes_account_created'));
+    }
+
+    public function resendSignInDetails(
+        Request $request,
+        string $user,
+        StaffClientAccountCreator $creator,
+    ): RedirectResponse {
+        Gate::authorize('admin.users.manage');
+        $managedUser = User::query()->findOrFail($user);
+        $actor = $request->user();
+        abort_unless($actor instanceof User, 403);
+        abort_unless($this->hubViewerCanManageAccess($actor, $managedUser), 403);
+
+        $request->validate([
+            'confirm_resend' => ['accepted'],
+        ]);
+
+        $creator->resendSignInDetails($actor, $managedUser);
+
+        return redirect()
+            ->route($this->accountShowRouteName($managedUser), [
+                'user' => $managedUser,
+                'tab' => 'account_management',
+            ])
+            ->with('status', __('admin.flash.sign_in_details_resent'));
     }
 
     public function chasePendingFirstLogin(

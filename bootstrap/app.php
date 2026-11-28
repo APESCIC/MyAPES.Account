@@ -9,6 +9,7 @@ use App\Http\Middleware\EnsureAuthorizationContext;
 use App\Http\Middleware\EnsureLocalPasskeyIdentity;
 use App\Http\Middleware\EnsureMaintenanceRecoveryAccess;
 use App\Http\Middleware\EnsureModuleAvailable;
+use App\Http\Middleware\EnsurePasswordChanged;
 use App\Http\Middleware\EnsurePluginEnabled;
 use App\Http\Middleware\EnsurePublicAccount;
 use App\Http\Middleware\EnsureRecentStepUp;
@@ -76,6 +77,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'plugin.enabled' => EnsurePluginEnabled::class,
             'maintenance.recovery' => EnsureMaintenanceRecoveryAccess::class,
             'account.ready' => EnsureAccountReady::class,
+            'account.password-changed' => EnsurePasswordChanged::class,
             'account.step-up' => EnsureRecentStepUp::class,
             'passkeys.local' => EnsureLocalPasskeyIdentity::class,
             'account.public' => EnsurePublicAccount::class,

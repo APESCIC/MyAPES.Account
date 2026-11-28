@@ -102,6 +102,24 @@ class PublicAuthController extends Controller
                 ->withErrors([$credentialField => __('auth.profile_only')]);
         }
 
+        if ($user->mustChangePassword()
+            && $user->temporary_password_expires_at !== null
+            && $user->temporary_password_expires_at->isPast()) {
+            $auditLogger->record(
+                'temporary_password.expired',
+                $user,
+                $user,
+                [
+                    'target_user_id' => $user->id,
+                    'method' => SessionAuthorizationContext::METHOD_PASSWORD,
+                ],
+            );
+
+            return redirect()
+                ->route('public.login')
+                ->withErrors([$credentialField => __('auth.temporary_password_unavailable')]);
+        }
+
         if ($user->identity_type !== User::IDENTITY_LOCAL
             || $this->authorizationProfile->hasDirectoryProtectedEligibility($user)) {
             $auditLogger->record('auth.public_login_blocked_for_staff', $user, $user);

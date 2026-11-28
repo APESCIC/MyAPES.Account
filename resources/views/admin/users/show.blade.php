@@ -131,9 +131,8 @@
         @endif
 
         @if($hubTab === 'account_management')
-            @if($hubIsProfileOnly)
-                @include('admin.users.partials.hub-create-account-soon')
-            @else
+            @include('admin.users.partials.hub-create-account-soon')
+            @if(! $hubIsProfileOnly)
             @include('admin.users.partials.hub-account-summary')
             @include('admin.users.partials.hub-account-actions')
             @can('admin.users.manage')

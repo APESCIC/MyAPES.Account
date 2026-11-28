@@ -5,15 +5,14 @@ namespace App\Services;
 use App\Core\Accounts\PhoneVerificationPinService;
 use App\Core\Accounts\User;
 use App\Core\Accounts\UserProfile;
-use App\Notifications\Auth\StaffAssistedSetPasswordNotification;
+use App\Notifications\Auth\WelcomeSignInDetailsNotification;
 use App\Rules\NotStaffEmail;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Staff, volunteers and students create local public client accounts (#669–#673).
+ * Staff, volunteers and students create local public client accounts (#669–#673, #937–#939).
  */
 final class StaffClientAccountCreator
 {
@@ -21,6 +20,7 @@ final class StaffClientAccountCreator
         private readonly AuthorizationAccountSynchronizer $accounts,
         private readonly PhoneVerificationPinService $pins,
         private readonly AuditLogger $audit,
+        private readonly TemporaryPasswordService $temporaryPasswords,
     ) {}
 
     /**
@@ -38,9 +38,9 @@ final class StaffClientAccountCreator
      *     county?: ?string,
      *     postcode: string,
      *     pin: string,
-     *     send_set_password_email?: bool
+     *     create_myapes_account?: bool
      * }  $input
-     * @return array{user: User, plain_pin: string, set_password_email_sent: bool}
+     * @return array{user: User, plain_pin: string, account_created: bool}
      */
     public function create(User $actor, array $input): array
     {
@@ -48,7 +48,13 @@ final class StaffClientAccountCreator
             ? strtolower(trim($input['email']))
             : null;
         $mobile = $input['mobile_number'];
-        $sendEmail = (bool) ($input['send_set_password_email'] ?? false) && $email !== null;
+        $createAccount = (bool) ($input['create_myapes_account'] ?? false);
+
+        if ($createAccount && $email === null) {
+            throw ValidationException::withMessages([
+                'email' => __('clients.validation.create_account_email_required'),
+            ]);
+        }
 
         if ($email !== null) {
             if (NotStaffEmail::isStaffDomain($email)) {
@@ -75,16 +81,19 @@ final class StaffClientAccountCreator
         }
 
         $plainPin = $input['pin'];
-        $username = $this->uniqueUsername($input['name'], $email, $mobile);
+        $username = $this->temporaryPasswords->generateUsername(
+            $input['first_name'],
+            $input['last_name'],
+        );
 
-        $user = DB::transaction(function () use ($actor, $input, $email, $mobile, $username, $plainPin, $sendEmail): User {
+        $user = DB::transaction(function () use ($actor, $input, $email, $mobile, $username, $plainPin, $createAccount): User {
             $user = new User([
                 'name' => $input['name'],
                 'username' => $username,
                 'email' => $email,
                 'password' => Str::password(32),
                 'identity_type' => User::IDENTITY_LOCAL,
-                'account_state' => $sendEmail
+                'account_state' => $createAccount
                     ? User::ACCOUNT_STATE_INVITED
                     : User::ACCOUNT_STATE_PROFILE_ONLY,
                 'email_verified_at' => $email !== null ? now() : null,
@@ -114,7 +123,7 @@ final class StaffClientAccountCreator
             $this->audit->record('client.created', $actor, $user, [
                 'client_user_id' => $user->id,
                 'pin_set' => true,
-                'set_password_email_sent' => $sendEmail,
+                'create_myapes_account' => $createAccount,
                 'staff_assisted_consent' => true,
                 'consent_staff_id' => $actor->id,
             ]);
@@ -122,50 +131,87 @@ final class StaffClientAccountCreator
             return $user;
         });
 
-        if ($sendEmail) {
-            $this->sendSetPasswordLink($user);
+        if ($createAccount) {
+            $this->issueWelcomeCredentials($user, $actor, 'temporary_password.issued');
         }
 
         return [
             'user' => $user->fresh(['profile']),
             'plain_pin' => $plainPin,
-            'set_password_email_sent' => $sendEmail,
+            'account_created' => $createAccount,
         ];
     }
 
-    private function sendSetPasswordLink(User $user): void
+    /**
+     * Promote a profile-only client to an invited MyAPES account (#938).
+     */
+    public function createAccountFromProfile(User $actor, User $client): User
     {
-        $status = Password::broker('staff_assisted')->sendResetLink(
-            ['email' => $user->email],
-            function (User $notifiable, string $token): void {
-                $notifiable->notify(new StaffAssistedSetPasswordNotification($token));
-            },
-        );
-
-        if ($status !== Password::RESET_LINK_SENT) {
+        if (! $client->isProfileOnly()) {
             throw ValidationException::withMessages([
-                'send_set_password_email' => __('clients.validation.set_password_email_failed'),
+                'create_myapes_account' => __('clients.validation.already_has_account'),
             ]);
         }
+
+        $email = is_string($client->email) ? trim($client->email) : '';
+        if ($email === '') {
+            throw ValidationException::withMessages([
+                'email' => __('clients.validation.create_account_email_required'),
+            ]);
+        }
+
+        if (NotStaffEmail::isStaffDomain($email)) {
+            throw ValidationException::withMessages([
+                'email' => __('clients.validation.staff_email_domain'),
+            ]);
+        }
+
+        $profile = $client->profile;
+        $firstName = is_string($profile?->first_name) ? $profile->first_name : $client->name;
+        $lastName = is_string($profile?->last_name) ? $profile->last_name : 'client';
+
+        if ($client->username === null || $client->username === ''
+            || ! str_contains((string) $client->username, '.')) {
+            $client->forceFill([
+                'username' => $this->temporaryPasswords->generateUsername($firstName, $lastName),
+            ])->save();
+        }
+
+        $this->audit->record('Account.created_from_profile', $actor, $client, [
+            'target_user_id' => $client->id,
+        ]);
+
+        $this->issueWelcomeCredentials($client, $actor, 'temporary_password.issued');
+
+        return $client->fresh(['profile']);
     }
 
-    private function uniqueUsername(string $name, ?string $email, string $mobile): string
+    /**
+     * Resend sign-in details with a new temporary password (#942).
+     */
+    public function resendSignInDetails(User $actor, User $client): User
     {
-        $base = Str::lower(Str::slug(Str::before($email ?? $name, '@'), ''));
-        $base = preg_replace('/[^a-z0-9]/', '', (string) $base) ?: 'client';
-        $base = substr($base, 0, 20);
-        if (strlen($base) < 3) {
-            $base = 'client'.substr(preg_replace('/\D/', '', $mobile) ?: '000', -3);
+        if ($client->isProfileOnly() || $client->suspended_at !== null) {
+            throw ValidationException::withMessages([
+                'resend' => __('clients.validation.resend_not_allowed'),
+            ]);
         }
 
-        for ($i = 0; $i < 20; $i++) {
-            $candidate = $base.($i === 0 ? '' : (string) random_int(10, 99));
-            $candidate = substr($candidate, 0, 30);
-            if (! User::query()->where('username', $candidate)->exists()) {
-                return $candidate;
-            }
+        $email = is_string($client->email) ? trim($client->email) : '';
+        if ($email === '') {
+            throw ValidationException::withMessages([
+                'email' => __('clients.validation.create_account_email_required'),
+            ]);
         }
 
-        return 'client'.Str::lower(Str::random(8));
+        $this->issueWelcomeCredentials($client, $actor, 'temporary_password.resent');
+
+        return $client->fresh(['profile']);
+    }
+
+    private function issueWelcomeCredentials(User $user, User $actor, string $event): void
+    {
+        $plain = $this->temporaryPasswords->issue($user, $actor, $event);
+        $user->notify(new WelcomeSignInDetailsNotification($plain));
     }
 }

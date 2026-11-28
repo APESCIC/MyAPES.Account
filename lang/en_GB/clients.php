@@ -54,6 +54,9 @@ return [
     'flash' => [
         'created' => 'Client account created. The phone PIN is shown once below.',
         'created_with_email' => 'Client account created. The phone PIN is shown once below, and a set-password email was sent.',
+        'created_with_account' => 'Client profile created with a MyAPES account. The phone PIN is shown once below, and sign-in details were emailed.',
+        'account_created' => 'MyAPES account created. Sign-in details were emailed to the client.',
+        'sign_in_resent' => 'New sign-in details were emailed. The previous temporary password no longer works.',
     ],
     'fields' => [
         'name' => 'Full name',
@@ -77,6 +80,8 @@ return [
         'pin_hint' => 'Enter :min to :max digits. Shown once after save; never emailed.',
         'send_set_password_email' => 'Email a 72-hour set-password link',
         'send_set_password_email_hint' => 'Only available when an email address is provided. The email never includes a password or PIN.',
+        'create_myapes_account' => 'Create MyAPES account',
+        'create_myapes_account_hint' => 'Requires an email address. Sends a temporary password that expires in 72 hours. Unticked saves a profile-only client who cannot sign in.',
         'consent_legend' => 'Staff-assisted consent',
         'consent' => 'I confirm the client has given consent for APES to create this public account on their behalf, under our privacy notice.',
     ],
@@ -87,6 +92,9 @@ return [
         'pin_invalid' => 'Enter a PIN of :min to :max digits.',
         'consent_required' => 'Confirm staff-assisted consent before creating the account.',
         'set_password_email_failed' => 'The set-password email could not be sent. Try again or create the account without the email.',
+        'create_account_email_required' => 'Enter an email address to create a MyAPES account.',
+        'already_has_account' => 'This client already has a MyAPES account.',
+        'resend_not_allowed' => 'Sign-in details can only be resent for invited accounts with an email address.',
         'first_name_required' => 'Enter the first name.',
         'last_name_required' => 'Enter the last name.',
         'date_of_birth_required' => 'Enter the date of birth.',
