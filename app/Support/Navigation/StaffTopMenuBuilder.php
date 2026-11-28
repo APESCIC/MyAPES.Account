@@ -180,12 +180,14 @@ final class StaffTopMenuBuilder
         $icons = [
             'overview' => 'layout-dashboard',
             'people' => 'users',
+            'security' => 'shield-check',
             'modules' => 'building-2',
+            'communication' => 'mail',
             'system' => 'settings',
         ];
 
         $items = [];
-        foreach (['overview', 'people', 'modules', 'system'] as $sectionKey) {
+        foreach (['overview', 'people', 'security', 'modules', 'communication', 'system'] as $sectionKey) {
             $group = collect($adminPanel->groups)->first(
                 static fn (NavGroup $group): bool => $group->key === $sectionKey && ! $group->isEmpty(),
             );

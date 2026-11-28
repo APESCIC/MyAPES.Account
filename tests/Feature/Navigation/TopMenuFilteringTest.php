@@ -124,7 +124,7 @@ class TopMenuFilteringTest extends TestCase
         $keys = array_map(static fn ($top) => $top->key, $this->menuFor($admin, 'admin.index')->topItems);
 
         $this->assertSame(
-            ['admin.overview', 'admin.people', 'admin.modules', 'admin.system'],
+            ['admin.overview', 'admin.people', 'admin.security', 'admin.modules', 'admin.communication', 'admin.system'],
             $keys,
         );
     }

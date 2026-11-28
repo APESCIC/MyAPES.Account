@@ -67,7 +67,9 @@ class AdminShellNavigationTest extends TestCase
             ->assertSee('>Overview</span>', false)
             ->assertSee('>Public Accounts</span>', false)
             ->assertSee('>Staff Accounts</span>', false)
+            ->assertSee('>'.__('workspace.groups.security').'</span>', false)
             ->assertSee('>Access</span>', false)
+            ->assertSee('>'.__('workspace.groups.communication').'</span>', false)
             ->assertSee('>Plugins</span>', false)
             ->assertSee('>Maintenance</span>', false);
     }
@@ -82,8 +84,10 @@ class AdminShellNavigationTest extends TestCase
             ->assertSee('>Overview</span>', false)
             ->assertSee('>Public Accounts</span>', false)
             ->assertSee('>Staff Accounts</span>', false)
+            ->assertSee('>'.__('workspace.groups.security').'</span>', false)
             ->assertSee('>Access</span>', false)
             ->assertSee('>Plugins</span>', false)
+            ->assertSee('>'.__('workspace.groups.communication').'</span>', false)
             ->assertSee('>'.__('admin.nav.emails').'</span>', false)
             ->assertSee('>'.__('admin.nav.email_import').'</span>', false)
             ->assertSee('>Maintenance</span>', false);
